@@ -1,7 +1,7 @@
 import csv
 import logging
 import re
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from functools import cached_property
 from urllib.parse import unquote
 
@@ -214,7 +214,7 @@ class DjAdminManager:
         try:
             for client in (self, self.kc):
                 try:
-                    getattr(client, "_get")(client.login_url)
+                    page = getattr(client, "_get")(client.login_url)
                     csrftoken = getattr(client, "client").cookies["csrftoken"]
                     getattr(client, "_post")(
                         client.login_url,
@@ -226,7 +226,7 @@ class DjAdminManager:
                         },
                     )
                     getattr(client, "assert_response")(302, client.admin_url)
-                except self.ResponseException as e:
+                except Exception as e:
                     raise self.ResponseException(f"Unable to login to Kobo at {client.login_url}: {e}")
 
             if request:
@@ -246,7 +246,7 @@ class DjAdminManager:
 
     def list_users(self):
         regex = re.compile(
-            r"field-username.*<a.*?>(?P<username>.*)</a></t.>" r'.*field-email">(?P<mail>.*?)<',
+            r'action-checkbox.*value="(?P<id>\d+)".*</td>.*field-username.*<a.*?>(?P<username>.*)</a></t.>.*field-email">(?P<mail>.*?)<',
             re.MULTILINE + re.IGNORECASE,
         )
         page = 2
@@ -296,10 +296,29 @@ class ImportToKoboForm(forms.Form):
     file = forms.FileField()
 
 
+# class HasKoboAccount(ChoicesFieldComboFilter):
+#     pass
+
+
+class HasKoboAccount(SimpleListFilter):
+    parameter_name = "kobo_account"
+    title = "Has Kobo Access"
+
+    def lookups(self, request, model_admin):
+        return (1, "Yes"), (0, "No")
+
+    def queryset(self, request, queryset):
+        if self.value() == "0":
+            return queryset.filter(custom_fields__kobo_pk__isnull=True)
+        elif self.value() == "1":
+            return queryset.exclude(custom_fields__kobo_pk__isnull=True)
+        return queryset
+
+
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
-    list_filter = ("is_staff", "is_superuser", "is_active")
+    list_filter = ("is_staff", HasKoboAccount, "is_superuser", "is_active")
     list_display = (
         "username",
         "email",
@@ -308,35 +327,50 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         "is_active",
         "is_staff",
         "is_superuser",
+        "kobo_user",
     )
     readonly_fields = ("ad_uuid",)
     fieldsets = (
-        (None, {"fields": ("username", "password")}),
+        # (None, {"fields": ("username", "password")}),
         (
             _("Personal info"),
-            {"fields": (("first_name", "last_name", "email"), "ad_uuid")},
+            {
+                "fields": (
+                    "username",
+                    "password",
+                    (
+                        "first_name",
+                        "last_name",
+                    ),
+                    ("email", "ad_uuid"),
+                )
+            },
         ),
         (
             _("Custom Fields"),
-            {"fields": ("custom_fields",)},
+            {"classes": ["collapse"], "fields": ("custom_fields",)},
         ),
         (
             _("Permissions"),
             {
+                "classes": ["collapse"],
                 "fields": (
-                    "is_active",
-                    "is_staff",
-                    "is_superuser",
+                    (
+                        "is_active",
+                        "is_staff",
+                        "is_superuser",
+                    ),
+                    ("groups",),
                 ),
             },
         ),
-        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+        (_("Important dates"), {"classes": ["collapse"], "fields": ("last_login", "date_joined")}),
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
 
-    def import_kobo_users(self):
-        pass
+    def kobo_user(self, obj):
+        return obj.custom_fields.get("kobo_username")
 
     def get_deleted_objects(self, objs, request):
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
@@ -379,7 +413,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             self.message_user(request, str(e), messages.ERROR)
             raise
 
-    @button()
+    @button(permission="account.can_add_user")
     def kobo_login(self, request):
         cookies = {}
         ctx = self.get_common_context(request, logged=False)
@@ -406,14 +440,33 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 )
         except Exception as e:
             logger.exception(e)
-            self.message_user(request, str(e), messages.ERROR)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+
         ctx["form"] = form
         response = TemplateResponse(request, "admin/kobo_login.html", ctx)
         for key, value in cookies.items():
             response.set_cookie(key, value)
         return response
 
-    @button(permission=["can_upload_to_kobo"])
+    @button()
+    def privileges(self, request, pk):
+        context = self.get_common_context(request, pk)
+        user: User = context["original"]
+        all_perms = user.get_all_permissions()
+        context["permissions"] = [p.split(".") for p in sorted(all_perms)]
+        ba_perms = defaultdict(list)
+        ba_roles = defaultdict(list)
+        for role in user.user_roles.all():
+            ba_roles[role.business_area.slug].append(role.role)
+
+        for role in user.user_roles.values_list("business_area__slug", flat=True).distinct("business_area"):
+            ba_perms[role].extend(user.permissions_in_business_area(role))
+
+        context["business_ares_permissions"] = dict(ba_perms)
+        context["business_ares_roles"] = dict(ba_roles)
+        return TemplateResponse(request, "admin/account/user/privileges.html", context)
+
+    @button(label="Import Kobo CSV", permission="account.can_upload_to_kobo")
     def kobo_import(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
@@ -469,86 +522,45 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
         return TemplateResponse(request, "admin/account/user/kobo_import.html", context)
 
-    # @button(label="Sync users from Kobo")
-    # def kobo_users_sync(self, request):
-    #     ctx = self.get_common_context(request)
-    #     users = []
-    #     try:
-    #         api = DjAdminManager()
-    #         api.login(request)
-    #         for entry in api.list_users():
-    #             local = User.objects.filter(email=entry[1]).first()
-    #             users.append([entry[0], entry[1], local])
-    #
-    #         ctx["users"] = users
-    #
-    #     except Exception as e:
-    #         self.message_user(request, str(e), messages.ERROR)
-    #     return TemplateResponse(request, "admin/kobo_users.html", ctx)
-    #
+    @button(label="Sync users from Kobo", permission="account.can_import_from_kobo")
+    def kobo_users_sync(self, request):
+        ctx = self.get_common_context(request)
+        users = []
+        if request.method == "POST":
+            selected = request.POST.getlist("kobo_id")
+            api = DjAdminManager()
+            api.login(request)
+            results = {"created": [], "updated": []}
+            for entry in api.list_users():
+                if entry[0] in selected:
+                    local, created = User.objects.get_or_create(
+                        email=entry[2],
+                        defaults={
+                            "username": entry[1],
+                            "custom_fields": {"kobo_pk": entry[0], "kobo_username": entry[1]},
+                        },
+                    )
+                    if created:
+                        results["created"].append(local)
+                    else:
+                        local.custom_fields["kobo_pk"] = entry[0]
+                        local.custom_fields["kobo_username"] = entry[1]
+                        local.save()
+                        results["created"].append(local)
+            ctx["results"] = results
+        else:
+            try:
+                api = DjAdminManager()
+                api.login(request)
+                for entry in api.list_users():
+                    local = User.objects.filter(email=entry[2]).first()
+                    users.append([entry[0], entry[1], entry[2], local])
+                ctx["users"] = users
 
-    # @button(label="Bulk upload Kobo Users")
-    # def kobo_bulk_create(self, request):
-    #     from hct_mis_api.apps.account.forms import KoboImportUsersForm
-    #
-    #     cookies = {}
-    #     ctx = self.get_common_context(request)
-    #     api = DjAdminManager()
-    #     form = None
-    #     try:
-    #         if request.method == "POST":
-    #             form = KoboImportUsersForm(request.POST)
-    #             if form.is_valid():
-    #                 emails = set(form.cleaned_data["emails"].split())
-    #                 api.login(request)
-    #                 results = self.Results([], [], [], [])
-    #                 ctx["results"] = results
-    #                 for email in emails:
-    #                     user, created = User.objects.get_or_create(username=email, is_active=False, email=email)
-    #                     password = get_random_string()
-    #                     try:
-    #                         pk = api.create_user(email, password)
-    #                         results.created.append((email, password))
-    #                         user.custom_fields["kobo_username"] = email
-    #                         user.custom_fields["kobo_pk"] = pk
-    #                         user.save()
-    #                         send_mail(
-    #                             "Kobo credentials",
-    #                             KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
-    #                             settings.DEFAULT_FROM_EMAIL,
-    #                             [email],
-    #                         )
-    #                     except DjAdminManager.ResponseException as e:
-    #                         results.errors.append((email, str(e)))
-    #                 if results.errors:
-    #                     self.message_user(request, "Some error occurred", messages.ERROR)
-    #
-    #                 ctx["results"] = results
-    #             else:
-    #                 self.message_user(request, "Invalid", messages.ERROR)
-    #         else:
-    #             api.login(request)
-    #             form = KoboImportUsersForm(
-    #                 initial={
-    #                     "username": request.COOKIES.get("kobo_username", request.user.email),
-    #                     "password": request.COOKIES.get("kobo_password", ""),
-    #                     "emails": "",
-    #                 }
-    #             )
-    #     except Exception as e:
-    #         logger.exception(e)
-    #         self.message_user(request, str(e), messages.ERROR)
-    #     ctx["form"] = form
-    #     response = TemplateResponse(request, "admin/kobo_bulk.html", ctx)
-    #     for key, value in cookies.items():
-    #         response.set_cookie(key, value)
-    #     return response
-    #
-
-    @button()
-    def privileges(self, request, pk):
-        ctx = self.get_common_context(request, pk)
-        return TemplateResponse(request, "admin/privileges.html", ctx)
+            except Exception as e:
+                logger.exception(e)
+                self.message_user(request, str(e), messages.ERROR)
+        return TemplateResponse(request, "admin/kobo_users.html", ctx)
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -565,7 +577,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             setattr(user, field, value or "")
         user.save()
 
-    @button(label="Sync", permission=["can_sync_with_ad"])
+    @button(label="Sync", permission="account.can_sync_with_ad")
     def sync_multi(self, request):
         not_found = []
         try:
@@ -582,7 +594,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
 
-    @button(label="Sync", permission=["can_sync_with_ad"])
+    @button(label="Sync", permission="account.can_sync_with_ad")
     def sync_single(self, request, pk):
         try:
             self._sync_ad_data(self.get_object(request, pk))
@@ -591,7 +603,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
 
-    @button(permission=["can_load_from_ad"])
+    @button(permission="account.can_load_from_ad")
     def load_ad_users(self, request):
         from hct_mis_api.apps.account.forms import LoadUsersForm
 
@@ -668,16 +680,62 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         return TemplateResponse(request, "admin/load_users.html", ctx)
 
 
+class PermissionFilter(SimpleListFilter):
+    title = "Permission Name"
+    parameter_name = "perm"
+    template = "adminfilters/combobox.html"
+
+    def lookups(self, request, model_admin):
+        return Permissions.choices()
+
+    def queryset(self, request, queryset):
+        if not self.value():
+            return queryset
+        return queryset.filter(permissions__contains=[self.value()])
+
+
 @admin.register(Role)
 class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("name",)
     search_fields = ("name",)
     form = RoleAdminForm
+    list_filter = (PermissionFilter,)
 
     @button()
     def members(self, request, pk):
         url = reverse("admin:account_userrole_changelist")
         return HttpResponseRedirect(f"{url}?role__id__exact={pk}")
+
+    @button()
+    def matrix(self, request):
+        ctx = self.get_common_context(request, action="Matrix")
+        matrix1 = {}
+        matrix2 = {}
+        perms = sorted([str(x.value) for x in Permissions])
+        roles = Role.objects.order_by("name")
+        for perm in perms:
+            granted_to_roles = []
+            for role in roles:
+                if perm in role.permissions:
+                    granted_to_roles.append("X")
+                else:
+                    granted_to_roles.append("")
+            matrix1[perm] = granted_to_roles
+
+        for role in roles:
+            values = []
+            for perm in perms:
+                if perm in role.permissions:
+                    values.append("X")
+                else:
+                    values.append("")
+            matrix2[role.name] = values
+
+        ctx["permissions"] = perms
+        ctx["roles"] = roles.values_list("name", flat=True)
+        ctx["matrix1"] = matrix1
+        ctx["matrix2"] = matrix2
+        return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
 
 @admin.register(UserRole)
@@ -717,3 +775,24 @@ class IncompatibleRoleFilter(SimpleListFilter):
 class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)
+
+
+from django.contrib.admin import site
+from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
+from django.contrib.auth.models import Group
+
+site.unregister(Group)
+
+
+@admin.register(Group)
+class GroupAdmin(ExtraUrlMixin, _GroupAdmin):
+    @button(permission=lambda request, group: request.user.is_superuser)
+    def import_fixture(self, request):
+        from adminactions.helpers import import_fixture as _import_fixture
+
+        return _import_fixture(self, request)
+
+    @button()
+    def show_members(self, request, pk):
+        ctx = self.get_common_context(request, pk)
+        return TemplateResponse(request, "admin/account/group/members.html", ctx)

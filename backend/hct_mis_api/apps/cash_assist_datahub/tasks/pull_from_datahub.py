@@ -1,7 +1,9 @@
 import logging
+import sys
 
 from django.db import transaction
 from django.db.models import Count
+
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.cash_assist_datahub import models as ca_models
@@ -98,16 +100,10 @@ class PullFromDatahubTask:
             sessions = session_queryset.filter(status=Session.STATUS_READY).order_by("-last_modified_date")
             for session in sessions:
                 try:
-                    with transaction.atomic(using="default"):
-                        with transaction.atomic(using="cash_assist_datahub_ca"):
-                            self.copy_session(session)
-                            ret["successes"].append(session.id)
+                    self.copy_session(session)
+                    ret["successes"].append(session.id)
                 except Exception as e:
                     ret["failures"].append(session.id)
-                    log.exception(e)
-                    session.status = Session.STATUS_FAILED
-                    session.save()
-
         return ret
 
     def build_arg_dict(self, model_object, mapping_dict):
@@ -116,21 +112,38 @@ class PullFromDatahubTask:
     def copy_session(self, session):
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
-
-            session.status = session.STATUS_PROCESSING
+            STATUS = session.STATUS_PROCESSING
+            TB = ""
+            SID = ""
+            session.status = STATUS
             session.save()
-            self.copy_service_providers(session)
-            programs = self.copy_programs_ids(session)
-            Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
-            TargetPopulation.objects.bulk_update(self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"])
-            self.copy_cash_plans(session)
-            self.copy_payment_records(session)
-            session.status = session.STATUS_COMPLETED
-            session.save()
+            try:
+                with transaction.atomic(using="default"):
+                    with transaction.atomic(using="cash_assist_datahub_ca"):
+                        try:
+                            self.copy_service_providers(session)
+                            programs = self.copy_programs_ids(session)
+                            Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
+                            TargetPopulation.objects.bulk_update(
+                                self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"]
+                            )
+                            self.copy_cash_plans(session)
+                            self.copy_payment_records(session)
+                            STATUS = session.STATUS_COMPLETED
+                        except Exception as e:
+                            session.process_exception(e)
+                            STATUS = session.status
+                            TB = session.traceback
+                            SID = session.sentry_id
+                            raise
+            finally:
+                session.sentry_id = SID
+                session.traceback = TB
+                session.status = STATUS
+                session.save()
 
     def copy_cash_plans(self, session):
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
-        exchange_rates_client = ExchangeRates()
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = self.build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
             self.set_cash_plan_service_provider(cash_plan_args)
@@ -139,10 +152,13 @@ class PullFromDatahubTask:
                 cash_plan,
                 created,
             ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
-
-            if not cash_plan.exchange_rate:
-                cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, exchange_rates_client)
-                cash_plan.save(update_fields=["exchange_rate"])
+            try:
+                if not cash_plan.exchange_rate:
+                    exchange_rates_client = ExchangeRates()
+                    cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, exchange_rates_client)
+                    cash_plan.save(update_fields=["exchange_rate"])
+            except Exception as e:
+                log.exception(e)
 
     def set_cash_plan_service_provider(self, cash_plan_args):
         assistance_through = cash_plan_args.get("assistance_through")
@@ -155,7 +171,7 @@ class PullFromDatahubTask:
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
-        exchange_rates_client = ExchangeRates()
+
         for dh_payment_record in dh_payment_records:
             payment_record_args = self.build_arg_dict(
                 dh_payment_record,
@@ -172,9 +188,13 @@ class PullFromDatahubTask:
                 created,
             ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
             if not payment_record.delivered_quantity_usd:
-                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
-                    payment_record, exchange_rates_client
-                )
+                try:
+                    exchange_rates_client = ExchangeRates()
+                    payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
+                        payment_record, exchange_rates_client
+                    )
+                except Exception as e:
+                    log.exception(e)
                 payment_record.save(update_fields=["delivered_quantity_usd"])
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
