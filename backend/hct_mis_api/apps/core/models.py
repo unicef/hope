@@ -217,7 +217,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         return self.title
 
     def country(self):
-        return AdminArea.objects.get(tree_id=self.tree_id, parent=None)
+        try:
+            return AdminArea.objects.get(tree_id=self.tree_id, parent=None)
+        except Exception:
+            return None
 
     @property
     def geo_point(self):
