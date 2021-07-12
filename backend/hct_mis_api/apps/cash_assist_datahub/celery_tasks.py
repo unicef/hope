@@ -1,5 +1,7 @@
 import logging
 
+from hct_mis_api.apps.core.exchange_rates.utils import fix_exchange_rates
+
 from hct_mis_api.apps.core.celery import app
 
 logger = logging.getLogger(__name__)
@@ -18,3 +20,12 @@ def pull_from_cashassist_datahub_task():
         raise
 
     logger.info("pull_from_cashassist_datahub_task end")
+
+
+@app.task
+def fix_exchange_rates_task():
+    try:
+        fix_exchange_rates()
+    except Exception as e:
+        logger.exception(e)
+        raise

@@ -1,0 +1,96 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load i18n admin_urls static admin_modify %}
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+    {{ adminform.media }}
+
+    <script type="text/javascript" src="/api/static/admin/js/vendor/jquery/jquery.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/jquery.init.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/core.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/admin/RelatedObjectLookups.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/actions.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/urlify.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/prepopulate.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/vendor/xregexp/xregexp.js"></script>
+
+    <style>
+        table.messagelist tr.warning td{
+            background: #ffc url({% static 'admin/img/icon-alert.svg' %}) 2px 10px no-repeat;
+            background-size: 14px auto;
+            padding-left: 20px;
+        }
+        table.messagelist tr.error td {
+            background: #ffefef url({% static 'admin/img/icon-no.svg' %}) 2px 10px no-repeat;
+            background-size: 14px auto;
+            padding-left: 20px;
+        }
+    </style>
+{% endblock %}
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        &rsaquo; <a
+            href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+        &rsaquo; <a
+            href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        &rsaquo; <a
+            href="{% url opts|admin_urlname:'change'  object_id=original.pk %}">{{ original }}</a>
+        &rsaquo; Inspect
+    </div>
+{% endblock %}
+{% block object-tools-items %}
+    {% if sentry_url %}
+        <li><a target='_sentry' href="{{ sentry_url }}" class="btn extra-link">Check errors in Sentry</a></li>
+    {% endif %}
+{% endblock %}
+{% block action-content %}
+    {% if warnings %}
+        <h3>Warnings</h3>
+        <table class="messagelist " width="100%">
+            {% for level, warn in warnings %}
+                <tr class="{{ level }}">
+                    <th width="10%">{{ level|upper }}</th>
+                    <td>{{ warn }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+    <div style="margin: 10px"></div>
+    <table>
+        <tr>
+            <th style="width: 10%;white-space:nowrap; ">Component</th>
+            <th style="width: 5%" colspan="2">#&nbsp;Records</th>
+            {#            <td style="width: 10px">-</td>#}
+            <th style="width: 90%"><a href="javascript:django.jQuery('table.errors').toggle();"># Warnings/Errors</a>
+            </th>
+        </tr>
+
+        {% for model, info in data.items %}
+            <tr>
+                <th>{{ info.meta.verbose_name_plural|title }}</th>
+                <td>{{ info.count }}</td>
+                <td>
+                    <a target="{{ model }}"
+                       href="{% url info.meta|admin_urlname:'changelist' %}?registration_data_import|name|istartswith={{ original.name }}">visit</a>
+                </td>
+                <td>
+                    <a href="javascript:django.jQuery('table.{{ info.meta.model_name }}').toggle();">{{ info.warnings|length }}/{{ info.errors|length }}</a>
+                    <table width="100%" class="errors messagelist {{ info.meta.model_name }}" style="display: none">
+                        {% for err in info.warnings %}
+                            <tr class="warning">
+                                <td>{{ err }}</td>
+                            </tr>
+                        {% endfor %}
+                        {% for err in info.errors %}
+                            <tr class="error">
+                                <td>{{ err }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+
+{% block submit_buttons_bottom %}{% endblock %}
