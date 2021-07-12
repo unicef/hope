@@ -28,7 +28,12 @@ from hct_mis_api.apps.core.filters import (
     IntegerRangeFilter,
 )
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import AdminAreaNode, ChoiceObject, FieldAttributeNode
+from hct_mis_api.apps.core.schema import (
+    AdminAreaNode,
+    ChoiceObject,
+    FieldAttributeNode,
+    _custom_dict_or_attr_resolver,
+)
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     chart_filters_decoder,
@@ -294,6 +299,15 @@ class HouseholdSelection(DjangoObjectType):
         model = HouseholdSelection
 
 
+class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
+    class Meta:
+        default_resolver = _custom_dict_or_attr_resolver
+
+    total_delivered_quantity = graphene.Decimal()
+    total_delivered_quantity_usd = graphene.Decimal()
+    currency = graphene.String()
+
+
 class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),
@@ -315,6 +329,10 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin1 = graphene.Field(AdminAreaNode)
     admin2 = graphene.Field(AdminAreaNode)
     status = graphene.String()
+    programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+
+    def resolve_programs_with_delivered_quantity(parent, info):
+        return parent.programs_with_delivered_quantity
 
     def resolve_country(parent, info):
         return parent.country.name

@@ -6,6 +6,7 @@ from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
+from django.db.models import F, Sum
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -425,6 +426,19 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     @property
     def total_cash_received(self):
         return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
+
+    @property
+    def programs_with_delivered_quantity(self):
+        return (
+            self.payment_records.all()
+            .annotate(program=F("cash_plan__program"))
+            .values("program")
+            .annotate(
+                total_delivered_quantity=Sum("delivered_quantity"),
+                total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
+                currency=F("currency"),
+            )
+        )
 
     def __str__(self):
         return f"{self.unicef_id}"
