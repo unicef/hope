@@ -299,13 +299,19 @@ class HouseholdSelection(DjangoObjectType):
         model = HouseholdSelection
 
 
+class DeliveredQuantityNode(graphene.ObjectType):
+    total_delivered_quantity = graphene.Decimal()
+    total_delivered_quantity_usd = graphene.Decimal()
+    currency = graphene.String()
+
+
 class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
     class Meta:
         default_resolver = _custom_dict_or_attr_resolver
 
-    total_delivered_quantity = graphene.Decimal()
-    total_delivered_quantity_usd = graphene.Decimal()
-    currency = graphene.String()
+    id = graphene.ID()
+    name = graphene.String()
+    quantity = graphene.List(DeliveredQuantityNode)
 
 
 class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
