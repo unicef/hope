@@ -1,5 +1,6 @@
 import logging
 import re
+from collections import defaultdict
 from datetime import date
 
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
@@ -429,7 +430,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def programs_with_delivered_quantity(self):
-        return (
+        programs = (
             self.payment_records.all()
             .annotate(program=F("cash_plan__program"))
             .values("program")
@@ -437,8 +438,29 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
                 total_delivered_quantity=Sum("delivered_quantity"),
                 total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
                 currency=F("currency"),
+                program_name=F("cash_plan__program__name"),
+                program_id=F("cash_plan__program__id"),
             )
         )
+
+        programs_dict = {}
+
+        for program in programs:
+            if not program["program_id"] in programs_dict:
+                programs_dict[program["program_id"]] = {
+                    "id": program["program_id"],
+                    "name": program["program_name"],
+                    "quantity": [],
+                }
+            programs_dict[program["program_id"]]["quantity"].append(
+                {
+                    "total_delivered_quantity": program["total_delivered_quantity"],
+                    "total_delivered_quantity_usd": program["total_delivered_quantity_usd"],
+                    "currency": program["currency"],
+                }
+            )
+
+        return programs_dict.values()
 
     def __str__(self):
         return f"{self.unicef_id}"

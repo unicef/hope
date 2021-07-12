@@ -19,9 +19,12 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         query Household($id: ID!) {
           household(id: $id) {
             programsWithDeliveredQuantity {
+              name
+              quantity {
                 totalDeliveredQuantity
                 totalDeliveredQuantityUsd
                 currency
+              }
             }
           }
         }
