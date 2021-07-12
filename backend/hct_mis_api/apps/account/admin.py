@@ -27,6 +27,7 @@ from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     ForeignKeyFieldFilter,
@@ -782,9 +783,10 @@ class UserRoleAdmin(HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
     raw_id_fields = ("user", "business_area")
+    search_fields = ("user__username__istartswith",)
     list_filter = (
-        ForeignKeyFieldFilter.factory("user|username|istartswith", "Username"),
-        ("business_area", RelatedFieldComboFilter),
+        # ForeignKeyFieldFilter.factory("user__username__istartswith", "Username"),
+        ("business_area", AutoCompleteFilter),
         ("role", RelatedFieldComboFilter),
     )
 
