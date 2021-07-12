@@ -7,9 +7,11 @@ from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import RegexValidator
 from django.db import transaction
+from django.db.models import Count, F, Func
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -93,6 +95,19 @@ class BusinessofficeFilter(SimpleListFilter):
         return queryset
 
 
+from django.db.models import Aggregate, CharField
+
+
+class GroupConcat(Aggregate):
+    function = "GROUP_CONCAT"
+    template = "%(function)s(%(distinct)s%(expressions)s)"
+
+    def __init__(self, expression, distinct=False, **extra):
+        super(GroupConcat, self).__init__(
+            expression, distinct="DISTINCT " if distinct else "", output_field=CharField(), **extra
+        )
+
+
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = (
@@ -142,6 +157,17 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             context["form"] = BusinessOfficeForm()
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
+
+    @button()
+    def members(self, request, pk):
+        context = self.get_common_context(request, pk, title="Members")
+        context["members"] = (
+            context["original"]
+            .user_roles.values("user__id", "user__email", "user__username")
+            .annotate(roles=ArrayAgg("role__name"))
+            .order_by("user__username")
+        )
+        return TemplateResponse(request, "core/admin/ba_members.html", context)
 
     @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
