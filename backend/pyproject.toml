@@ -46,7 +46,7 @@ skip = "migrations"
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "0.1.36"
+version = "0.1.42"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
@@ -67,7 +67,8 @@ django-extensions = "2.2.6"
 elasticsearch-dsl ="^7.0.0"
 django-elasticsearch-dsl = "7.1.4"
 django-constance = { version = "2.7.0", extras = ["redis"] }
-django-auditlog = { git = "https://github.com/Tivix/django-auditlog.git", branch="master" }
+#django-auditlog = { git = "https://github.com/Tivix/django-auditlog.git", branch="master" }
+django-auditlog = { url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip" }
 django-admin-extra-urls = "^3.3"
 unittest-xml-reporting = "3.0.4"
 django-multiselectfield = "0.1.12"
@@ -113,7 +114,9 @@ django-sysinfo = "^2.4.0"
 django-adminfilters = "^1.3.5"
 single-source = "^0.1.5"
 requests-mock = "^1.9.2"
-django-adminactions = "^1.11"
+django-adminactions = "^1.12"
+django-redis = "^5.0.0"
+django-sql-explorer = {extras = ["xls"], version = "^2.2"}
 
 [tool.poetry.dev-dependencies]
 factory-boy = "2.12.0"

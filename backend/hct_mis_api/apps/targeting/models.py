@@ -594,7 +594,13 @@ class TargetingCriteriaFilterMixin:
         argument = self.arguments if args_input_count > 1 else self.arguments[0]
 
         if select_many:
-            query = Q(**{f"{lookup}__contains": argument})
+            if isinstance(argument, list):
+                query = Q()
+                for arg in argument:
+                    # This regular expression can found the only exact word
+                    query &= Q(**{f"{lookup}__iregex": f"{arg}\\y"})
+            else:
+                query = Q(**{f"{lookup}__contains": argument})
         else:
             query = Q(**{f"{lookup}{comparision_attribute.get('lookup')}": argument})
         if comparision_attribute.get("negative"):

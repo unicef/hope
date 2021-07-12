@@ -14,13 +14,27 @@ import packageJson from '../../../package.json';
 import { AlertDialog } from '../AlertDialog';
 import { DrawerItems } from './DrawerItems';
 
+const matchColorToWindowOrigin = (): string => {
+  const url = window.location.href;
+  if (url.includes('trn')) {
+    return '#BF360C';
+  }
+  if (url.includes('stg')) {
+    return '#673AB7';
+  }
+  if (url.includes('dev')) {
+    return '#00796B';
+  }
+  return '#00ADEF';
+};
+
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   toolbarHeader: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingLeft: '51px',
-    backgroundColor: theme.hctPalette.lightBlue,
+    backgroundColor: matchColorToWindowOrigin(),
     color: 'white',
     borderRightWidth: 2,
     borderRightColor: '#02367D',
@@ -113,7 +127,10 @@ export function Drawer({
       data-cy={dataCy}
     >
       <div className={classes.toolbarHeader}>
-        <Logo transparent={false} displayLogoWithoutSubtitle />
+        <Logo
+          transparent={matchColorToWindowOrigin() !== '#00ADEF'}
+          displayLogoWithoutSubtitle
+        />
         <IconButton
           onClick={handleDrawerClose}
           className={classes.collapseIcon}
