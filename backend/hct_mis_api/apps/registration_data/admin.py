@@ -1,10 +1,15 @@
 import logging
 
-from admin_extra_urls.decorators import button
-from admin_extra_urls.extras import ExtraUrlMixin
-from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin, messages
 from django.shortcuts import get_object_or_404
+
+from admin_extra_urls.decorators import button
+from admin_extra_urls.extras import ExtraUrlMixin
+from adminfilters.filters import (
+    ChoicesFieldComboFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
+)
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -19,11 +24,15 @@ logger = logging.getLogger(__name__)
 
 @admin.register(RegistrationDataImport)
 class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+    list_display = ("name", "status", "import_date", "data_source", "business_area")
+    search_fields = ("name",)
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("data_source", ChoicesFieldComboFilter),
+        ("business_area", RelatedFieldComboFilter),
     )
     date_hierarchy = "updated_at"
+    raw_id_fields = ("imported_by",)
 
     @button(
         label="Re-run RDI",
@@ -34,11 +43,15 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         obj = self.get_object(request, pk)
         try:
             if obj.data_source == RegistrationDataImport.XLS:
-                from hct_mis_api.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
+                from hct_mis_api.apps.registration_datahub.celery_tasks import (
+                    registration_xlsx_import_task,
+                )
 
                 celery_task = registration_xlsx_import_task
             else:
-                from hct_mis_api.apps.registration_datahub.celery_tasks import registration_kobo_import_task
+                from hct_mis_api.apps.registration_datahub.celery_tasks import (
+                    registration_kobo_import_task,
+                )
 
                 celery_task = registration_kobo_import_task
 
