@@ -311,7 +311,7 @@ class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
 
     id = graphene.ID()
     name = graphene.String()
-    quantity = graphene.List(DeliveredQuantityNode)
+    quantity = graphene.Field(DeliveredQuantityNode)
 
 
 class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):

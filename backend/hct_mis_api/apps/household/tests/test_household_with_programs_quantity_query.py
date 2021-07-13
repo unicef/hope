@@ -37,17 +37,32 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         household, _ = create_household({"size": 2, "address": "Lorem Ipsum", "country_origin": "PL"})
         self.household = household
-        self.program = ProgramFactory.create(
-            name="Test program ONE",
-            business_area=self.business_area,
-        )
+        self.program1 = ProgramFactory.create(name="Test program ONE", business_area=self.business_area)
+        self.program2 = ProgramFactory.create(name="Test program TWO", business_area=self.business_area)
 
-        cash_plan1 = CashPlanFactory.create(program=self.program)
-        cash_plan2 = CashPlanFactory.create(program=self.program)
+        cash_plans_program1 = CashPlanFactory.create_batch(2, program=self.program1)
+        cash_plans_program2 = CashPlanFactory.create_batch(2, program=self.program2)
 
         PaymentRecordFactory.create_batch(
             3,
-            cash_plan=cash_plan1,
+            cash_plan=cash_plans_program1[0],
+            currency="AFG",
+            delivered_quantity_usd=50,
+            delivered_quantity=100,
+            household=household,
+        )
+        PaymentRecordFactory.create_batch(
+            3,
+            cash_plan=cash_plans_program1[1],
+            currency="AFG",
+            delivered_quantity_usd=100,
+            delivered_quantity=200,
+            household=household,
+        )
+
+        PaymentRecordFactory.create_batch(
+            3,
+            cash_plan=cash_plans_program2[0],
             currency="USD",
             delivered_quantity_usd=100,
             delivered_quantity=100,
@@ -55,21 +70,15 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         )
         PaymentRecordFactory.create_batch(
             3,
-            cash_plan=cash_plan2,
+            cash_plan=cash_plans_program2[1],
             currency="USD",
             delivered_quantity_usd=200,
             delivered_quantity=200,
             household=household,
         )
 
-        payment_records = PaymentRecord.objects.all()[:2]
-        for payment_record in payment_records:
-            payment_record.currency = "AFG"
-            payment_record.delivered_quantity = payment_record.delivered_quantity_usd * Decimal(0.8)
-
-        PaymentRecord.objects.bulk_update(payment_records, ["currency", "delivered_quantity"])
-
-        self.household.programs.add(self.program)
+        self.household.programs.add(self.program1)
+        self.household.programs.add(self.program2)
 
     @parameterized.expand(
         [
