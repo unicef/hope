@@ -13774,6 +13774,18 @@
             "deprecationReason": null
           },
           {
+            "name": "totalCashReceivedUsd",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Decimal",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "selection",
             "description": null,
             "args": [],
@@ -27912,13 +27924,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "DeliveredQuantityNode",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "DeliveredQuantityNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
