@@ -832,6 +832,7 @@ type HouseholdNode implements Node {
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelection!]!
   totalCashReceived: Decimal
+  totalCashReceivedUsd: Decimal
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
@@ -2185,7 +2186,7 @@ enum ProgramStatus {
 type ProgramsWithDeliveredQuantityNode {
   id: ID
   name: String
-  quantity: [DeliveredQuantityNode]
+  quantity: DeliveredQuantityNode
 }
 
 type Query {

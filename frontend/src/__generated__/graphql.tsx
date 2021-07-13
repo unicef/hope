@@ -1198,6 +1198,7 @@ export type HouseholdNode = Node & {
   targetPopulations: TargetPopulationNodeConnection,
   selections: Array<HouseholdSelection>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
+  totalCashReceivedUsd?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
   sanctionListConfirmedMatch?: Maybe<Scalars['Boolean']>,
@@ -3164,7 +3165,7 @@ export type ProgramsWithDeliveredQuantityNode = {
    __typename?: 'ProgramsWithDeliveredQuantityNode',
   id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
-  quantity?: Maybe<Array<Maybe<DeliveredQuantityNode>>>,
+  quantity?: Maybe<DeliveredQuantityNode>,
 };
 
 export type Query = {
@@ -5597,10 +5598,10 @@ export type HouseholdDetailedFragment = (
   ), programsWithDeliveredQuantity: Maybe<Array<Maybe<(
     { __typename?: 'ProgramsWithDeliveredQuantityNode' }
     & Pick<ProgramsWithDeliveredQuantityNode, 'id' | 'name'>
-    & { quantity: Maybe<Array<Maybe<(
+    & { quantity: Maybe<(
       { __typename?: 'DeliveredQuantityNode' }
       & Pick<DeliveredQuantityNode, 'totalDeliveredQuantity' | 'totalDeliveredQuantityUsd' | 'currency'>
-    )>>> }
+    )> }
   )>>> }
   & HouseholdMinimalFragment
 );
@@ -17374,6 +17375,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+  totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -17958,7 +17960,7 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 export type ProgramsWithDeliveredQuantityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramsWithDeliveredQuantityNode'] = ResolversParentTypes['ProgramsWithDeliveredQuantityNode']> = {
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  quantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveredQuantityNode']>>>, ParentType, ContextType>,
+  quantity?: Resolver<Maybe<ResolversTypes['DeliveredQuantityNode']>, ParentType, ContextType>,
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
