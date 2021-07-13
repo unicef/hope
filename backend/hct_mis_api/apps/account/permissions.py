@@ -1,14 +1,18 @@
 import logging
 from collections import OrderedDict
-from enum import unique, auto, Enum
+from enum import Enum, auto, unique
 from functools import partial
 
 from django.core.exceptions import PermissionDenied
+
 from graphene import Mutation
 from graphene.relay import ClientIDMutation
 from graphene.types.argument import to_arguments
 from graphene_django import DjangoConnectionField
-from graphene_django.filter.utils import get_filtering_args_from_filterset, get_filterset_class
+from graphene_django.filter.utils import (
+    get_filtering_args_from_filterset,
+    get_filterset_class,
+)
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -194,7 +198,9 @@ def hopePermissionClass(permission):
                 business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
                 if business_area is None:
                     return False
-            return info.context.user.has_permission(permission.name, business_area)
+            return info.context.user.is_authenticated and info.context.user.has_permission(
+                permission.name, business_area
+            )
 
     return XDPerm
 
@@ -203,18 +209,19 @@ def hopeOneOfPermissionClass(*permissions):
     class XDPerm(BasePermission):
         @classmethod
         def has_permission(cls, info, **kwargs):
-            business_area_arg = kwargs.get("business_area")
-            if isinstance(business_area_arg, BusinessArea):
-                business_area = business_area_arg
-            else:
-                if business_area_arg is None:
-                    return False
-                business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
-                if business_area is None:
-                    return False
-            for permission in permissions:
-                if info.context.user.has_permission(permission.name, business_area):
-                    return True
+            if info.context.user.is_authenticated:
+                business_area_arg = kwargs.get("business_area")
+                if isinstance(business_area_arg, BusinessArea):
+                    business_area = business_area_arg
+                else:
+                    if business_area_arg is None:
+                        return False
+                    business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
+                    if business_area is None:
+                        return False
+                for permission in permissions:
+                    if info.context.user.has_permission(permission.name, business_area):
+                        return True
             return False
 
     return XDPerm
@@ -252,8 +259,7 @@ class BaseNodePermissionMixin:
     ):
         user = info.context.user
         business_area = object_instance.business_area
-
-        if not (
+        if not info.context.user.is_authenticated or not (
             user.has_permission(general_permission, business_area)
             or (is_creator and user.has_permission(creator_permission, business_area))
             or (is_owner and user.has_permission(owner_permission, business_area))
