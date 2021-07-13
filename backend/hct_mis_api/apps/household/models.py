@@ -441,26 +441,24 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
                 program_name=F("cash_plan__program__name"),
                 program_id=F("cash_plan__program__id"),
             )
+            .order_by("cash_plan__program__created_at")
         )
 
-        programs_dict = {}
+        programs_dict = []
 
         for program in programs:
-            if not program["program_id"] in programs_dict:
-                programs_dict[program["program_id"]] = {
+            programs_dict.append(
+                {
                     "id": program["program_id"],
                     "name": program["program_name"],
-                    "quantity": [],
-                }
-            programs_dict[program["program_id"]]["quantity"].append(
-                {
-                    "total_delivered_quantity": program["total_delivered_quantity"],
-                    "total_delivered_quantity_usd": program["total_delivered_quantity_usd"],
-                    "currency": program["currency"],
+                    "quantity": {
+                        "total_delivered_quantity": program["total_delivered_quantity"],
+                        "total_delivered_quantity_usd": program["total_delivered_quantity_usd"],
+                        "currency": program["currency"],
+                    },
                 }
             )
-
-        return programs_dict.values()
+        return programs_dict
 
     def __str__(self):
         return f"{self.unicef_id}"
