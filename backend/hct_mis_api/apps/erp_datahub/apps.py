@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class CashAssistConfig(AppConfig):
-    name = "erp_datahub"
+    name = "hct_mis_api.apps.erp_datahub"

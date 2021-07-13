@@ -15,6 +15,8 @@ from admin_extra_urls.decorators import href
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
 from adminfilters.filters import TextFieldFilter
 
+from hct_mis_api.apps.core.models import BusinessArea
+
 logger = logging.getLogger(__name__)
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
@@ -42,12 +44,18 @@ class RollbackException(Exception):
 
 @admin.register(Session)
 class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area")
+    list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area", "run_time")
     date_hierarchy = "timestamp"
-    list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
+    list_filter = ("status", "source", "last_modified_date", TextFieldFilter.factory("business_area"))
     ordering = ("-timestamp",)
     exclude = ("traceback",)
-    readonly_fields = ("sentry_id", "source", "business_area")
+    readonly_fields = ("timestamp", "last_modified_date", "sentry_id", "source", "business_area")
+
+    def run_time(self, obj):
+        if obj.status in [obj.STATUS_PROCESSING, obj.STATUS_LOADING]:
+            elapsed = datetime.datetime.now() - obj.timestamp
+            if elapsed.total_seconds() >= HOUR:
+                return elapsed
 
     @button(permission="account.can_debug")
     def pull(self, request):
@@ -129,8 +137,8 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         errors = 0
         errors = 0
         has_content = False
-        if settings.SENTRY_URL:
-            context["sentry_url"] = f"{settings.SENTRY_URL}?query=session.ca%3A%22{obj.pk}%22"
+        if settings.SENTRY_URL and obj.sentry_id:
+            context["sentry_url"] = f"{settings.SENTRY_URL}?query={obj.sentry_id}"
 
         if obj.status == obj.STATUS_EMPTY:
             warnings.append([messages.WARNING, f"Session is empty"])
@@ -161,9 +169,9 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         svs = []
         for sv in ServiceProvider.objects.filter(session=pk):
             svs.append(sv.ca_id)
-            if not payment.ServiceProvider.objects.filter(ca_id=sv.ca_id).exists():
-                errors += 1
-                context["data"][ServiceProvider]["warnings"].append(f"ServiceProvider {sv.ca_id} not found in HOPE")
+            # if not payment.ServiceProvider.objects.filter(ca_id=sv.ca_id).exists():
+            #     errors += 1
+            #     context["data"][ServiceProvider]["warnings"].append(f"ServiceProvider {sv.ca_id} not found in HOPE")
 
         for pr in PaymentRecord.objects.filter(session=pk):
             if pr.service_provider_ca_id not in svs:
@@ -184,8 +192,12 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         if (obj.status == obj.STATUS_EMPTY) and has_content:
             warnings.append([messages.ERROR, f"Session marked as Empty but records found"])
 
-        context["warnings"] = [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings]
+        area = BusinessArea.objects.filter(code=obj.business_area.strip()).first()
+        context["area"] = area
+        if not area:
+            warnings.append([messages.ERROR, f"Invalid Business Area"])
 
+        context["warnings"] = [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings]
         return TemplateResponse(request, "admin/cash_assist_datahub/session/inspect.html", context)
 
 

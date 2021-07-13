@@ -19,13 +19,13 @@ export const householdMinimal = gql`
     unhcrId
     geopoint
     village
-    admin1{
+    admin1 {
       id
       title
       level
       pCode
     }
-    admin2{
+    admin2 {
       id
       title
       level
@@ -94,7 +94,7 @@ export const householdDetailed = gql`
       edges {
         node {
           ...individualMinimal
-            
+
           birthDate
           relationship
           identities {
@@ -143,5 +143,14 @@ export const householdDetailed = gql`
       }
     }
     flexFields
+    programsWithDeliveredQuantity {
+      id
+      name
+      quantity {
+        totalDeliveredQuantity
+        totalDeliveredQuantityUsd
+        currency
+      }
+    }
   }
 `;

@@ -27,6 +27,7 @@ from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     ForeignKeyFieldFilter,
@@ -35,7 +36,7 @@ from adminfilters.filters import (
 from constance import config
 from requests import HTTPError
 
-from hct_mis_api.apps.account.forms import KoboLoginForm
+from hct_mis_api.apps.account.forms import ImportCSV, KoboLoginForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
@@ -166,14 +167,14 @@ class DjAdminManager:
         self._username = None
         self._password = None
         self.form_errors = []
-        if kc_host:
-            self.kc = DjAdminManager(kc_host, None)
+        # if kc_host:
+        #     self.kc = DjAdminManager(kc_host, None)
 
     def extract_errors(self, res):
         self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
         return self.form_errors
 
-    def assert_response(self, status: int, location: str = None, custom_error=None):
+    def assert_response(self, status: [int], location: str = None, custom_error=None):
         if not isinstance(status, (list, tuple)):
             status = [status]
         if self._last_response.status_code not in status:
@@ -202,32 +203,28 @@ class DjAdminManager:
         self._password = request.session["kobo_password"] = None
 
     def login(self, request=None, username="", password="", twin=None):
-        if twin:
-            username = twin._username
-            password = twin._password
-        elif not username and request:
+        if not username and request:
             username = request.POST.get("kobo_username", request.session.get("kobo_username"))
             password = request.POST.get("kobo_password", request.session.get("kobo_password"))
         elif username:
             self._username = username
             self._password = password
         try:
-            for client in (self, self.kc):
-                try:
-                    getattr(client, "_get")(client.login_url)
-                    csrftoken = getattr(client, "client").cookies["csrftoken"]
-                    getattr(client, "_post")(
-                        client.login_url,
-                        {
-                            "username": username,
-                            "password": password,
-                            "next": client.admin_url,
-                            "csrfmiddlewaretoken": csrftoken,
-                        },
-                    )
-                    getattr(client, "assert_response")(302, client.admin_url)
-                except self.ResponseException as e:
-                    raise self.ResponseException(f"Unable to login to Kobo at {client.login_url}: {e}")
+            try:
+                self.client.get(self.login_url)
+                csrftoken = self.client.cookies["csrftoken"]
+                self._post(
+                    self.login_url,
+                    {
+                        "username": username,
+                        "password": password,
+                        "next": self.admin_url,
+                        "csrfmiddlewaretoken": csrftoken,
+                    },
+                )
+                self.assert_response(302, self.admin_url)
+            except Exception as e:
+                raise self.ResponseException(f"Unable to login to Kobo at {self.login_url}: {e.__class__.__name__} {e}")
 
             if request:
                 request.session["kobo_username"] = username
@@ -265,14 +262,13 @@ class DjAdminManager:
             page += 1
 
     def delete_user(self, username, pk):
-        for client in [self, self.kc]:
-            url = f"{client.admin_url}auth/user/{pk}/delete/"
-            getattr(client, "_get")(url)
-            getattr(client, "assert_response")([200, 404, 302])
-            if client._last_response.status_code == 200:
-                csrftoken = getattr(client, "client").cookies["csrftoken"]
-                getattr(client, "_post")(url, {"csrfmiddlewaretoken": csrftoken})
-                getattr(client, "assert_response")(302)
+        url = f"{self.admin_url}auth/user/{pk}/delete/"
+        self._get(url)
+        self.assert_response([200, 404, 302])
+        if self._last_response.status_code == 200:
+            csrftoken = self.client.cookies["csrftoken"]
+            self._post(url, {"csrfmiddlewaretoken": csrftoken})
+            self.assert_response(302)
 
     def create_user(self, username, password):
         self._get(f"{self.admin_url}auth/user/")
@@ -290,10 +286,6 @@ class DjAdminManager:
         m = re.search(r"auth/user/([0-9]*)/(change/|)$", redir_to)
         pk = m.groups()[0]
         return pk
-
-
-class ImportToKoboForm(forms.Form):
-    file = forms.FileField()
 
 
 # class HasKoboAccount(ChoicesFieldComboFilter):
@@ -369,6 +361,11 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     )
     inlines = (UserRoleInline,)
 
+    @button()
+    def inspect(self, request, pk):
+        context = self.get_common_context(request, pk, logged=False)
+        return TemplateResponse(request, "admin/account/user/inspect.html", context)
+
     def kobo_user(self, obj):
         return obj.custom_fields.get("kobo_username")
 
@@ -440,15 +437,16 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 )
         except Exception as e:
             logger.exception(e)
-            self.message_user(request, str(e), messages.ERROR)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+
         ctx["form"] = form
         response = TemplateResponse(request, "admin/kobo_login.html", ctx)
         for key, value in cookies.items():
             response.set_cookie(key, value)
         return response
 
-    @button(label="Permissions", permission="account.can_upload_to_kobo")
-    def permissions(self, request, pk):
+    @button()
+    def privileges(self, request, pk):
         context = self.get_common_context(request, pk)
         user: User = context["original"]
         all_perms = user.get_all_permissions()
@@ -463,63 +461,106 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
         context["business_ares_permissions"] = dict(ba_perms)
         context["business_ares_roles"] = dict(ba_roles)
-        return TemplateResponse(request, "admin/account/user/perms.html", context)
+        return TemplateResponse(request, "admin/account/user/privileges.html", context)
 
-    @button(label="Import Kobo CSV", permission="account.can_upload_to_kobo")
-    def kobo_import(self, request):
+    def _create_on_kobo(self, username, email, password, notify=False, **kwargs):
+        url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
+        res = requests.post(
+            url,
+            headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
+            json={"username": username, "email": email, "password": password, **kwargs},
+        )
+        if res.status_code == 400:
+            raise Exception(res.content)
+
+        if res.status_code == 201:
+            if notify:
+                send_mail(
+                    "Kobo credentials",
+                    KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                )
+            return res.json()
+        else:
+            raise Exception(f"Unexpected response from Kobo {res.status_code}")
+
+    def _create_on_ca(self):
+        # this not really creates on CA - simply "mark" the user as
+        pass
+
+    @button(label="Import CSV", permission="account.can_upload_to_kobo")
+    def import_csv(self, request):
+        from django.contrib.admin.helpers import AdminForm
+
         context = self.get_common_context(request)
         if request.method == "GET":
-            form = ImportToKoboForm(initial={})
+            form = ImportCSV(initial={})
             context["form"] = form
         else:
-            form = ImportToKoboForm(data=request.POST, files=request.FILES)
+            form = ImportCSV(data=request.POST, files=request.FILES)
             if form.is_valid():
                 try:
                     csv_file = form.cleaned_data["file"]
                     if csv_file.multiple_chunks():
                         raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
                     data_set = csv_file.read().decode("utf-8-sig").splitlines()
-                    reader = csv.DictReader(data_set, quoting=csv.QUOTE_NONE, delimiter=";")
-                    results = {"errors": [], "created": []}
+                    reader = csv.DictReader(
+                        data_set,
+                        quotechar=form.cleaned_data["quotechar"],
+                        quoting=int(form.cleaned_data["quoting"]),
+                        delimiter=form.cleaned_data["delimiter"],
+                    )
+                    results = []
+                    context["results"] = results
+                    context["reader"] = reader
+                    context["errors"] = []
                     for row in reader:
                         password = get_random_string()
-                        email = row["email"].strip()
-                        url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
+                        try:
+                            email = row["email"].strip()
+                        except Exception as e:
+                            raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
+
+                        user_info = {"email": email, "is_new": False, "kobo": False, "error": ""}
+
                         if "username" in row:
                             username = row["username"].strip()
                         else:
                             username = row["email"].replace("@", "_").replace(".", "_").lower()
-                        res = requests.post(
-                            url,
-                            headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
-                            json={
-                                "username": username,
-                                "email": email,
-                                "password": password,
-                                "first_name": row["first_name"],
-                                "last_name": row["last_name"],
-                            },
-                        )
-                        if res.status_code == 201:
-                            results["created"].append([username, row])
-                            send_mail(
-                                "Kobo credentials",
-                                KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
-                                settings.DEFAULT_FROM_EMAIL,
-                                [email],
-                            )
-                        else:
-                            results["errors"].append([row, res])
-                    context["results"] = results
-                    context["reader"] = reader
+                        u, isnew = User.objects.get_or_create(email=email, defaults={"username": username})
+                        if form.cleaned_data["enable_kobo"]:
+                            try:
+                                data = self._create_on_kobo(
+                                    username=u.username,
+                                    email=u.email,
+                                    password=password,
+                                    notify=True,
+                                    first_name=row.get("first_name", ""),
+                                    last_name=row.get("last_name", ""),
+                                )
+                                u.custom_fields["kobo_username"] = u.username
+                                u.save()
+                                user_info["kobo"] = True
+                            except Exception as e:
+                                user_info["error"] = str(e)
+                                context["errors"].append(f"{username}: {e}")
+                        if form.cleaned_data["enable_cash_assist"]:
+                            u.custom_fields["cash_assist_username"] = u.username
+                            u.save()
+                            user_info["ca"] = True
+
+                        context["results"].append(user_info)
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
+                    context["errors"] = [str(e)]
                     self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
             else:
                 context["form"] = form
-
-        return TemplateResponse(request, "admin/account/user/kobo_import.html", context)
+        fs = form._fieldsets or [(None, {"fields": form.base_fields})]
+        context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})
+        return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
     @button(label="Sync users from Kobo", permission="account.can_import_from_kobo")
     def kobo_users_sync(self, request):
@@ -560,11 +601,6 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 logger.exception(e)
                 self.message_user(request, str(e), messages.ERROR)
         return TemplateResponse(request, "admin/kobo_users.html", ctx)
-
-    @button()
-    def privileges(self, request, pk):
-        ctx = self.get_common_context(request, pk)
-        return TemplateResponse(request, "admin/privileges.html", ctx)
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -747,9 +783,10 @@ class UserRoleAdmin(HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
     raw_id_fields = ("user", "business_area")
+    search_fields = ("user__username__istartswith",)
     list_filter = (
-        ForeignKeyFieldFilter.factory("user|username|istartswith", "Username"),
-        ("business_area", RelatedFieldComboFilter),
+        # ForeignKeyFieldFilter.factory("user__username__istartswith", "Username"),
+        ("business_area", AutoCompleteFilter),
         ("role", RelatedFieldComboFilter),
     )
 
