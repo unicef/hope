@@ -64,8 +64,12 @@ class User(AbstractUser, UUIDModel):
 
     # CashAssist DOAP fields
     last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
-    last_doap_sync = models.DateTimeField(default=None, null=True, blank=True)
-    doap_hash = models.TextField(editable=False, default="")
+    last_doap_sync = models.DateTimeField(
+        default=None, null=True, blank=True, help_text="Timestamp of last sync with CA"
+    )
+    doap_hash = models.TextField(
+        editable=False, default="", help_text="System field used to check if changes need to be sent to CA"
+    )
 
     def __str__(self):
         if self.first_name or self.last_name:
