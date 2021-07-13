@@ -429,6 +429,14 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
 
     @property
+    def total_cash_received_usd(self):
+        return (
+            self.payment_records.filter()
+            .aggregate(models.Sum("delivered_quantity_usd"))
+            .get("delivered_quantity_usd__sum")
+        )
+
+    @property
     def programs_with_delivered_quantity(self):
         programs = (
             self.payment_records.all()
