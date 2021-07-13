@@ -36,9 +36,9 @@ from adminfilters.filters import (
 from constance import config
 from requests import HTTPError
 
+from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.forms import ImportCSV, KoboLoginForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import BusinessArea
@@ -56,16 +56,16 @@ class RoleAdminForm(ModelForm):
     )
 
     class Meta:
-        model = UserRole
+        model = account_models.UserRole
         fields = "__all__"
 
 
 class UserRoleAdminForm(ModelForm):
-    role = ModelChoiceField(Role.objects.order_by("name"))
+    role = ModelChoiceField(account_models.Role.objects.order_by("name"))
     business_area = ModelChoiceField(BusinessArea.objects.filter(is_split=False))
 
     class Meta:
-        model = UserRole
+        model = account_models.UserRole
         fields = "__all__"
 
     def clean(self):
@@ -74,9 +74,9 @@ class UserRoleAdminForm(ModelForm):
             return
         role = self.cleaned_data["role"]
         incompatible_roles = list(
-            IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-        ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
-        incompatible_userroles = UserRole.objects.filter(
+            account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+        ) + list(account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
+        incompatible_userroles = account_models.UserRole.objects.filter(
             business_area=self.cleaned_data["business_area"],
             role__id__in=incompatible_roles,
             user=self.cleaned_data["user"],
@@ -97,7 +97,7 @@ class UserRoleAdminForm(ModelForm):
 
 
 class UserRoleInlineFormSet(BaseInlineFormSet):
-    model = UserRole
+    model = account_models.UserRole
 
     def add_fields(self, form, index):
         super().add_fields(form, index)
@@ -116,8 +116,10 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
                 business_area = form.cleaned_data["business_area"]
                 role = form.cleaned_data["role"]
                 incompatible_roles = list(
-                    IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-                ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
+                    account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+                ) + list(
+                    account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True)
+                )
                 error_forms = [
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
@@ -133,7 +135,7 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
 
 
 class UserRoleInline(admin.TabularInline):
-    model = UserRole
+    model = account_models.UserRole
     extra = 0
     formset = UserRoleInlineFormSet
 
@@ -307,13 +309,25 @@ class HasKoboAccount(SimpleListFilter):
         return queryset
 
 
-@admin.register(User)
+@admin.register(account_models.Partner)
+class PartnerAdmin(ExtraUrlMixin, admin.ModelAdmin):
+    list_filter = ("is_un",)
+    search_fields = ("name",)
+
+
+@admin.register(account_models.User)
 class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
-    list_filter = ("is_staff", HasKoboAccount, "is_superuser", "is_active")
+    list_filter = (
+        ("partner", AutoCompleteFilter),
+        "is_staff",
+        HasKoboAccount,
+        "is_superuser",
+        "is_active",
+    )
     list_display = (
-        "username",
         "email",
+        "partner",
         "first_name",
         "last_name",
         "is_active",
@@ -321,7 +335,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         "is_superuser",
         "kobo_user",
     )
-    readonly_fields = ("ad_uuid",)
+    readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
     fieldsets = (
         # (None, {"fields": ("username", "password")}),
         (
@@ -340,7 +354,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         ),
         (
             _("Custom Fields"),
-            {"classes": ["collapse"], "fields": ("custom_fields",)},
+            {"classes": ["collapse"], "fields": ("custom_fields", "doap_hash")},
         ),
         (
             _("Permissions"),
@@ -356,7 +370,18 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 ),
             },
         ),
-        (_("Important dates"), {"classes": ["collapse"], "fields": ("last_login", "date_joined")}),
+        (
+            _("Important dates"),
+            {
+                "classes": ["collapse"],
+                "fields": (
+                    "last_login",
+                    "date_joined",
+                    "last_modify_date",
+                    "last_doap_sync",
+                ),
+            },
+        ),
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
@@ -383,7 +408,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             with transaction.atomic(using=router.db_for_write(self.model)):
                 res = self._delete_view(request, object_id, extra_context)
         else:
-            obj: User = self.get_object(request, unquote(object_id))
+            obj: account_models.User = self.get_object(request, unquote(object_id))
             kobo_pk = obj.custom_fields.get("kobo_pk", None)
             extra_context = extra_context or {}
             try:
@@ -448,7 +473,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     @button()
     def privileges(self, request, pk):
         context = self.get_common_context(request, pk)
-        user: User = context["original"]
+        user: account_models.User = context["original"]
         all_perms = user.get_all_permissions()
         context["permissions"] = [p.split(".") for p in sorted(all_perms)]
         ba_perms = defaultdict(list)
@@ -528,7 +553,9 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                             username = row["username"].strip()
                         else:
                             username = row["email"].replace("@", "_").replace(".", "_").lower()
-                        u, isnew = User.objects.get_or_create(email=email, defaults={"username": username})
+                        u, isnew = account_models.User.objects.get_or_create(
+                            email=email, defaults={"username": username}
+                        )
                         if form.cleaned_data["enable_kobo"]:
                             try:
                                 data = self._create_on_kobo(
@@ -573,7 +600,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             results = {"created": [], "updated": []}
             for entry in api.list_users():
                 if entry[0] in selected:
-                    local, created = User.objects.get_or_create(
+                    local, created = account_models.User.objects.get_or_create(
                         email=entry[2],
                         defaults={
                             "username": entry[1],
@@ -593,7 +620,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 api = DjAdminManager()
                 api.login(request)
                 for entry in api.list_users():
-                    local = User.objects.filter(email=entry[2]).first()
+                    local = account_models.User.objects.filter(email=entry[2]).first()
                     users.append([entry[0], entry[1], entry[2], local])
                 ctx["users"] = users
 
@@ -621,7 +648,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     def sync_multi(self, request):
         not_found = []
         try:
-            for user in User.objects.all():
+            for user in account_models.User.objects.all():
                 try:
                     self._sync_ad_data(user)
                 except Http404:
@@ -667,20 +694,20 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 business_area = form.cleaned_data["business_area"]
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
-                existing = set(User.objects.filter(email__in=emails).values_list("email", flat=True))
+                existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
                 results = self.Results([], [], [], [])
                 try:
                     ms_graph = MicrosoftGraphAPI()
                     for email in emails:
                         try:
                             if email in existing:
-                                user = User.objects.get(email=email)
+                                user = account_models.User.objects.get(email=email)
                                 self._sync_ad_data(user)
                                 results.updated.append(user)
                             else:
                                 user_data = ms_graph.get_user_data(email=email)
                                 user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                                user = User(**user_args)
+                                user = account_models.User(**user_args)
                                 if user.first_name is None:
                                     user.first_name = ""
                                 if user.last_name is None:
@@ -691,15 +718,17 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                                 user.set_unusable_password()
                                 users_to_bulk_create.append(user)
                                 global_business_area = BusinessArea.objects.filter(slug="global").first()
-                                basic_role = Role.objects.filter(name="Basic User").first()
+                                basic_role = account_models.Role.objects.filter(name="Basic User").first()
                                 if global_business_area and basic_role:
                                     users_role_to_bulk_create.append(
-                                        UserRole(business_area=global_business_area, user=user, role=basic_role)
+                                        account_models.UserRole(
+                                            business_area=global_business_area, user=user, role=basic_role
+                                        )
                                     )
                                 results.created.append(user)
 
                             users_role_to_bulk_create.append(
-                                UserRole(role=role, business_area=business_area, user=user)
+                                account_models.UserRole(role=role, business_area=business_area, user=user)
                             )
                         except HTTPError as e:
                             if e.response.status_code != 404:
@@ -707,8 +736,8 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                             results.missing.append(email)
                         except Http404:
                             results.missing.append(email)
-                    User.objects.bulk_create(users_to_bulk_create)
-                    UserRole.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
+                    account_models.User.objects.bulk_create(users_to_bulk_create)
+                    account_models.UserRole.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
                     ctx["results"] = results
                     return TemplateResponse(request, "admin/load_users.html", ctx)
                 except Exception as e:
@@ -734,12 +763,12 @@ class PermissionFilter(SimpleListFilter):
         return queryset.filter(permissions__contains=[self.value()])
 
 
-@admin.register(Role)
+@admin.register(account_models.Role)
 class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("name",)
+    list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
-    list_filter = (PermissionFilter,)
+    list_filter = (PermissionFilter, "subsystem")
 
     @button()
     def members(self, request, pk):
@@ -752,7 +781,7 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         matrix1 = {}
         matrix2 = {}
         perms = sorted([str(x.value) for x in Permissions])
-        roles = Role.objects.order_by("name")
+        roles = account_models.Role.objects.order_by("name")
         for perm in perms:
             granted_to_roles = []
             for role in roles:
@@ -778,14 +807,13 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
 
-@admin.register(UserRole)
+@admin.register(account_models.UserRole)
 class UserRoleAdmin(HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
     raw_id_fields = ("user", "business_area")
     search_fields = ("user__username__istartswith",)
     list_filter = (
-        # ForeignKeyFieldFilter.factory("user__username__istartswith", "Username"),
         ("business_area", AutoCompleteFilter),
         ("role", RelatedFieldComboFilter),
     )
@@ -812,7 +840,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
             raise IncorrectLookupParameters(e)
 
 
-@admin.register(IncompatibleRoles)
+@admin.register(account_models.IncompatibleRoles)
 class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)
