@@ -472,6 +472,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 )
 
             household_id = None
+
+            excluded = ("age",)
             for cell, header_cell in zip(row, first_row):
                 header = header_cell.value
                 combined_fields = {**self.COMBINED_FIELDS, **COLLECTORS_FIELDS}
@@ -483,7 +485,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 is_not_image = current_field["type"] != "IMAGE"
 
                 is_not_required_and_empty = not current_field.get("required") and cell.value is None and is_not_image
-
+                if header in excluded:
+                    continue
                 if is_not_required_and_empty:
                     continue
 
