@@ -323,6 +323,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     )
 
     total_cash_received = graphene.Decimal()
+    total_cash_received_usd = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
     currency = graphene.String()
