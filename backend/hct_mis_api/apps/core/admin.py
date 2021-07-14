@@ -1,18 +1,21 @@
 import csv
 import logging
 import time
+from io import StringIO
 
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.db.models import Count, F, Func
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -26,8 +29,10 @@ from adminfilters.filters import (
     ChoicesFieldComboFilter,
     TextFieldFilter,
 )
+from constance import config
 from xlrd import XLRDError
 
+from hct_mis_api.apps.account.models import INACTIVE, Role, User
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
@@ -152,18 +157,112 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     {"preserved_filters": preserved_filters, "opts": opts}, redirect_url
                 )
                 return HttpResponseRedirect(redirect_url)
-
         else:
             context["form"] = BusinessOfficeForm()
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
+
+    def _get_doap_matrix(self, obj):
+        matrix = []
+        ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
+        fields = ["org", "Last Name", "First Name", "Email", "Action"] + list(ca_roles)
+        matrix.append(fields)
+        all_user_data = {}
+        for member in obj.user_roles.all():
+            user_data = {}
+            if member.user.pk not in all_user_data:
+                user_roles = list(
+                    member.user.user_roles.filter(role__subsystem="CA").values_list("role__name", flat=True)
+                )
+                user_data["org"] = member.user.partner.name
+                user_data["Last Name"] = member.user.last_name
+                user_data["First Name"] = member.user.first_name
+                user_data["Email"] = member.user.email
+                user_data["Action"] = ""
+                for role in ca_roles:
+                    user_data[role] = {True: "Yes", False: ""}[role in user_roles]
+
+                # user_data["user_roles"] = user_roles
+                all_user_data[member.user.pk] = user_data
+
+                values = {key: value for (key, value) in user_data.items() if key not in ["action"]}
+                signature = str(hash(frozenset(values.items())))
+
+                user_data["signature"] = signature
+                user_data["hash"] = member.user.doap_hash
+                user_data["values"] = values
+                action = None
+                if member.user.doap_hash:
+                    if signature == member.user.doap_hash:
+                        action = "ACTIVE"
+                    elif len(user_roles) == 0:
+                        action = "REMOVE"
+                    else:
+                        action = "EDIT"
+                elif len(user_roles):
+                    action = "ADD"
+
+                if action:
+                    user_data["Action"] = action
+                    matrix.append(user_data)
+        return matrix
+
+    @button(label="Send DOAP", visible=False)
+    def _send_doap(self, request, pk):
+        context = self.get_common_context(request, pk, title="Members")
+        obj = context["original"]
+        matrix = self._get_doap_matrix(obj)
+        buffer = StringIO()
+        writer = csv.DictWriter(buffer, matrix[0], extrasaction="ignore")
+        writer.writeheader()
+        for row in matrix[1:]:
+            writer.writerow(row)
+        recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
+        self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
+        buffer.seek(0)
+        mail = EmailMessage(
+            f"DOAP updates for {obj.name}", f"Please find in attachment DOAP updates for {obj.name}", to=recipients
+        )
+        mail.attach(f"doap_{obj.name}.csv", buffer.read(), "text/csv")
+        mail.send()
+        for row in matrix[1:]:
+            if row["Action"] == "REMOVE":
+                User.objects.filter(email=row["Email"]).update(doap_hash="")
+            else:
+                User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
+
+        self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
+        return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
+
+    @button(label="Export DOAP", visible=False)
+    def _export_doap(self, request, pk):
+        context = self.get_common_context(request, pk, title="Members")
+        obj = context["original"]
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename=doap_{obj.name}.csv"
+        matrix = self._get_doap_matrix(obj)
+        writer = csv.DictWriter(response, matrix[0], extrasaction="ignore")
+        writer.writeheader()
+        for row in matrix[1:]:
+            writer.writerow(row)
+        return response
+
+    @button()
+    def view_ca_doap(self, request, pk):
+        context = self.get_common_context(request, pk, title="Members")
+        obj = context["original"]
+        matrix = self._get_doap_matrix(obj)
+        context["headers"] = matrix[0]
+        context["rows"] = matrix[0:]
+        context["matrix"] = matrix
+        return TemplateResponse(request, "core/admin/ca_doap.html", context)
 
     @button()
     def members(self, request, pk):
         context = self.get_common_context(request, pk, title="Members")
         context["members"] = (
             context["original"]
-            .user_roles.values("user__id", "user__email", "user__username")
+            .user_roles.values("user__id", "user__email", "user__username", "user__custom_fields__kobo_username")
             .annotate(roles=ArrayAgg("role__name"))
             .order_by("user__username")
         )
