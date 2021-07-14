@@ -110,7 +110,12 @@ export function DedupeResults({
   };
   return (
     <>
-      <Error onClick={() => setOpen(true)}>
+      <Error
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(true);
+        }}
+      >
         {status} ({results.length})
       </Error>
       <Dialog
@@ -173,8 +178,7 @@ export function DedupeResults({
                   <TableCell align='left'>{row.location}</TableCell>
                   <TableCell align='left'>{row.score}</TableCell>
                   <TableCell align='left'>
-                    {row.proximityToScore > 0 && '+'}{' '}
-                    {row.proximityToScore}
+                    {row.proximityToScore > 0 && '+'} {row.proximityToScore}
                   </TableCell>
                 </TableRow>
               ))}
