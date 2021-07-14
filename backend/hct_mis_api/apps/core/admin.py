@@ -20,6 +20,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html
 
 import xlrd
@@ -207,36 +208,51 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     matrix.append(user_data)
         return matrix
 
-    @button(label="Send DOAP", visible=False)
-    def _send_doap(self, request, pk):
+    @button(label="Force DOAP SYNC", permission="can_reset_doap", group="doap")
+    def force_sync_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
         matrix = self._get_doap_matrix(obj)
-        buffer = StringIO()
-        writer = csv.DictWriter(buffer, matrix[0], extrasaction="ignore")
-        writer.writeheader()
         for row in matrix[1:]:
-            writer.writerow(row)
-        recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
-        self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
-        buffer.seek(0)
-        mail = EmailMessage(
-            f"DOAP updates for {obj.name}", f"Please find in attachment DOAP updates for {obj.name}", to=recipients
-        )
-        mail.attach(f"doap_{obj.name}.csv", buffer.read(), "text/csv")
-        mail.send()
-        for row in matrix[1:]:
-            if row["Action"] == "REMOVE":
-                User.objects.filter(email=row["Email"]).update(doap_hash="")
-            else:
-                User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
-
-        self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
+            User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
-    @button(label="Export DOAP", visible=False)
-    def _export_doap(self, request, pk):
-        context = self.get_common_context(request, pk, title="Members")
+    @button(label="Send DOAP", group="doap")
+    def send_doap(self, request, pk):
+        try:
+            context = self.get_common_context(request, pk, title="Members")
+            obj = context["original"]
+            matrix = self._get_doap_matrix(obj)
+            buffer = StringIO()
+            writer = csv.DictWriter(buffer, matrix[0], extrasaction="ignore")
+            writer.writeheader()
+            for row in matrix[1:]:
+                writer.writerow(row)
+            recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
+            self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
+            buffer.seek(0)
+            mail = EmailMessage(
+                f"DOAP updates for {obj.name}", f"Please find in attachment DOAP updates for {obj.name}", to=recipients
+            )
+            mail.attach(f"doap_{obj.name}.csv", buffer.read(), "text/csv")
+            mail.send()
+            for row in matrix[1:]:
+                if row["Action"] == "REMOVE":
+                    User.objects.filter(email=row["Email"]).update(doap_hash="")
+                else:
+                    User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
+            obj.custom_fields.update({"hope": {"last_doap_sync": str(timezone.now())}})
+            obj.save()
+            self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+
+        return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
+
+    @button(label="Export DOAP", group="doap", permission="can_export_doap")
+    def export_doap(self, request, pk):
+        context = self.get_common_context(request, pk, title="DOAP matrix")
         obj = context["original"]
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f"attachment; filename=doap_{obj.name}.csv"
@@ -247,9 +263,10 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             writer.writerow(row)
         return response
 
-    @button()
+    @button(permission="can_send_doap")
     def view_ca_doap(self, request, pk):
-        context = self.get_common_context(request, pk, title="Members")
+        context = self.get_common_context(request, pk, title="DOAP matrix")
+        context["aeu_groups"] = ["doap"]
         obj = context["original"]
         matrix = self._get_doap_matrix(obj)
         context["headers"] = matrix[0]
