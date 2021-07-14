@@ -385,6 +385,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
+    actions = ["_create_kobo_user"]
 
     @button()
     def inspect(self, request, pk):
@@ -510,9 +511,22 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         else:
             raise Exception(f"Unexpected response from Kobo {res.status_code}")
 
-    def _create_on_ca(self):
-        # this not really creates on CA - simply "mark" the user as
-        pass
+    def _create_kobo_user(self, request, queryset):
+        for user in queryset.all():
+            password = get_random_string()
+            try:
+                self._create_on_kobo(
+                    username=user.username,
+                    email=user.email,
+                    password=password,
+                    notify=True,
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                )
+                user.custom_fields["kobo_username"] = user.username
+                user.save()
+            except Exception as e:
+                self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request):
@@ -541,14 +555,12 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                     context["reader"] = reader
                     context["errors"] = []
                     for row in reader:
-                        password = get_random_string()
                         try:
                             email = row["email"].strip()
                         except Exception as e:
                             raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
 
                         user_info = {"email": email, "is_new": False, "kobo": False, "error": ""}
-
                         if "username" in row:
                             username = row["username"].strip()
                         else:
@@ -556,27 +568,6 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                         u, isnew = account_models.User.objects.get_or_create(
                             email=email, defaults={"username": username}
                         )
-                        if form.cleaned_data["enable_kobo"]:
-                            try:
-                                data = self._create_on_kobo(
-                                    username=u.username,
-                                    email=u.email,
-                                    password=password,
-                                    notify=True,
-                                    first_name=row.get("first_name", ""),
-                                    last_name=row.get("last_name", ""),
-                                )
-                                u.custom_fields["kobo_username"] = u.username
-                                u.save()
-                                user_info["kobo"] = True
-                            except Exception as e:
-                                user_info["error"] = str(e)
-                                context["errors"].append(f"{username}: {e}")
-                        if form.cleaned_data["enable_cash_assist"]:
-                            u.custom_fields["cash_assist_username"] = u.username
-                            u.save()
-                            user_info["ca"] = True
-
                         context["results"].append(user_info)
                 except Exception as e:
                     logger.exception(e)

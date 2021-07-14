@@ -1,17 +1,22 @@
 {% extends "admin_extra_urls/action_page.html" %}
-{% block object-tools-items %}
-    {% load extra_urls i18n static admin_list admin_urls %}
-
-    {% for urlattrs in adminform.model_admin.extra_actions %}
-        {% if 'DOAP' in urlattrs.label %}
-            {% bind urlattrs as options %}
-            {% include "admin_extra_urls/includes/button.html" with options=options %}
-        {% endif %}
-    {% endfor %}
-
+{#{% block object-tools-items2 %}#}
+{#    {% load extra_urls i18n static admin_list admin_urls %}#}
+{##}
+{#    {% for urlattrs in adminform.model_admin.extra_actions %}#}
+{#        {% if 'DOAP' in urlattrs.label %}#}
+{#            {% bind urlattrs as options %}#}
+{#            {% include "admin_extra_urls/includes/button.html" with options=options %}#}
+{#        {% endif %}#}
+{#    {% endfor %}#}
+{##}
+{#{% endblock %}#}
+{% block content_title %}
+    <h1>{{ original }} - Last sync: {{ original.custom_fields.hope.last_doap_sync }}</h1>
 {% endblock %}
 {% block action-content %}
-    <h1>{{ original }}</h1><table><tr>
+
+
+    <table><tr>
     {% for h in headers %}
         <th>{{ h }}</th>
     {% endfor %}</tr>

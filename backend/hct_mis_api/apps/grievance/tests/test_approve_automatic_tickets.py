@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django_countries.fields import Country
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
@@ -66,8 +66,10 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
         )
-
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
+        partner = PartnerFactory()
+        household_one = HouseholdFactory.build(
+            id="07a901ed-d2a5-422a-b962-3570da1d5d07", registration_data_import__imported_by__partner=partner
+        )
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
