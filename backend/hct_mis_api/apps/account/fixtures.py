@@ -4,7 +4,22 @@ from django.contrib.auth import get_user_model
 
 import factory
 
-from hct_mis_api.apps.account.models import Role
+from hct_mis_api.apps.account.models import Partner, Role, UserRole
+from hct_mis_api.apps.core.models import BusinessArea
+
+
+class PartnerFactory(factory.DjangoModelFactory):
+    name = "UNICEF"
+
+    class Meta:
+        model = Partner
+        django_get_or_create = ("name",)
+
+
+class BusinessAreaFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = BusinessArea
+        django_get_or_create = ("name",)
 
 
 class UserFactory(factory.DjangoModelFactory):
@@ -13,15 +28,25 @@ class UserFactory(factory.DjangoModelFactory):
         django_get_or_create = ("username",)
 
     first_name = factory.Faker("first_name")
-
     last_name = factory.Faker("last_name")
-
+    partner = factory.SubFactory(PartnerFactory)
     email = factory.LazyAttribute(lambda o: f"{o.first_name.lower()}.{o.last_name.lower()}@unicef.com")
-
     username = factory.LazyAttribute(lambda o: f"{o.first_name}{o.last_name}_{time.time_ns()}")
 
 
 class RoleFactory(factory.DjangoModelFactory):
+    subsystem = "HOPE"
+
     class Meta:
         model = Role
-        django_get_or_create = ("name",)
+        django_get_or_create = ("name", "subsystem")
+
+
+class UserRoleFactory(factory.DjangoModelFactory):
+    user = factory.SubFactory(UserFactory)
+    role = factory.SubFactory(RoleFactory)
+    business_area = factory.SubFactory(BusinessAreaFactory)
+
+    class Meta:
+        model = UserRole
+        django_get_or_create = ("user", "role")
