@@ -150,6 +150,10 @@ class Role(TimeStampedUUIDModel):
         models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
     )
 
+    def clean(self):
+        if self.subsystem != Role.HOPE and self.permissions:
+            raise ValidationError("Only HOPE roles can have permissions")
+
     class Meta:
         unique_together = ("name", "subsystem")
 

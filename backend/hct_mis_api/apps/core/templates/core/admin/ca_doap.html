@@ -18,7 +18,7 @@
 
     {% for r in rows %}<tr>
         {% for field_name, c in r.items %}
-            {% if field_name == "signature" or field_name == "hash"  %}
+            {% if field_name == "signature" or field_name == "hash"  or field_name == 'values' %}
                 <td style="display: none">{{ field_name }}: {{ c }}</td>
             {% else %}
                 <td>{{ c }}</td>
