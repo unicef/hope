@@ -1,20 +1,11 @@
 {% extends "admin_extra_urls/action_page.html" %}
 {% block action-content %}
     <h1>{{ original }}</h1>
-    <table width="100%">
-        <tr>
-            <th>Username</th>
-            <th>email</th>
-            <th>roles</th>
-            <th>Kobo username</th>
-        </tr>
-
-        {% for member in members %}
+    <table width="100%">{% for member in members %}
         <tr>
             <td><a href="{% url "admin:account_user_change" object_id=member.user__id %}">{{ member.user__username }}</a></td>
             <td>{{ member.user__email }}</td>
             <td>{{ member.roles|join:", " }}</td>
-            <td>{{ member.user__custom_fields__kobo_username|default_if_none:"" }}</td>
         </tr>
 
     {% endfor %}</table>
