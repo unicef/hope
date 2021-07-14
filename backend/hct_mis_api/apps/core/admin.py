@@ -6,6 +6,7 @@ from io import StringIO
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -164,21 +165,20 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     def _get_doap_matrix(self, obj):
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
-        fields = ["org", "last_name", "first_name", "email", "action"] + list(ca_roles)
+        fields = ["org", "Last Name", "First Name", "Email", "Action"] + list(ca_roles)
         matrix.append(fields)
-
         all_user_data = {}
         for member in obj.user_roles.all():
+            user_data = {}
             if member.user.pk not in all_user_data:
-                user_data = {}
                 user_roles = list(
                     member.user.user_roles.filter(role__subsystem="CA").values_list("role__name", flat=True)
                 )
                 user_data["org"] = member.user.partner.name
-                user_data["last_name"] = member.user.last_name
-                user_data["first_name"] = member.user.first_name
-                user_data["email"] = member.user.email
-                user_data["action"] = ""
+                user_data["Last Name"] = member.user.last_name
+                user_data["First Name"] = member.user.first_name
+                user_data["Email"] = member.user.email
+                user_data["Action"] = ""
                 for role in ca_roles:
                     user_data[role] = {True: "Yes", False: ""}[role in user_roles]
 
@@ -191,20 +191,19 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 user_data["signature"] = signature
                 user_data["hash"] = member.user.doap_hash
                 user_data["values"] = values
-
+                action = None
                 if member.user.doap_hash:
                     if signature == member.user.doap_hash:
-                        user_data["action"] = "ACTIVE"
+                        action = "ACTIVE"
                     elif len(user_roles) == 0:
-                        user_data["action"] = "REMOVE"
+                        action = "REMOVE"
                     else:
-                        user_data["action"] = "EDIT"
+                        action = "EDIT"
                 elif len(user_roles):
-                    user_data["action"] = "ADD"
-                else:
-                    user_data["action"] = "-"
+                    action = "ADD"
 
-                if user_data["action"] != "-":
+                if action:
+                    user_data["Action"] = action
                     matrix.append(user_data)
         return matrix
 
@@ -218,18 +217,19 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         writer.writeheader()
         for row in matrix[1:]:
             writer.writerow(row)
-        recipients = [request.user.email, config.CASHASSIST_DOAP_RECIPIENT]
+        recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
+        self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
         buffer.seek(0)
         mail = EmailMessage(
             f"DOAP updates for {obj.name}", f"Please find in attachment DOAP updates for {obj.name}", to=recipients
         )
-        mail.attach("doap.csv", buffer.read(), "text/csv")
+        mail.attach(f"doap_{obj.name}.csv", buffer.read(), "text/csv")
         mail.send()
         for row in matrix[1:]:
-            if row["action"] == "REMOVE":
-                User.objects.filter(email=row["email"]).update(doap_hash="")
+            if row["Action"] == "REMOVE":
+                User.objects.filter(email=row["Email"]).update(doap_hash="")
             else:
-                User.objects.filter(email=row["email"]).update(doap_hash=row["signature"])
+                User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
 
         self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
@@ -239,10 +239,11 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = "attachment; filename=quiz.csv"
+        response["Content-Disposition"] = f"attachment; filename=doap_{obj.name}.csv"
         matrix = self._get_doap_matrix(obj)
-        writer = csv.DictWriter(response)
-        for row in matrix:
+        writer = csv.DictWriter(response, matrix[0], extrasaction="ignore")
+        writer.writeheader()
+        for row in matrix[1:]:
             writer.writerow(row)
         return response
 

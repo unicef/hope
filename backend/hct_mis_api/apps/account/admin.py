@@ -781,11 +781,11 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         matrix1 = {}
         matrix2 = {}
         perms = sorted([str(x.value) for x in Permissions])
-        roles = account_models.Role.objects.order_by("name")
+        roles = account_models.Role.objects.order_by("name").filter(subsystem="HOPE")
         for perm in perms:
             granted_to_roles = []
             for role in roles:
-                if perm in role.permissions:
+                if role.permissions and perm in role.permissions:
                     granted_to_roles.append("X")
                 else:
                     granted_to_roles.append("")
@@ -794,7 +794,7 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         for role in roles:
             values = []
             for perm in perms:
-                if perm in role.permissions:
+                if role.permissions and perm in role.permissions:
                     values.append("X")
                 else:
                     values.append("")
