@@ -1,9 +1,10 @@
 import random
 
 import factory
-from factory import fuzzy
+from factory import enums, fuzzy
 from pytz import utc
 
+from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
     MARITAL_STATUS_CHOICE,
@@ -108,6 +109,13 @@ class HouseholdFactory(factory.DjangoModelFactory):
     male_age_group_18_59_count = factory.fuzzy.FuzzyInteger(0, 3)
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
 
+    @classmethod
+    def build(cls, **kwargs):
+        """Build an instance of the associated class, with overriden attrs."""
+        if "registration_data_import__imported_by__parnter" not in kwargs:
+            kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
+        return cls._generate(enums.BUILD_STRATEGY, kwargs)
+
 
 class DocumentFactory(factory.DjangoModelFactory):
     class Meta:
@@ -167,10 +175,15 @@ def create_household(household_args=None, individual_args=None):
         household_args = {}
     if individual_args is None:
         individual_args = {}
+
+    partner = PartnerFactory(name="UNICEF")
+    household_args["registration_data_import__imported_by__partner"] = partner
+
     household = HouseholdFactory.build(**household_args)
     individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
 
     household.head_of_household = individuals[0]
+    # household.registration_data_import.imported_by.partner.save()
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
     household.save()

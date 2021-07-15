@@ -76,6 +76,13 @@ class User(AbstractUser, UUIDModel):
             return f"{self.first_name} {self.last_name}"
         return self.email or self.username
 
+    def save(self, *args, **kwargs):
+        if not self.partner:
+            self.partner = Partner.objects.get(name="UNICEF")
+        if not self.partner.pk:
+            self.partner.save()
+        super().save(*args, **kwargs)
+
     def permissions_in_business_area(self, business_area_slug):
         all_roles_permissions_list = list(
             Role.objects.filter(user_roles__user=self, user_roles__business_area__slug=business_area_slug).values_list(
@@ -96,7 +103,7 @@ class User(AbstractUser, UUIDModel):
         permissions = (
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
             ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
-            ("can_upload_to_kobo", "Can upload users to Kobo"),
+            ("can_create_kobo_user", "Can create users in Kobo"),
             ("can_import_from_kobo", "Can import and sync users from Kobo"),
             ("can_debug", "Can access debug informations"),
             ("can_inspect", "Can inspect objects"),
