@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 from django.db.models import Q
 
-from hct_mis_api.apps.account.models import Role, IncompatibleRoles
+from hct_mis_api.apps.account.models import IncompatibleRoles, Role
 from hct_mis_api.apps.account.permissions import Permissions
 
 
@@ -267,6 +267,7 @@ class Command(BaseCommand):
         roles_updated = []
         for default_role in default_roles_matrix:
             role, created = Role.objects.update_or_create(
+                subsystem=Role.HOPE,
                 name=default_role["name"],
                 defaults={"permissions": [permission.value for permission in default_role["permissions"]]},
             )
@@ -292,7 +293,8 @@ class Command(BaseCommand):
                 | Q(role_one__name=role_pair[1], role_two__name=role_pair[0])
             ).exists():
                 IncompatibleRoles.objects.create(
-                    role_one=Role.objects.get(name=role_pair[0]), role_two=Role.objects.get(name=role_pair[1])
+                    role_one=Role.objects.get(subsystem=Role.HOPE, name=role_pair[0]),
+                    role_two=Role.objects.get(subsystem=Role.HOPE, name=role_pair[1]),
                 )
                 incompatible_roles_created.append(f"{role_pair[0]} and {role_pair[1]}")
         if incompatible_roles_created:
