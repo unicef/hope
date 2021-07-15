@@ -128,7 +128,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
 
-    @button(label="Create Business Office", permission=["core.can_split_business_area"])
+    @button(label="Create Business Office", permission="core.can_split_business_area")
     def split_business_area(self, request, pk):
         context = self.get_common_context(request, pk)
         opts = self.object._meta
@@ -386,7 +386,7 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
     search_fields = ("name",)
     ordering = ("country_name", "admin_level")
 
-    @button(permission=["load_from_datamart"])
+    @button(permission="load_from_datamart")
     def load_from_datamart(self, request):
         api = DatamartAPI()
         for level in api.get_admin_levels():

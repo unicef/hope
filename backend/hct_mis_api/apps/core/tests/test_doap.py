@@ -42,7 +42,7 @@ class TestDOAP(WebTest):
         self.assertEqual(mail.outbox[0].subject, "DOAP updates for Afghanistan")
 
     def test_export_doap(self):
-        url = reverse("admin:core_businessarea__export_doap", args=[self.business_area.pk])
+        url = reverse("admin:core_businessarea_export_doap", args=[self.business_area.pk])
         res = self.app.get(url, user=self.user)
         self.assertEqual(res.content_type, "text/csv")
         csv_content = list(csv.reader(StringIO(res.content.decode())))
