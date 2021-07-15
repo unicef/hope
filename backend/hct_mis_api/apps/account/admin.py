@@ -206,13 +206,8 @@ class DjAdminManager:
         self._username = request.session["kobo_username"] = None
         self._password = request.session["kobo_password"] = None
 
-    def login(self, request=None, username="", password="", twin=None):
-        if not username and request:
-            username = request.POST.get("kobo_username", request.session.get("kobo_username"))
-            password = request.POST.get("kobo_password", request.session.get("kobo_password"))
-        elif username:
-            self._username = username
-            self._password = password
+    def login(self, request=None, twin=None):
+        username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
         try:
             try:
                 self.client.get(self.login_url)
@@ -267,8 +262,12 @@ class DjAdminManager:
 
     def delete_user(self, username, pk):
         url = f"{self.admin_url}auth/user/{pk}/delete/"
+        self.login()
         self._get(url)
         self.assert_response([200, 404, 302])
+        if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
+            raise Exception(f"Cannot access to {url} using")
+
         if self._last_response.status_code == 200:
             csrftoken = self.client.cookies["csrftoken"]
             self._post(url, {"csrfmiddlewaretoken": csrftoken})
@@ -498,10 +497,23 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
 
         return actions
 
-    @button(permission="account.can_create_kobo_user")
+    @button(permission="account.can_create_kobo_user", visible=lambda o, r: not o.custom_fields.get("kobo_username"))
     def create_kobo_user(self, request, pk):
         try:
             self._create_kobo_user_qs(request, self.get_queryset(request).filter(pk=pk))
+        except Exception as e:
+            self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+
+    @button(permission="account.can_create_kobo_user", visible=lambda o, r: o.custom_fields.get("kobo_username"))
+    def remove_kobo_access(self, request, pk):
+        try:
+            obj = self.get_object(request, pk)
+            api = DjAdminManager()
+            api.delete_user(obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"])
+            obj.custom_fields["kobo_username"] = ""
+            obj.custom_fields["kobo_pk"] = ""
+            obj.save()
+            self.message_user(request, f"Kobo Access removed {api.admin_url}", messages.SUCCESS)
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
@@ -598,7 +610,7 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
             selected = request.POST.getlist("kobo_id")
             api = DjAdminManager()
             api.login(request)
-            results = {"created": [], "updated": []}
+            results = []
             for entry in api.list_users():
                 if entry[0] in selected:
                     local, created = account_models.User.objects.get_or_create(
@@ -608,13 +620,10 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                             "custom_fields": {"kobo_pk": entry[0], "kobo_username": entry[1]},
                         },
                     )
-                    if created:
-                        results["created"].append(local)
-                    else:
-                        local.custom_fields["kobo_pk"] = entry[0]
-                        local.custom_fields["kobo_username"] = entry[1]
-                        local.save()
-                        results["created"].append(local)
+                    local.custom_fields["kobo_pk"] = entry[0]
+                    local.custom_fields["kobo_username"] = entry[1]
+                    local.save()
+                    results.append([local, created])
             ctx["results"] = results
         else:
             try:
