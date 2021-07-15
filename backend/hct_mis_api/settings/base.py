@@ -446,6 +446,12 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
+    "CASHASSIST_DOAP_RECIPIENT": ("", "UNHCR email address where to send DOAP updates", str),
+    "KOBO_ADMIN_CREDENTIALS": (
+        "",
+        "Kobo superuser credentislas in format user:password",
+        str,
+    ),
     "DEDUPLICATION_BATCH_DUPLICATES_ALLOWED": (
         5,
         "If amount of duplicates for single individual exceeds this limit deduplication is aborted",

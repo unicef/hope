@@ -1,11 +1,13 @@
 import logging
 import re
+from collections import defaultdict
 from datetime import date
 
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
+from django.db.models import F, Sum
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -425,6 +427,46 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     @property
     def total_cash_received(self):
         return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
+
+    @property
+    def total_cash_received_usd(self):
+        return (
+            self.payment_records.filter()
+            .aggregate(models.Sum("delivered_quantity_usd"))
+            .get("delivered_quantity_usd__sum")
+        )
+
+    @property
+    def programs_with_delivered_quantity(self):
+        programs = (
+            self.payment_records.all()
+            .annotate(program=F("cash_plan__program"))
+            .values("program")
+            .annotate(
+                total_delivered_quantity=Sum("delivered_quantity"),
+                total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
+                currency=F("currency"),
+                program_name=F("cash_plan__program__name"),
+                program_id=F("cash_plan__program__id"),
+            )
+            .order_by("cash_plan__program__created_at")
+        )
+
+        programs_dict = []
+
+        for program in programs:
+            programs_dict.append(
+                {
+                    "id": program["program_id"],
+                    "name": program["program_name"],
+                    "quantity": {
+                        "total_delivered_quantity": program["total_delivered_quantity"],
+                        "total_delivered_quantity_usd": program["total_delivered_quantity_usd"],
+                        "currency": program["currency"],
+                    },
+                }
+            )
+        return programs_dict
 
     def __str__(self):
         return f"{self.unicef_id}"

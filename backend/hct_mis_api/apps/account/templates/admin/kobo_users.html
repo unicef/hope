@@ -13,14 +13,13 @@
 
 {% block content %}
     {% if results %}
-        {% if results.created %}
-            <h3>The following user have been added to HOPE</h3>
-            {{ results.created|join:", " }}
-        {% endif %}
-        {% if results.updated %}
-            <h3>The following users have been found in HOPE and have been updated (role added)</h3>
-            {{ results.updated|join:", " }}
-        {% endif %}
+        <h3>The following user have been changed to HOPE</h3>
+        <table>{% for user, op in results %}
+            <tr>
+                <td><a href="{% url "admin:account_user_change" user.pk %}">{{ user }}</a></td>
+                <td>{% if op %}Created{% else %}Updated{% endif %}</td>
+            </tr>
+        {% endfor %}</table>
     {% elif users %}
         <form method="post">
             {% csrf_token %}
