@@ -47,6 +47,8 @@ class BusinessArea(TimeStampedUUIDModel):
         unique=True,
         db_index=True,
     )
+    custom_fields = JSONField(default=dict, blank=True)
+
     has_data_sharing_agreement = models.BooleanField(default=False)
     parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
     is_split = models.BooleanField(default=False)
@@ -95,7 +97,12 @@ class BusinessArea(TimeStampedUUIDModel):
 
     class Meta:
         ordering = ["name"]
-        permissions = (("can_split", "Can split BusinessArea"),)
+        permissions = (
+            ("can_split", "Can split BusinessArea"),
+            ("can_send_doap", "Can send DOAP matrix"),
+            ("can_reset_doap", "Can force sync DOAP matrix"),
+            ("can_export_doap", "Can export DOAP matrix"),
+        )
 
     def __str__(self):
         return self.name
