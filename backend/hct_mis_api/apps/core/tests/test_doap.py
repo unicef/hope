@@ -36,7 +36,7 @@ class TestDOAP(WebTest):
         assert self.user_role.user.email in str(res.content)
 
     def test_send_doap(self):
-        url = reverse("admin:core_businessarea__send_doap", args=[self.business_area.pk])
+        url = reverse("admin:core_businessarea_send_doap", args=[self.business_area.pk])
         res = self.app.get(url, user=self.user)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, "DOAP updates for Afghanistan")
