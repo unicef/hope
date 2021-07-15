@@ -3,7 +3,7 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from urllib.parse import unquote
+from urllib.parse import unquote, urlencode
 
 from django import forms
 from django.conf import settings
@@ -165,29 +165,30 @@ class DjAdminManager:
         self.admin_path = f"/admin/"
         self.admin_url = f"{kf_host}{self.admin_path}"
         self.login_url = f"{self.admin_url}login/"
+
+        self.admin_url_kc = f"{kc_host}{self.admin_path}"
+        self.login_url_kc = f"{self.admin_url_kc}login/"
         self._logged = False
         self._last_error = None
         self._last_response = False
         self._username = None
         self._password = None
         self.form_errors = []
-        # if kc_host:
-        #     self.kc = DjAdminManager(kc_host, None)
 
     def extract_errors(self, res):
         self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
         return self.form_errors
 
-    def assert_response(self, status: [int], location: str = None, custom_error=None):
+    def assert_response(self, status: [int], location: str = None, custom_error=""):
         if not isinstance(status, (list, tuple)):
             status = [status]
         if self._last_response.status_code not in status:
-            msg = custom_error or f"Unexpected code:{self._last_response.status_code} not in {status}"
+            msg = f"Unexpected code:{self._last_response.status_code} not in {status}: {custom_error}"
             self._last_error = self._last_response
             raise self.ResponseException(msg)
 
         if location and (redir_to := self._last_response.headers.get("location", "N/A")) != location:
-            msg = custom_error or f"Unexpected redirect:{redir_to} <> {location}"
+            msg = f"Unexpected redirect:{redir_to} <> {location}: {custom_error}"
             self._last_error = self._last_response
             raise self.ResponseException(msg)
 
@@ -210,7 +211,7 @@ class DjAdminManager:
         username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
         try:
             try:
-                self.client.get(self.login_url)
+                self.client.get(self.login_url_kc)
                 csrftoken = self.client.cookies["csrftoken"]
                 self._post(
                     self.login_url,
@@ -225,22 +226,20 @@ class DjAdminManager:
             except Exception as e:
                 raise self.ResponseException(f"Unable to login to Kobo at {self.login_url}: {e.__class__.__name__} {e}")
 
-            if request:
-                request.session["kobo_username"] = username
-                request.session["kobo_password"] = password
         except Exception as e:
             logger.exception(e)
             raise
 
     def _get(self, url):
         self._last_response = self.client.get(url, allow_redirects=False)
+        self.client.headers["Referer"] = url
         return self._last_response
 
     def _post(self, url, data):
         self._last_response = self.client.post(url, data, allow_redirects=False)
         return self._last_response
 
-    def list_users(self):
+    def list_users(self, q=""):
         regex = re.compile(
             r'action-checkbox.*value="(?P<id>\d+)".*</td>.*field-username.*<a.*?>(?P<username>.*)</a></t.>.*field-email">(?P<mail>.*?)<',
             re.MULTILINE + re.IGNORECASE,
@@ -248,7 +247,7 @@ class DjAdminManager:
         page = 2
         last_match = None
         while True:
-            url = f"{self.admin_url}auth/user/?p={page}"
+            url = f"{self.admin_url}auth/user/?q={q}&p={page}"
             res = self._get(url)
             self.assert_response(200)
             matches = regex.findall(res.content.decode())
@@ -260,39 +259,24 @@ class DjAdminManager:
 
             page += 1
 
+    def get_csrfmiddlewaretoken(self):
+        regex = re.compile("""csrfmiddlewaretoken["'] +value=["'](.*)["']""")
+        m = regex.search(self._last_response.content.decode("utf8"))
+        return m.groups()[0]
+
     def delete_user(self, username, pk):
-        url = f"{self.admin_url}auth/user/{pk}/delete/"
         self.login()
-        self._get(url)
-        self.assert_response([200, 404, 302])
-        if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
-            raise Exception(f"Cannot access to {url} using")
+        for url in [f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"]:
+            self._get(url)
+            self.assert_response([200, 404, 302], custom_error=url)
+            if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
+                raise Exception(f"Cannot access to {url}")
 
-        if self._last_response.status_code == 200:
-            csrftoken = self.client.cookies["csrftoken"]
-            self._post(url, {"csrfmiddlewaretoken": csrftoken})
-            self.assert_response(302)
-
-    def create_user(self, username, password):
-        self._get(f"{self.admin_url}auth/user/")
-        csrftoken = self.client.cookies["csrftoken"]
-        self.assert_response(200, None, "Cannot get csrftoken")
-        self._post(
-            f"{self.admin_url}auth/user/add/",
-            data={"username": username, "password1": password, "password2": password, "csrfmiddlewaretoken": csrftoken},
-        )
-        if self._last_response.status_code == 200:
-            self.extract_errors(self._last_response)
-            self.assert_response(302, None, f"Cannot create user {username}: {self.form_errors}")
-
-        redir_to = self._last_response.headers["location"]
-        m = re.search(r"auth/user/([0-9]*)/(change/|)$", redir_to)
-        pk = m.groups()[0]
-        return pk
-
-
-# class HasKoboAccount(ChoicesFieldComboFilter):
-#     pass
+            if self._last_response.status_code == 200:
+                # csrftoken = self.client.cookies.get_dict()['csrftoken']
+                csrftoken = self.get_csrfmiddlewaretoken()
+                self._post(url, {"csrfmiddlewaretoken": csrftoken, "post": "yes"})
+                self.assert_response(302, custom_error=f"{url} - {csrftoken}")
 
 
 class HasKoboAccount(SimpleListFilter):
@@ -439,41 +423,6 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
             self.message_user(request, str(e), messages.ERROR)
             raise
 
-    # @button(permission="account.can_add_user")
-    # def kobo_login(self, request):
-    #     cookies = {}
-    #     ctx = self.get_common_context(request, logged=False)
-    #     try:
-    #         if request.method == "POST":
-    #             form = KoboLoginForm(request.POST)
-    #             if form.is_valid():
-    #                 api = DjAdminManager()
-    #                 api.login(
-    #                     request,
-    #                     username=form.cleaned_data["kobo_username"],
-    #                     password=form.cleaned_data["kobo_password"],
-    #                 )
-    #                 self.message_user(request, "Successfully logged in", messages.SUCCESS)
-    #                 ctx["logged"] = True
-    #             else:
-    #                 self.message_user(request, "Invalid", messages.ERROR)
-    #         else:
-    #             form = KoboLoginForm(
-    #                 initial={
-    #                     "kobo_username": request.session.get("kobo_username", request.user.email),
-    #                     "kobo_password": request.session.get("kobo_password", ""),
-    #                 }
-    #             )
-    #     except Exception as e:
-    #         logger.exception(e)
-    #         self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-    #
-    #     ctx["form"] = form
-    #     response = TemplateResponse(request, "admin/kobo_login.html", ctx)
-    #     for key, value in cookies.items():
-    #         response.set_cookie(key, value)
-    #     return response
-
     @button()
     def privileges(self, request, pk):
         context = self.get_common_context(request, pk)
@@ -517,6 +466,7 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
             obj.save()
             self.message_user(request, f"Kobo Access removed {api.admin_url}", messages.SUCCESS)
         except Exception as e:
+            logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     def _create_kobo_user_qs(self, request, queryset):
@@ -538,6 +488,13 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                 )
                 if res.status_code == 400:
                     raise Exception(res.content)
+                api = DjAdminManager()
+                api.login()
+                for entry in api.list_users(q=username):
+                    if entry[1] == username and entry[2] == user.email:
+                        user.custom_fields["kobo_pk"] = entry[0]
+                        user.custom_fields["kobo_username"] = entry[1]
+                        user.save()
 
                 if res.status_code == 201:
                     send_mail(
@@ -633,7 +590,8 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                 api.login(request)
                 for entry in api.list_users():
                     local = account_models.User.objects.filter(email=entry[2]).first()
-                    users.append([entry[0], entry[1], entry[2], local])
+                    if entry[1] not in ["__sys__", "superuser"]:
+                        users.append([entry[0], entry[1], entry[2], local])
                 ctx["users"] = users
 
             except Exception as e:
