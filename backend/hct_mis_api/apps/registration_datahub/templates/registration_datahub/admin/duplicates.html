@@ -1,0 +1,62 @@
+{% extends "admin_extra_urls/action_page.html" %}
+{% block action-content %}
+    <h2>{{ original }}</h2>
+
+    <table border="1" width="100%">
+        <tr>
+            <th>proximity_to_score</th>
+            <th>score</th>
+            <th>full_name</th>
+            <th>hit_id</th>
+            <th>dob</th>
+            <th>location</th>
+        </tr>
+
+        <tr><th colspan="6">BATCH DUPLICATES</th></tr>
+        {% for k in original.deduplication_batch_results.duplicates %}
+            <tr>
+                <td>{{ k.proximity_to_score }}</td>
+                <td>{{ k.score }}</td>
+                <td>{{ k.full_name }}</td>
+                <td>{{ k.hit_id }}</td>
+                <td>{{ k.dob }}</td>
+                <td>{{ k.location }}</td>
+            </tr>
+        {% endfor %}
+        <tr><th colspan="6">BATCH POSSIBLE DUPLICATES</th></tr>
+        {% for k in original.deduplication_batch_results.possible_duplicates %}
+            <tr>
+                <td>{{ k.proximity_to_score }}</td>
+                <td>{{ k.score }}</td>
+                <td>{{ k.full_name }}</td>
+                <td>{{ k.hit_id }}</td>
+                <td>{{ k.dob }}</td>
+                <td>{{ k.location }}</td>
+            </tr>
+        {% endfor %}
+
+{#  GOLDEN RECORD #}
+        <tr><th colspan="6">GOLDEN RECORD DUPLICATES</th></tr>
+        {% for k in original.deduplication_golden_record_results.duplicates %}
+            <tr>
+                <td>{{ k.proximity_to_score }}</td>
+                <td>{{ k.score }}</td>
+                <td>{{ k.full_name }}</td>
+                <td>{{ k.hit_id }}</td>
+                <td>{{ k.dob }}</td>
+                <td>{{ k.location }}</td>
+            </tr>
+        {% endfor %}
+        <tr><th colspan="6">GOLDEN RECORD POSSIBLE DUPLICATES</th></tr>
+        {% for k in original.deduplication_golden_record_results.possible_duplicates %}
+            <tr>
+                <td>{{ k.proximity_to_score }}</td>
+                <td>{{ k.score }}</td>
+                <td>{{ k.full_name }}</td>
+                <td>{{ k.hit_id }}</td>
+                <td>{{ k.dob }}</td>
+                <td>{{ k.location }}</td>
+            </tr>
+        {% endfor %}
+  </table>
+{% endblock %}
