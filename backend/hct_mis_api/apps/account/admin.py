@@ -27,6 +27,8 @@ from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_urls.api import ExtraUrlMixin, button
+from adminactions.helpers import AdminActionPermMixin
+from adminactions.perms import get_permission_codename
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
@@ -316,7 +318,7 @@ class PartnerAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
 
 @admin.register(account_models.User)
-class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
+class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
     list_filter = (
         ("partner", AutoCompleteFilter),
@@ -385,7 +387,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
-    actions = ["_create_kobo_user"]
+    actions = ["_create_kobo_user_qs"]
 
     @button()
     def inspect(self, request, pk):
@@ -436,40 +438,40 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             self.message_user(request, str(e), messages.ERROR)
             raise
 
-    @button(permission="account.can_add_user")
-    def kobo_login(self, request):
-        cookies = {}
-        ctx = self.get_common_context(request, logged=False)
-        try:
-            if request.method == "POST":
-                form = KoboLoginForm(request.POST)
-                if form.is_valid():
-                    api = DjAdminManager()
-                    api.login(
-                        request,
-                        username=form.cleaned_data["kobo_username"],
-                        password=form.cleaned_data["kobo_password"],
-                    )
-                    self.message_user(request, "Successfully logged in", messages.SUCCESS)
-                    ctx["logged"] = True
-                else:
-                    self.message_user(request, "Invalid", messages.ERROR)
-            else:
-                form = KoboLoginForm(
-                    initial={
-                        "kobo_username": request.session.get("kobo_username", request.user.email),
-                        "kobo_password": request.session.get("kobo_password", ""),
-                    }
-                )
-        except Exception as e:
-            logger.exception(e)
-            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-
-        ctx["form"] = form
-        response = TemplateResponse(request, "admin/kobo_login.html", ctx)
-        for key, value in cookies.items():
-            response.set_cookie(key, value)
-        return response
+    # @button(permission="account.can_add_user")
+    # def kobo_login(self, request):
+    #     cookies = {}
+    #     ctx = self.get_common_context(request, logged=False)
+    #     try:
+    #         if request.method == "POST":
+    #             form = KoboLoginForm(request.POST)
+    #             if form.is_valid():
+    #                 api = DjAdminManager()
+    #                 api.login(
+    #                     request,
+    #                     username=form.cleaned_data["kobo_username"],
+    #                     password=form.cleaned_data["kobo_password"],
+    #                 )
+    #                 self.message_user(request, "Successfully logged in", messages.SUCCESS)
+    #                 ctx["logged"] = True
+    #             else:
+    #                 self.message_user(request, "Invalid", messages.ERROR)
+    #         else:
+    #             form = KoboLoginForm(
+    #                 initial={
+    #                     "kobo_username": request.session.get("kobo_username", request.user.email),
+    #                     "kobo_password": request.session.get("kobo_password", ""),
+    #                 }
+    #             )
+    #     except Exception as e:
+    #         logger.exception(e)
+    #         self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+    #
+    #     ctx["form"] = form
+    #     response = TemplateResponse(request, "admin/kobo_login.html", ctx)
+    #     for key, value in cookies.items():
+    #         response.set_cookie(key, value)
+    #     return response
 
     @button()
     def privileges(self, request, pk):
@@ -489,42 +491,50 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         context["business_ares_roles"] = dict(ba_roles)
         return TemplateResponse(request, "admin/account/user/privileges.html", context)
 
-    def _create_on_kobo(self, username, email, password, notify=False, **kwargs):
-        url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
-        res = requests.post(
-            url,
-            headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
-            json={"username": username, "email": email, "password": password, **kwargs},
-        )
-        if res.status_code == 400:
-            raise Exception(res.content)
+    def get_actions(self, request):
+        actions = super(UserAdmin, self).get_actions(request)
+        if not request.user.has_perm("account.can_create_kobo_user"):
+            del actions["_create_kobo_user_qs"]
 
-        if res.status_code == 201:
-            if notify:
-                send_mail(
-                    "Kobo credentials",
-                    KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                )
-            return res.json()
-        else:
-            raise Exception(f"Unexpected response from Kobo {res.status_code}")
+        return actions
 
-    def _create_kobo_user(self, request, queryset):
+    @button(permission="account.can_create_kobo_user")
+    def create_kobo_user(self, request, pk):
+        try:
+            self._create_kobo_user_qs(request, self.get_queryset(request).filter(pk=pk))
+        except Exception as e:
+            self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+
+    def _create_kobo_user_qs(self, request, queryset):
         for user in queryset.all():
             password = get_random_string()
             try:
-                self._create_on_kobo(
-                    username=user.username,
-                    email=user.email,
-                    password=password,
-                    notify=True,
-                    first_name=user.first_name,
-                    last_name=user.last_name,
+                url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
+                username = user.username.replace("@", "_at_").replace(".", "_").lower()
+                res = requests.post(
+                    url,
+                    headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
+                    json={
+                        "username": username,
+                        "email": user.email,
+                        "password": password,
+                        "last_name": user.last_name,
+                        "first_name": user.first_name,
+                    },
                 )
+                if res.status_code == 400:
+                    raise Exception(res.content)
+
+                if res.status_code == 201:
+                    send_mail(
+                        "Kobo credentials",
+                        KOBO_ACCESS_EMAIL.format(email=user.email, password=password, kobo_url=settings.KOBO_KF_URL),
+                        settings.DEFAULT_FROM_EMAIL,
+                        [user.email],
+                    )
                 user.custom_fields["kobo_username"] = user.username
                 user.save()
+                self.message_user(request, f"User successfully `{username}` created on Kobo", messages.SUCCESS)
             except Exception as e:
                 self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
