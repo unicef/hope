@@ -304,9 +304,11 @@ class HasKoboAccount(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "0":
-            return queryset.filter(custom_fields__kobo_pk__isnull=True)
+            return queryset.filter(
+                Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None),
+            )
         elif self.value() == "1":
-            return queryset.exclude(custom_fields__kobo_pk__isnull=True)
+            return queryset.filter(custom_fields__kobo_pk__isnull=False).exclude(custom_fields__kobo_pk=None)
         return queryset
 
 
@@ -510,8 +512,8 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
             obj = self.get_object(request, pk)
             api = DjAdminManager()
             api.delete_user(obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"])
-            obj.custom_fields["kobo_username"] = ""
-            obj.custom_fields["kobo_pk"] = ""
+            obj.custom_fields["kobo_username"] = None
+            obj.custom_fields["kobo_pk"] = None
             obj.save()
             self.message_user(request, f"Kobo Access removed {api.admin_url}", messages.SUCCESS)
         except Exception as e:
