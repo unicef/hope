@@ -816,7 +816,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
     parameter_name = "role"
 
     def lookups(self, request, model_admin):
-        types = Role.objects.values_list("id", "name")
+        types = account_models.Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 
     def queryset(self, request, queryset):
