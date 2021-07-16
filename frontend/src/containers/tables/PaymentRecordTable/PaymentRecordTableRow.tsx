@@ -12,6 +12,7 @@ import {
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -29,12 +30,12 @@ export function PaymentRecordTableRow({
 }: PaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const history = useHistory();
+  const paymentRecordPath = `/${businessArea}/payment-records/${paymentRecord.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment-records/${paymentRecord.id}`;
     if (openInNewTab) {
-      window.open(path);
+      window.open(paymentRecordPath);
     } else {
-      history.push(path);
+      history.push(paymentRecordPath);
     }
   };
   return (
@@ -44,7 +45,9 @@ export function PaymentRecordTableRow({
       role='checkbox'
       key={paymentRecord.id}
     >
-      <TableCell align='left'>{paymentRecord.caId}</TableCell>
+      <TableCell align='left'>
+        <BlackLink to={paymentRecordPath}>{paymentRecord.caId}</BlackLink>
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

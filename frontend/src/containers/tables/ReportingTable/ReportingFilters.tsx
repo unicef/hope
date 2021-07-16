@@ -66,7 +66,6 @@ export const ReportingFilters = ({
             <FieldLabel>Creation Date</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
-              disableToolbar
               inputVariant='outlined'
               margin='dense'
               label='From'
@@ -86,7 +85,6 @@ export const ReportingFilters = ({
         <Grid item>
           <KeyboardDatePicker
             variant='inline'
-            disableToolbar
             inputVariant='outlined'
             margin='dense'
             label='To'

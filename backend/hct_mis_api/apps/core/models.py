@@ -1,19 +1,21 @@
-import mptt
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
+
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+
+import mptt
+from hct_mis_api.apps.core.utils import unique_slugify
+from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
-
-from hct_mis_api.apps.core.utils import unique_slugify
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
 
 
 class BusinessArea(TimeStampedUUIDModel):
@@ -45,14 +47,62 @@ class BusinessArea(TimeStampedUUIDModel):
         unique=True,
         db_index=True,
     )
+    custom_fields = JSONField(default=dict, blank=True)
+
     has_data_sharing_agreement = models.BooleanField(default=False)
+    parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
+    is_split = models.BooleanField(default=False)
+
+    countries = models.ManyToManyField(
+        "AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0}, related_name="business_areas"
+    )
+    deduplication_batch_duplicate_score = models.FloatField(
+        default=6.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results equal or above this score are considered duplicates",
+    )
+
+    deduplication_batch_duplicates_percentage = models.IntegerField(
+        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+    )
+    deduplication_batch_duplicates_allowed = models.IntegerField(
+        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
+    )
+
+    deduplication_golden_record_duplicate_score = models.FloatField(
+        default=6.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results equal or above this score are considered duplicates",
+    )
+    deduplication_golden_record_duplicates_percentage = models.IntegerField(
+        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+    )
+    deduplication_golden_record_duplicates_allowed = models.IntegerField(
+        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
+    )
+    deduplication_golden_record_min_score = models.FloatField(
+        default=11.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results below the minimum score will not be taken into account",
+    )
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
+        if self.parent:
+            self.parent.is_split = True
+            self.parent.save()
+        if self.children.count():
+            self.is_split = True
         super(BusinessArea, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ["name"]
+        permissions = (
+            ("can_split", "Can split BusinessArea"),
+            ("can_send_doap", "Can send DOAP matrix"),
+            ("can_reset_doap", "Can force sync DOAP matrix"),
+            ("can_export_doap", "Can export DOAP matrix"),
+        )
 
     def __str__(self):
         return self.name
@@ -69,29 +119,44 @@ class BusinessArea(TimeStampedUUIDModel):
         ]
 
 
+class AdminAreaLevelManager(models.Manager):
+    def get_countries(self):
+        return self.filter(admin_level=0).order_by("country_name").values_list("id", "country_name")
+
+
 class AdminAreaLevel(TimeStampedUUIDModel):
     """
     Represents an Admin Type in location-related models.
     """
 
-    name = models.CharField(max_length=64, unique=True, verbose_name=_("Name"))
+    name = models.CharField(max_length=64, verbose_name=_("Name"))
     display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
-    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"))
-    real_admin_level = models.PositiveSmallIntegerField(verbose_name=_("Real Admin Level"), null=True)
+    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"), blank=True, null=True)
     business_area = models.ForeignKey(
-        "BusinessArea",
-        on_delete=models.SET_NULL,
-        related_name="admin_area_level",
-        null=True,
+        "BusinessArea", on_delete=models.SET_NULL, related_name="admin_area_level", null=True, blank=True
     )
+    area_code = models.CharField(max_length=8, blank=True, null=True)
+    country_name = models.CharField(max_length=100, blank=True, null=True)
+    country = models.ForeignKey(
+        "self", blank=True, null=True, limit_choices_to={"admin_level": 0}, on_delete=models.CASCADE
+    )
+    datamart_id = models.CharField(max_length=8, blank=True, null=True, unique=True)
+    objects = AdminAreaLevelManager()
 
     class Meta:
         ordering = ["name"]
         verbose_name = "Admin Area Level"
-        unique_together = ("business_area", "admin_level")
+        unique_together = ("country", "admin_level")
+        permissions = (
+            ("load_from_datamart", "Load data from Datamart"),
+            ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
+            ("can_upload_to_kobo", "Can upload users to Kobo"),
+        )
 
     def __str__(self):
-        return "{} - {}".format(self.business_area, self.name)
+        if self.admin_level == 0:
+            return self.country_name or ""
+        return "{} - {}".format(self.area_code, self.name)
 
 
 class AdminAreaManager(TreeManager):
@@ -124,7 +189,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
 
-    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="Postal Code")
+    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="P Code")
 
     parent = TreeForeignKey(
         "self",
@@ -142,16 +207,27 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     class Meta:
         unique_together = ("title", "p_code")
         ordering = ["title"]
+        permissions = (
+            ("import_from_csv", "Import AdminAreas from CSV file"),
+            ("load_from_datamart", "Load data from Datamart"),
+        )
 
     def __str__(self):
+        level_name = self.admin_area_level.name if self.admin_area_level else ""
         if self.p_code:
             return "{} ({} {})".format(
                 self.title,
-                self.admin_area_level.name,
-                "{}: {}".format("CERD" if self.admin_area_level.name == "School" else "PCode", self.p_code or ""),
+                level_name,
+                "{}: {}".format("CERD" if level_name == "School" else "PCode", self.p_code or ""),
             )
 
         return self.title
+
+    def country(self):
+        try:
+            return AdminArea.objects.get(tree_id=self.tree_id, parent=None)
+        except Exception:
+            return None
 
     @property
     def geo_point(self):

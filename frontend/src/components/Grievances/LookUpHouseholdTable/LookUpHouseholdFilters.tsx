@@ -122,7 +122,6 @@ export function LookUpHouseholdFilters({
             <FieldLabel>Registration Date</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
-              disableToolbar
               inputVariant='outlined'
               margin='dense'
               placeholder='From'
@@ -145,7 +144,6 @@ export function LookUpHouseholdFilters({
         <Grid item>
           <KeyboardDatePicker
             variant='inline'
-            disableToolbar
             inputVariant='outlined'
             margin='dense'
             placeholder='To'
@@ -189,6 +187,7 @@ export function LookUpHouseholdFilters({
           <AdminAreasAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
+            value={filter.admin2}
           />
         </Grid>
         <Grid item>

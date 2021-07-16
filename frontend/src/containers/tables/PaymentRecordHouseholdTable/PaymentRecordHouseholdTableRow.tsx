@@ -11,6 +11,7 @@ import {
   paymentRecordStatusToColor,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -30,12 +31,12 @@ export function PaymentRecordHouseholdTableRow({
 }: PaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const history = useHistory();
+  const paymentRecordDetailsPath = `/${businessArea}/payment-records/${paymentRecord.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment-records/${paymentRecord.id}`;
     if (openInNewTab) {
-      window.open(path);
+      window.open(paymentRecordDetailsPath);
     } else {
-      history.push(path);
+      history.push(paymentRecordDetailsPath);
     }
   };
   return (
@@ -45,7 +46,15 @@ export function PaymentRecordHouseholdTableRow({
       role='checkbox'
       key={paymentRecord.id}
     >
-      <TableCell align='left'>{paymentRecord.caId}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <BlackLink to={paymentRecordDetailsPath}>
+            {paymentRecord.caId}
+          </BlackLink>
+        ) : (
+          paymentRecord.caId
+        )}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

@@ -1,40 +1,44 @@
-from datetime import datetime, date
+from datetime import date, datetime
 
-import graphene
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from django_countries.fields import Country
+from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.core.utils import to_snake_case
-from hct_mis_api.apps.grievance.celery_tasks import deduplicate_and_check_against_sanctions_list_task
+from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
+from hct_mis_api.apps.grievance.celery_tasks import (
+    deduplicate_and_check_against_sanctions_list_task,
+)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
-    TicketIndividualDataUpdateDetails,
     TicketAddIndividualDetails,
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
 )
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     handle_add_document,
+    handle_add_identity,
     handle_role,
     prepare_previous_documents,
+    prepare_previous_identities,
+    reassign_roles_on_update,
     verify_flex_fields,
     withdraw_individual_and_reassign_roles,
-    handle_add_identity,
-    prepare_previous_identities,
 )
 from hct_mis_api.apps.household.models import (
-    Individual,
-    Household,
     HEAD,
-    Document,
-    ROLE_NO_ROLE,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
+    ROLE_NO_ROLE,
+    Document,
+    Household,
+    Individual,
     IndividualIdentity,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -587,10 +591,12 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         and relationship_to_head_of_household.get("approve_status")
         and individual.relationship != HEAD
     ):
+        if household.individuals.filter(relationship=HEAD).count() > 1:
+            raise GraphQLError("There is one head of household. First, you need to change its role.")
         household.head_of_household = individual
-        household.individuals.exclude(id=individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
         household.save()
 
+    reassign_roles_on_update(individual, ticket_details.role_reassign_data, info)
     if role_data.get("approve_status") is True:
         handle_role(role_data.get("value"), household, individual)
 

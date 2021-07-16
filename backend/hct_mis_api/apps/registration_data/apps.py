@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class RegistrationDataConfig(AppConfig):
-    name = "registration_data"
+    name = "hct_mis_api.apps.registration_data"

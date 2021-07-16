@@ -53,14 +53,13 @@ export const LookUpIndividualTable = ({
     search: filter.search,
     programs: [decodeIdString(filter.programs)],
     lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
-    status: [filter.status],
+    status: filter.status,
     admin2: [decodeIdString(filter?.admin2?.node?.id)],
     sex: [filter.sex],
     householdId: valuesInner.selectedHousehold
       ? decodeIdString(valuesInner.selectedHousehold.id)
       : null,
     excludedId: excludedId || ticket?.individual?.id || null,
-    withdrawn: false,
   };
 
   return (

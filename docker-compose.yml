@@ -117,14 +117,14 @@ services:
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:
-      - db:/data/postgres
+      - db:/var/lib/postgresql/data
     env_file:
       - .env
 
   cash_assist_datahub_db:
     image: mdillon/postgis:9.5-alpine
     volumes:
-      - db_ca:/data/postgres
+      - db_ca:/var/lib/postgresql/data
     env_file:
       - .env
     ports:
@@ -133,7 +133,7 @@ services:
   registration_datahub_db:
     image: mdillon/postgis:9.5-alpine
     volumes:
-      - db_reg:/data/postgres
+      - db_reg:/var/lib/postgresql/data
     env_file:
       - .env
 

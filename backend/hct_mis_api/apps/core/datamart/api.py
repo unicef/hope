@@ -1,9 +1,10 @@
 import logging
 
-import requests
 from django.conf import settings
-from django.contrib.gis.geos import Point, MultiPolygon, Polygon
+from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.core.exceptions import ValidationError
+
+import requests
 
 from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel
 
@@ -18,13 +19,55 @@ class DatamartAPI:
         self._client = requests.session()
         self._init_auth()
         self.url = settings.DATAMART_URL
+        self._location_cache = {}
 
     def _init_auth(self):
         self._client.auth = (settings.DATAMART_USER, settings.DATAMART_PASSWORD)
 
+    def get_admin_levels(self, max_pages=None):
+        url = f"/api/latest/datamart/gateway-type/?&page_size={DatamartAPI.PAGE_SIZE}"
+        next_url = f"{self.url}{url}"
+        results: list = []
+        page = 1
+        while next_url:
+            data = self._handle_get_request(next_url, is_absolute_url=True)
+            next_url = data["next"]
+            for entry in data["results"]:
+                yield entry
+            if max_pages and page >= max_pages:
+                break
+            page += 1
+        return results
+
+    def get_location(self, id):
+        url = f"/api/latest/datamart/locations/{id}/"
+        return self._handle_get_request(url)
+
+    def get_locations(self, *, country=None, gis=False, max_records=None, page_size=None):
+        url = f"/api/latest/datamart/locations/?&ordering=id,page_size={page_size or self.PAGE_SIZE}"
+        if country:
+            url = f"{url}&country_name={country}"
+        if gis:
+            url = f"{url}&-serializer=gis"
+        next_url = f"{self.url}{url}"
+        records = 0
+        while next_url:
+            data = self._handle_get_request(next_url, is_absolute_url=True)
+            next_url = data["next"]
+            for entry in data["results"]:
+                records += 1
+                if entry["is_active"]:
+                    yield entry
+                if max_records and records >= max_records:
+                    break
+            if max_records and records >= max_records:
+                break
+
     def get_locations_geo_data(self, business_area):
         return self._get_paginated_results(
-            f"{DatamartAPI.LOCATIONS_ENDPOINT}" f"&country_name={business_area.name}&page_size={DatamartAPI.PAGE_SIZE}"
+            f"{DatamartAPI.LOCATIONS_ENDPOINT}"
+            f"&area_code={business_area.code}&page_size={DatamartAPI.PAGE_SIZE}"
+            # f"{DatamartAPI.LOCATIONS_ENDPOINT}" f"&country_name={business_area.name}&page_size={DatamartAPI.PAGE_SIZE}"
         )
 
     def _features_to_multi_polygon(self, geometry):
@@ -100,13 +143,18 @@ class DatamartAPI:
             raise
         return response.json()
 
-    def _get_paginated_results(self, url) -> list:
+    def _get_paginated_results(self, url, max_pages=None) -> list:
         next_url = f"{self._get_url()}{url}"
         results: list = []
+        page = 1
         while next_url:
+            print(next_url)
             data = self._handle_get_request(next_url, is_absolute_url=True)
             next_url = data["next"]
             results.extend(data["results"]["features"])
+            if max_pages and page >= max_pages:
+                break
+            page += 1
         return results
 
     def _handle_post_request(self, url, data) -> dict:

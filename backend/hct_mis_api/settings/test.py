@@ -45,7 +45,11 @@ LOGGING = {
             "level": "CRITICAL",
             "propagate": True,
         },
-        "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+        "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {
+            "handlers": ["default"],
+            "level": "CRITICAL",
+            "propagate": True,
+        },
     },
 }
 
@@ -59,3 +63,5 @@ try:
 except ImportError:
     pass
 logging.disable(logging.CRITICAL)
+
+EXCHANGE_RATE_CACHE_EXPIRY = 0

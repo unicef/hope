@@ -120,7 +120,6 @@ export function RegistrationDataImport(): React.ReactElement {
   const [importType, setImportType] = useState();
   const [koboProject, setKoboProject] = useState();
   const [onlyActiveSubmissions, setOnlyActiveSubmissions] = useState(true);
-  const [pullPictures, setPullPictures] = useState(true);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [
@@ -317,7 +316,6 @@ export function RegistrationDataImport(): React.ReactElement {
             try {
               let rdiId = null;
               if (importType === 'kobo') {
-                console.log('test test test')
                 const { data } = await createRegistrationKoboMutate({
                   variables: {
                     registrationDataImportData: {
@@ -377,7 +375,7 @@ export function RegistrationDataImport(): React.ReactElement {
           }}
           initialValues={{ name: '', pullPictures: true }}
         >
-          {({ submitForm }) => (
+          {() => (
             <Form>
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title'>

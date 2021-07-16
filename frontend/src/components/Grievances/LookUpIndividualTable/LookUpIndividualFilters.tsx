@@ -106,7 +106,6 @@ export function LookUpIndividualFilters({
             <FieldLabel>Registration Date</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
-              disableToolbar
               inputVariant='outlined'
               margin='dense'
               placeholder='From'
@@ -129,7 +128,6 @@ export function LookUpIndividualFilters({
         <Grid item>
           <KeyboardDatePicker
             variant='inline'
-            disableToolbar
             inputVariant='outlined'
             margin='dense'
             placeholder='To'
@@ -162,7 +160,8 @@ export function LookUpIndividualFilters({
             >
               {[
                 { value: 'ACTIVE', name: 'Active' },
-                { value: 'INACTIVE', name: 'Inactive' },
+                { value: 'WITHDRAWN', name: 'Withdrawn' },
+                { value: 'DUPLICATE', name: 'Duplicate' },
               ].map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>
@@ -177,6 +176,7 @@ export function LookUpIndividualFilters({
           <AdminAreasAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
+            value={filter.admin2}
           />
         </Grid>
         <Grid item>

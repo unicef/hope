@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
-        field_name="admin_area_level__business_area__slug",
+        field_name="admin_area_level__country__business_areas__slug",
     )
     level = IntegerFilter(
         field_name="level",
@@ -302,6 +302,9 @@ class Query(graphene.ObjectType):
         description="All Kobo projects/assets.",
     )
     cash_assist_url_prefix = graphene.String()
+
+    def resolve_all_business_areas(parent, info):
+        return BusinessArea.objects.filter(is_split=False)
 
     def resolve_cash_assist_url_prefix(parent, info):
         return config.CASH_ASSIST_URL_PREFIX
