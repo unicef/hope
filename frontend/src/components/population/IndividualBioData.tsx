@@ -15,7 +15,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 import { UniversalMoment } from '../UniversalMoment';
 import { ContentLink } from '../ContentLink';
-import { DocumentPhotoModal } from './DocumentPhotoModal';
+import { DocumentPopulationPhotoModal } from './DocumentPopulationPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -67,9 +67,9 @@ export function IndividualsBioData({
         <Box mb={1}>
           <LabelizedField label={edge.node.type.label}>
             {edge.node.photo ? (
-              <DocumentPhotoModal
+              <DocumentPopulationPhotoModal
                 documentId={edge.node.documentNumber}
-                photo={edge.node.photo}
+                individual={individual}
               />
             ) : (
               edge.node.documentNumber
