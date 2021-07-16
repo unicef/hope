@@ -16,7 +16,6 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
 import { ContentLink } from '../../../../components/ContentLink';
-import { DocumentPopulationPhotoModal } from '../../../../components/population/DocumentPopulationPhotoModal';
 import { DocumentRegistrationPhotoModal } from './DocumentRegistrationPhotoModal';
 
 const Overview = styled(Paper)`
