@@ -18,6 +18,7 @@ import {
   sexToCapitalize,
 } from '../../utils/utils';
 import { UniversalMoment } from '../../components/UniversalMoment';
+import { BlackLink } from '../../components/BlackLink';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -120,7 +121,15 @@ export function HouseholdIndividualsTable({
             role='checkbox'
             key={row.id}
           >
-            <TableCell align='left'>{row.unicefId}</TableCell>
+            <TableCell align='left'>
+              <BlackLink
+                target='_blank'
+                rel='noopener noreferrer'
+                to={`/${businessArea}/population/individuals/${row.id}`}
+              >
+                {row.unicefId}
+              </BlackLink>
+            </TableCell>
             <TableCell align='left'>{row.fullName}</TableCell>
             <TableCell align='left'>
               <StatusContainer>

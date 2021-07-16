@@ -4,7 +4,8 @@ import { useHistory } from 'react-router-dom';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
-import {AnonTableCell} from "../../../../components/table/AnonTableCell";
+import { AnonTableCell } from '../../../../components/table/AnonTableCell';
+import { BlackLink } from '../../../../components/BlackLink';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
@@ -17,10 +18,9 @@ export function ProgrammeTableRow({
 }): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
+  const householdDetailsPath = `/${businessArea}/population/household/${household.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/population/household/${household.id}`;
-    history.push(path);
+    history.push(householdDetailsPath);
   };
   return (
     <ClickableTableRow
@@ -29,7 +29,19 @@ export function ProgrammeTableRow({
       role='checkbox'
       key={household.id}
     >
-      <TableCell align='left'>{household.unicefId}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <BlackLink
+            target='_blank'
+            rel='noopener noreferrer'
+            to={householdDetailsPath}
+          >
+            {household.unicefId}
+          </BlackLink>
+        ) : (
+          household.unicefId
+        )}
+      </TableCell>
       <AnonTableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>

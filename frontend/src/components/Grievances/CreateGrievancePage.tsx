@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import * as Yup from 'yup';
 import { Field, Formik } from 'formik';
 import {
   Box,
@@ -53,6 +52,7 @@ import { EditHouseholdDataChange } from './EditHouseholdDataChange';
 import { TicketsAlreadyExist } from './TicketsAlreadyExist';
 import { prepareVariables } from './utils/createGrievanceUtils';
 import { validate } from './utils/validateGrievance';
+import { validationSchema } from "./utils/validationSchema";
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -84,28 +84,13 @@ export const dataChangeComponentDict = {
   },
 };
 
-const validationSchema = Yup.object().shape({
-  description: Yup.string().required('Description is required'),
-  assignedTo: Yup.string().required('Assigned To is required'),
-  category: Yup.string()
-    .required('Category is required')
-    .nullable(),
-  admin: Yup.string().nullable(),
-  area: Yup.string(),
-  language: Yup.string().required('Language is required'),
-  consent: Yup.bool().oneOf([true], 'Consent is required'),
-  selectedPaymentRecords: Yup.array()
-    .of(Yup.string())
-    .nullable(),
-  selectedRelatedTickets: Yup.array()
-    .of(Yup.string())
-    .nullable(),
-});
-
 export function CreateGrievancePage(): React.ReactElement {
+  const history = useHistory();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+
+  const linkedTicketId = history.location.state?.linkedTicketId;
 
   const initialValues = {
     description: '',
@@ -118,7 +103,7 @@ export function CreateGrievancePage(): React.ReactElement {
     selectedHousehold: null,
     selectedIndividual: null,
     selectedPaymentRecords: [],
-    selectedRelatedTickets: [],
+    selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
   };
@@ -356,7 +341,7 @@ export function CreateGrievancePage(): React.ReactElement {
                             multiline
                             fullWidth
                             variant='outlined'
-                            label='Languages Spoken*'
+                            label='Languages Spoken'
                             component={FormikTextField}
                           />
                         </Grid>

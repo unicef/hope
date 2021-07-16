@@ -11,6 +11,7 @@ import {
   renderSomethingOrDash,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -26,9 +27,9 @@ export function CashPlanTableRow({
 }: CashPlanTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const cashPlanPath = `/${businessArea}/cashplans/${cashPlan.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/cashplans/${cashPlan.id}`;
-    history.push(path);
+    history.push(cashPlanPath);
   };
   return (
     <ClickableTableRow
@@ -38,13 +39,15 @@ export function CashPlanTableRow({
       key={cashPlan.id}
     >
       <TableCell align='left'>
-        <div
-          style={{
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {cashPlan.caId}
-        </div>
+        <BlackLink target='_blank' rel='noopener noreferrer' to={cashPlanPath}>
+          <div
+            style={{
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {cashPlan.caId}
+          </div>
+        </BlackLink>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>

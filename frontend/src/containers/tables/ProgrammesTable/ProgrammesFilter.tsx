@@ -116,7 +116,6 @@ export function ProgrammesFilters({
             <Grid item>
               <KeyboardDatePicker
                 variant='inline'
-                disableToolbar
                 inputVariant='outlined'
                 margin='dense'
                 label='Start Date'
@@ -135,7 +134,6 @@ export function ProgrammesFilters({
             <Grid item>
               <KeyboardDatePicker
                 variant='inline'
-                disableToolbar
                 inputVariant='outlined'
                 margin='dense'
                 label='End Date'

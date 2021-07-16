@@ -4,6 +4,7 @@ export const GrievanceTicket = gql`
   query GrievanceTicket($id: ID!) {
     grievanceTicket(id: $id) {
       id
+      unicefId
       status
       category
       consent
@@ -74,6 +75,7 @@ export const GrievanceTicket = gql`
           ...individualDetailed
         }
         individualData
+        roleReassignData
       }
       householdDataUpdateTicketDetails {
         id

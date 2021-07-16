@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Coalesce, Lower
 
@@ -34,6 +32,7 @@ from hct_mis_api.apps.core.schema import (
     AdminAreaNode,
     ChoiceObject,
     FieldAttributeNode,
+    _custom_dict_or_attr_resolver,
 )
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
@@ -49,18 +48,21 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
     AGENCY_TYPE_CHOICES,
-    DISABILITY_CHOICE,
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     IDENTIFICATION_TYPE_CHOICE,
-    INDIVIDUAL_HOUSEHOLD_STATUS,
+    INDIVIDUAL_STATUS_CHOICES,
     MARITAL_STATUS_CHOICE,
+    OBSERVED_DISABILITY_CHOICE,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
+    STATUS_ACTIVE,
+    STATUS_DUPLICATE,
+    STATUS_WITHDRAWN,
     WORK_STATUS_CHOICE,
     Agency,
     Document,
@@ -163,7 +165,7 @@ class IndividualFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2))
-    status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
+    status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
 
@@ -210,6 +212,17 @@ class IndividualFilter(FilterSet):
             q_obj |= Q(middle_name__startswith=value)
             q_obj |= Q(family_name__startswith=value)
         return qs.filter(q_obj)
+
+    def status_filter(self, qs, name, value):
+        q_obj = Q()
+        if STATUS_DUPLICATE in value:
+            q_obj |= Q(duplicate=True)
+        if STATUS_WITHDRAWN in value:
+            q_obj |= Q(withdrawn=True)
+        if STATUS_ACTIVE in value:
+            q_obj |= Q(duplicate=False, withdrawn=False)
+
+        return qs.filter(q_obj).distinct()
 
     def filter_excluded_id(self, qs, name, value):
         return qs.exclude(id=decode_id_string(value))
@@ -286,6 +299,21 @@ class HouseholdSelection(DjangoObjectType):
         model = HouseholdSelection
 
 
+class DeliveredQuantityNode(graphene.ObjectType):
+    total_delivered_quantity = graphene.Decimal()
+    total_delivered_quantity_usd = graphene.Decimal()
+    currency = graphene.String()
+
+
+class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
+    class Meta:
+        default_resolver = _custom_dict_or_attr_resolver
+
+    id = graphene.ID()
+    name = graphene.String()
+    quantity = graphene.Field(DeliveredQuantityNode)
+
+
 class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),
@@ -295,6 +323,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     )
 
     total_cash_received = graphene.Decimal()
+    total_cash_received_usd = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
     currency = graphene.String()
@@ -307,6 +336,10 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin1 = graphene.Field(AdminAreaNode)
     admin2 = graphene.Field(AdminAreaNode)
     status = graphene.String()
+    programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+
+    def resolve_programs_with_delivered_quantity(parent, info):
+        return parent.programs_with_delivered_quantity
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -594,7 +627,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(SEVERITY_OF_DISABILITY_CHOICES)
 
     def resolve_observed_disability_choices(self, info, **kwargs):
-        return to_choice_object(DISABILITY_CHOICE)
+        return to_choice_object(OBSERVED_DISABILITY_CHOICE)
 
     def resolve_work_status_choices(self, info, **kwargs):
         return to_choice_object(WORK_STATUS_CHOICE)

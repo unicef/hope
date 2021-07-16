@@ -6,12 +6,12 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import {
-  decodeIdString,
   grievanceTicketStatusToColor,
   renderUserName,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../UniversalMoment';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
+import { BlackLink } from '../../BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -33,10 +33,10 @@ export function GrievancesTableRow({
 }: GrievancesTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const detailsPath = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
 
   const handleClick = (): void => {
-    const path = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
-    history.push(path);
+    history.push(detailsPath);
   };
   return (
     <ClickableTableRow
@@ -45,7 +45,15 @@ export function GrievancesTableRow({
       role='checkbox'
       key={ticket.id}
     >
-      <TableCell align='left'>{decodeIdString(ticket.id)}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <BlackLink target='_blank' rel='noopener noreferrer' to={detailsPath}>
+            {ticket.unicefId}
+          </BlackLink>
+        ) : (
+          ticket.unicefId
+        )}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

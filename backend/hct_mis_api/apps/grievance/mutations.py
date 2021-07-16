@@ -1,10 +1,11 @@
 import logging
 
-import graphene
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -28,6 +29,10 @@ from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     save_data_change_extras,
     update_data_change_extras,
 )
+from hct_mis_api.apps.grievance.mutations_extras.feedback import (
+    save_negative_feedback_extras,
+    save_positive_feedback_extras,
+)
 from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
     save_grievance_complaint_extras,
 )
@@ -39,6 +44,7 @@ from hct_mis_api.apps.grievance.mutations_extras.main import (
 from hct_mis_api.apps.grievance.mutations_extras.payment_verification import (
     save_payment_verification_extras,
 )
+from hct_mis_api.apps.grievance.mutations_extras.referral import save_referral_extras
 from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import (
     save_sensitive_grievance_extras,
 )
@@ -88,6 +94,8 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     area = graphene.String()
     language = graphene.String()
     linked_tickets = graphene.List(graphene.ID)
+    household = graphene.GlobalID(node=HouseholdNode, required=False)
+    individual = graphene.GlobalID(node=IndividualNode, required=False)
     extras = UpdateGrievanceTicketExtrasInput()
 
 
@@ -223,6 +231,9 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_DATA_CHANGE: save_data_change_extras,
             GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: save_grievance_complaint_extras,
             GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: save_sensitive_grievance_extras,
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK: save_positive_feedback_extras,
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: save_negative_feedback_extras,
+            GrievanceTicket.CATEGORY_REFERRAL: save_referral_extras,
         }
         save_extra_method = save_extra_methods.get(category)
         grievances = [grievance_ticket]
@@ -306,6 +317,14 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         arg = lambda name, default=None: input.get(name, default)
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
         grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
+        household, individual = None, None
+
+        if arg("household") is not None:
+            household = get_object_or_404(Household, id=decode_id_string(arg("household")))
+
+        if arg("individual") is not None:
+            individual = get_object_or_404(Individual, id=decode_id_string(arg("individual")))
+
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         business_area = grievance_ticket.business_area
         cls.has_creator_or_owner_permission(
@@ -343,6 +362,30 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             update_extra_method = update_extra_methods.get(category)
             if update_extra_method:
                 grievance_ticket = update_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
+
+        if grievance_ticket.category in [
+            GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+        ]:
+            ticket_details_fields = {
+                GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: lambda ticket: ticket.sensitive_ticket_details,
+                GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: lambda ticket: ticket.complaint_ticket_details,
+            }
+
+            ticket_details = ticket_details_fields.get(grievance_ticket.category)(grievance_ticket)
+
+            if ticket_details.household and ticket_details.household != household:
+                raise GraphQLError("Cannot change household")
+            if ticket_details.individual and ticket_details.individual != individual:
+                raise GraphQLError("Cannot change individual")
+
+            if household:
+                ticket_details.household = household
+            if individual:
+                ticket_details.individual = individual
+            ticket_details.save()
+            grievance_ticket.save()
+
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -626,7 +669,7 @@ class CreateTicketNoteMutation(PermissionMutation):
 
         ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=created_by)
         notification = GrievanceNotification(
-            grievance_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=created_by
+            grievance_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=created_by, ticket_note=ticket_note
         )
         notification.send_email_notification()
         return cls(grievance_ticket_note=ticket_note)

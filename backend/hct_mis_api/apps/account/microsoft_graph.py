@@ -1,8 +1,9 @@
 import logging
 
-import requests
 from django.conf import settings
 from django.http import Http404
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -56,10 +57,10 @@ class MicrosoftGraphAPI:
     def get_user_data(self, *, email=None, uuid=None):
         try:
             if uuid:
-                q = f"https://graph.microsoft.com/beta/users/{uuid}"
+                q = f"https://graph.microsoft.com/v1.0/users/{uuid}"
                 value = self.get_results(q)
             elif email:
-                q = f"https://graph.microsoft.com/beta/users/?$filter=userType in ['Member','guest'] and mail eq '{email}'"
+                q = f"https://graph.microsoft.com/v1.0/users/?$filter=userType in ['Member','guest'] and mail eq '{email}'"
                 data = self.get_results(q)
                 value = data.get("value")[0]
             else:

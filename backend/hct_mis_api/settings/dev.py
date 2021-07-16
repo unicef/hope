@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import os
+
 from .base import *  # noqa: ignore=F403
 
 # dev overrides
@@ -16,7 +18,7 @@ ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2"])
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800}}
+# CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800}}
 
 # change logging level to debug
 LOGGING["loggers"]["django.request"]["level"] = "DEBUG"
@@ -31,4 +33,5 @@ ELASTICSEARCH_DSL = {
     "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
     "test": {"hosts": "elasticsearch_test:9200"},
 }
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")

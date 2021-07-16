@@ -16,10 +16,9 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from sentry_sdk.integrations.celery import CeleryIntegration
+from single_source import get_version
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
-
-from single_source import get_version
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -91,6 +90,11 @@ EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "").lower() == "true"
+
+KOBO_KF_URL = os.getenv("KOBO_KF_URL", "https://kf-hope.unitst.org")
+KOBO_KC_URL = os.getenv("KOBO_KC_URL", "https://kc-hope.unitst.org")
+KOBO_MASTER_API_TOKEN = os.getenv("KOBO_MASTER_API_TOKEN", "KOBO_TOKEN")
+KOBO_APP_API_TOKEN = os.getenv("KOBO_APP_API_TOKEN", "KOBO_APP_TOKEN")
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = os.getenv("ENV")
@@ -217,6 +221,7 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
+    "smart_admin.logs",
     "smart_admin.templates",
     "smart_admin",
     "django_sysinfo",
@@ -242,11 +247,13 @@ OTHER_APPS = [
     "constance",
     "admin_extra_urls",
     "adminfilters",
+    "adminactions",
     "multiselectfield",
     "mptt",
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    "explorer",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -427,11 +434,18 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
+    "CASHASSIST_DOAP_RECIPIENT": ("", "UNHCR email address where to send DOAP updates", str),
+    "KOBO_ADMIN_CREDENTIALS": (
+        "",
+        "Kobo superuser credentislas in format user:password",
+        str,
+    ),
     "DEDUPLICATION_BATCH_DUPLICATES_ALLOWED": (
         5,
         "If amount of duplicates for single individual exceeds this limit deduplication is aborted",
         "positive_integers",
     ),
+    "KOBO_APP_API_TOKEN": ("", "Kobo KPI token", str),
     # GOLDEN RECORDS SETTINGS
     "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
         6.0,
@@ -478,8 +492,6 @@ TEST_OUTPUT_FILE_NAME = "result.xml"
 DATAMART_USER = os.getenv("DATAMART_USER")
 DATAMART_PASSWORD = os.getenv("DATAMART_PASSWORD")
 DATAMART_URL = os.getenv("DATAMART_URL", "https://datamart-dev.unicef.io")
-
-KOBO_MASTER_API_TOKEN = os.getenv("KOBO_MASTER_API_TOKEN", "KOBO_TOKEN")
 
 COUNTRIES_OVERRIDE = {
     "U": {
@@ -566,4 +578,48 @@ SMART_ADMIN_SECTIONS = {
         "sites",
     ],
 }
+
+EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
+
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
+
+# see adminactions.perms
+# set handker to AA_PERMISSION_CREATE_USE_COMMAND
+AA_PERMISSION_HANDLER = 3
+
+
+def filter_environment(key):
+    return False
+
+
+SYSINFO = {"filter_environment": "hct_mis_api.settings.base.filter_environment"}
+
+EXPLORER_CONNECTIONS = {
+    "default": "default",
+    "HUB MIS": "cash_assist_datahub_mis",
+    "HUB CA": "cash_assist_datahub_ca",
+    "HUB ERP": "cash_assist_datahub_erp",
+    "HUB Reg": "registration_datahub",
+}
+EXPLORER_DEFAULT_CONNECTION = "default"
+EXPLORER_PERMISSION_VIEW = lambda r: r.user.is_superuser
+EXPLORER_PERMISSION_CHANGE = lambda r: r.user.is_superuser
+
+# EXPLORER_SCHEMA_INCLUDE_TABLE_PREFIXES = (
+#     'hct_mis_api',
+# )
+# EXPLORER_SCHEMA_EXCLUDE_TABLE_PREFIXES = (
+#     'django.contrib.auth',
+#     'django.contrib.contenttypes',
+#     'django_site',
+#     'django_session',
+#     'django.contrib.sessions',
+#     'django.contrib.admin',
+#     'django_celery',
+#     'django_celery.beat',
+#     'django_celery_beat',
+#     'django_celery_results',
+#     'django_migrations',
+#     'social_auth',
+#     'django_admin',
+# )

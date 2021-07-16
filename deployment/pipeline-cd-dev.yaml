@@ -69,6 +69,9 @@ stages:
                 backend.secret.DATAMART_USER=$(DATAMART_USER),\
                 backend.secret.DATAMART_PASSWORD=$(DATAMART_PASSWORD),\
                 backend.secret.DATAMART_URL=$(DATAMART_URL),\
+                backend.secret.KOBO_KF_URL=$(KOBO_KF_URL),\
+                backend.secret.KOBO_KC_URL=$(KOBO_KC_URL),\
+                backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
                 frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
                 ingress.host=dev-hope.unitst.org,\
                 ingress.tls=true,\

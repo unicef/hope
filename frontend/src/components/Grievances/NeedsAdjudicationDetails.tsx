@@ -10,9 +10,9 @@ import {
   TableRow,
   Typography,
 } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -22,6 +22,7 @@ import { ConfirmationDialog } from '../ConfirmationDialog';
 import { UniversalMoment } from '../UniversalMoment';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { BlackLink } from '../BlackLink';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -39,11 +40,6 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-const ClickableTableCell = styled(TableCell)`
-  cursor: pointer;
-  text-decoration: underline;
-`;
-
 export function NeedsAdjudicationDetails({
   ticket,
   canApprove,
@@ -51,8 +47,8 @@ export function NeedsAdjudicationDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApprove: boolean;
 }): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
+  const history = useHistory();
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {
@@ -72,24 +68,27 @@ export function NeedsAdjudicationDetails({
   const isEditable = isEditMode || !isApproved;
 
   const isApproveDisabled = (): boolean => {
-    return (
-      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-    );
+    return ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   };
 
-  const handleClickId = (individualId: string, entityPath: string): void => {
-    if (!individualId && !entityPath) {
-      return;
-    }
-    const path = `/${businessArea}/population/${entityPath}/${individualId}`;
-    history.push(path);
-  };
   return (
     <StyledBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>Needs Adjudication Details</Typography>
-          <Box>
+          <Box gridGap={24} display='flex'>
+            <Button
+              onClick={() =>
+                history.push({
+                  pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                  state: { linkedTicketId: ticket.id },
+                })
+              }
+              variant='outlined'
+              color='primary'
+            >
+              Create Linked Ticket
+            </Button>
             {!isEditable && (
               <Button
                 variant='outlined'
@@ -102,7 +101,6 @@ export function NeedsAdjudicationDetails({
                 Edit
               </Button>
             )}
-
             {isEditable && canApprove && (
               <ConfirmationDialog
                 title='Confirmation'
@@ -123,7 +121,7 @@ export function NeedsAdjudicationDetails({
                     variant='outlined'
                     color='primary'
                   >
-                    mark as duplicate and remove
+                    mark duplicate
                   </Button>
                 )}
               </ConfirmationDialog>
@@ -163,28 +161,25 @@ export function NeedsAdjudicationDetails({
                 }
               />
             </TableCell>
-            <ClickableTableCell
-              align='left'
-              onClick={() =>
-                handleClickId(
-                  details.goldenRecordsIndividual?.id,
-                  'individuals',
-                )
-              }
-            >
-              {details.goldenRecordsIndividual?.unicefId}
-            </ClickableTableCell>
-            <ClickableTableCell
-              align='left'
-              onClick={() =>
-                handleClickId(
-                  details.goldenRecordsIndividual?.household?.id,
-                  'household',
-                )
-              }
-            >
-              {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-            </ClickableTableCell>
+
+            <TableCell align='left'>
+              <BlackLink
+                target='_blank'
+                rel='noopener noreferrer'
+                to={`/${businessArea}/population/individuals/${details.goldenRecordsIndividual?.id}`}
+              >
+                {details.goldenRecordsIndividual?.unicefId}
+              </BlackLink>
+            </TableCell>
+            <TableCell align='left'>
+              <BlackLink
+                target='_blank'
+                rel='noopener noreferrer'
+                to={`/${businessArea}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
+              >
+                {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+              </BlackLink>
+            </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.fullName}
             </TableCell>
@@ -223,25 +218,24 @@ export function NeedsAdjudicationDetails({
                 }
               />
             </TableCell>
-            <ClickableTableCell
-              align='left'
-              onClick={() =>
-                handleClickId(details.possibleDuplicate?.id, 'individuals')
-              }
-            >
-              {details.possibleDuplicate?.unicefId}
-            </ClickableTableCell>
-            <ClickableTableCell
-              align='left'
-              onClick={() =>
-                handleClickId(
-                  details.possibleDuplicate?.household?.id,
-                  'household',
-                )
-              }
-            >
-              {details.possibleDuplicate?.household?.unicefId || '-'}
-            </ClickableTableCell>
+            <TableCell align='left'>
+              <BlackLink
+                target='_blank'
+                rel='noopener noreferrer'
+                to={`/${businessArea}/population/individuals/${details.possibleDuplicate?.id}`}
+              >
+                {details.possibleDuplicate?.unicefId}
+              </BlackLink>
+            </TableCell>
+            <TableCell align='left'>
+              <BlackLink
+                target='_blank'
+                rel='noopener noreferrer'
+                to={`/${businessArea}/population/household/${details.possibleDuplicate?.household?.id}`}
+              >
+                {details.possibleDuplicate?.household?.unicefId || '-'}
+              </BlackLink>
+            </TableCell>
             <TableCell align='left'>
               {details.possibleDuplicate?.fullName}
             </TableCell>

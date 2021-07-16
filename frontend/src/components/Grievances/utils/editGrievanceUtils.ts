@@ -1,6 +1,5 @@
 import camelCase from 'lodash/camelCase';
 import React from 'react';
-import * as Yup from 'yup';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -178,17 +177,7 @@ export function prepareInitialValues(
   ) as EditValuesTypes;
   return initialValues;
 }
-export const validationSchema = Yup.object().shape({
-  description: Yup.string().required('Description is required'),
-  assignedTo: Yup.string().required('Assigned To is required'),
-  category: Yup.string().required('Category is required').nullable(),
-  admin: Yup.string().nullable(),
-  area: Yup.string(),
-  language: Yup.string().required('Language is required'),
-  consent: Yup.bool().oneOf([true], 'Consent is required'),
-  selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
-  selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
-});
+
 export const EmptyComponent = (): React.ReactElement => null;
 export const dataChangeComponentDict = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
@@ -384,6 +373,8 @@ export function prepareVariables(businessArea, values, ticket) {
     language: values.language,
     admin: values?.admin?.node?.pCode,
     area: values.area,
+    household: values.selectedHousehold?.id,
+    individual: values.selectedIndividual?.id,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,

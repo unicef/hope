@@ -8,7 +8,7 @@ import {
 } from '@material-ui/core';
 import get from 'lodash/get';
 
-const toExternalValue = (internalValue) => {
+const toExternalValue = (internalValue): boolean | null => {
   switch (internalValue) {
     case 'YES':
       return true;

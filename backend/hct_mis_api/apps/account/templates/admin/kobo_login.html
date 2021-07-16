@@ -7,22 +7,26 @@
             href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
         &rsaquo; <a
             href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
-        &rsaquo; <a href="{% url opts|admin_urlname:'change' original.pk %}">{{ original }}</a>
-        &rsaquo; Privileges
+        &rsaquo; Kobo Login
     </div>
 {% endblock %}
 
 {% block content %}
-    <h1>{{ original }}</h1>
-    {% regroup original.user_roles.all by business_area as by_business_area %}
-    {% for group in by_business_area %}
-        <div class="content">
-            <h3>{{ group.grouper }}</h3>
-            {% for role in group.list %}
-                {{ role.role }}
-            {% endfor %}
+    {% if not logged %}
+        <h1>Import Users</h1>
+        <h3>Provide your Kobo credentials</h3>
+        <form method="POST" id="load_users" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div><input type="submit" value="Login"></div>
+        </form>
+    {% else %}
+        <h1>Success</h1>
+        <h3>You can now administrate Kobo Users</h3>
+        <div>
+            <h3><a class="btn" href="{% url opts|admin_urlname:'kobo_login' %}">Login As Different Kobo User</a></h3>
         </div>
-    {% endfor %}
+    {% endif %}
 {% endblock content %}
 
 {% block submit_buttons_bottom %}{% endblock %}

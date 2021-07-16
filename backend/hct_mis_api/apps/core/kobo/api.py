@@ -3,8 +3,9 @@ import os
 import time
 from io import BytesIO
 
-import requests
 from django.conf import settings
+
+import requests
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RetryError
 from requests.packages.urllib3.util.retry import Retry
@@ -14,7 +15,6 @@ from hct_mis_api.apps.core.models import BusinessArea, XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
 
 
 class TokenNotProvided(Exception):
@@ -26,11 +26,10 @@ class TokenInvalid(Exception):
 
 
 class KoboAPI:
-    KPI_URL = os.getenv("KOBO_API_URL", "https://kobo.humanitarianresponse.info")
+    # KPI_URL = os.getenv("KOBO_KF_URL", "https://kobo.humanitarianresponse.info")
 
     def __init__(self, business_area_slug: str = None, kpi_url: str = None):
-        if kpi_url:
-            self.KPI_URL = kpi_url
+        self.KPI_URL = kpi_url or settings.KOBO_KF_URL
         if business_area_slug is not None:
             self.business_area = BusinessArea.objects.get(slug=business_area_slug)
         else:
