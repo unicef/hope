@@ -15,6 +15,7 @@ import {
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -31,9 +32,9 @@ export function PaymentVerificationTableRow({
 }: PaymentVerificationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const paymentVerificationPlanPath = `/${businessArea}/payment-verification/${plan.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment-verification/${plan.id}`;
-    history.push(path);
+    history.push(paymentVerificationPlanPath);
   };
   const {
     data: statusChoicesData,
@@ -51,7 +52,19 @@ export function PaymentVerificationTableRow({
       role='checkbox'
       key={plan.id}
     >
-      <TableCell align='left'>{plan.caId}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <BlackLink
+            target='_blank'
+            rel='noopener noreferrer'
+            to={paymentVerificationPlanPath}
+          >
+            {plan.caId}
+          </BlackLink>
+        ) : (
+          plan.caId
+        )}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

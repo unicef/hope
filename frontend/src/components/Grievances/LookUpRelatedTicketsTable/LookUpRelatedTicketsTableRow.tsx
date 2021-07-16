@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import React from 'react';
 import { Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import {
@@ -12,6 +11,7 @@ import {
   renderUserName,
 } from '../../../utils/utils';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
+import { BlackLink } from '../../BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -37,13 +37,6 @@ export function LookUpRelatedTicketsTableRow({
   categoryChoices,
 }: LookUpRelatedTicketsTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
-  const handleClick = (): void => {
-    const path = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
-    const win = window.open(path);
-    if (win != null) {
-      win.focus();
-    }
-  };
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.id);
 
@@ -57,8 +50,14 @@ export function LookUpRelatedTicketsTableRow({
           inputProps={{ 'aria-labelledby': ticket.id }}
         />
       </TableCell>
-      <TableCell onClick={handleClick} align='left'>
-        <Pointer>{decodeIdString(ticket.id)}</Pointer>
+      <TableCell align='left'>
+        <BlackLink
+          target='_blank'
+          rel='noopener noreferrer'
+          to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}
+        >
+          {decodeIdString(ticket.id)}
+        </BlackLink>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>

@@ -1,30 +1,41 @@
 from typing import Union
+
+from django.db.models import Prefetch, Q
+from django.db.models.functions import Lower
+
 import django_filters
 import graphene
-from django.db.models import Q, Prefetch
-from django.db.models.functions import Lower
-from django_filters import FilterSet, CharFilter, ModelMultipleChoiceFilter
+from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter
 from graphene import relay
-from graphene_django import DjangoObjectType, DjangoConnectionField
-from graphene_django.filter import DjangoFilterConnectionField
+from graphene_django import DjangoConnectionField, DjangoObjectType
 
 import hct_mis_api.apps.targeting.models as target_models
-from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
+from hct_mis_api.apps.account.permissions import (
+    BaseNodePermissionMixin,
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopePermissionClass,
+)
+from hct_mis_api.apps.core.core_fields_attributes import (
+    CORE_FIELDS_ATTRIBUTES_DICTIONARY,
+)
 from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode, ChoiceObject
-from hct_mis_api.apps.core.utils import decode_id_string, CustomOrderingFilter, decode_and_get_object
+from hct_mis_api.apps.core.schema import (
+    ChoiceObject,
+    ExtendedConnection,
+    FieldAttributeNode,
+)
+from hct_mis_api.apps.core.utils import (
+    CustomOrderingFilter,
+    decode_and_get_object,
+    decode_id_string,
+)
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 from hct_mis_api.apps.utils.schema import Arg
-from hct_mis_api.apps.account.permissions import (
-    DjangoPermissionFilterConnectionField,
-    hopePermissionClass,
-    Permissions,
-    BaseNodePermissionMixin,
-)
 
 
 class HouseholdFilter(FilterSet):
@@ -49,6 +60,8 @@ class TargetPopulationFilter(django_filters.FilterSet):
 
     name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
     created_by_name = django_filters.CharFilter(field_name="created_by", method="filter_created_by_name")
+    number_of_households_min = IntegerFilter(method="filter_number_of_households_min")
+    number_of_households_max = IntegerFilter(method="filter_number_of_households_max")
     candidate_list_total_households_min = IntegerFilter(
         field_name="candidate_list_total_households",
         lookup_expr="gte",
@@ -92,6 +105,18 @@ class TargetPopulationFilter(django_filters.FilterSet):
         lname_query_key = f"{model_field}__family_name__icontains"
         for name in value.strip().split():
             queryset = queryset.filter(Q(**{fname_query_key: name}) | Q(**{lname_query_key: name}))
+        return queryset
+
+    def filter_number_of_households_min(self, queryset, model_field, value):
+        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_DRAFT).filter(
+            number_of_households__gte=value
+        )
+        return queryset
+
+    def filter_number_of_households_max(self, queryset, model_field, value):
+        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_DRAFT).filter(
+            number_of_households__lte=value
+        )
         return queryset
 
     class Meta:
@@ -321,9 +346,13 @@ class Query(graphene.ObjectType):
             return prefetch_selections(
                 Household.objects.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
             ).distinct()
-        return prefetch_selections(
-            target_population_model.vulnerability_score_filtered_households, target_population_model
-        ).distinct().all()
+        return (
+            prefetch_selections(
+                target_population_model.vulnerability_score_filtered_households, target_population_model
+            )
+            .distinct()
+            .all()
+        )
 
     def resolve_final_households_list_by_targeting_criteria(
         parent, info, target_population, targeting_criteria=None, **kwargs

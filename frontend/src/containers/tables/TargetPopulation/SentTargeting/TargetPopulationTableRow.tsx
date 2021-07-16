@@ -5,6 +5,7 @@ import { HouseholdNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
 import { decodeIdString } from '../../../../utils/utils';
+import { BlackLink } from '../../../../components/BlackLink';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
@@ -16,10 +17,9 @@ export function TargetPopulationHouseholdTableRow({
 }): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
+  const householdDetailsPath = `/${businessArea}/population/household/${household.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/population/household/${household.id}`;
-    history.push(path);
+    history.push(householdDetailsPath);
   };
   return (
     <ClickableTableRow
@@ -28,7 +28,19 @@ export function TargetPopulationHouseholdTableRow({
       role='checkbox'
       key={household.id}
     >
-      <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <BlackLink
+            target='_blank'
+            rel='noopener noreferrer'
+            to={householdDetailsPath}
+          >
+            {household.unicefId}
+          </BlackLink>
+        ) : (
+          decodeIdString(household.id)
+        )}
+      </TableCell>
       <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>-</TableCell>

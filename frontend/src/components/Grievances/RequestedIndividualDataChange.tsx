@@ -36,11 +36,14 @@ export function RequestedIndividualDataChange({
     ...ticket.individualDataUpdateTicketDetails.individualData,
   };
   let allApprovedCount = 0;
+  const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const documents = individualData?.documents || [];
   const documentsToRemove = individualData.documents_to_remove || [];
   const identities = individualData?.identities || [];
   const identitiesToRemove = individualData.identities_to_remove || [];
   const flexFields = individualData.flex_fields || {};
+  const role = individualData.role || {};
+  const relationship = individualData.relationship || {};
   delete individualData.flex_fields;
   delete individualData.documents;
   delete individualData.identities;
@@ -99,10 +102,26 @@ export function RequestedIndividualDataChange({
       selectedIdentitiesToRemove.push(i);
     }
   }
+
+  const isHeadOfHousehold =
+    ticket.individual?.id === ticket.household?.headOfHousehold?.id;
+  const rolesToReassign = ticket.individual?.householdsAndRoles?.filter(
+    (el) => el.role !== 'NO_ROLE',
+  ).length;
+
+  const rolesCount =
+    (role.value ? rolesToReassign : 0) +
+    (isHeadOfHousehold && relationship.value && relationship.value !== 'HEAD'
+      ? 1
+      : 0);
+
+  const rolesReassignedCount = Object.keys(
+    JSON.parse(ticket.individualDataUpdateTicketDetails.roleReassignData),
+  ).length;
+  const approveEnabled = isForApproval && rolesCount === rolesReassignedCount;
+
   const shouldShowEditButton = (allChangesLength): boolean =>
-    allChangesLength &&
-    !isEdit &&
-    ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+    allChangesLength && !isEdit && isForApproval;
 
   const areAllApproved = (allSelected): boolean => {
     const countAll =
@@ -122,7 +141,7 @@ export function RequestedIndividualDataChange({
           onClick={submitForm}
           variant='contained'
           color='primary'
-          disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+          disabled={!approveEnabled}
         >
           Approve
         </Button>
@@ -138,7 +157,7 @@ export function RequestedIndividualDataChange({
             onClick={confirm(() => submitForm())}
             variant='contained'
             color='primary'
-            disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+            disabled={!approveEnabled}
           >
             Approve
           </Button>
@@ -204,13 +223,7 @@ export function RequestedIndividualDataChange({
             },
           });
           showMessage('Changes Approved');
-          const sum =
-            values.selected.length +
-            values.selectedFlexFields.length +
-            values.selectedDocuments.length +
-            values.selectedDocumentsToRemove.length +
-            values.selectedIdentities.length +
-            values.selectedIdentitiesToRemove.length;
+          const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
@@ -218,13 +231,7 @@ export function RequestedIndividualDataChange({
       }}
     >
       {({ submitForm, setFieldValue, values }) => {
-        const allChangesLength =
-          values.selected.length +
-          values.selectedFlexFields.length +
-          values.selectedDocuments.length +
-          values.selectedDocumentsToRemove.length +
-          values.selectedIdentities.length +
-          values.selectedIdentitiesToRemove.length;
+        const allChangesLength = Object.values(values).flat().length;
 
         return (
           <StyledBox>

@@ -10,7 +10,6 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
-import { decodeIdString } from '../../utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -20,6 +19,7 @@ import { PageHeader } from '../PageHeader';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ButtonDialog } from '../ButtonDialog';
+import { useSnackbar } from '../../hooks/useSnackBar';
 
 const Separator = styled.div`
   width: 1px;
@@ -64,6 +64,7 @@ export const GrievanceDetailsToolbar = ({
   canClose: boolean;
 }): React.ReactElement => {
   const { id } = useParams();
+  const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -170,19 +171,23 @@ export const GrievanceDetailsToolbar = ({
 
   const closingConfirmationText = 'Are you sure you want to close the ticket?';
 
-  const changeState = (status): void => {
-    mutate({
-      variables: {
-        grievanceTicketId: ticket.id,
-        status,
-      },
-      refetchQueries: () => [
-        {
-          query: GrievanceTicketDocument,
-          variables: { id: ticket.id },
+  const changeState = async (status): Promise<void> => {
+    try {
+      await mutate({
+        variables: {
+          grievanceTicketId: ticket.id,
+          status,
         },
-      ],
-    });
+        refetchQueries: () => [
+          {
+            query: GrievanceTicketDocument,
+            variables: { id: ticket.id },
+          },
+        ],
+      });
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
   };
 
   const getClosingConfirmationText = (): string => {
@@ -192,12 +197,13 @@ export const GrievanceDetailsToolbar = ({
     if (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
       let additionalContent = '';
       if (!ticket.systemFlaggingTicketDetails.approveStatus) {
-        additionalContent = ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found';
+        additionalContent =
+          ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found';
       }
       return `${closingConfirmationText}${additionalContent}`;
     }
     return closingConfirmationText;
-  }
+  };
 
   let closeButton = (
     <ConfirmationDialog
@@ -236,7 +242,7 @@ export const GrievanceDetailsToolbar = ({
   }
   return (
     <PageHeader
-      title={`Ticket #${decodeIdString(id)}`}
+      title={`Ticket ID: ${ticket.unicefId}`}
       breadCrumbs={breadCrumbsItems}
     >
       <Box display='flex' alignItems='center'>

@@ -1,14 +1,21 @@
 import logging
 import re
 from datetime import date, datetime, timedelta
+from collections import defaultdict
+from datetime import date
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.gis.db.models import PointField, UniqueConstraint, Q, Count
 from django.contrib.postgres.fields import JSONField, CICharField
+from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
+from django.contrib.postgres.fields import CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
+from django.db.models import F, Sum
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.managers import SoftDeletableManager
@@ -21,9 +28,9 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
-    TimeStampedUUIDModel,
     ConcurrencyModel,
     SoftDeletableModelWithDate,
+    TimeStampedUUIDModel,
 )
 from dateutil.relativedelta import relativedelta
 
@@ -69,7 +76,7 @@ WALKING = "WALKING"
 MEMORY = "MEMORY"
 SELF_CARE = "SELF_CARE"
 COMMUNICATING = "COMMUNICATING"
-DISABILITY_CHOICE = (
+OBSERVED_DISABILITY_CHOICE = (
     (NONE, _("None")),
     (SEEING, _("Difficulty seeing (even if wearing glasses)")),
     (HEARING, _("Difficulty hearing (even if using a hearing aid)")),
@@ -161,14 +168,19 @@ IDENTIFICATION_TYPE_DICT = {
 }
 UNHCR = "UNHCR"
 WFP = "WFP"
-AGENCY_TYPE_CHOICES = {
+AGENCY_TYPE_CHOICES = (
     (UNHCR, _("UNHCR")),
     (WFP, _("WFP")),
-}
+)
 STATUS_ACTIVE = "ACTIVE"
 STATUS_INACTIVE = "INACTIVE"
 STATUS_WITHDRAWN = "WITHDRAWN"
 STATUS_DUPLICATE = "DUPLICATE"
+INDIVIDUAL_STATUS_CHOICES = (
+    (STATUS_ACTIVE, "Active"),
+    (STATUS_WITHDRAWN, "Withdrawn"),
+    (STATUS_DUPLICATE, "Duplicate"),
+)
 INDIVIDUAL_HOUSEHOLD_STATUS = ((STATUS_ACTIVE, "Active"), (STATUS_INACTIVE, "Inactive"))
 UNIQUE = "UNIQUE"
 DUPLICATE = "DUPLICATE"
@@ -222,6 +234,19 @@ REGISTRATION_METHOD_CHOICES = (
     (BLANK, _("None")),
     (HH_REGISTRATION, "Household Registration"),
     (COMMUNITY, "Community-level Registration"),
+)
+
+DISABLED = "disabled"
+NOT_DISABLED = "not disabled"
+DISABILITY_CHOICES = (
+    (
+        DISABLED,
+        "disabled",
+    ),
+    (
+        NOT_DISABLED,
+        "not disabled",
+    ),
 )
 
 logger = logging.getLogger(__name__)
@@ -407,6 +432,46 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     @property
     def total_cash_received(self):
         return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
+
+    @property
+    def total_cash_received_usd(self):
+        return (
+            self.payment_records.filter()
+            .aggregate(models.Sum("delivered_quantity_usd"))
+            .get("delivered_quantity_usd__sum")
+        )
+
+    @property
+    def programs_with_delivered_quantity(self):
+        programs = (
+            self.payment_records.all()
+            .annotate(program=F("cash_plan__program"))
+            .values("program")
+            .annotate(
+                total_delivered_quantity=Sum("delivered_quantity"),
+                total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
+                currency=F("currency"),
+                program_name=F("cash_plan__program__name"),
+                program_id=F("cash_plan__program__id"),
+            )
+            .order_by("cash_plan__program__created_at")
+        )
+
+        programs_dict = []
+
+        for program in programs:
+            programs_dict.append(
+                {
+                    "id": program["program_id"],
+                    "name": program["program_name"],
+                    "quantity": {
+                        "total_delivered_quantity": program["total_delivered_quantity"],
+                        "total_delivered_quantity_usd": program["total_delivered_quantity_usd"],
+                        "currency": program["currency"],
+                    },
+                }
+            )
+        return programs_dict
 
     def __str__(self):
         return f"{self.unicef_id}"
@@ -693,7 +758,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         on_delete=models.CASCADE,
         null=True,
     )
-    disability = models.BooleanField(default=False)
+    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
     work_status = models.CharField(
         max_length=20,
         choices=WORK_STATUS_CHOICE,
@@ -724,7 +789,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     sanction_list_confirmed_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
     pregnant = models.NullBooleanField()
-    observed_disability = MultiSelectField(choices=DISABILITY_CHOICE, default=NONE)
+    observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE, default=NONE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     physical_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
@@ -809,6 +874,9 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             self.last_registration_date < (datetime.now() - relativedelta(months=+9)) and self.pregnant
         )
         self.pregnant = should_be_still_pregnant
+
+    def count_all_roles(self):
+        return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
 
 
 class EntitlementCard(TimeStampedUUIDModel):

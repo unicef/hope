@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +33,12 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "sensitive_ticket_details.payment_record": "payment_record",
             "sensitive_ticket_details.household": "household",
             "sensitive_ticket_details.individual": "individual",
+            "positive_feedback_ticket_details.household": "household",
+            "positive_feedback_ticket_details.individual": "individual",
+            "negative_feedback_ticket_details.household": "household",
+            "negative_feedback_ticket_details.individual": "individual",
+            "referral_ticket_details.household": "household",
+            "referral_ticket_details.individual": "individual",
             "household_data_update_ticket_details.household": "household",
             "household_data_update_ticket_details.household_data": "household_data",
             "individual_data_update_ticket_details.individual": "individual",
@@ -152,6 +158,18 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "household",
             "payment_record",
         ),
+        "positive_feedback_ticket_details": (
+            "individual",
+            "household",
+        ),
+        "negative_feedback_ticket_details": (
+            "individual",
+            "household",
+        ),
+        "referral_ticket_details": (
+            "individual",
+            "household",
+        ),
         "individual_data_update_ticket_details": ("individual", {"household": "individual__household"}),
         "add_individual_ticket_details": ("household",),
         "household_data_update_ticket_details": ("household",),
@@ -168,6 +186,18 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "individual",
             "household",
             "payment_record",
+        ),
+        "positive_feedback_ticket_details": (
+            "individual",
+            "household",
+        ),
+        "negative_feedback_ticket_details": (
+            "individual",
+            "household",
+        ),
+        "referral_ticket_details": (
+            "individual",
+            "household",
         ),
         "individual_data_update_ticket_details": ("individual", "household"),
         "add_individual_ticket_details": ("household",),
@@ -206,9 +236,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         },
         CATEGORY_PAYMENT_VERIFICATION: "",
         CATEGORY_GRIEVANCE_COMPLAINT: "complaint_ticket_details",
-        CATEGORY_NEGATIVE_FEEDBACK: None,
-        CATEGORY_REFERRAL: None,
-        CATEGORY_POSITIVE_FEEDBACK: None,
+        CATEGORY_NEGATIVE_FEEDBACK: "negative_feedback_ticket_details",
+        CATEGORY_REFERRAL: "referral_ticket_details",
+        CATEGORY_POSITIVE_FEEDBACK: "positive_feedback_ticket_details",
         CATEGORY_NEEDS_ADJUDICATION: "needs_adjudication_ticket_details",
         CATEGORY_SYSTEM_FLAGGING: "system_flagging_ticket_details",
     }
@@ -262,10 +292,11 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport", null=True, blank=True, on_delete=models.CASCADE
     )
+    unicef_id = models.CharField(max_length=250, blank=True, default="")
 
     @property
     def related_tickets(self):
-        combined_related_tickets = self.linked_tickets.all() | self.linked_tickets_related.all()
+        combined_related_tickets = (self.linked_tickets.all() | self.linked_tickets_related.all()).distinct()
         yield from combined_related_tickets
 
     @property
@@ -424,6 +455,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         null=True,
     )
     individual_data = JSONField(null=True)
+    role_reassign_data = JSONField(default=dict)
 
     @property
     def household(self):
@@ -500,4 +532,58 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     payment_verification_status = models.CharField(
         max_length=50,
         choices=PaymentVerification.STATUS_CHOICES,
+    )
+
+
+class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="positive_feedback_ticket_details", on_delete=models.CASCADE
+    )
+    household = models.ForeignKey(
+        "household.Household",
+        related_name="positive_feedback_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    individual = models.ForeignKey(
+        "household.Individual",
+        related_name="positive_feedback_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+
+
+class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="negative_feedback_ticket_details", on_delete=models.CASCADE
+    )
+    household = models.ForeignKey(
+        "household.Household",
+        related_name="negative_feedback_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    individual = models.ForeignKey(
+        "household.Individual",
+        related_name="negative_feedback_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+
+
+class TicketReferralDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="referral_ticket_details", on_delete=models.CASCADE
+    )
+    household = models.ForeignKey(
+        "household.Household",
+        related_name="referral_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    individual = models.ForeignKey(
+        "household.Individual",
+        related_name="referral_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )

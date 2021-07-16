@@ -1,36 +1,41 @@
 import datetime
 import logging
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.postgres.fields import IntegerRangeField, CICharField
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import CICharField, IntegerRangeField, JSONField
 from django.contrib.postgres.validators import (
-    RangeMinValueValidator,
     RangeMaxValueValidator,
+    RangeMinValueValidator,
 )
 from django.core.exceptions import ValidationError
-from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    ProhibitNullCharactersValidator,
+)
 from django.db import models
-from django.db.models import Q, Count
+from django.db.models import Case, Count, Q, Value, When
 from django.utils.translation import ugettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
-    _INDIVIDUAL,
-    TYPE_SELECT_MANY,
     _HOUSEHOLD,
-    XLSX_ONLY_FIELDS,
+    _INDIVIDUAL,
     TARGETING_CORE_FIELDS,
+    TYPE_SELECT_MANY,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.household.models import Individual, Household, MALE, FEMALE
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
-from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +57,21 @@ def get_integer_range(min_range=None, max_range=None):
         blank=True,
         validators=[RangeMinValueValidator(min_range), RangeMaxValueValidator(max_range)],
     )
+
+
+class TargetPopulationManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                number_of_households=Case(
+                    When(status=TargetPopulation.STATUS_APPROVED, then="candidate_list_total_households"),
+                    When(status=TargetPopulation.STATUS_FINALIZED, then="final_list_total_households"),
+                    default=Value(0),
+                )
+            )
+        )
 
 
 class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel):
@@ -88,6 +108,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_DRAFT = "DRAFT"
     STATUS_APPROVED = "APPROVED"
     STATUS_FINALIZED = "FINALIZED"
+
+    objects = TargetPopulationManager()
 
     name = CICharField(
         unique=True,
@@ -572,7 +594,13 @@ class TargetingCriteriaFilterMixin:
         argument = self.arguments if args_input_count > 1 else self.arguments[0]
 
         if select_many:
-            query = Q(**{f"{lookup}__contains": argument})
+            if isinstance(argument, list):
+                query = Q()
+                for arg in argument:
+                    # This regular expression can found the only exact word
+                    query &= Q(**{f"{lookup}__iregex": f"{arg}\\y"})
+            else:
+                query = Q(**{f"{lookup}__contains": argument})
         else:
             query = Q(**{f"{lookup}{comparision_attribute.get('lookup')}": argument})
         if comparision_attribute.get("negative"):

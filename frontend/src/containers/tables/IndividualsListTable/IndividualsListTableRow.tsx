@@ -8,13 +8,11 @@ import {
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { Flag } from '../../../components/Flag';
-import {
-  choicesToDict,
-  sexToCapitalize,
-} from '../../../utils/utils';
+import { choicesToDict, sexToCapitalize } from '../../../utils/utils';
 import { FlagTooltip } from '../../../components/FlagTooltip';
 import { LoadingComponent } from '../../../components/LoadingComponent';
 import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { BlackLink } from '../../../components/BlackLink';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -39,9 +37,9 @@ export function IndividualsListTableRow({
     choicesData.relationshipChoices,
   );
 
+  const individualDetailsPath = `/${businessArea}/population/individuals/${individual.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/population/individuals/${individual.id}`;
-    history.push(path);
+    history.push(individualDetailsPath);
   };
   return (
     <ClickableTableRow
@@ -59,7 +57,15 @@ export function IndividualsListTableRow({
           <Flag confirmed={individual.sanctionListConfirmedMatch} />
         )}
       </TableCell>
-      <TableCell align='left'>{individual.unicefId}</TableCell>
+      <TableCell align='left'>
+        <BlackLink
+          target='_blank'
+          rel='noopener noreferrer'
+          to={individualDetailsPath}
+        >
+          {individual.unicefId}
+        </BlackLink>
+      </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>
         {individual.household ? individual.household.unicefId : ''}

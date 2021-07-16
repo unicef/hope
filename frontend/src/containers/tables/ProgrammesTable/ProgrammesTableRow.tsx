@@ -15,6 +15,7 @@ import {
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -31,10 +32,9 @@ export function ProgrammesTableRow({
 }: ProgrammesTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
+  const programDetailsPath = `/${businessArea}/programs/${program.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/programs/${program.id}`;
-    history.push(path);
+    history.push(programDetailsPath);
   };
 
   const programSectorChoiceDict = choicesToDict(
@@ -48,7 +48,15 @@ export function ProgrammesTableRow({
       role='checkbox'
       key={program.id}
     >
-      <TableCell align='left'>{program.name}</TableCell>
+      <TableCell align='left'>
+        <BlackLink
+          target='_blank'
+          rel='noopener noreferrer'
+          to={programDetailsPath}
+        >
+          {program.name}
+        </BlackLink>
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

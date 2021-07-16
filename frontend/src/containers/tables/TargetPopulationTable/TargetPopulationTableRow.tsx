@@ -11,6 +11,7 @@ import {
   targetPopulationStatusMapping,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -28,10 +29,9 @@ export function TargetPopulationTableRow({
 }: TargetPopulationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
+  const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/target-population/${targetPopulation.id}`;
-    history.push(path);
+    history.push(targetPopulationDetailsPath);
   };
   return (
     <ClickableTableRow
@@ -40,7 +40,19 @@ export function TargetPopulationTableRow({
       role='checkbox'
       key={targetPopulation.id}
     >
-      <TableCell align='left'>{targetPopulation.name}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <BlackLink
+            target='_blank'
+            rel='noopener noreferrer'
+            to={targetPopulationDetailsPath}
+          >
+            {targetPopulation.name}
+          </BlackLink>
+        ) : (
+          targetPopulation.name
+        )}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

@@ -2,16 +2,18 @@ import json
 import numbers
 from collections import defaultdict
 from datetime import date, datetime
+from functools import partial
 from io import BytesIO
 from typing import Union
 
-import openpyxl
-from dateutil.parser import parse
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
+
+import openpyxl
+from dateutil.parser import parse
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -24,21 +26,24 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_STRING,
 )
 from hct_mis_api.apps.core.kobo.api import KoboAPI
-from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.kobo.common import (
+    KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
+    get_field_name,
+)
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import (
+    SheetImageLoader,
     get_combined_attributes,
     rename_dict_keys,
     serialize_flex_attributes,
-    SheetImageLoader,
 )
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_DICT,
+    IDENTIFICATION_TYPE_OTHER,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    IDENTIFICATION_TYPE_OTHER,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -50,11 +55,14 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
     KoboImportedSubmission,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
+from hct_mis_api.apps.registration_datahub.tasks.utils import (
+    collectors_str_ids_to_list,
+    get_submission_metadata,
+)
 
 
 def is_flex_field_attr(field):
@@ -274,6 +282,15 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return str(value)
         return value
 
+    def _handle_bool_field(self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs):
+        value = cell.value
+        if isinstance(value, str):
+            if value.lower() == "false":
+                return False
+            elif value.lower() == "true":
+                return True
+        return value
+
     def _handle_geopoint_field(self, value, *args, **kwargs):
         if not value:
             return ""
@@ -427,10 +444,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "photo_i_c": self._handle_image_field,
                 "primary_collector_id": self._handle_collectors,
                 "alternate_collector_id": self._handle_collectors,
+                "pregnant_i_c": self._handle_bool_field,
             },
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
                 "hh_geopoint_h_c": self._handle_geopoint_field,
+                "fchild_hoh_h_c": self._handle_bool_field,
+                "child_hoh_h_c": self._handle_bool_field,
+                "consent_h_c": self._handle_bool_field,
             },
         }
 
@@ -438,26 +459,27 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "GEOPOINT": self._handle_geopoint_field,
             "IMAGE": self._handle_image_field,
             "DECIMAL": self._handle_decimal_field,
+            "BOOL": self._handle_bool_field,
         }
 
         sheet_title = sheet.title.lower()
+        if sheet_title == "households":
+            obj = partial(ImportedHousehold, registration_data_import=registration_data_import)
+        elif sheet_title == "individuals":
+            obj = partial(ImportedIndividual, registration_data_import=registration_data_import)
+        else:
+            raise ValueError(f"Unhandled sheet label '{sheet.title}'")
 
         first_row = sheet[1]
         households_to_update = []
         for row in sheet.iter_rows(min_row=3):
             if not any([cell.value for cell in row]):
                 continue
-
-            if sheet_title == "households":
-                obj_to_create = ImportedHousehold(
-                    registration_data_import=registration_data_import,
-                )
-            else:
-                obj_to_create = ImportedIndividual(
-                    registration_data_import=registration_data_import,
-                )
+            obj_to_create = obj()
 
             household_id = None
+
+            excluded = ("age",)
             for cell, header_cell in zip(row, first_row):
                 header = header_cell.value
                 combined_fields = {**self.COMBINED_FIELDS, **COLLECTORS_FIELDS}
@@ -469,7 +491,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 is_not_image = current_field["type"] != "IMAGE"
 
                 is_not_required_and_empty = not current_field.get("required") and cell.value is None and is_not_image
-
+                if header in excluded:
+                    continue
                 if is_not_required_and_empty:
                     continue
 

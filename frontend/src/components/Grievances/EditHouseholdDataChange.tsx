@@ -16,7 +16,6 @@ import {
   useHouseholdLazyQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { LabelizedField } from '../LabelizedField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
