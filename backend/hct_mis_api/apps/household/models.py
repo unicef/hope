@@ -477,6 +477,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return f"{self.unicef_id}"
 
     def recalculate_data(self):
+        for individual in self.individuals.all():
+            individual.recalculate_data()
         date_6_years_ago = datetime.now() - relativedelta(years=+6)
         date_12_years_ago = datetime.now() - relativedelta(years=+12)
         date_18_years_ago = datetime.now() - relativedelta(years=+18)
@@ -1017,8 +1019,6 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         return None
 
     def recalculate_data(self):
-        for individual in self.indiviudals.all():
-            individual.recalculate_data()
         disability_fields = (
             "seeing_disability",
             "hearing_disability",
