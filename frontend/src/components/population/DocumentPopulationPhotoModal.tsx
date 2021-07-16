@@ -4,6 +4,10 @@ import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { BlackLink } from '../BlackLink';
+import {
+  IndividualNode,
+  useIndividualPhotosLazyQuery,
+} from '../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -21,22 +25,29 @@ const StyledImage = styled.img`
   max-height: 100%;
 `;
 
-interface DocumentPhotoModalProps {
-  photo: string;
+interface DocumentPopulationPhotoModalProps {
+  individual: IndividualNode;
   documentId: string;
 }
 
-export const DocumentPhotoModal = ({
-  photo,
+export const DocumentPopulationPhotoModal = ({
+  individual,
   documentId,
-}: DocumentPhotoModalProps): React.ReactElement => {
+}: DocumentPopulationPhotoModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [getPhotos, { data }] = useIndividualPhotosLazyQuery({
+    variables: { id: individual?.id },
+  });
+  const documentWithPhoto = data?.individual?.documents?.edges?.find(
+    (el) => el.node.id === documentId,
+  );
 
   return (
     <>
       <BlackLink
         onClick={() => {
           setDialogOpen(true);
+          getPhotos();
         }}
       >
         {documentId}
@@ -53,7 +64,7 @@ export const DocumentPhotoModal = ({
         </DialogTitleWrapper>
         <DialogContent>
           <Box p={3}>
-            <StyledImage alt='document' src={photo} />
+            <StyledImage alt='document' src={documentWithPhoto?.node?.photo} />
           </Box>
         </DialogContent>
         <DialogFooter>

@@ -7725,6 +7725,29 @@ export type IndividualPhotosQuery = (
   )> }
 );
 
+export type ImportedIndividualPhotosQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ImportedIndividualPhotosQuery = (
+  { __typename?: 'Query' }
+  & { importedIndividual: Maybe<(
+    { __typename?: 'ImportedIndividualNode' }
+    & Pick<ImportedIndividualNode, 'id' | 'photo'>
+    & { documents: (
+      { __typename?: 'ImportedDocumentNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ImportedDocumentNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ImportedDocumentNode' }
+          & Pick<ImportedDocumentNode, 'id' | 'photo'>
+        )> }
+      )>> }
+    ) }
+  )> }
+);
+
 export type LookUpPaymentRecordsQueryVariables = {
   cashPlan?: Maybe<Scalars['ID']>,
   household?: Maybe<Scalars['ID']>,
@@ -14026,6 +14049,65 @@ export function useIndividualPhotosLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type IndividualPhotosQueryHookResult = ReturnType<typeof useIndividualPhotosQuery>;
 export type IndividualPhotosLazyQueryHookResult = ReturnType<typeof useIndividualPhotosLazyQuery>;
 export type IndividualPhotosQueryResult = ApolloReactCommon.QueryResult<IndividualPhotosQuery, IndividualPhotosQueryVariables>;
+export const ImportedIndividualPhotosDocument = gql`
+    query ImportedIndividualPhotos($id: ID!) {
+  importedIndividual(id: $id) {
+    id
+    photo
+    documents {
+      edges {
+        node {
+          id
+          photo
+        }
+      }
+    }
+  }
+}
+    `;
+export type ImportedIndividualPhotosComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>, 'query'> & ({ variables: ImportedIndividualPhotosQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ImportedIndividualPhotosComponent = (props: ImportedIndividualPhotosComponentProps) => (
+      <ApolloReactComponents.Query<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables> query={ImportedIndividualPhotosDocument} {...props} />
+    );
+    
+export type ImportedIndividualPhotosProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables> & TChildProps;
+export function withImportedIndividualPhotos<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedIndividualPhotosQuery,
+  ImportedIndividualPhotosQueryVariables,
+  ImportedIndividualPhotosProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables, ImportedIndividualPhotosProps<TChildProps>>(ImportedIndividualPhotosDocument, {
+      alias: 'importedIndividualPhotos',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedIndividualPhotosQuery__
+ *
+ * To run a query within a React component, call `useImportedIndividualPhotosQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedIndividualPhotosQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedIndividualPhotosQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useImportedIndividualPhotosQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, baseOptions);
+      }
+export function useImportedIndividualPhotosLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, baseOptions);
+        }
+export type ImportedIndividualPhotosQueryHookResult = ReturnType<typeof useImportedIndividualPhotosQuery>;
+export type ImportedIndividualPhotosLazyQueryHookResult = ReturnType<typeof useImportedIndividualPhotosLazyQuery>;
+export type ImportedIndividualPhotosQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>;
 export const LookUpPaymentRecordsDocument = gql`
     query LookUpPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
   allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
