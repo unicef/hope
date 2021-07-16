@@ -8318,7 +8318,7 @@ export type ImportedIndividualDetailedFragment = (
       { __typename?: 'ImportedDocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ImportedDocumentNode' }
-        & Pick<ImportedDocumentNode, 'id' | 'country' | 'documentNumber'>
+        & Pick<ImportedDocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
           & Pick<ImportedDocumentTypeNode, 'label' | 'country'>
@@ -9147,6 +9147,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
           country
         }
         documentNumber
+        photo
       }
     }
   }
