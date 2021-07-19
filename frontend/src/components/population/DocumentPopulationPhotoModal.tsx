@@ -27,16 +27,19 @@ const StyledImage = styled.img`
 
 interface DocumentPopulationPhotoModalProps {
   individual: IndividualNode;
+  documentNumber: string;
   documentId: string;
 }
 
 export const DocumentPopulationPhotoModal = ({
   individual,
+  documentNumber,
   documentId,
 }: DocumentPopulationPhotoModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [getPhotos, { data }] = useIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
+    fetchPolicy: 'network-only',
   });
   const documentWithPhoto = data?.individual?.documents?.edges?.find(
     (el) => el.node.id === documentId,
@@ -50,7 +53,7 @@ export const DocumentPopulationPhotoModal = ({
           getPhotos();
         }}
       >
-        {documentId}
+        {documentNumber}
       </BlackLink>
       <Dialog
         open={dialogOpen}

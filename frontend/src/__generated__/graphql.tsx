@@ -5682,7 +5682,7 @@ export type IndividualDetailedFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'country' | 'photo' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
           & Pick<DocumentTypeNode, 'country' | 'label'>
@@ -8817,6 +8817,7 @@ export const IndividualDetailedFragmentDoc = gql`
       node {
         id
         country
+        photo
         type {
           country
           label

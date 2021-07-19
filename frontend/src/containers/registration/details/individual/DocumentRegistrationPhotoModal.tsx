@@ -27,16 +27,19 @@ const StyledImage = styled.img`
 
 interface DocumentRegistrationPhotoModalProps {
   individual: ImportedIndividualDetailedFragment;
+  documentNumber: string;
   documentId: string;
 }
 
 export const DocumentRegistrationPhotoModal = ({
   individual,
+  documentNumber,
   documentId,
 }: DocumentRegistrationPhotoModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [getPhotos, { data }] = useImportedIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
+    fetchPolicy: 'network-only',
   });
   const documentWithPhoto = data?.importedIndividual?.documents?.edges?.find(
     (el) => el.node.id === documentId,
@@ -50,7 +53,7 @@ export const DocumentRegistrationPhotoModal = ({
           getPhotos();
         }}
       >
-        {documentId}
+        {documentNumber}
       </BlackLink>
       <Dialog
         open={dialogOpen}
