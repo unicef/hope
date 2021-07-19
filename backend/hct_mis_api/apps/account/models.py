@@ -48,6 +48,10 @@ class Partner(models.Model):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_partners_as_choices(cls):
+        return [(role.id, role.name) for role in cls.objects.all()]
+
 
 class User(AbstractUser, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
