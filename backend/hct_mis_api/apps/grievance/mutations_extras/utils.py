@@ -324,6 +324,7 @@ def log_and_withdraw_household_if_needed(
         old_individual_to_remove,
         individual_to_remove,
     )
+    removed_individual_household.refresh_from_db()
     if removed_individual_household:
         if removed_individual_household.individuals.count() == 0:
             removed_individual_household.withdraw()
