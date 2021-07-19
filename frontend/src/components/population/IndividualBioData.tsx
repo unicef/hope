@@ -68,7 +68,8 @@ export function IndividualsBioData({
           <LabelizedField label={edge.node.type.label}>
             {edge.node.photo ? (
               <DocumentPopulationPhotoModal
-                documentId={edge.node.documentNumber}
+                documentNumber={edge.node.documentNumber}
+                documentId={edge.node.id}
                 individual={individual}
               />
             ) : (
