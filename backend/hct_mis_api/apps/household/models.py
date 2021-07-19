@@ -511,7 +511,7 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     def clean(self):
         from django.core.exceptions import ValidationError
 
-        for validator in self.type.validators:
+        for validator in self.type.validators.all():
             if not re.match(validator.regex, self.document_number):
                 logger.error("Document number is not validating")
                 raise ValidationError("Document number is not validating")
