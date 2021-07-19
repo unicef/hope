@@ -531,6 +531,11 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
 
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
+
+    if individual.household:
+        individual.household.recalculate_data()
+    else:
+        individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
@@ -614,6 +619,11 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     Document.objects.filter(id__in=documents_to_remove).delete()
     IndividualIdentity.objects.bulk_create(identities_to_create)
     IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
+    new_individual.refresh_from_db()
+    if new_individual.household:
+        new_individual.household.recalculate_data()
+    else:
+        new_individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
@@ -655,6 +665,7 @@ def close_update_household_grievance_ticket(grievance_ticket, info):
     merged_flex_fields.update(flex_fields)
     Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
     new_household = Household.objects.get(id=household.id)
+    new_household.recalculate_data()
     log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_household, new_household)
 
 
@@ -662,6 +673,11 @@ def close_delete_individual_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
-
     individual_to_remove = ticket_details.individual
+    household = None
+    if individual_to_remove.household:
+        household = individual_to_remove.household
     withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove, info)
+    if household:
+        household.refresh_from_db()
+        household.recalculate_data()
