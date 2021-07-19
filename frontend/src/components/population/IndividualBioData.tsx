@@ -15,6 +15,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 import { UniversalMoment } from '../UniversalMoment';
 import { ContentLink } from '../ContentLink';
+import { DocumentPopulationPhotoModal } from './DocumentPopulationPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -65,7 +66,15 @@ export function IndividualsBioData({
       <Box flexDirection='column'>
         <Box mb={1}>
           <LabelizedField label={edge.node.type.label}>
-            {edge.node.documentNumber}
+            {edge.node.photo ? (
+              <DocumentPopulationPhotoModal
+                documentNumber={edge.node.documentNumber}
+                documentId={edge.node.id}
+                individual={individual}
+              />
+            ) : (
+              edge.node.documentNumber
+            )}
           </LabelizedField>
         </Box>
         <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
