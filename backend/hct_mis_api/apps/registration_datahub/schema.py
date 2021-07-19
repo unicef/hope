@@ -157,7 +157,9 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_individuals(parent, info):
         imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
         collectors_ids = list(
-            parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list("individual_id", flat=True)
+            parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list(
+                "individual_id", flat=True
+            )
         )
         ids = list(set(imported_individuals_ids + collectors_ids))
 
@@ -255,9 +257,15 @@ class ImportedDocumentTypeNode(DjangoObjectType):
 
 class ImportedDocumentNode(DjangoObjectType):
     country = graphene.String(description="Document country")
+    photo = graphene.String(description="Photo url")
 
     def resolve_country(parent, info):
         return getattr(parent.type.country, "name", parent.type.country)
+
+    def resolve_photo(parent, info):
+        if parent.photo:
+            return parent.photo.url
+        return
 
     class Meta:
         model = ImportedDocument
