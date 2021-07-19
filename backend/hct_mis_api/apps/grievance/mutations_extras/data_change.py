@@ -674,9 +674,10 @@ def close_delete_individual_ticket(grievance_ticket, info):
     if not ticket_details or ticket_details.approve_status is False:
         return
     individual_to_remove = ticket_details.individual
-    household= None
+    household = None
     if individual_to_remove.household:
-        household =individual_to_remove.household
+        household = individual_to_remove.household
     withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove, info)
     if household:
+        household.refresh_from_db()
         household.recalculate_data()
