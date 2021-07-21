@@ -14,6 +14,8 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
+    UNHCR,
+    WFP,
 )
 
 logger = logging.getLogger(__name__)
@@ -121,3 +123,21 @@ def get_documents_issuer_query(document_type, country_alpha3):
 
 def get_role_query(_, args):
     return Q(households_and_roles__role=args[0])
+
+
+def get_scope_id_number(_, args):
+    return Q(identities__agency__type=WFP, identities__number=args[0])
+
+
+def get_scope_id_issuer(_, args):
+    alpha2 = Countries.get_country_value(args[0])
+    return Q(identities__agency__type=WFP, identities__agency__country=alpha2)
+
+
+def get_unhcr_id_number(_, args):
+    return Q(identities__agency__type=UNHCR, identities__number=args[0])
+
+
+def get_unhcr_id_issuer(_, args):
+    alpha2 = Countries.get_country_value(args[0])
+    return Q(identities__agency__type=UNHCR, identities__agency__country=alpha2)
