@@ -140,6 +140,10 @@ export function NeedsAdjudicationDetails({
             <TableCell align='left'>Date of Birth</TableCell>
             <TableCell align='left'>Similarity Score</TableCell>
             <TableCell align='left'>Last Registration Date</TableCell>
+            <TableCell align='left'>Doc Type</TableCell>
+            <TableCell align='left'>Doc #</TableCell>
+            <TableCell align='left'>Admin Level 2</TableCell>
+            <TableCell align='left'>Village</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -201,6 +205,24 @@ export function NeedsAdjudicationDetails({
                 {details.goldenRecordsIndividual?.lastRegistrationDate}
               </UniversalMoment>
             </TableCell>
+            <TableCell align='left'>
+              {
+                details.goldenRecordsIndividual?.documents?.edges[0]?.node.type
+                  .label
+              }
+            </TableCell>
+            <TableCell align='left'>
+              {
+                details.goldenRecordsIndividual?.documents?.edges[0]?.node
+                  .documentNumber
+              }
+            </TableCell>
+            <TableCell align='left'>
+              {details.goldenRecordsIndividual?.household?.admin2?.title}
+            </TableCell>
+            <TableCell align='left'>
+              {details.goldenRecordsIndividual?.household?.village}
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell align='left'>
@@ -254,6 +276,21 @@ export function NeedsAdjudicationDetails({
               <UniversalMoment>
                 {details.possibleDuplicate?.lastRegistrationDate}
               </UniversalMoment>
+            </TableCell>
+            <TableCell align='left'>
+              {details.possibleDuplicate?.documents?.edges[0]?.node.type.label}
+            </TableCell>
+            <TableCell align='left'>
+              {
+                details.possibleDuplicate?.documents?.edges[0]?.node
+                  .documentNumber
+              }
+            </TableCell>
+            <TableCell align='left'>
+              {details.possibleDuplicate?.household?.admin2?.title}
+            </TableCell>
+            <TableCell align='left'>
+              {details.possibleDuplicate?.household?.village}
             </TableCell>
           </TableRow>
         </TableBody>
