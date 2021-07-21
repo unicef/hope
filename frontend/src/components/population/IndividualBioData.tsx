@@ -95,6 +95,13 @@ export function IndividualsBioData({
     </Grid>
   ));
 
+  const formatAge = (age): string | number => {
+    if (age > 0) {
+      return age;
+    }
+    return '<1';
+  }
+
   return (
     <Overview>
       <Title>
@@ -127,7 +134,7 @@ export function IndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Age'>{individual.age}</LabelizedField>
+          <LabelizedField label='Age'>{formatAge(individual.age)}</LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>
