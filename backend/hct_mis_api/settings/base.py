@@ -477,6 +477,11 @@ CONSTANCE_CONFIG = {
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
     # CASH ASSIST
     "CASH_ASSIST_URL_PREFIX": ("", "Cash Assist base url used to generate url to cash assist"),
+    "SEND_GRIEVANCES_NOTIFICATION": (
+        False,
+        "Should send grievances notification",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
