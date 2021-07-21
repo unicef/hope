@@ -883,7 +883,7 @@ export type DocumentNode = Node & {
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
   documentNumber: Scalars['String'],
-  photo: Scalars['String'],
+  photo?: Maybe<Scalars['String']>,
   individual: IndividualNode,
   type: DocumentTypeNode,
   status: DocumentStatus,
@@ -1442,7 +1442,7 @@ export type ImportedDocumentNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   documentNumber: Scalars['String'],
-  photo: Scalars['String'],
+  photo?: Maybe<Scalars['String']>,
   individual: ImportedIndividualNode,
   type: ImportedDocumentTypeNode,
   country?: Maybe<Scalars['String']>,
@@ -7565,9 +7565,26 @@ export type GrievanceTicketQuery = (
       & { goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
-        & { household: Maybe<(
+        & { documents: (
+          { __typename?: 'DocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'DocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'DocumentNode' }
+              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
+              & { type: (
+                { __typename?: 'DocumentTypeNode' }
+                & Pick<DocumentTypeNode, 'label' | 'country'>
+              ) }
+            )> }
+          )>> }
+        ), household: Maybe<(
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'unicefId'>
+          & Pick<HouseholdNode, 'id' | 'unicefId' | 'village'>
+          & { admin2: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'id' | 'title'>
+          )> }
         )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
@@ -7575,9 +7592,26 @@ export type GrievanceTicketQuery = (
       ), possibleDuplicate: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
-        & { household: Maybe<(
+        & { documents: (
+          { __typename?: 'DocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'DocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'DocumentNode' }
+              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
+              & { type: (
+                { __typename?: 'DocumentTypeNode' }
+                & Pick<DocumentTypeNode, 'label' | 'country'>
+              ) }
+            )> }
+          )>> }
+        ), household: Maybe<(
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'unicefId' | 'id'>
+          & Pick<HouseholdNode, 'unicefId' | 'id' | 'village'>
+          & { admin2: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'id' | 'title'>
+          )> }
         )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
@@ -13628,9 +13662,28 @@ export const GrievanceTicketDocument = gql`
       goldenRecordsIndividual {
         id
         unicefId
+        documents {
+          edges {
+            node {
+              id
+              country
+              type {
+                label
+                country
+              }
+              documentNumber
+              photo
+            }
+          }
+        }
         household {
           id
           unicefId
+          village
+          admin2 {
+            id
+            title
+          }
         }
         fullName
         birthDate
@@ -13644,11 +13697,30 @@ export const GrievanceTicketDocument = gql`
       }
       possibleDuplicate {
         id
+        documents {
+          edges {
+            node {
+              id
+              country
+              type {
+                label
+                country
+              }
+              documentNumber
+              photo
+            }
+          }
+        }
         unicefId
         lastRegistrationDate
         household {
           unicefId
           id
+          village
+          admin2 {
+            id
+            title
+          }
         }
         fullName
         birthDate
@@ -17276,7 +17348,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
@@ -17539,7 +17611,7 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
