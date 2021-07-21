@@ -39,13 +39,14 @@ export function ImportedIndividualsTableRow({
   );
 
   const individualPath = `/${businessArea}/registration-data-import/individual/${individual.id}`;
-  const handleClick = (): void => {
+  const handleClick = (e): void => {
+    e.stopPropagation();
     history.push(individualPath);
   };
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={(e) => handleClick(e)}
       role='checkbox'
       key={individual.id}
     >
