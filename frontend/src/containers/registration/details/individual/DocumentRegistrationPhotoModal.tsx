@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
 import {
-  IndividualNode,
-  useIndividualPhotosLazyQuery,
-} from '../../__generated__/graphql';
+  ImportedIndividualDetailedFragment,
+  useImportedIndividualPhotosLazyQuery,
+} from '../../../../__generated__/graphql';
+import { BlackLink } from '../../../../components/BlackLink';
+import { Dialog } from '../../../dialogs/Dialog';
+import { DialogActions } from '../../../dialogs/DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -24,31 +25,36 @@ const StyledImage = styled.img`
   max-height: 100%;
 `;
 
-interface IndividualPhotoModalProps {
-  individual: IndividualNode;
+interface DocumentRegistrationPhotoModalProps {
+  individual: ImportedIndividualDetailedFragment;
+  documentNumber: string;
+  documentId: string;
 }
 
-export const IndividualPhotoModal = ({
+export const DocumentRegistrationPhotoModal = ({
   individual,
-}: IndividualPhotoModalProps): React.ReactElement => {
+  documentNumber,
+  documentId,
+}: DocumentRegistrationPhotoModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [getPhotos, { data }] = useIndividualPhotosLazyQuery({
+  const [getPhotos, { data }] = useImportedIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
     fetchPolicy: 'network-only',
   });
+  const documentWithPhoto = data?.importedIndividual?.documents?.edges?.find(
+    (el) => el.node.id === documentId,
+  );
 
   return (
     <>
-      <Button
-        color='primary'
-        variant='outlined'
+      <BlackLink
         onClick={() => {
           setDialogOpen(true);
           getPhotos();
         }}
       >
-        Show Photo
-      </Button>
+        {documentNumber}
+      </BlackLink>
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -56,12 +62,12 @@ export const IndividualPhotoModal = ({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            Individual&apos;s Photo
+            Document&apos;s Photo
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box p={3}>
-            <StyledImage alt='Individual' src={data?.individual?.photo} />
+            <StyledImage alt='document' src={documentWithPhoto?.node?.photo} />
           </Box>
         </DialogContent>
         <DialogFooter>

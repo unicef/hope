@@ -3,7 +3,7 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from urllib.parse import unquote
+from urllib.parse import unquote, urlencode
 
 from django import forms
 from django.conf import settings
@@ -27,6 +27,8 @@ from django.utils.translation import gettext_lazy as _
 
 import requests
 from admin_extra_urls.api import ExtraUrlMixin, button
+from adminactions.helpers import AdminActionPermMixin
+from adminactions.perms import get_permission_codename
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
@@ -36,9 +38,9 @@ from adminfilters.filters import (
 from constance import config
 from requests import HTTPError
 
+from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.forms import ImportCSV, KoboLoginForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import BusinessArea
@@ -56,16 +58,16 @@ class RoleAdminForm(ModelForm):
     )
 
     class Meta:
-        model = UserRole
+        model = account_models.UserRole
         fields = "__all__"
 
 
 class UserRoleAdminForm(ModelForm):
-    role = ModelChoiceField(Role.objects.order_by("name"))
+    role = ModelChoiceField(account_models.Role.objects.order_by("name"))
     business_area = ModelChoiceField(BusinessArea.objects.filter(is_split=False))
 
     class Meta:
-        model = UserRole
+        model = account_models.UserRole
         fields = "__all__"
 
     def clean(self):
@@ -74,9 +76,9 @@ class UserRoleAdminForm(ModelForm):
             return
         role = self.cleaned_data["role"]
         incompatible_roles = list(
-            IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-        ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
-        incompatible_userroles = UserRole.objects.filter(
+            account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+        ) + list(account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
+        incompatible_userroles = account_models.UserRole.objects.filter(
             business_area=self.cleaned_data["business_area"],
             role__id__in=incompatible_roles,
             user=self.cleaned_data["user"],
@@ -97,7 +99,7 @@ class UserRoleAdminForm(ModelForm):
 
 
 class UserRoleInlineFormSet(BaseInlineFormSet):
-    model = UserRole
+    model = account_models.UserRole
 
     def add_fields(self, form, index):
         super().add_fields(form, index)
@@ -116,8 +118,10 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
                 business_area = form.cleaned_data["business_area"]
                 role = form.cleaned_data["role"]
                 incompatible_roles = list(
-                    IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-                ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
+                    account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+                ) + list(
+                    account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True)
+                )
                 error_forms = [
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
@@ -133,7 +137,7 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
 
 
 class UserRoleInline(admin.TabularInline):
-    model = UserRole
+    model = account_models.UserRole
     extra = 0
     formset = UserRoleInlineFormSet
 
@@ -161,29 +165,30 @@ class DjAdminManager:
         self.admin_path = f"/admin/"
         self.admin_url = f"{kf_host}{self.admin_path}"
         self.login_url = f"{self.admin_url}login/"
+
+        self.admin_url_kc = f"{kc_host}{self.admin_path}"
+        self.login_url_kc = f"{self.admin_url_kc}login/"
         self._logged = False
         self._last_error = None
         self._last_response = False
         self._username = None
         self._password = None
         self.form_errors = []
-        # if kc_host:
-        #     self.kc = DjAdminManager(kc_host, None)
 
     def extract_errors(self, res):
         self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
         return self.form_errors
 
-    def assert_response(self, status: [int], location: str = None, custom_error=None):
+    def assert_response(self, status: [int], location: str = None, custom_error=""):
         if not isinstance(status, (list, tuple)):
             status = [status]
         if self._last_response.status_code not in status:
-            msg = custom_error or f"Unexpected code:{self._last_response.status_code} not in {status}"
+            msg = f"Unexpected code:{self._last_response.status_code} not in {status}: {custom_error}"
             self._last_error = self._last_response
             raise self.ResponseException(msg)
 
         if location and (redir_to := self._last_response.headers.get("location", "N/A")) != location:
-            msg = custom_error or f"Unexpected redirect:{redir_to} <> {location}"
+            msg = f"Unexpected redirect:{redir_to} <> {location}: {custom_error}"
             self._last_error = self._last_response
             raise self.ResponseException(msg)
 
@@ -202,16 +207,11 @@ class DjAdminManager:
         self._username = request.session["kobo_username"] = None
         self._password = request.session["kobo_password"] = None
 
-    def login(self, request=None, username="", password="", twin=None):
-        if not username and request:
-            username = request.POST.get("kobo_username", request.session.get("kobo_username"))
-            password = request.POST.get("kobo_password", request.session.get("kobo_password"))
-        elif username:
-            self._username = username
-            self._password = password
+    def login(self, request=None, twin=None):
+        username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
         try:
             try:
-                self.client.get(self.login_url)
+                self.client.get(self.login_url_kc)
                 csrftoken = self.client.cookies["csrftoken"]
                 self._post(
                     self.login_url,
@@ -226,22 +226,20 @@ class DjAdminManager:
             except Exception as e:
                 raise self.ResponseException(f"Unable to login to Kobo at {self.login_url}: {e.__class__.__name__} {e}")
 
-            if request:
-                request.session["kobo_username"] = username
-                request.session["kobo_password"] = password
         except Exception as e:
             logger.exception(e)
             raise
 
     def _get(self, url):
         self._last_response = self.client.get(url, allow_redirects=False)
+        self.client.headers["Referer"] = url
         return self._last_response
 
     def _post(self, url, data):
         self._last_response = self.client.post(url, data, allow_redirects=False)
         return self._last_response
 
-    def list_users(self):
+    def list_users(self, q=""):
         regex = re.compile(
             r'action-checkbox.*value="(?P<id>\d+)".*</td>.*field-username.*<a.*?>(?P<username>.*)</a></t.>.*field-email">(?P<mail>.*?)<',
             re.MULTILINE + re.IGNORECASE,
@@ -249,7 +247,7 @@ class DjAdminManager:
         page = 2
         last_match = None
         while True:
-            url = f"{self.admin_url}auth/user/?p={page}"
+            url = f"{self.admin_url}auth/user/?q={q}&p={page}"
             res = self._get(url)
             self.assert_response(200)
             matches = regex.findall(res.content.decode())
@@ -261,35 +259,24 @@ class DjAdminManager:
 
             page += 1
 
+    def get_csrfmiddlewaretoken(self):
+        regex = re.compile("""csrfmiddlewaretoken["'] +value=["'](.*)["']""")
+        m = regex.search(self._last_response.content.decode("utf8"))
+        return m.groups()[0]
+
     def delete_user(self, username, pk):
-        url = f"{self.admin_url}auth/user/{pk}/delete/"
-        self._get(url)
-        self.assert_response([200, 404, 302])
-        if self._last_response.status_code == 200:
-            csrftoken = self.client.cookies["csrftoken"]
-            self._post(url, {"csrfmiddlewaretoken": csrftoken})
-            self.assert_response(302)
+        self.login()
+        for url in [f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"]:
+            self._get(url)
+            self.assert_response([200, 404, 302], custom_error=url)
+            if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
+                raise Exception(f"Cannot access to {url}")
 
-    def create_user(self, username, password):
-        self._get(f"{self.admin_url}auth/user/")
-        csrftoken = self.client.cookies["csrftoken"]
-        self.assert_response(200, None, "Cannot get csrftoken")
-        self._post(
-            f"{self.admin_url}auth/user/add/",
-            data={"username": username, "password1": password, "password2": password, "csrfmiddlewaretoken": csrftoken},
-        )
-        if self._last_response.status_code == 200:
-            self.extract_errors(self._last_response)
-            self.assert_response(302, None, f"Cannot create user {username}: {self.form_errors}")
-
-        redir_to = self._last_response.headers["location"]
-        m = re.search(r"auth/user/([0-9]*)/(change/|)$", redir_to)
-        pk = m.groups()[0]
-        return pk
-
-
-# class HasKoboAccount(ChoicesFieldComboFilter):
-#     pass
+            if self._last_response.status_code == 200:
+                # csrftoken = self.client.cookies.get_dict()['csrftoken']
+                csrftoken = self.get_csrfmiddlewaretoken()
+                self._post(url, {"csrfmiddlewaretoken": csrftoken, "post": "yes"})
+                self.assert_response(302, custom_error=f"{url} - {csrftoken}")
 
 
 class HasKoboAccount(SimpleListFilter):
@@ -301,19 +288,33 @@ class HasKoboAccount(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "0":
-            return queryset.filter(custom_fields__kobo_pk__isnull=True)
+            return queryset.filter(
+                Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None),
+            )
         elif self.value() == "1":
-            return queryset.exclude(custom_fields__kobo_pk__isnull=True)
+            return queryset.filter(custom_fields__kobo_pk__isnull=False).exclude(custom_fields__kobo_pk=None)
         return queryset
 
 
-@admin.register(User)
-class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
+@admin.register(account_models.Partner)
+class PartnerAdmin(ExtraUrlMixin, admin.ModelAdmin):
+    list_filter = ("is_un",)
+    search_fields = ("name",)
+
+
+@admin.register(account_models.User)
+class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
-    list_filter = ("is_staff", HasKoboAccount, "is_superuser", "is_active")
+    list_filter = (
+        ("partner", AutoCompleteFilter),
+        "is_staff",
+        HasKoboAccount,
+        "is_superuser",
+        "is_active",
+    )
     list_display = (
-        "username",
         "email",
+        "partner",
         "first_name",
         "last_name",
         "is_active",
@@ -321,7 +322,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         "is_superuser",
         "kobo_user",
     )
-    readonly_fields = ("ad_uuid",)
+    readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
     fieldsets = (
         # (None, {"fields": ("username", "password")}),
         (
@@ -340,7 +341,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         ),
         (
             _("Custom Fields"),
-            {"classes": ["collapse"], "fields": ("custom_fields",)},
+            {"classes": ["collapse"], "fields": ("custom_fields", "doap_hash")},
         ),
         (
             _("Permissions"),
@@ -356,10 +357,22 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 ),
             },
         ),
-        (_("Important dates"), {"classes": ["collapse"], "fields": ("last_login", "date_joined")}),
+        (
+            _("Important dates"),
+            {
+                "classes": ["collapse"],
+                "fields": (
+                    "last_login",
+                    "date_joined",
+                    "last_modify_date",
+                    "last_doap_sync",
+                ),
+            },
+        ),
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
+    actions = ["_create_kobo_user_qs"]
 
     @button()
     def inspect(self, request, pk):
@@ -383,7 +396,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             with transaction.atomic(using=router.db_for_write(self.model)):
                 res = self._delete_view(request, object_id, extra_context)
         else:
-            obj: User = self.get_object(request, unquote(object_id))
+            obj: account_models.User = self.get_object(request, unquote(object_id))
             kobo_pk = obj.custom_fields.get("kobo_pk", None)
             extra_context = extra_context or {}
             try:
@@ -410,45 +423,10 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             self.message_user(request, str(e), messages.ERROR)
             raise
 
-    @button(permission="account.can_add_user")
-    def kobo_login(self, request):
-        cookies = {}
-        ctx = self.get_common_context(request, logged=False)
-        try:
-            if request.method == "POST":
-                form = KoboLoginForm(request.POST)
-                if form.is_valid():
-                    api = DjAdminManager()
-                    api.login(
-                        request,
-                        username=form.cleaned_data["kobo_username"],
-                        password=form.cleaned_data["kobo_password"],
-                    )
-                    self.message_user(request, "Successfully logged in", messages.SUCCESS)
-                    ctx["logged"] = True
-                else:
-                    self.message_user(request, "Invalid", messages.ERROR)
-            else:
-                form = KoboLoginForm(
-                    initial={
-                        "kobo_username": request.session.get("kobo_username", request.user.email),
-                        "kobo_password": request.session.get("kobo_password", ""),
-                    }
-                )
-        except Exception as e:
-            logger.exception(e)
-            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-
-        ctx["form"] = form
-        response = TemplateResponse(request, "admin/kobo_login.html", ctx)
-        for key, value in cookies.items():
-            response.set_cookie(key, value)
-        return response
-
     @button()
     def privileges(self, request, pk):
         context = self.get_common_context(request, pk)
-        user: User = context["original"]
+        user: account_models.User = context["original"]
         all_perms = user.get_all_permissions()
         context["permissions"] = [p.split(".") for p in sorted(all_perms)]
         ba_perms = defaultdict(list)
@@ -463,31 +441,73 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         context["business_ares_roles"] = dict(ba_roles)
         return TemplateResponse(request, "admin/account/user/privileges.html", context)
 
-    def _create_on_kobo(self, username, email, password, notify=False, **kwargs):
-        url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
-        res = requests.post(
-            url,
-            headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
-            json={"username": username, "email": email, "password": password, **kwargs},
-        )
-        if res.status_code == 400:
-            raise Exception(res.content)
+    def get_actions(self, request):
+        actions = super(UserAdmin, self).get_actions(request)
+        if not request.user.has_perm("account.can_create_kobo_user"):
+            del actions["_create_kobo_user_qs"]
 
-        if res.status_code == 201:
-            if notify:
-                send_mail(
-                    "Kobo credentials",
-                    KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
+        return actions
+
+    @button(permission="account.can_create_kobo_user", visible=lambda o, r: not o.custom_fields.get("kobo_username"))
+    def create_kobo_user(self, request, pk):
+        try:
+            self._create_kobo_user_qs(request, self.get_queryset(request).filter(pk=pk))
+        except Exception as e:
+            self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+
+    @button(permission="account.can_create_kobo_user", visible=lambda o, r: o.custom_fields.get("kobo_username"))
+    def remove_kobo_access(self, request, pk):
+        try:
+            obj = self.get_object(request, pk)
+            api = DjAdminManager()
+            api.delete_user(obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"])
+            obj.custom_fields["kobo_username"] = None
+            obj.custom_fields["kobo_pk"] = None
+            obj.save()
+            self.message_user(request, f"Kobo Access removed {api.admin_url}", messages.SUCCESS)
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+
+    def _create_kobo_user_qs(self, request, queryset):
+        for user in queryset.all():
+            password = get_random_string()
+            try:
+                url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
+                username = user.username.replace("@", "_at_").replace(".", "_").lower()
+                res = requests.post(
+                    url,
+                    headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
+                    json={
+                        "username": username,
+                        "email": user.email,
+                        "password": password,
+                        "last_name": user.last_name,
+                        "first_name": user.first_name,
+                    },
                 )
-            return res.json()
-        else:
-            raise Exception(f"Unexpected response from Kobo {res.status_code}")
+                if res.status_code == 400:
+                    raise Exception(res.content)
+                api = DjAdminManager()
+                api.login()
+                for entry in api.list_users(q=username):
+                    if entry[1] == username and entry[2] == user.email:
+                        user.custom_fields["kobo_pk"] = entry[0]
+                        user.custom_fields["kobo_username"] = entry[1]
+                        user.save()
 
-    def _create_on_ca(self):
-        # this not really creates on CA - simply "mark" the user as
-        pass
+                if res.status_code == 201:
+                    send_mail(
+                        "Kobo credentials",
+                        KOBO_ACCESS_EMAIL.format(email=user.email, password=password, kobo_url=settings.KOBO_KF_URL),
+                        settings.DEFAULT_FROM_EMAIL,
+                        [user.email],
+                    )
+                user.custom_fields["kobo_username"] = user.username
+                user.save()
+                self.message_user(request, f"User successfully `{username}` created on Kobo", messages.SUCCESS)
+            except Exception as e:
+                self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request):
@@ -516,40 +536,19 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                     context["reader"] = reader
                     context["errors"] = []
                     for row in reader:
-                        password = get_random_string()
                         try:
                             email = row["email"].strip()
                         except Exception as e:
                             raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
 
                         user_info = {"email": email, "is_new": False, "kobo": False, "error": ""}
-
                         if "username" in row:
                             username = row["username"].strip()
                         else:
                             username = row["email"].replace("@", "_").replace(".", "_").lower()
-                        u, isnew = User.objects.get_or_create(email=email, defaults={"username": username})
-                        if form.cleaned_data["enable_kobo"]:
-                            try:
-                                data = self._create_on_kobo(
-                                    username=u.username,
-                                    email=u.email,
-                                    password=password,
-                                    notify=True,
-                                    first_name=row.get("first_name", ""),
-                                    last_name=row.get("last_name", ""),
-                                )
-                                u.custom_fields["kobo_username"] = u.username
-                                u.save()
-                                user_info["kobo"] = True
-                            except Exception as e:
-                                user_info["error"] = str(e)
-                                context["errors"].append(f"{username}: {e}")
-                        if form.cleaned_data["enable_cash_assist"]:
-                            u.custom_fields["cash_assist_username"] = u.username
-                            u.save()
-                            user_info["ca"] = True
-
+                        u, isnew = account_models.User.objects.get_or_create(
+                            email=email, defaults={"username": username}
+                        )
                         context["results"].append(user_info)
                 except Exception as e:
                     logger.exception(e)
@@ -570,31 +569,29 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             selected = request.POST.getlist("kobo_id")
             api = DjAdminManager()
             api.login(request)
-            results = {"created": [], "updated": []}
+            results = []
             for entry in api.list_users():
                 if entry[0] in selected:
-                    local, created = User.objects.get_or_create(
+                    local, created = account_models.User.objects.get_or_create(
                         email=entry[2],
                         defaults={
                             "username": entry[1],
                             "custom_fields": {"kobo_pk": entry[0], "kobo_username": entry[1]},
                         },
                     )
-                    if created:
-                        results["created"].append(local)
-                    else:
-                        local.custom_fields["kobo_pk"] = entry[0]
-                        local.custom_fields["kobo_username"] = entry[1]
-                        local.save()
-                        results["created"].append(local)
+                    local.custom_fields["kobo_pk"] = entry[0]
+                    local.custom_fields["kobo_username"] = entry[1]
+                    local.save()
+                    results.append([local, created])
             ctx["results"] = results
         else:
             try:
                 api = DjAdminManager()
                 api.login(request)
                 for entry in api.list_users():
-                    local = User.objects.filter(email=entry[2]).first()
-                    users.append([entry[0], entry[1], entry[2], local])
+                    local = account_models.User.objects.filter(email=entry[2]).first()
+                    if entry[1] not in ["__sys__", "superuser"]:
+                        users.append([entry[0], entry[1], entry[2], local])
                 ctx["users"] = users
 
             except Exception as e:
@@ -621,7 +618,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     def sync_multi(self, request):
         not_found = []
         try:
-            for user in User.objects.all():
+            for user in account_models.User.objects.all():
                 try:
                     self._sync_ad_data(user)
                 except Http404:
@@ -667,20 +664,20 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 business_area = form.cleaned_data["business_area"]
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
-                existing = set(User.objects.filter(email__in=emails).values_list("email", flat=True))
+                existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
                 results = self.Results([], [], [], [])
                 try:
                     ms_graph = MicrosoftGraphAPI()
                     for email in emails:
                         try:
                             if email in existing:
-                                user = User.objects.get(email=email)
+                                user = account_models.User.objects.get(email=email)
                                 self._sync_ad_data(user)
                                 results.updated.append(user)
                             else:
                                 user_data = ms_graph.get_user_data(email=email)
                                 user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                                user = User(**user_args)
+                                user = account_models.User(**user_args)
                                 if user.first_name is None:
                                     user.first_name = ""
                                 if user.last_name is None:
@@ -691,15 +688,17 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                                 user.set_unusable_password()
                                 users_to_bulk_create.append(user)
                                 global_business_area = BusinessArea.objects.filter(slug="global").first()
-                                basic_role = Role.objects.filter(name="Basic User").first()
+                                basic_role = account_models.Role.objects.filter(name="Basic User").first()
                                 if global_business_area and basic_role:
                                     users_role_to_bulk_create.append(
-                                        UserRole(business_area=global_business_area, user=user, role=basic_role)
+                                        account_models.UserRole(
+                                            business_area=global_business_area, user=user, role=basic_role
+                                        )
                                     )
                                 results.created.append(user)
 
                             users_role_to_bulk_create.append(
-                                UserRole(role=role, business_area=business_area, user=user)
+                                account_models.UserRole(role=role, business_area=business_area, user=user)
                             )
                         except HTTPError as e:
                             if e.response.status_code != 404:
@@ -707,8 +706,8 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                             results.missing.append(email)
                         except Http404:
                             results.missing.append(email)
-                    User.objects.bulk_create(users_to_bulk_create)
-                    UserRole.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
+                    account_models.User.objects.bulk_create(users_to_bulk_create)
+                    account_models.UserRole.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
                     ctx["results"] = results
                     return TemplateResponse(request, "admin/load_users.html", ctx)
                 except Exception as e:
@@ -734,12 +733,12 @@ class PermissionFilter(SimpleListFilter):
         return queryset.filter(permissions__contains=[self.value()])
 
 
-@admin.register(Role)
+@admin.register(account_models.Role)
 class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("name",)
+    list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
-    list_filter = (PermissionFilter,)
+    list_filter = (PermissionFilter, "subsystem")
 
     @button()
     def members(self, request, pk):
@@ -752,11 +751,11 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         matrix1 = {}
         matrix2 = {}
         perms = sorted([str(x.value) for x in Permissions])
-        roles = Role.objects.order_by("name")
+        roles = account_models.Role.objects.order_by("name").filter(subsystem="HOPE")
         for perm in perms:
             granted_to_roles = []
             for role in roles:
-                if perm in role.permissions:
+                if role.permissions and perm in role.permissions:
                     granted_to_roles.append("X")
                 else:
                     granted_to_roles.append("")
@@ -765,7 +764,7 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         for role in roles:
             values = []
             for perm in perms:
-                if perm in role.permissions:
+                if role.permissions and perm in role.permissions:
                     values.append("X")
                 else:
                     values.append("")
@@ -778,14 +777,13 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
 
-@admin.register(UserRole)
+@admin.register(account_models.UserRole)
 class UserRoleAdmin(HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
     raw_id_fields = ("user", "business_area")
     search_fields = ("user__username__istartswith",)
     list_filter = (
-        # ForeignKeyFieldFilter.factory("user__username__istartswith", "Username"),
         ("business_area", AutoCompleteFilter),
         ("role", RelatedFieldComboFilter),
     )
@@ -797,7 +795,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
     parameter_name = "role"
 
     def lookups(self, request, model_admin):
-        types = Role.objects.values_list("id", "name")
+        types = account_models.Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 
     def queryset(self, request, queryset):
@@ -812,7 +810,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
             raise IncorrectLookupParameters(e)
 
 
-@admin.register(IncompatibleRoles)
+@admin.register(account_models.IncompatibleRoles)
 class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)
