@@ -159,6 +159,7 @@ export const importedIndividualDetailed = gql`
             country
           }
           documentNumber
+          photo
         }
       }
     }

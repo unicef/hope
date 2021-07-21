@@ -271,6 +271,7 @@ export type BusinessAreaNode = Node & {
   rapidProHost?: Maybe<Scalars['String']>,
   rapidProApiKey?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
+  customFields: Scalars['JSONString'],
   hasDataSharingAgreement: Scalars['Boolean'],
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
@@ -2867,6 +2868,22 @@ export type PageInfo = {
   endCursor?: Maybe<Scalars['String']>,
 };
 
+export type PartnerType = {
+   __typename?: 'PartnerType',
+  id: Scalars['ID'],
+  name: Scalars['String'],
+  isUn: Scalars['Boolean'],
+  userSet: UserNodeConnection,
+};
+
+
+export type PartnerTypeUserSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
 export enum PaymentRecordDeliveryType {
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
@@ -4162,9 +4179,16 @@ export type RoleNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   name: Scalars['String'],
+  subsystem: RoleSubsystem,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
   userRoles: Array<UserRoleNode>,
 };
+
+export enum RoleSubsystem {
+  Hope = 'HOPE',
+  Kobo = 'KOBO',
+  Ca = 'CA'
+}
 
 export enum RuleLanguage {
   Python = 'PYTHON',
@@ -5124,6 +5148,7 @@ export type UserBusinessAreaNode = Node & {
   rapidProHost?: Maybe<Scalars['String']>,
   rapidProApiKey?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
+  customFields: Scalars['JSONString'],
   hasDataSharingAgreement: Scalars['Boolean'],
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
@@ -5312,11 +5337,14 @@ export type UserNode = Node & {
   isActive: Scalars['Boolean'],
   dateJoined: Scalars['DateTime'],
   status: UserStatus,
-  partner: UserPartner,
+  partner?: Maybe<PartnerType>,
   availableForExport: Scalars['Boolean'],
   customFields: Scalars['JSONString'],
   jobTitle: Scalars['String'],
   adUuid?: Maybe<Scalars['String']>,
+  lastModifyDate?: Maybe<Scalars['DateTime']>,
+  lastDoapSync?: Maybe<Scalars['DateTime']>,
+  doapHash: Scalars['String'],
   userRoles: Array<UserRoleNode>,
   createdTickets: GrievanceTicketNodeConnection,
   assignedTickets: GrievanceTicketNodeConnection,
@@ -5481,12 +5509,6 @@ export type UserNodeEdge = {
   node?: Maybe<UserNode>,
   cursor: Scalars['String'],
 };
-
-export enum UserPartner {
-  Unhcr = 'UNHCR',
-  Wfp = 'WFP',
-  Unicef = 'UNICEF'
-}
 
 export type UserRoleNode = {
    __typename?: 'UserRoleNode',
@@ -5660,7 +5682,7 @@ export type IndividualDetailedFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'country' | 'photo' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
           & Pick<DocumentTypeNode, 'country' | 'label'>
@@ -7215,8 +7237,11 @@ export type AllUsersQuery = (
       & Pick<UserNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'UserNode' }
-        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email' | 'isActive' | 'lastLogin' | 'status' | 'partner'>
-        & { userRoles: Array<(
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email' | 'isActive' | 'lastLogin' | 'status'>
+        & { partner: Maybe<(
+          { __typename?: 'PartnerType' }
+          & Pick<PartnerType, 'name'>
+        )>, userRoles: Array<(
           { __typename?: 'UserRoleNode' }
           & { businessArea: (
             { __typename?: 'UserBusinessAreaNode' }
@@ -7694,6 +7719,29 @@ export type IndividualPhotosQuery = (
         & { node: Maybe<(
           { __typename?: 'DocumentNode' }
           & Pick<DocumentNode, 'id' | 'photo'>
+        )> }
+      )>> }
+    ) }
+  )> }
+);
+
+export type ImportedIndividualPhotosQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ImportedIndividualPhotosQuery = (
+  { __typename?: 'Query' }
+  & { importedIndividual: Maybe<(
+    { __typename?: 'ImportedIndividualNode' }
+    & Pick<ImportedIndividualNode, 'id' | 'photo'>
+    & { documents: (
+      { __typename?: 'ImportedDocumentNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ImportedDocumentNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ImportedDocumentNode' }
+          & Pick<ImportedDocumentNode, 'id' | 'photo'>
         )> }
       )>> }
     ) }
@@ -8293,7 +8341,7 @@ export type ImportedIndividualDetailedFragment = (
       { __typename?: 'ImportedDocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ImportedDocumentNode' }
-        & Pick<ImportedDocumentNode, 'id' | 'country' | 'documentNumber'>
+        & Pick<ImportedDocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
           & Pick<ImportedDocumentTypeNode, 'label' | 'country'>
@@ -8769,6 +8817,7 @@ export const IndividualDetailedFragmentDoc = gql`
       node {
         id
         country
+        photo
         type {
           country
           label
@@ -9122,6 +9171,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
           country
         }
         documentNumber
+        photo
       }
     }
   }
@@ -12837,7 +12887,9 @@ export const AllUsersDocument = gql`
         isActive
         lastLogin
         status
-        partner
+        partner {
+          name
+        }
         userRoles {
           businessArea {
             name
@@ -13998,6 +14050,65 @@ export function useIndividualPhotosLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type IndividualPhotosQueryHookResult = ReturnType<typeof useIndividualPhotosQuery>;
 export type IndividualPhotosLazyQueryHookResult = ReturnType<typeof useIndividualPhotosLazyQuery>;
 export type IndividualPhotosQueryResult = ApolloReactCommon.QueryResult<IndividualPhotosQuery, IndividualPhotosQueryVariables>;
+export const ImportedIndividualPhotosDocument = gql`
+    query ImportedIndividualPhotos($id: ID!) {
+  importedIndividual(id: $id) {
+    id
+    photo
+    documents {
+      edges {
+        node {
+          id
+          photo
+        }
+      }
+    }
+  }
+}
+    `;
+export type ImportedIndividualPhotosComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>, 'query'> & ({ variables: ImportedIndividualPhotosQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ImportedIndividualPhotosComponent = (props: ImportedIndividualPhotosComponentProps) => (
+      <ApolloReactComponents.Query<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables> query={ImportedIndividualPhotosDocument} {...props} />
+    );
+    
+export type ImportedIndividualPhotosProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables> & TChildProps;
+export function withImportedIndividualPhotos<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedIndividualPhotosQuery,
+  ImportedIndividualPhotosQueryVariables,
+  ImportedIndividualPhotosProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables, ImportedIndividualPhotosProps<TChildProps>>(ImportedIndividualPhotosDocument, {
+      alias: 'importedIndividualPhotos',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedIndividualPhotosQuery__
+ *
+ * To run a query within a React component, call `useImportedIndividualPhotosQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedIndividualPhotosQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedIndividualPhotosQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useImportedIndividualPhotosQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, baseOptions);
+      }
+export function useImportedIndividualPhotosLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, baseOptions);
+        }
+export type ImportedIndividualPhotosQueryHookResult = ReturnType<typeof useImportedIndividualPhotosQuery>;
+export type ImportedIndividualPhotosLazyQueryHookResult = ReturnType<typeof useImportedIndividualPhotosLazyQuery>;
+export type ImportedIndividualPhotosQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>;
 export const LookUpPaymentRecordsDocument = gql`
     query LookUpPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
   allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
@@ -16093,7 +16204,9 @@ export type ResolversTypes = {
   UserNode: ResolverTypeWrapper<UserNode>,
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
   UserStatus: UserStatus,
-  UserPartner: UserPartner,
+  PartnerType: ResolverTypeWrapper<PartnerType>,
+  UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
+  UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
   JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
   UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
@@ -16258,6 +16371,7 @@ export type ResolversTypes = {
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
   RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
   RoleNode: ResolverTypeWrapper<RoleNode>,
+  RoleSubsystem: RoleSubsystem,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   SanctionListIndividualNodeConnection: ResolverTypeWrapper<SanctionListIndividualNodeConnection>,
   SanctionListIndividualNodeEdge: ResolverTypeWrapper<SanctionListIndividualNodeEdge>,
@@ -16293,8 +16407,6 @@ export type ResolversTypes = {
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
-  UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -16430,7 +16542,9 @@ export type ResolversParentTypes = {
   UserNode: UserNode,
   DateTime: Scalars['DateTime'],
   UserStatus: UserStatus,
-  UserPartner: UserPartner,
+  PartnerType: PartnerType,
+  UserNodeConnection: UserNodeConnection,
+  UserNodeEdge: UserNodeEdge,
   JSONString: Scalars['JSONString'],
   UserRoleNode: UserRoleNode,
   UserBusinessAreaNode: UserBusinessAreaNode,
@@ -16595,6 +16709,7 @@ export type ResolversParentTypes = {
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
   RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
   RoleNode: RoleNode,
+  RoleSubsystem: RoleSubsystem,
   ChoiceObject: ChoiceObject,
   SanctionListIndividualNodeConnection: SanctionListIndividualNodeConnection,
   SanctionListIndividualNodeEdge: SanctionListIndividualNodeEdge,
@@ -16630,8 +16745,6 @@ export type ResolversParentTypes = {
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  UserNodeConnection: UserNodeConnection,
-  UserNodeEdge: UserNodeEdge,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -16868,6 +16981,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -17837,6 +17951,13 @@ export type PageInfoResolvers<ContextType = any, ParentType extends ResolversPar
   endCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerTypeUserSetArgs>,
+};
+
 export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNode'] = ResolversParentTypes['PaymentRecordNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -18221,6 +18342,7 @@ export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversPar
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  subsystem?: Resolver<ResolversTypes['RoleSubsystem'], ParentType, ContextType>,
   permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
 };
@@ -18858,6 +18980,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -18910,11 +19033,14 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>,
-  partner?: Resolver<ResolversTypes['UserPartner'], ParentType, ContextType>,
+  partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>,
   availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   jobTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adUuid?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  lastModifyDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  lastDoapSync?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  doapHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeCreatedTicketsArgs>,
   assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeAssignedTicketsArgs>,
@@ -19071,6 +19197,7 @@ export type Resolvers<ContextType = any> = {
   NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>,
   Node?: NodeResolvers,
   PageInfo?: PageInfoResolvers<ContextType>,
+  PartnerType?: PartnerTypeResolvers<ContextType>,
   PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
   PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,
   PaymentRecordNodeEdge?: PaymentRecordNodeEdgeResolvers<ContextType>,

@@ -264,9 +264,15 @@ class IndividualIdentityNode(DjangoObjectType):
 
 class DocumentNode(DjangoObjectType):
     country = graphene.String(description="Document country")
+    photo = graphene.String(description="Photo url")
 
     def resolve_country(parent, info):
         return getattr(parent.type.country, "name", parent.type.country)
+
+    def resolve_photo(parent, info):
+        if parent.photo:
+            return parent.photo.url
+        return
 
     class Meta:
         model = Document

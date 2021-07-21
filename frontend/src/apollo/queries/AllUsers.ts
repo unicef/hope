@@ -41,7 +41,9 @@ export const ALL_USERS_QUERY = gql`
           isActive
           lastLogin
           status
-          partner
+          partner {
+              name
+          }
           userRoles {
             businessArea {
               name

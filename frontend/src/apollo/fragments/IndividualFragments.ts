@@ -102,6 +102,7 @@ export const individualDetailed = gql`
         node {
           id
           country
+          photo
           type {
             country
             label

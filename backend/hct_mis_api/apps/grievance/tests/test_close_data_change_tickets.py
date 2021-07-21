@@ -211,7 +211,6 @@ class TestCloseDataChangeTickets(APITestCase):
             household=self.household_one,
             household_data={
                 "village": {"value": "Test Village", "approve_status": True},
-                "size": {"value": 19, "approve_status": True},
             },
         )
 
@@ -329,7 +328,6 @@ class TestCloseDataChangeTickets(APITestCase):
     )
     def test_close_update_household(self, _, permissions, should_close):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
@@ -342,7 +340,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
         self.household_one.refresh_from_db()
         if should_close:
-            self.assertEqual(self.household_one.size, 19)
             self.assertEqual(self.household_one.village, "Test Village")
 
     @parameterized.expand(
@@ -365,7 +362,9 @@ class TestCloseDataChangeTickets(APITestCase):
             },
         )
         if should_close:
-            self.assertTrue(Individual.objects.filter(id=self.individuals_household_two[0].id).first().withdrawn)
+            ind =Individual.objects.filter(id=self.individuals_household_two[0].id).first()
+            ind.refresh_from_db()
+            self.assertTrue(ind.withdrawn)
             changed_role_exists = IndividualRoleInHousehold.objects.filter(
                 role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
             ).exists()

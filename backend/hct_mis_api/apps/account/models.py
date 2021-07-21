@@ -1,9 +1,10 @@
 import logging
+from enum import Enum, unique
 
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
@@ -11,8 +12,9 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from model_utils import Choices
@@ -39,9 +41,23 @@ USER_STATUS_CHOICES = (
 USER_PARTNER_CHOICES = Choices("UNHCR", "WFP", "UNICEF")
 
 
+class Partner(models.Model):
+    name = CICharField(max_length=100, unique=True)
+    is_un = models.BooleanField(verbose_name="U.N.", default=False)
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def get_partners_as_choices(cls):
+        return [(role.id, role.name) for role in cls.objects.all()]
+
+
 class User(AbstractUser, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
-    partner = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
+    # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
+    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
+
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
@@ -50,10 +66,26 @@ class User(AbstractUser, UUIDModel):
     job_title = models.CharField(max_length=255, blank=True)
     ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
+    # CashAssist DOAP fields
+    last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
+    last_doap_sync = models.DateTimeField(
+        default=None, null=True, blank=True, help_text="Timestamp of last sync with CA"
+    )
+    doap_hash = models.TextField(
+        editable=False, default="", help_text="System field used to check if changes need to be sent to CA"
+    )
+
     def __str__(self):
         if self.first_name or self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.email or self.username
+
+    def save(self, *args, **kwargs):
+        if not self.partner:
+            self.partner = Partner.objects.get(name="UNICEF")
+        if not self.partner.pk:
+            self.partner.save()
+        super().save(*args, **kwargs)
 
     def permissions_in_business_area(self, business_area_slug):
         all_roles_permissions_list = list(
@@ -61,7 +93,9 @@ class User(AbstractUser, UUIDModel):
                 "permissions", flat=True
             )
         )
-        return [permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions]
+        return [
+            permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
+        ]
 
     def has_permission(self, permission, business_area, write=False):
         query = Role.objects.filter(
@@ -73,7 +107,7 @@ class User(AbstractUser, UUIDModel):
         permissions = (
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
             ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
-            ("can_upload_to_kobo", "Can upload users to Kobo"),
+            ("can_create_kobo_user", "Can create users in Kobo"),
             ("can_import_from_kobo", "Can import and sync users from Kobo"),
             ("can_debug", "Can access debug informations"),
             ("can_inspect", "Can inspect objects"),
@@ -103,9 +137,17 @@ class UserRole(TimeStampedUUIDModel):
 
 
 class Role(TimeStampedUUIDModel):
+    HOPE = "HOPE"
+    KOBO = "KOBO"
+    CA = "CA"
+    SUBSYSTEMS = (
+        (HOPE, "HOPE"),
+        (KOBO, "Kobo"),
+        (CA, "CashAssist"),
+    )
+
     name = models.CharField(
         max_length=250,
-        unique=True,
         validators=[
             MinLengthValidator(3),
             MaxLengthValidator(255),
@@ -114,21 +156,42 @@ class Role(TimeStampedUUIDModel):
             ProhibitNullCharactersValidator(),
         ],
     )
+    subsystem = models.CharField(choices=SUBSYSTEMS, max_length=30, default=HOPE)
     permissions = ChoiceArrayField(
         models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
     )
 
+    def clean(self):
+        if self.subsystem != Role.HOPE and self.permissions:
+            raise ValidationError("Only HOPE roles can have permissions")
+
+    class Meta:
+        unique_together = ("name", "subsystem")
+
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.subsystem})"
 
     @classmethod
     def get_roles_as_choices(cls):
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
+@receiver(post_save, sender=UserRole)
+def post_save_userrole(sender, instance, *args, **kwargs):
+    instance.user.last_modify_date = timezone.now()
+    instance.user.save()
+
+
+@receiver(pre_delete, sender=UserRole)
+def pre_delete_userrole(sender, instance, *args, **kwargs):
+    instance.user.last_modify_date = timezone.now()
+    instance.user.save()
+
+
 @receiver(pre_save, sender=get_user_model())
 def pre_save_user(sender, instance, *args, **kwargs):
     instance.available_for_export = True
+    instance.last_modify_date = timezone.now()
 
 
 @receiver(post_save, sender=get_user_model())
