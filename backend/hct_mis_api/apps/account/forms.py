@@ -8,7 +8,7 @@ from django.utils.translation import gettext as _
 
 from adminactions.api import delimiters, quotes
 
-from hct_mis_api.apps.account.models import Role
+from hct_mis_api.apps.account.models import Partner, Role
 from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ class ImportCSV(forms.Form):
     escapechar = forms.ChoiceField(label=_("Escapechar"), choices=(("", ""), ("\\", "\\")), required=False)
 
     enable_kobo = forms.BooleanField(required=False)
-    enable_cash_assist = forms.BooleanField(required=False)
+    partner = forms.ModelChoiceField(queryset=Partner.objects.all())
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
     role = forms.ModelChoiceField(queryset=Role.objects.all())
 
@@ -65,7 +65,7 @@ class ImportCSV(forms.Form):
                 "fields": (
                     (
                         "enable_kobo",
-                        "enable_cash_assist",
+                        "partner",
                         "business_area",
                         "role",
                     ),

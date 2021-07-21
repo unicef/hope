@@ -16,6 +16,7 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
 import { ContentLink } from '../../../../components/ContentLink';
+import { DocumentRegistrationPhotoModal } from './DocumentRegistrationPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -66,7 +67,15 @@ export function RegistrationIndividualsBioData({
       <Box flexDirection='column'>
         <Box mb={1}>
           <LabelizedField label={edge.node.type.label}>
-            {edge.node.documentNumber}
+            {edge.node.photo ? (
+              <DocumentRegistrationPhotoModal
+                documentNumber={edge.node.documentNumber}
+                documentId={edge.node.id}
+                individual={individual}
+              />
+            ) : (
+              edge.node.documentNumber
+            )}
           </LabelizedField>
         </Box>
         <LabelizedField label='issued'>{edge.node.country}</LabelizedField>

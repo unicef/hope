@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { BlackLink } from '../BlackLink';
 import {
   IndividualNode,
   useIndividualPhotosLazyQuery,
@@ -24,31 +25,36 @@ const StyledImage = styled.img`
   max-height: 100%;
 `;
 
-interface IndividualPhotoModalProps {
+interface DocumentPopulationPhotoModalProps {
   individual: IndividualNode;
+  documentNumber: string;
+  documentId: string;
 }
 
-export const IndividualPhotoModal = ({
+export const DocumentPopulationPhotoModal = ({
   individual,
-}: IndividualPhotoModalProps): React.ReactElement => {
+  documentNumber,
+  documentId,
+}: DocumentPopulationPhotoModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [getPhotos, { data }] = useIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
     fetchPolicy: 'network-only',
   });
+  const documentWithPhoto = data?.individual?.documents?.edges?.find(
+    (el) => el.node.id === documentId,
+  );
 
   return (
     <>
-      <Button
-        color='primary'
-        variant='outlined'
+      <BlackLink
         onClick={() => {
           setDialogOpen(true);
           getPhotos();
         }}
       >
-        Show Photo
-      </Button>
+        {documentNumber}
+      </BlackLink>
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -56,12 +62,12 @@ export const IndividualPhotoModal = ({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            Individual&apos;s Photo
+            Document&apos;s Photo
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box p={3}>
-            <StyledImage alt='Individual' src={data?.individual?.photo} />
+            <StyledImage alt='document' src={documentWithPhoto?.node?.photo} />
           </Box>
         </DialogContent>
         <DialogFooter>

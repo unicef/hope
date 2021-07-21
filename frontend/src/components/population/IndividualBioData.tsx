@@ -15,6 +15,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 import { UniversalMoment } from '../UniversalMoment';
 import { ContentLink } from '../ContentLink';
+import { DocumentPopulationPhotoModal } from './DocumentPopulationPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -65,7 +66,15 @@ export function IndividualsBioData({
       <Box flexDirection='column'>
         <Box mb={1}>
           <LabelizedField label={edge.node.type.label}>
-            {edge.node.documentNumber}
+            {edge.node.photo ? (
+              <DocumentPopulationPhotoModal
+                documentNumber={edge.node.documentNumber}
+                documentId={edge.node.id}
+                individual={individual}
+              />
+            ) : (
+              edge.node.documentNumber
+            )}
           </LabelizedField>
         </Box>
         <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
@@ -85,6 +94,13 @@ export function IndividualsBioData({
       </Box>
     </Grid>
   ));
+
+  const formatAge = (age): string | number => {
+    if (age > 0) {
+      return age;
+    }
+    return '<1';
+  }
 
   return (
     <Overview>
@@ -118,7 +134,7 @@ export function IndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Age'>{individual.age}</LabelizedField>
+          <LabelizedField label='Age'>{formatAge(individual.age)}</LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>

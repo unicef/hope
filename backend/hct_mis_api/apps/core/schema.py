@@ -1,39 +1,33 @@
 import logging
 from collections import Iterable
 
+from django.core.exceptions import ObjectDoesNotExist
+
 import graphene
 from constance import config
-from django.core.exceptions import ObjectDoesNotExist
-from django_filters import FilterSet, CharFilter
-from graphene import (
-    String,
-    DateTime,
-    relay,
-    ConnectionField,
-    Connection,
-    Boolean,
-)
-from graphene.types.resolver import (
-    dict_or_attr_resolver,
-    attr_resolver,
-    dict_resolver,
-)
+from django_filters import CharFilter, FilterSet
+from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
+from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from hct_mis_api.apps.core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS, ROLE_FIELD
+from hct_mis_api.apps.core.core_fields_attributes import (
+    FILTERABLE_CORE_FIELDS_ATTRIBUTES,
+    ROLE_FIELD,
+    XLSX_ONLY_FIELDS,
+)
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.kobo.api import KoboAPI
-from hct_mis_api.apps.core.kobo.common import reduce_assets_list, reduce_asset
+from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.models import (
     AdminArea,
+    AdminAreaLevel,
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
-    AdminAreaLevel,
 )
 from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
 
@@ -42,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
-        field_name="admin_area_level__country__business_areas__slug",
+        field_name="admin_area_level__business_area__slug",
     )
     level = IntegerFilter(
         field_name="level",
