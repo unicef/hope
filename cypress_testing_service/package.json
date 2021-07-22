@@ -41,7 +41,7 @@
     "tsify": "^4.0.1",
     "typescript": "^3.8.0",
     "uuidv4": "^6.0.8",
-    "xlsx": "^0.16.0"
+    "xlsx": "^0.17.0"
   },
   "cypress-cucumber-preprocessor": {
     "nonGlobalStepDefinitions": true
