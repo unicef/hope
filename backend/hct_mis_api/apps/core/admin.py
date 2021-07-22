@@ -414,6 +414,8 @@ class LoadAdminAreaForm(forms.Form):
     page_size = forms.IntegerField(required=True, validators=[lambda x: x >= 1])
     max_records = forms.IntegerField(required=False, help_text="Leave blank for all records")
 
+    skip_rebuild = forms.BooleanField(required=False, help_text="Do not rebuild MPTT tree")
+
 
 class ImportAreaForm(forms.Form):
     # country = forms.ChoiceField(choices=AdminAreaLevel.objects.get_countries())
@@ -431,6 +433,13 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
         TextFieldFilter.factory("tree_id"),
         TextFieldFilter.factory("external_id"),
     )
+
+    @button(permission=lambda r, __: r.user.is_superuser)
+    def rebuild_tree(self, request):
+        try:
+            AdminArea.objects.rebuild()
+        except Exception as e:
+            self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     @button(permission="core.import_from_csv_adminarea")
     def import_file(self, request):
@@ -483,11 +492,20 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                                 lines.append(row)
                             else:
                                 infos["skipped"] += 1
-                    AdminArea.objects.rebuild()
+                        try:
+                            AdminArea.objects.rebuild()
+                        except Exception as e:
+                            raise Warning(
+                                f"Data successfully loaded but MPTT rebuild failed due to {e.__class__.__name__}: {e}"
+                            ) from e
                     context["country"] = form.cleaned_data["country"]
                     context["columns"] = minimum_set
                     context["lines"] = lines
                     context["infos"] = infos
+                except Warning as e:
+                    logger.exception(e)
+                    context["form"] = form
+                    self.message_user(request, str(e), messages.ERROR)
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
@@ -513,11 +531,18 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                     max_records = form.cleaned_data["max_records"]
                     if form.cleaned_data["run_in_background"]:
                         load_admin_area.delay(
-                            country, geom, page_size=page_size, max_records=max_records, notify_to=[request.user.email]
+                            country,
+                            geom,
+                            page_size=page_size,
+                            max_records=max_records,
+                            notify_to=[request.user.email],
+                            rebuild_mptt=not form.cleaned_data["skip_rebuild"],
                         )
                         context["run_in_background"] = True
                     else:
-                        results = load_admin_area(country, geom, page_size, max_records)
+                        results = load_admin_area(
+                            country, geom, page_size, max_records, rebuild_mptt=not form.cleaned_data["skip_rebuild"]
+                        )
                         context["admin_areas"] = results
                 except Exception as e:
                     context["form"] = form
