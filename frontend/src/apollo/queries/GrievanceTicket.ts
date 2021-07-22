@@ -54,6 +54,7 @@ export const GrievanceTicket = gql`
       }
       relatedTickets {
         id
+        unicefId
         status
         household {
           id
