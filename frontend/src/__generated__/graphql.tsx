@@ -7565,9 +7565,26 @@ export type GrievanceTicketQuery = (
       & { goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
-        & { household: Maybe<(
+        & { documents: (
+          { __typename?: 'DocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'DocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'DocumentNode' }
+              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
+              & { type: (
+                { __typename?: 'DocumentTypeNode' }
+                & Pick<DocumentTypeNode, 'label' | 'country'>
+              ) }
+            )> }
+          )>> }
+        ), household: Maybe<(
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'unicefId'>
+          & Pick<HouseholdNode, 'id' | 'unicefId' | 'village'>
+          & { admin2: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'id' | 'title'>
+          )> }
         )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
@@ -7575,9 +7592,26 @@ export type GrievanceTicketQuery = (
       ), possibleDuplicate: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
-        & { household: Maybe<(
+        & { documents: (
+          { __typename?: 'DocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'DocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'DocumentNode' }
+              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
+              & { type: (
+                { __typename?: 'DocumentTypeNode' }
+                & Pick<DocumentTypeNode, 'label' | 'country'>
+              ) }
+            )> }
+          )>> }
+        ), household: Maybe<(
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'unicefId' | 'id'>
+          & Pick<HouseholdNode, 'unicefId' | 'id' | 'village'>
+          & { admin2: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'id' | 'title'>
+          )> }
         )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
@@ -13643,9 +13677,28 @@ export const GrievanceTicketDocument = gql`
       goldenRecordsIndividual {
         id
         unicefId
+        documents {
+          edges {
+            node {
+              id
+              country
+              type {
+                label
+                country
+              }
+              documentNumber
+              photo
+            }
+          }
+        }
         household {
           id
           unicefId
+          village
+          admin2 {
+            id
+            title
+          }
         }
         fullName
         birthDate
@@ -13659,11 +13712,30 @@ export const GrievanceTicketDocument = gql`
       }
       possibleDuplicate {
         id
+        documents {
+          edges {
+            node {
+              id
+              country
+              type {
+                label
+                country
+              }
+              documentNumber
+              photo
+            }
+          }
+        }
         unicefId
         lastRegistrationDate
         household {
           unicefId
           id
+          village
+          admin2 {
+            id
+            title
+          }
         }
         fullName
         birthDate
