@@ -56,10 +56,15 @@ class BusinessArea(TimeStampedUUIDModel):
     countries = models.ManyToManyField(
         "AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0}, related_name="business_areas"
     )
-    deduplication_batch_duplicate_score = models.FloatField(
+    deduplication_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
         help_text="Results equal or above this score are considered duplicates",
+    )
+    deduplication_possible_duplicate_score = models.FloatField(
+        default=6.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results equal or above this score are considered possible duplicates (needs adjudication) must be lower than deduplication_duplicate_score",
     )
 
     deduplication_batch_duplicates_percentage = models.IntegerField(
@@ -68,23 +73,13 @@ class BusinessArea(TimeStampedUUIDModel):
     deduplication_batch_duplicates_allowed = models.IntegerField(
         default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
     )
-
-    deduplication_golden_record_duplicate_score = models.FloatField(
-        default=6.0,
-        validators=[MinValueValidator(0.0)],
-        help_text="Results equal or above this score are considered duplicates",
-    )
     deduplication_golden_record_duplicates_percentage = models.IntegerField(
         default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
     )
     deduplication_golden_record_duplicates_allowed = models.IntegerField(
         default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
     )
-    deduplication_golden_record_min_score = models.FloatField(
-        default=11.0,
-        validators=[MinValueValidator(0.0)],
-        help_text="Results below the minimum score will not be taken into account",
-    )
+
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
