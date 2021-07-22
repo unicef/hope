@@ -80,7 +80,7 @@ class CheckAgainstSanctionListPreMergeTask:
         return query_dict
 
     @classmethod
-    def execute(cls, individuals=None):
+    def execute(cls, individuals=None, registration_data_import=None):
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
@@ -109,6 +109,7 @@ class CheckAgainstSanctionListPreMergeTask:
                             business_area=marked_individual.business_area,
                             admin2=admin_level_2,
                             area=area,
+                            registration_data_import=registration_data_import,
                         )
                         ticket_details = TicketSystemFlaggingDetails(
                             ticket=ticket,

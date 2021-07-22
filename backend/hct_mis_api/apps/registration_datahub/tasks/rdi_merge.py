@@ -304,7 +304,7 @@ class RdiMergeTask:
                     )
 
                     # SANCTION LIST CHECK
-                    CheckAgainstSanctionListPreMergeTask.execute()
+                    CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
