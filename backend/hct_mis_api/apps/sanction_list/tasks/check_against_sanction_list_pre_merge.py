@@ -1,12 +1,19 @@
 import logging
 
-from constance import config
 from django.utils import timezone
 
-from hct_mis_api.apps.grievance.models import TicketSystemFlaggingDetails, GrievanceTicket
+from constance import config
+
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketSystemFlaggingDetails,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import IndividualDocument
-from hct_mis_api.apps.household.models import Individual, IDENTIFICATION_TYPE_NATIONAL_ID
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    Individual,
+)
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 log = logging.getLogger(__name__)
