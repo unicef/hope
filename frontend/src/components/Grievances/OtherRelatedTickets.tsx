@@ -62,7 +62,7 @@ export const OtherRelatedTickets = ({
             <ContentLink
               href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
             >
-              {decodeIdString(edge.node.id)}
+              {edge.node.unicefId}
             </ContentLink>
           </Box>
         ))
@@ -74,7 +74,7 @@ export const OtherRelatedTickets = ({
             <ContentLink
               href={`/${businessArea}/grievance-and-feedback/${edge.id}`}
             >
-              {decodeIdString(edge.id)}
+              {edge.unicefId}
             </ContentLink>
           </Box>
         ))

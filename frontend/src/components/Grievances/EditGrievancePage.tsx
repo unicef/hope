@@ -58,7 +58,7 @@ import { validate } from './utils/validateGrievance';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
-import { validationSchema } from "./utils/validationSchema";
+import { validationSchema } from './utils/validationSchema';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -262,7 +262,7 @@ export function EditGrievancePage(): React.ReactElement {
         return (
           <>
             <PageHeader
-              title={`Edit Ticket #${decodeIdString(id)}`}
+              title={`Edit Ticket #${ticket.unicefId}`}
               breadCrumbs={breadCrumbsItems}
             />
             <Grid container spacing={3}>
@@ -315,7 +315,10 @@ export function EditGrievancePage(): React.ReactElement {
                         />
                         <LookUpSection
                           values={values}
-                          disabledHouseholdIndividual={values.selectedIndividual || values.selectedHousehold}
+                          disabledHouseholdIndividual={
+                            values.selectedIndividual ||
+                            values.selectedHousehold
+                          }
                           disabledPaymentRecords
                           onValueChange={setFieldValue}
                           errors={errors}
