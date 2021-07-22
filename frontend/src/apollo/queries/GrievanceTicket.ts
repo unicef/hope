@@ -151,9 +151,28 @@ export const GrievanceTicket = gql`
         goldenRecordsIndividual {
           id
           unicefId
+          documents {
+            edges {
+              node {
+                id
+                country
+                type {
+                  label
+                  country
+                }
+                documentNumber
+                photo
+              }
+            }
+          }
           household {
             id
             unicefId
+            village
+            admin2 {
+              id
+              title
+            }
           }
           fullName
           birthDate
@@ -167,11 +186,30 @@ export const GrievanceTicket = gql`
         }
         possibleDuplicate {
           id
+          documents {
+            edges {
+              node {
+                id
+                country
+                type {
+                  label
+                  country
+                }
+                documentNumber
+                photo
+              }
+            }
+          }
           unicefId
           lastRegistrationDate
           household {
             unicefId
             id
+            village
+            admin2 {
+              id
+              title
+            }
           }
           fullName
           birthDate
