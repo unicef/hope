@@ -3,7 +3,6 @@ import React from 'react';
 import styled from 'styled-components';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { decodeIdString } from '../../../utils/utils';
 import { RelatedTicketIdDisplay } from './RelatedTicketIdDisplay';
 
 const StyledBox = styled.div`
