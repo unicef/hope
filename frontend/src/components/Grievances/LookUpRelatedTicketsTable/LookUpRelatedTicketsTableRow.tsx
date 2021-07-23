@@ -6,7 +6,6 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import {
-  decodeIdString,
   grievanceTicketStatusToColor,
   renderUserName,
 } from '../../../utils/utils';
