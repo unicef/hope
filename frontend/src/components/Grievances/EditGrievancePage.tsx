@@ -35,7 +35,6 @@ import {
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import {
-  decodeIdString,
   isInvalid,
   isPermissionDeniedError,
   renderUserName,
