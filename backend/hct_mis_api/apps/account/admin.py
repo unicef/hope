@@ -5,10 +5,11 @@ from collections import defaultdict, namedtuple
 from functools import cached_property
 from urllib.parse import unquote, urlencode
 
-from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.helpers import AdminForm
+from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -16,10 +17,12 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, router, transaction
 from django.db.models import Q
+from django.db.transaction import atomic
 from django.forms import Form, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.crypto import get_random_string
@@ -39,8 +42,9 @@ from constance import config
 from requests import HTTPError
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.account.forms import ImportCSV, KoboLoginForm
+from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSV, KoboLoginForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
+from hct_mis_api.apps.account.models import UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import BusinessArea
@@ -329,6 +333,7 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
             _("Personal info"),
             {
                 "fields": (
+                    "partner",
                     "username",
                     "password",
                     (
@@ -372,7 +377,15 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
-    actions = ["_create_kobo_user_qs"]
+    actions = ["_create_kobo_user_qs", "add_business_area_role"]
+
+    def get_fields(self, request, obj=None):
+        return ["last_name", "first_name", "email", "partner", "job_title"]
+
+    def get_fieldsets(self, request, obj=None):
+        if request.user.is_superuser:
+            return super().get_fieldsets(request, obj)
+        return [(None, {"fields": self.get_fields(request, obj)})]
 
     @button()
     def inspect(self, request, pk):
@@ -445,7 +458,8 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         actions = super(UserAdmin, self).get_actions(request)
         if not request.user.has_perm("account.can_create_kobo_user"):
             del actions["_create_kobo_user_qs"]
-
+        if not request.user.has_perm("account.add_userrole"):
+            del actions["add_business_area_role"]
         return actions
 
     @button(permission="account.can_create_kobo_user", visible=lambda o, r: not o.custom_fields.get("kobo_username"))
@@ -468,6 +482,48 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+
+    def add_business_area_role(self, request, queryset):
+        if "apply" in request.POST:
+            form = AddRoleForm(request.POST)
+            if form.is_valid():
+                ba = form.cleaned_data["business_area"]
+                roles = form.cleaned_data["roles"]
+                crud = form.cleaned_data["operation"]
+
+                with atomic():
+                    users, added, removed = 0, 0, 0
+                    for u in queryset.all():
+                        users += 1
+                        for role in roles:
+                            if crud == "ADD":
+                                ur, is_new = u.user_roles.get_or_create(business_area=ba, role=role)
+                                if is_new:
+                                    added += 1
+                                    self.log_addition(request, ur, "Role added")
+                            elif crud == "REMOVE":
+                                to_delete = u.user_roles.filter(business_area=ba, role=role).first()
+                                if to_delete:
+                                    removed += 1
+                                    self.log_deletion(request, to_delete, str(to_delete))
+                                    to_delete.delete()
+                            else:
+                                raise ValueError("Bug found. {} not valid operation for add/rem role")
+                    if removed:
+                        msg = f"{removed} roles removed from {users} users"
+                    elif added:
+                        msg = f"{added} roles granted to {users} users"
+                    else:
+                        msg = f"{users} users processed no actions have been required"
+
+                    self.message_user(request, msg)
+            return HttpResponseRedirect(request.get_full_path())
+        else:
+            ctx = self.get_common_context(request, title="Add Role", selection=queryset)
+            ctx["form"] = AddRoleForm()
+            return render(request, "admin/account/user/business_area_role.html", context=ctx)
+
+    add_business_area_role.short_description = "Add/Remove Business Area roles"
 
     def _create_kobo_user_qs(self, request, queryset):
         for user in queryset.all():
