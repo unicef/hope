@@ -8,12 +8,13 @@ import { BlackLink } from '../../../components/BlackLink';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
+  canViewDetails?: boolean;
 }
 
 export function TargetPopulationHouseholdTableRow({
   household,
   canViewDetails,
-}): React.ReactElement {
+}): React.ReactElement<TargetPopulationHouseholdTableRowProps> {
   const businessArea = useBusinessArea();
   const householdDetailsPath = `/${businessArea}/population/household/${household.id}`;
   const handleClick = (): void => {
@@ -22,6 +23,15 @@ export function TargetPopulationHouseholdTableRow({
       win.focus();
     }
   };
+
+  const renderHoHName = (): string => {
+    const {headOfHousehold: {givenName, familyName, fullName}} = household;
+    if (givenName && familyName) {
+      return `${givenName} ${familyName}`;
+    }
+    return fullName;
+  }
+
   return (
     <ClickableTableRow
       hover
@@ -42,7 +52,7 @@ export function TargetPopulationHouseholdTableRow({
           household.unicefId
         )}
       </TableCell>
-      <AnonTableCell>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</AnonTableCell>
+      <AnonTableCell>{renderHoHName()}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>

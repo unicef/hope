@@ -1,12 +1,19 @@
 import logging
 
-from constance import config
 from django.utils import timezone
 
-from hct_mis_api.apps.grievance.models import TicketSystemFlaggingDetails, GrievanceTicket
+from constance import config
+
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketSystemFlaggingDetails,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import IndividualDocument
-from hct_mis_api.apps.household.models import Individual, IDENTIFICATION_TYPE_NATIONAL_ID
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    Individual,
+)
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 log = logging.getLogger(__name__)
@@ -73,7 +80,7 @@ class CheckAgainstSanctionListPreMergeTask:
         return query_dict
 
     @classmethod
-    def execute(cls, individuals=None):
+    def execute(cls, individuals=None, registration_data_import=None):
         if individuals is None:
             individuals = SanctionListIndividual.objects.all()
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
@@ -102,6 +109,7 @@ class CheckAgainstSanctionListPreMergeTask:
                             business_area=marked_individual.business_area,
                             admin2=admin_level_2,
                             area=area,
+                            registration_data_import=registration_data_import,
                         )
                         ticket_details = TicketSystemFlaggingDetails(
                             ticket=ticket,

@@ -52,7 +52,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
             <ContentLink
               href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
             >
-              {decodeIdString(edge.node.id)}
+              {edge.node.unicefId}
             </ContentLink>
           </Box>
         ))
@@ -91,7 +91,8 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
           <Box mb={3} mt={3}>
             <Typography>Closed Tickets</Typography>
             <LabelizedField
-              label={`For Household ${values?.selectedHousehold?.unicefId || '-'} `}
+              label={`For Household ${values?.selectedHousehold?.unicefId ||
+                '-'} `}
             >
               <>{renderIds(closedHouseholdTickets)}</>
             </LabelizedField>

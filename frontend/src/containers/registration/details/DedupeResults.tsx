@@ -187,7 +187,14 @@ export function DedupeResults({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>CLOSE</Button>
+            <Button
+              onClick={(e) => {
+                setOpen(false);
+                e.stopPropagation();
+              }}
+            >
+              CLOSE
+            </Button>
           </DialogActions>
         </DialogFooter>
       </Dialog>

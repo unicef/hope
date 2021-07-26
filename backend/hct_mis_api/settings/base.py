@@ -199,7 +199,7 @@ TEMPLATES = [
 ]
 PROJECT_APPS = [
     "hct_mis_api.apps.account",
-    "hct_mis_api.apps.core",
+    "hct_mis_api.apps.core.apps.CoreConfig",
     "hct_mis_api.apps.grievance",
     "hct_mis_api.apps.household",
     "hct_mis_api.apps.id_management",
@@ -477,6 +477,11 @@ CONSTANCE_CONFIG = {
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
     # CASH ASSIST
     "CASH_ASSIST_URL_PREFIX": ("", "Cash Assist base url used to generate url to cash assist"),
+    "SEND_GRIEVANCES_NOTIFICATION": (
+        False,
+        "Should send grievances notification",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)

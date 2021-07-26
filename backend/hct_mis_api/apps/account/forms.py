@@ -2,6 +2,7 @@ import csv
 import logging
 
 from django import forms  # Form, CharField, Textarea, ModelChoiceField, PasswordInput
+from django.contrib.admin import widgets
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.utils.translation import gettext as _
@@ -35,7 +36,7 @@ class KoboImportUsersForm(forms.Form):
         return self.cleaned_data["emails"]
 
 
-class ImportCSV(forms.Form):
+class ImportCSVForm(forms.Form):
     file = forms.FileField()
     delimiter = forms.ChoiceField(label=_("Delimiter"), choices=list(zip(delimiters, delimiters)), initial=",")
     quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes)), initial="'")
@@ -97,3 +98,12 @@ class LoadUsersForm(forms.Form):
             logger.error("Invalid emails %s" % ", ".join(errors))
             raise ValidationError("Invalid emails %s" % ", ".join(errors))
         return self.cleaned_data["emails"]
+
+
+class AddRoleForm(forms.Form):
+    operation = forms.ChoiceField(choices=(("ADD", "Add"), ("REMOVE", "Remove")))
+    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
+    roles = forms.ModelMultipleChoiceField(
+        queryset=Role.objects.all(),
+        widget=widgets.FilteredSelectMultiple("Roles", False),
+    )

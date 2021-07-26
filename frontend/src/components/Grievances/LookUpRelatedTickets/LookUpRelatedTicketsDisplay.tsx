@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { decodeIdString } from '../../../utils/utils';
+import { RelatedTicketIdDisplay } from './RelatedTicketIdDisplay';
 
 const StyledBox = styled.div`
   border: 1.5px solid #043e91;
@@ -39,15 +40,15 @@ export const LookUpRelatedTicketsDisplay = ({
   };
   const renderRelatedTickets = (): React.ReactElement => {
     if (values.selectedRelatedTickets.length) {
-      return values.selectedRelatedTickets.map((ticket) => (
-        <BlueText>{decodeIdString(ticket)}</BlueText>
+      return values.selectedRelatedTickets.map((id) => (
+        <RelatedTicketIdDisplay ticketId={id} />
       ));
     }
     return <BlueText>-</BlueText>;
   };
   return (
     <StyledBox>
-      <Grid container>
+      <Grid container justify='space-between'>
         <Grid item>
           <Box display='flex' flexDirection='column'>
             Ticket ID:
