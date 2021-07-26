@@ -8488,7 +8488,7 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
         & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'updatedAt' | 'address'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName' | 'fullName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
@@ -15905,6 +15905,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
           id
           givenName
           familyName
+          fullName
         }
         size
         adminArea {
