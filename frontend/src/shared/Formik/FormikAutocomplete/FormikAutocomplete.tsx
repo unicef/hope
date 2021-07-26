@@ -9,7 +9,7 @@ export const FormikAutocomplete = ({
   label,
 }): React.ReactElement => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [value, setValue] = useState(null);
+  const [value, setValue] = useState(field.value);
   const realSelectedValue = choices.find((item) => item.value === value);
 
   const handleChange = (e, option): void => {
