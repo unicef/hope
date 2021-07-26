@@ -39,9 +39,6 @@
             {{ form.as_p }}
             <div><input type="submit" value="Add to Kobo"></div>
         </form>
-
-    {% else %}
-        <h3><a class="btn" href="{% url opts|admin_urlname:'kobo_login' %}">Login To Kobo</a></h3>
     {% endif %}
 {% endblock content %}
 

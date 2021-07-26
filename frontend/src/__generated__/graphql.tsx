@@ -883,7 +883,7 @@ export type DocumentNode = Node & {
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
   documentNumber: Scalars['String'],
-  photo: Scalars['String'],
+  photo?: Maybe<Scalars['String']>,
   individual: IndividualNode,
   type: DocumentTypeNode,
   status: DocumentStatus,
@@ -1442,7 +1442,7 @@ export type ImportedDocumentNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   documentNumber: Scalars['String'],
-  photo: Scalars['String'],
+  photo?: Maybe<Scalars['String']>,
   individual: ImportedIndividualNode,
   type: ImportedDocumentTypeNode,
   country?: Maybe<Scalars['String']>,
@@ -7400,7 +7400,7 @@ export type ExistingGrievanceTicketsQuery = (
       & Pick<GrievanceTicketNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'GrievanceTicketNode' }
-        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'createdAt' | 'userModified' | 'admin'>
+        & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'createdAt' | 'userModified' | 'admin'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -7474,7 +7474,7 @@ export type GrievanceTicketQuery = (
       & Pick<PaymentRecordNode, 'id'>
     )>, relatedTickets: Maybe<Array<Maybe<(
       { __typename?: 'GrievanceTicketNode' }
-      & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status'>
       & { household: Maybe<(
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -7565,9 +7565,26 @@ export type GrievanceTicketQuery = (
       & { goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
-        & { household: Maybe<(
+        & { documents: (
+          { __typename?: 'DocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'DocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'DocumentNode' }
+              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
+              & { type: (
+                { __typename?: 'DocumentTypeNode' }
+                & Pick<DocumentTypeNode, 'label' | 'country'>
+              ) }
+            )> }
+          )>> }
+        ), household: Maybe<(
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'unicefId'>
+          & Pick<HouseholdNode, 'id' | 'unicefId' | 'village'>
+          & { admin2: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'id' | 'title'>
+          )> }
         )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
@@ -7575,9 +7592,26 @@ export type GrievanceTicketQuery = (
       ), possibleDuplicate: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
-        & { household: Maybe<(
+        & { documents: (
+          { __typename?: 'DocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'DocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'DocumentNode' }
+              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
+              & { type: (
+                { __typename?: 'DocumentTypeNode' }
+                & Pick<DocumentTypeNode, 'label' | 'country'>
+              ) }
+            )> }
+          )>> }
+        ), household: Maybe<(
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'unicefId' | 'id'>
+          & Pick<HouseholdNode, 'unicefId' | 'id' | 'village'>
+          & { admin2: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'id' | 'title'>
+          )> }
         )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
           { __typename?: 'DeduplicationResultNode' }
           & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
@@ -7614,6 +7648,19 @@ export type GrievanceTicketQuery = (
         )> }
       )>> }
     ) }
+  )> }
+);
+
+export type GrievanceTicketUnicefIdQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type GrievanceTicketUnicefIdQuery = (
+  { __typename?: 'Query' }
+  & { grievanceTicket: Maybe<(
+    { __typename?: 'GrievanceTicketNode' }
+    & Pick<GrievanceTicketNode, 'id' | 'unicefId'>
   )> }
 );
 
@@ -8441,7 +8488,7 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
         & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'updatedAt' | 'address'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName' | 'fullName'>
         ), adminArea: Maybe<(
           { __typename?: 'AdminAreaNode' }
           & Pick<AdminAreaNode, 'id' | 'title'>
@@ -13347,6 +13394,7 @@ export const ExistingGrievanceTicketsDocument = gql`
       cursor
       node {
         id
+        unicefId
         status
         assignedTo {
           id
@@ -13533,6 +13581,7 @@ export const GrievanceTicketDocument = gql`
     }
     relatedTickets {
       id
+      unicefId
       status
       household {
         id
@@ -13628,9 +13677,28 @@ export const GrievanceTicketDocument = gql`
       goldenRecordsIndividual {
         id
         unicefId
+        documents {
+          edges {
+            node {
+              id
+              country
+              type {
+                label
+                country
+              }
+              documentNumber
+              photo
+            }
+          }
+        }
         household {
           id
           unicefId
+          village
+          admin2 {
+            id
+            title
+          }
         }
         fullName
         birthDate
@@ -13644,11 +13712,30 @@ export const GrievanceTicketDocument = gql`
       }
       possibleDuplicate {
         id
+        documents {
+          edges {
+            node {
+              id
+              country
+              type {
+                label
+                country
+              }
+              documentNumber
+              photo
+            }
+          }
+        }
         unicefId
         lastRegistrationDate
         household {
           unicefId
           id
+          village
+          admin2 {
+            id
+            title
+          }
         }
         fullName
         birthDate
@@ -13743,6 +13830,57 @@ export function useGrievanceTicketLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type GrievanceTicketQueryHookResult = ReturnType<typeof useGrievanceTicketQuery>;
 export type GrievanceTicketLazyQueryHookResult = ReturnType<typeof useGrievanceTicketLazyQuery>;
 export type GrievanceTicketQueryResult = ApolloReactCommon.QueryResult<GrievanceTicketQuery, GrievanceTicketQueryVariables>;
+export const GrievanceTicketUnicefIdDocument = gql`
+    query GrievanceTicketUnicefId($id: ID!) {
+  grievanceTicket(id: $id) {
+    id
+    unicefId
+  }
+}
+    `;
+export type GrievanceTicketUnicefIdComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>, 'query'> & ({ variables: GrievanceTicketUnicefIdQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GrievanceTicketUnicefIdComponent = (props: GrievanceTicketUnicefIdComponentProps) => (
+      <ApolloReactComponents.Query<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables> query={GrievanceTicketUnicefIdDocument} {...props} />
+    );
+    
+export type GrievanceTicketUnicefIdProps<TChildProps = {}> = ApolloReactHoc.DataProps<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables> & TChildProps;
+export function withGrievanceTicketUnicefId<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievanceTicketUnicefIdQuery,
+  GrievanceTicketUnicefIdQueryVariables,
+  GrievanceTicketUnicefIdProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables, GrievanceTicketUnicefIdProps<TChildProps>>(GrievanceTicketUnicefIdDocument, {
+      alias: 'grievanceTicketUnicefId',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievanceTicketUnicefIdQuery__
+ *
+ * To run a query within a React component, call `useGrievanceTicketUnicefIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGrievanceTicketUnicefIdQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGrievanceTicketUnicefIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGrievanceTicketUnicefIdQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>) {
+        return ApolloReactHooks.useQuery<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>(GrievanceTicketUnicefIdDocument, baseOptions);
+      }
+export function useGrievanceTicketUnicefIdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>(GrievanceTicketUnicefIdDocument, baseOptions);
+        }
+export type GrievanceTicketUnicefIdQueryHookResult = ReturnType<typeof useGrievanceTicketUnicefIdQuery>;
+export type GrievanceTicketUnicefIdLazyQueryHookResult = ReturnType<typeof useGrievanceTicketUnicefIdLazyQuery>;
+export type GrievanceTicketUnicefIdQueryResult = ApolloReactCommon.QueryResult<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>;
 export const GrievancesChoiceDataDocument = gql`
     query GrievancesChoiceData {
   grievanceTicketStatusChoices {
@@ -15767,6 +15905,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
           id
           givenName
           familyName
+          fullName
         }
         size
         adminArea {
@@ -17276,7 +17415,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
@@ -17539,7 +17678,7 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,

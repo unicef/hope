@@ -543,11 +543,11 @@ class TargetingCriteriaFilterMixin:
         },
         "GREATER_THAN": {
             "arguments": 1,
-            "lookup": "__gt",
+            "lookup": "__gte",
             "negative": False,
             "supported_types": ["INTEGER", "DECIMAL"],
         },
-        "LESS_THAN": {"arguments": 1, "lookup": "__lt", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
+        "LESS_THAN": {"arguments": 1, "lookup": "__lte", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
     }
 
     COMPARISON_CHOICES = Choices(

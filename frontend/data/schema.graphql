@@ -567,7 +567,7 @@ type DocumentNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   documentNumber: String!
-  photo: String!
+  photo: String
   individual: IndividualNode!
   type: DocumentTypeNode!
   status: DocumentStatus!
@@ -960,7 +960,7 @@ type ImportedDocumentNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   documentNumber: String!
-  photo: String!
+  photo: String
   individual: ImportedIndividualNode!
   type: ImportedDocumentTypeNode!
   country: String

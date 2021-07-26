@@ -1,4 +1,5 @@
 import logging
+
 from django.db import transaction
 from django.forms import model_to_dict
 
@@ -7,26 +8,29 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.documents import IndividualDocument
-from hct_mis_api.apps.household.elasticsearch_utils import populate_index, remove_document_by_matching_ids
+from hct_mis_api.apps.household.elasticsearch_utils import (
+    populate_index,
+    remove_document_by_matching_ids,
+)
 from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    HEAD,
+    NEEDS_ADJUDICATION,
+    Agency,
     Document,
     DocumentType,
-    HEAD,
+    Household,
+    Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
-    Agency,
-    DUPLICATE,
-    NEEDS_ADJUDICATION,
 )
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
-    RegistrationDataImportDatahub,
     ImportedHousehold,
-    ImportedIndividualRoleInHousehold,
     ImportedIndividual,
+    ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -300,7 +304,7 @@ class RdiMergeTask:
                     )
 
                     # SANCTION LIST CHECK
-                    CheckAgainstSanctionListPreMergeTask.execute()
+                    CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
