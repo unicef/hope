@@ -116,6 +116,7 @@ django-adminactions = "^1.13"
 django-redis = "^5.0.0"
 django-sql-explorer = {extras = ["xls"], version = "^2.2"}
 django-webtest = "^1.9.7"
+django-environ = "*"
 
 [tool.poetry.dev-dependencies]
 factory-boy = "2.12.0"
