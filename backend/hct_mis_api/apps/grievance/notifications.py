@@ -5,12 +5,14 @@ from enum import auto
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from constance import config
 
 from hct_mis_api.apps.account.models import User, UserRole
 from hct_mis_api.apps.core.utils import choices_to_dict, encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 logger = logging.getLogger(__name__)
+
 
 class GrievanceNotification:
     ACTION_ASSIGNMENT_CHANGED = auto()
@@ -61,6 +63,8 @@ class GrievanceNotification:
         return email
 
     def send_email_notification(self):
+        if not config.SEND_GRIEVANCES_NOTIFICATION:
+            return
         try:
             for email in self.emails:
                 email.send()

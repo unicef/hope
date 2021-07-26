@@ -5,10 +5,11 @@ from collections import defaultdict, namedtuple
 from functools import cached_property
 from urllib.parse import unquote, urlencode
 
-from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.helpers import AdminForm
+from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -16,10 +17,12 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, router, transaction
 from django.db.models import Q
+from django.db.transaction import atomic
 from django.forms import Form, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.crypto import get_random_string
@@ -39,8 +42,9 @@ from constance import config
 from requests import HTTPError
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.account.forms import ImportCSV, KoboLoginForm
+from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm, KoboLoginForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
+from hct_mis_api.apps.account.models import Partner, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import BusinessArea
@@ -155,6 +159,10 @@ The HOPE team.
 """
 
 
+def get_valid_kobo_username(user: User):
+    return user.username.replace("@", "_at_").replace(".", "_").replace("+", "_").lower()
+
+
 class DjAdminManager:
     regex = re.compile('class="errorlist"><li>(.*)(?=<\/li>)')
 
@@ -208,11 +216,14 @@ class DjAdminManager:
         self._password = request.session["kobo_password"] = None
 
     def login(self, request=None, twin=None):
-        username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
+        try:
+            username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
+        except ValueError:
+            raise ValueError("Invalid KOBO_ADMIN_CREDENTIALS")
         try:
             try:
-                self.client.get(self.login_url_kc)
-                csrftoken = self.client.cookies["csrftoken"]
+                self._get(self.login_url)
+                csrftoken = self.get_csrfmiddlewaretoken()
                 self._post(
                     self.login_url,
                     {
@@ -224,7 +235,11 @@ class DjAdminManager:
                 )
                 self.assert_response(302, self.admin_url)
             except Exception as e:
-                raise self.ResponseException(f"Unable to login to Kobo at {self.login_url}: {e.__class__.__name__} {e}")
+                raise self.ResponseException(
+                    f"Unable to login to Kobo at "
+                    f"{self.login_url}: {e.__class__.__name__} {e}. "
+                    f"Check KOBO_ADMIN_CREDENTIALS value"
+                )
 
         except Exception as e:
             logger.exception(e)
@@ -244,7 +259,7 @@ class DjAdminManager:
             r'action-checkbox.*value="(?P<id>\d+)".*</td>.*field-username.*<a.*?>(?P<username>.*)</a></t.>.*field-email">(?P<mail>.*?)<',
             re.MULTILINE + re.IGNORECASE,
         )
-        page = 2
+        page = 1
         last_match = None
         while True:
             url = f"{self.admin_url}auth/user/?q={q}&p={page}"
@@ -261,8 +276,11 @@ class DjAdminManager:
 
     def get_csrfmiddlewaretoken(self):
         regex = re.compile("""csrfmiddlewaretoken["'] +value=["'](.*)["']""")
-        m = regex.search(self._last_response.content.decode("utf8"))
-        return m.groups()[0]
+        try:
+            m = regex.search(self._last_response.content.decode("utf8"))
+            return m.groups()[0]
+        except Exception as e:
+            raise ValueError("Unable to get CSRF token from Kobo")
 
     def delete_user(self, username, pk):
         self.login()
@@ -329,6 +347,7 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
             _("Personal info"),
             {
                 "fields": (
+                    "partner",
                     "username",
                     "password",
                     (
@@ -372,11 +391,20 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
-    actions = ["_create_kobo_user_qs"]
+    actions = ["create_kobo_user_qs", "add_business_area_role"]
+
+    def get_fields(self, request, obj=None):
+        return ["last_name", "first_name", "email", "partner", "job_title"]
+
+    def get_fieldsets(self, request, obj=None):
+        if request.user.is_superuser:
+            return super().get_fieldsets(request, obj)
+        return [(None, {"fields": self.get_fields(request, obj)})]
 
     @button()
     def inspect(self, request, pk):
-        context = self.get_common_context(request, pk, logged=False)
+        context = self.get_common_context(request, pk, title="Inspect")
+        context["reverse"] = [f for f in self.model._meta.get_fields() if f.auto_created and not f.concrete]
         return TemplateResponse(request, "admin/account/user/inspect.html", context)
 
     def kobo_user(self, obj):
@@ -445,14 +473,106 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         actions = super(UserAdmin, self).get_actions(request)
         if not request.user.has_perm("account.can_create_kobo_user"):
             del actions["_create_kobo_user_qs"]
-
+        if not request.user.has_perm("account.add_userrole"):
+            del actions["add_business_area_role"]
         return actions
+
+    def add_business_area_role(self, request, queryset):
+        if "apply" in request.POST:
+            form = AddRoleForm(request.POST)
+            if form.is_valid():
+                ba = form.cleaned_data["business_area"]
+                roles = form.cleaned_data["roles"]
+                crud = form.cleaned_data["operation"]
+
+                with atomic():
+                    users, added, removed = 0, 0, 0
+                    for u in queryset.all():
+                        users += 1
+                        for role in roles:
+                            if crud == "ADD":
+                                ur, is_new = u.user_roles.get_or_create(business_area=ba, role=role)
+                                if is_new:
+                                    added += 1
+                                    self.log_addition(request, ur, "Role added")
+                            elif crud == "REMOVE":
+                                to_delete = u.user_roles.filter(business_area=ba, role=role).first()
+                                if to_delete:
+                                    removed += 1
+                                    self.log_deletion(request, to_delete, str(to_delete))
+                                    to_delete.delete()
+                            else:
+                                raise ValueError("Bug found. {} not valid operation for add/rem role")
+                    if removed:
+                        msg = f"{removed} roles removed from {users} users"
+                    elif added:
+                        msg = f"{added} roles granted to {users} users"
+                    else:
+                        msg = f"{users} users processed no actions have been required"
+
+                    self.message_user(request, msg)
+            return HttpResponseRedirect(request.get_full_path())
+        else:
+            ctx = self.get_common_context(request, title="Add Role", selection=queryset)
+            ctx["form"] = AddRoleForm()
+            return render(request, "admin/account/user/business_area_role.html", context=ctx)
+
+    add_business_area_role.short_description = "Add/Remove Business Area roles"
+
+    def _grant_kobo_accesss_to_user(self, user, notify=True, sync=True):
+        password = get_random_string()
+        url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
+        username = get_valid_kobo_username(user)
+        res = requests.post(
+            url,
+            headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
+            json={
+                "username": username,
+                "email": user.email,
+                "password": password,
+                "last_name": user.last_name,
+                "first_name": user.first_name,
+            },
+        )
+        if res.status_code != 201:
+            raise Exception(res.content)
+        if res.status_code == 400:
+            raise Exception(res.content)
+
+        if sync:
+            api = DjAdminManager()
+            api.login()
+            for entry in api.list_users(q=username):
+                if entry[1] == username and entry[2] == user.email:
+                    user.custom_fields["kobo_pk"] = entry[0]
+                    user.custom_fields["kobo_username"] = entry[1]
+                    user.save()
+        if res.status_code == 201 and notify:
+            send_mail(
+                "Kobo credentials",
+                KOBO_ACCESS_EMAIL.format(email=user.email, password=password, kobo_url=settings.KOBO_KF_URL),
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+            )
+        user.custom_fields["kobo_username"] = user.username
+        user.save()
+
+    def create_kobo_user_qs(self, request, queryset):
+        for user in queryset.all():
+            try:
+                self._grant_kobo_accesss_to_user(request, user)
+            except Exception as e:
+                logger.exception(e)
+                self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+        self.message_user(request, f"User successfully `{user.username}` created on Kobo", messages.SUCCESS)
 
     @button(permission="account.can_create_kobo_user", visible=lambda o, r: not o.custom_fields.get("kobo_username"))
     def create_kobo_user(self, request, pk):
         try:
-            self._create_kobo_user_qs(request, self.get_queryset(request).filter(pk=pk))
+            self._grant_kobo_accesss_to_user(self.get_queryset(request).get(pk=pk))
+            self.message_user(request, f"Granted access to {settings.KOBO_KF_URL}", messages.SUCCESS)
         except Exception as e:
+            logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     @button(permission="account.can_create_kobo_user", visible=lambda o, r: o.custom_fields.get("kobo_username"))
@@ -464,50 +584,10 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
             obj.custom_fields["kobo_username"] = None
             obj.custom_fields["kobo_pk"] = None
             obj.save()
-            self.message_user(request, f"Kobo Access removed {api.admin_url}", messages.SUCCESS)
+            self.message_user(request, f"Kobo Access removed from {settings.KOBO_KF_URL}", messages.WARNING)
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
-
-    def _create_kobo_user_qs(self, request, queryset):
-        for user in queryset.all():
-            password = get_random_string()
-            try:
-                url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
-                username = user.username.replace("@", "_at_").replace(".", "_").lower()
-                res = requests.post(
-                    url,
-                    headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
-                    json={
-                        "username": username,
-                        "email": user.email,
-                        "password": password,
-                        "last_name": user.last_name,
-                        "first_name": user.first_name,
-                    },
-                )
-                if res.status_code == 400:
-                    raise Exception(res.content)
-                api = DjAdminManager()
-                api.login()
-                for entry in api.list_users(q=username):
-                    if entry[1] == username and entry[2] == user.email:
-                        user.custom_fields["kobo_pk"] = entry[0]
-                        user.custom_fields["kobo_username"] = entry[1]
-                        user.save()
-
-                if res.status_code == 201:
-                    send_mail(
-                        "Kobo credentials",
-                        KOBO_ACCESS_EMAIL.format(email=user.email, password=password, kobo_url=settings.KOBO_KF_URL),
-                        settings.DEFAULT_FROM_EMAIL,
-                        [user.email],
-                    )
-                user.custom_fields["kobo_username"] = user.username
-                user.save()
-                self.message_user(request, f"User successfully `{username}` created on Kobo", messages.SUCCESS)
-            except Exception as e:
-                self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request):
@@ -515,13 +595,15 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
 
         context = self.get_common_context(request)
         if request.method == "GET":
-            form = ImportCSV(initial={})
+            form = ImportCSVForm(initial={"partner": Partner.objects.first()})
             context["form"] = form
         else:
-            form = ImportCSV(data=request.POST, files=request.FILES)
+            form = ImportCSVForm(data=request.POST, files=request.FILES)
             if form.is_valid():
                 try:
                     csv_file = form.cleaned_data["file"]
+                    enable_kobo = form.cleaned_data["enable_kobo"]
+
                     if csv_file.multiple_chunks():
                         raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
                     data_set = csv_file.read().decode("utf-8-sig").splitlines()
@@ -549,6 +631,8 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                         u, isnew = account_models.User.objects.get_or_create(
                             email=email, defaults={"username": username}
                         )
+                        if enable_kobo:
+                            self._grant_kobo_accesss_to_user(u, sync=False)
                         context["results"].append(user_info)
                 except Exception as e:
                     logger.exception(e)

@@ -52,9 +52,6 @@
             </table>
             <div><input type="submit" value="Import"></div>
         </form>
-
-    {% else %}
-        <h3><a class="btn" href="{% url opts|admin_urlname:'kobo_login' %}">Login To Kobo</a></h3>
     {% endif %}
 {% endblock content %}
 

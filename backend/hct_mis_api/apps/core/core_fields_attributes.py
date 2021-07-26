@@ -20,6 +20,10 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_other_document_number_query,
     get_other_issuer_query,
     get_role_query,
+    get_scope_id_issuer,
+    get_scope_id_number,
+    get_unhcr_id_issuer,
+    get_unhcr_id_number,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -596,6 +600,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "unhcr_id_no_i_c",
+        "get_query": get_unhcr_id_number,
     },
     {
         "id": "801bdd67-d27d-4afa-9d23-823e1c8d1313",
@@ -608,6 +613,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": Countries.get_choices(output_code="alpha3"),
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "unhcr_id_issuer_i_c",
+        "get_query": get_unhcr_id_issuer,
     },
     {
         "id": "2f9ca147-afde-4311-9d61-e906a8ef2334",
@@ -708,6 +714,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "scope_id_no_i_c",
+        "get_query": get_scope_id_number,
     },
     {
         "id": "638a6383-6e87-4c4f-842c-6c5433599267",
@@ -720,6 +727,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": Countries.get_choices(output_code="alpha3"),
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "scope_id_issuer_i_c",
+        "get_query": get_scope_id_issuer,
     },
     {
         "id": "4aa3d595-131a-48df-8752-ec171eabe3be",
