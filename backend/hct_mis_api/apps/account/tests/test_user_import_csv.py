@@ -16,7 +16,7 @@ from hct_mis_api.apps.account.admin import (
     UserRoleInlineFormSet,
     get_valid_kobo_username,
 )
-from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 
@@ -27,6 +27,7 @@ class UserImportCSVTest(WebTest):
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.user: User = UserFactory(is_superuser=True, is_staff=True)
         self.role = RoleFactory(name="NoAccess")
+        self.partner = PartnerFactory(name="Partner1")
         # self.user.set_password('123')
         # self.user.save()
         # self.client = Client()
@@ -39,12 +40,13 @@ class UserImportCSVTest(WebTest):
             res = self.app.get(url, user=self.user)
             res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
             res.form["business_area"] = self.business_area.id
+            res.form["partner"] = self.partner.id
             res.form["role"] = self.role.id
             res.form["enable_kobo"] = False
             res = res.form.submit()
             assert res.status_code == 200
 
-            u = User.objects.filter(email="test@example.com").first()
+            u = User.objects.filter(email="test@example.com", partner=self.partner).first()
             assert u, "User not found"
 
     @responses.activate
@@ -56,12 +58,13 @@ class UserImportCSVTest(WebTest):
             res = self.app.get(url, user=self.user)
             res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
             res.form["business_area"] = self.business_area.id
+            res.form["partner"] = self.partner.id
             res.form["role"] = self.role.id
             res.form["enable_kobo"] = True
             res = res.form.submit()
             assert res.status_code == 200
 
-            u = User.objects.filter(email="test@example.com").first()
+            u = User.objects.filter(email="test@example.com", partner=self.partner).first()
             assert u, "User not found"
             assert u.custom_fields["kobo_username"] == u.username
 
