@@ -36,7 +36,7 @@ class KoboImportUsersForm(forms.Form):
         return self.cleaned_data["emails"]
 
 
-class ImportCSV(forms.Form):
+class ImportCSVForm(forms.Form):
     file = forms.FileField()
     delimiter = forms.ChoiceField(label=_("Delimiter"), choices=list(zip(delimiters, delimiters)), initial=",")
     quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes)), initial="'")
