@@ -538,10 +538,7 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
             raise Exception(res.content)
         if res.status_code == 400:
             raise Exception(res.content)
-        # FIXME: remove this line (pdb)
-        import pdb
 
-        pdb.set_trace()
         if sync:
             api = DjAdminManager()
             api.login()
