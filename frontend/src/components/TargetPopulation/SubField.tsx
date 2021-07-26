@@ -6,6 +6,7 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { FormikAutocomplete } from '../../shared/Formik/FormikAutocomplete';
 
 const FlexWrapper = styled.div`
   display: flex;
@@ -91,7 +92,15 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
         </FlexWrapper>
       );
     case 'SELECT_ONE':
-      return (
+      return field.fieldName.includes('admin') ? (
+        <Field
+          name={`${baseName}.value`}
+          label={`${field.fieldAttribute.labelEn}`}
+          choices={field.fieldAttribute.choices}
+          index={index}
+          component={FormikAutocomplete}
+        />
+      ) : (
         <Field
           name={`${baseName}.value`}
           label={`${field.fieldAttribute.labelEn}`}
@@ -132,14 +141,14 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               labelEn: 'Yes',
               labels: [{ label: 'Yes', language: 'English(EN)' }],
               listName: null,
-              value: "True",
+              value: 'True',
             },
             {
               admin: null,
               labelEn: 'No',
               labels: [{ label: 'No', language: 'English(EN)' }],
               listName: null,
-              value: "False",
+              value: 'False',
             },
           ]}
           index={index}
