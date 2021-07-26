@@ -1,6 +1,6 @@
 import { TextField, Box } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import React, { useState } from 'react';
+import React from 'react';
 
 export const FormikAutocomplete = ({
   field,
