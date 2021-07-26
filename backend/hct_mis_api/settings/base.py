@@ -23,18 +23,19 @@ from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from .config import env
 
 # domains/hosts etc.
-DOMAIN_NAME = os.getenv("DOMAIN", "localhost")
+DOMAIN_NAME = env("DOMAIN")
 WWW_ROOT = "http://%s/" % DOMAIN_NAME
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") + [DOMAIN_NAME]
-FRONTEND_HOST = os.getenv("HCT_MIS_FRONTEND_HOST", DOMAIN_NAME)
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
+FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 
 ####
 # Other settings
 ####
 ADMINS = (
-    ("Alerts", os.getenv("ALERTS_EMAIL") or "admin@hct-mis.com"),
+    ("Alerts", env("ALERTS_EMAIL")),
     ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@tivix.com"),
 )
 
@@ -42,11 +43,11 @@ SITE_ID = 1
 TIME_ZONE = "UTC"
 LANGUAGE_CODE = "en-us"
 USE_I18N = True
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY")
 DEFAULT_CHARSET = "utf-8"
 ROOT_URLCONF = "hct_mis_api.urls"
 
-DATA_VOLUME = os.getenv("DATA_VOLUME", "/data")
+DATA_VOLUME = env("DATA_VOLUME")
 
 ALLOWED_EXTENSIONS = (
     "pdf",
@@ -63,7 +64,7 @@ ALLOWED_EXTENSIONS = (
 )
 UPLOADS_DIR_NAME = "uploads"
 MEDIA_URL = f"/api/{UPLOADS_DIR_NAME}/"
-MEDIA_ROOT = os.getenv("HCT_MIS_UPLOADS_PATH", os.path.join(DATA_VOLUME, UPLOADS_DIR_NAME))
+MEDIA_ROOT = env("HCT_MIS_UPLOADS_PATH") or os.path.join(DATA_VOLUME, UPLOADS_DIR_NAME)
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25mb
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
@@ -84,71 +85,74 @@ IS_DEV = False
 IS_STAGING = False
 IS_PROD = False
 
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "HCT-MIS Stage <noreply@hct-mis.org>")
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = os.getenv("EMAIL_PORT")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "").lower() == "true"
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
-KOBO_KF_URL = os.getenv("KOBO_KF_URL", "https://kf-hope.unitst.org")
-KOBO_KC_URL = os.getenv("KOBO_KC_URL", "https://kc-hope.unitst.org")
-KOBO_MASTER_API_TOKEN = os.getenv("KOBO_MASTER_API_TOKEN", "KOBO_TOKEN")
-KOBO_APP_API_TOKEN = os.getenv("KOBO_APP_API_TOKEN", "KOBO_APP_TOKEN")
+# EMAIL_CONFIG = env.email_url('EMAIL_URL', default='smtp://user@:password@localhost:25')
+# vars().update(EMAIL_CONFIG)
+
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env("EMAIL_PORT")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+
+KOBO_KF_URL = env("KOBO_KF_URL")
+KOBO_KC_URL = env("KOBO_KC_URL")
+KOBO_MASTER_API_TOKEN = env("KOBO_MASTER_API_TOKEN")
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
-ENV = os.getenv("ENV")
-if not ENV:
-    raise Exception("Environment variable ENV is required!")
+ENV = env("ENV")
 
 # prefix all non-production emails
 if ENV != "prod":
     EMAIL_SUBJECT_PREFIX = "{}".format(ENV)
 
+# BACKWARD_COMPATIBILITY SNIPPET
+if "DATABASE_URL" not in os.environ:
+    os.environ["DATABASE_URL"] = (
+        f'postgis://{os.getenv("POSTGRES_USER")}'
+        f':{os.getenv("POSTGRES_PASSWORD")}'
+        f'@{os.getenv("POSTGRES_HOST")}:5432/'
+        f'{os.getenv("POSTGRES_DB")}'
+    )
+    if os.getenv("POSTGRES_SSL_MODE", "off") == "on":
+        os.environ["DATABASE_URL"] = os.environ["DATABASE_URL"] + "?sslmode=require"
+
+if "DATABASE_URL_HUB_MIS" not in os.environ:
+    os.environ["DATABASE_URL_HUB_MIS"] = (
+        f'postgis://{os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER")}'
+        f':{os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD")}'
+        f'@{os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST")}:5432/'
+        f'{os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB")}?options=-c search_path=mis'
+    )
+if "DATABASE_URL_HUB_CA" not in os.environ:
+    os.environ["DATABASE_URL_HUB_CA"] = (
+        f'postgis://{os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER")}'
+        f':{os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD")}'
+        f'@{os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST")}:5432/'
+        f'{os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB")}?options=-c search_path=ca'
+    )
+if "DATABASE_URL_HUB_ERP" not in os.environ:
+    os.environ["DATABASE_URL_HUB_ERP"] = (
+        f'postgis://{os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER")}'
+        f':{os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD")}'
+        f'@{os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST")}:5432/'
+        f'{os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB")}?options=-c search_path=erp'
+    )
+if "DATABASE_URL_HUB_REGISTRATION" not in os.environ:
+    os.environ["DATABASE_URL_HUB_REGISTRATION"] = (
+        f'postgis://{os.getenv("POSTGRES_REGISTRATION_DATAHUB_USER")}'
+        f':{os.getenv("POSTGRES_REGISTRATION_DATAHUB_PASSWORD")}'
+        f'@{os.getenv("POSTGRES_REGISTRATION_DATAHUB_HOST")}:5432/'
+        f'{os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB")}'
+    )
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST"),
-        "PORT": 5432,
-    },
-    "cash_assist_datahub_mis": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "OPTIONS": {"options": "-c search_path=mis"},
-        "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
-        "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
-        "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
-        "PORT": 5432,
-    },
-    "cash_assist_datahub_ca": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "OPTIONS": {"options": "-c search_path=ca"},
-        "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
-        "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
-        "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
-        "PORT": 5432,
-    },
-    "cash_assist_datahub_erp": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "OPTIONS": {"options": "-c search_path=erp"},
-        "NAME": os.getenv("POSTGRES_CASHASSIST_DATAHUB_DB"),
-        "USER": os.getenv("POSTGRES_CASHASSIST_DATAHUB_USER"),
-        "PASSWORD": os.getenv("POSTGRES_CASHASSIST_DATAHUB_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_CASHASSIST_DATAHUB_HOST"),
-        "PORT": 5432,
-    },
-    "registration_datahub": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB"),
-        "USER": os.getenv("POSTGRES_REGISTRATION_DATAHUB_USER"),
-        "PASSWORD": os.getenv("POSTGRES_REGISTRATION_DATAHUB_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_REGISTRATION_DATAHUB_HOST"),
-        "PORT": 5432,
-    },
+    "default": env.db(),
+    "cash_assist_datahub_mis": env.db("DATABASE_URL_HUB_MIS"),
+    "cash_assist_datahub_ca": env.db("DATABASE_URL_HUB_CA"),
+    "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
+    "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
 }
 
 # If app is not specified here it will use default db
@@ -160,10 +164,6 @@ DATABASE_APPS_MAPPING = {
 }
 
 DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
-
-POSTGRES_SSL_MODE = os.getenv("POSTGRES_SSL_MODE", "off")
-if POSTGRES_SSL_MODE == "on":
-    DATABASES["default"].update({"OPTIONS": {"sslmode": "require"}})
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -314,20 +314,32 @@ LOGGING = {
 
 GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
 
-REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
+# REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
+#
+# if REDIS_INSTANCE:
+#     CACHES = {
+#         "default": {
+#             "BACKEND": "django_redis.cache.RedisCache",
+#             "LOCATION": f"redis://{REDIS_INSTANCE}/1",
+#             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+#             "TIMEOUT": 3600,
+#         }
+#     }
+#     DJANGO_REDIS_IGNORE_EXCEPTIONS = not DEBUG
+# else:
+#     CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis"}}
 
-if REDIS_INSTANCE:
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://{REDIS_INSTANCE}/1",
-            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-            "TIMEOUT": 3600,
-        }
-    }
-    DJANGO_REDIS_IGNORE_EXCEPTIONS = not DEBUG
-else:
-    CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis"}}
+if "CACHE_URL" not in os.environ:
+    REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
+    if REDIS_INSTANCE:
+        os.environ["CACHE_URL"] = f"redis://{REDIS_INSTANCE}:6379/1?client_class=django_redis.client.DefaultClient"
+    else:
+        os.environ["CACHE_URL"] = f"dummycache://{REDIS_INSTANCE}:6379/1?client_class=django_redis.client.DefaultClient"
+
+
+CACHES = {
+    "default": env.cache(),
+}
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
@@ -340,9 +352,9 @@ GRAPHENE = {
 }
 
 # Social Auth settings.
-AZURE_CLIENT_ID = os.environ.get("AZURE_CLIENT_ID")
-AZURE_CLIENT_SECRET = os.environ.get("AZURE_CLIENT_SECRET")
-AZURE_TENANT_KEY = os.environ.get("AZURE_TENANT_KEY")
+AZURE_CLIENT_ID = env("AZURE_CLIENT_ID")
+AZURE_CLIENT_SECRET = env("AZURE_CLIENT_SECRET")
+AZURE_TENANT_KEY = env("AZURE_TENANT_KEY")
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = AZURE_CLIENT_ID
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = AZURE_CLIENT_SECRET
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = AZURE_TENANT_KEY
@@ -391,13 +403,13 @@ GRAPH_MODELS = {
 
 PHONENUMBER_DEFAULT_REGION = "US"
 
-SANCTION_LIST_CC_MAIL = os.getenv("SANCTION_LIST_CC_MAIL", "dfam-cashassistance@unicef.org")
+SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
-ELASTICSEARCH_HOST = os.getenv("ELASTICSEARCH_HOST", "elasticsearch:9200")
+ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
 
-RAPID_PRO_URL = os.getenv("RAPID_PRO_URL", "https://rapidpro.io")
+RAPID_PRO_URL = env("RAPID_PRO_URL")
 
 # DJANGO CONSTANCE settings
 CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
@@ -494,9 +506,9 @@ AZURE_TOKEN_URL = "https://login.microsoftonline.com/unicef.org/oauth2/token"
 TEST_OUTPUT_DIR = "./test-results"
 TEST_OUTPUT_FILE_NAME = "result.xml"
 
-DATAMART_USER = os.getenv("DATAMART_USER")
-DATAMART_PASSWORD = os.getenv("DATAMART_PASSWORD")
-DATAMART_URL = os.getenv("DATAMART_URL", "https://datamart-dev.unicef.io")
+DATAMART_USER = env("DATAMART_USER")
+DATAMART_PASSWORD = env("DATAMART_PASSWORD")
+DATAMART_URL = env("DATAMART_URL")
 
 COUNTRIES_OVERRIDE = {
     "U": {
@@ -506,10 +518,10 @@ COUNTRIES_OVERRIDE = {
     },
 }
 
-ROOT_TOKEN = os.getenv("ROOT_ACCESS_TOKEN", uuid4())
+ROOT_TOKEN = env("ROOT_ACCESS_TOKEN", uuid4())
 
-SENTRY_DSN = os.getenv("SENTRY_DSN")
-SENTRY_URL = os.getenv("SENTRY_URL")
+SENTRY_DSN = env("SENTRY_DSN")
+SENTRY_URL = env("SENTRY_URL")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
@@ -544,7 +556,7 @@ CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
-CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", False)
+CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
 
 from smart_admin.utils import match, regex
 
