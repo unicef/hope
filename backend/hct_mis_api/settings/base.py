@@ -199,7 +199,7 @@ TEMPLATES = [
 ]
 PROJECT_APPS = [
     "hct_mis_api.apps.account",
-    "hct_mis_api.apps.core",
+    "hct_mis_api.apps.core.apps.CoreConfig",
     "hct_mis_api.apps.grievance",
     "hct_mis_api.apps.household",
     "hct_mis_api.apps.id_management",
