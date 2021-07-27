@@ -11,6 +11,7 @@ import { LogEntryNode } from '../../__generated__/graphql';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
 import { headCells } from './headCels';
+import { useTranslation } from 'react-i18next';
 
 const Table = styled.div`
   display: flex;
@@ -58,10 +59,12 @@ export function ActivityLogTable({
   onChangeRowsPerPage,
 }: ActivityLogTableProps): ReactElement {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation();
+
   return (
     <PaperContainer>
       <Toolbar>
-        <Typography variant='h6'>Activity Log</Typography>
+        <Typography variant='h6'>{t('Activity Log')}</Typography>
         <Button
           variant='outlined'
           color='primary'

@@ -1,6 +1,3 @@
-import React from 'react';
-import styled from 'styled-components';
-import moment from 'moment';
 import {
   Box,
   Button,
@@ -9,20 +6,24 @@ import {
   MenuItem,
   TextField,
 } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
-import GroupIcon from '@material-ui/icons/Group';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
+import GroupIcon from '@material-ui/icons/Group';
+import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardDatePicker } from '@material-ui/pickers';
+import moment from 'moment';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import InputLabel from '../../../shared/InputLabel';
+import Select from '../../../shared/Select';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
-import InputLabel from '../../../shared/InputLabel';
-import Select from '../../../shared/Select';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
+import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -66,6 +67,7 @@ export function LookUpHouseholdFilters({
   setFilterHouseholdApplied,
   householdFilterInitial,
 }: LookUpHouseholdFiltersProps): React.ReactElement {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
@@ -73,7 +75,7 @@ export function LookUpHouseholdFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
+            label={t('Search')}
             variant='outlined'
             margin='dense'
             value={filter.search}
@@ -90,13 +92,13 @@ export function LookUpHouseholdFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Programme</InputLabel>
+            <InputLabel>{t('Programme')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'programs')}
               variant='outlined'
-              label='Programme'
+              label={t('Programme')}
               value={filter.programs || []}
               InputProps={{
                 startAdornment: (
@@ -107,7 +109,7 @@ export function LookUpHouseholdFilters({
               }}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {programs.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
@@ -119,12 +121,12 @@ export function LookUpHouseholdFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Registration Date</FieldLabel>
+            <FieldLabel>{t('Registration Date')}</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
               inputVariant='outlined'
               margin='dense'
-              placeholder='From'
+              placeholder={t('From')}
               autoOk
               onChange={(date) =>
                 onFilterChange({
@@ -146,7 +148,7 @@ export function LookUpHouseholdFilters({
             variant='inline'
             inputVariant='outlined'
             margin='dense'
-            placeholder='To'
+            placeholder={t('To')}
             autoOk
             onChange={(date) =>
               onFilterChange({
@@ -164,13 +166,13 @@ export function LookUpHouseholdFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
+            <InputLabel>{t('Status')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'residenceStatus')}
               variant='outlined'
-              label='Status'
+              label={t('Status')}
               value={filter.residenceStatus || ''}
             >
               {choicesData.residenceStatusChoices.map((item) => {
@@ -192,7 +194,7 @@ export function LookUpHouseholdFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Household Size</FieldLabel>
+            <FieldLabel>{t('Household Size')}</FieldLabel>
             <TextContainer
               id='minFilter'
               value={filter.size.min || ''}
@@ -221,7 +223,7 @@ export function LookUpHouseholdFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Household Size</FieldLabel>
+            <FieldLabel>{t('Household Size')}</FieldLabel>
             <TextContainer
               id='maxFilter'
               value={filter.size.max || ''}
@@ -256,14 +258,14 @@ export function LookUpHouseholdFilters({
               onFilterChange(householdFilterInitial);
             }}
           >
-            Clear
+            {t('Clear')}
           </Button>
           <Button
             color='primary'
             variant='outlined'
             onClick={() => setFilterHouseholdApplied(filter)}
           >
-            Apply
+            {t('Apply')}
           </Button>
         </Grid>
       </Grid>
