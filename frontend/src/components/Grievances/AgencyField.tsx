@@ -2,6 +2,7 @@ import { Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import { Field } from 'formik';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
@@ -21,6 +22,7 @@ export function AgencyField({
   countryChoices,
   identityTypeChoices,
 }: AgencyFieldProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <>
       <Grid item xs={4}>
@@ -28,7 +30,7 @@ export function AgencyField({
           name={`${baseName}[${index}].country`}
           fullWidth
           variant='outlined'
-          label='Country'
+          label={t('Country')}
           component={FormikSelectField}
           choices={countryChoices}
           required
@@ -39,7 +41,7 @@ export function AgencyField({
           name={`${baseName}[${index}].agency`}
           fullWidth
           variant='outlined'
-          label='Agency'
+          label={t('Agency')}
           component={FormikSelectField}
           choices={identityTypeChoices}
           required
@@ -50,7 +52,7 @@ export function AgencyField({
           name={`${baseName}[${index}].number`}
           fullWidth
           variant='outlined'
-          label='Identity Number'
+          label={t('Identity Number')}
           component={FormikTextField}
           required
         />

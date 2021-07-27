@@ -1,9 +1,3 @@
-import React from 'react';
-import styled from 'styled-components';
-import moment from 'moment';
-import SearchIcon from '@material-ui/icons/Search';
-import WcIcon from '@material-ui/icons/Wc';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import {
   Box,
   Button,
@@ -12,11 +6,18 @@ import {
   MenuItem,
   TextField,
 } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import FormControl from '@material-ui/core/FormControl';
-import { ContainerWithBorder } from '../../ContainerWithBorder';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
+import SearchIcon from '@material-ui/icons/Search';
+import WcIcon from '@material-ui/icons/Wc';
+import { KeyboardDatePicker } from '@material-ui/pickers';
+import moment from 'moment';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
+import { ContainerWithBorder } from '../../ContainerWithBorder';
 import { FieldLabel } from '../../FieldLabel';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 
@@ -50,6 +51,7 @@ export function LookUpIndividualFilters({
   setFilterIndividualApplied,
   individualFilterInitial,
 }: LookUpIndividualFiltersProps): React.ReactElement {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
@@ -57,7 +59,7 @@ export function LookUpIndividualFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
+            label={t('Search')}
             variant='outlined'
             margin='dense'
             value={filter.search}
@@ -74,13 +76,13 @@ export function LookUpIndividualFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Programme</InputLabel>
+            <InputLabel>{t('Programme')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'programs')}
               variant='outlined'
-              label='Programme'
+              label={t('Programme')}
               value={filter.programs || []}
               InputProps={{
                 startAdornment: (
@@ -91,7 +93,7 @@ export function LookUpIndividualFilters({
               }}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {programs.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
@@ -103,12 +105,12 @@ export function LookUpIndividualFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Registration Date</FieldLabel>
+            <FieldLabel>{t('Registration Date')}</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
               inputVariant='outlined'
               margin='dense'
-              placeholder='From'
+              placeholder={t('From')}
               autoOk
               onChange={(date) =>
                 onFilterChange({
@@ -130,7 +132,7 @@ export function LookUpIndividualFilters({
             variant='inline'
             inputVariant='outlined'
             margin='dense'
-            placeholder='To'
+            placeholder={t('To')}
             autoOk
             onChange={(date) =>
               onFilterChange({
@@ -148,14 +150,14 @@ export function LookUpIndividualFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
+            <InputLabel>{t('Status')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'status')}
               multiple
               variant='outlined'
-              label='Status'
+              label={t('Status')}
               value={filter.status || []}
             >
               {[
@@ -181,14 +183,14 @@ export function LookUpIndividualFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Gender</InputLabel>
+            <InputLabel>{t('Gender')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'sex')}
               variant='outlined'
               value={filter.sex || ''}
-              label='Gender'
+              label={t('Gender')}
               InputProps={{
                 startAdornment: (
                   <StartInputAdornment position='start'>
@@ -204,10 +206,10 @@ export function LookUpIndividualFilters({
               }}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
-              <MenuItem value='MALE'>Male</MenuItem>
-              <MenuItem value='FEMALE'>Female</MenuItem>
+              <MenuItem value='MALE'>{t('Male')}</MenuItem>
+              <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
             </Select>
           </StyledFormControl>
         </Grid>
@@ -219,14 +221,14 @@ export function LookUpIndividualFilters({
               onFilterChange(individualFilterInitial);
             }}
           >
-            Clear
+            {t('Clear')}
           </Button>
           <Button
             color='primary'
             variant='outlined'
             onClick={() => setFilterIndividualApplied(filter)}
           >
-            Apply
+            {t('Apply')}
           </Button>
         </Grid>
       </Grid>
