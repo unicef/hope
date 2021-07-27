@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
 import {
+  Box,
   Button,
+  DialogActions,
   DialogContent,
   DialogTitle,
-  DialogActions,
   Grid,
   InputAdornment,
   TextField,
-  Box,
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -37,6 +38,7 @@ export const ViewSanctionList = ({
 }: {
   referenceNumber: string;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const initialFilter = {
     fullName: '',
@@ -54,7 +56,7 @@ export const ViewSanctionList = ({
   return (
     <>
       <Button color='primary' onClick={() => setDialogOpen(true)}>
-        VIEW SANCTION LIST
+        {t('VIEW SANCTION LIST')}
       </Button>
       <Dialog
         fullWidth
@@ -65,14 +67,16 @@ export const ViewSanctionList = ({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>Sanction List View</DialogTitle>
+          <DialogTitle id='scroll-dialog-title'>
+            {t('Sanction List View')}
+          </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box mb={3}>
             <Grid container spacing={3}>
               <Grid item>
                 <SearchTextField
-                  label='Reference Number'
+                  label={t('Reference Number')}
                   value={filter.referenceNumber}
                   variant='outlined'
                   margin='dense'
@@ -89,7 +93,7 @@ export const ViewSanctionList = ({
               </Grid>
               <Grid item>
                 <SearchTextField
-                  label='Full Name'
+                  label={t('Full Name')}
                   value={filter.fullName}
                   variant='outlined'
                   margin='dense'
@@ -116,7 +120,7 @@ export const ViewSanctionList = ({
                 setDialogOpen(false);
               }}
             >
-              CLOSE
+              {t('CLOSE')}
             </Button>
           </DialogActions>
         </DialogFooter>

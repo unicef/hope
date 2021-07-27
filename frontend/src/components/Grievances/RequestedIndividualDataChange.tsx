@@ -1,16 +1,17 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
-import styled from 'styled-components';
-import React, { ReactElement, useState } from 'react';
 import { Formik } from 'formik';
-import mapKeys from 'lodash/mapKeys';
 import camelCase from 'lodash/camelCase';
-import { ConfirmationDialog } from '../ConfirmationDialog';
+import mapKeys from 'lodash/mapKeys';
+import React, { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useSnackbar } from '../../hooks/useSnackBar';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketQuery,
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { ConfirmationDialog } from '../ConfirmationDialog';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
 
 const StyledBox = styled(Paper)`
@@ -31,6 +32,7 @@ export function RequestedIndividualDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
@@ -143,7 +145,7 @@ export function RequestedIndividualDataChange({
           color='primary'
           disabled={!approveEnabled}
         >
-          Approve
+          {t('Approve')}
         </Button>
       );
     }
@@ -159,7 +161,7 @@ export function RequestedIndividualDataChange({
             color='primary'
             disabled={!approveEnabled}
           >
-            Approve
+            {t('Approve')}
           </Button>
         )}
       </ConfirmationDialog>
@@ -245,7 +247,7 @@ export function RequestedIndividualDataChange({
                     color='primary'
                     disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                   >
-                    EDIT
+                    {t('EDIT')}
                   </Button>
                 ) : (
                   canApproveDataChange &&

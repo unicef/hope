@@ -1,22 +1,23 @@
-import React, { ReactElement } from 'react';
-import styled from 'styled-components';
+import { Box, Checkbox, makeStyles, Typography } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import camelCase from 'lodash/camelCase';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
-import { Box, Checkbox, makeStyles, Typography } from '@material-ui/core';
-import { LoadingComponent } from '../LoadingComponent';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useArrayToDict } from '../../hooks/useArrayToDict';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   AllAddIndividualFieldsQuery,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
+import { LoadingComponent } from '../LoadingComponent';
 import { NewValue } from './RequestedHouseholdDataChangeTable';
 
 const Title = styled.div`
@@ -122,7 +123,9 @@ function individualDataRow(
       </TableCell>
       <TableCell id={labelId} scope='row' align='left'>
         <Capitalize>
-          {row[0] === 'sex' ? "gender" : row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
+          {row[0] === 'sex'
+            ? 'gender'
+            : row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
         </Capitalize>
       </TableCell>
       <TableCell align='left'>
@@ -141,6 +144,7 @@ export function RequestedIndividualDataChangeTable({
   values,
   isEdit,
 }: RequestedIndividualDataChangeTableProps): ReactElement {
+  const { t } = useTranslation();
   const useStyles = makeStyles(() => ({
     table: {
       minWidth: 100,
@@ -271,9 +275,9 @@ export function RequestedIndividualDataChangeTable({
     <TableHead>
       <TableRow>
         <TableCell align='left' />
-        <TableCell align='left'>ID Type</TableCell>
-        <TableCell align='left'>Country</TableCell>
-        <TableCell align='left'>Number</TableCell>
+        <TableCell align='left'>{t('ID Type')}</TableCell>
+        <TableCell align='left'>{t('Country')}</TableCell>
+        <TableCell align='left'>{t('Number')}</TableCell>
       </TableRow>
     </TableHead>
   );
@@ -281,9 +285,9 @@ export function RequestedIndividualDataChangeTable({
     <TableHead>
       <TableRow>
         <TableCell align='left' />
-        <TableCell align='left'>Agency</TableCell>
-        <TableCell align='left'>Country</TableCell>
-        <TableCell align='left'>Number</TableCell>
+        <TableCell align='left'>{t('Agency')}</TableCell>
+        <TableCell align='left'>{t('Country')}</TableCell>
+        <TableCell align='left'>{t('Number')}</TableCell>
       </TableRow>
     </TableHead>
   );
@@ -293,14 +297,14 @@ export function RequestedIndividualDataChangeTable({
         <TableHead>
           <TableRow>
             <TableCell align='left' />
-            <TableCell align='left'>Type of Data</TableCell>
+            <TableCell align='left'>{t('Type of Data')}</TableCell>
             <TableCell align='left'>
               {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
-                ? 'Previous'
-                : 'Current'}{' '}
-              Value
+                ? t('Previous')
+                : t('Current')}{' '}
+              {t('Value')}
             </TableCell>
-            <TableCell align='left'>New Value</TableCell>
+            <TableCell align='left'>{t('New Value')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -332,7 +336,7 @@ export function RequestedIndividualDataChangeTable({
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>Documents to be added</Typography>
+              <Typography variant='h6'>{t('Documents to be added')}</Typography>
             </Box>
           </Title>
           <Table className={classes.table}>
@@ -381,7 +385,9 @@ export function RequestedIndividualDataChangeTable({
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>Identities to be added</Typography>
+              <Typography variant='h6'>
+                {t('Identities to be added')}
+              </Typography>
             </Box>
           </Title>
           <Table className={classes.table}>
@@ -430,7 +436,9 @@ export function RequestedIndividualDataChangeTable({
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>Documents to be removed</Typography>
+              <Typography variant='h6'>
+                {t('Documents to be removed')}
+              </Typography>
             </Box>
           </Title>
           <Table className={classes.table}>
@@ -480,7 +488,9 @@ export function RequestedIndividualDataChangeTable({
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>Identities to be removed</Typography>
+              <Typography variant='h6'>
+                {t('Identities to be removed')}
+              </Typography>
             </Box>
           </Title>
           <Table className={classes.table}>
