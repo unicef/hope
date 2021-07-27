@@ -16,7 +16,12 @@ from hct_mis_api.apps.account.admin import (
     UserRoleInlineFormSet,
     get_valid_kobo_username,
 )
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    PartnerFactory,
+    RoleFactory,
+    UserFactory,
+    UserRoleFactory,
+)
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 
@@ -25,19 +30,17 @@ class UserImportCSVTest(WebTest):
     def setUp(self):
         call_command("loadbusinessareas")
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.user: User = UserFactory(is_superuser=True, is_staff=True)
+        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
         self.role = RoleFactory(name="NoAccess")
+        self.role_2 = Role.objects.create(name="Role_2")
         self.partner = PartnerFactory(name="Partner1")
-        # self.user.set_password('123')
-        # self.user.save()
-        # self.client = Client()
-        # self.client.login(username=self.user.username, password='123')
+        IncompatibleRoles.objects.create(role_one=self.role, role_two=self.role_2)
 
     @responses.activate
     def test_import_csv(self):
         url = reverse("admin:account_user_import_csv")
         with (Path(__file__).parent / "users.csv").open("r") as fp:
-            res = self.app.get(url, user=self.user)
+            res = self.app.get(url, user=self.superuser)
             res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
             res.form["business_area"] = self.business_area.id
             res.form["partner"] = self.partner.id
@@ -55,7 +58,7 @@ class UserImportCSVTest(WebTest):
 
         url = reverse("admin:account_user_import_csv")
         with (Path(__file__).parent / "users.csv").open("r") as fp:
-            res = self.app.get(url, user=self.user)
+            res = self.app.get(url, user=self.superuser)
             res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
             res.form["business_area"] = self.business_area.id
             res.form["partner"] = self.partner.id
@@ -68,12 +71,29 @@ class UserImportCSVTest(WebTest):
             assert u, "User not found"
             assert u.custom_fields["kobo_username"] == u.username
 
+    @responses.activate
+    def test_import_csv_detect_incompatible_roles(self):
+        u: User = UserFactory(email="test@example.com", partner=self.partner)
+        UserRoleFactory(user=u, role=self.role_2, business_area=self.business_area)
+        url = reverse("admin:account_user_import_csv")
+        with (Path(__file__).parent / "users.csv").open("r") as fp:
+            res = self.app.get(url, user=self.superuser)
+            res.form["file"] = ("users.csv", (Path(__file__).parent / "users.csv").read_bytes())
+            res.form["business_area"] = self.business_area.id
+            res.form["partner"] = self.partner.id
+            res.form["role"] = self.role.id
+            res.form["enable_kobo"] = False
+            res = res.form.submit()
+            assert res.status_code == 200
+
+            assert not u.user_roles.filter(role=self.role, business_area=self.business_area).exists()
+
 
 class UserKoboActionsTest(WebTest):
     def setUp(self):
         call_command("loadbusinessareas")
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.user: User = UserFactory(is_superuser=True, is_staff=True)
+        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
         self.role = RoleFactory(name="NoAccess")
 
     @responses.activate
@@ -81,7 +101,7 @@ class UserKoboActionsTest(WebTest):
         # responses.add(responses.POST, f"{settings.KOBO_KF_URL}/authorized_application/users/", json={}, status=201)
 
         url = reverse("admin:account_user_kobo_users_sync")
-        res = self.app.get(url, user=self.user)
+        res = self.app.get(url, user=self.superuser)
         assert res.status_code == 200
 
     @responses.activate
@@ -115,7 +135,7 @@ class UserKoboActionsTest(WebTest):
         )
 
         url = reverse("admin:account_user_create_kobo_user", args=[self.user.pk])
-        res = self.app.get(url, user=self.user)
+        res = self.app.get(url, user=self.superuser)
         assert res.status_code == 302, res.context["messages"]
         self.user.refresh_from_db()
         assert self.user.custom_fields["kobo_username"] == self.user.username
