@@ -14,6 +14,7 @@ import { LabelizedField } from '../LabelizedField';
 import { ContentLink } from '../ContentLink';
 import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUpReassignRole/ReassignRoleUnique';
+import { useTranslation } from 'react-i18next';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.oragne};
@@ -43,6 +44,7 @@ export const ReassignRoleBox = ({
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   let { individual } = ticket;
   let { household } = ticket;
@@ -57,10 +59,13 @@ export const ReassignRoleBox = ({
       ticket.needsAdjudicationTicketDetails.roleReassignData,
     );
     uniqueIndividual =
-      ticket.needsAdjudicationTicketDetails.possibleDuplicate.id === individual.id
+      ticket.needsAdjudicationTicketDetails.possibleDuplicate.id ===
+      individual.id
         ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
         : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
-  } else if (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
+  } else if (
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
+  ) {
     reassignData = JSON.parse(
       ticket.systemFlaggingTicketDetails.roleReassignData,
     );
@@ -68,12 +73,20 @@ export const ReassignRoleBox = ({
   let householdsAndRoles = individual?.householdsAndRoles;
   let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
 
-  if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-    if (_.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)) {
+  if (
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+    ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+  ) {
+    if (
+      _.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)
+    ) {
       householdsAndRoles = [];
     }
-    if (_.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.relationship)) {
+    if (
+      _.isEmpty(
+        ticket.individualDataUpdateTicketDetails.individualData.relationship,
+      )
+    ) {
       shouldShowReassignHoH = false;
     }
   }
@@ -83,10 +96,10 @@ export const ReassignRoleBox = ({
     .map((el) => (
       <Box mb={2} mt={2} key={el.id}>
         <Box mb={2}>
-          <LabelizedField label='ROLE'>
+          <LabelizedField label={t('ROLE')}>
             <>{capitalize(el.role)} Collector</>
           </LabelizedField>
-          <LabelizedField label='HOUSEHOLD ID'>
+          <LabelizedField label={t('HOUSEHOLD ID')}>
             <ContentLink
               href={`/${businessArea}/population/household/${el.household.id}`}
             >
@@ -121,20 +134,22 @@ export const ReassignRoleBox = ({
       <Title>
         <Typography variant='h6'>
           <WarnIcon />
-          Individual is the HOH or the external collector for a household
+          {t('Individual is the HOH or the external collector for a household')}
         </Typography>
       </Title>
       <Typography variant='body2'>
-        Upon removing you will need to select new individual(s) for this role.
+        {t(
+          'Upon removing you will need to select new individual(s) for this role.',
+        )}
       </Typography>
       <Box mt={3} display='flex' flexDirection='column'>
         {shouldShowReassignHoH && (
           <Box mb={2} mt={2}>
             <Box mb={2}>
-              <LabelizedField label='ROLE'>
-                <>Head of Household</>
+              <LabelizedField label={t('ROLE')}>
+                <>{t('Head of Household')}</>
               </LabelizedField>
-              <LabelizedField label='HOUSEHOLD ID'>
+              <LabelizedField label={t('HOUSEHOLD ID')}>
                 <ContentLink
                   href={`/${businessArea}/population/household/${ticket?.household.id}`}
                 >
