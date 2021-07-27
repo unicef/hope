@@ -1,10 +1,11 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import { DashboardPaper } from '../DashboardPaper';
-import { GrievancesChart } from '../charts/GrievancesChart';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { formatNumber } from '../../../utils/utils';
+import { AllChartsQuery } from '../../../__generated__/graphql';
+import { GrievancesChart } from '../charts/GrievancesChart';
+import { DashboardPaper } from '../DashboardPaper';
 
 const CardTitleSmaller = styled.div`
   text-transform: capitalize;
@@ -20,25 +21,29 @@ interface GrievancesSectionProps {
 export const GrievancesSection = ({
   data,
 }: GrievancesSectionProps): React.ReactElement => {
+  const { t } = useTranslation();
+
   if (!data) return null;
   return (
     <DashboardPaper title='Grievances and Feedback'>
       <Grid container spacing={3}>
         <Grid item xs={6}>
-          <CardTitleSmaller>TOTAL NUMBER OF GRIEVANCES</CardTitleSmaller>
+          <CardTitleSmaller>{t('TOTAL NUMBER OF GRIEVANCES')}</CardTitleSmaller>
           <Typography variant='caption'>
             {formatNumber(data?.totalNumberOfGrievances)}
           </Typography>
         </Grid>
         <Grid item xs={6}>
-          <CardTitleSmaller>TOTAL NUMBER OF FEEDBACK</CardTitleSmaller>
+          <CardTitleSmaller>{t('TOTAL NUMBER OF FEEDBACK')}</CardTitleSmaller>
           <Typography variant='caption'>
             {formatNumber(data?.totalNumberOfFeedback)}
           </Typography>
         </Grid>
       </Grid>
       <GrievancesChart data={data} />
-      <CardTitleSmaller>NUMBER OF OPEN SENSITIVE GRIEVANCES</CardTitleSmaller>
+      <CardTitleSmaller>
+        {t('NUMBER OF OPEN SENSITIVE GRIEVANCES')}
+      </CardTitleSmaller>
       <Typography variant='caption'>
         {formatNumber(data?.totalNumberOfOpenSensitive)}
       </Typography>

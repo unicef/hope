@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   hasCreatorOrOwnerPermissions,
@@ -32,6 +33,7 @@ export const GrievancesTable = ({
   businessArea,
   filter,
 }: GrievancesTableProps): React.ReactElement => {
+  const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search,
@@ -100,7 +102,7 @@ export const GrievancesTable = ({
         AllGrievanceTicketQueryVariables
       >
         headCells={headCells}
-        title='Grievance and Feedback List'
+        title={t('Grievance and Feedback List')}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllGrievanceTicketQuery}
         queriedObjectName='allGrievanceTicket'

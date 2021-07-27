@@ -1,8 +1,9 @@
 import { Box, Grid } from '@material-ui/core';
-import React from 'react';
-import styled from 'styled-components';
-import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 const StyledBox = styled.div`
   border: ${({ disabled }) => (disabled ? 0 : 1.5)}px solid #043e91;
@@ -45,6 +46,7 @@ export const LookUpHouseholdIndividualDisplay = ({
   setSelectedIndividual?;
   setSelectedHousehold?;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const handleRemove = (): void => {
     onValueChange('selectedHousehold', null);
     setSelectedHousehold(null);
@@ -58,11 +60,11 @@ export const LookUpHouseholdIndividualDisplay = ({
         <Grid item>
           <Box display='flex' flexDirection='column'>
             <span>
-              Household ID:
+              {t('Household ID')}:
               <BlueText> {values?.selectedHousehold?.unicefId || '-'}</BlueText>
             </span>
             <span>
-              Individual ID:
+              {t('Individual ID')}:
               <BlueText>{values?.selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
