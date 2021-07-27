@@ -518,7 +518,7 @@ COUNTRIES_OVERRIDE = {
     },
 }
 
-ROOT_TOKEN = env("ROOT_ACCESS_TOKEN", uuid4())
+ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
 
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_URL = env("SENTRY_URL")
