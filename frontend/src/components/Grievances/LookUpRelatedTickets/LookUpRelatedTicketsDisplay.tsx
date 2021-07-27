@@ -1,8 +1,9 @@
 import { Box, Grid } from '@material-ui/core';
-import React from 'react';
-import styled from 'styled-components';
-import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { RelatedTicketIdDisplay } from './RelatedTicketIdDisplay';
 
 const StyledBox = styled.div`
@@ -34,6 +35,7 @@ export const LookUpRelatedTicketsDisplay = ({
   setLookUpDialogOpen,
   onValueChange,
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const handleRemove = (): void => {
     onValueChange('selectedRelatedTickets', []);
   };
@@ -50,8 +52,7 @@ export const LookUpRelatedTicketsDisplay = ({
       <Grid container justify='space-between'>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            Ticket ID:
-            {renderRelatedTickets()}
+            {t('Ticket ID')}:{renderRelatedTickets()}
           </Box>
         </Grid>
         <Grid item>

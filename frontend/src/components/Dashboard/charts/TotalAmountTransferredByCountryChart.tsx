@@ -1,14 +1,14 @@
 import { Box, Button } from '@material-ui/core';
-import React, { useState } from 'react';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import React, { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import {
   formatCurrencyWithSymbol,
   formatThousands,
   getPercentage,
 } from '../../../utils/utils';
 import { GlobalAreaChartsQuery } from '../../../__generated__/graphql';
-import { useTranslation } from 'react-i18next';
 
 interface TotalAmountTransferredByCountryChartProps {
   data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];

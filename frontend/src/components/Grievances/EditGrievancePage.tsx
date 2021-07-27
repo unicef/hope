@@ -1,7 +1,3 @@
-import React from 'react';
-import { Link, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import { Field, Formik } from 'formik';
 import {
   Box,
   Button,
@@ -9,13 +5,33 @@ import {
   FormHelperText,
   Grid,
 } from '@material-ui/core';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { PageHeader } from '../PageHeader';
-import { BreadCrumbsItem } from '../BreadCrumbs';
+import { Field, Formik } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import {
+  hasCreatorOrOwnerPermissions,
+  PERMISSIONS,
+} from '../../config/permissions';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { usePermissions } from '../../hooks/usePermissions';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_TICKET_STATES,
+} from '../../utils/constants';
+import {
+  isInvalid,
+  isPermissionDeniedError,
+  renderUserName,
+  thingForSpecificGrievanceType,
+} from '../../utils/utils';
 import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
@@ -27,26 +43,14 @@ import {
   useMeQuery,
   useUpdateGrievanceMutation,
 } from '../../__generated__/graphql';
+import { BreadCrumbsItem } from '../BreadCrumbs';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LoadingComponent } from '../LoadingComponent';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
-import {
-  isInvalid,
-  isPermissionDeniedError,
-  renderUserName,
-  thingForSpecificGrievanceType,
-} from '../../utils/utils';
-import { usePermissions } from '../../hooks/usePermissions';
+import { PageHeader } from '../PageHeader';
 import { PermissionDenied } from '../PermissionDenied';
-import {
-  hasCreatorOrOwnerPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
+import { Consent } from './Consent';
+import { LookUpSection } from './LookUpSection';
+import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import {
   dataChangeComponentDict,
   EmptyComponent,
@@ -54,9 +58,6 @@ import {
   prepareVariables,
 } from './utils/editGrievanceUtils';
 import { validate } from './utils/validateGrievance';
-import { Consent } from './Consent';
-import { LookUpSection } from './LookUpSection';
-import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import { validationSchema } from './utils/validationSchema';
 
 const BoxPadding = styled.div`
@@ -82,6 +83,7 @@ const BoxWithBorders = styled.div`
 `;
 
 export function EditGrievancePage(): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -182,7 +184,7 @@ export function EditGrievancePage(): React.ReactElement {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Grievance and Feedback',
+      title: t('Grievance and Feedback'),
       to: `/${businessArea}/grievance-and-feedback/${ticket.id}`,
     },
   ];
@@ -228,7 +230,7 @@ export function EditGrievancePage(): React.ReactElement {
               },
             ],
           });
-          showMessage('Grievance Ticket edited.', {
+          showMessage(t('Grievance Ticket edited.'), {
             pathname: `/${businessArea}/grievance-and-feedback/${ticket.id}`,
             historyMethod: 'push',
           });
@@ -261,7 +263,7 @@ export function EditGrievancePage(): React.ReactElement {
         return (
           <>
             <PageHeader
-              title={`Edit Ticket #${ticket.unicefId}`}
+              title={`${t('Edit Ticket')} #${ticket.unicefId}`}
               breadCrumbs={breadCrumbsItems}
             />
             <Grid container spacing={3}>
@@ -272,7 +274,7 @@ export function EditGrievancePage(): React.ReactElement {
                       <Grid item xs={6}>
                         <Field
                           name='category'
-                          label='Category*'
+                          label={t('Category*')}
                           disabled
                           onChange={(e) => {
                             setFieldValue('category', e.target.value);
@@ -291,7 +293,7 @@ export function EditGrievancePage(): React.ReactElement {
                           <Field
                             name='issueType'
                             disabled
-                            label='Issue Type*'
+                            label={t('Issue Type*')}
                             variant='outlined'
                             choices={
                               issueTypeDict[values.category.toString()]
@@ -307,7 +309,7 @@ export function EditGrievancePage(): React.ReactElement {
                         <Consent />
                         <Field
                           name='consent'
-                          label='Received Consent*'
+                          label={t('Received Consent*')}
                           color='primary'
                           disabled
                           component={FormikCheckboxField}
@@ -330,7 +332,7 @@ export function EditGrievancePage(): React.ReactElement {
                         <Grid item xs={6}>
                           <Field
                             name='assignedTo'
-                            label='Assigned to*'
+                            label={t('Assigned to*')}
                             variant='outlined'
                             choices={mappedIndividuals}
                             component={FormikSelectField}

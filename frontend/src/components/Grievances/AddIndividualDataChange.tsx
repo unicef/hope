@@ -1,21 +1,22 @@
-import React from 'react';
 import { Button, Grid, Typography } from '@material-ui/core';
-import styled from 'styled-components';
-import { Field, FieldArray } from 'formik';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { AddCircleOutline } from '@material-ui/icons';
+import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { Field, FieldArray } from 'formik';
 import camelCase from 'lodash/camelCase';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
   AllAddIndividualFieldsQuery,
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
+import { AgencyField } from './AgencyField';
 import { DocumentField } from './DocumentField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
-import { AgencyField } from './AgencyField';
 
 const Title = styled.div`
   width: 100%;
@@ -113,6 +114,7 @@ export interface AddIndividualDataChangeProps {
 export const AddIndividualDataChange = ({
   values,
 }: AddIndividualDataChangeProps): React.ReactElement => {
+  const { t } = useTranslation();
   const { data, loading } = useAllAddIndividualFieldsQuery();
   if (loading) {
     return <LoadingComponent />;
@@ -126,18 +128,18 @@ export const AddIndividualDataChange = ({
   return (
     <>
       <Title>
-        <Typography variant='h6'>Individual Data</Typography>
+        <Typography variant='h6'>{t('Individual Data')}</Typography>
       </Title>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          Core Fields
+          {t('Core Fields')}
         </Grid>
 
         {coreFields.map((item) => (
           <AddIndividualDataChangeField field={item} />
         ))}
         <Grid item xs={12}>
-          Flex Fields
+          {t('Flex Fields')}
         </Grid>
         {flexFields.map((item) => (
           <AddIndividualDataChangeField field={item} flexField />
@@ -172,7 +174,7 @@ export const AddIndividualDataChange = ({
                     }}
                   >
                     <AddIcon />
-                    Add Document
+                    {t('Add Document')}
                   </Button>
                 </Grid>
               </>
@@ -209,7 +211,7 @@ export const AddIndividualDataChange = ({
                     }}
                   >
                     <AddIcon />
-                    Add Identity
+                    {t('Add Identity')}
                   </Button>
                 </Grid>
               </>

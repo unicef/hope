@@ -1,13 +1,14 @@
 import { Formik } from 'formik';
 import React, { useState } from 'react';
-import {
-  GrievanceTicketQuery,
-  useIndividualQuery,
-} from '../../../__generated__/graphql';
+import { useTranslation } from 'react-i18next';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
+import {
+  GrievanceTicketQuery,
+  useIndividualQuery,
+} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../LoadingComponent';
 import { LookUpButton } from '../LookUpButton';
 import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
@@ -28,21 +29,29 @@ export const LookUpReassignRole = ({
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
   let roleReassignData = null;
   switch (ticket.category.toString()) {
     case GRIEVANCE_CATEGORIES.DATA_CHANGE:
-      if (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
-        roleReassignData = ticket?.deleteIndividualTicketDetails?.roleReassignData;
-      } else if (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-        roleReassignData = ticket?.individualDataUpdateTicketDetails?.roleReassignData;
+      if (
+        ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+      ) {
+        roleReassignData =
+          ticket?.deleteIndividualTicketDetails?.roleReassignData;
+      } else if (
+        ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+      ) {
+        roleReassignData =
+          ticket?.individualDataUpdateTicketDetails?.roleReassignData;
       }
       break;
     case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
       roleReassignData = ticket?.systemFlaggingTicketDetails?.roleReassignData;
       break;
     case GRIEVANCE_CATEGORIES.DEDUPLICATION:
-      roleReassignData = ticket?.needsAdjudicationTicketDetails?.roleReassignData;
+      roleReassignData =
+        ticket?.needsAdjudicationTicketDetails?.roleReassignData;
       break;
     default:
       break;
@@ -78,7 +87,7 @@ export const LookUpReassignRole = ({
             />
           ) : (
             <LookUpButton
-              title='Reassign Role'
+              title={t('Reassign Role')}
               handleClick={() => setLookUpDialogOpen(true)}
             />
           )}
