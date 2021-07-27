@@ -1,17 +1,17 @@
-import React, { ReactElement, useState } from 'react';
-import styled from 'styled-components';
-import ExpandLess from '@material-ui/icons/ExpandLessRounded';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
-import Collapse from '@material-ui/core/Collapse';
 import { Paper } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import Collapse from '@material-ui/core/Collapse';
 import TablePagination from '@material-ui/core/TablePagination';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import ExpandLess from '@material-ui/icons/ExpandLessRounded';
+import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
+import React, { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { LogEntryNode } from '../../__generated__/graphql';
+import { headCells } from './headCels';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
-import { headCells } from './headCels';
-import { useTranslation } from 'react-i18next';
 
 const Table = styled.div`
   display: flex;

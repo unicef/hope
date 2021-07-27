@@ -1,17 +1,18 @@
 import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
-import styled from 'styled-components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { getFlexFieldTextValue, renderBoolean } from '../../utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { LabelizedField } from '../LabelizedField';
 import { ConfirmationDialog } from '../ConfirmationDialog';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { getFlexFieldTextValue, renderBoolean } from '../../utils/utils';
+import { LabelizedField } from '../LabelizedField';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -31,6 +32,7 @@ export function AddIndividualGrievanceDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveAddIndividualDataChangeMutation();
   const { showMessage } = useSnackbar();
@@ -70,7 +72,7 @@ export function AddIndividualGrievanceDetails({
       return (
         <Grid key={key} item xs={6}>
           <LabelizedField
-            label={key === 'sex' ? 'GENDER' : key.replace(/_/g, ' ')}
+            label={key === 'sex' ? t('GENDER') : key.replace(/_/g, ' ')}
             value={textValue}
           />
         </Grid>
@@ -115,18 +117,20 @@ export function AddIndividualGrievanceDetails({
     ...identityLabels,
   ];
 
-  let dialogText =
-    'You did not approve the following add individual data. Are you sure you want to continue?';
+  let dialogText = t(
+    'You did not approve the following add individual data. Are you sure you want to continue?',
+  );
   if (!ticket.addIndividualTicketDetails.approveStatus) {
-    dialogText =
-      'You are approving the following Add individual data. Are you sure you want to continue?';
+    dialogText = t(
+      'You are approving the following Add individual data. Are you sure you want to continue?',
+    );
   }
 
   return (
     <StyledBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Individual Data</Typography>
+          <Typography variant='h6'>{t('Individual Data')}</Typography>
           {canApproveDataChange && (
             <ConfirmationDialog title='Warning' content={dialogText}>
               {(confirm) => (
@@ -147,10 +151,10 @@ export function AddIndividualGrievanceDetails({
                         ],
                       });
                       if (ticket.addIndividualTicketDetails.approveStatus) {
-                        showMessage('Changes Disapproved');
+                        showMessage(t('Changes Disapproved'));
                       }
                       if (!ticket.addIndividualTicketDetails.approveStatus) {
-                        showMessage('Changes Approved');
+                        showMessage(t('Changes Approved'));
                       }
                     } catch (e) {
                       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -167,8 +171,8 @@ export function AddIndividualGrievanceDetails({
                   }
                 >
                   {ticket.addIndividualTicketDetails.approveStatus
-                    ? 'Disapprove'
-                    : 'Approve'}
+                    ? t('Disapprove')
+                    : t('Approve')}
                 </Button>
               )}
             </ConfirmationDialog>
