@@ -329,8 +329,8 @@ GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
 # else:
 #     CACHES = {"default": {"BACKEND": "common.cache_backends.DummyRedisCache", "LOCATION": "hct_mis"}}
 
+REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
 if "CACHE_URL" not in os.environ:
-    REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
     if REDIS_INSTANCE:
         os.environ["CACHE_URL"] = f"redis://{REDIS_INSTANCE}:6379/1?client_class=django_redis.client.DefaultClient"
     else:
