@@ -628,33 +628,37 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                     context["results"] = results
                     context["reader"] = reader
                     context["errors"] = []
-                    for row in reader:
+                    with atomic():
                         try:
-                            email = row["email"].strip()
+                            for row in reader:
+                                try:
+                                    email = row["email"].strip()
+                                except Exception as e:
+                                    raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
+
+                                user_info = {"email": email, "is_new": False, "kobo": False, "error": ""}
+                                if "username" in row:
+                                    username = row["username"].strip()
+                                else:
+                                    username = row["email"].replace("@", "_").replace(".", "_").lower()
+                                u, isnew = account_models.User.objects.get_or_create(
+                                    email=email, partner=partner, defaults={"username": username}
+                                )
+                                if isnew:
+                                    u.user_roles.create(business_area=business_area, role=role)
+                                else:  # check role validity
+                                    try:
+                                        IncompatibleRoles.objects.validate_user_role(u, business_area, role)
+                                        u.user_roles.get_or_create(business_area=business_area, role=role)
+                                    except ValidationError as e:
+                                        self.message_user(request, f"Error on {u}: {e}", messages.ERROR)
+
+                                if enable_kobo:
+                                    self._grant_kobo_accesss_to_user(u, sync=False)
+
+                                context["results"].append(user_info)
                         except Exception as e:
-                            raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
-
-                        user_info = {"email": email, "is_new": False, "kobo": False, "error": ""}
-                        if "username" in row:
-                            username = row["username"].strip()
-                        else:
-                            username = row["email"].replace("@", "_").replace(".", "_").lower()
-                        u, isnew = account_models.User.objects.get_or_create(
-                            email=email, defaults={"username": username, "partner": partner}
-                        )
-                        if isnew:
-                            u.user_roles.create(business_area=business_area, role=role)
-                        else:  # check role validity
-                            try:
-                                IncompatibleRoles.objects.validate_user_role(u, business_area, role)
-                                u.user_roles.get_or_create(business_area=business_area, role=role)
-                            except ValidationError as e:
-                                self.message_user(request, f"Error on {u}: {e}", messages.ERROR)
-
-                        if enable_kobo:
-                            self._grant_kobo_accesss_to_user(u, sync=False)
-
-                        context["results"].append(user_info)
+                            raise
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
