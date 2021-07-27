@@ -8,6 +8,7 @@ import {
   getPercentage,
 } from '../../../utils/utils';
 import { GlobalAreaChartsQuery } from '../../../__generated__/graphql';
+import { useTranslation } from 'react-i18next';
 
 interface TotalAmountTransferredByCountryChartProps {
   data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];
@@ -18,6 +19,7 @@ export const TotalAmountTransferredByCountryChart = ({
 }: TotalAmountTransferredByCountryChartProps): React.ReactElement => {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
+  const { t } = useTranslation();
 
   if (!data) return null;
 
@@ -123,7 +125,7 @@ export const TotalAmountTransferredByCountryChart = ({
             onClick={() => setShowAll(!showAll)}
             fullWidth
           >
-            {showAll ? 'HIDE' : 'SHOW ALL COUNTRIES'}
+            {showAll ? t('HIDE') : t('SHOW ALL COUNTRIES')}
           </Button>
         </Box>
       ) : null}

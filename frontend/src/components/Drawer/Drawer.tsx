@@ -1,17 +1,18 @@
-import clsx from 'clsx';
-import IconButton from '@material-ui/core/IconButton';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import Divider from '@material-ui/core/Divider';
-import List from '@material-ui/core/List';
-import DrawerMaterial from '@material-ui/core/Drawer';
-import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core';
-import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
-import { theme as themeObj } from '../../theme';
-import { Logo } from '../Logo';
+import { makeStyles } from '@material-ui/core';
+import Divider from '@material-ui/core/Divider';
+import DrawerMaterial from '@material-ui/core/Drawer';
+import IconButton from '@material-ui/core/IconButton';
+import List from '@material-ui/core/List';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import { gql } from 'apollo-boost';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import packageJson from '../../../package.json';
+import { theme as themeObj } from '../../theme';
 import { AlertDialog } from '../AlertDialog';
+import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 
 const matchColorToWindowOrigin = (): string => {
@@ -103,6 +104,7 @@ export function Drawer({
   dataCy,
 }: Props): React.ReactElement {
   const classes = useStyles({});
+  const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
   const { data } = useQuery(GET_BACKEND_VERSION, { fetchPolicy: 'cache-only' });
   const backendVersion = data?.backendVersion;
@@ -148,7 +150,7 @@ export function Drawer({
       </div>
       <AlertDialog
         show={showMismatchedDialog}
-        message='Version mismatch, please refresh page'
+        message={t('Version mismatch, please refresh page')}
       />
     </DrawerMaterial>
   );

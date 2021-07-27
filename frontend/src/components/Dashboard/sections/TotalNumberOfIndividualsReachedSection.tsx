@@ -1,19 +1,20 @@
-import { Grid, DialogContent, Button, Box } from '@material-ui/core';
-import styled from 'styled-components';
-import React, { useState } from 'react';
+import { Box, Button, DialogContent, Grid } from '@material-ui/core';
 import PersonIcon from '@material-ui/icons/Person';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { Dialog } from '../../../containers/dialogs/Dialog';
 import { DialogActions } from '../../../containers/dialogs/DialogActions';
+import { formatNumber } from '../../../utils/utils';
+import { AllChartsQuery } from '../../../__generated__/graphql';
+import { IndividualsReachedByAgeAndGenderGroupsChart } from '../charts/IndividualsReachedByAgeAndGenderGroupsChart';
+import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
 import {
   CardAmountLink,
   CardTitle,
   DashboardCard,
   IconContainer,
 } from '../DashboardCard';
-import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
-import { IndividualsReachedByAgeAndGenderGroupsChart } from '../charts/IndividualsReachedByAgeAndGenderGroupsChart';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { formatNumber } from '../../../utils/utils';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -44,11 +45,12 @@ export const TotalNumberOfIndividualsReachedSection = ({
   chartDataIndividualsDisability,
 }: TotalNumberOfIndividualsReachedSectionProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { t } = useTranslation();
   if (!data) return null;
   return (
     <>
       <DashboardCard color='#345DA0'>
-        <CardTitle>TOTAL NUMBER OF INDIVIDUALS REACHED</CardTitle>
+        <CardTitle>{t('TOTAL NUMBER OF INDIVIDUALS REACHED')}</CardTitle>
         <Grid container justify='space-between' alignItems='center'>
           <Grid item>
             <CardAmountLink onClick={() => setDialogOpen(true)}>
@@ -73,7 +75,9 @@ export const TotalNumberOfIndividualsReachedSection = ({
         <DialogContent>
           <DialogContainer>
             <Box mb={6}>
-              <Title mb={6}>Individuals Reached by Age and Gender Groups</Title>
+              <Title mb={6}>
+                {t('Individuals Reached by Age and Gender Groups')}
+              </Title>
               <ChartWrapper>
                 <IndividualsReachedByAgeAndGenderGroupsChart
                   data={chartDataIndividuals}
@@ -82,7 +86,7 @@ export const TotalNumberOfIndividualsReachedSection = ({
             </Box>
             <Box>
               <Title mb={6}>
-                Individuals with Disability Reached by Age Groups
+                {t('Individuals with Disability Reached by Age Groups')}
               </Title>
               <IndividualsWithDisabilityReachedByAgeGroupsChart
                 data={chartDataIndividualsDisability}
