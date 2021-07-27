@@ -356,7 +356,7 @@ export function EditGrievancePage(): React.ReactElement {
                         <Grid item xs={6}>
                           <Field
                             name='admin'
-                            label='Administrative Level 2'
+                            label={t('Administrative Level 2')}
                             disabled={Boolean(ticket.admin)}
                             variant='outlined'
                             component={FormikAdminAreaAutocomplete}
@@ -368,7 +368,7 @@ export function EditGrievancePage(): React.ReactElement {
                             fullWidth
                             disabled={Boolean(ticket.area)}
                             variant='outlined'
-                            label='Area / Village / Pay point'
+                            label={t('Area / Village / Pay point')}
                             component={FormikTextField}
                           />
                         </Grid>
@@ -379,7 +379,7 @@ export function EditGrievancePage(): React.ReactElement {
                             fullWidth
                             disabled={Boolean(ticket.language)}
                             variant='outlined'
-                            label='Languages Spoken'
+                            label={t('Languages Spoken')}
                             component={FormikTextField}
                           />
                         </Grid>
@@ -408,14 +408,14 @@ export function EditGrievancePage(): React.ReactElement {
                           component={Link}
                           to={`/${businessArea}/grievance-and-feedback`}
                         >
-                          Cancel
+                          {t('Cancel')}
                         </Button>
                         <Button
                           color='primary'
                           variant='contained'
                           onClick={submitForm}
                         >
-                          Save
+                          {t('Save')}
                         </Button>
                       </DialogActions>
                     </DialogFooter>

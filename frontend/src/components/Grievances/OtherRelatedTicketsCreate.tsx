@@ -1,5 +1,6 @@
 import { Box, Paper, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
@@ -28,6 +29,7 @@ const BlueBold = styled.div`
 `;
 
 export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const [show, setShow] = useState(false);
 
@@ -72,27 +74,28 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   return householdTickets.length ? (
     <StyledBox>
       <Title>
-        <Typography variant='h6'>Other Related Tickets</Typography>
+        <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
       </Title>
       <Box display='flex' flexDirection='column'>
         <LabelizedField
-          label={`For Household ${values?.selectedHousehold?.unicefId || '-'} `}
+          label={`${t('For Household')} ${values?.selectedHousehold?.unicefId ||
+            '-'} `}
         >
           <>{renderIds(openHouseholdTickets)}</>
         </LabelizedField>
         {!show && closedHouseholdTickets.length ? (
           <Box mt={3}>
             <BlueBold onClick={() => setShow(true)}>
-              SHOW CLOSED TICKETS ({closedHouseholdTickets.length})
+              {t('SHOW CLOSED TICKETS')} ({closedHouseholdTickets.length})
             </BlueBold>
           </Box>
         ) : null}
         {show && (
           <Box mb={3} mt={3}>
-            <Typography>Closed Tickets</Typography>
+            <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`For Household ${values?.selectedHousehold?.unicefId ||
-                '-'} `}
+              label={`${t('For Household')} ${values?.selectedHousehold
+                ?.unicefId || '-'} `}
             >
               <>{renderIds(closedHouseholdTickets)}</>
             </LabelizedField>
@@ -100,7 +103,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
         )}
         {show && closedHouseholdTickets.length ? (
           <BlueBold onClick={() => setShow(false)}>
-            HIDE CLOSED TICKETS ({closedHouseholdTickets.length})
+            {t('HIDE CLOSED TICKETS')} ({closedHouseholdTickets.length})
           </BlueBold>
         ) : null}
       </Box>

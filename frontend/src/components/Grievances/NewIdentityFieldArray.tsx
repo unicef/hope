@@ -1,7 +1,8 @@
-import React from 'react';
 import { Button, Grid } from '@material-ui/core';
-import { FieldArray } from 'formik';
 import { AddCircleOutline } from '@material-ui/icons';
+import { FieldArray } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
 import { AgencyField } from './AgencyField';
@@ -19,6 +20,7 @@ export function NewIdentityFieldArray({
   addIndividualFieldsData,
   values,
 }: NewIdentityFieldArrayProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <Grid container spacing={3}>
       <FieldArray
@@ -54,7 +56,7 @@ export function NewIdentityFieldArray({
                   }}
                 >
                   <AddIcon />
-                  Add Identity
+                  {t('Add Identity')}
                 </Button>
               </Grid>
             </>

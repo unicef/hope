@@ -1,5 +1,6 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import {
   hasPermissionInModule,
@@ -9,15 +10,19 @@ import {
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import { usePermissions } from '../../hooks/usePermissions';
-import { useAllUsersQuery, useGrievancesChoiceDataQuery } from '../../__generated__/graphql';
+import { renderUserName } from '../../utils/utils';
+import {
+  useAllUsersQuery,
+  useGrievancesChoiceDataQuery,
+} from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { PageHeader } from '../PageHeader';
 import { PermissionDenied } from '../PermissionDenied';
-import { renderUserName } from "../../utils/utils";
 import { GrievancesFilters } from './GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from './GrievancesTable/GrievancesTable';
 
 export function GrievancesTablePage(): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
@@ -36,7 +41,9 @@ export function GrievancesTablePage(): React.ReactElement {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  const {data: userData, loading: userDataLoading} = useAllUsersQuery({variables: {businessArea}});
+  const { data: userData, loading: userDataLoading } = useAllUsersQuery({
+    variables: { businessArea },
+  });
 
   if (choicesLoading || userDataLoading) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -59,7 +66,7 @@ export function GrievancesTablePage(): React.ReactElement {
             component={Link}
             to={`/${businessArea}/grievance-and-feedback/new-ticket`}
           >
-            NEW TICKET
+            {t('NEW TICKET')}
           </Button>
         )}
       </PageHeader>
