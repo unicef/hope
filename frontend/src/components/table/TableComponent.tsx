@@ -12,6 +12,7 @@ import { Box } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
+import { useTranslation } from 'react-i18next';
 
 export type Order = 'asc' | 'desc';
 
@@ -93,6 +94,7 @@ export function TableComponent<T>({
   onSelectAllClick,
   numSelected = 0,
 }: TableComponentProps<T>): React.ReactElement {
+  const { t } = useTranslation();
   const classes = useStyles({});
 
   const emptyRows = itemsCount
@@ -115,8 +117,9 @@ export function TableComponent<T>({
             <FindInPageIcon className={classes.icon} fontSize='inherit' />
             <Box mt={2}>No results</Box>
             <Box className={classes.smallerText} mt={2}>
-              Try adjusting your search or your filters to find what you&apos;re
-              looking for.
+              {t(
+                'Try adjusting your search or your filters to find what you are looking for.',
+              )}
             </Box>
           </div>
         </TableCell>

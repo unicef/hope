@@ -74,8 +74,9 @@ export function DiscardVerificationPlan({
             <Box p={5}>
               <div>
                 {t(
-                  'Are you sure you would like to delete payment verification records <br /> and restart the verification process?',
+                  'Are you sure you would like to delete payment verification records',
                 )}
+                <br /> {t('and restart the verification process?')}
               </div>
             </Box>
           </DialogContainer>
