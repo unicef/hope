@@ -1,14 +1,21 @@
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
-from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    ProhibitNullCharactersValidator,
+)
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
-from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
+)
 
 
 class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
@@ -76,6 +83,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     number_of_households = models.PositiveIntegerField(db_index=True)
     datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
     error_message = models.TextField(blank=True)
+    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
+
     pull_pictures = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
 

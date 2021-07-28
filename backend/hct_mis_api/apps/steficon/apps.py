@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class SteficonConfig(AppConfig):
-    name = "steficon"
+    name = "hct_mis_api.apps.steficon"

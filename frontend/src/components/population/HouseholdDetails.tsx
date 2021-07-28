@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Typography, Grid, Paper } from '@material-ui/core';
+import { Typography, Grid, Paper, Box } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
 import {
   HouseholdChoiceDataQuery,
@@ -158,27 +158,55 @@ export function HouseholdDetails({
         </Title>
         <Grid container>
           <Grid item xs={4}>
+            <Grid container>
+              <Grid item xs={6}>
+                <LabelizedField label='PrOgRAmmE(S) ENROLLED'>
+                  <div>
+                    {household.programsWithDeliveredQuantity.length
+                      ? household.programsWithDeliveredQuantity.map((item) => (
+                          <ContentLink
+                            key={item.id}
+                            href={`/${businessArea}/programs/${item.id}`}
+                          >
+                            {item.name}
+                          </ContentLink>
+                        ))
+                      : '-'}
+                  </div>
+                </LabelizedField>
+              </Grid>
+              <Grid item xs={6}>
+                <LabelizedField label='Cash received'>
+                  <div>
+                    {household.programsWithDeliveredQuantity.length
+                      ? household.programsWithDeliveredQuantity.map((item) => (
+                          <Box display='flex' flexDirection='column'>
+                            <Box>
+                              {formatCurrencyWithSymbol(
+                                item.quantity.totalDeliveredQuantity,
+                                item.quantity.currency,
+                              )}
+                            </Box>
+                            <Box>
+                              {formatCurrencyWithSymbol(
+                                item.quantity.totalDeliveredQuantityUsd,
+                                'USD',
+                              )}
+                            </Box>
+                          </Box>
+                        ))
+                      : '-'}
+                  </div>
+                </LabelizedField>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={4}>
             <LabelizedField label='Total Cash Received'>
               {formatCurrencyWithSymbol(
                 household.totalCashReceived,
                 household.currency,
               )}
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='PrOgRAmmE(S) ENROLLED'>
-              <div>
-                {household.programs.edges.length
-                  ? household.programs.edges.map((item) => (
-                      <ContentLink
-                        key={item.node.id}
-                        href={`/${businessArea}/programs/${item.node.id}`}
-                      >
-                        {item.node.name}
-                      </ContentLink>
-                    ))
-                  : '-'}
-              </div>
             </LabelizedField>
           </Grid>
         </Grid>

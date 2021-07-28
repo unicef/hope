@@ -204,22 +204,22 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertTrue(self.household_size_2.pk in [h.pk for h in queryset])
 
-    def test_rule_filter_size_gt_1(self):
+    def test_rule_filter_size_gte_2(self):
         rule_filter = TargetingCriteriaRuleFilter(
             comparision_method="GREATER_THAN",
             field_name="size",
-            arguments=[1],
+            arguments=[2],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
         self.assertEqual(queryset.count(), 1)
         self.assertTrue(self.household_size_2.pk in [h.pk for h in queryset])
 
-    def test_rule_filter_size_lt_2(self):
+    def test_rule_filter_size_lte_1(self):
         rule_filter = TargetingCriteriaRuleFilter(
             comparision_method="LESS_THAN",
             field_name="size",
-            arguments=[2],
+            arguments=[1],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()

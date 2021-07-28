@@ -1,7 +1,6 @@
 import json
 import logging
 
-import graphene
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
@@ -9,21 +8,30 @@ from django.db.models import Q
 from django.db.models.functions import Lower
 from django.utils.encoding import force_text
 from django.utils.functional import Promise
-from django_filters import FilterSet, CharFilter, MultipleChoiceFilter
+
+import graphene
+from django_filters import CharFilter, FilterSet, MultipleChoiceFilter
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from hct_mis_api.apps.account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role, UserRole, User
+from hct_mis_api.apps.account.models import (
+    USER_STATUS_CHOICES,
+    Partner,
+    Role,
+    User,
+    UserRole,
+)
 from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
     DjangoPermissionFilterConnectionField,
     Permissions,
+    hopeOneOfPermissionClass,
     hopePermissionClass,
-    hopeOneOfPermissionClass, ALL_GRIEVANCES_CREATE_MODIFY,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, to_choice_object
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +48,7 @@ class UsersFilter(FilterSet):
     business_area = CharFilter(required=True, method="business_area_filter")
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
-    partner = MultipleChoiceFilter(field_name="partner", choices=USER_PARTNER_CHOICES)
+    partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices(), method="partners_filter")
     roles = MultipleChoiceFilter(choices=Role.get_roles_as_choices(), method="roles_filter")
 
     class Meta:
@@ -67,6 +75,12 @@ class UsersFilter(FilterSet):
 
     def business_area_filter(self, qs, name, value):
         return qs.filter(user_roles__business_area__slug=value)
+
+    def partners_filter(self, qs, name, values):
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(partner__id=value)
+        return qs.filter(q_obj)
 
     def roles_filter(self, qs, name, values):
         business_area_slug = self.data.get("business_area")
@@ -111,6 +125,11 @@ class UserObjectType(DjangoObjectType):
     class Meta:
         model = get_user_model()
         exclude = ("password",)
+
+
+class PartnerType(DjangoObjectType):
+    class Meta:
+        model = Partner
 
 
 class UserNode(DjangoObjectType):
@@ -162,10 +181,7 @@ class Query(graphene.ObjectType):
         UserNode,
         filterset_class=UsersFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(
-                Permissions.USER_MANAGEMENT_VIEW_LIST,
-                *ALL_GRIEVANCES_CREATE_MODIFY
-            ),
+            hopeOneOfPermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
     )
     # all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
@@ -198,7 +214,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(USER_STATUS_CHOICES)
 
     def resolve_user_partner_choices(self, info, **kwargs):
-        return to_choice_object(USER_PARTNER_CHOICES)
+        return to_choice_object(Partner.get_partners_as_choices())
 
     def resolve_has_available_users_to_export(self, info, business_area_slug, **kwargs):
         return (

@@ -27,9 +27,10 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     TARGETING_CORE_FIELDS,
-    TYPE_SELECT_MANY,
+    TYPE_SELECT_MANY, TYPE_DECIMAL, TYPE_INTEGER,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -543,11 +544,11 @@ class TargetingCriteriaFilterMixin:
         },
         "GREATER_THAN": {
             "arguments": 1,
-            "lookup": "__gt",
+            "lookup": "__gte",
             "negative": False,
             "supported_types": ["INTEGER", "DECIMAL"],
         },
-        "LESS_THAN": {"arguments": 1, "lookup": "__lt", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
+        "LESS_THAN": {"arguments": 1, "lookup": "__lte", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
     }
 
     COMPARISON_CHOICES = Choices(
@@ -567,7 +568,23 @@ class TargetingCriteriaFilterMixin:
     def get_lookup_prefix(self, associated_with):
         return "individuals__" if associated_with == _INDIVIDUAL else ""
 
-    def get_query_for_lookup(self, lookup, select_many=False):
+    def prepare_arguments(self, arguments, field_attr):
+        is_flex_field = get_attr_value("is_flex_field", field_attr, False)
+        if not is_flex_field:
+            return arguments
+        type =get_attr_value("type", field_attr, None)
+        if type == TYPE_DECIMAL:
+            return [float(arg) for arg in arguments]
+        if type == TYPE_INTEGER:
+            return [int(arg) for arg in arguments]
+        return arguments
+
+    def get_query_for_lookup(
+        self,
+        lookup,
+        field_attr,
+    ):
+        select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
         comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(self.comparision_method)
         args_count = comparision_attribute.get("arguments")
         if self.arguments is None:
@@ -591,10 +608,16 @@ class TargetingCriteriaFilterMixin:
                 f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
                 f"arguments gets {args_input_count}"
             )
-        argument = self.arguments if args_input_count > 1 else self.arguments[0]
-
+        arguments = self.prepare_arguments(self.arguments, field_attr)
+        argument = arguments if args_input_count > 1 else arguments[0]
         if select_many:
-            query = Q(**{f"{lookup}__contains": argument})
+            if isinstance(argument, list):
+                query = Q()
+                for arg in argument:
+                    # This regular expression can found the only exact word
+                    query &= Q(**{f"{lookup}__iregex": f"{arg}\\y"})
+            else:
+                query = Q(**{f"{lookup}__contains": argument})
         else:
             query = Q(**{f"{lookup}{comparision_attribute.get('lookup')}": argument})
         if comparision_attribute.get("negative"):
@@ -624,10 +647,7 @@ class TargetingCriteriaFilterMixin:
                 " doesn't have get_query method or lookup field"
             )
         lookup_prefix = self.get_lookup_prefix(core_field_attr["associated_with"])
-        return self.get_query_for_lookup(
-            f"{lookup_prefix}{lookup}",
-            select_many=core_field_attr.get("type") == TYPE_SELECT_MANY,
-        )
+        return self.get_query_for_lookup(f"{lookup_prefix}{lookup}", core_field_attr)
 
     def get_query_for_flex_field(self):
         flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
@@ -638,10 +658,7 @@ class TargetingCriteriaFilterMixin:
             )
         lookup_prefix = self.get_lookup_prefix(_INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD)
         lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
-        return self.get_query_for_lookup(
-            lookup,
-            select_many=flex_field_attr.type == TYPE_SELECT_MANY,
-        )
+        return self.get_query_for_lookup(lookup, flex_field_attr)
 
     def get_query(self):
         if not self.is_flex_field:

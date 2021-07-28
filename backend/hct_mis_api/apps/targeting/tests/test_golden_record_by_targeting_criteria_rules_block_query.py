@@ -1,12 +1,12 @@
 from django.core.management import call_command
 
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import MALE
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.permissions import Permissions
 
 
 class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
@@ -30,33 +30,6 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
       }
     }
     """
-    VARIABLES = {
-        "targetingCriteria": {
-            "rules": [
-                {
-                    "filters": [],
-                    "individualsFiltersBlocks": [
-                        {
-                            "individualBlockFilters": [
-                                {
-                                    "comparisionMethod": "EQUALS",
-                                    "arguments": ["MARRIED"],
-                                    "fieldName": "marital_status",
-                                    "isFlexField": False,
-                                },
-                                {
-                                    "comparisionMethod": "EQUALS",
-                                    "arguments": [MALE],
-                                    "fieldName": "sex",
-                                    "isFlexField": False,
-                                },
-                            ]
-                        }
-                    ],
-                }
-            ]
-        }
-    }
 
     @classmethod
     def setUpTestData(cls):
@@ -68,7 +41,19 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             {
                 "business_area": cls.business_area,
             },
-            [{"sex": "MALE", "marital_status": "MARRIED"}],
+            [
+                {
+                    "sex": "MALE",
+                    "marital_status": "MARRIED",
+                    "observed_disability": ["SEEING", "HEARING", "WALKING", "MEMORY", "SELF_CARE", "COMMUNICATING"],
+                    "seeing_disability": "LOT_DIFFICULTY",
+                    "hearing_disability": "SOME_DIFFICULTY",
+                    "physical_disability": "SOME_DIFFICULTY",
+                    "memory_disability": "LOT_DIFFICULTY",
+                    "selfcare_disability": "CANNOT_DO",
+                    "comms_disability": "SOME_DIFFICULTY",
+                },
+            ],
         )
         cls.household_targeted = household
         (household, individuals) = create_household_and_individuals(
@@ -79,16 +64,115 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
         )
         cls.not_targeted_household = household
 
+        cls.user = UserFactory()
+        cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)
+
     def test_golden_record_by_targeting_criteria_size(self):
-        user = UserFactory()
-        self.create_user_role_with_permissions(user, [Permissions.TARGETING_CREATE], self.business_area)
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
-            **GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase.VARIABLES,
+            "targetingCriteria": {
+                "rules": [
+                    {
+                        "filters": [],
+                        "individualsFiltersBlocks": [
+                            {
+                                "individualBlockFilters": [
+                                    {
+                                        "comparisionMethod": "EQUALS",
+                                        "arguments": ["MARRIED"],
+                                        "fieldName": "marital_status",
+                                        "isFlexField": False,
+                                    },
+                                    {
+                                        "comparisionMethod": "EQUALS",
+                                        "arguments": [MALE],
+                                        "fieldName": "sex",
+                                        "isFlexField": False,
+                                    },
+                                ]
+                            }
+                        ],
+                    }
+                ]
+            },
         }
         self.snapshot_graphql_request(
-            context={"user": user},
+            context={"user": self.user},
+            request_string=GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase.QUERY,
+            variables=variables,
+        )
+
+    def test_golden_record_by_targeting_criteria_observed_disability(self):
+        variables = {
+            "program": self.id_to_base64(self.program.id, "Program"),
+            "businessArea": self.business_area.slug,
+            "targetingCriteria": {
+                "rules": [
+                    {
+                        "filters": [],
+                        "individualsFiltersBlocks": [
+                            {
+                                "individualBlockFilters": [
+                                    {
+                                        "comparisionMethod": "CONTAINS",
+                                        "arguments": [
+                                            "COMMUNICATING",
+                                            "HEARING",
+                                            "MEMORY",
+                                            "SEEING",
+                                            "WALKING",
+                                            "SELF_CARE",
+                                        ],
+                                        "fieldName": "observed_disability",
+                                        "isFlexField": False,
+                                    }
+                                ]
+                            }
+                        ],
+                    }
+                ]
+            },
+        }
+        self.snapshot_graphql_request(
+            context={"user": self.user},
+            request_string=GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase.QUERY,
+            variables=variables,
+        )
+
+    def test_golden_record_by_targeting_criteria_observed_disability_with_invalid_argument(self):
+        variables = {
+            "program": self.id_to_base64(self.program.id, "Program"),
+            "businessArea": self.business_area.slug,
+            "targetingCriteria": {
+                "rules": [
+                    {
+                        "filters": [],
+                        "individualsFiltersBlocks": [
+                            {
+                                "individualBlockFilters": [
+                                    {
+                                        "comparisionMethod": "CONTAINS",
+                                        "arguments": [
+                                            "COMMUNICATING",
+                                            "HEARING",
+                                            "MEMORY",
+                                            "SEEING",
+                                            "WALKING",
+                                            "SELF",
+                                        ],
+                                        "fieldName": "observed_disability",
+                                        "isFlexField": False,
+                                    }
+                                ]
+                            }
+                        ],
+                    }
+                ]
+            },
+        }
+        self.snapshot_graphql_request(
+            context={"user": self.user},
             request_string=GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase.QUERY,
             variables=variables,
         )

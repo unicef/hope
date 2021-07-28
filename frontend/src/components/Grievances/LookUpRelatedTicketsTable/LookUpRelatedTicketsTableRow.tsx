@@ -56,7 +56,7 @@ export function LookUpRelatedTicketsTableRow({
           rel='noopener noreferrer'
           to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}
         >
-          {decodeIdString(ticket.id)}
+          {ticket.unicefId}
         </BlackLink>
       </TableCell>
       <TableCell align='left'>

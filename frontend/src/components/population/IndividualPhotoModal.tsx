@@ -34,6 +34,7 @@ export const IndividualPhotoModal = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [getPhotos, { data }] = useIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
+    fetchPolicy: 'network-only',
   });
 
   return (

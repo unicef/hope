@@ -10,6 +10,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
 from hct_mis_api.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task,
@@ -531,6 +532,11 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
 
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
+
+    if individual.household:
+        individual.household.recalculate_data()
+    else:
+        individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
@@ -578,6 +584,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     }
     old_individual = copy_model_object(individual)
     merged_flex_fields = {}
+    cast_flex_fields(flex_fields)
     if individual.flex_fields is not None:
         merged_flex_fields.update(individual.flex_fields)
     merged_flex_fields.update(flex_fields)
@@ -614,6 +621,11 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     Document.objects.filter(id__in=documents_to_remove).delete()
     IndividualIdentity.objects.bulk_create(identities_to_create)
     IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
+    new_individual.refresh_from_db()
+    if new_individual.household:
+        new_individual.household.recalculate_data()
+    else:
+        new_individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
@@ -623,6 +635,14 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         )
     )
 
+def cast_flex_fields(flex_fields):
+    decimals_flex_attrs_name_list=FlexibleAttribute.objects.filter(type="DECIMAL").values_list("name", flat=True)
+    integer_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="INTEGER").values_list("name", flat=True)
+    for key, value in flex_fields.items():
+        if key in decimals_flex_attrs_name_list:
+            flex_fields[key] = float(value)
+        if key in integer_flex_attrs_name_list:
+            flex_fields[key] = int(value)
 
 def close_update_household_grievance_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.household_data_update_ticket_details
@@ -650,11 +670,13 @@ def close_update_household_grievance_ticket(grievance_ticket, info):
     }
     old_household = copy_model_object(household)
     merged_flex_fields = {}
+    cast_flex_fields(flex_fields)
     if household.flex_fields is not None:
         merged_flex_fields.update(household.flex_fields)
     merged_flex_fields.update(flex_fields)
     Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
     new_household = Household.objects.get(id=household.id)
+    new_household.recalculate_data()
     log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_household, new_household)
 
 
@@ -662,6 +684,11 @@ def close_delete_individual_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
-
     individual_to_remove = ticket_details.individual
+    household = None
+    if individual_to_remove.household:
+        household = individual_to_remove.household
     withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove, info)
+    if household:
+        household.refresh_from_db()
+        household.recalculate_data()
