@@ -1,11 +1,12 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { TargetPopulationNode } from '../../__generated__/graphql';
-import { UniversalMoment } from '../UniversalMoment';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
+import { LabelizedField } from '../LabelizedField';
 import { OverviewContainer } from '../OverviewContainer';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -25,6 +26,7 @@ export function TargetPopulationDetails({
     finalizedAt,
     program,
   } = targetPopulation;
+  const { t } = useTranslation();
   const closeDate = approvedAt ? (
     <UniversalMoment>{approvedAt}</UniversalMoment>
   ) : (
@@ -42,30 +44,30 @@ export function TargetPopulationDetails({
   return (
     <ContainerColumnWithBorder data-cy='target-population-details-container'>
       <Title>
-        <Typography variant='h6'>Details</Typography>
+        <Typography variant='h6'>{t('Details')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField
-              label='created by'
+              label={t('created by')}
               value={`${createdBy.firstName} ${createdBy.lastName}`}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='Programme population close date'
+              label={t('Programme population close date')}
               value={closeDate}
             />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Programme' value={programName} />
+            <LabelizedField label={t('Programme')} value={programName} />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Send by' value={sendBy} />
+            <LabelizedField label={t('Send by')} value={sendBy} />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Send date' value={sendDate} />
+            <LabelizedField label={t('Send date')} value={sendDate} />
           </Grid>
         </Grid>
       </OverviewContainer>

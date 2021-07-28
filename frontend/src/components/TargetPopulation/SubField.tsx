@@ -1,12 +1,13 @@
-import React from 'react';
-import styled from 'styled-components';
-import { Field } from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { Field } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { FormikAutocomplete } from '../../shared/Formik/FormikAutocomplete';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
-import { FormikAutocomplete } from '../../shared/Formik/FormikAutocomplete';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 
 const FlexWrapper = styled.div`
   display: flex;
@@ -17,6 +18,7 @@ const InlineField = styled.div`
 `;
 
 export const SubField = ({ field, index, baseName }): React.ReactElement => {
+  const { t } = useTranslation();
   switch (field.fieldAttribute.type) {
     case 'DECIMAL':
       return (
@@ -138,15 +140,15 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           choices={[
             {
               admin: null,
-              labelEn: 'Yes',
-              labels: [{ label: 'Yes', language: 'English(EN)' }],
+              labelEn: t('Yes'),
+              labels: [{ label: t('Yes'), language: 'English(EN)' }],
               listName: null,
               value: 'True',
             },
             {
               admin: null,
-              labelEn: 'No',
-              labels: [{ label: 'No', language: 'English(EN)' }],
+              labelEn: t('No'),
+              labels: [{ label: t('No'), language: 'English(EN)' }],
               listName: null,
               value: 'False',
             },
