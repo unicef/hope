@@ -288,6 +288,10 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
 
+    @property
+    def is_flex_field(self):
+        return True
+
     def __str__(self):
         return f"type: {self.type}, name: {self.name}"
 
