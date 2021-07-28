@@ -1,13 +1,14 @@
-import React from 'react';
-import styled from 'styled-components';
-import SearchIcon from '@material-ui/icons/Search';
-import CakeIcon from '@material-ui/icons/Cake';
-import WcIcon from '@material-ui/icons/Wc';
 import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
+import CakeIcon from '@material-ui/icons/Cake';
+import SearchIcon from '@material-ui/icons/Search';
+import WcIcon from '@material-ui/icons/Wc';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
-import TextField from '../../shared/TextField';
 import Select from '../../shared/Select';
+import TextField from '../../shared/TextField';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { FieldLabel } from '../FieldLabel';
 import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
@@ -46,6 +47,7 @@ export function IndividualsFilter({
   onFilterChange,
   filter,
 }: IndividualsFilterProps): React.ReactElement {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
@@ -53,7 +55,7 @@ export function IndividualsFilter({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
+            label={t('Search')}
             variant='outlined'
             margin='dense'
             value={filter.text}
@@ -76,14 +78,14 @@ export function IndividualsFilter({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Gender</InputLabel>
+            <InputLabel>{t('Gender')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'sex')}
               variant='outlined'
               value={filter.sex || ''}
-              label='Gender'
+              label={t('Gender')}
               InputProps={{
                 startAdornment: (
                   <StartInputAdornment position='start'>
@@ -99,10 +101,10 @@ export function IndividualsFilter({
               }}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
-              <MenuItem value='MALE'>Male</MenuItem>
-              <MenuItem value='FEMALE'>Female</MenuItem>
+              <MenuItem value='MALE'>{t('Male')}</MenuItem>
+              <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
             </Select>
           </StyledFormControl>
         </Grid>
@@ -112,7 +114,7 @@ export function IndividualsFilter({
             <TextContainer
               variant='outlined'
               margin='dense'
-              placeholder='From'
+              placeholder={t('From')}
               value={filter.age.min}
               onChange={(e) =>
                 onFilterChange({
@@ -135,7 +137,7 @@ export function IndividualsFilter({
           <TextContainer
             variant='outlined'
             margin='dense'
-            placeholder='To'
+            placeholder={t('To')}
             value={filter.age.max}
             onChange={(e) =>
               onFilterChange({
