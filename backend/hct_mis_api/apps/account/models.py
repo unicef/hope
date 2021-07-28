@@ -57,7 +57,7 @@ class User(AbstractUser, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
     partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
-
+    email = models.EmailField(_("email address"), blank=True, unique=True)
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
@@ -205,6 +205,28 @@ def post_save_user(sender, instance, created, *args, **kwargs):
         UserRole.objects.get_or_create(business_area=business_area, user=instance, role=role)
 
 
+class IncompatibleRolesManager(models.Manager):
+    def validate_user_role(self, user, business_area, role):
+        incompatible_roles = list(
+            IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+        ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
+        incompatible_userroles = UserRole.objects.filter(
+            business_area=business_area,
+            role__id__in=incompatible_roles,
+            user=user,
+        )
+        if user.id:
+            incompatible_userroles = incompatible_userroles.exclude(id=user.id)
+        if incompatible_userroles.exists():
+            raise ValidationError(
+                {
+                    "role": _(
+                        f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+                    )
+                }
+            )
+
+
 class IncompatibleRoles(TimeStampedUUIDModel):
     """
     Keeps track of what roles are incompatible:
@@ -213,6 +235,8 @@ class IncompatibleRoles(TimeStampedUUIDModel):
 
     role_one = models.ForeignKey("account.Role", related_name="incompatible_roles_one", on_delete=models.CASCADE)
     role_two = models.ForeignKey("account.Role", related_name="incompatible_roles_two", on_delete=models.CASCADE)
+
+    objects = IncompatibleRolesManager()
 
     def __str__(self):
         return f"{self.role_one.name} and {self.role_two.name}"
