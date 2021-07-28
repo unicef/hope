@@ -11,6 +11,8 @@ def cast_flex_fields(flex_fields, decimals_flex_attrs_name_list, integer_flex_at
                 flex_fields[key] = float(value)
             if key in integer_flex_attrs_name_list:
                 flex_fields[key] = int(value)
+        except TypeError:
+            pass
         except ValueError:
             pass
 
