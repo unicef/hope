@@ -27,6 +27,7 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
             id
             givenName
             familyName
+            fullName
           }
           size
           adminArea {

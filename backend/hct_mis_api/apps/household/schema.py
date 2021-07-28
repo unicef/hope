@@ -28,7 +28,12 @@ from hct_mis_api.apps.core.filters import (
     IntegerRangeFilter,
 )
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import AdminAreaNode, ChoiceObject, FieldAttributeNode
+from hct_mis_api.apps.core.schema import (
+    AdminAreaNode,
+    ChoiceObject,
+    FieldAttributeNode,
+    _custom_dict_or_attr_resolver,
+)
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     chart_filters_decoder,
@@ -259,9 +264,15 @@ class IndividualIdentityNode(DjangoObjectType):
 
 class DocumentNode(DjangoObjectType):
     country = graphene.String(description="Document country")
+    photo = graphene.String(description="Photo url")
 
     def resolve_country(parent, info):
         return getattr(parent.type.country, "name", parent.type.country)
+
+    def resolve_photo(parent, info):
+        if parent.photo:
+            return parent.photo.url
+        return
 
     class Meta:
         model = Document
@@ -294,6 +305,21 @@ class HouseholdSelection(DjangoObjectType):
         model = HouseholdSelection
 
 
+class DeliveredQuantityNode(graphene.ObjectType):
+    total_delivered_quantity = graphene.Decimal()
+    total_delivered_quantity_usd = graphene.Decimal()
+    currency = graphene.String()
+
+
+class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
+    class Meta:
+        default_resolver = _custom_dict_or_attr_resolver
+
+    id = graphene.ID()
+    name = graphene.String()
+    quantity = graphene.Field(DeliveredQuantityNode)
+
+
 class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),
@@ -303,6 +329,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     )
 
     total_cash_received = graphene.Decimal()
+    total_cash_received_usd = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
     currency = graphene.String()
@@ -315,6 +342,10 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin1 = graphene.Field(AdminAreaNode)
     admin2 = graphene.Field(AdminAreaNode)
     status = graphene.String()
+    programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+
+    def resolve_programs_with_delivered_quantity(parent, info):
+        return parent.programs_with_delivered_quantity
 
     def resolve_country(parent, info):
         return parent.country.name

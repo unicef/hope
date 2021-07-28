@@ -9,6 +9,10 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.cash_assist_datahub.celery_tasks.pull_from_cashassist_datahub_task",
         "schedule": crontab(minute=0, hour="*/1"),
     },
+    "fix_exchange_rates_task": {
+        "task": "hct_mis_api.apps.cash_assist_datahub.celery_tasks.fix_exchange_rates_task",
+        "schedule": crontab(minute=0, hour="*/1"),
+    },
     "get_sync_run_rapid_pro": {
         "task": "hct_mis_api.apps.payment.celery_tasks.get_sync_run_rapid_pro_task",
         "schedule": crontab(minute="*/20"),
@@ -20,6 +24,10 @@ TASKS_SCHEDULES = {
     "sync_to_mis_datahub": {
         "task": "hct_mis_api.apps.erp_datahub.celery_tasks.sync_to_mis_datahub_task",
         "schedule": crontab(minute="*/20"),
+    },
+    "recalculate_population_fields_task": {
+        "task": "hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task",
+        "schedule": crontab(hour="*/24"),
     },
     # "registration_kobo_import_hourly_task": {
     #     "task": "hct_mis_api.apps.registration_datahub.celery_tasks.registration_kobo_import_hourly_task",

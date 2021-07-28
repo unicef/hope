@@ -38,6 +38,7 @@ export const ExistingGrievanceTickets = gql`
         cursor
         node {
           id
+          unicefId
           status
           assignedTo {
             id

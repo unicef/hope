@@ -8,14 +8,14 @@
         &rsaquo; <a
             href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
         &rsaquo; <a
-            href="{% url opts|admin_urlname:'kobo_import' %}">Kobo Import</a>
+            href="{% url opts|admin_urlname:'import_csv' %}">Import CSV</a>
     </div>
 {% endblock %}
 
 {% block content %}
     {% if results %}
         <h1>Import Results</h1>
-
+        {{ results }}
         {% if results.created %}
             <h2>The following user have been added to HOPE</h2>
             {% for entry in results.created %}
@@ -30,26 +30,28 @@
         {% endif %}
         <div>
         <a class="btn btn-primary" href="{% url opts|admin_urlname:'changelist' %}">Back To user List</a>
-        <a class="btn" href="{% url opts|admin_urlname:'kobo_import' %}">Kobo Import</a>
+        <a class="btn" href="{% url opts|admin_urlname:'import_csv' %}">Kobo Import</a>
         </div>
     {% elif form %}
         <h1>Import Users</h1>
         <div>
         Load csv file.
-        Allowed formats are:
+        Allowed columns are:
         <ul>
-            <li>email(email); first_name(char); last_name(char)</li>
-            <li>email(email); first_name(char); last_name(char); username(char)</li>
+            <li>email(email)</li>
+            <li>email(email) | first_name(char) | last_name(char)</li>
+            <li>email(email) | first_name(char) | last_name(char) | username(char)</li>
         </ul>
 
         <form method="POST" id="load_users" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
-            {{ form.as_p }}
+            <table>
+                {% for fieldset in adminform %}
+                    {% include "admin/includes/fieldset.html" %}
+                {% endfor %}
+            </table>
             <div><input type="submit" value="Import"></div>
         </form>
-
-    {% else %}
-        <h3><a class="btn" href="{% url opts|admin_urlname:'kobo_login' %}">Login To Kobo</a></h3>
     {% endif %}
 {% endblock content %}
 

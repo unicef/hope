@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
     logger.info("registration_xlsx_import_task start")
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+            RdiXlsxCreateTask,
+        )
 
         RdiXlsxCreateTask().execute(
             registration_data_import_id=registration_data_import_id,
@@ -19,7 +21,9 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
     except Exception as e:
         logger.exception(e)
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-        from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+        from hct_mis_api.apps.registration_datahub.models import (
+            RegistrationDataImportDatahub,
+        )
 
         RegistrationDataImportDatahub.objects.filter(
             id=registration_data_import_id,
@@ -38,7 +42,9 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
     logger.info("registration_kobo_import_task start")
 
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+            RdiKoboCreateTask,
+        )
 
         RdiKoboCreateTask().execute(
             registration_data_import_id=registration_data_import_id,
@@ -48,7 +54,16 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
     except Exception as e:
         logger.exception(e)
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-        from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+        from hct_mis_api.apps.registration_datahub.models import (
+            RegistrationDataImportDatahub,
+        )
+
+        try:
+            from sentry_sdk import capture_exception
+
+            err = capture_exception(e)
+        except:
+            err = "N/A"
 
         RegistrationDataImportDatahub.objects.filter(
             id=registration_data_import_id,
@@ -56,7 +71,8 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
 
         RegistrationDataImport.objects.filter(
             datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR)
+        ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
+
         raise
 
     logger.info("registration_kobo_import_task end")
@@ -153,8 +169,12 @@ def rdi_deduplication_task(registration_data_import_id):
     logger.info("rdi_deduplication_task start")
 
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-        from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+        from hct_mis_api.apps.registration_datahub.models import (
+            RegistrationDataImportDatahub,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+            DeduplicateTask,
+        )
 
         rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_id)
 
