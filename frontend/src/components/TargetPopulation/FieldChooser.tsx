@@ -1,8 +1,9 @@
-import React from 'react';
-import styled from 'styled-components';
-import { Field } from 'formik';
 import { IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
+import { Field } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { CriteriaAutocomplete } from './TargetingCriteria/CriteriaAutocomplete';
 
 const FlexWrapper = styled.div`
@@ -27,11 +28,12 @@ export function FieldChooser({
   baseName: string;
   showDelete: boolean;
 }): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <FlexWrapper>
       <Field
         name={`${baseName}.fieldName`}
-        label='Select Field'
+        label={t('Select Field')}
         required
         choices={choices}
         index={index}

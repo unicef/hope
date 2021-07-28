@@ -126,7 +126,7 @@ export function TargetingCriteria({
                   color='primary'
                   onClick={() => setOpen(true)}
                 >
-                  Add &apos;Or&apos; Filter
+                  {t('Add')} &apos;Or&apos; {t('Filter')}
                 </Button>
               )}
               <TargetCriteriaForm
@@ -174,7 +174,7 @@ export function TargetingCriteria({
               data-cy='button-target-population-add-criteria'
             >
               <AddCircleOutline />
-              <p>Add Filter</p>
+              <p>{t('Add Filter')}</p>
             </AddCriteria>
           )}
         </ContentWrapper>
