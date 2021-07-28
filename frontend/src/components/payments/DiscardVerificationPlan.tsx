@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
-import styled from 'styled-components';
+import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
 import ClearIcon from '@material-ui/icons/Clear';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { ErrorButtonContained } from '../ErrorButtonContained';
-import { ErrorButton } from '../ErrorButton';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useDiscardCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import { ErrorButton } from '../ErrorButton';
+import { ErrorButtonContained } from '../ErrorButtonContained';
 
 export interface Props {
   cashPlanVerificationId: string;
@@ -31,6 +32,7 @@ const DialogContainer = styled.div`
 export function DiscardVerificationPlan({
   cashPlanVerificationId,
 }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useDiscardCashPlanPaymentVerificationMutation();
@@ -40,10 +42,10 @@ export function DiscardVerificationPlan({
       variables: { cashPlanVerificationId },
     });
     if (errors) {
-      showMessage('Error while submitting');
+      showMessage(t('Error while submitting'));
       return;
     }
-    showMessage('Verification plan has been discarded.');
+    showMessage(t('Verification plan has been discarded.'));
   };
   return (
     <>
@@ -64,28 +66,31 @@ export function DiscardVerificationPlan({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            Discard Verification Plan
+            {t('Discard Verification Plan')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
             <Box p={5}>
               <div>
-                Are you sure you would like to delete payment verification
-                records <br /> and restart the verification process?
+                {t(
+                  'Are you sure you would like to delete payment verification records <br /> and restart the verification process?',
+                )}
               </div>
             </Box>
           </DialogContainer>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setFinishDialogOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setFinishDialogOpen(false)}>
+              {t('CANCEL')}
+            </Button>
             <ErrorButtonContained
               type='submit'
               onClick={() => discard()}
               data-cy='button-submit'
             >
-              DISCARD
+              {t('DISCARD')}
             </ErrorButtonContained>
           </DialogActions>
         </DialogFooter>
