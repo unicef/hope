@@ -279,7 +279,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if not is_flex_field:
             return value
         if isinstance(value, numbers.Number):
-            return str(value)
+            return float(value)
         return value
 
     def _handle_bool_field(self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs):
@@ -686,7 +686,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if not is_flex_field:
             return value
         if isinstance(value, numbers.Number):
-            return str(value)
+            return float(value)
         return value
 
     def _cast_and_assign(self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]):
