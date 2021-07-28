@@ -1,21 +1,22 @@
-import React from 'react';
-import styled from 'styled-components';
 import {
-  InputAdornment,
-  MenuItem,
+  Box,
   FormControl,
   Grid,
-  Box,
+  InputAdornment,
+  MenuItem,
 } from '@material-ui/core';
+import { Group, Person, Search } from '@material-ui/icons';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
-import { Person, Search, Group } from '@material-ui/icons';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
-import InputLabel from '../../shared/InputLabel';
 import { TARGETING_STATES } from '../../utils/constants';
+import { ProgramNode } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { FieldLabel } from '../FieldLabel';
-import { ProgramNode } from '../../__generated__/graphql';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -55,6 +56,7 @@ export function TargetPopulationFilters({
   filter,
   programs,
 }: TargetPopulationFiltersProps): React.ReactElement {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
@@ -62,7 +64,7 @@ export function TargetPopulationFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
+            label={t('Search')}
             variant='outlined'
             value={filter.name || ''}
             margin='dense'
@@ -79,13 +81,13 @@ export function TargetPopulationFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
+            <InputLabel>{t('Status')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'status')}
               variant='outlined'
-              label='Programme'
+              label={t('Programme')}
               InputProps={{
                 startAdornment: (
                   <StartInputAdornment position='start'>
@@ -105,13 +107,13 @@ export function TargetPopulationFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Programme</InputLabel>
+            <InputLabel>{t('Programme')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'program')}
               variant='outlined'
-              label='Programme'
+              label={t('Programme')}
               value={filter.program || ''}
               InputProps={{
                 startAdornment: (
@@ -122,7 +124,7 @@ export function TargetPopulationFilters({
               }}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {programs.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
@@ -134,13 +136,13 @@ export function TargetPopulationFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Number of Households</FieldLabel>
+            <FieldLabel>{t('Number of Households')}</FieldLabel>
             <TextContainer
               id='minFilter'
               value={filter.numIndividuals.min}
               variant='outlined'
               margin='dense'
-              placeholder='From'
+              placeholder={t('From')}
               onChange={(e) =>
                 onFilterChange({
                   ...filter,
@@ -167,7 +169,7 @@ export function TargetPopulationFilters({
             value={filter.numIndividuals.max}
             variant='outlined'
             margin='dense'
-            placeholder='To'
+            placeholder={t('To')}
             onChange={(e) =>
               onFilterChange({
                 ...filter,
