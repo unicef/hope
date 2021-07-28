@@ -1,34 +1,35 @@
-import React, { useState } from 'react';
-import moment from 'moment';
-import * as Yup from 'yup';
-import get from 'lodash/get';
-import { Field, Form, Formik } from 'formik';
 import {
   Button,
   DialogContent,
   DialogTitle,
-  Typography,
-  Paper,
   Grid,
+  Paper,
+  Typography,
 } from '@material-ui/core';
-import styled from 'styled-components';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { Field, Form, Formik } from 'formik';
+import get from 'lodash/get';
+import moment from 'moment';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import * as Yup from 'yup';
+import { ALL_REPORTS_QUERY } from '../../apollo/queries/AllReports';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { REPORT_TYPES } from '../../utils/constants';
 import {
   useAllProgramsQuery,
   useCreateReportMutation,
   useReportChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../LoadingComponent';
-import { ALL_REPORTS_QUERY } from '../../apollo/queries/AllReports';
-import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
-import { REPORT_TYPES } from '../../utils/constants';
 import { FieldLabel } from '../FieldLabel';
+import { LoadingComponent } from '../LoadingComponent';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -41,27 +42,30 @@ const DialogFooter = styled.div`
   text-align: right;
 `;
 
-const validationSchema = Yup.object().shape({
-  reportType: Yup.string().required('Report type is required'),
-  dateFrom: Yup.date().required('Date From is required'),
-  dateTo: Yup.date()
-    .when(
-      'dateFrom',
-      (dateFrom, schema) =>
-        dateFrom &&
-        schema.min(
-          dateFrom,
-          `End date have to be greater than
-          ${moment(dateFrom).format('YYYY-MM-DD')}`,
-        ),
-      '',
-    )
-    .required('Date To is required'),
-});
 export const NewReportForm = (): React.ReactElement => {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
+
+  const validationSchema = Yup.object().shape({
+    reportType: Yup.string().required(t('Report type is required')),
+    dateFrom: Yup.date().required(t('Date From is required')),
+    dateTo: Yup.date()
+      .when(
+        'dateFrom',
+        (dateFrom, schema) =>
+          dateFrom &&
+          schema.min(
+            dateFrom,
+            `${t('End date have to be greater than')}
+            ${moment(dateFrom).format('YYYY-MM-DD')}`,
+          ),
+        '',
+      )
+      .required(t('Date To is required')),
+  });
+
   const {
     data: allProgramsData,
     loading: loadingPrograms,
@@ -159,7 +163,7 @@ export const NewReportForm = (): React.ReactElement => {
       <Grid item xs={12}>
         <Field
           name='adminArea'
-          label='Administrative Level 2'
+          label={t('Administrative Level 2')}
           variant='outlined'
           component={FormikAdminAreaAutocompleteMultiple}
         />
@@ -169,7 +173,7 @@ export const NewReportForm = (): React.ReactElement => {
       <Grid item xs={12}>
         <Field
           name='program'
-          label='Programme'
+          label={t('Programme')}
           fullWidth
           variant='outlined'
           choices={mappedPrograms}
@@ -213,19 +217,19 @@ export const NewReportForm = (): React.ReactElement => {
     switch (reportType) {
       case REPORT_TYPES.INDIVIDUALS:
       case REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS:
-        label = 'Last Registration Date';
+        label = t('Last Registration Date');
         break;
       case REPORT_TYPES.CASH_PLAN_VERIFICATION:
       case REPORT_TYPES.PAYMENT_VERIFICATION:
-        label = 'Completion Date';
+        label = t('Completion Date');
         break;
       case REPORT_TYPES.PAYMENTS:
       case REPORT_TYPES.INDIVIDUALS_AND_PAYMENT:
-        label = 'Delivery Date';
+        label = t('Delivery Date');
         break;
       case REPORT_TYPES.CASH_PLAN:
       case REPORT_TYPES.PROGRAM:
-        label = 'End Date';
+        label = t('End Date');
         break;
       default:
         break;
@@ -240,7 +244,7 @@ export const NewReportForm = (): React.ReactElement => {
         variant='contained'
         onClick={() => setDialogOpen(true)}
       >
-        NEW REPORT
+        {t('NEW REPORT')}
       </Button>
       <Dialog
         open={dialogOpen}
@@ -266,7 +270,9 @@ export const NewReportForm = (): React.ReactElement => {
             <>
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title' disableTypography>
-                  <Typography variant='h6'>Generate New Report</Typography>
+                  <Typography variant='h6'>
+                    {t('Generate New Report')}
+                  </Typography>
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
@@ -275,7 +281,7 @@ export const NewReportForm = (): React.ReactElement => {
                     <Grid item xs={12}>
                       <Field
                         name='reportType'
-                        label='Report Type'
+                        label={t('Report Type')}
                         fullWidth
                         variant='outlined'
                         required
@@ -292,7 +298,7 @@ export const NewReportForm = (): React.ReactElement => {
                         <Grid item xs={6}>
                           <Field
                             name='dateFrom'
-                            label='From Date'
+                            label={t('From Date')}
                             component={FormikDateField}
                             required
                             fullWidth
@@ -304,7 +310,7 @@ export const NewReportForm = (): React.ReactElement => {
                         <Grid item xs={6}>
                           <Field
                             name='dateTo'
-                            label='To Date'
+                            label={t('To Date')}
                             component={FormikDateField}
                             required
                             disabled={!values.dateFrom}
@@ -324,7 +330,9 @@ export const NewReportForm = (): React.ReactElement => {
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
+                  <Button onClick={() => setDialogOpen(false)}>
+                    {t('CANCEL')}
+                  </Button>
                   <Button
                     type='submit'
                     color='primary'
@@ -332,7 +340,7 @@ export const NewReportForm = (): React.ReactElement => {
                     onClick={submitForm}
                     data-cy='button-submit'
                   >
-                    GENERATE
+                    {t('GENERATE')}
                   </Button>
                 </DialogActions>
               </DialogFooter>

@@ -1,20 +1,21 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Box, Grid, Paper, Typography } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import {
+  choicesToDict,
+  renderBoolean,
+  sexToCapitalize,
+} from '../../utils/utils';
 import {
   IndividualNode,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
-import {
-  sexToCapitalize,
-  choicesToDict,
-  renderBoolean,
-} from '../../utils/utils';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { ContentLink } from '../ContentLink';
+import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
 import { UniversalMoment } from '../UniversalMoment';
-import { ContentLink } from '../ContentLink';
 import { DocumentPopulationPhotoModal } from './DocumentPopulationPhotoModal';
 
 const Overview = styled(Paper)`
@@ -37,6 +38,7 @@ interface IndividualBioDataProps {
 export function IndividualsBioData({
   individual,
 }: IndividualBioDataProps): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
   const {
@@ -100,69 +102,71 @@ export function IndividualsBioData({
       return age;
     }
     return '<1';
-  }
+  };
 
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>Bio Data</Typography>
+        <Typography variant='h6'>{t('Bio Data')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={3}>
-          <LabelizedField label='Full Name'>
+          <LabelizedField label={t('Full Name')}>
             {individual.fullName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Given Name'>
+          <LabelizedField label={t('Given Name')}>
             {individual.givenName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Middle Name'>
+          <LabelizedField label={t('Middle Name')}>
             {individual.middleName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Family Name'>
+          <LabelizedField label={t('Family Name')}>
             {individual.familyName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Gender'>
+          <LabelizedField label={t('Gender')}>
             {sexToCapitalize(individual.sex)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Age'>{formatAge(individual.age)}</LabelizedField>
+          <LabelizedField label={t('Age')}>
+            {formatAge(individual.age)}
+          </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Date of Birth'>
+          <LabelizedField label={t('Date of Birth')}>
             <UniversalMoment>{individual.birthDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Estimated Date of Birth'>
+          <LabelizedField label={t('Estimated Date of Birth')}>
             {renderBoolean(individual.estimatedBirthDate)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Marital Status'>
+          <LabelizedField label={t('Marital Status')}>
             {maritalStatusChoicesDict[individual.maritalStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Work Status'>
+          <LabelizedField label={t('Work Status')}>
             {workStatusChoicesDict[individual.workStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Pregnant'>
+          <LabelizedField label={t('Pregnant')}>
             {renderBoolean(individual.pregnant)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Household ID'>
+          <LabelizedField label={t('Household ID')}>
             {individual?.household?.id ? (
               <ContentLink
                 href={`/${businessArea}/population/household/${individual?.household?.id}`}
@@ -175,12 +179,12 @@ export function IndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Role'>
+          <LabelizedField label={t('Role')}>
             {roleChoicesDict[individual.role]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Relationship to HOH'>
+          <LabelizedField label={t('Relationship to HOH')}>
             {relationshipChoicesDict[individual.relationship]}
           </LabelizedField>
         </Grid>
@@ -188,39 +192,41 @@ export function IndividualsBioData({
           <BorderBox />
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Observed disabilities'>
+          <LabelizedField label={t('Observed disabilities')}>
             {individual.observedDisability
               .map((choice) => observedDisabilityChoicesDict[choice])
               .join(', ')}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Seeing disability severity'>
+          <LabelizedField label={t('Seeing disability severity')}>
             {severityOfDisabilityChoicesDict[individual.seeingDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Hearing disability severity'>
+          <LabelizedField label={t('Hearing disability severity')}>
             {severityOfDisabilityChoicesDict[individual.hearingDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Physical disability severity'>
+          <LabelizedField label={t('Physical disability severity')}>
             {severityOfDisabilityChoicesDict[individual.physicalDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Remembering or concentrating disability severity'>
+          <LabelizedField
+            label={t('Remembering or concentrating disability severity')}
+          >
             {severityOfDisabilityChoicesDict[individual.memoryDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Self-care disability severity'>
+          <LabelizedField label={t('Self-care disability severity')}>
             {severityOfDisabilityChoicesDict[individual.selfcareDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Communicating disability severity'>
+          <LabelizedField label={t('Communicating disability severity')}>
             {severityOfDisabilityChoicesDict[individual.commsDisability]}
           </LabelizedField>
         </Grid>
@@ -236,12 +242,12 @@ export function IndividualsBioData({
           <BorderBox />
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Phone Number'>
+          <LabelizedField label={t('Phone Number')}>
             {individual.phoneNo}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Alternate Phone Number'>
+          <LabelizedField label={t('Alternative Phone Number')}>
             {individual.phoneNoAlternative}
           </LabelizedField>
         </Grid>
@@ -249,7 +255,9 @@ export function IndividualsBioData({
           <BorderBox />
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Date of last screening against sanctions list'>
+          <LabelizedField
+            label={t('Date of last screening against sanctions list')}
+          >
             <UniversalMoment>
               {individual.sanctionListLastCheck}
             </UniversalMoment>
