@@ -172,7 +172,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         else:
             button.visible = False
 
-    @button()
+    @button(permission="user.can_inspect")
     def inspect(self, request, pk):
         context = self.get_common_context(request, pk)
         obj = context["original"]

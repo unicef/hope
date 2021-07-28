@@ -108,6 +108,15 @@
             "name": "SanctionListIndividualDateOfBirthNode"
           },
           {
+            "name": "TicketPositiveFeedbackDetailsNode"
+          },
+          {
+            "name": "TicketNegativeFeedbackDetailsNode"
+          },
+          {
+            "name": "TicketReferralDetailsNode"
+          },
+          {
             "name": "DocumentNode"
           },
           {

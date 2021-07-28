@@ -1,0 +1,117 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load staticfiles %}
+{% block content %}
+    <style>
+        .matrix, .matrix td, .matrix th {
+            border: 1px solid grey;
+        }
+
+        table.matrix {
+            width: 100%;
+            box-sizing: border-box;
+            border-collapse: collapse;
+        }
+
+        .matrix tr, .matrix td, .matrix th {
+            border: 1px solid #ddd;
+            position: relative;
+            padding: 10px;
+        }
+
+        .matrix td.header span {
+            transform-origin: 0 50%;
+            transform: rotate(-90deg);
+            white-space: nowrap;
+            display: block;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+        }
+    </style>
+    <input type="text" style="width: 578px;padding:10px;margin-bottom:10px" id="filterInput1"
+           placeholder="Search for...">
+    <a class="rotate" href="#">Rotate</a>
+    <table class="matrix matrix1" id="by_role">
+        <tr class="section">
+            <td>Role/Perm</td>
+            {% for role in roles %}
+                <td class="header"><span>{{ role }}</span></td>
+            {% endfor %}
+        </tr>
+
+        {% for role, values in matrix1.items %}
+            <tr class="perms">
+                <td>{{ role }}</td>
+                {% for val in values %}
+                    <td class="">{{ val }}</td>{% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+    <table class="matrix matrix2" id="by_perm" style="display: none">
+        <tr class="section">
+            <td>Role/Perm</td>
+            {% for perm in permissions %}
+                <td class="header" style="height: 100px"><span>{{ perm }}</span></td>
+            {% endfor %}
+        </tr>
+
+        {% for role, values in matrix2.items %}
+            <tr class="perms">
+                <td>{{ role }}</td>
+                {% for val in values %}
+                    <td class="">{{ val }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock content %}
+{% block footer %}
+    <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
+    <script>
+        function delay(callback, ms) {
+            var timer = 0;
+            return function () {
+                var context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    callback.apply(context, args);
+                }, ms || 0);
+            };
+        }
+
+        (function ($) {
+            $(".rotate").click(function () {
+                $('.matrix1').toggle()
+                $('.matrix2').toggle()
+                rotateHeaders();
+                return false;
+            });
+            function rotateHeaders(){
+                var header_height = 0;
+                $(".matrix td.header span").each(function () {
+                    if ($(this).outerWidth() > header_height) {
+                        header_height = $(this).outerWidth();
+                    }
+                });
+                $(".matrix td.header").height(header_height);
+            }
+
+            $("#filterInput1").on("keyup", delay(function () {
+                let filter = this.value.toUpperCase();
+                $("table tr.perms").each(function (i, el) {
+                    let txt = $(el).find("td").text();
+                    if (txt.toUpperCase().indexOf(filter) > -1) {
+                        $(el).closest(".section").show();
+                        $(el).show();
+                    } else {
+                        $(el).hide();
+                    }
+                });
+            }, 300)).trigger("keyup").focus();
+            rotateHeaders();
+        })(django.jQuery);
+
+    </script>
+    <div id="footer"></div>{% endblock %}

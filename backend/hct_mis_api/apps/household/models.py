@@ -1,11 +1,17 @@
 import logging
 import re
+from datetime import date, datetime, timedelta
+from collections import defaultdict
 from datetime import date
 
+from dateutil.relativedelta import relativedelta
+from django.contrib.gis.db.models import PointField, UniqueConstraint, Q, Count
+from django.contrib.postgres.fields import JSONField, CICharField
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
+from django.db.models import F, Sum
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -26,6 +32,7 @@ from hct_mis_api.apps.utils.models import (
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
+from dateutil.relativedelta import relativedelta
 
 BLANK = ""
 IDP = "IDP"
@@ -426,8 +433,282 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def total_cash_received(self):
         return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
 
+    @property
+    def total_cash_received_usd(self):
+        return (
+            self.payment_records.filter()
+            .aggregate(models.Sum("delivered_quantity_usd"))
+            .get("delivered_quantity_usd__sum")
+        )
+
+    @property
+    def programs_with_delivered_quantity(self):
+        programs = (
+            self.payment_records.all()
+            .annotate(program=F("cash_plan__program"))
+            .values("program")
+            .annotate(
+                total_delivered_quantity=Sum("delivered_quantity"),
+                total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
+                currency=F("currency"),
+                program_name=F("cash_plan__program__name"),
+                program_id=F("cash_plan__program__id"),
+            )
+            .order_by("cash_plan__program__created_at")
+        )
+
+        programs_dict = []
+
+        for program in programs:
+            programs_dict.append(
+                {
+                    "id": program["program_id"],
+                    "name": program["program_name"],
+                    "quantity": {
+                        "total_delivered_quantity": program["total_delivered_quantity"],
+                        "total_delivered_quantity_usd": program["total_delivered_quantity_usd"],
+                        "currency": program["currency"],
+                    },
+                }
+            )
+        return programs_dict
+
     def __str__(self):
         return f"{self.unicef_id}"
+
+    def recalculate_data(self):
+        for individual in self.individuals.all():
+            individual.recalculate_data()
+        date_6_years_ago = datetime.now() - relativedelta(years=+6)
+        date_12_years_ago = datetime.now() - relativedelta(years=+12)
+        date_18_years_ago = datetime.now() - relativedelta(years=+18)
+        date_60_years_ago = datetime.now() - relativedelta(years=+60)
+        age_groups = self.individuals.aggregate(
+            female_age_group_0_5_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(withdrawn=False, duplicate=False, birth_date__gt=date_6_years_ago, sex=FEMALE),
+            ),
+            female_age_group_6_11_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_6_years_ago,
+                    birth_date__gt=date_12_years_ago,
+                    sex=FEMALE,
+                ),
+            ),
+            female_age_group_12_17_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_12_years_ago,
+                    birth_date__gt=date_18_years_ago,
+                    sex=FEMALE,
+                ),
+            ),
+            female_age_group_18_59_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(birth_date__lte=date_18_years_ago, birth_date__gt=date_60_years_ago, sex=FEMALE),
+            ),
+            female_age_group_60_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(withdrawn=False, duplicate=False, birth_date__lte=date_60_years_ago, sex=FEMALE),
+            ),
+            male_age_group_0_5_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(withdrawn=False, duplicate=False, birth_date__gt=date_6_years_ago, sex=MALE),
+            ),
+            male_age_group_6_11_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_6_years_ago,
+                    birth_date__gt=date_12_years_ago,
+                    sex=MALE,
+                ),
+            ),
+            male_age_group_12_17_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_12_years_ago,
+                    birth_date__gt=date_18_years_ago,
+                    sex=MALE,
+                ),
+            ),
+            male_age_group_18_59_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_18_years_ago,
+                    birth_date__gt=date_60_years_ago,
+                    sex=MALE,
+                ),
+            ),
+            male_age_group_60_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(withdrawn=False, duplicate=False, birth_date__lte=date_60_years_ago, sex=MALE),
+            ),
+            female_age_group_0_5_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False, duplicate=False, birth_date__gt=date_6_years_ago, sex=FEMALE, disability=True
+                ),
+            ),
+            female_age_group_6_11_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_6_years_ago,
+                    birth_date__gt=date_12_years_ago,
+                    sex=FEMALE,
+                    disability=True,
+                ),
+            ),
+            female_age_group_12_17_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_12_years_ago,
+                    birth_date__gt=date_18_years_ago,
+                    sex=FEMALE,
+                    disability=True,
+                ),
+            ),
+            female_age_group_18_59_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_18_years_ago,
+                    birth_date__gt=date_60_years_ago,
+                    sex=FEMALE,
+                    disability=True,
+                ),
+            ),
+            female_age_group_60_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False, duplicate=False, birth_date__lte=date_60_years_ago, sex=FEMALE, disability=True
+                ),
+            ),
+            male_age_group_0_5_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(withdrawn=False, duplicate=False, birth_date__gt=date_6_years_ago, sex=MALE, disability=True),
+            ),
+            male_age_group_6_11_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_6_years_ago,
+                    birth_date__gt=date_12_years_ago,
+                    sex=MALE,
+                    disability=True,
+                ),
+            ),
+            male_age_group_12_17_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_12_years_ago,
+                    birth_date__gt=date_18_years_ago,
+                    sex=MALE,
+                    disability=True,
+                ),
+            ),
+            male_age_group_18_59_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                    birth_date__lte=date_18_years_ago,
+                    birth_date__gt=date_60_years_ago,
+                    sex=MALE,
+                    disability=True,
+                ),
+            ),
+            male_age_group_60_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False, duplicate=False, birth_date__lte=date_60_years_ago, sex=MALE, disability=True
+                ),
+            ),
+            size=Count(
+                "id",
+                distinct=True,
+                filter=Q(
+                    withdrawn=False,
+                    duplicate=False,
+                ),
+            ),
+            pregnant_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(withdrawn=False, pregnant=True),
+            ),
+        )
+        self.female_age_group_0_5_disabled_count = age_groups.get("female_age_group_0_5_disabled_count")
+        self.female_age_group_6_11_disabled_count = age_groups.get("female_age_group_6_11_disabled_count")
+        self.female_age_group_12_17_disabled_count = age_groups.get("female_age_group_12_17_disabled_count")
+        self.female_age_group_18_59_disabled_count = age_groups.get("female_age_group_18_59_disabled_count")
+        self.female_age_group_60_disabled_count = age_groups.get("female_age_group_60_disabled_count")
+
+        self.male_age_group_0_5_disabled_count = age_groups.get("male_age_group_0_5_disabled_count")
+        self.male_age_group_6_11_disabled_count = age_groups.get("male_age_group_6_11_disabled_count")
+        self.male_age_group_12_17_disabled_count = age_groups.get("male_age_group_12_17_disabled_count")
+        self.male_age_group_18_59_disabled_count = age_groups.get("male_age_group_18_59_disabled_count")
+        self.male_age_group_60_disabled_count = age_groups.get("male_age_group_60_disabled_count")
+
+        self.female_age_group_0_5_count = age_groups.get("female_age_group_0_5_count")
+        self.female_age_group_6_11_count = age_groups.get("female_age_group_6_11_count")
+        self.female_age_group_12_17_count = age_groups.get("female_age_group_12_17_count")
+        self.female_age_group_18_59_count = age_groups.get("female_age_group_18_59_count")
+        self.female_age_group_60_count = age_groups.get("female_age_group_60_count")
+
+        self.male_age_group_0_5_count = age_groups.get("male_age_group_0_5_count")
+        self.male_age_group_6_11_count = age_groups.get("male_age_group_6_11_count")
+        self.male_age_group_12_17_count = age_groups.get("male_age_group_12_17_count")
+        self.male_age_group_18_59_count = age_groups.get("male_age_group_18_59_count")
+        self.male_age_group_60_count = age_groups.get("male_age_group_60_count")
+        self.pregnant_count = age_groups.get("pregnant_count")
+        self.size = age_groups.get("size")
+        self.child_hoh = False
+        self.fchild_hoh = False
+        if self.head_of_household.age < 18:
+            if self.head_of_household.sex == FEMALE:
+                self.fchild_hoh = True
+            else:
+                self.child_hoh = True
+        self.save()
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -469,7 +750,7 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     def clean(self):
         from django.core.exceptions import ValidationError
 
-        for validator in self.type.validators:
+        for validator in self.type.validators.all():
             if not re.match(validator.regex, self.document_number):
                 logger.error("Document number is not validating")
                 raise ValidationError("Document number is not validating")
@@ -736,6 +1017,22 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
+
+    def recalculate_data(self):
+        disability_fields = (
+            "seeing_disability",
+            "hearing_disability",
+            "physical_disability",
+            "memory_disability",
+            "selfcare_disability",
+            "comms_disability",
+        )
+        should_be_disabled = False
+        for field in disability_fields:
+            value = getattr(self, field, None)
+            should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
+        self.disability = DISABLED if should_be_disabled else NOT_DISABLED
+        self.save()
 
     def count_all_roles(self):
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()

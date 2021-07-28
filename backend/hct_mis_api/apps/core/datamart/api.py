@@ -44,7 +44,7 @@ class DatamartAPI:
         return self._handle_get_request(url)
 
     def get_locations(self, *, country=None, gis=False, max_records=None, page_size=None):
-        url = f"/api/latest/datamart/locations/?&page_size={page_size or self.PAGE_SIZE}"
+        url = f"/api/latest/datamart/locations/?&ordering=id,page_size={page_size or self.PAGE_SIZE}"
         if country:
             url = f"{url}&country_name={country}"
         if gis:
@@ -56,7 +56,8 @@ class DatamartAPI:
             next_url = data["next"]
             for entry in data["results"]:
                 records += 1
-                yield entry
+                if entry["is_active"]:
+                    yield entry
                 if max_records and records >= max_records:
                     break
             if max_records and records >= max_records:

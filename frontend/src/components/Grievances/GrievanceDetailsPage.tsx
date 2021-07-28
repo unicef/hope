@@ -492,7 +492,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
             </OverviewContainer>
           </ContainerColumnWithBorder>
         </Grid>
-        <Grid item xs={8}>
+        <Grid item xs={12}>
           {ticket?.category?.toString() ===
             GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING && (
             <PaddingContainer>
@@ -547,11 +547,13 @@ export function GrievanceDetailsPage(): React.ReactElement {
               />
             </PaddingContainer>
           )}
+        </Grid>
+        <Grid item xs={9}>
           <PaddingContainer>
             <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
           </PaddingContainer>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           {renderRightSection()}
         </Grid>
       </Grid>

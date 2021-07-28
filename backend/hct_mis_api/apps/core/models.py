@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
@@ -46,12 +47,43 @@ class BusinessArea(TimeStampedUUIDModel):
         unique=True,
         db_index=True,
     )
+    custom_fields = JSONField(default=dict, blank=True)
+
     has_data_sharing_agreement = models.BooleanField(default=False)
     parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
     is_split = models.BooleanField(default=False)
 
     countries = models.ManyToManyField(
         "AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0}, related_name="business_areas"
+    )
+    deduplication_batch_duplicate_score = models.FloatField(
+        default=6.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results equal or above this score are considered duplicates",
+    )
+
+    deduplication_batch_duplicates_percentage = models.IntegerField(
+        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+    )
+    deduplication_batch_duplicates_allowed = models.IntegerField(
+        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
+    )
+
+    deduplication_golden_record_duplicate_score = models.FloatField(
+        default=6.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results equal or above this score are considered duplicates",
+    )
+    deduplication_golden_record_duplicates_percentage = models.IntegerField(
+        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+    )
+    deduplication_golden_record_duplicates_allowed = models.IntegerField(
+        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
+    )
+    deduplication_golden_record_min_score = models.FloatField(
+        default=11.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results below the minimum score will not be taken into account",
     )
 
     def save(self, *args, **kwargs):
@@ -65,7 +97,12 @@ class BusinessArea(TimeStampedUUIDModel):
 
     class Meta:
         ordering = ["name"]
-        permissions = (("can_split", "Can split BusinessArea"),)
+        permissions = (
+            ("can_split", "Can split BusinessArea"),
+            ("can_send_doap", "Can send DOAP matrix"),
+            ("can_reset_doap", "Can force sync DOAP matrix"),
+            ("can_export_doap", "Can export DOAP matrix"),
+        )
 
     def __str__(self):
         return self.name
@@ -187,7 +224,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         return self.title
 
     def country(self):
-        return AdminArea.objects.get(tree_id=self.tree_id, parent=None)
+        try:
+            return AdminArea.objects.get(tree_id=self.tree_id, parent=None)
+        except Exception:
+            return None
 
     @property
     def geo_point(self):
@@ -247,6 +287,10 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         null=True,
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
+
+    @property
+    def is_flex_field(self):
+        return True
 
     def __str__(self):
         return f"type: {self.type}, name: {self.name}"
