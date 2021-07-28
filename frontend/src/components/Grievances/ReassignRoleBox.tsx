@@ -1,20 +1,20 @@
 import { Box, Paper, Typography } from '@material-ui/core';
+import WarningIcon from '@material-ui/icons/Warning';
+import _ from 'lodash';
 import capitalize from 'lodash/capitalize';
 import React from 'react';
-import WarningIcon from '@material-ui/icons/Warning';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import _ from 'lodash';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../utils/constants';
-import { LabelizedField } from '../LabelizedField';
+import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../ContentLink';
+import { LabelizedField } from '../LabelizedField';
 import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUpReassignRole/ReassignRoleUnique';
-import { useTranslation } from 'react-i18next';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.oragne};
