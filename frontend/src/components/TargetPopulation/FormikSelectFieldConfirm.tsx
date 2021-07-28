@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
 import {
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   FormHelperText,
-  MenuItem,
   InputLabel,
+  MenuItem,
   Select,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
 } from '@material-ui/core';
-import { DialogFooter, DialogTitleWrapper } from '../ConfirmationDialog';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { getFullNodeFromEdgesById } from '../../utils/utils';
-import { useTranslation } from 'react-i18next';
+import { DialogFooter, DialogTitleWrapper } from '../ConfirmationDialog';
 
 export const FormikSelectFieldConfirm = ({
   field,
