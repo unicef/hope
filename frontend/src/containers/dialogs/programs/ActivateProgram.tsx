@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Button,
   Dialog,
@@ -7,17 +5,20 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { programCompare } from '../../../utils/utils';
 import {
   AllProgramsQuery,
   ProgramNode,
   ProgramStatus,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { programCompare } from '../../../utils/utils';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 import { DialogActions } from '../DialogActions';
 
 const DialogTitleWrapper = styled.div`
@@ -44,6 +45,7 @@ interface ActivateProgramProps {
 export function ActivateProgram({
   program,
 }: ActivateProgramProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -79,13 +81,13 @@ export function ActivateProgram({
       },
     });
     if (!response.errors && response.data.updateProgram) {
-      showMessage('Programme activated.', {
+      showMessage(t('Programme activated.'), {
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
         dataCy: 'snackbar-program-activate-success',
       });
       setOpen(false);
     } else {
-      showMessage('Programme activate action failed.', {
+      showMessage(t('Programme activate action failed.'), {
         dataCy: 'snackbar-program-activate-failure',
       });
     }
@@ -108,17 +110,17 @@ export function ActivateProgram({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>Activate Programme</Typography>
+            <Typography variant='h6'>{t('Activate Programme')}</Typography>
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            Are you sure you want to activate this Programme?
+            {t('Are you sure you want to activate this Programme?')}
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <Button
               type='submit'
               color='primary'
@@ -126,7 +128,7 @@ export function ActivateProgram({
               onClick={activateProgram}
               data-cy='button-activate-program'
             >
-              ACTIVATE
+              {t('ACTIVATE')}
             </Button>
           </DialogActions>
         </DialogFooter>

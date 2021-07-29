@@ -1,5 +1,3 @@
-import React from 'react';
-import styled from 'styled-components';
 import {
   Button,
   DialogActions,
@@ -7,6 +5,9 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { Dialog } from '../containers/dialogs/Dialog';
 
 interface ConfirmationDialogProps {
@@ -29,7 +30,9 @@ export const DialogFooter = styled.div`
   text-align: right;
 `;
 
-export class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
+export class ConfirmationDialog extends React.Component<
+  ConfirmationDialogProps
+> {
   //eslint-disable-next-line
   state = {
     open: false,
@@ -80,6 +83,7 @@ export class ConfirmationDialog extends React.Component<ConfirmationDialogProps>
   };
 
   render(): React.ReactElement {
+    const { t } = useTranslation();
     const { title, content, continueText, extraContent } = this.props;
     const { children } = this.props;
     const { open } = this.state;
@@ -106,7 +110,7 @@ export class ConfirmationDialog extends React.Component<ConfirmationDialogProps>
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Button onClick={() => this.hide()}>CANCEL</Button>
+              <Button onClick={() => this.hide()}>{t('CANCEL')}</Button>
               <Button
                 type='submit'
                 color='primary'
@@ -114,7 +118,7 @@ export class ConfirmationDialog extends React.Component<ConfirmationDialogProps>
                 onClick={() => this.confirm()}
                 data-cy='button-submit'
               >
-                {continueText || 'Continue'}
+                {continueText || t('Continue')}
               </Button>
             </DialogActions>
           </DialogFooter>
