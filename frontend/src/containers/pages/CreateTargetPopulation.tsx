@@ -1,31 +1,32 @@
-import React from 'react';
-import * as Yup from 'yup';
-import styled from 'styled-components';
 import { Button, Paper, Typography } from '@material-ui/core';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import { PageHeader } from '../../components/PageHeader';
-import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { Results } from '../../components/TargetPopulation/Results';
-import {
-  useCreateTpMutation,
-  useAllProgramsQuery,
-} from '../../__generated__/graphql';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import * as Yup from 'yup';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { CreateTable } from '../tables/TargetPopulation/Create';
-import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
-import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
-import { TargetingCriteriaDisabled } from '../../components/TargetPopulation/TargetingCriteria/TargetingCriteriaDisabled';
-import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PageHeader } from '../../components/PageHeader';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { Results } from '../../components/TargetPopulation/Results';
+import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
+import { TargetingCriteriaDisabled } from '../../components/TargetPopulation/TargetingCriteria/TargetingCriteriaDisabled';
+import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
 import {
   getFullNodeFromEdgesById,
   handleValidationErrors,
 } from '../../utils/utils';
+import {
+  useAllProgramsQuery,
+  useCreateTpMutation,
+} from '../../__generated__/graphql';
+import { CreateTable } from '../tables/TargetPopulation/Create';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -45,6 +46,7 @@ const Label = styled.p`
 `;
 
 export function CreateTargetPopulation(): React.ReactElement {
+  const { t } = useTranslation();
   const initialValues = {
     name: '',
     criterias: [],
@@ -69,14 +71,14 @@ export function CreateTargetPopulation(): React.ReactElement {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Targeting',
+      title: t('Targeting'),
       to: `/${businessArea}/target-population/`,
     },
   ];
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .min(2, 'Too short')
-      .max(255, 'Too long'),
+      .min(2, t('Too short'))
+      .max(255, t('Too long')),
   });
 
   return (
@@ -95,7 +97,7 @@ export function CreateTargetPopulation(): React.ReactElement {
               },
             },
           });
-          showMessage('Target Population Created', {
+          showMessage(t('Target Population Created'), {
             pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
             historyMethod: 'push',
           });
@@ -107,7 +109,9 @@ export function CreateTargetPopulation(): React.ReactElement {
             showMessage,
           );
           if (nonValidationErrors.length > 0) {
-            showMessage('Unexpected problem while creating Target Population');
+            showMessage(
+              t('Unexpected problem while creating Target Population'),
+            );
           }
         }
       }}
@@ -118,7 +122,7 @@ export function CreateTargetPopulation(): React.ReactElement {
             title={
               <Field
                 name='name'
-                label='Enter Target Population Name'
+                label={t('Enter Target Population Name')}
                 type='text'
                 fullWidth
                 required
@@ -141,7 +145,7 @@ export function CreateTargetPopulation(): React.ReactElement {
                   disabled={values.criterias?.length === 0 || !values.name}
                   data-cy='button-target-population-create'
                 >
-                  Save
+                  {t('Save')}
                 </Button>
               </ButtonContainer>
             </>
@@ -179,9 +183,9 @@ export function CreateTargetPopulation(): React.ReactElement {
           ) : (
             <PaperContainer>
               <Typography variant='h6'>
-                Target Population Entries (Households)
+                {t('Target Population Entries (Households)')}
               </Typography>
-              <Label>Add targeting criteria to see results.</Label>
+              <Label>{t('Add targeting criteria to see results.')}</Label>
             </PaperContainer>
           )}
         </Form>

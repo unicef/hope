@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
-import { IndividualsListTable } from '../tables/IndividualsListTable';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { IndividualsFilter } from '../../components/population/IndividualsFilter';
-import { useDebounce } from '../../hooks/useDebounce';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { IndividualsFilter } from '../../components/population/IndividualsFilter';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useDebounce } from '../../hooks/useDebounce';
 import { usePermissions } from '../../hooks/usePermissions';
+import { IndividualsListTable } from '../tables/IndividualsListTable';
 
 const Container = styled.div`
   display: flex;
@@ -16,6 +17,7 @@ const Container = styled.div`
 `;
 
 export function PopulationIndividualsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
@@ -34,7 +36,7 @@ export function PopulationIndividualsPage(): React.ReactElement {
 
   return (
     <>
-      <PageHeader title='Individuals' />
+      <PageHeader title={t('Individuals')} />
       <IndividualsFilter filter={filter} onFilterChange={setFilter} />
       <Container data-cy='page-details-container'>
         <IndividualsListTable
