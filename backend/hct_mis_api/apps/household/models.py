@@ -477,6 +477,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return f"{self.unicef_id}"
 
     def recalculate_data(self):
+        if not (self.collect_individual_data == YES):
+            return
         for individual in self.individuals.all():
             individual.recalculate_data()
         date_6_years_ago = datetime.now() - relativedelta(years=+6)
