@@ -1,16 +1,17 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import { CashPlanNode } from '../__generated__/graphql';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useBusinessArea } from '../hooks/useBusinessArea';
 import { MiśTheme } from '../theme';
 import { cashPlanStatusToColor } from '../utils/utils';
-import { useBusinessArea } from '../hooks/useBusinessArea';
+import { CashPlanNode } from '../__generated__/graphql';
+import { ContainerWithBorder } from './ContainerWithBorder';
+import { ContentLink } from './ContentLink';
 import { LabelizedField } from './LabelizedField';
+import { OverviewContainer } from './OverviewContainer';
 import { StatusBox } from './StatusBox';
 import { UniversalMoment } from './UniversalMoment';
-import { ContainerWithBorder } from './ContainerWithBorder';
-import { OverviewContainer } from './OverviewContainer';
-import { ContentLink } from './ContentLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -43,6 +44,7 @@ interface CashPlanProps {
 export function CashPlanDetails({
   cashPlan,
 }: CashPlanProps): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
   const filteredTps = (): Array<{
@@ -81,12 +83,12 @@ export function CashPlanDetails({
   return (
     <ContainerWithBorder>
       <Title>
-        <Typography variant='h6'>Cash Plan Details</Typography>
+        <Typography variant='h6'>{t('Cash Plan Details')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
           <Grid item xs={4}>
-            <LabelizedField label='status'>
+            <LabelizedField label={t('Status')}>
               <StatusContainer>
                 <StatusBox
                   status={cashPlan.status}
@@ -97,55 +99,60 @@ export function CashPlanDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='plan start date'
+              label={t('Plan Start Date')}
               value={<UniversalMoment>{cashPlan?.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='plan end date'
+              label={t('Plan End Date')}
               value={<UniversalMoment>{cashPlan?.endDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='cash plan name' value={cashPlan.name} />
+            <LabelizedField label={t('cash plan name')} value={cashPlan.name} />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='delivery type'
+              label={t('delivery type')}
               value={cashPlan.deliveryType}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='assistance through'
+              label={t('assistance through')}
               value={cashPlan.serviceProvider?.fullName}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='dispertion date'
+              label={t('dispertion date')}
               value={
                 <UniversalMoment>{cashPlan?.dispersionDate}</UniversalMoment>
               }
             />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='fc id' value={cashPlan.fundsCommitment} />
+            <LabelizedField
+              label={t('fc id')}
+              value={cashPlan.fundsCommitment}
+            />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='dp id' value={cashPlan.downPayment} />
+            <LabelizedField label={t('dp id')} value={cashPlan.downPayment} />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='Target population(s)'
+              label={t('Target population(s)')}
               value={renderTargetPopulations()}
             />
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
-          <LabelizedField label='Total Number of Households'>
-            <NumberOfHouseHoldsValue>{cashPlan.totalNumberOfHouseholds}</NumberOfHouseHoldsValue>
+          <LabelizedField label={t('Total Number of Households')}>
+            <NumberOfHouseHoldsValue>
+              {cashPlan.totalNumberOfHouseholds}
+            </NumberOfHouseHoldsValue>
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
