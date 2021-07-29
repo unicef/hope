@@ -1,20 +1,21 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { PermissionDenied } from '../../components/PermissionDenied';
 import { ProgramDetails } from '../../components/programs/ProgramDetails';
-import { CashPlanTable } from '../tables/CashPlanTable';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { usePermissions } from '../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../utils/utils';
 import {
   ProgramNode,
   ProgramStatus,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../../components/LoadingComponent';
+import { CashPlanTable } from '../tables/CashPlanTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { isPermissionDeniedError } from '../../utils/utils';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 
 const Container = styled.div`
@@ -50,6 +51,7 @@ const NoCashPlansSubTitle = styled.div`
 `;
 
 export function ProgramDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { data, loading, error } = useProgramQuery({
     variables: { id },
@@ -84,11 +86,12 @@ export function ProgramDetailsPage(): React.ReactElement {
         {program.status === ProgramStatus.Draft ? (
           <NoCashPlansContainer>
             <NoCashPlansTitle>
-              To see more details please Activate your Programme
+              {t('To see more details please Activate your Programme')}
             </NoCashPlansTitle>
             <NoCashPlansSubTitle>
-              All data will be pushed to CashAssist. You can edit this plan even
-              if it is active.
+              {t(
+                'All data will be pushed to CashAssist. You can edit this plan even if it is active.',
+              )}
             </NoCashPlansSubTitle>
           </NoCashPlansContainer>
         ) : (

@@ -11,6 +11,7 @@ import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
+import { useTranslation } from 'react-i18next';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -29,6 +30,7 @@ export function RegistrationDataImportDetailsPageHeader({
   canRerunDedupe,
   canViewList,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   let buttons = null;
   // eslint-disable-next-line default-case
@@ -66,7 +68,7 @@ export function RegistrationDataImportDetailsPageHeader({
                 component={Link}
                 to={`/${businessArea}/grievance-and-feedback/rdi/${registration.id}`}
               >
-                View Tickets
+                {t('View Tickets')}
               </Button>
             </MergeButtonContainer>
           )}
@@ -77,7 +79,7 @@ export function RegistrationDataImportDetailsPageHeader({
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Registration Data import',
+      title: t('Registration Data import'),
       to: `/${businessArea}/registration-data-import/`,
     },
   ];

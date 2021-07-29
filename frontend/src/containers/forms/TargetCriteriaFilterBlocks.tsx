@@ -1,10 +1,11 @@
-import styled from 'styled-components';
-import { FieldArray } from 'formik';
 import { Box, Button } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
+import { FieldArray } from 'formik';
 import React, { Fragment } from 'react';
-import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { chooseFieldType, clearField } from '../../utils/targetingUtils';
+import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
 
 const Divider = styled.div`
@@ -78,6 +79,7 @@ export function TargetCriteriaFilterBlocks({
   values;
   onDelete: () => void;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const shouldShowAndDivider =
     blockIndex + 1 < values.individualsFiltersBlocks.length;
   return (
@@ -145,7 +147,7 @@ export function TargetCriteriaFilterBlocks({
                     backgroundColor: '#fff',
                   }}
                 >
-                  Add Next Rule
+                  {t('Add Next Rule')}
                 </Button>
               </Box>
             </GrayFiltersBlock>
@@ -154,7 +156,7 @@ export function TargetCriteriaFilterBlocks({
       />
       {shouldShowAndDivider && (
         <AndDivider>
-          <AndDividerLabel>And</AndDividerLabel>
+          <AndDividerLabel>{t('And')}</AndDividerLabel>
         </AndDivider>
       )}
     </div>

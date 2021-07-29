@@ -33,6 +33,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
 import { BlackLink } from '../../components/BlackLink';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
   display: flex;
@@ -83,6 +84,7 @@ const StatusContainer = styled.div`
 `;
 
 export function PaymentVerificationDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
@@ -164,7 +166,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           rel='noopener noreferrer'
           to={`/${businessArea}/cashplans/${cashPlan.id}`}
         >
-          Cash Plan {cashPlan.caId}
+          {t('Cash Plan')} {cashPlan.caId}
         </BlackLink>
       }
       breadCrumbs={
@@ -217,13 +219,13 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         <Grid container>
           <Grid item xs={9}>
             <Title>
-              <Typography variant='h6'>Cash Plan Details</Typography>
+              <Typography variant='h6'>{t('Cash Plan Details')}</Typography>
             </Title>
             <Grid container>
               {[
-                { label: 'PROGRAMME NAME', value: cashPlan.program.name },
+                { label: t('PROGRAMME NAME'), value: cashPlan.program.name },
                 {
-                  label: 'PROGRAMME ID',
+                  label: t('PROGRAMME ID'),
                   value: (
                     <BlackLink
                       target='_blank'
@@ -235,17 +237,17 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   ),
                 },
                 {
-                  label: 'PAYMENT RECORDS',
+                  label: t('PAYMENT RECORDS'),
                   value: cashPlan.paymentRecords.totalCount,
                 },
                 {
-                  label: 'START DATE',
+                  label: t('START DATE'),
                   value: (
                     <UniversalMoment>{cashPlan.startDate}</UniversalMoment>
                   ),
                 },
                 {
-                  label: 'END DATE',
+                  label: t('END DATE'),
                   value: <UniversalMoment>{cashPlan.endDate}</UniversalMoment>,
                 },
               ].map((el) => (
@@ -260,15 +262,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           <Grid item xs={3}>
             <BorderLeftBox>
               <Title>
-                <Typography variant='h6'>Bank reconciliation</Typography>
+                <Typography variant='h6'>{t('Bank reconciliation')}</Typography>
               </Title>
               <Grid container>
                 <Grid item xs={6}>
                   <Grid container direction='column'>
-                    <LabelizedField label='SUCCESSFUL'>
+                    <LabelizedField label={t('SUCCESSFUL')}>
                       <p>{bankReconciliationSuccessPercentage}%</p>
                     </LabelizedField>
-                    <LabelizedField label='ERRONEUS'>
+                    <LabelizedField label={t('ERRONEUS')}>
                       <p>{bankReconciliationErrorPercentage}%</p>
                     </LabelizedField>
                   </Grid>
@@ -286,7 +288,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         },
                       }}
                       data={{
-                        labels: ['Successful', 'Erroneus'],
+                        labels: [t('SUCCESSFUL'), t('ERRONEUS')],
                         datasets: [
                           {
                             data: [
@@ -309,13 +311,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       {cashPlan.verifications && cashPlan.verifications.edges.length ? (
         <Container>
           <Title>
-            <Typography variant='h6'>Verification Plan Details</Typography>
+            <Typography variant='h6'>
+              {t('Verification Plan Details')}
+            </Typography>
           </Title>
           <Grid container>
             <Grid item xs={11}>
               <Grid container>
                 <Grid item xs={3}>
-                  <LabelizedField label='STATUS'>
+                  <LabelizedField label={t('STATUS')}>
                     <StatusContainer>
                       <StatusBox
                         status={verificationPlan.status}
@@ -326,32 +330,35 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 </Grid>
                 {[
                   {
-                    label: 'SAMPLING',
+                    label: t('SAMPLING'),
                     value: samplingChoicesDict[verificationPlan.sampling],
                   },
                   {
-                    label: 'RESPONDED',
+                    label: t('RESPONDED'),
                     value: verificationPlan.respondedCount,
                   },
                   {
-                    label: 'RECEIVED WITH ISSUES',
+                    label: t('RECEIVED WITH ISSUES'),
                     value: verificationPlan.receivedWithProblemsCount,
                   },
                   {
-                    label: 'VERIFICATION METHOD',
+                    label: t('VERIFICATION METHOD'),
                     value: verificationPlan.verificationMethod,
                   },
-                  { label: 'SAMPLE SIZE', value: verificationPlan.sampleSize },
                   {
-                    label: 'RECEIVED',
+                    label: t('SAMPLE SIZE'),
+                    value: verificationPlan.sampleSize,
+                  },
+                  {
+                    label: t('RECEIVED'),
                     value: verificationPlan.receivedCount,
                   },
                   {
-                    label: 'NOT RECEIVED',
+                    label: t('NOT RECEIVED'),
                     value: verificationPlan.notReceivedCount,
                   },
                   {
-                    label: 'ACTIVATION DATE',
+                    label: t('ACTIVATION DATE'),
                     value: (
                       <UniversalMoment>
                         {verificationPlan.activationDate}
@@ -359,7 +366,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                     ),
                   },
                   {
-                    label: 'COMPLETION DATE',
+                    label: t('COMPLETION DATE'),
                     value: (
                       <UniversalMoment>
                         {verificationPlan.completionDate}
@@ -389,10 +396,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   }}
                   data={{
                     labels: [
-                      'RECEIVED',
-                      'RECEIVED WITH ISSUES',
-                      'NOT RECEIVED',
-                      'PENDING',
+                      t('RECEIVED'),
+                      t('RECEIVED WITH ISSUES'),
+                      t('NOT RECEIVED'),
+                      t('PENDING'),
                     ],
                     datasets: [
                       {
@@ -461,13 +468,13 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       cashPlan.verificationStatus !== 'ACTIVE' &&
       cashPlan.verificationStatus !== 'FINISHED' ? (
         <BottomTitle>
-          To see more details please activate Verification Plan
+          {t('To see more details please activate Verification Plan')}
         </BottomTitle>
       ) : null}
       {!cashPlan.verifications.edges.length &&
       cashPlan.verificationStatus !== 'ACTIVE' ? (
         <BottomTitle>
-          To see more details please create Verification Plan
+          {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
       {cashPlan.verifications?.edges[0]?.node?.id &&

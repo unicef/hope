@@ -1,8 +1,9 @@
-import styled from 'styled-components';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { FieldChooser } from '../../components/TargetPopulation/FieldChooser';
 import { SubField } from '../../components/TargetPopulation/SubField';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FieldChooser } from '../../components/TargetPopulation/FieldChooser';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;
@@ -44,8 +45,8 @@ export function TargetingCriteriaFilter({
   values;
   onClick: () => void;
 }): React.ReactElement {
-  const shouldShowDivider =
-    index + 1 < values.filters.length;
+  const { t } = useTranslation();
+  const shouldShowDivider = index + 1 < values.filters.length;
   return (
     <div>
       <FieldChooser
@@ -64,7 +65,7 @@ export function TargetingCriteriaFilter({
       )}
       {shouldShowDivider && (
         <Divider>
-          <DividerLabel>And</DividerLabel>
+          <DividerLabel>{t('And')}</DividerLabel>
         </Divider>
       )}
     </div>

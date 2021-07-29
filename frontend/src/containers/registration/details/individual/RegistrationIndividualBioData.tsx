@@ -1,21 +1,22 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { ContentLink } from '../../../../components/ContentLink';
+import { LabelizedField } from '../../../../components/LabelizedField';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
-  decodeIdString,
-  sexToCapitalize,
   choicesToDict,
+  decodeIdString,
   renderBoolean,
+  sexToCapitalize,
 } from '../../../../utils/utils';
 import {
   ImportedIndividualDetailedFragment,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { LabelizedField } from '../../../../components/LabelizedField';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../../../components/LoadingComponent';
-import { UniversalMoment } from '../../../../components/UniversalMoment';
-import { ContentLink } from '../../../../components/ContentLink';
 import { DocumentRegistrationPhotoModal } from './DocumentRegistrationPhotoModal';
 
 const Overview = styled(Paper)`
@@ -38,6 +39,7 @@ interface RegistrationIndividualBioDataProps {
 export function RegistrationIndividualsBioData({
   individual,
 }: RegistrationIndividualBioDataProps): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
   const {
@@ -78,7 +80,7 @@ export function RegistrationIndividualsBioData({
             )}
           </LabelizedField>
         </Box>
-        <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{edge.node.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -91,7 +93,7 @@ export function RegistrationIndividualsBioData({
             {item.documentNumber}
           </LabelizedField>
         </Box>
-        <LabelizedField label='issued'>{item.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{item.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -99,64 +101,64 @@ export function RegistrationIndividualsBioData({
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>Bio Data</Typography>
+        <Typography variant='h6'>{t('Bio Data')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={3}>
-          <LabelizedField label='Full Name'>
+          <LabelizedField label={t('Full Name')}>
             {individual.fullName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Given Name'>
+          <LabelizedField label={t('Given Name')}>
             {individual.givenName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Middle Name'>
+          <LabelizedField label={t('Middle Name')}>
             {individual.middleName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Family Name'>
+          <LabelizedField label={t('Family Name')}>
             {individual.familyName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Gender'>
+          <LabelizedField label={t('Gender')}>
             {sexToCapitalize(individual.sex)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Age'>{individual.age}</LabelizedField>
+          <LabelizedField label={t('Age')}>{individual.age}</LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Date of Birth'>
+          <LabelizedField label={t('Date of Birth')}>
             <UniversalMoment>{individual.birthDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Estimated Date of Birth'>
+          <LabelizedField label={t('Estimated Date of Birth')}>
             {renderBoolean(individual.estimatedBirthDate)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Marital Status'>
+          <LabelizedField label={t('Marital Status')}>
             {maritalStatusChoicesDict[individual.maritalStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Work Status'>
+          <LabelizedField label={t('Work Status')}>
             {workStatusChoicesDict[individual.workStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Pregnant'>
+          <LabelizedField label={t('Pregnant')}>
             {renderBoolean(individual.pregnant)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Household ID'>
+          <LabelizedField label={t('Household ID')}>
             {individual?.household?.id ? (
               <ContentLink
                 href={`/${businessArea}/registration-data-import/household/${individual?.household?.id}`}
@@ -169,12 +171,12 @@ export function RegistrationIndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Role'>
+          <LabelizedField label={t('Role')}>
             {roleChoicesDict[individual.role]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Relationship to HOH'>
+          <LabelizedField label={t('Relationship to HOH')}>
             {relationshipChoicesDict[individual.relationship]}
           </LabelizedField>
         </Grid>
@@ -182,39 +184,41 @@ export function RegistrationIndividualsBioData({
           <BorderBox />
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Observed disabilities'>
+          <LabelizedField label={t('Observed disabilities')}>
             {individual.observedDisability
               .map((choice) => observedDisabilityChoicesDict[choice])
               .join(', ')}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Seeing disability severity'>
+          <LabelizedField label={t('Seeing disability severity')}>
             {severityOfDisabilityChoicesDict[individual.seeingDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Hearing disability severity'>
+          <LabelizedField label={t('Hearing disability severity')}>
             {severityOfDisabilityChoicesDict[individual.hearingDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Physical disability severity'>
+          <LabelizedField label={t('Physical disability severity')}>
             {severityOfDisabilityChoicesDict[individual.physicalDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Remembering or concentrating disability severity'>
+          <LabelizedField
+            label={t('Remembering or concentrating disability severity')}
+          >
             {severityOfDisabilityChoicesDict[individual.memoryDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Self-care disability severity'>
+          <LabelizedField label={t('Self-care disability severity')}>
             {severityOfDisabilityChoicesDict[individual.selfcareDisability]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Communicating disability severity'>
+          <LabelizedField label={t('Communicating disability severity')}>
             {severityOfDisabilityChoicesDict[individual.commsDisability]}
           </LabelizedField>
         </Grid>
@@ -230,12 +234,12 @@ export function RegistrationIndividualsBioData({
           <BorderBox />
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Phone Number'>
+          <LabelizedField label={t('Phone Number')}>
             {individual.phoneNo}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Alternate Phone Number'>
+          <LabelizedField label={t('Alternate Phone Number')}>
             {individual.phoneNoAlternative}
           </LabelizedField>
         </Grid>
