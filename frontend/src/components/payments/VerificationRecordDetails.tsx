@@ -1,17 +1,18 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
-import { StatusBox } from '../StatusBox';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import {
   formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
-import { LabelizedField } from '../LabelizedField';
 import { PaymentVerificationNode } from '../../__generated__/graphql';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
-import { UniversalMoment } from '../UniversalMoment';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
+import { LabelizedField } from '../LabelizedField';
+import { StatusBox } from '../StatusBox';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -43,15 +44,16 @@ export function VerificationRecordDetails({
   paymentVerification,
   canViewActivityLog,
 }: VerificationRecordDetailsProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>Payment Record Details</Typography>
+          <Typography variant='h6'>{t('Payment Record Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
-            <LabelizedField label='STATUS'>
+            <LabelizedField label={t('STATUS')}>
               <StatusContainer>
                 <StatusBox
                   status={paymentVerification.paymentRecord.status}
@@ -62,7 +64,7 @@ export function VerificationRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='STATUS DATE'
+              label={t('STATUS DATE')}
               value={
                 <UniversalMoment>
                   {paymentVerification.paymentRecord.statusDate}
@@ -72,19 +74,19 @@ export function VerificationRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='REGISTRATION GROUP'
+              label={t('REGISTRATION GROUP')}
               value={paymentVerification.paymentRecord.registrationCaId}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='TARGET POPULATION'
+              label={t('TARGET POPULATION')}
               value={paymentVerification.paymentRecord.targetPopulation.name}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='DISTRIBUTION MODALITY'
+              label={t('DISTRIBUTION MODALITY')}
               value={paymentVerification.paymentRecord.distributionModality}
             />
           </Grid>
@@ -92,11 +94,11 @@ export function VerificationRecordDetails({
       </ContainerColumnWithBorder>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>Verification Details</Typography>
+          <Typography variant='h6'>{t('Verification Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
-            <LabelizedField label='STATUS'>
+            <LabelizedField label={t('STATUS')}>
               <StatusContainer>
                 <StatusBox
                   status={paymentVerification.status}
@@ -107,7 +109,7 @@ export function VerificationRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='STATUS DATE'
+              label={t('STATUS DATE')}
               value={
                 <UniversalMoment>
                   {paymentVerification.statusDate}
@@ -117,7 +119,7 @@ export function VerificationRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='AMOUNT RECEIVED'
+              label={t('AMOUNT RECEIVED')}
               value={formatCurrencyWithSymbol(
                 paymentVerification.receivedAmount,
                 paymentVerification.paymentRecord.currency,
@@ -128,30 +130,30 @@ export function VerificationRecordDetails({
       </ContainerColumnWithBorder>
       <Overview>
         <Title>
-          <Typography variant='h6'>Household</Typography>
+          <Typography variant='h6'>{t('Household')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField
-              label='HOUSEHOLD ID'
+              label={t('HOUSEHOLD ID')}
               value={paymentVerification.paymentRecord.household.unicefId}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='HEAD OF HOUSEHOLD'
+              label={t('HEAD OF HOUSEHOLD')}
               value={paymentVerification.paymentRecord.fullName}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='TOTAL PERSON COVERED'
+              label={t('TOTAL PERSON COVERED')}
               value={paymentVerification.paymentRecord.totalPersonsCovered}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='PHONE NUMBER'
+              label={t('PHONE NUMBER')}
               value={
                 paymentVerification.paymentRecord.household.headOfHousehold
                   .phoneNo
@@ -160,7 +162,7 @@ export function VerificationRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='ALT. PHONE NUMBER'
+              label={t('ALT. PHONE NUMBER')}
               value={
                 paymentVerification.paymentRecord.household.headOfHousehold
                   .phoneNoAlternative
@@ -171,36 +173,36 @@ export function VerificationRecordDetails({
       </Overview>
       <Overview>
         <Title>
-          <Typography variant='h6'>Entitlement Details</Typography>
+          <Typography variant='h6'>{t('Entitlement Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField
-              label='ENTITLEMENT QUANTITY'
+              label={t('ENTITLEMENT QUANTITY')}
               value={paymentVerification.paymentRecord.entitlementQuantity}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='DELIVERED QUANTITY'
+              label={t('DELIVERED QUANTITY')}
               value={paymentVerification.paymentRecord.deliveredQuantity}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='CURRENCY'
+              label={t('CURRENCY')}
               value={paymentVerification.paymentRecord.currency}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='DELIVERY TYPE'
+              label={t('DELIVERY TYPE')}
               value={paymentVerification.paymentRecord.deliveryType}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='DELIVERY DATE'
+              label={t('DELIVERY DATE')}
               value={
                 <UniversalMoment>
                   {paymentVerification.paymentRecord.deliveryDate}
@@ -210,19 +212,19 @@ export function VerificationRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='ENTITLEMENT CARD ID'
+              label={t('ENTITLEMENT CARD ID')}
               value={paymentVerification.paymentRecord.entitlementCardNumber}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='TRANSACTION REFERENCE ID'
+              label={t('TRANSACTION REFERENCE ID')}
               value={paymentVerification.paymentRecord.transactionReferenceId}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='ENTITLEMENT CARD ISSUE DATE'
+              label={t('ENTITLEMENT CARD ISSUE DATE')}
               value={
                 <UniversalMoment>
                   {paymentVerification.paymentRecord.entitlementCardIssueDate}
@@ -232,7 +234,7 @@ export function VerificationRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label='FSP'
+              label={t('FSP')}
               value={paymentVerification.paymentRecord.serviceProvider.fullName}
             />
           </Grid>

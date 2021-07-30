@@ -1,20 +1,21 @@
-import React from 'react';
-import * as Yup from 'yup';
 import {
   Button,
   DialogContent,
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import { Field, Formik } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Formik, Field } from 'formik';
-import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import * as Yup from 'yup';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { handleValidationErrors } from '../../../utils/utils';
+import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
-import { handleValidationErrors } from '../../../utils/utils';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -53,6 +54,7 @@ export function DuplicateTargetPopulation({
   setOpen,
   targetPopulationId,
 }: DuplicateTargetPopulationPropTypes): React.ReactElement {
+  const { t } = useTranslation();
   const [mutate] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -77,7 +79,7 @@ export function DuplicateTargetPopulation({
               variables: { input: { targetPopulationData: { ...values } } },
             });
             setOpen(false);
-            showMessage('Target Population Duplicated', {
+            showMessage(t('Target Population Duplicated'), {
               pathname: `/${businessArea}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
               historyMethod: 'push',
             });
@@ -90,7 +92,7 @@ export function DuplicateTargetPopulation({
             );
             if (nonValidationErrors.length > 0) {
               showMessage(
-                'Unexpected problem while creating Target Population',
+                t('Unexpected problem while creating Target Population'),
               );
             }
           }
@@ -107,15 +109,18 @@ export function DuplicateTargetPopulation({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>
-                Please use a unique name for the copy of this Target Population.
-                <br /> <strong>Note</strong>: This duplicate will copy the
-                Target Criteria of the Programme Population and update to the
-                latest results from the system.
+                {t(
+                  'Please use a unique name for the copy of this Target Population.',
+                )}
+                <br /> <strong>{t('Note')}</strong>:{' '}
+                {t(
+                  'This duplicate will copy the Target Criteria of the Programme Population and update to the latest results from the system.',
+                )}
               </DialogDescription>
               <Field
                 name='name'
                 fullWidth
-                label='Name Copy of Target Population'
+                label={t('Name Copy of Target Population')}
                 required
                 variant='outlined'
                 component={FormikTextField}
@@ -123,7 +128,7 @@ export function DuplicateTargetPopulation({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setOpen(false)}>CANCEL</Button>
+                <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
                 <Button
                   type='submit'
                   color='primary'
@@ -131,7 +136,7 @@ export function DuplicateTargetPopulation({
                   onClick={submitForm}
                   data-cy='button-target-population-duplicate'
                 >
-                  Save
+                  {t('Save')}
                 </Button>
               </DialogActions>
             </DialogFooter>

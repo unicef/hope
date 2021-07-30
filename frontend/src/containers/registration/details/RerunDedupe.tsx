@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Button,
   Dialog,
@@ -7,11 +5,14 @@ import {
   DialogContent,
   DialogTitle,
 } from '@material-ui/core';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   RegistrationDetailedFragment,
   useRerunDedupeMutation,
 } from '../../../__generated__/graphql';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -37,6 +38,7 @@ interface RerunDedupeProps {
 export function RerunDedupe({
   registration,
 }: RerunDedupeProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useRerunDedupeMutation({
@@ -54,7 +56,7 @@ export function RerunDedupe({
   return (
     <span>
       <Button color='primary' variant='contained' onClick={() => setOpen(true)}>
-        Rerun Deduplication
+        {t('Rerun Deduplication')}
       </Button>
       <Dialog
         open={open}
@@ -64,24 +66,24 @@ export function RerunDedupe({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            Rerun Deduplication
+            {t('Rerun Deduplication')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            <div>Are your sure you want to rerun deduplication?</div>
+            <div>{t('Are your sure you want to rerun deduplication?')}</div>
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <Button
               type='submit'
               color='primary'
               variant='contained'
               onClick={rerunDedupe}
             >
-              Rerun
+              {t('Rerun')}
             </Button>
           </DialogActions>
         </DialogFooter>

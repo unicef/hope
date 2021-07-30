@@ -1,7 +1,8 @@
-import React from 'react';
 import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
-import { CountryChartsQuery } from '../../__generated__/graphql';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatNumber } from '../../utils/utils';
+import { CountryChartsQuery } from '../../__generated__/graphql';
 import { EnhancedTableHead } from '../table/EnhancedTableHead';
 
 interface TotalAmountTransferredByAdminAreaTableProps {
@@ -12,32 +13,34 @@ interface TotalAmountTransferredByAdminAreaTableProps {
 }
 type Order = 'asc' | 'desc';
 
-const headCells = [
-  {
-    disablePadding: false,
-    label: 'Administrative Area 2',
-    id: 'admin2',
-    numeric: false,
-  },
-  {
-    disablePadding: false,
-    label: 'Total Transferred',
-    id: 'totalCashTransferred',
-    numeric: true,
-  },
-  {
-    disablePadding: false,
-    label: 'Households Reached',
-    id: 'totalHouseholds',
-    numeric: true,
-  },
-];
 export const TotalAmountTransferredByAdminAreaTable = ({
   data,
   handleSort,
   order,
   orderBy,
 }: TotalAmountTransferredByAdminAreaTableProps): React.ReactElement => {
+  const { t } = useTranslation();
+
+  const headCells = [
+    {
+      disablePadding: false,
+      label: t('Administrative Area 2'),
+      id: 'admin2',
+      numeric: false,
+    },
+    {
+      disablePadding: false,
+      label: t('Total Transferred'),
+      id: 'totalCashTransferred',
+      numeric: true,
+    },
+    {
+      disablePadding: false,
+      label: t('Households Reached'),
+      id: 'totalHouseholds',
+      numeric: true,
+    },
+  ];
   if (!data) return null;
 
   const renderRows = (): Array<React.ReactElement> => {

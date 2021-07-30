@@ -10,19 +10,20 @@ import {
   TableRow,
   Typography,
 } from '@material-ui/core';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
+import { BlackLink } from '../BlackLink';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { UniversalMoment } from '../UniversalMoment';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { BlackLink } from '../BlackLink';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -47,6 +48,7 @@ export function NeedsAdjudicationDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApprove: boolean;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const history = useHistory();
   const [approve] = useApproveNeedsAdjudicationMutation({
@@ -62,8 +64,9 @@ export function NeedsAdjudicationDetails({
     details?.selectedIndividual?.id,
   );
   const [isEditMode, setIsEditMode] = useState(false);
-  const confirmationText =
-    'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.';
+  const confirmationText = t(
+    'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.',
+  );
   const isApproved = !!details.selectedIndividual;
   const isEditable = isEditMode || !isApproved;
 
@@ -75,7 +78,9 @@ export function NeedsAdjudicationDetails({
     <StyledBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Needs Adjudication Details</Typography>
+          <Typography variant='h6'>
+            {t('Needs Adjudication Details')}
+          </Typography>
           <Box gridGap={24} display='flex'>
             <Button
               onClick={() =>
@@ -87,7 +92,7 @@ export function NeedsAdjudicationDetails({
               variant='outlined'
               color='primary'
             >
-              Create Linked Ticket
+              {t('Create Linked Ticket')}
             </Button>
             {!isEditable && (
               <Button
@@ -98,12 +103,12 @@ export function NeedsAdjudicationDetails({
                 }
                 onClick={() => setIsEditMode(true)}
               >
-                Edit
+                {t('Edit')}
               </Button>
             )}
             {isEditable && canApprove && (
               <ConfirmationDialog
-                title='Confirmation'
+                title={t('Confirmation')}
                 content={confirmationText}
               >
                 {(confirm) => (
@@ -121,7 +126,7 @@ export function NeedsAdjudicationDetails({
                     variant='outlined'
                     color='primary'
                   >
-                    mark duplicate
+                    {t('Mark Duplicate')}
                   </Button>
                 )}
               </ConfirmationDialog>
@@ -133,17 +138,17 @@ export function NeedsAdjudicationDetails({
         <TableHead>
           <TableRow>
             <TableCell align='left' />
-            <TableCell align='left'>Individual ID</TableCell>
-            <TableCell align='left'>Household ID</TableCell>
-            <TableCell align='left'>Full Name</TableCell>
-            <TableCell align='left'>Gender</TableCell>
-            <TableCell align='left'>Date of Birth</TableCell>
-            <TableCell align='left'>Similarity Score</TableCell>
-            <TableCell align='left'>Last Registration Date</TableCell>
-            <TableCell align='left'>Doc Type</TableCell>
-            <TableCell align='left'>Doc #</TableCell>
-            <TableCell align='left'>Admin Level 2</TableCell>
-            <TableCell align='left'>Village</TableCell>
+            <TableCell align='left'>{t('Individual ID')}</TableCell>
+            <TableCell align='left'>{t('Household ID')}</TableCell>
+            <TableCell align='left'>{t('Full Name')}</TableCell>
+            <TableCell align='left'>{t('Gender')}</TableCell>
+            <TableCell align='left'>{t('Date of Birth')}</TableCell>
+            <TableCell align='left'>{t('Similarity Score')}</TableCell>
+            <TableCell align='left'>{t('Last Registration Date')}</TableCell>
+            <TableCell align='left'>{t('Doc Type')}</TableCell>
+            <TableCell align='left'>{t('Doc #')}</TableCell>
+            <TableCell align='left'>{t('Admin Level 2')}</TableCell>
+            <TableCell align='left'>{t('Village')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

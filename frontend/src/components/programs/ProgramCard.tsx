@@ -1,19 +1,20 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { Grid } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Grid } from '@material-ui/core';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { theme as themeObj } from '../../theme';
 import { choicesToDict, programStatusToColor } from '../../utils/utils';
-import { LabelizedField } from '../LabelizedField';
-import { StatusBox } from '../StatusBox';
 import {
   ProgrammeChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LabelizedField } from '../LabelizedField';
+import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
@@ -77,6 +78,7 @@ export function ProgramCard({
   program,
   choices,
 }: ProgramCardProps): React.ReactElement {
+  const { t } = useTranslation();
   const classes = useStyles({ status: program.status });
   const businessArea = useBusinessArea();
   const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
@@ -96,7 +98,7 @@ export function ProgramCard({
             <Grid container spacing={4}>
               <Grid className={classes.gridElement} item xs={7}>
                 <LabelizedField
-                  label='TIMEFRAME'
+                  label={t('TIMEFRAME')}
                   value={
                     <>
                       <UniversalMoment>{program.startDate}</UniversalMoment>-
@@ -106,7 +108,7 @@ export function ProgramCard({
                 />
               </Grid>
               <Grid className={classes.gridElement} item xs={5}>
-                <LabelizedField label='status'>
+                <LabelizedField label={t('status')}>
                   <StatusBox
                     status={program.status}
                     statusToColor={programStatusToColor}
@@ -115,7 +117,9 @@ export function ProgramCard({
               </Grid>
               <Grid className={classes.gridElement} item xs={12}>
                 <div className={classes.tittleBox}>
-                  <Typography className={classes.label}>Programme</Typography>
+                  <Typography className={classes.label}>
+                    {t('Programme')}
+                  </Typography>
                   <Typography className={classes.tittle}>
                     {program.name}
                   </Typography>
@@ -124,7 +128,7 @@ export function ProgramCard({
 
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
-                  label='Frequency of payments'
+                  label={t('Frequency of payments')}
                   value={
                     programFrequencyOfPaymentsChoicesDict[
                       program.frequencyOfPayments
@@ -134,7 +138,7 @@ export function ProgramCard({
               </Grid>
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
-                  label='Budget (USD)'
+                  label={t('Budget (USD)')}
                   value={`${program.budget.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -144,20 +148,20 @@ export function ProgramCard({
 
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
-                  label='Population Goal (# of Individuals)'
+                  label={t('Population Goal (# of Individuals)')}
                   value={program.populationGoal}
                 />
               </Grid>
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
-                  label='Num. of households'
+                  label={t('Num. of households')}
                   value={program.totalNumberOfHouseholds}
                 />
               </Grid>
 
               <Grid className={classes.gridElement} item xs={6}>
                 <LabelizedField
-                  label='SECTOR'
+                  label={t('SECTOR')}
                   value={programSectorChoicesDict[program.sector]}
                 />
               </Grid>

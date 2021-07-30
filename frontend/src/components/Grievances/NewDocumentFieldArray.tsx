@@ -1,7 +1,8 @@
-import React from 'react';
 import { Button, Grid } from '@material-ui/core';
-import { FieldArray } from 'formik';
 import { AddCircleOutline } from '@material-ui/icons';
+import { FieldArray } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
 import { DocumentField } from './DocumentField';
@@ -19,6 +20,7 @@ export function NewDocumentFieldArray({
   addIndividualFieldsData,
   values,
 }: NewDocumentFieldArrayProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <Grid container spacing={3}>
       <FieldArray
@@ -54,7 +56,7 @@ export function NewDocumentFieldArray({
                   }}
                 >
                   <AddIcon />
-                  Add Document
+                  {t('Add Document')}
                 </Button>
               </Grid>
             </>

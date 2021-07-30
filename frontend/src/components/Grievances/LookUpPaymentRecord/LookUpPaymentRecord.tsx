@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LookUpButton } from '../LookUpButton';
 import { LookUpPaymentRecordDisplay } from './LookUpPaymentRecordDisplay';
 import { LookUpPaymentRecordModal } from './LookUpPaymentRecordModal';
@@ -12,6 +13,7 @@ export const LookUpPaymentRecord = ({
   values;
   disabled?;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
 
   const shouldDisplayPlaceholder = (): boolean => {
@@ -30,7 +32,7 @@ export const LookUpPaymentRecord = ({
       ) : (
         <LookUpButton
           placeholder={shouldDisplayPlaceholder()}
-          title='Look up Payment Record'
+          title={t('Look up Payment Record')}
           handleClick={() => setLookUpDialogOpen(true)}
         />
       )}

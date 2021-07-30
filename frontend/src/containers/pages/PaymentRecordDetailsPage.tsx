@@ -1,21 +1,22 @@
+import { Button } from '@material-ui/core';
+import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import { Button } from '@material-ui/core';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { PageHeader } from '../../components/PageHeader';
+import { PaymentRecordDetails } from '../../components/payments/PaymentRecordDetails';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
   PaymentRecordNode,
   useCashAssistUrlPrefixQuery,
   usePaymentRecordQuery,
 } from '../../__generated__/graphql';
-import { PageHeader } from '../../components/PageHeader';
-import { PaymentRecordDetails } from '../../components/payments/PaymentRecordDetails';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
 
 const Container = styled.div`
   display: flex;
@@ -27,6 +28,7 @@ const ButtonContainer = styled.span`
 `;
 
 export function PaymentRecordDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery();
   const { data, loading } = usePaymentRecordQuery({
@@ -48,7 +50,7 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Programme Management',
+      title: t('Programme Management'),
       to: `/${businessArea}/programs/`,
     },
     {
@@ -77,7 +79,7 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
             href={`${caData?.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
           >
-            Open in CashAssist
+            {t('Open in CashAssist')}
           </Button>
         </ButtonContainer>
       </PageHeader>
