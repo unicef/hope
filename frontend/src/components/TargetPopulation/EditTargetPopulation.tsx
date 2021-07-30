@@ -1,24 +1,25 @@
-import React from 'react';
-import * as Yup from 'yup';
-import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
 import { Button } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
-import { PageHeader } from '../PageHeader';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { BreadCrumbsItem } from '../BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import {
-  useAllProgramsQuery,
-  useUpdateTpMutation,
-} from '../../__generated__/graphql';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import * as Yup from 'yup';
 import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
 import {
   getFullNodeFromEdgesById,
   handleValidationErrors,
 } from '../../utils/utils';
+import {
+  useAllProgramsQuery,
+  useUpdateTpMutation,
+} from '../../__generated__/graphql';
+import { BreadCrumbsItem } from '../BreadCrumbs';
+import { PageHeader } from '../PageHeader';
 import { CandidateListTab } from './Edit/CandidateListTab';
 import { TargetPopulationProgramme } from './TargetPopulationProgramme';
 
@@ -37,6 +38,7 @@ export function EditTargetPopulation({
   cancelEdit,
   targetPopulation,
 }: EditTargetPopulationProps): React.ReactElement {
+  const { t } = useTranslation();
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
@@ -76,8 +78,9 @@ export function EditTargetPopulation({
     const { candidateListCriterias } = values;
     const errors: { candidateListCriterias?: string } = {};
     if (!candidateListCriterias.length) {
-      errors.candidateListCriterias =
-        'You need to select at least one targeting criteria';
+      errors.candidateListCriterias = t(
+        'You need to select at least one targeting criteria',
+      );
     }
     return errors;
   };
@@ -117,7 +120,7 @@ export function EditTargetPopulation({
             ],
           });
           cancelEdit();
-          showMessage('Target Population Updated', {
+          showMessage(t('Target Population Updated'), {
             pathname: `/${businessArea}/target-population/${values.id}`,
             historyMethod: 'push',
           });
@@ -129,7 +132,9 @@ export function EditTargetPopulation({
             showMessage,
           );
           if (nonValidationErrors.length > 0) {
-            showMessage('Unexpected problem while creating Target Population');
+            showMessage(
+              t('Unexpected problem while creating Target Population'),
+            );
           }
         }
       }}
@@ -141,7 +146,7 @@ export function EditTargetPopulation({
               isTitleEditable() ? (
                 <Field
                   name='name'
-                  label='Enter Target Population Name'
+                  label={t('Enter Target Population Name')}
                   type='text'
                   fullWidth
                   required
@@ -162,7 +167,7 @@ export function EditTargetPopulation({
                     color='primary'
                     onClick={cancelEdit}
                   >
-                    Cancel
+                    {t('Cancel')}
                   </Button>
                 </ButtonContainer>
               )}
@@ -177,7 +182,7 @@ export function EditTargetPopulation({
                       0 || !values.name
                   }
                 >
-                  Save
+                  {t('Save')}
                 </Button>
               </ButtonContainer>
             </>

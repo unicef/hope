@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
 import { Box, Button, Grid, IconButton, Typography } from '@material-ui/core';
-import styled from 'styled-components';
-import { Field, FieldArray, useField } from 'formik';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
+import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { Field, FieldArray, useField } from 'formik';
 import camelCase from 'lodash/camelCase';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
@@ -15,13 +17,12 @@ import {
   useAllAddIndividualFieldsQuery,
   useIndividualLazyQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 import { LabelizedField } from '../LabelizedField';
-import { NewDocumentFieldArray } from './NewDocumentFieldArray';
+import { LoadingComponent } from '../LoadingComponent';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
-import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
+import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 
 const Title = styled.div`
@@ -129,6 +130,7 @@ export function CurrentValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
+  const { t } = useTranslation();
   let displayValue = value;
   switch (field?.type) {
     case 'SELECT_ONE':
@@ -150,7 +152,7 @@ export function CurrentValue({
       break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
-      displayValue = value === null ? '-' : value ? 'Yes' : 'No';
+      displayValue = value === null ? '-' : value ? t('Yes') : t('No');
       break;
     default:
       displayValue = value;
@@ -245,6 +247,7 @@ export const EditIndividualDataChange = ({
   values,
   setFieldValue,
 }: EditIndividualDataChangeProps): React.ReactElement => {
+  const { t } = useTranslation();
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
   const {
@@ -277,7 +280,7 @@ export const EditIndividualDataChange = ({
   }, []);
   const { data, loading } = useAllAddIndividualFieldsQuery();
   if (!individual) {
-    return <div>You have to select an individual earlier</div>;
+    return <div>{t('You have to select an individual earlier')}</div>;
   }
   if (
     loading ||
@@ -323,7 +326,7 @@ export const EditIndividualDataChange = ({
                     }}
                   >
                     <AddIcon />
-                    Add new field
+                    {t('Add new field')}
                   </Button>
                 </Grid>
               </>
@@ -333,7 +336,7 @@ export const EditIndividualDataChange = ({
       </BoxWithBorders>
       <Box mt={3}>
         <Title>
-          <Typography variant='h6'>Documents</Typography>
+          <Typography variant='h6'>{t('Documents')}</Typography>
         </Title>
         <ExistingDocumentFieldArray
           values={values}
@@ -347,7 +350,7 @@ export const EditIndividualDataChange = ({
       </Box>
       <Box mt={3}>
         <Title>
-          <Typography variant='h6'>Identities</Typography>
+          <Typography variant='h6'>{t('Identities')}</Typography>
         </Title>
         <ExistingIdentityFieldArray
           values={values}

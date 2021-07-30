@@ -1,5 +1,6 @@
 import { Box, FormHelperText } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { isInvalid } from '../../../utils/utils';
 import { LookUpButton } from '../LookUpButton';
 import { LookUpHouseholdIndividualDisplay } from './LookUpHouseholdIndividualDisplay';
@@ -18,6 +19,7 @@ export const LookUpHouseholdIndividual = ({
   errors?;
   touched?;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
   const [selectedHousehold, setSelectedHousehold] = useState(
     values.selectedHousehold,
@@ -41,7 +43,7 @@ export const LookUpHouseholdIndividual = ({
           />
         ) : (
           <LookUpButton
-            title='Look up Household / Individual'
+            title={t('Look up Household / Individual')}
             handleClick={() => setLookUpDialogOpen(true)}
           />
         )}

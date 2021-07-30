@@ -1,5 +1,6 @@
-import React from 'react';
 import { Paper, Typography } from '@material-ui/core';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 const PaperContainer = styled(Paper)`
@@ -12,9 +13,10 @@ const PaperContainer = styled(Paper)`
 `;
 
 export function EmptyTable(): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <PaperContainer>
-      <Typography variant='h6'>No data</Typography>
+      <Typography variant='h6'>{t('No data')}</Typography>
     </PaperContainer>
   );
 }

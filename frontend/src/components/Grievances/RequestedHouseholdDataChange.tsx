@@ -1,14 +1,15 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
-import styled from 'styled-components';
-import React, { ReactElement, useState } from 'react';
 import { Formik } from 'formik';
+import React, { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../ConfirmationDialog';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useSnackbar } from '../../hooks/useSnackBar';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable';
 
 const StyledBox = styled(Paper)`
@@ -29,6 +30,7 @@ export function RequestedHouseholdDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const getConfirmationText = (values): string => {
     const allSelected =
@@ -75,7 +77,7 @@ export function RequestedHouseholdDataChange({
           color='primary'
           disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
         >
-          Approve
+          {t('Approve')}
         </Button>
       );
     }
@@ -88,7 +90,7 @@ export function RequestedHouseholdDataChange({
             color='primary'
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
           >
-            Approve
+            {t('Approve')}
           </Button>
         )}
       </ConfirmationDialog>
@@ -142,7 +144,7 @@ export function RequestedHouseholdDataChange({
         <StyledBox>
           <Title>
             <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>Requested Data Change</Typography>
+              <Typography variant='h6'>{t('Requested Data Change')}</Typography>
               {shouldShowEditButton(values) ? (
                 <Button
                   onClick={() => setEdit(true)}
@@ -150,7 +152,7 @@ export function RequestedHouseholdDataChange({
                   color='primary'
                   disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                 >
-                  EDIT
+                  {t('EDIT')}
                 </Button>
               ) : (
                 canApproveDataChange && getApprovalButton(values, submitForm)
