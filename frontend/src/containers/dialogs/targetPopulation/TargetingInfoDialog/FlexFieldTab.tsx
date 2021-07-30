@@ -12,6 +12,7 @@ import { FlexFieldsTable } from '../../../tables/TargetPopulation/FlexFields';
 import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
 import InputLabel from '../../../../shared/InputLabel';
 import Select from '../../../../shared/Select';
+import { useTranslation } from 'react-i18next';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -34,6 +35,7 @@ const FilterWrapper = styled.div`
 `;
 
 export function FlexFieldTab(): React.ReactElement {
+  const { t } = useTranslation();
   const { data } = useAllFieldsAttributesQuery();
   const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);
@@ -57,7 +59,7 @@ export function FlexFieldTab(): React.ReactElement {
       <Grid container spacing={3}>
         <Grid item>
           <TextContainer
-            placeholder='Search'
+            placeholder={t('Search')}
             variant='outlined'
             margin='dense'
             onChange={(e) => setSearchValue(e.target.value)}
@@ -74,7 +76,7 @@ export function FlexFieldTab(): React.ReactElement {
         <Grid item>
           {selectOptions.length && (
             <StyledFormControl variant='outlined' margin='dense'>
-              <InputLabel>Type</InputLabel>
+              <InputLabel>{t('Type')}</InputLabel>
               <Select
                 /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
                 // @ts-ignore
@@ -84,7 +86,7 @@ export function FlexFieldTab(): React.ReactElement {
                 value={selectedOption}
               >
                 <MenuItem value=''>
-                  <em>All</em>
+                  <em>{t('All')}</em>
                 </MenuItem>
                 {selectOptions.map((type) => {
                   return (
@@ -99,17 +101,17 @@ export function FlexFieldTab(): React.ReactElement {
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Field Type</InputLabel>
+            <InputLabel>{t('Field Type')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => setSelectedFieldType(e.target.value)}
               variant='outlined'
-              label='Field Type'
+              label={t('Field Type')}
               value={selectedFieldType}
             >
-              <MenuItem value='All'>
-                <em>All</em>
+              <MenuItem value={t('All')}>
+                <em>{t('All')}</em>
               </MenuItem>
               {[
                 { name: 'Flex field', value: 'Flex field' },

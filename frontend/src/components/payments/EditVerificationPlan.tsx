@@ -1,36 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { Formik, Form, Field } from 'formik';
-import styled from 'styled-components';
 import {
+  Box,
   Button,
   DialogContent,
   DialogTitle,
-  Tabs,
-  Tab,
-  Typography,
-  Box,
   Grid,
+  Tab,
+  Tabs,
+  Typography,
 } from '@material-ui/core';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { Field, Form, Formik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { CashPlan } from '../../apollo/queries/CashPlan';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { TabPanel } from '../TabPanel';
-import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
-  useAllRapidProFlowsQuery,
   useAllAdminAreasQuery,
-  useEditCashPlanPaymentVerificationMutation,
+  useAllRapidProFlowsQuery,
   useCashPlanQuery,
+  useEditCashPlanPaymentVerificationMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
-import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikEffect } from '../FormikEffect';
-import { CashPlan } from '../../apollo/queries/CashPlan';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { TabPanel } from '../TabPanel';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -113,6 +114,7 @@ export function EditVerificationPlan({
   cashPlanVerificationId,
   cashPlanId,
 }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
@@ -194,10 +196,10 @@ export function EditVerificationPlan({
     setOpen(false);
 
     if (errors) {
-      showMessage('Error while submitting');
+      showMessage(t('Error while submitting'));
       return;
     }
-    showMessage('Verification plan edited.');
+    showMessage(t('Verification plan edited.'));
   };
 
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
@@ -213,11 +215,9 @@ export function EditVerificationPlan({
 
   const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${
-        (sampleSizesData?.sampleSize?.sampleSize /
-          sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100
-      })%`;
+      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
+        sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100})%`;
     }
     return ` (0%)`;
   };
@@ -235,7 +235,7 @@ export function EditVerificationPlan({
             onClick={() => setOpen(true)}
             data-cy='button-new-plan'
           >
-            EDIT VERIFICATION PLAN
+            {t('EDIT VERIFICATION PLAN')}
           </Button>
           <Dialog
             open={open}
@@ -245,7 +245,7 @@ export function EditVerificationPlan({
           >
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
-                Edit Verification Plan
+                {t('Edit Verification Plan')}
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
@@ -266,8 +266,8 @@ export function EditVerificationPlan({
                     variant='fullWidth'
                     aria-label='full width tabs example'
                   >
-                    <Tab label='FULL LIST' />
-                    <Tab label='RANDOM SAMPLING' />
+                    <Tab label={t('FULL LIST')} />
+                    <Tab label={t('RANDOM SAMPLING')} />
                   </StyledTabs>
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
@@ -276,7 +276,7 @@ export function EditVerificationPlan({
                       name='excludedAdminAreasFull'
                       choices={mappedAdminAreas}
                       variant='outlined'
-                      label='Filter Out Administrative Level Areas'
+                      label={t('Filter Out Administrative Level Areas')}
                       component={FormikMultiSelectField}
                     />
                   )}
@@ -292,11 +292,11 @@ export function EditVerificationPlan({
                       {getSampleSizePercentage()}
                     </Box>
                     <Box fontSize={12} color='#797979'>
-                      This option is recommended for RapidPro
+                      {t('This option is recommended for RapidPro')}
                     </Box>
                     <Field
                       name='verificationChannel'
-                      label='Verification Channel'
+                      label={t('Verification Channel')}
                       style={{ flexDirection: 'row' }}
                       choices={[
                         { value: 'RAPIDPRO', name: 'RAPIDPRO' },
@@ -327,7 +327,7 @@ export function EditVerificationPlan({
                   <Box pt={3}>
                     <Field
                       name='confidenceInterval'
-                      label='Confidence Interval'
+                      label={t('Confidence Interval')}
                       min={90}
                       max={99}
                       component={FormikSliderField}
@@ -335,28 +335,30 @@ export function EditVerificationPlan({
                     />
                     <Field
                       name='marginOfError'
-                      label='Margin of Error'
+                      label={t('Margin of Error')}
                       min={0}
                       max={9}
                       component={FormikSliderField}
                       suffix='%'
                     />
-                    <Typography variant='caption'>Cluster Filters</Typography>
+                    <Typography variant='caption'>
+                      {t('Cluster Filters')}
+                    </Typography>
                     <Box flexDirection='column' display='flex'>
                       <Box display='flex'>
                         <Field
                           name='adminCheckbox'
-                          label='Administrative Level'
+                          label={t('Administrative Level')}
                           component={FormikCheckboxField}
                         />
                         <Field
                           name='ageCheckbox'
-                          label='Age of HoH'
+                          label={t('Age of HoH')}
                           component={FormikCheckboxField}
                         />
                         <Field
                           name='sexCheckbox'
-                          label='Gender of HoH'
+                          label={t('Gender of HoH')}
                           component={FormikCheckboxField}
                         />
                       </Box>
@@ -365,7 +367,7 @@ export function EditVerificationPlan({
                           name='excludedAdminAreasRandom'
                           choices={mappedAdminAreas}
                           variant='outlined'
-                          label='Filter Out Administrative Level Areas'
+                          label={t('Filter Out Administrative Level Areas')}
                           component={FormikMultiSelectField}
                         />
                       )}
@@ -377,7 +379,7 @@ export function EditVerificationPlan({
                               <Grid item xs={4}>
                                 <Field
                                   name='filterAgeMin'
-                                  label='Minimum Age'
+                                  label={t('Minimum Age')}
                                   type='number'
                                   color='primary'
                                   component={FormikTextField}
@@ -386,7 +388,7 @@ export function EditVerificationPlan({
                               <Grid item xs={4}>
                                 <Field
                                   name='filterAgeMax'
-                                  label='Maximum Age'
+                                  label={t('Maximum Age')}
                                   type='number'
                                   color='primary'
                                   component={FormikTextField}
@@ -399,11 +401,11 @@ export function EditVerificationPlan({
                           <Grid item xs={5}>
                             <Field
                               name='filterSex'
-                              label='Gender'
+                              label={t('Gender')}
                               color='primary'
                               choices={[
-                                { value: 'FEMALE', name: 'Female' },
-                                { value: 'MALE', name: 'Male' },
+                                { value: 'FEMALE', name: t('Female') },
+                                { value: 'MALE', name: t('Male') },
                               ]}
                               component={FormikSelectField}
                             />
@@ -450,7 +452,7 @@ export function EditVerificationPlan({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setOpen(false)}>CANCEL</Button>
+                <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
                 <Button
                   type='submit'
                   color='primary'
@@ -458,7 +460,7 @@ export function EditVerificationPlan({
                   onClick={submitForm}
                   data-cy='button-submit'
                 >
-                  SAVE
+                  {t('SAVE')}
                 </Button>
               </DialogActions>
             </DialogFooter>

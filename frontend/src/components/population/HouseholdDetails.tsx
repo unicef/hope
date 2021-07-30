@@ -1,14 +1,15 @@
+import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Typography, Grid, Paper, Box } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { choicesToDict, formatCurrencyWithSymbol } from '../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../__generated__/graphql';
-import { choicesToDict, formatCurrencyWithSymbol } from '../../utils/utils';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContentLink } from '../ContentLink';
+import { LabelizedField } from '../LabelizedField';
 
 const Container = styled.div`
   display: flex;
@@ -50,6 +51,7 @@ export function HouseholdDetails({
   household,
   choicesData,
 }: HouseholdDetailsProps): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
@@ -58,22 +60,22 @@ export function HouseholdDetails({
     <>
       <Container>
         <Title>
-          <Typography variant='h6'>Details</Typography>
+          <Typography variant='h6'>{t('Details')}</Typography>
         </Title>
         <Overview>
           <Grid container spacing={3}>
             <Grid item xs={3}>
-              <LabelizedField label='Household Size'>
+              <LabelizedField label={t('Household Size')}>
                 {household.size}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Residence Status'>
+              <LabelizedField label={t('Residence Status')}>
                 {residenceChoicesDict[household.residenceStatus]}
               </LabelizedField>
             </Grid>
             <Grid item xs={6}>
-              <LabelizedField label='Head of Household'>
+              <LabelizedField label={t('Head of Household')}>
                 <ContentLink
                   href={`/${businessArea}/population/individuals/${household.headOfHousehold.id}`}
                 >
@@ -82,71 +84,71 @@ export function HouseholdDetails({
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='FEMALE CHILD HEADED HOUSEHOLD'>
-                {household.fchildHoh ? 'Yes' : 'No'}
+              <LabelizedField label={t('FEMALE CHILD HEADED HOUSEHOLD')}>
+                {household.fchildHoh ? t('Yes') : t('No')}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='CHILD HEADED HOUSEHOLD'>
-                {household.childHoh ? 'Yes' : 'No'}
+              <LabelizedField label={t('CHILD HEADED HOUSEHOLD')}>
+                {household.childHoh ? t('Yes') : t('No')}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Country'>
+              <LabelizedField label={t('Country')}>
                 {household.country}
               </LabelizedField>
             </Grid>
 
             <Grid item xs={3}>
-              <LabelizedField label='Country of Origin'>
+              <LabelizedField label={t('Country of Origin')}>
                 {household.countryOrigin}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Address'>
+              <LabelizedField label={t('Address')}>
                 {household.address}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Village'>
+              <LabelizedField label={t('Village')}>
                 {household.village}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Administrative Level 1'>
+              <LabelizedField label={t('Administrative Level 1')}>
                 {household.admin1?.title}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Administrative Level 2'>
+              <LabelizedField label={t('Administrative Level 2')}>
                 {household.admin2?.title}
               </LabelizedField>
             </Grid>
             <Grid item xs={6}>
-              <LabelizedField label='Geolocation'>
+              <LabelizedField label={t('Geolocation')}>
                 {household.geopoint
                   ? `${household.geopoint.coordinates[0]}, ${household.geopoint.coordinates[1]}`
                   : '-'}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='UNHCR CASE ID'>
+              <LabelizedField label={t('UNHCR CASE ID')}>
                 {household?.unhcrId}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='LENGTH OF TIME SINCE ARRIVAL'>
+              <LabelizedField label={t('LENGTH OF TIME SINCE ARRIVAL')}>
                 {household.flexFields?.months_displaced_h_f}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='NUMBER OF TIMES DISPLACED'>
+              <LabelizedField label={t('NUMBER OF TIMES DISPLACED')}>
                 {household.flexFields?.number_times_displaced_h_f}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='IS THIS A RETURNEE HOUSEHOLD?'>
-                {household.returnee ? 'Yes' : 'No'}
+              <LabelizedField label={t('IS THIS A RETURNEE HOUSEHOLD?')}>
+                {household.returnee ? t('Yes') : t('No')}
               </LabelizedField>
             </Grid>
           </Grid>
@@ -154,13 +156,13 @@ export function HouseholdDetails({
       </Container>
       <OverviewPaper>
         <Title>
-          <Typography variant='h6'>Benefits</Typography>
+          <Typography variant='h6'>{t('Benefits')}</Typography>
         </Title>
         <Grid container>
           <Grid item xs={4}>
             <Grid container>
               <Grid item xs={6}>
-                <LabelizedField label='PrOgRAmmE(S) ENROLLED'>
+                <LabelizedField label={t('PrOgRAmmE(S) ENROLLED')}>
                   <div>
                     {household.programsWithDeliveredQuantity.length
                       ? household.programsWithDeliveredQuantity.map((item) => (
@@ -176,7 +178,7 @@ export function HouseholdDetails({
                 </LabelizedField>
               </Grid>
               <Grid item xs={6}>
-                <LabelizedField label='Cash received'>
+                <LabelizedField label={t('Cash received')}>
                   <div>
                     {household.programsWithDeliveredQuantity.length
                       ? household.programsWithDeliveredQuantity.map((item) => (
@@ -202,7 +204,7 @@ export function HouseholdDetails({
             </Grid>
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Total Cash Received'>
+            <LabelizedField label={t('Total Cash Received')}>
               {formatCurrencyWithSymbol(
                 household.totalCashReceived,
                 household.currency,
