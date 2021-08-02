@@ -1,16 +1,16 @@
-import React from 'react';
-import styled from 'styled-components';
 import { InputAdornment, MenuItem } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
 import FormControl from '@material-ui/core/FormControl';
+import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardDatePicker } from '@material-ui/pickers';
-import { useRegistrationChoicesQuery } from '../../../__generated__/graphql';
-import InputLabel from '../../../shared/InputLabel';
-import TextField from '../../../shared/TextField';
-import Select from '../../../shared/Select';
-import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
-import { UsersAutocomplete } from './UsersAutocomplete';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
+import InputLabel from '../../../shared/InputLabel';
+import Select from '../../../shared/Select';
+import TextField from '../../../shared/TextField';
+import { useRegistrationChoicesQuery } from '../../../__generated__/graphql';
+import { UsersAutocomplete } from './UsersAutocomplete';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;

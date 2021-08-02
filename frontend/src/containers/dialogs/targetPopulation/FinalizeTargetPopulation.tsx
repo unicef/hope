@@ -66,7 +66,7 @@ export function FinalizeTargetPopulation({
     >
       <DialogTitleWrapper>
         <DialogTitle id='scroll-dialog-title'>
-          <Typography variant='h6'>{'Send to Cash Assist'}</Typography>
+          <Typography variant='h6'>{t('Send to Cash Assist')}</Typography>
         </DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
