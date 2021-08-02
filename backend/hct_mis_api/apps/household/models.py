@@ -382,6 +382,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
+    user_fields = JSONField(default=dict, blank=True)
 
     class Meta:
         verbose_name = "Household"
@@ -397,6 +398,15 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         self.withdrawn_date = timezone.now()
         self.save()
 
+    def set_sys_field(self, key, value):
+        if "sys" not in self.user_fields:
+            self.user_fields["sys"] = {}
+        self.user_fields["sys"][key] = value
+
+    def get_sys_field(self, key):
+        if "sys" in self.user_fields:
+            return self.user_fields["sys"][key]
+        return None
     @property
     def admin1(self):
         if self.admin_area is None:
@@ -477,6 +487,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return f"{self.unicef_id}"
 
     def recalculate_data(self):
+        if not (self.collect_individual_data == YES):
+            return
         for individual in self.individuals.all():
             individual.recalculate_data()
         date_6_years_ago = datetime.now() - relativedelta(years=+6)
