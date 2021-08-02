@@ -116,7 +116,7 @@ export class ConfirmationDialog extends React.Component<
                 onClick={() => this.confirm()}
                 data-cy='button-submit'
               >
-                {continueText || 'Continue')}
+                {continueText || 'Continue'}
               </Button>
             </DialogActions>
           </DialogFooter>
