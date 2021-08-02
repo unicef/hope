@@ -1,39 +1,39 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import { Box, Grid, Typography } from '@material-ui/core';
+import React, { useState } from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { PageHeader } from '../../components/PageHeader';
-import { LabelizedField } from '../../components/LabelizedField';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import styled from 'styled-components';
+import { BlackLink } from '../../components/BlackLink';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { EditVerificationPlan } from '../../components/payments/EditVerificationPlan';
-import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
-import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
-import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
-import {
-  useCashPlanQuery,
-  useCashPlanVerificationSamplingChoicesQuery,
-} from '../../__generated__/graphql';
+import { LabelizedField } from '../../components/LabelizedField';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { PageHeader } from '../../components/PageHeader';
+import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
+import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
+import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
+import { EditVerificationPlan } from '../../components/payments/EditVerificationPlan';
+import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { StatusBox } from '../../components/StatusBox';
+import { UniversalMoment } from '../../components/UniversalMoment';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useDebounce } from '../../hooks/useDebounce';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
   choicesToDict,
   countPercentage,
   isPermissionDeniedError,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
-import { StatusBox } from '../../components/StatusBox';
+import {
+  useCashPlanQuery,
+  useCashPlanVerificationSamplingChoicesQuery,
+} from '../../__generated__/graphql';
+import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
-import { useDebounce } from '../../hooks/useDebounce';
 import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
-import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
-import { UniversalMoment } from '../../components/UniversalMoment';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { BlackLink } from '../../components/BlackLink';
-import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
   display: flex;

@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Button,
   Dialog,
@@ -8,18 +6,20 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { programCompare } from '../../../utils/utils';
 import {
   AllProgramsQuery,
   ProgramNode,
   ProgramStatus,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { programCompare } from '../../../utils/utils';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useTranslation } from 'react-i18next';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
