@@ -6,7 +6,6 @@ import {
   Typography,
 } from '@material-ui/core';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../containers/dialogs/Dialog';
 
@@ -83,7 +82,6 @@ export class ConfirmationDialog extends React.Component<
   };
 
   render(): React.ReactElement {
-    const { t } = useTranslation();
     const { title, content, continueText, extraContent } = this.props;
     const { children } = this.props;
     const { open } = this.state;
@@ -110,7 +108,7 @@ export class ConfirmationDialog extends React.Component<
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Button onClick={() => this.hide()}>{t('CANCEL')}</Button>
+              <Button onClick={() => this.hide()}>CANCEL</Button>
               <Button
                 type='submit'
                 color='primary'
@@ -118,7 +116,7 @@ export class ConfirmationDialog extends React.Component<
                 onClick={() => this.confirm()}
                 data-cy='button-submit'
               >
-                {continueText || t('Continue')}
+                {continueText || 'Continue')}
               </Button>
             </DialogActions>
           </DialogFooter>
