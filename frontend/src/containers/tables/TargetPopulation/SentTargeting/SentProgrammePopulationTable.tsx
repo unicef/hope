@@ -7,6 +7,7 @@ import { ProgrammeTableRow } from './ProgrammeTableRow';
 import { headCells as programmeHeadCells } from './ProgrammeHeadCells';
 import { headCells as targetPopulationHeadCells } from './TargetPopulationHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationTableRow';
+import { useTranslation } from 'react-i18next';
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -27,6 +28,7 @@ export const SentTargetPopulationTable = ({
   selectedTab,
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement => {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const initialVariables = {
     ...(id && { targetPopulation: id }),
@@ -36,7 +38,7 @@ export const SentTargetPopulationTable = ({
   return (
     <TableWrapper>
       <UniversalTable
-        title='Households'
+        title={t('Households')}
         headCells={
           selectedTab === 0 ? programmeHeadCells : targetPopulationHeadCells
         }
