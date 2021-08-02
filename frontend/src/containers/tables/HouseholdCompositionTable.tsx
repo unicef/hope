@@ -7,8 +7,9 @@ import {
   TableRow,
   Typography,
 } from '@material-ui/core';
-import styled from 'styled-components';
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { HouseholdDetailedFragment } from '../../__generated__/graphql';
 
 const GreyTableCell = styled(TableCell)`
@@ -30,21 +31,22 @@ export interface HouseholdCompositionTableProps {
 export function HouseholdCompositionTable({
   household,
 }: HouseholdCompositionTableProps): ReactElement {
+  const { t } = useTranslation();
   return (
     <OverviewPaper>
       <Title>
-        <Typography variant='h6'>Household Composition</Typography>
+        <Typography variant='h6'>{t('Household Composition')}</Typography>
       </Title>
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell align='left'>Age Group</TableCell>
-            <GreyTableCell align='left'>Females</GreyTableCell>
-            <GreyTableCell align='left'>with disability</GreyTableCell>
-            <GreyTableCell align='left'>Pregnant</GreyTableCell>
+            <TableCell align='left'>{t('Age Group')}</TableCell>
+            <GreyTableCell align='left'>{t('Females')}</GreyTableCell>
+            <GreyTableCell align='left'>{t('with disability')}</GreyTableCell>
+            <GreyTableCell align='left'>{t('Pregnant')}</GreyTableCell>
             <TableCell align='left' />
-            <GreyTableCell align='left'>Males</GreyTableCell>
-            <GreyTableCell align='left'>with disability</GreyTableCell>
+            <GreyTableCell align='left'>{t('Males')}</GreyTableCell>
+            <GreyTableCell align='left'>{t('with disability')}</GreyTableCell>
           </TableRow>
         </TableHead>
         <TableBody>

@@ -1,10 +1,11 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
-  UserNode,
   AllUsersQueryVariables,
   useAllUsersQuery,
+  UserNode,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './UsersListTableHeadCells';
@@ -21,6 +22,7 @@ interface UsersListTableProps {
 export const UsersListTable = ({
   filter,
 }: UsersListTableProps): ReactElement => {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
   const initialVariables = {
@@ -33,7 +35,7 @@ export const UsersListTable = ({
   return (
     <TableWrapper>
       <UniversalTable<UserNode, AllUsersQueryVariables>
-        title='Users List'
+        title={t('Users List')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllUsersQuery}
