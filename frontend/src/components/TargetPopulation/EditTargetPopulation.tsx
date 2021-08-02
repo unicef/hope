@@ -55,7 +55,7 @@ export function EditTargetPopulation({
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Targeting',
+      title: t('Targeting'),
       to: `/${businessArea}/target-population/`,
     },
   ];
