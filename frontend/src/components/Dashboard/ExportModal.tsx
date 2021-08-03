@@ -91,7 +91,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
     return data.map((el) => {
       const isItemSelected = isSelected(el.id);
       return (
-        <TableRow key={el.id}>
+        <TableRow onClick={() => onCheckboxClick(el.id)} key={el.id}>
           <TableCell align='left' padding='checkbox'>
             <Checkbox
               color='primary'

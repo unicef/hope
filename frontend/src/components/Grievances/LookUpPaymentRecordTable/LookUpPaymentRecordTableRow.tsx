@@ -22,7 +22,9 @@ interface LookUpPaymentRecordTableRowProps {
   openInNewTab: boolean;
   selected: Array<string>;
   checkboxClickHandler: (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     number,
   ) => void;
 }
@@ -38,7 +40,12 @@ export function LookUpPaymentRecordTableRow({
   const received =
     paymentRecord?.verifications?.edges?.[0]?.node?.receivedAmount;
   return (
-    <ClickableTableRow hover role='checkbox' key={paymentRecord.id}>
+    <ClickableTableRow
+      onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
+      hover
+      role='checkbox'
+      key={paymentRecord.id}
+    >
       <TableCell padding='checkbox'>
         <Checkbox
           color='primary'
