@@ -107,6 +107,8 @@ export const GrievancesTable = ({
         query={useAllGrievanceTicketQuery}
         queriedObjectName='allGrievanceTicket'
         initialVariables={initialVariables}
+        defaultOrderBy='created_at'
+        defaultOrderDirection='desc'
         renderRow={(row) => (
           <GrievancesTableRow
             key={row.id}

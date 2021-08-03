@@ -16,7 +16,7 @@ interface UniversalTableProps<T, K> {
   title?: string;
   isOnPaper?: boolean;
   defaultOrderBy?: string;
-  defaultOrderDirection?: string;
+  defaultOrderDirection?: Order;
   actions?: Array<ReactElement>;
   onSelectAllClick?: (event, rows) => void;
   numSelected?: number;
@@ -31,18 +31,16 @@ export function UniversalTable<T, K>({
   title,
   getTitle,
   isOnPaper,
-  defaultOrderBy,
-  defaultOrderDirection,
   actions,
   onSelectAllClick,
+  defaultOrderBy,
+  defaultOrderDirection = 'asc',
   numSelected = 0,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(defaultOrderBy);
-  const [orderDirection, setOrderDirection] = useState(
-    defaultOrderDirection || 'asc',
-  );
+  const [orderDirection, setOrderDirection] = useState<Order>(defaultOrderDirection);
   const initVariables = {
     ...initialVariables,
     first: rowsPerPage,
@@ -130,7 +128,7 @@ export function UniversalTable<T, K>({
         refetch(variables);
       }}
       handleRequestSort={(event, property) => {
-        let direction = 'asc';
+        let direction: Order = 'asc';
         if (property === orderBy) {
           direction = orderDirection === 'asc' ? 'desc' : 'asc';
         }
@@ -146,7 +144,7 @@ export function UniversalTable<T, K>({
         });
       }}
       orderBy={orderBy}
-      order={orderDirection as Order}
+      order={orderDirection}
       onSelectAllClick={onSelectAllClick}
       numSelected={numSelected}
     />
