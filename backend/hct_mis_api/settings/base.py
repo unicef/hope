@@ -179,7 +179,10 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(PROJECT_ROOT, "apps", "core", "templates")],
+        "DIRS": [
+            os.path.join(PROJECT_ROOT, "apps", "administration", "templates"),
+            os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
+        ],
         "OPTIONS": {
             "loaders": ["django.template.loaders.filesystem.Loader", "django.template.loaders.app_directories.Loader"],
             "context_processors": [
@@ -221,9 +224,10 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
-    "smart_admin.logs",
+    "hct_mis_api.apps.administration",
     "smart_admin.templates",
-    "smart_admin",
+    "smart_admin.logs",
+    # "smart_admin",
     "django_sysinfo",
     "django.contrib.auth",
     "django.contrib.humanize",
@@ -493,6 +497,18 @@ CONSTANCE_CONFIG = {
         False,
         "Should send grievances notification",
         bool,
+    ),
+    "QUICK_LINKS": (
+        """Kobo,https://kf-hope.unitst.org/;
+CashAssist,https://cashassist-trn.crm4.dynamics.com/;
+Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/;
+elasticsearch,hope-elasticsearch-coordinating-only:9200;
+Datamart,https://datamart.unicef.io;
+Flower,https://stg-hope.unitst.org/flower/;
+Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
+""",
+        "",
+        str,
     ),
 }
 

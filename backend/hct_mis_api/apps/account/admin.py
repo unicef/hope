@@ -476,9 +476,11 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     def get_actions(self, request):
         actions = super(UserAdmin, self).get_actions(request)
         if not request.user.has_perm("account.can_create_kobo_user"):
-            del actions["_create_kobo_user_qs"]
+            if "create_kobo_user_qs" in actions:
+                del actions["create_kobo_user_qs"]
         if not request.user.has_perm("account.add_userrole"):
-            del actions["add_business_area_role"]
+            if "add_business_area_role" in actions:
+                del actions["add_business_area_role"]
         return actions
 
     def add_business_area_role(self, request, queryset):

@@ -531,7 +531,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                     max_records = form.cleaned_data["max_records"]
                     if form.cleaned_data["run_in_background"]:
                         load_admin_area.delay(
-                            country,
+                            country.id,
                             geom,
                             page_size=page_size,
                             max_records=max_records,
@@ -541,12 +541,13 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                         context["run_in_background"] = True
                     else:
                         results = load_admin_area(
-                            country, geom, page_size, max_records, rebuild_mptt=not form.cleaned_data["skip_rebuild"]
+                            country.id, geom, page_size, max_records, rebuild_mptt=not form.cleaned_data["skip_rebuild"]
                         )
                         context["admin_areas"] = results
                 except Exception as e:
+                    logger.exception(e)
                     context["form"] = form
-                    self.message_user(request, str(e), messages.ERROR)
+                    self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             else:
                 context["form"] = form
 
