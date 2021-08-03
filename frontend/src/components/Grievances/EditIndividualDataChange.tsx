@@ -297,7 +297,7 @@ export const EditIndividualDataChange = ({
     <>
       <BoxWithBorders>
         <Title>
-          <Typography variant='h6'>Bio Data</Typography>
+          <Typography variant='h6'>{t('Bio Data')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <FieldArray
