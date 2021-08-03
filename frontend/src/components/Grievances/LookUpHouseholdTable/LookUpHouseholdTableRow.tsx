@@ -32,7 +32,14 @@ export function LookUpHouseholdTableRow({
     return programNames?.length ? programNames.join(', ') : '-';
   };
   return (
-    <ClickableTableRow hover role='checkbox' key={household.id}>
+    <ClickableTableRow
+      onClick={() => {
+        radioChangeHandler(household);
+      }}
+      hover
+      role='checkbox'
+      key={household.id}
+    >
       <TableCell padding='checkbox'>
         <Radio
           color='primary'

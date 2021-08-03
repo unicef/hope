@@ -21,7 +21,9 @@ interface LookUpRelatedTicketsTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
   selected: Array<string>;
   checkboxClickHandler: (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     number,
   ) => void;
   statusChoices: { [id: number]: string };
@@ -40,7 +42,12 @@ export function LookUpRelatedTicketsTableRow({
   const isItemSelected = isSelected(ticket.id);
 
   return (
-    <ClickableTableRow hover role='checkbox' key={ticket.id}>
+    <ClickableTableRow
+      onClick={(event) => checkboxClickHandler(event, ticket.id)}
+      hover
+      role='checkbox'
+      key={ticket.id}
+    >
       <TableCell padding='checkbox'>
         <Checkbox
           color='primary'
