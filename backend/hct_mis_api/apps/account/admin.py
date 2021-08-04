@@ -13,6 +13,7 @@ from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, router, transaction
@@ -34,11 +35,13 @@ from adminactions.helpers import AdminActionPermMixin
 from adminactions.perms import get_permission_codename
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
+    AllValuesComboFilter,
     ChoicesFieldComboFilter,
     ForeignKeyFieldFilter,
     RelatedFieldComboFilter,
 )
 from constance import config
+from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 
 from hct_mis_api.apps.account import models as account_models
@@ -318,6 +321,20 @@ class HasKoboAccount(SimpleListFilter):
         return queryset
 
 
+class BusinessAreaFilter(SimpleListFilter):
+    parameter_name = "ba"
+    title = "Business Area"
+    template = "adminfilters/combobox.html"
+
+    def lookups(self, request, model_admin):
+        return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(user_roles__business_area=self.value())
+        return queryset
+
+
 @admin.register(account_models.Partner)
 class PartnerAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_filter = ("is_un",)
@@ -329,6 +346,7 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
     list_filter = (
         ("partner", AutoCompleteFilter),
+        BusinessAreaFilter,
         "is_staff",
         HasKoboAccount,
         "is_superuser",
@@ -396,6 +414,9 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     )
     inlines = (UserRoleInline,)
     actions = ["create_kobo_user_qs", "add_business_area_role"]
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
     def get_fields(self, request, obj=None):
         return ["last_name", "first_name", "email", "partner", "job_title"]
@@ -716,14 +737,22 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     def _sync_ad_data(self, user):
         ms_graph = MicrosoftGraphAPI()
         if user.ad_uuid:
-            filters = {"uuid": user.ad_uuid}
+            filters = [{"uuid": user.ad_uuid}, {"email": user.email}]
         else:
-            filters = {"email": user.email}
-        user_data = ms_graph.get_user_data(**filters)
-        user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-        for field, value in user_args.items():
-            setattr(user, field, value or "")
-        user.save()
+            filters = [{"email": user.email}]
+
+        for _filter in filters:
+            try:
+                user_data = ms_graph.get_user_data(**_filter)
+                user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+                for field, value in user_args.items():
+                    setattr(user, field, value or "")
+                user.save()
+                break
+            except Http404:
+                pass
+        else:
+            raise Http404
 
     @button(label="Sync", permission="account.can_sync_with_ad")
     def sync_multi(self, request):
