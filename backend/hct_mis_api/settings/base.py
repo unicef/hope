@@ -224,9 +224,10 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
-    "hct_mis_api.apps.administration",
+    "hct_mis_api.apps.administration.apps.TemplateConfig",
     "smart_admin.templates",
     "smart_admin.logs",
+    "hct_mis_api.apps.administration.apps.Config",
     # "smart_admin",
     "django_sysinfo",
     "django.contrib.auth",
@@ -241,6 +242,7 @@ DJANGO_APPS = [
 ]
 
 OTHER_APPS = [
+    "jsoneditor",
     "django_countries",
     "phonenumber_field",
     "compressor",

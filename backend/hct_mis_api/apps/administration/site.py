@@ -8,6 +8,11 @@ cache = caches["default"]
 
 
 class HopeAdminSite(SmartAdminSite):
+    # index_template = 'admin/smart_index.html'
+    site_title = "HOPE"
+    site_header = "HOPE Administration"
+    index_title = "Index"
+
     def each_context(self, request):
         context = super().each_context(request)
         quick_links = {}
