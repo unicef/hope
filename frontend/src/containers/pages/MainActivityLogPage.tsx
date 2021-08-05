@@ -46,17 +46,21 @@ export const ActivityLogPage = (): React.ReactElement => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const [filters, setFilters] = useState({ search: null, module: '' });
+  const debouncedFilters = useDebounce(filters, 700);
 
   const { data, refetch, loading } = useAllLogEntriesQuery({
     variables: {
       businessArea,
       first: rowsPerPage,
+      last: undefined,
+      after: undefined,
+      before: undefined,
+      ...filtersToVariables(debouncedFilters),
     },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
   });
-  const [filters, setFilters] = useState({ search: null, module: '' });
-  const debouncedFilters = useDebounce(filters, 700);
 
   useEffect(() => {
     // we need to check for permission before refetch, otherwise returned permission denied error
