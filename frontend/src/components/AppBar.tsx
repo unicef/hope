@@ -1,15 +1,16 @@
-import React from 'react';
-import clsx from 'clsx';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
+import { Box, Button, makeStyles } from '@material-ui/core';
 import MuiAppBar from '@material-ui/core/AppBar';
+import IconButton from '@material-ui/core/IconButton';
+import TextsmsIcon from '@material-ui/icons/Textsms';
+import Toolbar from '@material-ui/core/Toolbar';
+import MenuIcon from '@material-ui/icons/Menu';
+import clsx from 'clsx';
+import React from 'react';
 import styled from 'styled-components';
-import { makeStyles } from '@material-ui/core';
-import { MiśTheme } from '../theme';
 import { BusinessAreaSelect } from '../containers/BusinessAreaSelect';
-import { useMeQuery } from '../__generated__/graphql';
 import { UserProfileMenu } from '../containers/UserProfileMenu';
+import { MiśTheme } from '../theme';
+import { useMeQuery } from '../__generated__/graphql';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   root: {
@@ -56,6 +57,10 @@ const StyledToolbar = styled(Toolbar)`
   display: flex;
   justify-content: space-between;
 `;
+const StyledLink = styled.a`
+  text-decoration: none;
+  color: #e3e6e7;
+`;
 
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   const { data: meData, loading: meLoading } = useMeQuery({
@@ -80,10 +85,20 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
         >
           <MenuIcon />
         </IconButton>
-        <BusinessAreaContainer data-cy="business-area-container">
+        <BusinessAreaContainer data-cy='business-area-container'>
           <BusinessAreaSelect />
         </BusinessAreaContainer>
-        <UserProfileMenu meData={meData} />
+        <Box display='flex' justifyContent='flex-end'>
+          <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
+            <StyledLink
+              target='_blank'
+              href='https://unicef.service-now.com/cc/?id=sc_cat_item&sys_id=35b00b1bdb255f00085184735b9619e6&sysparm_category=c6ab1444db5b5700085184735b961920'
+            >
+              Support
+            </StyledLink>
+          </Button>
+          <UserProfileMenu meData={meData} />
+        </Box>
       </StyledToolbar>
     </MuiAppBar>
   );
