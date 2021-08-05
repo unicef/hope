@@ -197,7 +197,7 @@ def get_data_from_role_data(role_data):
     return role_name, old_individual, new_individual, household
 
 
-def reassign_roles(individual_to_remove, info, ticket_details):
+def reassign_roles(individual_to_remove, info, ticket_details, should_log=True):
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -222,13 +222,14 @@ def reassign_roles(individual_to_remove, info, ticket_details):
             household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             new_individual.relationship = HEAD
             new_individual.save()
-            log_create(
-                Individual.ACTIVITY_LOG_MAPPING,
-                "business_area",
-                info.context.user,
-                old_new_individual,
-                new_individual,
-            )
+            if should_log:
+                log_create(
+                    Individual.ACTIVITY_LOG_MAPPING,
+                    "business_area",
+                    info.context.user,
+                    old_new_individual,
+                    new_individual,
+                )
 
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
@@ -238,7 +239,10 @@ def reassign_roles(individual_to_remove, info, ticket_details):
             roles_to_bulk_update.append(role)
     household = individual_to_remove.household
     can_be_closed_because_of_empty_household = household.individuals.count() == 1 if household else False
-    if len(roles_to_bulk_update) != individual_to_remove.count_all_roles() and not can_be_closed_because_of_empty_household:
+    if (
+        len(roles_to_bulk_update) != individual_to_remove.count_all_roles()
+        and not can_be_closed_because_of_empty_household
+    ):
         logger.error("Ticket cannot be closed, not all roles have been reassigned")
         raise GraphQLError("Ticket cannot be closed, not all roles have been reassigned")
     if roles_to_bulk_update:
@@ -250,7 +254,8 @@ def reassign_roles(individual_to_remove, info, ticket_details):
         removed_individual_is_head = False
     if (
         not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
-        and removed_individual_is_head and not can_be_closed_because_of_empty_household
+        and removed_individual_is_head
+        and not can_be_closed_because_of_empty_household
     ):
         logger.error("Ticket cannot be closed head of household has not been reassigned")
         raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")

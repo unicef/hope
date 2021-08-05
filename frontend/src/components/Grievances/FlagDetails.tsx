@@ -117,7 +117,7 @@ export function FlagDetails({
         <TableBody>
           <TableRow>
             <TableCell align='left'>
-              {details.approveStatus ? <Flag /> : ''}
+              {isFlagConfirmed ? <Flag confirmed /> : ''}
             </TableCell>
             <TableCell align='left'>-</TableCell>
             <TableCell align='left'>
