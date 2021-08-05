@@ -40,7 +40,9 @@ export function UniversalTable<T, K>({
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
   const [orderBy, setOrderBy] = useState(defaultOrderBy);
-  const [orderDirection, setOrderDirection] = useState<Order>(defaultOrderDirection);
+  const [orderDirection, setOrderDirection] = useState<Order>(
+    defaultOrderDirection,
+  );
   const initVariables = {
     ...initialVariables,
     first: rowsPerPage,
@@ -116,6 +118,7 @@ export function UniversalTable<T, K>({
         setRowsPerPage(value);
         setPage(0);
         const variables = {
+          ...initialVariables,
           first: value,
           last: undefined,
           before: undefined,
