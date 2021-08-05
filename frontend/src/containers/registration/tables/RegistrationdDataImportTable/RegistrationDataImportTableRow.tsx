@@ -42,11 +42,7 @@ export function RegistrationDataImportTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink
-            target='_blank'
-            rel='noopener noreferrer'
-            to={importDetailsPath}
-          >
+          <BlackLink to={importDetailsPath}>
             {registrationDataImport.name}
           </BlackLink>
         ) : (

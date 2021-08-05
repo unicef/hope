@@ -55,11 +55,7 @@ export function LookUpPaymentRecordTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={`/${businessArea}/payment-records/${paymentRecord.id}`}
-        >
+        <BlackLink to={`/${businessArea}/payment-records/${paymentRecord.id}`}>
           {paymentRecord.caId}
         </BlackLink>
       </TableCell>

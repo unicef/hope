@@ -49,13 +49,7 @@ export function ProgrammesTableRow({
       key={program.id}
     >
       <TableCell align='left'>
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={programDetailsPath}
-        >
-          {program.name}
-        </BlackLink>
+        <BlackLink to={programDetailsPath}>{program.name}</BlackLink>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
