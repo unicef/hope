@@ -37,9 +37,7 @@ export function ImportedHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink target='_blank' rel='noopener noreferrer' to={householdPath}>
-          {decodeIdString(household.id)}
-        </BlackLink>
+        <BlackLink to={householdPath}>{decodeIdString(household.id)}</BlackLink>
       </TableCell>
       <AnonTableCell>{household?.headOfHousehold?.fullName}</AnonTableCell>
       <TableCell align='right'>{household.size}</TableCell>

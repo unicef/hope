@@ -51,8 +51,6 @@ export function LookUpIndividualTableRow({
       </TableCell>
       <TableCell align='left'>
         <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
           to={`/${businessArea}/population/individuals/${individual.id}`}
         >
           {individual.unicefId}

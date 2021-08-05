@@ -54,13 +54,7 @@ export function PaymentVerificationTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink
-            target='_blank'
-            rel='noopener noreferrer'
-            to={paymentVerificationPlanPath}
-          >
-            {plan.caId}
-          </BlackLink>
+          <BlackLink to={paymentVerificationPlanPath}>{plan.caId}</BlackLink>
         ) : (
           plan.caId
         )}

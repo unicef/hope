@@ -53,11 +53,7 @@ export function LookUpHouseholdTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={`/${businessArea}/population/household/${household.id}`}
-        >
+        <BlackLink to={`/${businessArea}/population/household/${household.id}`}>
           {household.unicefId}
         </BlackLink>
       </TableCell>
