@@ -51,11 +51,7 @@ export function ImportedIndividualsTableRow({
       key={individual.id}
     >
       <TableCell align='left'>
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={individualPath}
-        >
+        <BlackLink to={individualPath}>
           {decodeIdString(individual.id)}
         </BlackLink>
       </TableCell>

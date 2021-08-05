@@ -42,11 +42,7 @@ export function TargetPopulationTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink
-            target='_blank'
-            rel='noopener noreferrer'
-            to={targetPopulationDetailsPath}
-          >
+          <BlackLink to={targetPopulationDetailsPath}>
             {targetPopulation.name}
           </BlackLink>
         ) : (

@@ -47,9 +47,7 @@ export function GrievancesTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink target='_blank' rel='noopener noreferrer' to={detailsPath}>
-            {ticket.unicefId}
-          </BlackLink>
+          <BlackLink to={detailsPath}>{ticket.unicefId}</BlackLink>
         ) : (
           ticket.unicefId
         )}
