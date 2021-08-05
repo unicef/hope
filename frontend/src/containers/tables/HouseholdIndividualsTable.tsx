@@ -123,8 +123,6 @@ export function HouseholdIndividualsTable({
           >
             <TableCell align='left'>
               <BlackLink
-                target='_blank'
-                rel='noopener noreferrer'
                 to={`/${businessArea}/population/individuals/${row.id}`}
               >
                 {row.unicefId}
