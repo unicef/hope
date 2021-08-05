@@ -43,7 +43,7 @@ function filtersToVariables(filters) {
 export const ActivityLogPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const [filters, setFilters] = useState({ search: null, module: '' });
