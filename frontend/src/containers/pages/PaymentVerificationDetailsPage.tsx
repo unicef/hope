@@ -161,11 +161,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const toolbar = (
     <PageHeader
       title={
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={`/${businessArea}/cashplans/${cashPlan.id}`}
-        >
+        <BlackLink to={`/${businessArea}/cashplans/${cashPlan.id}`}>
           {t('Cash Plan')} {cashPlan.caId}
         </BlackLink>
       }
@@ -228,8 +224,6 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   label: t('PROGRAMME ID'),
                   value: (
                     <BlackLink
-                      target='_blank'
-                      rel='noopener noreferrer'
                       to={`/${businessArea}/programs/${cashPlan.program.id}`}
                     >
                       {cashPlan.program?.caId}

@@ -57,11 +57,7 @@ export function LookUpRelatedTicketsTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}
-        >
+        <BlackLink to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}>
           {ticket.unicefId}
         </BlackLink>
       </TableCell>
