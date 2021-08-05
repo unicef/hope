@@ -243,7 +243,25 @@ export function CreateGrievancePage(): React.ReactElement {
                   ? breadCrumbsItems
                   : null
               }
-            />
+            >
+              <Box display='flex' alignContent='center'>
+                <Box mr={1}>
+                  <Button
+                    component={Link}
+                    to={`/${businessArea}/grievance-and-feedback`}
+                  >
+                    {t('Cancel')}
+                  </Button>
+                </Box>
+                <Button
+                  color='primary'
+                  variant='contained'
+                  onClick={submitForm}
+                >
+                  {t('Save')}
+                </Button>
+              </Box>
+            </PageHeader>
             <Grid container spacing={3}>
               <Grid item xs={8}>
                 <NewTicket>
@@ -358,23 +376,6 @@ export function CreateGrievancePage(): React.ReactElement {
                       />
                       {dataChangeErrors(errors, touched)}
                     </BoxPadding>
-                    <DialogFooter>
-                      <DialogActions>
-                        <Button
-                          component={Link}
-                          to={`/${businessArea}/grievance-and-feedback`}
-                        >
-                          {t('Cancel')}
-                        </Button>
-                        <Button
-                          color='primary'
-                          variant='contained'
-                          onClick={submitForm}
-                        >
-                          {t('Save')}
-                        </Button>
-                      </DialogActions>
-                    </DialogFooter>
                   </ContainerColumnWithBorder>
                 </NewTicket>
               </Grid>
