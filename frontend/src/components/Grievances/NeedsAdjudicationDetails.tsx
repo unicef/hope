@@ -173,8 +173,6 @@ export function NeedsAdjudicationDetails({
 
             <TableCell align='left'>
               <BlackLink
-                target='_blank'
-                rel='noopener noreferrer'
                 to={`/${businessArea}/population/individuals/${details.goldenRecordsIndividual?.id}`}
               >
                 {details.goldenRecordsIndividual?.unicefId}
@@ -182,8 +180,6 @@ export function NeedsAdjudicationDetails({
             </TableCell>
             <TableCell align='left'>
               <BlackLink
-                target='_blank'
-                rel='noopener noreferrer'
                 to={`/${businessArea}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
               >
                 {details.goldenRecordsIndividual?.household?.unicefId || '-'}
@@ -247,8 +243,6 @@ export function NeedsAdjudicationDetails({
             </TableCell>
             <TableCell align='left'>
               <BlackLink
-                target='_blank'
-                rel='noopener noreferrer'
                 to={`/${businessArea}/population/individuals/${details.possibleDuplicate?.id}`}
               >
                 {details.possibleDuplicate?.unicefId}
@@ -256,8 +250,6 @@ export function NeedsAdjudicationDetails({
             </TableCell>
             <TableCell align='left'>
               <BlackLink
-                target='_blank'
-                rel='noopener noreferrer'
                 to={`/${businessArea}/population/household/${details.possibleDuplicate?.household?.id}`}
               >
                 {details.possibleDuplicate?.household?.unicefId || '-'}

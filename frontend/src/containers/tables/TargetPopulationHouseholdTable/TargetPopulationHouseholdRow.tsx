@@ -25,12 +25,14 @@ export function TargetPopulationHouseholdTableRow({
   };
 
   const renderHoHName = (): string => {
-    const {headOfHousehold: {givenName, familyName, fullName}} = household;
+    const {
+      headOfHousehold: { givenName, familyName, fullName },
+    } = household;
     if (givenName && familyName) {
       return `${givenName} ${familyName}`;
     }
     return fullName;
-  }
+  };
 
   return (
     <ClickableTableRow
@@ -41,13 +43,7 @@ export function TargetPopulationHouseholdTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink
-            target='_blank'
-            rel='noopener noreferrer'
-            to={householdDetailsPath}
-          >
-            {household.unicefId}
-          </BlackLink>
+          <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
         ) : (
           household.unicefId
         )}

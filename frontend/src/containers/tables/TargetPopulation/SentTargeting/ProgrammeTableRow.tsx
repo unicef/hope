@@ -31,13 +31,7 @@ export function ProgrammeTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink
-            target='_blank'
-            rel='noopener noreferrer'
-            to={householdDetailsPath}
-          >
-            {household.unicefId}
-          </BlackLink>
+          <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
         ) : (
           household.unicefId
         )}
