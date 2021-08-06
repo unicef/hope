@@ -29,15 +29,7 @@ python-versions = "*"
 name = "appnope"
 version = "0.1.2"
 description = "Disable App Nap on macOS >= 10.9"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
-name = "argh"
-version = "0.26.2"
-description = "An unobtrusive argparse wrapper with natural syntax"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -90,7 +82,7 @@ pytz = ">=2015.7"
 name = "backcall"
 version = "0.2.0"
 description = "Specifications for callback functions passed in to an API"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -98,7 +90,7 @@ python-versions = "*"
 name = "beautifulsoup4"
 version = "4.9.3"
 description = "Screen-scraping library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -271,7 +263,7 @@ six = "*"
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -298,7 +290,7 @@ test = ["pytest (>=6.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pret
 name = "decorator"
 version = "5.0.9"
 description = "Decorators for Humans"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -328,7 +320,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-admin-extra-urls"
-version = "3.5"
+version = "3.5.1"
 description = "Django mixin to easily add urls to any ModelAdmin"
 category = "main"
 optional = false
@@ -357,7 +349,7 @@ test = ["pytz", "xlrd (>=0.9.2)", "xlwt", "check-manifest", "django-dynamic-fixt
 
 [[package]]
 name = "django-adminfilters"
-version = "1.4.1"
+version = "1.5.1"
 description = "Extra filters for django admin site"
 category = "main"
 optional = false
@@ -441,11 +433,11 @@ python-versions = "*"
 
 [[package]]
 name = "django-constance"
-version = "2.7.0"
+version = "2.8.0"
 description = "Django live settings with pluggable backends, including Redis."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.dependencies]
 redis = {version = "*", optional = true, markers = "extra == \"redis\""}
@@ -615,15 +607,15 @@ redis = ">=3.0.0"
 
 [[package]]
 name = "django-smart-admin"
-version = "0.6.0"
+version = "1.0.0"
 description = ""
 category = "main"
 optional = false
 python-versions = "==3.*,>=3.0.0,>=3.6"
 
 [package.extras]
-dev = ["django-webtest", "bump2version", "factory-boy", "tox", "flake8", "isort", "pytest", "pyquery", "pytest-echo", "pytest-cov (>=2.11.1,<3.0.0)", "pytest-django (>=4.1.0,<5.0.0)", "pytest-pythonpath (>=0.7.3,<1.0.0)"]
-full = ["django-adminfilters", "django-admin-extra-urls", "django-sysinfo"]
+dev = ["django-webtest", "django-environ", "whitenoise", "factory-boy", "django-constance", "django-picklefield", "bump2version", "factory-boy", "tox", "flake8", "isort", "pytest", "pyquery", "pytest-echo", "pytest-cov (>=2.11.1,<3.0.0)", "pytest-django (>=4.1.0,<5.0.0)", "pytest-pythonpath (>=0.7.3,<1.0.0)"]
+full = ["django-adminfilters (>=1.5.1)", "django-admin-extra-urls (>=3.5.1)", "django-adminactions (>=1.13)", "django-sysinfo (>=2.5)"]
 
 [[package]]
 name = "django-sql-explorer"
@@ -664,7 +656,7 @@ sftp = ["paramiko"]
 
 [[package]]
 name = "django-sysinfo"
-version = "2.4.0"
+version = "2.5.0"
 description = "Simple django app to expose system infos: libraries version, databae server infos..."
 category = "main"
 optional = false
@@ -694,7 +686,7 @@ rest_framework = ["djangorestframework (>=3.0.0)"]
 name = "django-webtest"
 version = "1.9.7"
 description = "Instant integration of Ian Bicking's WebTest (http://docs.pylonsproject.org/projects/webtest/) with django's testing framework."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -758,7 +750,7 @@ Faker = ">=0.7.0"
 name = "faker"
 version = "5.0.2"
 description = "Faker is a Python package that generates fake data for you."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -781,7 +773,7 @@ wasmer = {version = ">=0.3.0", markers = "python_version >= \"3.5\" and platform
 name = "freezegun"
 version = "0.3.14"
 description = "Let your Python tests travel through time"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -930,7 +922,7 @@ python-versions = ">=3.5"
 name = "ipdb"
 version = "0.13.4"
 description = "IPython-enabled pdb"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7"
 
@@ -941,7 +933,7 @@ ipython = {version = ">=5.1.0", markers = "python_version >= \"3.4\""}
 name = "ipython"
 version = "7.26.0"
 description = "IPython: Productive Interactive Computing"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 
@@ -973,7 +965,7 @@ test = ["nose (>=0.10.1)", "requests", "testpath", "pygments", "nbformat", "ipyk
 name = "ipython-genutils"
 version = "0.2.0"
 description = "Vestigial utilities from IPython"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1054,7 +1046,7 @@ python-versions = ">=3.6"
 name = "matplotlib-inline"
 version = "0.1.2"
 description = "Inline Matplotlib backend for Jupyter"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -1150,7 +1142,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 name = "pexpect"
 version = "4.8.0"
 description = "Pexpect allows easy control of interactive console applications."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1169,7 +1161,7 @@ python-versions = "*"
 name = "pickleshare"
 version = "0.7.5"
 description = "Tiny 'shelve'-like database with concurrency support"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1570,7 +1562,7 @@ python-versions = "*"
 name = "soupsieve"
 version = "2.2.1"
 description = "A modern CSS selector implementation for Beautiful Soup."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -1594,7 +1586,7 @@ python-versions = "*"
 name = "text-unidecode"
 version = "1.3"
 description = "The most basic Text::Unidecode port"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1610,7 +1602,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "traitlets"
 version = "5.0.5"
 description = "Traitlets Python configuration system"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 
@@ -1640,7 +1632,7 @@ python-versions = "*"
 name = "unittest-xml-reporting"
 version = "3.0.4"
 description = "unittest-based test runner with Ant/JUnit like XML reporting."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -1669,7 +1661,7 @@ python-versions = ">=3.6"
 name = "waitress"
 version = "2.0.0"
 description = "Waitress WSGI server"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6.0"
 
@@ -1681,7 +1673,7 @@ testing = ["pytest", "pytest-cover", "coverage (>=5.0)"]
 name = "wasmer"
 version = "0.4.1"
 description = "Python extension to run WebAssembly binaries"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1689,7 +1681,7 @@ python-versions = "*"
 name = "watchdog"
 version = "2.1.3"
 description = "Filesystem events monitoring"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -1708,7 +1700,7 @@ python-versions = "*"
 name = "webob"
 version = "1.8.7"
 description = "WSGI request and response object"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*"
 
@@ -1720,7 +1712,7 @@ testing = ["pytest (>=3.1.0)", "coverage", "pytest-cov", "pytest-xdist"]
 name = "webtest"
 version = "2.0.35"
 description = "Helper to test WSGI applications"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1786,7 +1778,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "4acc8d4323a7d141bd0941417329205a95ec31e073777f56642ea29cee74dfea"
+content-hash = "879de79a69ca412f951b08be81a8403cc984a1ce3b87a51d28c77312f07cb3f8"
 
 [metadata.files]
 amqp = [
@@ -1804,10 +1796,6 @@ appdirs = [
 appnope = [
     {file = "appnope-0.1.2-py2.py3-none-any.whl", hash = "sha256:93aa393e9d6c54c5cd570ccadd8edad61ea0c4b9ea7a01409020c9aa019eb442"},
     {file = "appnope-0.1.2.tar.gz", hash = "sha256:dd83cd4b5b460958838f6eb3000c660b1f9caf2a5b1de4264e941512f603258a"},
-]
-argh = [
-    {file = "argh-0.26.2-py2.py3-none-any.whl", hash = "sha256:a9b3aaa1904eeb78e32394cd46c6f37ac0fb4af6dc488daa58971bdc7d7fcaf3"},
-    {file = "argh-0.26.2.tar.gz", hash = "sha256:e9535b8c84dc9571a48999094fda7f33e63c3f1b74f3e5f3ac0105a58405bb65"},
 ]
 azure-common = [
     {file = "azure-common-1.1.27.zip", hash = "sha256:9f3f5d991023acbd93050cf53c4e863c6973ded7e236c69e99c8ff5c7bad41ef"},
@@ -1941,13 +1929,13 @@ django = [
     {file = "Django-2.2.16.tar.gz", hash = "sha256:62cf45e5ee425c52e411c0742e641a6588b7e8af0d2c274a27940931b2786594"},
 ]
 django-admin-extra-urls = [
-    {file = "django-admin-extra-urls-3.5.tar.gz", hash = "sha256:f4c40113fbe27707cdf0038d565376502b3ded7ab270547a7eeaaee8dd3f8ecb"},
+    {file = "django-admin-extra-urls-3.5.1.tar.gz", hash = "sha256:fc68efd40569f2301cb329a0c445dd3517b0aa9c03c1ab7d9fc8a006d22de9b8"},
 ]
 django-adminactions = [
     {file = "django-adminactions-1.13.0.tar.gz", hash = "sha256:c468b201c942579551a0ae4f20f6f29987f4b0a9752910857ef26191499ddac9"},
 ]
 django-adminfilters = [
-    {file = "django-adminfilters-1.4.1.tar.gz", hash = "sha256:c7baed8a7a376d8766161f5ff86f59c6b700f4bbde9963601dc2a658719ad927"},
+    {file = "django-adminfilters-1.5.1.tar.gz", hash = "sha256:0f9644726246afc4f826b70490f9259f8f74acc7edcf067af43953160c487bca"},
 ]
 django-appconf = [
     {file = "django-appconf-1.0.4.tar.gz", hash = "sha256:be58deb54a43d77d2e1621fe59f787681376d3cd0b8bd8e4758ef6c3a6453380"},
@@ -1970,8 +1958,8 @@ django-concurrency = [
     {file = "django-concurrency-2.3.tar.gz", hash = "sha256:36c5ab4836de6e255285661b3b057a36c58c8c69c81287f4c1b7e7be7c733503"},
 ]
 django-constance = [
-    {file = "django-constance-2.7.0.tar.gz", hash = "sha256:62bdb1a3aef20d80e18d832b30ffcc6626762c538817a5a3571bcefa5a55c849"},
-    {file = "django_constance-2.7.0-py3-none-any.whl", hash = "sha256:866a7356d3f8ee08374285e97c1edae70edaa3df6eaf7b2e9699f7cde8a88f3b"},
+    {file = "django-constance-2.8.0.tar.gz", hash = "sha256:0a492454acc78799ce7b9f7a28a00c53427d513f34f8bf6fdc90a46d8864b2af"},
+    {file = "django_constance-2.8.0-py3-none-any.whl", hash = "sha256:60fec73e397d5f4f7440f611b18d3e7ce5342647f316fedc47b62e1411c849e7"},
 ]
 django-cors-headers = [
     {file = "django-cors-headers-3.2.0.tar.gz", hash = "sha256:84933651fbbde8f2bc084bef2f077b79db1ec1389432f21dd661eaae6b3d6a95"},
@@ -2030,7 +2018,7 @@ django-redis = [
     {file = "django_redis-5.0.0-py3-none-any.whl", hash = "sha256:97739ca9de3f964c51412d1d7d8aecdfd86737bb197fce6e1ff12620c63c97ee"},
 ]
 django-smart-admin = [
-    {file = "django-smart-admin-0.6.0.tar.gz", hash = "sha256:2d74dc32a0ee562cad7a8db2338c3f56aa11e1cbbae9b33eddbf959a24673f0b"},
+    {file = "django-smart-admin-1.0.0.tar.gz", hash = "sha256:b6cd1f64205544662d65573b41fe1ff857f1040c00061d0113ced4767f35cb3b"},
 ]
 django-sql-explorer = [
     {file = "django-sql-explorer-2.3.tar.gz", hash = "sha256:031788a88938102c454679b0d97a41d0e177280fd4c39aebf73b157ece62c960"},
@@ -2041,7 +2029,7 @@ django-storages = [
     {file = "django_storages-1.8-py2.py3-none-any.whl", hash = "sha256:0a9b7e620e969fb0797523695329ed223bf540bbfdf6cd163b061fc11dab2d1c"},
 ]
 django-sysinfo = [
-    {file = "django-sysinfo-2.4.0.tar.gz", hash = "sha256:0b15a168e0fa951b2a09b6ce794de8be24ae973765b518f143c5d0da77e199b2"},
+    {file = "django-sysinfo-2.5.0.tar.gz", hash = "sha256:882fe8e0227c5f2505f3f3e2bd0d43cee7b89745b79d146005502fb77f79c983"},
 ]
 django-timezone-field = [
     {file = "django-timezone-field-4.2.1.tar.gz", hash = "sha256:97780cde658daa5094ae515bb55ca97c1352928ab554041207ad515dee3fe971"},

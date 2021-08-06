@@ -188,7 +188,7 @@ class CashPlan(TimeStampedUUIDModel):
         ),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    ca_id = models.CharField(max_length=255, null=True)
+    ca_id = models.CharField(max_length=255, null=True, db_index=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICE, db_index=True)
     status_date = models.DateTimeField()
