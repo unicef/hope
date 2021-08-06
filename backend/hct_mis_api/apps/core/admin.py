@@ -219,9 +219,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
     @button(label="Send DOAP", group="doap")
     def send_doap(self, request, pk):
+        context = self.get_common_context(request, pk, title="Members")
+        obj = context["original"]
         try:
-            context = self.get_common_context(request, pk, title="Members")
-            obj = context["original"]
             matrix = self._get_doap_matrix(obj)
             buffer = StringIO()
             writer = csv.DictWriter(buffer, matrix[0], extrasaction="ignore")
@@ -292,24 +292,6 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
 
         if request.method == "GET":
-            # phone_number = request.GET.get("phone_number", None)
-            # flow_uuid = request.GET.get("flow_uuid", None)
-            # flow_name = request.GET.get("flow_name", None)
-            # timestamp = request.GET.get("timestamp", None)
-            #
-            # if all([phone_number, flow_uuid, flow_name, timestamp]):
-            #     error, result = api.test_connection_flow_run(flow_uuid, phone_number, timestamp)
-            #     context["run_result"] = result
-            #     context["phone_number"] = phone_number
-            #     context["flow_uuid"] = flow_uuid
-            #     context["flow_name"] = flow_name
-            #     context["timestamp"] = timestamp
-            #
-            #     if error:
-            #         messages.error(request, error)
-            #     else:
-            #         messages.success(request, "Connection successful")
-            # else:
             context["form"] = TestRapidproForm()
         else:
             form = TestRapidproForm(request.POST)

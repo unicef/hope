@@ -25,7 +25,7 @@ access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"
 
 
 def post_fork(server, worker):
-    server.logger.info("Worker spawned (pid: %s)", worker.pid)
+    server.log.info("Worker spawned (pid: %s)", worker.pid)
 
 
 def pre_fork(server, worker):
@@ -33,15 +33,15 @@ def pre_fork(server, worker):
 
 
 def pre_exec(server):
-    server.logger.info("Forked child, re-executing.")
+    server.log.info("Forked child, re-executing.")
 
 
 def when_ready(server):
-    server.logger.info("Server is ready. Spawning workers")
+    server.log.info("Server is ready. Spawning workers")
 
 
 def worker_int(worker):
-    worker.logger.info("Worker received INT or QUIT signal")
+    worker.log.info("Worker received INT or QUIT signal")
 
     # get traceback info
     import sys
@@ -56,8 +56,8 @@ def worker_int(worker):
             code.append('File: "%s", line %d, in %s' % (filename, lineno, name))
             if line:
                 code.append("  %s" % (line.strip()))
-    worker.logger.debug("\n".join(code))
+    worker.log.debug("\n".join(code))
 
 
 def worker_abort(worker):
-    worker.logger.info("worker received SIGABRT signal")
+    worker.log.info("worker received SIGABRT signal")
