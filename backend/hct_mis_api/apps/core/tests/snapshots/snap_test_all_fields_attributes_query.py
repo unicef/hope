@@ -43353,10 +43353,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 0-5',
+                'labelEn': 'Females Age 0 -< 5',
                 'labels': [
                     {
-                        'label': 'Females Age 0-5',
+                        'label': 'Females Age 0 -< 5',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43370,10 +43370,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 6-11',
+                'labelEn': 'Females Age 5 - 12',
                 'labels': [
                     {
-                        'label': 'Females Age 6-11',
+                        'label': 'Females Age 5 - 12',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43387,10 +43387,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 12-17',
+                'labelEn': 'Females Age 12 -< 17',
                 'labels': [
                     {
-                        'label': 'Females Age 12-17',
+                        'label': 'Females Age 12 -< 17',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43404,10 +43404,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 18-59',
+                'labelEn': 'Females Age 18 -< 59',
                 'labels': [
                     {
-                        'label': 'Females Age 18-59',
+                        'label': 'Females Age 18 -< 59',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43421,10 +43421,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 60+',
+                'labelEn': 'Females Age 60 +',
                 'labels': [
                     {
-                        'label': 'Females Age 60+',
+                        'label': 'Females Age 60 +',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43455,10 +43455,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 0-5',
+                'labelEn': 'Males Age 0 -< 5',
                 'labels': [
                     {
-                        'label': 'Males Age 0-5',
+                        'label': 'Males Age 0 -< 5',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43472,10 +43472,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 6-11',
+                'labelEn': 'Males Age 5 - 12',
                 'labels': [
                     {
-                        'label': 'Males Age 6-11',
+                        'label': 'Males Age 5 - 12',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43489,10 +43489,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 12-17',
+                'labelEn': 'Males Age 12 -< 17',
                 'labels': [
                     {
-                        'label': 'Males Age 12-17',
+                        'label': 'Males Age 12 -< 17',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43506,10 +43506,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 18-59',
+                'labelEn': 'Males Age 18 -< 59',
                 'labels': [
                     {
-                        'label': 'Males Age 18-59',
+                        'label': 'Males Age 18 -< 59',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43523,10 +43523,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 60+',
+                'labelEn': 'Males Age 60 +',
                 'labels': [
                     {
-                        'label': 'Males Age 60+',
+                        'label': 'Males Age 60 +',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43540,10 +43540,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females age 0-5 with disability',
+                'labelEn': 'Females age 0 -< 5 with disability',
                 'labels': [
                     {
-                        'label': 'Females age 0-5 with disability',
+                        'label': 'Females age 0 -< 5 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43557,10 +43557,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females age 6-11 with disability',
+                'labelEn': 'Females age 5 - 12 with disability',
                 'labels': [
                     {
-                        'label': 'Females age 6-11 with disability',
+                        'label': 'Females age 5 - 12 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43574,10 +43574,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females age 12-17 with disability',
+                'labelEn': 'Females age 12 -< 17 with disability',
                 'labels': [
                     {
-                        'label': 'Females age 12-17 with disability',
+                        'label': 'Females age 12 -< 17 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43591,10 +43591,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 18-59 with disability',
+                'labelEn': 'Females Age 18 -< 59 with disability',
                 'labels': [
                     {
-                        'label': 'Females Age 18-59 with disability',
+                        'label': 'Females Age 18 -< 59 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43608,10 +43608,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Female members with Disability age 60+',
+                'labelEn': 'Female members with Disability age 60 +',
                 'labels': [
                     {
-                        'label': 'Female members with Disability age 60+',
+                        'label': 'Female members with Disability age 60 +',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43625,10 +43625,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males age 0-5 with disability',
+                'labelEn': 'Males age 0 -< 5 with disability',
                 'labels': [
                     {
-                        'label': 'Males age 0-5 with disability',
+                        'label': 'Males age 0 -< 5 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43642,10 +43642,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males age 6-11 with disability',
+                'labelEn': 'Males age 5 - 12 with disability',
                 'labels': [
                     {
-                        'label': 'Males age 6-11 with disability',
+                        'label': 'Males age 5 - 12 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43659,10 +43659,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males age 12-17 with disability',
+                'labelEn': 'Males age 12 -< 17 with disability',
                 'labels': [
                     {
-                        'label': 'Males age 12-17 with disability',
+                        'label': 'Males age 12 -< 17 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43676,10 +43676,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 18-59 with disability',
+                'labelEn': 'Males Age 18 -< 59 with disability',
                 'labels': [
                     {
-                        'label': 'Males Age 18-59 with disability',
+                        'label': 'Males Age 18 -< 59 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43693,10 +43693,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Male members with Disability age 60+',
+                'labelEn': 'Male members with Disability age 60 +',
                 'labels': [
                     {
-                        'label': 'Male members with Disability age 60+',
+                        'label': 'Male members with Disability age 60 +',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43757,10 +43757,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Does the individual have paid employment in the curent month?',
+                'labelEn': 'Does the individual have paid employment in the current month?',
                 'labels': [
                     {
-                        'label': 'Does the individual have paid employment in the curent month?',
+                        'label': 'Does the individual have paid employment in the current month?',
                         'language': 'English(EN)'
                     }
                 ],
