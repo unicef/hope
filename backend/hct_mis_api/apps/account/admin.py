@@ -668,11 +668,14 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                                     email=email, partner=partner, defaults={"username": username}
                                 )
                                 if isnew:
-                                    u.user_roles.create(business_area=business_area, role=role)
+                                    ur = u.user_roles.create(business_area=business_area, role=role)
+                                    self.log_addition(request, u, "User imported by CSV")
+                                    self.log_addition(request, ur, "User Role added")
                                 else:  # check role validity
                                     try:
                                         IncompatibleRoles.objects.validate_user_role(u, business_area, role)
                                         u.user_roles.get_or_create(business_area=business_area, role=role)
+                                        self.log_addition(request, ur, "User Role added")
                                     except ValidationError as e:
                                         self.message_user(request, f"Error on {u}: {e}", messages.ERROR)
 
