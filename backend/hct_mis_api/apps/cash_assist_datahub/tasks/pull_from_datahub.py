@@ -187,7 +187,8 @@ class PullFromDatahubTask:
                 payment_record,
                 created,
             ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
-            if not payment_record.delivered_quantity_usd:
+            # FIXME: Slow methods, HOTFIX
+            if False:
                 try:
                     exchange_rates_client = ExchangeRates()
                     payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
