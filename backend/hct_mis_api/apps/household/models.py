@@ -862,6 +862,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             "deduplication_batch_results",
             "imported_individual_id",
             "sanction_list_possible_match",
+            "sanction_list_confirmed_match",
             "sanction_list_last_check",
             "pregnant",
             "observed_disability",
