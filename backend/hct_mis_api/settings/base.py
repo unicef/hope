@@ -224,9 +224,10 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
-    "hct_mis_api.apps.administration.apps.TemplateConfig",
-    "smart_admin.templates",
+    # "hct_mis_api.apps.administration.apps.TemplateConfig",
+    # "smart_admin.templates",
     "smart_admin.logs",
+    "smart_admin.apps.SmartTemplateConfig",
     "hct_mis_api.apps.administration.apps.Config",
     # "smart_admin",
     "django_sysinfo",
@@ -341,7 +342,6 @@ if "CACHE_URL" not in os.environ:
         os.environ["CACHE_URL"] = f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
     else:
         os.environ["CACHE_URL"] = f"dummycache://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
-
 
 CACHES = {
     "default": env.cache(),
@@ -614,6 +614,18 @@ SMART_ADMIN_SECTIONS = {
     ],
 }
 
+# SMART_ADMIN_BOOKMARKS = [('GitHub', 'https://github.com/saxix/django-smart-admin'),
+#                          'https://github.com/saxix/django-adminactions',
+#                          'https://github.com/saxix/django-sysinfo',
+#                          'https://github.com/saxix/django-adminfilters',
+#                          'https://github.com/saxix/django-admin-extra-urls',
+#                          ]
+SMART_ADMIN_BOOKMARKS = "hct_mis_api.apps.administration.site.get_bookmarks"
+
+SMART_ADMIN_BOOKMARKS_PERMISSION = None
+SMART_ADMIN_PROFILE_LINK = True
+SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root-token") == env("ROOT_TOKEN")
+
 EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
 
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
@@ -627,7 +639,10 @@ def filter_environment(key):
     return False
 
 
-SYSINFO = {"filter_environment": "hct_mis_api.settings.base.filter_environment"}
+SYSINFO = {
+    "filter_environment": "hct_mis_api.settings.base.filter_environment",
+    "ttl": 60,
+}
 
 EXPLORER_CONNECTIONS = {
     "default": "default",
