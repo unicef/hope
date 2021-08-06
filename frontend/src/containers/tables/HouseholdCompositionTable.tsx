@@ -51,7 +51,7 @@ export function HouseholdCompositionTable({
         </TableHead>
         <TableBody>
           <TableRow>
-            <TableCell align='left'>0-5</TableCell>
+            <TableCell align='left'>0 -&lt; 5</TableCell>
             <GreyTableCell align='left'>
               {household.femaleAgeGroup05Count}
             </GreyTableCell>
@@ -68,7 +68,7 @@ export function HouseholdCompositionTable({
             </GreyTableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left'>6-11</TableCell>
+            <TableCell align='left'>5 - 12</TableCell>
             <GreyTableCell align='left'>
               {household.femaleAgeGroup611Count}
             </GreyTableCell>
@@ -85,7 +85,7 @@ export function HouseholdCompositionTable({
             </GreyTableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left'>12-&lt;17</TableCell>
+            <TableCell align='left'>12 -&lt; 17</TableCell>
             <GreyTableCell align='left'>
               {household.femaleAgeGroup1217Count}
             </GreyTableCell>
@@ -102,7 +102,7 @@ export function HouseholdCompositionTable({
             </GreyTableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left'>18-&lt;59</TableCell>
+            <TableCell align='left'>18 -&lt; 59</TableCell>
             <GreyTableCell align='left'>
               {household.femaleAgeGroup1859Count}
             </GreyTableCell>
@@ -121,7 +121,7 @@ export function HouseholdCompositionTable({
             </GreyTableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left'>60+</TableCell>
+            <TableCell align='left'>60 +</TableCell>
             <GreyTableCell align='left'>
               {household.femaleAgeGroup60Count}
             </GreyTableCell>
