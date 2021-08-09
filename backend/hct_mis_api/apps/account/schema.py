@@ -40,7 +40,8 @@ def permissions_resolver(user_roles):
     all_user_roles = user_roles
     permissions_set = set()
     for user_role in all_user_roles:
-        permissions_set.update(user_role.role.permissions)
+        if user_role.role and user_role.role.permissions:
+            permissions_set.update(user_role.role.permissions)
     return permissions_set
 
 
