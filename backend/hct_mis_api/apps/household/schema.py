@@ -604,6 +604,7 @@ class Query(graphene.ObjectType):
     countries_choices = graphene.List(ChoiceObject)
     observed_disability_choices = graphene.List(ChoiceObject)
     severity_of_disability_choices = graphene.List(ChoiceObject)
+    flag_choices = graphene.List(ChoiceObject)
 
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
@@ -652,6 +653,9 @@ class Query(graphene.ObjectType):
 
     def resolve_observed_disability_choices(self, info, **kwargs):
         return to_choice_object(OBSERVED_DISABILITY_CHOICE)
+
+    def resolve_flag_choices(self, info, **kwargs):
+        return to_choice_object(INDIVIDUAL_FLAGS_CHOICES)
 
     def resolve_work_status_choices(self, info, **kwargs):
         return to_choice_object(WORK_STATUS_CHOICE)
