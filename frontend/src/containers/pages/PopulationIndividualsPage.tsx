@@ -9,6 +9,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import { usePermissions } from '../../hooks/usePermissions';
 import { IndividualsListTable } from '../tables/IndividualsListTable';
+import { useIndividualChoiceDataQuery } from '../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;
@@ -24,8 +25,10 @@ export function PopulationIndividualsPage(): React.ReactElement {
   const [filter, setFilter] = useState({
     sex: [],
     age: { min: undefined, max: undefined },
+    flags: [],
   });
   const debouncedFilter = useDebounce(filter, 500);
+  const { data: choicesData } = useIndividualChoiceDataQuery();
 
   if (permissions === null) return null;
 
@@ -37,7 +40,11 @@ export function PopulationIndividualsPage(): React.ReactElement {
   return (
     <>
       <PageHeader title={t('Individuals')} />
-      <IndividualsFilter filter={filter} onFilterChange={setFilter} />
+      <IndividualsFilter
+        filter={filter}
+        onFilterChange={setFilter}
+        choicesData={choicesData}
+      />
       <Container data-cy='page-details-container'>
         <IndividualsListTable
           filter={debouncedFilter}

@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  DialogActions,
   FormHelperText,
   Grid,
 } from '@material-ui/core';
@@ -60,12 +59,6 @@ const BoxPadding = styled.div`
 `;
 const NewTicket = styled.div`
   padding: 20px;
-`;
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
 `;
 const BoxWithBorderBottom = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
