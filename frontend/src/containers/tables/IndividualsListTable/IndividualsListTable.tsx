@@ -32,6 +32,7 @@ export const IndividualsListTable = ({
     sex: [filter.sex],
     search: filter.text,
     adminArea: filter.adminArea?.node?.id,
+    flags: filter.flags,
   };
 
   return (
