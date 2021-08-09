@@ -10,6 +10,7 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   choicesToDict,
   decodeIdString,
+  formatAge,
   renderBoolean,
   sexToCapitalize,
 } from '../../../../utils/utils';
@@ -36,6 +37,7 @@ const BorderBox = styled.div`
 interface RegistrationIndividualBioDataProps {
   individual: ImportedIndividualDetailedFragment;
 }
+
 export function RegistrationIndividualsBioData({
   individual,
 }: RegistrationIndividualBioDataProps): React.ReactElement {
@@ -130,7 +132,9 @@ export function RegistrationIndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label={t('Age')}>{individual.age}</LabelizedField>
+          <LabelizedField label={t('Age')}>
+            {formatAge(individual.age)}
+          </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Date of Birth')}>
