@@ -243,6 +243,14 @@ DISABILITY_CHOICES = (
         "not disabled",
     ),
 )
+SANCTION_LIST_POSSIBLE_MATCH = "SANCTION_LIST_POSSIBLE_MATCH"
+SANCTION_LIST_CONFIRMED_MATCH = "SANCTION_LIST_CONFIRMED_MATCH"
+INDIVIDUAL_FLAGS_CHOICES = (
+    (NEEDS_ADJUDICATION, "Needs adjudication"),
+    (DUPLICATE, "Duplicate"),
+    (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
+    (SANCTION_LIST_CONFIRMED_MATCH, "Sanction list match"),
+)
 
 logger = logging.getLogger(__name__)
 
