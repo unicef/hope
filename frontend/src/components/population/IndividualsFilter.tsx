@@ -11,6 +11,7 @@ import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { FieldLabel } from '../FieldLabel';
+import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
@@ -42,10 +43,13 @@ const StartInputAdornment = styled(InputAdornment)`
 interface IndividualsFilterProps {
   onFilterChange;
   filter;
+  choicesData: IndividualChoiceDataQuery;
 }
+
 export function IndividualsFilter({
   onFilterChange,
   filter,
+  choicesData,
 }: IndividualsFilterProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
@@ -154,6 +158,34 @@ export function IndividualsFilter({
               ),
             }}
           />
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>{t('Flags')}</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'flags')}
+              variant='outlined'
+              label={t('Flags')}
+              multiple
+              value={filter.flags}
+              SelectDisplayProps={{ 'data-cy': 'filters-flags' }}
+              MenuProps={{
+                'data-cy': 'filters-flags-options',
+              }}
+            >
+              {choicesData?.flagChoices.map((each, index) => (
+                <MenuItem
+                  key={each.value}
+                  value={each.value}
+                  data-cy={`select-option-${index}`}
+                >
+                  {each.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </StyledFormControl>
         </Grid>
       </Grid>
     </ContainerWithBorder>
