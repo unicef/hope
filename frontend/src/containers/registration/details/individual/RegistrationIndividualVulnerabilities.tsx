@@ -52,49 +52,34 @@ export function RegistrationIndividualVulnerabilities({
     return null;
   }
 
+  const getLabelOrDash = (choices, value): string =>
+    choices.find((item) => item.value === value)?.labelEn || '-';
+
   const fields = Object.entries(individual.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
-      if (flexAttributesDict[key]?.type === 'IMAGE') {
-        return (
-          <LabelizedField
-            key={key}
-            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-          >
-            <Image src={value} />
-          </LabelizedField>
-        );
-      }
-      if (
-        flexAttributesDict[key]?.type === 'SELECT_MANY' ||
-        flexAttributesDict[key]?.type === 'SELECT_ONE'
-      ) {
-        let newValue =
-          flexAttributesDict[key].choices.find((item) => item.value === value)
-            ?.labelEn || '-';
+      const { type, choices } = flexAttributesDict[key];
+      const label = key.replaceAll('_i_f', '').replace(/_/g, ' ');
+      let newValue;
+      let children;
+
+      if (type === 'IMAGE') {
+        children = <Image src={value} />;
+      } else if (type === 'SELECT_MANY' || type === 'SELECT_ONE') {
+        newValue = getLabelOrDash(choices, value);
         if (value instanceof Array) {
           newValue = value
-            .map(
-              (choice) =>
-                flexAttributesDict[key].choices.find(
-                  (item) => item.value === choice,
-                )?.labelEn || '-',
-            )
+            .map((choice) => getLabelOrDash(choices, choice))
             .join(', ');
         }
-        return (
-          <LabelizedField
-            key={key}
-            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-            value={newValue}
-          />
-        );
+      } else {
+        newValue = value;
       }
       return (
-        <LabelizedField
-          key={key}
-          label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-          value={value}
-        />
+        <Grid item xs={4} key={key}>
+          <LabelizedField label={label} value={newValue}>
+            {children}
+          </LabelizedField>
+        </Grid>
       );
     },
   );
@@ -104,11 +89,7 @@ export function RegistrationIndividualVulnerabilities({
         <Typography variant='h6'>{t('Vulnerabilities')}</Typography>
       </Title>
       <Grid container spacing={6}>
-        {fields.map((field) => (
-          <Grid item xs={4}>
-            {field}
-          </Grid>
-        ))}
+        {fields}
       </Grid>
     </Overview>
   );
