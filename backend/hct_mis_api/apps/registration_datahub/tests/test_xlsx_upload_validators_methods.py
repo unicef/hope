@@ -1,9 +1,10 @@
 import operator
 from unittest import TestCase, mock
 
-import openpyxl
 from django.conf import settings
 from django.core.management import call_command
+
+import openpyxl
 
 from hct_mis_api.apps.core.utils import SheetImageLoader
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
