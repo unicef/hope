@@ -471,3 +471,27 @@ class TestXLSXValidatorsMethods(TestCase):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             result = upload_xlsx_instance_validator.required_validator(value="", header="test")
             self.assertTrue(result)
+
+    def test_validate_empty_file(self):
+        empty_file_path = f"{self.FILES_DIR_PATH}/empty_rdi.xlsx"
+        wb = openpyxl.load_workbook(
+            empty_file_path,
+            data_only=True,
+        )
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+
+        expected_result = [
+            {
+                "header": "Households",
+                "message": "There aren't households in the file.",
+                "row_number": 1,
+            },
+            {
+                "header": "Individuals",
+                "message": "There aren't individuals in the file.",
+                "row_number": 1,
+            },
+        ]
+
+        result = upload_xlsx_instance_validator.validate_collectors_size(wb)
+        self.assertEqual(result, expected_result)
