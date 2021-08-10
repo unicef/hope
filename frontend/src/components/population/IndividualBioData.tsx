@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
   choicesToDict,
+  formatAge,
   renderBoolean,
   sexToCapitalize,
 } from '../../utils/utils';
@@ -96,13 +97,6 @@ export function IndividualsBioData({
       </Box>
     </Grid>
   ));
-
-  const formatAge = (age): string | number => {
-    if (age > 0) {
-      return age;
-    }
-    return '<1';
-  };
 
   return (
     <Overview>
