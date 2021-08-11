@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 
 from django.core.management import BaseCommand
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import AdminAreaLevel, BusinessArea
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class Command(BaseCommand):
         root = tree.getroot()
 
         for business_area_tag in root:
-            BusinessArea.objects.get_or_create(
+            business_area, _ = BusinessArea.objects.get_or_create(
                 code=business_area_tag.find("BUSINESS_AREA_CODE").text,
                 defaults=dict(
                     name=business_area_tag.find("BUSINESS_AREA_NAME").text,
@@ -52,6 +52,10 @@ class Command(BaseCommand):
                     has_data_sharing_agreement=True,
                 ),
             )
+
+            country = AdminAreaLevel.objects.filter(admin_level=0, country_name=business_area.name).first()
+            if country:
+                business_area.countries.add(country)
         BusinessArea.objects.get_or_create(
             code="GLOBAL",
             defaults=dict(
