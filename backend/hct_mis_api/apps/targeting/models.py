@@ -19,6 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from model_utils import Choices
+from model_utils.managers import SoftDeletableManager
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
@@ -60,7 +61,7 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class TargetPopulationManager(models.Manager):
+class TargetPopulationManager(SoftDeletableManager):
     def get_queryset(self):
         return (
             super()
