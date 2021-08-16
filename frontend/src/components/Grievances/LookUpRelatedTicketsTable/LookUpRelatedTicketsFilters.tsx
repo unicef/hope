@@ -1,6 +1,3 @@
-import React from 'react';
-import styled from 'styled-components';
-import moment from 'moment';
 import {
   Box,
   Button,
@@ -12,13 +9,17 @@ import {
   Select,
   TextField,
 } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardDatePicker } from '@material-ui/pickers';
-import { ContainerWithBorder } from '../../ContainerWithBorder';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { FieldLabel } from '../../FieldLabel';
+import moment from 'moment';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import { ContainerWithBorder } from '../../ContainerWithBorder';
+import { FieldLabel } from '../../FieldLabel';
+import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 
 const SearchTextField = styled(TextField)`
   flex: 1;
@@ -46,6 +47,7 @@ export function LookUpRelatedTicketsFilters({
   setFilterApplied,
   filterInitial,
 }: LookUpRelatedTicketsFiltersProps): React.ReactElement {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
@@ -53,7 +55,7 @@ export function LookUpRelatedTicketsFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
+            label={t('Search')}
             variant='outlined'
             margin='dense'
             value={filter.search}
@@ -70,13 +72,13 @@ export function LookUpRelatedTicketsFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
+            <InputLabel>{t('Status')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'status')}
               variant='outlined'
-              label='Status'
+              label={t('Status')}
               value={filter.status || null}
             >
               <MenuItem value=''>
@@ -94,7 +96,7 @@ export function LookUpRelatedTicketsFilters({
         </Grid>
         <Grid item>
           <SearchTextField
-            label='FSP'
+            label={t('FSP')}
             variant='outlined'
             margin='dense'
             value={filter.fsp}
@@ -110,7 +112,7 @@ export function LookUpRelatedTicketsFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Creation Date</FieldLabel>
+            <FieldLabel>{t('Creation Date')}</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
               inputVariant='outlined'
@@ -122,7 +124,9 @@ export function LookUpRelatedTicketsFilters({
                   ...filter,
                   createdAtRange: {
                     ...filter.createdAtRange,
-                    min: moment(date).startOf('day').toISOString(),
+                    min: moment(date)
+                      .startOf('day')
+                      .toISOString(),
                   },
                 })
               }
@@ -137,14 +141,16 @@ export function LookUpRelatedTicketsFilters({
             variant='inline'
             inputVariant='outlined'
             margin='dense'
-            label='To'
+            label={t('To')}
             autoOk
             onChange={(date) =>
               onFilterChange({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  max: moment(date).endOf('day').toISOString(),
+                  max: moment(date)
+                    .endOf('day')
+                    .toISOString(),
                 },
               })
             }
@@ -167,14 +173,14 @@ export function LookUpRelatedTicketsFilters({
               onFilterChange(filterInitial);
             }}
           >
-            Clear
+            {t('Clear')}
           </Button>
           <Button
             color='primary'
             variant='outlined'
             onClick={() => setFilterApplied(filter)}
           >
-            Apply
+            {t('Apply')}
           </Button>
         </Grid>
       </Grid>

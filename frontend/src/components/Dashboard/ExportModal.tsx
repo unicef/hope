@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import {
+  Box,
   Button,
+  Checkbox,
   DialogContent,
   DialogTitle,
   Table,
@@ -8,20 +9,20 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Checkbox,
   Typography,
-  Box,
 } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import {
-  useDashboardReportChoiceDataQuery,
-  useCreateDashboardReportMutation,
-} from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
+import {
+  useCreateDashboardReportMutation,
+  useDashboardReportChoiceDataQuery,
+} from '../../__generated__/graphql';
+import { LoadingComponent } from '../LoadingComponent';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -43,6 +44,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
   const [selected, setSelected] = useState([]);
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
+  const { t } = useTranslation();
   const numSelected = selected.length;
   const isSelected = (id: string): boolean => selected.includes(id);
 
@@ -89,7 +91,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
     return data.map((el) => {
       const isItemSelected = isSelected(el.id);
       return (
-        <TableRow key={el.id}>
+        <TableRow onClick={() => onCheckboxClick(el.id)} key={el.id}>
           <TableCell align='left' padding='checkbox'>
             <Checkbox
               color='primary'
@@ -117,9 +119,9 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
       },
     });
     if (!response.errors && response.data.createDashboardReport.success) {
-      showMessage('Report was created.');
+      showMessage(t('Report was created.'));
     } else {
-      showMessage('Report create action failed.');
+      showMessage(t('Report create action failed.'));
     }
     setSelected([]);
     setDialogOpen(false);
@@ -143,19 +145,20 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
         maxWidth='md'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>Export Data</DialogTitle>
+          <DialogTitle id='scroll-dialog-title'>{t('Export Data')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
             <Box mb={6}>
               <Typography variant='body2'>
-                The filters applied on the dashboard will be used for the
-                reports.
+                {t(
+                  'The filters applied on the dashboard will be used for the reports.',
+                )}
               </Typography>
             </Box>
             <Box mb={2}>
               <Typography variant='subtitle2'>
-                Select types of reports to be exported:
+                {t('Select types of reports to be exported')}:
               </Typography>
             </Box>
             <Table>
@@ -170,22 +173,23 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
                       inputProps={{ 'aria-label': 'select all' }}
                     />
                   </TableCell>
-                  <TableCell align='left'>Report Type</TableCell>
+                  <TableCell align='left'>{t('Report Type')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>{renderRows()}</TableBody>
             </Table>
             <Box p={3} m={4} bgcolor='#F5F5F5'>
               <Typography variant='subtitle2'>
-                Upon clicking export button, report will be generated and send
-                to your email address when ready.
+                {t(
+                  'Upon clicking export button, report will be generated and send to your email address when ready.',
+                )}
               </Typography>
             </Box>
           </DialogContainer>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setDialogOpen(false)}>{t('CANCEL')}</Button>
             <Button
               type='submit'
               color='primary'
@@ -193,7 +197,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
               onClick={submitFormHandler}
               data-cy='button-submit'
             >
-              Export
+              {t('Export')}
             </Button>
           </DialogActions>
         </DialogFooter>

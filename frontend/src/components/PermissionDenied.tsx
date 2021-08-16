@@ -1,7 +1,8 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Box, Paper } from '@material-ui/core';
 import BlockRoundedIcon from '@material-ui/icons/BlockRounded';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 const Container = styled.div`
   padding: 20px;
@@ -26,14 +27,15 @@ const SmallerText = styled.div`
 `;
 
 export function PermissionDenied(): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <Container>
       <Paper>
         <PaperContainer>
           <Icon />
-          <Box>Permission Denied</Box>
+          <Box>{t('Permission Denied')}</Box>
           <SmallerText>
-            Ask the Administrator to get access to this page
+            {t('Ask the Administrator to get access to this page')}
           </SmallerText>
         </PaperContainer>
       </Paper>

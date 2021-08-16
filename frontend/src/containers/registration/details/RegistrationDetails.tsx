@@ -1,14 +1,15 @@
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Grid, Typography, Box } from '@material-ui/core';
-import { StatusBox } from '../../../components/StatusBox';
-import { registrationDataImportStatusToColor } from '../../../utils/utils';
-import { LabelizedField } from '../../../components/LabelizedField';
-import { UniversalMoment } from '../../../components/UniversalMoment';
-import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
-import { MiśTheme } from '../../../theme';
 import { ContainerColumnWithBorder } from '../../../components/ContainerColumnWithBorder';
+import { LabelizedField } from '../../../components/LabelizedField';
 import { OverviewContainer } from '../../../components/OverviewContainer';
+import { StatusBox } from '../../../components/StatusBox';
+import { UniversalMoment } from '../../../components/UniversalMoment';
+import { MiśTheme } from '../../../theme';
+import { registrationDataImportStatusToColor } from '../../../utils/utils';
+import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
 import { DedupeBox } from './DedupeBox';
 
 const StatusContainer = styled.div`
@@ -46,6 +47,7 @@ interface RegistrationDetailsProps {
 export function RegistrationDetails({
   registration,
 }: RegistrationDetailsProps): React.ReactElement {
+  const { t } = useTranslation();
   const withinBatchOptions = [
     {
       name: 'Unique',
@@ -82,7 +84,7 @@ export function RegistrationDetails({
   return (
     <ContainerColumnWithBorder>
       <Title>
-        <Typography variant='h6'>Import Details</Typography>
+        <Typography variant='h6'>{t('Import Details')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid alignItems='center' container>
@@ -90,7 +92,7 @@ export function RegistrationDetails({
             <Grid container spacing={3}>
               <Grid item xs={6}>
                 <Box display='flex' flexDirection='column'>
-                  <LabelizedField label='status'>
+                  <LabelizedField label={t('status')}>
                     <StatusContainer>
                       <StatusBox
                         status={registration?.status}
@@ -105,13 +107,13 @@ export function RegistrationDetails({
               </Grid>
               <Grid item xs={6}>
                 <LabelizedField
-                  label='Source of Data'
+                  label={t('Source of Data')}
                   value={registration?.dataSource}
                 />
               </Grid>
               <Grid item xs={6}>
                 <LabelizedField
-                  label='Import Date'
+                  label={t('Import Date')}
                   value={
                     <UniversalMoment withTime>
                       {registration?.importDate}
@@ -121,7 +123,7 @@ export function RegistrationDetails({
               </Grid>
               <Grid item xs={6}>
                 <LabelizedField
-                  label='Imported by'
+                  label={t('Imported by')}
                   value={`${registration?.importedBy?.firstName} ${registration?.importedBy?.lastName}`}
                 />
               </Grid>
@@ -132,7 +134,7 @@ export function RegistrationDetails({
               <Grid item xs={6}>
                 <BigValueContainer>
                   <LabelizedField
-                    label='Total Number of Households'
+                    label={t('Total Number of Households')}
                     dataCy='households'
                   >
                     <BigValue>{registration?.numberOfHouseholds}</BigValue>
@@ -142,7 +144,7 @@ export function RegistrationDetails({
               <Grid item xs={6}>
                 <BigValueContainer>
                   <LabelizedField
-                    label='Total Number of Individuals'
+                    label={t('Total Number of Individuals')}
                     dataCy='individuals'
                   >
                     <BigValue>{registration?.numberOfIndividuals}</BigValue>

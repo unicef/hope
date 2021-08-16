@@ -44,7 +44,7 @@ from requests import HTTPError
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm, KoboLoginForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import Partner, User, UserRole
+from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import BusinessArea
@@ -79,27 +79,31 @@ class UserRoleAdminForm(ModelForm):
         if not self.is_valid():
             return
         role = self.cleaned_data["role"]
-        incompatible_roles = list(
-            account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-        ) + list(account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
-        incompatible_userroles = account_models.UserRole.objects.filter(
-            business_area=self.cleaned_data["business_area"],
-            role__id__in=incompatible_roles,
-            user=self.cleaned_data["user"],
-        )
-        if self.instance.id:
-            incompatible_userroles = incompatible_userroles.exclude(id=self.instance.id)
-        if incompatible_userroles.exists():
-            logger.error(
-                f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
-            )
-            raise ValidationError(
-                {
-                    "role": _(
-                        f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
-                    )
-                }
-            )
+        user = self.cleaned_data["user"]
+        business_area = self.cleaned_data["business_area"]
+
+        account_models.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
+        # incompatible_roles = list(
+        #     account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+        # ) + list(account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
+        # incompatible_userroles = account_models.UserRole.objects.filter(
+        #     business_area=self.cleaned_data["business_area"],
+        #     role__id__in=incompatible_roles,
+        #     user=self.cleaned_data["user"],
+        # )
+        # if self.instance.id:
+        #     incompatible_userroles = incompatible_userroles.exclude(id=self.instance.id)
+        # if incompatible_userroles.exists():
+        #     logger.error(
+        #         f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+        #     )
+        #     raise ValidationError(
+        #         {
+        #             "role": _(
+        #                 f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+        #             )
+        #         }
+        #     )
 
 
 class UserRoleInlineFormSet(BaseInlineFormSet):
@@ -491,10 +495,14 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                         users += 1
                         for role in roles:
                             if crud == "ADD":
-                                ur, is_new = u.user_roles.get_or_create(business_area=ba, role=role)
-                                if is_new:
-                                    added += 1
-                                    self.log_addition(request, ur, "Role added")
+                                try:
+                                    IncompatibleRoles.objects.validate_user_role(u, ba, role)
+                                    ur, is_new = u.user_roles.get_or_create(business_area=ba, role=role)
+                                    if is_new:
+                                        added += 1
+                                        self.log_addition(request, ur, "Role added")
+                                except ValidationError as e:
+                                    self.message_user(request, str(e), messages.ERROR)
                             elif crud == "REMOVE":
                                 to_delete = u.user_roles.filter(business_area=ba, role=role).first()
                                 if to_delete:
@@ -603,6 +611,9 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                 try:
                     csv_file = form.cleaned_data["file"]
                     enable_kobo = form.cleaned_data["enable_kobo"]
+                    partner = form.cleaned_data["partner"]
+                    business_area = form.cleaned_data["business_area"]
+                    role = form.cleaned_data["role"]
 
                     if csv_file.multiple_chunks():
                         raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
@@ -617,23 +628,37 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                     context["results"] = results
                     context["reader"] = reader
                     context["errors"] = []
-                    for row in reader:
+                    with atomic():
                         try:
-                            email = row["email"].strip()
-                        except Exception as e:
-                            raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
+                            for row in reader:
+                                try:
+                                    email = row["email"].strip()
+                                except Exception as e:
+                                    raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
 
-                        user_info = {"email": email, "is_new": False, "kobo": False, "error": ""}
-                        if "username" in row:
-                            username = row["username"].strip()
-                        else:
-                            username = row["email"].replace("@", "_").replace(".", "_").lower()
-                        u, isnew = account_models.User.objects.get_or_create(
-                            email=email, defaults={"username": username}
-                        )
-                        if enable_kobo:
-                            self._grant_kobo_accesss_to_user(u, sync=False)
-                        context["results"].append(user_info)
+                                user_info = {"email": email, "is_new": False, "kobo": False, "error": ""}
+                                if "username" in row:
+                                    username = row["username"].strip()
+                                else:
+                                    username = row["email"].replace("@", "_").replace(".", "_").lower()
+                                u, isnew = account_models.User.objects.get_or_create(
+                                    email=email, partner=partner, defaults={"username": username}
+                                )
+                                if isnew:
+                                    u.user_roles.create(business_area=business_area, role=role)
+                                else:  # check role validity
+                                    try:
+                                        IncompatibleRoles.objects.validate_user_role(u, business_area, role)
+                                        u.user_roles.get_or_create(business_area=business_area, role=role)
+                                    except ValidationError as e:
+                                        self.message_user(request, f"Error on {u}: {e}", messages.ERROR)
+
+                                if enable_kobo:
+                                    self._grant_kobo_accesss_to_user(u, sync=False)
+
+                                context["results"].append(user_info)
+                        except Exception as e:
+                            raise
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form

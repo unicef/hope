@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Button,
   Dialog,
@@ -7,10 +6,12 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
-import styled from 'styled-components';
 import { Formik } from 'formik';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useDeleteTargetPopulationMutation } from '../../../__generated__/graphql';
 
 export interface DeleteTargetPopulation {
@@ -40,6 +41,7 @@ export function DeleteTargetPopulation({
   setOpen,
   targetPopulationId,
 }): React.ReactElement {
+  const { t } = useTranslation();
   const [mutate] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -71,24 +73,26 @@ export function DeleteTargetPopulation({
           <>
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
-                <Typography variant='h6'>Delete Target Population</Typography>
+                <Typography variant='h6'>
+                  {t('Delete Target Population')}
+                </Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>
-                Are you sure you want to delete this Target Population?
+                {t('Are you sure you want to delete this Target Population?')}
               </DialogDescription>
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button onClick={() => setOpen(false)}>CANCEL</Button>
+                <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
                 <Button
                   type='submit'
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
                 >
-                  Delete
+                  {t('Delete')}
                 </Button>
               </DialogActions>
             </DialogFooter>

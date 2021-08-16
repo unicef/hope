@@ -1,6 +1,3 @@
-import React from 'react';
-import styled from 'styled-components';
-import { Formik } from 'formik';
 import {
   Button,
   Dialog,
@@ -8,6 +5,10 @@ import {
   DialogContent,
   DialogTitle,
 } from '@material-ui/core';
+import { Formik } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { LookUpPaymentRecordTable } from '../LookUpPaymentRecordTable/LookUpPaymentRecordTable';
 
 const DialogFooter = styled.div`
@@ -26,6 +27,7 @@ export const LookUpPaymentRecordModal = ({
   lookUpDialogOpen,
   setLookUpDialogOpen,
 }): React.ReactElement => {
+  const { t } = useTranslation();
   return (
     <Formik
       initialValues={initialValues}
@@ -46,7 +48,7 @@ export const LookUpPaymentRecordModal = ({
           >
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
-                Look up Payment Record
+                {t('Look up Payment Record')}
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
@@ -59,7 +61,7 @@ export const LookUpPaymentRecordModal = ({
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setLookUpDialogOpen(false)}>
-                  CANCEL
+                  {t('CANCEL')}
                 </Button>
                 <Button
                   type='submit'
@@ -68,7 +70,7 @@ export const LookUpPaymentRecordModal = ({
                   onClick={submitForm}
                   data-cy='button-submit'
                 >
-                  SAVE
+                  {t('SAVE')}
                 </Button>
               </DialogActions>
             </DialogFooter>

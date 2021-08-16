@@ -4,11 +4,16 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     mark_as_duplicate_individual_and_reassign_roles,
     reassign_roles,
 )
-from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH, Document
+from hct_mis_api.apps.household.models import (
+    UNIQUE,
+    UNIQUE_IN_BATCH,
+    Document,
+    Individual,
+)
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
-def close_system_flagging_ticket(grievance_ticket, info):
+def close_system_flagging_ticket(grievance_ticket, info, should_log=True):
     ticket_details = grievance_ticket.ticket_details
 
     if not ticket_details:
@@ -20,6 +25,12 @@ def close_system_flagging_ticket(grievance_ticket, info):
     if ticket_details.approve_status is False:
         individual.sanction_list_possible_match = False
         individual.save()
+    else:
+        individual.sanction_list_confirmed_match = True
+        individual.save()
+        reassign_roles(individual, info, ticket_details, should_log)
+
+    if should_log:
         log_create(
             Individual.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -27,8 +38,6 @@ def close_system_flagging_ticket(grievance_ticket, info):
             old_individual,
             individual,
         )
-    else:
-        reassign_roles(ticket_details.golden_records_individual, info, ticket_details)
 
 
 def _clear_deduplication_individuals_fields(individuals):
