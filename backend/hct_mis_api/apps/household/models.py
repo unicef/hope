@@ -722,8 +722,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         if self.head_of_household.age < 18:
             if self.head_of_household.sex == FEMALE:
                 self.fchild_hoh = True
-            else:
-                self.child_hoh = True
+            self.child_hoh = True
         self.save()
 
 
