@@ -49,13 +49,7 @@ export function HouseHoldTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={householdDetailsPath}
-        >
-          {household.unicefId}
-        </BlackLink>
+        <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
       </TableCell>
       <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>

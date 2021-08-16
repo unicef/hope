@@ -1,6 +1,7 @@
 import { Box, Paper, Typography } from '@material-ui/core';
-import { useParams } from 'react-router-dom';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
@@ -37,6 +38,7 @@ export const OtherRelatedTickets = ({
   linkedTickets: GrievanceTicketQuery['grievanceTicket']['relatedTickets'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const { id } = useParams();
 
@@ -113,7 +115,7 @@ export const OtherRelatedTickets = ({
   return linkedTickets.length || householdTickets.length ? (
     <StyledBox>
       <Title>
-        <Typography variant='h6'>Other Related Tickets</Typography>
+        <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
       </Title>
       <Box display='flex' flexDirection='column'>
         <LabelizedField
@@ -121,33 +123,34 @@ export const OtherRelatedTickets = ({
         >
           <>{renderIds(openHouseholdTickets)}</>
         </LabelizedField>
-        <LabelizedField label='Tickets'>
+        <LabelizedField label={t('Tickets')}>
           <>{renderRelatedIds(openTickets)}</>
         </LabelizedField>
         {!show && (closedTickets.length || closedHouseholdTickets.length) ? (
           <Box mt={3}>
             <BlueBold onClick={() => setShow(true)}>
-              SHOW CLOSED TICKETS (
+              {t('SHOW CLOSED TICKETS')} (
               {closedTickets.length + closedHouseholdTickets.length})
             </BlueBold>
           </Box>
         ) : null}
         {show && (
           <Box mb={3} mt={3}>
-            <Typography>Closed Tickets</Typography>
+            <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`For Household ${ticket.household?.unicefId || '-'} `}
+              label={`${t('For Household')} ${ticket.household?.unicefId ||
+                '-'} `}
             >
               <>{renderIds(closedHouseholdTickets)}</>
             </LabelizedField>
-            <LabelizedField label='Tickets'>
+            <LabelizedField label={t('Tickets')}>
               <>{renderRelatedIds(closedTickets)}</>
             </LabelizedField>
           </Box>
         )}
         {show && (closedTickets.length || closedHouseholdTickets.length) ? (
           <BlueBold onClick={() => setShow(false)}>
-            HIDE CLOSED TICKETS (
+            {t('HIDE CLOSED TICKETS')} (
             {closedTickets.length + closedHouseholdTickets.length})
           </BlueBold>
         ) : null}

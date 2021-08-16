@@ -1,5 +1,6 @@
 import { Typography } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
@@ -14,18 +15,19 @@ const Title = styled.div`
 `;
 
 export function PastTickets({ tickets }): React.ReactElement {
+  const { t } = useTranslation();
   const formattedTickets = (strings: string[]) =>
-    strings ? strings.join(', ') : 'No past tickets';
+    strings ? strings.join(', ') : t('No past tickets');
   return (
     <PastContainer>
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant='h6'>
-            Past tickets <Missing />
+            {t('Past tickets')} <Missing />
           </Typography>
         </Title>
         <OverviewContainer>
-          <LabelizedField label='TICKET ID'>
+          <LabelizedField label={t('TICKET ID')}>
             <p>{formattedTickets(tickets)}</p>
           </LabelizedField>
         </OverviewContainer>

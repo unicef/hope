@@ -1,21 +1,23 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { PageHeader } from '../../components/PageHeader';
+import { VerificationRecordDetails } from '../../components/payments/VerificationRecordDetails';
+import { VerifyManual } from '../../components/payments/VerifyManual';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
+import { decodeIdString, isPermissionDeniedError } from '../../utils/utils';
 import {
   PaymentVerificationNode,
   usePaymentRecordVerificationQuery,
 } from '../../__generated__/graphql';
-import { PageHeader } from '../../components/PageHeader';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { VerificationRecordDetails } from '../../components/payments/VerificationRecordDetails';
-import { decodeIdString, isPermissionDeniedError } from '../../utils/utils';
-import { VerifyManual } from '../../components/payments/VerifyManual';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
 
 export function VerificationRecordDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const { data, loading, error } = usePaymentRecordVerificationQuery({
@@ -33,7 +35,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
           {
-            title: 'Payment Verification',
+            title: t('Payment Verification'),
             to: `/${businessArea}/payment-verification`,
           },
         ]
@@ -44,7 +46,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
     )
       ? [
           {
-            title: `Cash Plan ${decodeIdString(
+            title: `${t('Cash Plan')} ${decodeIdString(
               paymentVerification.paymentRecord.cashPlan.id,
             )}`,
             to: `/${businessArea}/payment-verification/${paymentVerification.paymentRecord.cashPlan.id}`,
@@ -55,12 +57,15 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      title={`Payment ID ${paymentVerification.paymentRecord.caId}`}
+      title={`${t('Payment ID')} ${paymentVerification.paymentRecord.caId}`}
       breadCrumbs={breadCrumbsItems}
     >
       {verification.verificationMethod === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
-        <VerifyManual paymentVerificationId={paymentVerification.id} enabled={paymentVerification.isManuallyEditable}/>
+        <VerifyManual
+          paymentVerificationId={paymentVerification.id}
+          enabled={paymentVerification.isManuallyEditable}
+        />
       ) : null}
     </PageHeader>
   );

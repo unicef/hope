@@ -1,6 +1,3 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   Box,
   Button,
@@ -10,18 +7,22 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 import { Field, Formik } from 'formik';
-import { useDebounce } from '../../../hooks/useDebounce';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import {
   GrievanceTicketDocument,
   ProgramNode,
   useAllProgramsQuery,
   useReassignRoleGrievanceMutation,
 } from '../../../__generated__/graphql';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -45,6 +46,7 @@ export const LookUpReassignRoleModal = ({
   setSelectedHousehold,
   excludedIndividual,
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
@@ -92,7 +94,7 @@ export const LookUpReassignRoleModal = ({
               },
             ],
           });
-          showMessage('Role Reassigned');
+          showMessage(t('Role Reassigned'));
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
@@ -108,7 +110,9 @@ export const LookUpReassignRoleModal = ({
           aria-labelledby='form-dialog-title'
         >
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>Reassign Role</DialogTitle>
+            <DialogTitle id='scroll-dialog-title'>
+              {t('Reassign Role')}
+            </DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
             <LookUpIndividualFilters
@@ -139,7 +143,7 @@ export const LookUpReassignRoleModal = ({
                     component={FormikCheckboxField}
                   />
                 </Box>
-                <Button onClick={() => handleCancel()}>CANCEL</Button>
+                <Button onClick={() => handleCancel()}>{t('CANCEL')}</Button>
                 <Button
                   type='submit'
                   color='primary'
@@ -148,7 +152,7 @@ export const LookUpReassignRoleModal = ({
                   disabled={values.identityVerified === false}
                   data-cy='button-submit'
                 >
-                  SAVE
+                  {t('SAVE')}
                 </Button>
               </Box>
             </DialogActions>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllHouseholdsQueryVariables,
@@ -27,6 +28,7 @@ export const HouseholdTable = ({
   choicesData,
   canViewDetails,
 }: HouseholdTableProps): React.ReactElement => {
+  const { t } = useTranslation();
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     familySize: JSON.stringify(filter.householdSize),
@@ -41,7 +43,7 @@ export const HouseholdTable = ({
   return (
     <TableWrapper>
       <UniversalTable<HouseholdNode, AllHouseholdsQueryVariables>
-        title='Households'
+        title={t('Households')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllHouseholdsQuery}

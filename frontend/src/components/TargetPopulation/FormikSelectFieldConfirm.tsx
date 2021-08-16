@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
 import {
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   FormHelperText,
-  MenuItem,
   InputLabel,
+  MenuItem,
   Select,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
 } from '@material-ui/core';
-import { DialogFooter, DialogTitleWrapper } from '../ConfirmationDialog';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { getFullNodeFromEdgesById } from '../../utils/utils';
+import { DialogFooter, DialogTitleWrapper } from '../ConfirmationDialog';
 
 export const FormikSelectFieldConfirm = ({
   field,
@@ -20,6 +21,7 @@ export const FormikSelectFieldConfirm = ({
   allProgramsEdges,
   ...otherProps
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const [selectedProgram, setSelectedProgram] = useState(null);
 
   const isInvalid = form.errors[field.name] && form.touched[field.name];
@@ -93,19 +95,23 @@ export const FormikSelectFieldConfirm = ({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <span>Programme Change</span>
+            <span>{t('Programme Change')}</span>
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           {' '}
           <span>
-            Are you sure you want to change the programme ? <br /> Changing the
-            programme will result in deleting your current Targeting Criteria.
+            {t('Are you sure you want to change the programme ?')} <br />{' '}
+            {t(
+              'Changing the programme will result in deleting your current Targeting Criteria.',
+            )}
           </span>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setSelectedProgram(null)}>CANCEL</Button>
+            <Button onClick={() => setSelectedProgram(null)}>
+              {t('CANCEL')}
+            </Button>
             <Button
               type='submit'
               color='primary'
@@ -113,7 +119,7 @@ export const FormikSelectFieldConfirm = ({
               onClick={() => handleOnChange(selectedProgram, true)}
               data-cy='button-submit'
             >
-              Continue
+              {t('Continue')}
             </Button>
           </DialogActions>
         </DialogFooter>

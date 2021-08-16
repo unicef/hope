@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllIndividualsQueryVariables,
@@ -24,18 +25,20 @@ export const IndividualsListTable = ({
   filter,
   canViewDetails,
 }: IndividualsListTableProps): React.ReactElement => {
+  const { t } = useTranslation();
   const initialVariables = {
     age: JSON.stringify(filter.age),
     businessArea,
     sex: [filter.sex],
     search: filter.text,
     adminArea: filter.adminArea?.node?.id,
+    flags: filter.flags,
   };
 
   return (
     <TableWrapper>
       <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
-        title='Individuals'
+        title={t('Individuals')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllIndividualsQuery}

@@ -1,13 +1,14 @@
-import React from 'react';
-import { Typography, Paper } from '@material-ui/core';
-import { FieldArray } from 'formik';
+import { Paper, Typography } from '@material-ui/core';
 import { Label } from '@material-ui/icons';
+import { FieldArray } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
-import { TargetingCriteria } from '../TargetingCriteria';
-import { Results } from '../Results';
-import { useGoldenRecordByTargetingCriteriaQuery } from '../../../__generated__/graphql';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
+import { useGoldenRecordByTargetingCriteriaQuery } from '../../../__generated__/graphql';
+import { Results } from '../Results';
+import { TargetingCriteria } from '../TargetingCriteria';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -27,6 +28,7 @@ export function CandidateListTab({
   selectedProgram?;
   businessArea?;
 }): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <>
       <FieldArray
@@ -56,9 +58,9 @@ export function CandidateListTab({
       ) : (
         <PaperContainer>
           <Typography variant='h6'>
-            Target Population Entries (Households)
+            {t('Target Population Entries (Households)')}
           </Typography>
-          <Label>Add targeting criteria to see results.</Label>
+          <Label>{t('Add targeting criteria to see results.')}</Label>
         </PaperContainer>
       )}
     </>
