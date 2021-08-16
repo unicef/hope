@@ -7,8 +7,7 @@ from collections import MutableMapping, OrderedDict
 from typing import List
 
 from PIL import Image
-from django.db.models import QuerySet, Q
-from django.db.transaction import atomic
+from django.db.models import QuerySet
 from django_filters import OrderingFilter
 from graphql import GraphQLError
 
@@ -684,79 +683,3 @@ class SheetImageLoader:
         else:
             image = io.BytesIO(self._images[cell]())
             return Image.open(image)
-
-
-def process_old_composition(household, imported_household):
-    fields_to_copy_from_datahub = (
-        "female_age_group_0_5_count",
-        "female_age_group_6_11_count",
-        "female_age_group_12_17_count",
-        "female_age_group_18_59_count",
-        "female_age_group_60_count",
-        "pregnant_count",
-        "male_age_group_0_5_count",
-        "male_age_group_6_11_count",
-        "male_age_group_12_17_count",
-        "male_age_group_18_59_count",
-        "male_age_group_60_count",
-        "female_age_group_0_5_disabled_count",
-        "female_age_group_6_11_disabled_count",
-        "female_age_group_12_17_disabled_count",
-        "female_age_group_18_59_disabled_count",
-        "female_age_group_60_disabled_count",
-        "male_age_group_0_5_disabled_count",
-        "male_age_group_6_11_disabled_count",
-        "male_age_group_12_17_disabled_count",
-        "male_age_group_18_59_disabled_count",
-        "male_age_group_60_disabled_count",
-        "size",
-        "child_hoh",
-        "fchild_hoh",
-    )
-    for field in fields_to_copy_from_datahub:
-        imported_household_value = getattr(imported_household,field)
-        setattr(household, field, imported_household_value)
-    household.set_sys_field("processed_due_to_household_composition_problem_29_JUL_2021", True)
-    household.set_sys_field("imported_household_id", str(imported_household.id))
-    household.save()
-
-
-@atomic
-def look_for_same_record(household):
-    from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
-
-    fields_to_check = (
-        "residence_status",
-        "country_origin",
-        "country",
-        "geopoint",
-        # "flex_fields",
-        "first_registration_date",
-        "last_registration_date",
-    )
-    query_dict = {}
-    for field in fields_to_check:
-        query_dict[field] = getattr(household, field)
-    rdi_hct_id = household.registration_data_import.id
-    imported_households = ImportedHousehold.objects.filter(
-        **query_dict,
-        head_of_household__full_name=household.head_of_household.full_name,
-        registration_data_import__hct_id=rdi_hct_id,
-    )
-    if imported_households.count() != 1:
-        print("NOT_PROCESSED::", household, imported_households.count())
-    else:
-        try:
-            process_old_composition(household, imported_households.first())
-            print("PROCESSED_CORRECTLY::", household)
-        except:
-            print("PROBLEM_WITH_PROCESSING::", household, imported_households)
-            raise
-
-
-def check_all_affected_rows():
-    from hct_mis_api.apps.household.models import Household
-
-    households = Household.objects.filter(collect_individual_data="0")
-    for hh in households:
-        look_for_same_record(hh)
