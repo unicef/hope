@@ -1,6 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import CloseIcon from '@material-ui/icons/CloseRounded';
 import {
   Button,
   Dialog,
@@ -8,14 +5,18 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/CloseRounded';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   AllProgramsQuery,
   ProgramNode,
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 import { DialogActions } from '../DialogActions';
 
 const DialogTitleWrapper = styled.div`
@@ -62,6 +63,7 @@ interface DeleteProgramProps {
 export function DeleteProgram({
   program,
 }: DeleteProgramProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -90,14 +92,14 @@ export function DeleteProgram({
       },
     });
     if (!response.errors && response.data.deleteProgram) {
-      showMessage('Programme removed.', {
+      showMessage(t('Programme removed.'), {
         pathname: `/${businessArea}/programs/`,
         historyMethod: 'push',
         dataCy: 'snackbar-program-remove-success',
       });
       setOpen(false);
     } else {
-      showMessage('Programme remove action failed.', {
+      showMessage(t('Programme remove action failed.'), {
         dataCy: 'snackbar-program-remove-failure',
       });
     }
@@ -109,7 +111,7 @@ export function DeleteProgram({
         onClick={() => setOpen(true)}
         data-cy='button-remove-program'
       >
-        REMOVE
+        {t('REMOVE')}
       </RemoveButton>
       <MidDialog
         open={open}
@@ -119,17 +121,17 @@ export function DeleteProgram({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>Remove Programme</Typography>
+            <Typography variant='h6'>{t('Remove Programme')}</Typography>
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            Are you sure you want to remove this Programme?
+            {t('Are you sure you want to remove this Programme?')}
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <RemoveModalButton
               type='submit'
               color='primary'
@@ -137,7 +139,7 @@ export function DeleteProgram({
               onClick={deleteProgram}
               data-cy='button-remove-program'
             >
-              REMOVE
+              {t('REMOVE')}
             </RemoveModalButton>
           </DialogActions>
         </DialogFooter>

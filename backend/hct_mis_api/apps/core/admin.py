@@ -390,9 +390,10 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
     @button(permission="load_from_datamart")
     def load_from_datamart(self, request):
         api = DatamartAPI()
+        admin_areas_country_name = []
         for level in api.get_admin_levels():
             try:
-                AdminAreaLevel.objects.update_or_create(
+                admin_area, _ = AdminAreaLevel.objects.update_or_create(
                     datamart_id=level["id"],
                     defaults={
                         "name": level["name"],
@@ -401,8 +402,13 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
                         "admin_level": level["admin_level"],
                     },
                 )
+                if level["admin_level"] == 0:
+                    admin_areas_country_name.append((admin_area, level["country_name"]))
             except Exception as e:
                 logger.exception(e)
+        if admin_areas_country_name:
+            for admin_area, country_name in admin_areas_country_name:
+                AdminAreaLevel.objects.filter(country_name=country_name).update(country=admin_area)
 
 
 class LoadAdminAreaForm(forms.Form):

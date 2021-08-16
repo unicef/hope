@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
 import { Button, Grid, IconButton, Typography } from '@material-ui/core';
-import styled from 'styled-components';
-import { Field, FieldArray, useField } from 'formik';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
+import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { Field, FieldArray, useField } from 'formik';
 import camelCase from 'lodash/camelCase';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
   AllEditHouseholdFieldsQuery,
   AllHouseholdsQuery,
@@ -15,9 +17,8 @@ import {
   useAllEditHouseholdFieldsQuery,
   useHouseholdLazyQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
 import { LabelizedField } from '../LabelizedField';
-import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { LoadingComponent } from '../LoadingComponent';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 
 const Title = styled.div`
@@ -114,6 +115,7 @@ export function CurrentValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
+  const { t } = useTranslation();
   let displayValue;
   if (field?.name === 'country' || field?.name === 'country_origin') {
     displayValue = value || '-';
@@ -146,7 +148,7 @@ export function CurrentValue({
   }
   return (
     <Grid item xs={3}>
-      <LabelizedField label='Current Value' value={displayValue} />
+      <LabelizedField label={t('Current Value')} value={displayValue} />
     </Grid>
   );
 }
@@ -167,6 +169,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   notAvailableFields,
   onDelete,
 }: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
+  const { t } = useTranslation();
   const field = fields.find((item) => item.name === itemValue.fieldName);
   const [, , helpers] = useField(
     `householdDataUpdateFields[${index}].isFlexField`,
@@ -185,7 +188,7 @@ export const EditHouseholdDataChangeFieldRow = ({
           name={`householdDataUpdateFields[${index}].fieldName`}
           fullWidth
           variant='outlined'
-          label='Field'
+          label={t('Field')}
           required
           component={FormikSelectField}
           choices={fields
@@ -231,6 +234,7 @@ export const EditHouseholdDataChange = ({
   values,
   setFieldValue,
 }: EditHouseholdDataChangeProps): React.ReactElement => {
+  const { t } = useTranslation();
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
   const [
@@ -259,7 +263,7 @@ export const EditHouseholdDataChange = ({
     loading: householdFieldsLoading,
   } = useAllEditHouseholdFieldsQuery();
   if (!household) {
-    return <div>You have to select a household earlier</div>;
+    return <div>{t('You have to select a household earlier')}</div>;
   }
   if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
     return <LoadingComponent />;
@@ -270,7 +274,7 @@ export const EditHouseholdDataChange = ({
   return (
     <>
       <Title>
-        <Typography variant='h6'>Household Data</Typography>
+        <Typography variant='h6'>{t('Household Data')}</Typography>
       </Title>
       <Grid container spacing={3}>
         <FieldArray
@@ -297,7 +301,7 @@ export const EditHouseholdDataChange = ({
                   }}
                 >
                   <AddIcon />
-                  Add new field
+                  {t('Add new field')}
                 </Button>
               </Grid>
             </>

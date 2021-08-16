@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import get from 'lodash/get';
 import { InputAdornment } from '@material-ui/core';
-import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import get from 'lodash/get';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import TextField from '../../shared/TextField';
 import {
   AllAdminAreasQuery,
   useAllAdminAreasQuery,
 } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
   .MuiFormControl-marginDense {
@@ -28,6 +29,7 @@ export function AdminAreaFixedAutocomplete({
   onChange;
   disabled?;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [inputValue, onInputTextChange] = React.useState('');
 
@@ -88,7 +90,7 @@ export function AdminAreaFixedAutocomplete({
       renderInput={(params) => (
         <TextField
           {...params}
-          label='Administrative Level 2'
+          label={t('Administrative Level 2')}
           variant='outlined'
           margin='dense'
           value={inputValue}

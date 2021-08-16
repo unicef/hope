@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import get from 'lodash/get';
 import { Box } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import get from 'lodash/get';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import TextField from '../../shared/TextField';
 import {
   AllAdminAreasQuery,
   useAllAdminAreasQuery,
 } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../LoadingComponent';
 import { FieldLabel } from '../FieldLabel';
+import { LoadingComponent } from '../LoadingComponent';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;
@@ -29,6 +30,7 @@ export function AdminAreaAutocompleteMultiple({
   onChange;
   disabled?;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputTextChange] = React.useState('');
 
@@ -53,7 +55,7 @@ export function AdminAreaAutocompleteMultiple({
   if (!data) return null;
   return (
     <Box display='flex' flexDirection='column'>
-      <FieldLabel>Administrative Level 2</FieldLabel>
+      <FieldLabel>{t('Administrative Level 2')}</FieldLabel>
       <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
         open={open}
         multiple
@@ -88,7 +90,7 @@ export function AdminAreaAutocompleteMultiple({
                 value: inputValue,
               }}
               placeholder={
-                newValue.length > 0 ? null : 'Administrative Level 2'
+                newValue.length > 0 ? null : t('Administrative Level 2')
               }
               variant='outlined'
               margin='dense'

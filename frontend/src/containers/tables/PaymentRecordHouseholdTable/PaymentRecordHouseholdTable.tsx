@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AllPaymentRecordsQueryVariables,
   HouseholdNode,
@@ -21,13 +22,14 @@ export function PaymentRecordHouseholdTable({
   businessArea,
   canViewPaymentRecordDetails,
 }: PaymentRecordTableProps): ReactElement {
+  const { t } = useTranslation();
   const initialVariables = {
     household: household?.id,
     businessArea,
   };
   return (
     <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>
-      title='Payment Records'
+      title={t('Payment Records')}
       headCells={headCells}
       query={useAllPaymentRecordsQuery}
       queriedObjectName='allPaymentRecords'

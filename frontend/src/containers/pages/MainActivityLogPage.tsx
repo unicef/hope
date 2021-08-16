@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { Paper } from '@material-ui/core';
-import { MainActivityLogTable } from '../tables/MainActivityLogTable/MainActivityLogTable';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { ActivityLogPageFilters } from '../../components/ActivityLogPageFilters';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { PageHeader } from '../../components/PageHeader';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { EmptyTable } from '../../components/table/EmptyTable';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useDebounce } from '../../hooks/useDebounce';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
   LogEntryNode,
   useAllLogEntriesQuery,
 } from '../../__generated__/graphql';
-import { PageHeader } from '../../components/PageHeader';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ActivityLogPageFilters } from '../../components/ActivityLogPageFilters';
-import { useDebounce } from '../../hooks/useDebounce';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { EmptyTable } from '../../components/table/EmptyTable';
+import { MainActivityLogTable } from '../tables/MainActivityLogTable/MainActivityLogTable';
 
 export const StyledPaper = styled(Paper)`
   margin: 20px;
@@ -40,21 +41,26 @@ function filtersToVariables(filters) {
 }
 
 export const ActivityLogPage = (): React.ReactElement => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const [filters, setFilters] = useState({ search: null, module: '' });
+  const debouncedFilters = useDebounce(filters, 700);
 
   const { data, refetch, loading } = useAllLogEntriesQuery({
     variables: {
       businessArea,
       first: rowsPerPage,
+      last: undefined,
+      after: undefined,
+      before: undefined,
+      ...filtersToVariables(debouncedFilters),
     },
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
   });
-  const [filters, setFilters] = useState({ search: null, module: '' });
-  const debouncedFilters = useDebounce(filters, 700);
 
   useEffect(() => {
     // we need to check for permission before refetch, otherwise returned permission denied error
@@ -89,7 +95,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   const logEntries = edges.map((edge) => edge.node as LogEntryNode);
   return (
     <>
-      <PageHeader title='Activity Log' />
+      <PageHeader title={t('Activity Log')} />
       <ActivityLogPageFilters filter={filters} onFilterChange={setFilters} />
       <StyledPaper>
         <MainActivityLogTable
