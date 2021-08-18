@@ -431,16 +431,16 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 
 CONSTANCE_CONFIG = {
     # BATCH SETTINGS
-    "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
+    "DEDUPLICATION_DUPLICATE_SCORE": (
         6.0,
         "Results equal or above this score are considered duplicates",
         "positive_floats",
     ),
-    # "DEDUPLICATION_BATCH_MIN_SCORE": (
-    #     15.0,
-    #     "Results below the minimum score will not be taken into account",
-    #     "positive_integers",
-    # ),
+    "DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE": (
+        6.0,
+        "Results equal or above this score are considered possible duplicates (needs adjudication) must be lower than DEDUPLICATION_DUPLICATE_SCORE",
+        "positive_floats",
+    ),
     "DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE": (
         50,
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
@@ -459,16 +459,6 @@ CONSTANCE_CONFIG = {
     ),
     "KOBO_APP_API_TOKEN": ("", "Kobo KPI token", str),
     # GOLDEN RECORDS SETTINGS
-    "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
-        6.0,
-        "Results below the minimum score will not be taken into account",
-        "positive_floats",
-    ),
-    "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
-        11.0,
-        "Results equal or above this score are considered duplicates",
-        "positive_floats",
-    ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE": (
         50,
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
