@@ -1,22 +1,24 @@
-import React, { ReactElement, useState } from 'react';
 import { Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
+import React, { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
+import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
 import {
   ProgramNode,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
-import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
 
 interface EditProgramProps {
   program: ProgramNode;
 }
 
 export function EditProgram({ program }: EditProgramProps): ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -55,7 +57,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
           version: program.version,
         },
       });
-      showMessage('Programme edited.', {
+      showMessage(t('Programme edited.'), {
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
       });
       setOpen(false);
@@ -81,7 +83,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
           variant='contained'
           data-cy='button-save'
         >
-          Save
+          {t('Save')}
         </Button>
       </>
     );
@@ -95,7 +97,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
         startIcon={<EditIcon />}
         onClick={() => setOpen(true)}
       >
-        EDIT PROGRAMME
+        {t('EDIT PROGRAMME')}
       </Button>
       <ProgramForm
         onSubmit={submitFormHandler}
@@ -103,7 +105,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
         program={program}
         open={open}
         onClose={() => setOpen(false)}
-        title='Edit Programme Details'
+        title={t('Edit Programme Details')}
       />
     </span>
   );

@@ -1,27 +1,28 @@
 import { Button, Grid, Typography } from '@material-ui/core';
-import EmailIcon from '@material-ui/icons/Email';
-import CheckIcon from '@material-ui/icons/Check';
 import { GetApp } from '@material-ui/icons';
+import CheckIcon from '@material-ui/icons/Check';
+import EmailIcon from '@material-ui/icons/Email';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { ContainerColumnWithBorder } from '../../components/ContainerColumnWithBorder';
+import { LabelizedField } from '../../components/LabelizedField';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { OverviewContainer } from '../../components/OverviewContainer';
+import { PageHeader } from '../../components/PageHeader';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { StatusBox } from '../../components/StatusBox';
+import { UniversalMoment } from '../../components/UniversalMoment';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
+import { reduceChoices, reportStatusToColor } from '../../utils/utils';
 import {
   useReportChoiceDataQuery,
   useReportQuery,
 } from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../components/ContainerColumnWithBorder';
-import { LabelizedField } from '../../components/LabelizedField';
-import { OverviewContainer } from '../../components/OverviewContainer';
-import { PageHeader } from '../../components/PageHeader';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { StatusBox } from '../../components/StatusBox';
-import { reduceChoices, reportStatusToColor } from '../../utils/utils';
-import { UniversalMoment } from '../../components/UniversalMoment';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -50,6 +51,7 @@ const IconsContainer = styled.div`
   font-size: 50px;
 `;
 export const ReportingDetailsPage = (): React.ReactElement => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -72,7 +74,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Reporting',
+      title: t('Reporting'),
       to: `/${businessArea}/reporting/`,
     },
   ];
@@ -91,7 +93,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
     size: boolean | 3 | 6 | 8 | 11 | 'auto' | 1 | 2 | 4 | 5 | 7 | 9 | 10 | 12;
   }[] = [
     {
-      label: 'STATUS',
+      label: t('STATUS'),
       value: (
         <StatusContainer>
           <StatusBox
@@ -103,12 +105,12 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       size: 3,
     },
     {
-      label: 'Report Type',
+      label: t('Report Type'),
       value: <span>{typeChoices[report.reportType]}</span>,
       size: 3,
     },
     {
-      label: 'Timeframe',
+      label: t('Timeframe'),
       value: (
         <span>
           <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
@@ -118,7 +120,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       size: 3,
     },
     {
-      label: 'Creation Date',
+      label: t('Creation Date'),
       value: (
         <span>
           <UniversalMoment>{report.createdAt}</UniversalMoment>
@@ -127,7 +129,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       size: 3,
     },
     {
-      label: 'Created By',
+      label: t('Created By'),
       value: (
         <span>
           {report.createdBy.firstName} {report.createdBy.lastName}
@@ -136,12 +138,12 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       size: 3,
     },
     {
-      label: 'Programme',
+      label: t('Programme'),
       value: <span>{report.program?.name || '-'}</span>,
       size: 3,
     },
     {
-      label: 'Administrative Level 2',
+      label: t('Administrative Level 2'),
       value: (
         <span>
           {report.adminArea?.edges.map((edge) => edge.node.title).join(', ') ||
@@ -169,13 +171,13 @@ export const ReportingDetailsPage = (): React.ReactElement => {
             startIcon={<GetApp />}
             href={report.fileUrl}
           >
-            DOWNLOAD REPORT
+            {t('DOWNLOAD REPORT')}
           </Button>
         ) : null}
       </PageHeader>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>Details</Typography>
+          <Typography variant='h6'>{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>
@@ -198,8 +200,9 @@ export const ReportingDetailsPage = (): React.ReactElement => {
             </IconContainer>
           </IconsContainer>
           <GreyText>
-            Report was successfully generated and sent to email address of the
-            creator.
+            {t(
+              'Report was successfully generated and sent to email address of the creator.',
+            )}
           </GreyText>
         </>
       )}

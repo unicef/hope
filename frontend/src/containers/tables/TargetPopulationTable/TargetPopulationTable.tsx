@@ -1,12 +1,13 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { decodeIdString } from '../../../utils/utils';
 import {
+  AllTargetPopulationsQueryVariables,
   TargetPopulationNode,
   useAllTargetPopulationsQuery,
-  AllTargetPopulationsQueryVariables,
 } from '../../../__generated__/graphql';
-import { decodeIdString } from '../../../utils/utils';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
@@ -24,6 +25,7 @@ export const TargetPopulationTable = ({
   filter,
   canViewDetails,
 }: TargetPopulationProps): ReactElement => {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
@@ -44,7 +46,7 @@ export const TargetPopulationTable = ({
   return (
     <TableWrapper>
       <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
-        title='Target Populations'
+        title={t('Target Populations')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}

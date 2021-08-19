@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback } from 'react';
-import styled from 'styled-components';
 import { Box } from '@material-ui/core';
+import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { LoadingComponent } from './LoadingComponent';
 
 const DropzoneContainer = styled.div`
@@ -27,6 +28,7 @@ export function DropzoneField({
   loading,
   dontShowFilename,
 }): React.ReactElement {
+  const { t } = useTranslation();
   const onDrop = useCallback((acceptedFiles) => {
     onChange(acceptedFiles);
   }, []);
@@ -43,7 +45,7 @@ export function DropzoneField({
         <LoadingComponent isLoading={loading} absolute />
         <input {...getInputProps()} data-cy='rdi-file-input' />
         {dontShowFilename || !acceptedFilename
-          ? 'UPLOAD FILE'
+          ? t('UPLOAD FILE')
           : acceptedFilename}
       </DropzoneContainer>
     </Box>

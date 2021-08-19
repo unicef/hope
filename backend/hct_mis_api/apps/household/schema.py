@@ -51,13 +51,17 @@ from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     IDENTIFICATION_TYPE_CHOICE,
+    INDIVIDUAL_FLAGS_CHOICES,
     INDIVIDUAL_STATUS_CHOICES,
     MARITAL_STATUS_CHOICE,
+    NEEDS_ADJUDICATION,
     OBSERVED_DISABILITY_CHOICE,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     ROLE_NO_ROLE,
+    SANCTION_LIST_CONFIRMED_MATCH,
+    SANCTION_LIST_POSSIBLE_MATCH,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     STATUS_ACTIVE,
@@ -168,6 +172,7 @@ class IndividualFilter(FilterSet):
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
+    flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
 
     class Meta:
         model = Individual
@@ -197,6 +202,19 @@ class IndividualFilter(FilterSet):
             "first_registration_date",
         )
     )
+
+    def flags_filter(self, qs, name, value):
+        q_obj = Q()
+        if NEEDS_ADJUDICATION in value:
+            q_obj |= Q(deduplication_golden_record_status=NEEDS_ADJUDICATION)
+        if DUPLICATE in value:
+            q_obj |= Q(deduplication_golden_record_status=DUPLICATE)
+        if SANCTION_LIST_POSSIBLE_MATCH in value:
+            q_obj |= Q(sanction_list_possible_match=True, sanction_list_confirmed_match=False)
+        if SANCTION_LIST_CONFIRMED_MATCH in value:
+            q_obj |= Q(sanction_list_confirmed_match=True)
+
+        return qs.filter(q_obj)
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -586,6 +604,7 @@ class Query(graphene.ObjectType):
     countries_choices = graphene.List(ChoiceObject)
     observed_disability_choices = graphene.List(ChoiceObject)
     severity_of_disability_choices = graphene.List(ChoiceObject)
+    flag_choices = graphene.List(ChoiceObject)
 
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
@@ -634,6 +653,9 @@ class Query(graphene.ObjectType):
 
     def resolve_observed_disability_choices(self, info, **kwargs):
         return to_choice_object(OBSERVED_DISABILITY_CHOICE)
+
+    def resolve_flag_choices(self, info, **kwargs):
+        return to_choice_object(INDIVIDUAL_FLAGS_CHOICES)
 
     def resolve_work_status_choices(self, info, **kwargs):
         return to_choice_object(WORK_STATUS_CHOICE)

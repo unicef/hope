@@ -28,15 +28,6 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
-# @override_config(
-#     DEDUPLICATION_BATCH_DUPLICATE_SCORE=14.0,
-#     DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE=100,
-#     DEDUPLICATION_BATCH_DUPLICATES_ALLOWED=10,
-#     DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=11.0,
-#     DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=14.0,
-#     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE=100,
-#     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED=10,
-# )
 class TestBatchDeduplication(BaseElasticSearchTestCase):
     multi_db = True
 
@@ -55,11 +46,10 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             region_code="64",
             region_name="SAR",
             has_data_sharing_agreement=True,
-            deduplication_batch_duplicate_score=14.0,
+            deduplication_duplicate_score=14.0,
+            deduplication_possible_duplicate_score=11.0,
             deduplication_batch_duplicates_percentage=100,
             deduplication_batch_duplicates_allowed=10,
-            deduplication_golden_record_min_score=11.0,
-            deduplication_golden_record_duplicate_score=14.0,
             deduplication_golden_record_duplicates_percentage=100,
             deduplication_golden_record_duplicates_allowed=10,
         )
@@ -304,9 +294,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
             region_code="64",
             region_name="SAR",
+            deduplication_possible_duplicate_score=11.0,
             has_data_sharing_agreement=True,
-            deduplication_golden_record_min_score=11.0,
-            deduplication_golden_record_duplicate_score=14.0,
         )
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
         registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
