@@ -1,13 +1,15 @@
-import React, { useState, ReactElement } from 'react';
 import { Button } from '@material-ui/core';
-import { useCreateProgramMutation } from '../../../__generated__/graphql';
-import { ProgramForm } from '../../forms/ProgramForm';
+import React, { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
 import { handleValidationErrors } from '../../../utils/utils';
+import { useCreateProgramMutation } from '../../../__generated__/graphql';
+import { ProgramForm } from '../../forms/ProgramForm';
 
 export function CreateProgram(): ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -41,7 +43,7 @@ export function CreateProgram(): ReactElement {
         showMessage,
       );
       if (nonValidationErrors.length > 0) {
-        showMessage('Programme create action failed.');
+        showMessage(t('Programme create action failed.'));
       }
     }
   };
@@ -57,7 +59,7 @@ export function CreateProgram(): ReactElement {
           variant='contained'
           data-cy='button-save'
         >
-          Save
+          {t('Save')}
         </Button>
       </>
     );
@@ -71,7 +73,7 @@ export function CreateProgram(): ReactElement {
         onClick={() => setOpen(true)}
         data-cy='button-new-program'
       >
-        new programme
+        {t('New Programme')}
       </Button>
 
       <ProgramForm
@@ -79,7 +81,7 @@ export function CreateProgram(): ReactElement {
         renderSubmit={renderSubmit}
         open={open}
         onClose={() => setOpen(false)}
-        title='Set-up a new Programme'
+        title={t('Set-up a new Programme')}
       />
     </div>
   );

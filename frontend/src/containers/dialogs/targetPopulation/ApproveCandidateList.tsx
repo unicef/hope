@@ -1,16 +1,17 @@
-import React from 'react';
 import {
   Button,
   DialogContent,
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useApproveTpMutation } from '../../../__generated__/graphql';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { DialogActions } from '../DialogActions';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useApproveTpMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
+import { DialogActions } from '../DialogActions';
 
 export interface ApproveCandidateListPropTypes {
   open: boolean;
@@ -39,6 +40,7 @@ export function ApproveCandidateList({
   setOpen,
   targetPopulationId,
 }): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
   const { showMessage } = useSnackbar();
@@ -53,23 +55,24 @@ export function ApproveCandidateList({
       <>
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>Lock Target Population</Typography>
+            <Typography variant='h6'>{t('Lock Target Population')}</Typography>
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            After you lock this Target Population, the selected criteria will no
-            longer accept new households that may get merged to Population in
-            the future.
+            {t(
+              'After you lock this Target Population, the selected criteria will no longer accept new households that may get merged to Population in the future.',
+            )}
           </DialogDescription>
           <DialogDescription>
-            Note: You may duplicate the Programme Population target criteria at
-            any time.
+            {t(
+              'Note: You may duplicate the Programme Population target criteria at any time.',
+            )}
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <Button
               color='primary'
               variant='contained'
@@ -78,14 +81,14 @@ export function ApproveCandidateList({
                   variables: { id: targetPopulationId },
                 }).then(() => {
                   setOpen(false);
-                  showMessage('Target Population Locked', {
+                  showMessage(t('Target Population Locked'), {
                     pathname: `/${businessArea}/target-population/${targetPopulationId}`,
                   });
                 });
               }}
               data-cy='button-target-population-close'
             >
-              Lock
+              {t('Lock')}
             </Button>
           </DialogActions>
         </DialogFooter>

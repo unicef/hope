@@ -1,14 +1,15 @@
-import React from 'react';
-import styled from 'styled-components';
 import { InputAdornment, MenuItem } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
 import FormControl from '@material-ui/core/FormControl';
+import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardDatePicker } from '@material-ui/pickers';
-import { useRegistrationChoicesQuery } from '../../../__generated__/graphql';
-import InputLabel from '../../../shared/InputLabel';
-import TextField from '../../../shared/TextField';
-import Select from '../../../shared/Select';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
+import InputLabel from '../../../shared/InputLabel';
+import Select from '../../../shared/Select';
+import TextField from '../../../shared/TextField';
+import { useRegistrationChoicesQuery } from '../../../__generated__/graphql';
 import { UsersAutocomplete } from './UsersAutocomplete';
 
 const StyledFormControl = styled(FormControl)`
@@ -34,6 +35,7 @@ export function RegistrationFilters({
 }: RegistrationFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
+  const { t } = useTranslation();
   const { data: registrationChoicesData } = useRegistrationChoicesQuery();
   if (!registrationChoicesData) {
     return null;
@@ -43,7 +45,7 @@ export function RegistrationFilters({
     <ContainerWithBorder>
       <StyledTextField
         variant='outlined'
-        label='Search'
+        label={t('Search')}
         margin='dense'
         onChange={(e) => handleFilterChange(e, 'search')}
         value={filter.search}
@@ -59,7 +61,7 @@ export function RegistrationFilters({
         variant='inline'
         inputVariant='outlined'
         margin='dense'
-        label='Import Date'
+        label={t('Import Date')}
         autoOk
         onChange={(date) => onFilterChange({ ...filter, importDate: date })}
         value={filter.importDate || null}
@@ -81,17 +83,17 @@ export function RegistrationFilters({
         value={filter.importedBy}
       />
       <StyledFormControl variant='outlined' margin='dense'>
-        <InputLabel>Status</InputLabel>
+        <InputLabel>{t('Status')}</InputLabel>
         <Select
           // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
           // @ts-ignore
           value={filter.status || ''}
           variant='outlined'
-          label='Status'
+          label={t('Status')}
           onChange={(e) => handleFilterChange(e, 'status')}
         >
           <MenuItem value=''>
-            <em>None</em>
+            <em>{t('None')}</em>
           </MenuItem>
           {registrationChoicesData.registrationDataStatusChoices.map((item) => {
             return (

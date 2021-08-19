@@ -1,7 +1,8 @@
 import { Box, Button } from '@material-ui/core';
-import React, { useState } from 'react';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import React, { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import {
   formatCurrencyWithSymbol,
   formatThousands,
@@ -18,6 +19,7 @@ export const TotalAmountTransferredByCountryChart = ({
 }: TotalAmountTransferredByCountryChartProps): React.ReactElement => {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
+  const { t } = useTranslation();
 
   if (!data) return null;
 
@@ -123,7 +125,7 @@ export const TotalAmountTransferredByCountryChart = ({
             onClick={() => setShowAll(!showAll)}
             fullWidth
           >
-            {showAll ? 'HIDE' : 'SHOW ALL COUNTRIES'}
+            {showAll ? t('HIDE') : t('SHOW ALL COUNTRIES')}
           </Button>
         </Box>
       ) : null}

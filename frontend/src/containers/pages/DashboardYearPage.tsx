@@ -1,26 +1,27 @@
-import React, { useEffect } from 'react';
-import styled from 'styled-components';
 import { Grid } from '@material-ui/core';
-import { TabPanel } from '../../components/TabPanel';
-import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { PaymentsChart } from '../../components/Dashboard/charts/PaymentsChart';
 import { ProgrammesBySector } from '../../components/Dashboard/charts/ProgrammesBySector';
 import { TotalTransferredByMonth } from '../../components/Dashboard/charts/TotalTransferredByMonth';
 import { VolumeByDeliveryMechanism } from '../../components/Dashboard/charts/VolumeByDeliveryMechanism';
-import { PaymentsChart } from '../../components/Dashboard/charts/PaymentsChart';
+import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
 import { GrievancesSection } from '../../components/Dashboard/sections/GrievancesSection';
-import { TotalNumberOfIndividualsReachedSection } from '../../components/Dashboard/sections/TotalNumberOfIndividualsReachedSection';
+import { PaymentVerificationSection } from '../../components/Dashboard/sections/PaymentVerificationSection';
+import { TotalAmountTransferredSectionByAdminAreaSection } from '../../components/Dashboard/sections/TotalAmountTransferredByAdminAreaSection';
+import { TotalAmountTransferredSectionByCountry } from '../../components/Dashboard/sections/TotalAmountTransferredByCountrySection';
+import { TotalAmountTransferredSection } from '../../components/Dashboard/sections/TotalAmountTransferredSection';
 import { TotalNumberOfChildrenReachedSection } from '../../components/Dashboard/sections/TotalNumberOfChildrenReachedSection';
 import { TotalNumberOfHouseholdsReachedSection } from '../../components/Dashboard/sections/TotalNumberOfHouseholdsReachedSection';
-import { TotalAmountTransferredSection } from '../../components/Dashboard/sections/TotalAmountTransferredSection';
-import { PaymentVerificationSection } from '../../components/Dashboard/sections/PaymentVerificationSection';
-import { TotalAmountTransferredSectionByCountry } from '../../components/Dashboard/sections/TotalAmountTransferredByCountrySection';
+import { TotalNumberOfIndividualsReachedSection } from '../../components/Dashboard/sections/TotalNumberOfIndividualsReachedSection';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { TabPanel } from '../../components/TabPanel';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
   useAllChartsQuery,
   useGlobalAreaChartsLazyQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { TotalAmountTransferredSectionByAdminAreaSection } from '../../components/Dashboard/sections/TotalAmountTransferredByAdminAreaSection';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -48,6 +49,7 @@ export function DashboardYearPage({
   selectedTab,
   filter,
 }: DashboardYearPageProps): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const isGlobal = businessArea === 'global';
 
@@ -98,14 +100,14 @@ export function DashboardYearPage({
             <TotalAmountTransferredSectionByCountry
               data={globalData?.chartTotalTransferredCashByCountry}
             />
-            <DashboardPaper title='Number of Programmes by Sector'>
+            <DashboardPaper title={t('Number of Programmes by Sector')}>
               <ChartWrapper
                 numberOfProgrammes={data.chartProgrammesBySector.labels.length}
               >
                 <ProgrammesBySector data={data.chartProgrammesBySector} />
               </ChartWrapper>
             </DashboardPaper>
-            <DashboardPaper title='Total Transferred by Month'>
+            <DashboardPaper title={t('Total Transferred by Month')}>
               <TotalTransferredByMonth
                 data={data.chartTotalTransferredByMonth}
               />
@@ -142,12 +144,12 @@ export function DashboardYearPage({
                 </Grid>
                 <Grid item xs={12}>
                   <DashboardPaper
-                    title='Volume by Delivery Mechanism in USD'
+                    title={t('Volume by Delivery Mechanism in USD')}
                     noMarginTop
                     extraPaddingTitle={false}
                   >
                     <CardTextLight large>
-                      Delivery type in CashAssist
+                      {t('Delivery type in CashAssist')}
                     </CardTextLight>
                     <VolumeByDeliveryMechanism
                       data={data.chartVolumeByDeliveryMechanism}
