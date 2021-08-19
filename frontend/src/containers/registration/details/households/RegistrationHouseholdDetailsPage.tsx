@@ -1,21 +1,22 @@
 import React from 'react';
-import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { PageHeader } from '../../../../components/PageHeader';
-import {
-  useHouseholdChoiceDataQuery,
-  useImportedHouseholdQuery,
-} from '../../../../__generated__/graphql';
+import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
+import { PageHeader } from '../../../../components/PageHeader';
+import { PermissionDenied } from '../../../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../../hooks/usePermissions';
 import {
   decodeIdString,
   isPermissionDeniedError,
 } from '../../../../utils/utils';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { LoadingComponent } from '../../../../components/LoadingComponent';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { PermissionDenied } from '../../../../components/PermissionDenied';
+import {
+  useHouseholdChoiceDataQuery,
+  useImportedHouseholdQuery,
+} from '../../../../__generated__/graphql';
 import { HouseholdImportedIndividualsTable } from '../../tables/HouseholdIndividualsTable';
 import { HouseholdDetails } from './HouseholdDetails';
 import { RegistrationDetails } from './RegistrationDetails';
@@ -30,6 +31,7 @@ const Container = styled.div`
 `;
 
 export function RegistrationHouseholdDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -51,7 +53,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
           {
-            title: 'Registration Data import',
+            title: t('Registration Data import'),
             to: `/${businessArea}/registration-data-import/`,
           },
         ]
@@ -67,7 +69,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Household ID: ${decodeIdString(id)}`}
+        title={`${'Household ID'}: ${decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
       />
       <HouseholdDetails

@@ -1,7 +1,3 @@
-import React, { ReactElement } from 'react';
-import moment from 'moment';
-import * as Yup from 'yup';
-import styled from 'styled-components';
 import {
   Dialog,
   DialogContent,
@@ -10,17 +6,22 @@ import {
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import moment from 'moment';
+import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import * as Yup from 'yup';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { selectFields } from '../../utils/utils';
 import {
   ProgramNode,
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { selectFields } from '../../utils/utils';
 import { DialogActions } from '../dialogs/DialogActions';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -59,49 +60,6 @@ const FullWidth = styled.div`
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
-const validationSchema = Yup.object().shape({
-  name: Yup.string()
-    .required('Programme name is required')
-    .min(2, 'Too short')
-    .max(255, 'Too long'),
-  scope: Yup.string()
-    .required('CashAssist Scope is required')
-    .min(2, 'Too short')
-    .max(50, 'Too long'),
-  startDate: Yup.date().required('Start Date is required'),
-  endDate: Yup.date()
-    .required('End Date is required')
-    .min(today, 'End Date cannot be in the past')
-    .when(
-      'startDate',
-      (startDate, schema) =>
-        startDate &&
-        schema.min(
-          startDate,
-          `End date have to be greater than ${moment(startDate).format(
-            'YYYY-MM-DD',
-          )}`,
-        ),
-      '',
-    ),
-  sector: Yup.string()
-    .required('Sector is required')
-    .min(2, 'Too short')
-    .max(50, 'Too long'),
-  budget: Yup.number()
-    .min(0)
-    .max(99999999, 'Number is too big'),
-  administrativeAreasOfImplementation: Yup.string()
-    .min(2, 'Too short')
-    .max(255, 'Too long'),
-  description: Yup.string()
-    .min(2, 'Too short')
-    .max(255, 'Too long'),
-  populationGoal: Yup.number()
-    .min(0)
-    .max(99999999, 'Number is too big'),
-});
-
 interface ProgramFormPropTypes {
   program?: ProgramNode;
   onSubmit: (values, setFieldError) => Promise<void>;
@@ -119,7 +77,52 @@ export function ProgramForm({
   onClose,
   title,
 }: ProgramFormPropTypes): ReactElement {
+  const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
+
+  const validationSchema = Yup.object().shape({
+    name: Yup.string()
+      .required(t('Programme name is required'))
+      .min(2, t('Too short'))
+      .max(255, t('Too long')),
+    scope: Yup.string()
+      .required(t('CashAssist Scope is required'))
+      .min(2, t('Too short'))
+      .max(50, t('Too long')),
+    startDate: Yup.date().required(t('Start Date is required')),
+    endDate: Yup.date()
+      .required(t('End Date is required'))
+      .min(today, t('End Date cannot be in the past'))
+      .when(
+        'startDate',
+        (startDate, schema) =>
+          startDate &&
+          schema.min(
+            startDate,
+            `${t('End date have to be greater than')} ${moment(
+              startDate,
+            ).format('YYYY-MM-DD')}`,
+          ),
+        '',
+      ),
+    sector: Yup.string()
+      .required(t('Sector is required'))
+      .min(2, t('Too short'))
+      .max(50, t('Too long')),
+    budget: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
+    administrativeAreasOfImplementation: Yup.string()
+      .min(2, t('Too short'))
+      .max(255, t('Too long')),
+    description: Yup.string()
+      .min(2, t('Too short'))
+      .max(255, t('Too long')),
+    populationGoal: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
+  });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValue: { [key: string]: any } = {
     name: '',
@@ -146,11 +149,13 @@ export function ProgramForm({
   }
   if (!data) return null;
 
-  const withoutIndividualDataText =
-    'This programme will use only household and/or head of household details for targeting or entitlement calculation';
+  const withoutIndividualDataText = t(
+    'This programme will use only household and/or head of household details for targeting or entitlement calculation',
+  );
 
-  const withIndividualDataText =
-    'This programme will use household member individuals’ details for targeting or entitlement calculation. Setting this flag can reduce the number of households filtered in the target population.';
+  const withIndividualDataText = t(
+    'This programme will use household member individuals’ details for targeting or entitlement calculation. Setting this flag can reduce the number of households filtered in the target population.',
+  );
 
   return (
     <DialogContainer>
@@ -183,13 +188,14 @@ export function ProgramForm({
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogDescription>
-                  To create a new Programme, please complete all required fields
-                  on the form below and save.
+                  {t(
+                    'To create a new Programme, please complete all required fields on the form below and save.',
+                  )}
                 </DialogDescription>
                 <Form>
                   <Field
                     name='name'
-                    label='Programme Name'
+                    label={t('Programme Name')}
                     type='text'
                     fullWidth
                     required
@@ -198,7 +204,7 @@ export function ProgramForm({
                   />
                   <Field
                     name='scope'
-                    label='CashAssist Scope'
+                    label={t('CashAssist Scope')}
                     fullWidth
                     variant='outlined'
                     required
@@ -207,7 +213,7 @@ export function ProgramForm({
                   />
                   <Field
                     name='sector'
-                    label='Sector'
+                    label={t('Sector')}
                     fullWidth
                     required
                     variant='outlined'
@@ -218,7 +224,7 @@ export function ProgramForm({
                     <DateField>
                       <Field
                         name='startDate'
-                        label='Start Date'
+                        label={t('Start Date')}
                         component={FormikDateField}
                         required
                         fullWidth
@@ -230,7 +236,7 @@ export function ProgramForm({
                     <DateField>
                       <Field
                         name='endDate'
-                        label='End Date'
+                        label={t('End Date')}
                         component={FormikDateField}
                         required
                         disabled={!values.startDate}
@@ -245,7 +251,7 @@ export function ProgramForm({
                   </DateFields>
                   <Field
                     name='description'
-                    label='Description'
+                    label={t('Description')}
                     type='text'
                     fullWidth
                     multiline
@@ -254,7 +260,7 @@ export function ProgramForm({
                   />
                   <Field
                     name='budget'
-                    label='Budget (USD)'
+                    label={t('Budget (USD)')}
                     type='number'
                     fullWidth
                     precision={2}
@@ -263,13 +269,13 @@ export function ProgramForm({
                   />
                   <Field
                     name='frequencyOfPayments'
-                    label='Frequency of Payment'
+                    label={t('Frequency of Payment')}
                     choices={data.programFrequencyOfPaymentsChoices}
                     component={FormikRadioGroup}
                   />
                   <Field
                     name='administrativeAreasOfImplementation'
-                    label='Administrative Areas of Implementation'
+                    label={t('Administrative Areas of Implementation')}
                     type='text'
                     fullWidth
                     variant='outlined'
@@ -277,7 +283,7 @@ export function ProgramForm({
                   />
                   <Field
                     name='populationGoal'
-                    label='Population Goal (# of Individuals)'
+                    label={t('Population Goal (# of Individuals)')}
                     type='number'
                     fullWidth
                     variant='outlined'
@@ -286,7 +292,7 @@ export function ProgramForm({
                   <FullWidth>
                     <Field
                       name='cashPlus'
-                      label='Cash+'
+                      label={t('Cash+')}
                       color='primary'
                       component={FormikCheckboxField}
                     />
@@ -295,7 +301,9 @@ export function ProgramForm({
                     <Field
                       name='individualDataNeeded'
                       disabled={program && program.status === 'ACTIVE'}
-                      label='Data for targeting or entitlement calculation*'
+                      label={t(
+                        'Data for targeting or entitlement calculation*',
+                      )}
                       choices={[
                         {
                           name: withoutIndividualDataText,

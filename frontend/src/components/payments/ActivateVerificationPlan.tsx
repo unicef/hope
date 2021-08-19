@@ -1,9 +1,10 @@
+import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { useSnackbar } from '../../hooks/useSnackBar';
 import { useActivateCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
 
 export interface Props {
@@ -28,6 +29,7 @@ const DialogContainer = styled.div`
 export function ActivateVerificationPlan({
   cashPlanVerificationId,
 }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
 
   const { showMessage } = useSnackbar();
@@ -50,11 +52,11 @@ export function ActivateVerificationPlan({
           ),
         );
       } else {
-        showMessage('Error during activating\n');
+        showMessage(t('Error during activating.'));
       }
     }
 
-    showMessage('Verification plan has been activated.');
+    showMessage(t('Verification plan has been activated.'));
   };
   return (
     <>
@@ -65,7 +67,7 @@ export function ActivateVerificationPlan({
           onClick={() => setActivateDialogOpen(true)}
           data-cy='button-activate-plan'
         >
-          ACTIVATE
+          {t('ACTIVATE')}
         </Button>
       </Box>
       <Dialog
@@ -76,14 +78,15 @@ export function ActivateVerificationPlan({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            Activate Verification Plan
+            {t('Activate Verification Plan')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
             <Box p={5}>
-              Are you sure you want to activate the Verification Plan for this
-              Cash Plan?
+              {t(
+                'Are you sure you want to activate the Verification Plan for this Cash Plan?',
+              )}
             </Box>
           </DialogContainer>
         </DialogContent>
@@ -97,7 +100,7 @@ export function ActivateVerificationPlan({
               onClick={() => activate()}
               data-cy='button-submit'
             >
-              ACTIVATE
+              {t('ACTIVATE')}
             </Button>
           </DialogActions>
         </DialogFooter>

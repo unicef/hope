@@ -1,10 +1,11 @@
 import { Box, Paper, Typography } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContentLink } from '../ContentLink';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { decodeIdString } from '../../utils/utils';
+import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import { ContentLink } from '../ContentLink';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -21,6 +22,7 @@ export const PaymentIds = ({
 }: {
   verifications: GrievanceTicketQuery['grievanceTicket']['paymentVerificationTicketDetails']['paymentVerifications']['edges'];
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
   const mappedIds = verifications.map(
@@ -37,7 +39,7 @@ export const PaymentIds = ({
   return (
     <StyledBox>
       <Title>
-        <Typography variant='h6'>Payment Ids</Typography>
+        <Typography variant='h6'>{t('Payment Ids')}</Typography>
       </Title>
       <Box display='flex' flexDirection='column'>
         {mappedIds}

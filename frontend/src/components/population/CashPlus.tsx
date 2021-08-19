@@ -1,6 +1,7 @@
+import { Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Typography, Paper, Grid } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
 
 const Overview = styled(Paper)`
@@ -15,23 +16,24 @@ const Title = styled.div`
 `;
 
 export function CashPlus({ individual }): React.ReactElement {
+  const { t } = useTranslation();
   const { enrolledInNutritionProgramme, administrationOfRutf } = individual;
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>Cash+</Typography>
+        <Typography variant='h6'>{t('Cash+')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={4}>
           <LabelizedField
-            label='Enrolled in nutrition programme'
-            value={enrolledInNutritionProgramme ? 'YES' : 'NO'}
+            label={t('Enrolled in nutrition programme')}
+            value={enrolledInNutritionProgramme ? t('YES') : t('NO')}
           />
         </Grid>
         <Grid item xs={4}>
           <LabelizedField
-            label='Administratiion of rutf'
-            value={administrationOfRutf ? 'YES' : 'NO'}
+            label={t('Administratiion of rutf')}
+            value={administrationOfRutf ? t('YES') : t('NO')}
           />
         </Grid>
       </Grid>

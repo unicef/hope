@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   AllCashPlansQueryVariables,
@@ -14,6 +15,7 @@ interface CashPlanTableProps {
   program: ProgramNode;
 }
 export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const initialVariables = {
     program: program.id,
@@ -22,7 +24,7 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
 
   return (
     <UniversalTable<CashPlanNode, AllCashPlansQueryVariables>
-      title='Cash Plans'
+      title={t('Cash Plans')}
       headCells={headCells}
       query={useAllCashPlansQuery}
       queriedObjectName='allCashPlans'

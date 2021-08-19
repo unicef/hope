@@ -1,8 +1,9 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Paper, Typography } from '@material-ui/core';
-import { TargetingCriteria } from './TargetingCriteria';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { Results } from './Results';
+import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
 
 const PaperContainer = styled(Paper)`
@@ -25,6 +26,7 @@ export function TargetPopulationCore({
   targetPopulation,
   canViewHouseholdDetails,
 }): React.ReactElement {
+  const { t } = useTranslation();
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
   return (
@@ -47,9 +49,9 @@ export function TargetPopulationCore({
       ) : (
         <PaperContainer>
           <Typography variant='h6'>
-            Target Population Entries (Households)
+            {t('Target Population Entries (Households)')}
           </Typography>
-          <Label>Add targeting criteria to see results.</Label>
+          <Label>{t('Add targeting criteria to see results.')}</Label>
         </PaperContainer>
       )}
     </>

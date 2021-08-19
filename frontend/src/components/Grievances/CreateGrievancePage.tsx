@@ -1,21 +1,36 @@
-import React, { ReactElement } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import styled from 'styled-components';
-import { Field, Formik } from 'formik';
 import {
   Box,
   Button,
-  DialogActions,
   FormHelperText,
   Grid,
 } from '@material-ui/core';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { PageHeader } from '../PageHeader';
-import { BreadCrumbsItem } from '../BreadCrumbs';
+import { Field, Formik } from 'formik';
+import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+import {
+  hasPermissionInModule,
+  hasPermissions,
+  PERMISSIONS,
+} from '../../config/permissions';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { usePermissions } from '../../hooks/usePermissions';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../utils/constants';
+import {
+  isInvalid,
+  renderUserName,
+  thingForSpecificGrievanceType,
+} from '../../utils/utils';
 import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
@@ -23,48 +38,27 @@ import {
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
 } from '../../__generated__/graphql';
+import { BreadCrumbsItem } from '../BreadCrumbs';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LoadingComponent } from '../LoadingComponent';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../utils/constants';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
-import {
-  isInvalid,
-  renderUserName,
-  thingForSpecificGrievanceType,
-} from '../../utils/utils';
-import { usePermissions } from '../../hooks/usePermissions';
-import {
-  hasPermissionInModule,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
+import { PageHeader } from '../PageHeader';
 import { PermissionDenied } from '../PermissionDenied';
+import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { Consent } from './Consent';
+import { EditHouseholdDataChange } from './EditHouseholdDataChange';
+import { EditIndividualDataChange } from './EditIndividualDataChange';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
-import { AddIndividualDataChange } from './AddIndividualDataChange';
-import { EditIndividualDataChange } from './EditIndividualDataChange';
-import { EditHouseholdDataChange } from './EditHouseholdDataChange';
 import { TicketsAlreadyExist } from './TicketsAlreadyExist';
 import { prepareVariables } from './utils/createGrievanceUtils';
 import { validate } from './utils/validateGrievance';
-import { validationSchema } from "./utils/validationSchema";
+import { validationSchema } from './utils/validationSchema';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
 `;
 const NewTicket = styled.div`
   padding: 20px;
-`;
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
 `;
 const BoxWithBorderBottom = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -85,6 +79,7 @@ export const dataChangeComponentDict = {
 };
 
 export function CreateGrievancePage(): React.ReactElement {
+  const { t } = useTranslation();
   const history = useHistory();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -165,7 +160,7 @@ export function CreateGrievancePage(): React.ReactElement {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Grievance and Feedback',
+      title: t('Grievance and Feedback'),
       to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
@@ -198,14 +193,16 @@ export function CreateGrievancePage(): React.ReactElement {
           const response = await mutate(prepareVariables(businessArea, values));
           if (values.selectedPaymentRecords.length > 1) {
             showMessage(
-              `${values.selectedPaymentRecords.length} Grievance Tickets created.`,
+              `${values.selectedPaymentRecords.length} ${t(
+                'Grievance Tickets created',
+              )}.`,
               {
                 pathname: `/${businessArea}/grievance-and-feedback`,
                 historyMethod: 'push',
               },
             );
           } else {
-            showMessage('Grievance Ticket created.', {
+            showMessage(t('Grievance Ticket created.'), {
               pathname: `/${businessArea}/grievance-and-feedback/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
               historyMethod: 'push',
             });
@@ -239,7 +236,25 @@ export function CreateGrievancePage(): React.ReactElement {
                   ? breadCrumbsItems
                   : null
               }
-            />
+            >
+              <Box display='flex' alignContent='center'>
+                <Box mr={1}>
+                  <Button
+                    component={Link}
+                    to={`/${businessArea}/grievance-and-feedback`}
+                  >
+                    {t('Cancel')}
+                  </Button>
+                </Box>
+                <Button
+                  color='primary'
+                  variant='contained'
+                  onClick={submitForm}
+                >
+                  {t('Save')}
+                </Button>
+              </Box>
+            </PageHeader>
             <Grid container spacing={3}>
               <Grid item xs={8}>
                 <NewTicket>
@@ -281,7 +296,7 @@ export function CreateGrievancePage(): React.ReactElement {
                         <Consent />
                         <Field
                           name='consent'
-                          label='Received Consent*'
+                          label={t('Received Consent*')}
                           color='primary'
                           component={FormikCheckboxField}
                         />
@@ -298,7 +313,7 @@ export function CreateGrievancePage(): React.ReactElement {
                         <Grid item xs={6}>
                           <Field
                             name='assignedTo'
-                            label='Assigned to*'
+                            label={t('Assigned to*')}
                             variant='outlined'
                             choices={mappedIndividuals}
                             component={FormikSelectField}
@@ -321,7 +336,7 @@ export function CreateGrievancePage(): React.ReactElement {
                         <Grid item xs={6}>
                           <Field
                             name='admin'
-                            label='Administrative Level 2'
+                            label={t('Administrative Level 2')}
                             variant='outlined'
                             component={FormikAdminAreaAutocomplete}
                           />
@@ -331,7 +346,7 @@ export function CreateGrievancePage(): React.ReactElement {
                             name='area'
                             fullWidth
                             variant='outlined'
-                            label='Area / Village / Pay point'
+                            label={t('Area / Village / Pay point')}
                             component={FormikTextField}
                           />
                         </Grid>
@@ -341,7 +356,7 @@ export function CreateGrievancePage(): React.ReactElement {
                             multiline
                             fullWidth
                             variant='outlined'
-                            label='Languages Spoken'
+                            label={t('Languages Spoken')}
                             component={FormikTextField}
                           />
                         </Grid>
@@ -354,23 +369,6 @@ export function CreateGrievancePage(): React.ReactElement {
                       />
                       {dataChangeErrors(errors, touched)}
                     </BoxPadding>
-                    <DialogFooter>
-                      <DialogActions>
-                        <Button
-                          component={Link}
-                          to={`/${businessArea}/grievance-and-feedback`}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          color='primary'
-                          variant='contained'
-                          onClick={submitForm}
-                        >
-                          Save
-                        </Button>
-                      </DialogActions>
-                    </DialogFooter>
                   </ContainerColumnWithBorder>
                 </NewTicket>
               </Grid>

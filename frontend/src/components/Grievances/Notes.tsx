@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Avatar,
   Box,
@@ -7,20 +6,22 @@ import {
   Paper,
   Typography,
 } from '@material-ui/core';
-import { useParams } from 'react-router-dom';
-import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import * as Yup from 'yup';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { UniversalMoment } from '../UniversalMoment';
-import { OverviewContainerColumn } from '../OverviewContainerColumn';
+import { renderUserName } from '../../utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../__generated__/graphql';
-import { renderUserName } from '../../utils/utils';
+import { OverviewContainerColumn } from '../OverviewContainerColumn';
+import { UniversalMoment } from '../UniversalMoment';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -50,6 +51,7 @@ export function Notes({
   notes: GrievanceTicketQuery['grievanceTicket']['ticketNotes'];
   canAddNote: boolean;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
   });
@@ -103,7 +105,7 @@ export function Notes({
   };
 
   const validationSchema = Yup.object().shape({
-    newNote: Yup.string().required('Note cannot be empty'),
+    newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
   return (
@@ -160,7 +162,7 @@ export function Notes({
                             variant='contained'
                             onClick={submitForm}
                           >
-                            Add New Note
+                            {t('Add New Note')}
                           </Button>
                         </Box>
                       </Form>

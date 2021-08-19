@@ -1,22 +1,23 @@
 import React from 'react';
-import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { PageHeader } from '../../components/PageHeader';
+import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { PageHeader } from '../../components/PageHeader';
+import { PermissionDenied } from '../../components/PermissionDenied';
 import { IndividualsBioData } from '../../components/population/IndividualBioData';
+import { IndividualPhotoModal } from '../../components/population/IndividualPhotoModal';
+import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../utils/utils';
 import {
   IndividualNode,
   useIndividualQuery,
 } from '../../__generated__/graphql';
-import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { usePermissions } from '../../hooks/usePermissions';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { isPermissionDeniedError } from '../../utils/utils';
-import { IndividualPhotoModal } from '../../components/population/IndividualPhotoModal';
 
 const Container = styled.div`
   padding: 20px;
@@ -28,6 +29,7 @@ const Container = styled.div`
 `;
 
 export function PopulationIndividualsDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -55,7 +57,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Individual ID: ${individual.unicefId}`}
+        title={`${t('Individual ID')}: ${individual.unicefId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
