@@ -6,7 +6,6 @@ from io import StringIO
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
-from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -15,7 +14,6 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
-from django.db.models import Count, F, Func
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -36,7 +34,7 @@ from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
-from hct_mis_api.apps.account.models import INACTIVE, Role, User
+from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
