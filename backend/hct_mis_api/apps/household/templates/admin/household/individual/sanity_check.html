@@ -21,6 +21,7 @@
 {% endblock %}
 
 {% block content %}
+    {% if  warnings %}
     <h3>Warnings</h3>
     <table class="messagelist ">
         {% for level, warn in warnings %}
@@ -30,11 +31,35 @@
             </tr>
         {% endfor %}
     </table>
-    {% if original.heading_household %}
-        -- {{ original.heading_household }}
     {% endif %}
+    <h3>Household</h3>
+    {% if original.heading_household %}
+        <a href="{% url "admin:household_household_change" original.household.pk %}">{{ original.heading_household }}</a>
+    {% endif %}
+    <h3>Parents</h3>
     <table>
-    {{ roles }}
+        <tr><th>Id</th><th>Name</th><th>Relation to Head of Household</th></tr>
+        {% for parent in original.parents.all %}
+            <tr><td><a href="{% url "admin:household_individual_change" parent.pk %}">{{ parent }}</a></td>
+                <td>{{ parent.full_name }}</td>
+                <td>{{ parent.relationship }}</td>
+            </tr>
+        {% endfor %}
     </table>
-    
+    <h3>Roles</h3>
+    <table>
+    {% for role in original.households_and_roles.all %}
+        <tr><td><a href="{% url "admin:household_household_change" role.household.pk %}">{{ role.household }}</a></td><td>{{ role.role }}</td></tr>
+    {% endfor %}
+    </table>
+    <h3>Documents</h3>
+    <table>
+        {% for doc in original.documents.all %}
+            <tr><td><a href="{% url "admin:household_document_change" doc.pk %}">{{ doc.document_number }}</a></td>
+                <td>{{ doc.type }}</td>
+                <td>{{ doc.status }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
 {% endblock %}

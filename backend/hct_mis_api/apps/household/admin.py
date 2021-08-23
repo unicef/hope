@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.contrib.admin import TabularInline
 from django.contrib.messages import DEFAULT_TAGS
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -177,6 +178,19 @@ class HouseholdAdmin(LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFie
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
 
+class IndividualRoleInHouseholdInline(TabularInline):
+    model = IndividualRoleInHousehold
+    extra = 0
+    readonly_fields = ("household", "role")
+    fields = ("household", "role")
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Individual)
 class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = (
@@ -200,7 +214,7 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedF
     search_fields = ("family_name",)
     readonly_fields = ("created_at", "updated_at")
     exclude = ("created_at", "updated_at")
-
+    inlines = [IndividualRoleInHouseholdInline]
     list_filter = (
         TextFieldFilter.factory("unicef_id__iexact", "UNICEF ID"),
         TextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
@@ -265,7 +279,7 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedF
     def sanity_check(self, request, pk):
         context = self.get_common_context(request, pk)
         obj = context["original"]
-        roles = obj.households_and_roles.all()
+        context["roles"] = obj.households_and_roles.all()
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
