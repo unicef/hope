@@ -428,11 +428,11 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
 
     @button()
     def linked_objects(self, request, pk):
-        IGNORED = ["created_advanced_filters", "advancedfilter", "logentry", "social_auth", "query", "querylog", "logs"]
+        ignored = config.IGNORED_USER_LINKED_OBJECTS.split(",")
         context = self.get_common_context(request, pk, title="Inspect")
         reverse = []
         for f in self.model._meta.get_fields():
-            if f.auto_created and not f.concrete and not f.name in IGNORED:
+            if f.auto_created and not f.concrete and not f.name in ignored:
                 reverse.append(f)
         context["reverse"] = reverse
         return TemplateResponse(request, "admin/account/user/inspect.html", context)
