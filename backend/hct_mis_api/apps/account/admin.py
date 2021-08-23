@@ -427,9 +427,14 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         return [(None, {"fields": self.get_fields(request, obj)})]
 
     @button()
-    def inspect(self, request, pk):
+    def linked_objects(self, request, pk):
+        IGNORED = ["created_advanced_filters", "advancedfilter", "logentry", "social_auth", "query", "querylog", "logs"]
         context = self.get_common_context(request, pk, title="Inspect")
-        context["reverse"] = [f for f in self.model._meta.get_fields() if f.auto_created and not f.concrete]
+        reverse = []
+        for f in self.model._meta.get_fields():
+            if f.auto_created and not f.concrete and not f.name in IGNORED:
+                reverse.append(f)
+        context["reverse"] = reverse
         return TemplateResponse(request, "admin/account/user/inspect.html", context)
 
     def kobo_user(self, obj):
