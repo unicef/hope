@@ -14,6 +14,7 @@ from adminfilters.filters import (
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.household.models import (
@@ -28,10 +29,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.admin import (
-    HOPEModelAdminBase,
-    LastSyncDateResetMixin,
-)
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, LastSyncDateResetMixin
 
 
 @admin.register(Agency)
@@ -52,7 +50,16 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Household)
-class HouseholdAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminBase):
+class HouseholdAdmin(LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase):
+    advanced_filter_fields = (
+        "name",
+        "country",
+        "head_of_household",
+        "size",
+        "unhcr_id",
+        ("business_area__name", "business area"),
+    )
+
     list_display = (
         "unicef_id",
         "country",
@@ -171,7 +178,7 @@ class HouseholdAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminB
 
 
 @admin.register(Individual)
-class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminBase):
+class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "given_name",
@@ -181,6 +188,15 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdmin
         "relationship",
         "birth_date",
     )
+    advanced_filter_fields = (
+        "updated_at",
+        "last_sync_at",
+        "deduplication_golden_record_status",
+        "deduplication_batch_status",
+        "duplicate",
+        ("business_area__name", "business area"),
+    )
+
     search_fields = ("family_name",)
     readonly_fields = ("created_at", "updated_at")
     exclude = ("created_at", "updated_at")
@@ -244,6 +260,14 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdmin
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.household.unicef_id}")
+
+    @button()
+    def sanity_check(self, request, pk):
+        context = self.get_common_context(request, pk)
+        obj = context["original"]
+        roles = obj.households_and_roles.all()
+
+        return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
 
 @admin.register(IndividualRoleInHousehold)
