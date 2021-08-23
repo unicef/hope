@@ -491,6 +491,11 @@ CONSTANCE_CONFIG = {
         "Should send grievances notification",
         bool,
     ),
+    "IGNORED_USER_LINKED_OBJECTS": (
+        "created_advanced_filters,advancedfilter,logentry,social_auth,query,querylog,logs",
+        "list of relation to hide in 'linked objects' user page",
+        str,
+    ),
     "QUICK_LINKS": (
         """Kobo,https://kf-hope.unitst.org/;
 CashAssist,https://cashassist-trn.crm4.dynamics.com/;
