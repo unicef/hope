@@ -790,6 +790,7 @@ class Agency(models.Model):
     country = CountryField()
 
     class Meta:
+        verbose_name_plural = "Agencies"
         constraints = [
             UniqueConstraint(
                 fields=["type", "country"],

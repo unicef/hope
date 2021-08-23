@@ -10,6 +10,7 @@ from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
@@ -25,12 +26,14 @@ from django.utils.html import format_html
 
 import xlrd
 from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     AllValuesComboFilter,
     ChoicesFieldComboFilter,
     TextFieldFilter,
 )
 from constance import config
+from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import INACTIVE, Role, User
@@ -558,15 +561,22 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         "is_removed",
     )
     search_fields = ("name",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 @admin.register(FlexibleAttributeGroup)
 class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
-    autocomplete_fields = ("parent",)
+    # autocomplete_fields = ("parent",)
+    raw_id_fields = ("parent",)
     list_filter = ("repeatable", "required", "is_removed")
     search_fields = ("name",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 @admin.register(FlexibleAttributeChoice)
@@ -578,14 +588,21 @@ class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
     search_fields = ("name", "list_name")
     list_filter = ("is_removed",)
     filter_horizontal = ("flex_attributes",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 @admin.register(XLSXKoboTemplate)
 class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
-
+    list_filter = (
+        "status",
+        ("uploaded_by", AutoCompleteFilter),
+    )
+    search_fields = ("file_name",)
+    date_hierarchy = "created_at"
     exclude = ("is_removed", "file_name", "status", "template_id")
-
     readonly_fields = ("original_file_name", "uploaded_by", "file", "import_status", "error_description")
 
     def import_status(self, obj):
