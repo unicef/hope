@@ -11,6 +11,7 @@ from django.db.models import F, Sum
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices

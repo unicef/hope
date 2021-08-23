@@ -59,6 +59,7 @@ PyYAML = "^5.4.1"
 black = "^20.8b1"
 celery = {extras = ["redis"], version = "^5.0.5"}
 defusedxml= "0.7.0rc1"
+django-advanced-filters = "*"
 django-admin-extra-urls = "^3.5.1"
 django-adminactions = "^1.13"
 django-adminfilters = "^1.5.1"
