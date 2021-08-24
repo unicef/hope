@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.messages import DEFAULT_TAGS
@@ -6,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-from admin_extra_urls.decorators import button
+from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
@@ -111,6 +113,16 @@ class HouseholdAdmin(LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFie
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
+
+    @button()
+    def tickets(self, request, pk):
+        context = self.get_common_context(request, pk, title="Tickets")
+        obj = context["original"]
+        tickets = []
+        for entry in chain(obj.sensitive_ticket_details.all(), obj.complaint_ticket_details.all()):
+            tickets.append(entry.ticket)
+        context["tickets"] = tickets
+        return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
     @button()
     def members(self, request, pk):
