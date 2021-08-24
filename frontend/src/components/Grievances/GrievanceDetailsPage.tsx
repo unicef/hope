@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   hasCreatorOrOwnerPermissions,
+  hasPermissions,
   PERMISSIONS,
 } from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -210,6 +211,8 @@ export function GrievanceDetailsPage(): React.ReactElement {
     PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
     permissions,
   );
+
+  const canAssign = hasPermissions(PERMISSIONS.GRIEVANCES_ASSIGN, permissions);
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
@@ -476,6 +479,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
         canSendForApproval={canSendForApproval}
         canSendBack={canSendBack}
         canClose={canClose}
+        canAssign={canAssign}
       />
       <Grid container>
         <Grid item xs={12}>

@@ -55,6 +55,7 @@ export const GrievanceDetailsToolbar = ({
   canSendForApproval,
   canSendBack,
   canClose,
+  canAssign,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canEdit: boolean;
@@ -63,6 +64,7 @@ export const GrievanceDetailsToolbar = ({
   canSendForApproval: boolean;
   canSendBack: boolean;
   canClose: boolean;
+  canAssign: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -271,7 +273,7 @@ export const GrievanceDetailsToolbar = ({
             <Separator />
           </>
         )}
-        {isNew && canEdit && (
+        {isNew && canEdit && canAssign && (
           <>
             <Button
               color='primary'
