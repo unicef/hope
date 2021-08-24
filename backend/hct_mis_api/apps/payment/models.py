@@ -7,10 +7,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+
 from model_utils import Choices
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 
 
 class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
@@ -83,7 +84,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         choices=STATUS_CHOICE,
     )
     status_date = models.DateTimeField()
-    ca_id = models.CharField(max_length=255, null=True)
+    ca_id = models.CharField(max_length=255, null=True, db_index=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
     cash_plan = models.ForeignKey(
         "program.CashPlan",

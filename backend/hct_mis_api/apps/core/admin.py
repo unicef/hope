@@ -10,6 +10,7 @@ from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
@@ -25,12 +26,14 @@ from django.utils.html import format_html
 
 import xlrd
 from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     AllValuesComboFilter,
     ChoicesFieldComboFilter,
     TextFieldFilter,
 )
 from constance import config
+from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import INACTIVE, Role, User
@@ -219,9 +222,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
     @button(label="Send DOAP", group="doap")
     def send_doap(self, request, pk):
+        context = self.get_common_context(request, pk, title="Members")
+        obj = context["original"]
         try:
-            context = self.get_common_context(request, pk, title="Members")
-            obj = context["original"]
             matrix = self._get_doap_matrix(obj)
             buffer = StringIO()
             writer = csv.DictWriter(buffer, matrix[0], extrasaction="ignore")
@@ -292,24 +295,6 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
 
         if request.method == "GET":
-            # phone_number = request.GET.get("phone_number", None)
-            # flow_uuid = request.GET.get("flow_uuid", None)
-            # flow_name = request.GET.get("flow_name", None)
-            # timestamp = request.GET.get("timestamp", None)
-            #
-            # if all([phone_number, flow_uuid, flow_name, timestamp]):
-            #     error, result = api.test_connection_flow_run(flow_uuid, phone_number, timestamp)
-            #     context["run_result"] = result
-            #     context["phone_number"] = phone_number
-            #     context["flow_uuid"] = flow_uuid
-            #     context["flow_name"] = flow_name
-            #     context["timestamp"] = timestamp
-            #
-            #     if error:
-            #         messages.error(request, error)
-            #     else:
-            #         messages.success(request, "Connection successful")
-            # else:
             context["form"] = TestRapidproForm()
         else:
             form = TestRapidproForm(request.POST)
@@ -537,7 +522,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                     max_records = form.cleaned_data["max_records"]
                     if form.cleaned_data["run_in_background"]:
                         load_admin_area.delay(
-                            country,
+                            country.id,
                             geom,
                             page_size=page_size,
                             max_records=max_records,
@@ -547,12 +532,13 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                         context["run_in_background"] = True
                     else:
                         results = load_admin_area(
-                            country, geom, page_size, max_records, rebuild_mptt=not form.cleaned_data["skip_rebuild"]
+                            country.id, geom, page_size, max_records, rebuild_mptt=not form.cleaned_data["skip_rebuild"]
                         )
                         context["admin_areas"] = results
                 except Exception as e:
+                    logger.exception(e)
                     context["form"] = form
-                    self.message_user(request, str(e), messages.ERROR)
+                    self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             else:
                 context["form"] = form
 
@@ -575,15 +561,22 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         "is_removed",
     )
     search_fields = ("name",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 @admin.register(FlexibleAttributeGroup)
 class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
-    autocomplete_fields = ("parent",)
+    # autocomplete_fields = ("parent",)
+    raw_id_fields = ("parent",)
     list_filter = ("repeatable", "required", "is_removed")
     search_fields = ("name",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 @admin.register(FlexibleAttributeChoice)
@@ -595,14 +588,21 @@ class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
     search_fields = ("name", "list_name")
     list_filter = ("is_removed",)
     filter_horizontal = ("flex_attributes",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 @admin.register(XLSXKoboTemplate)
 class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
-
+    list_filter = (
+        "status",
+        ("uploaded_by", AutoCompleteFilter),
+    )
+    search_fields = ("file_name",)
+    date_hierarchy = "created_at"
     exclude = ("is_removed", "file_name", "status", "template_id")
-
     readonly_fields = ("original_file_name", "uploaded_by", "file", "import_status", "error_description")
 
     def import_status(self, obj):
