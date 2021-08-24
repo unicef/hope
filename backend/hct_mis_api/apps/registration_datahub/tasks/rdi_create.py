@@ -1,4 +1,5 @@
 import json
+import logging
 import numbers
 from collections import defaultdict
 from datetime import date, datetime
@@ -63,6 +64,8 @@ from hct_mis_api.apps.registration_datahub.tasks.utils import (
     collectors_str_ids_to_list,
     get_submission_metadata,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def is_flex_field_attr(field):
@@ -475,98 +478,110 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         for row in sheet.iter_rows(min_row=3):
             if not any([cell.value for cell in row]):
                 continue
-            obj_to_create = obj()
+            try:
+                obj_to_create = obj()
 
-            household_id = None
+                household_id = None
 
-            excluded = ("age",)
-            for cell, header_cell in zip(row, first_row):
-                header = header_cell.value
-                combined_fields = {**self.COMBINED_FIELDS, **COLLECTORS_FIELDS}
-                current_field = combined_fields.get(header)
+                excluded = ("age",)
+                for cell, header_cell in zip(row, first_row):
+                    try:
+                        header = header_cell.value
+                        combined_fields = {**self.COMBINED_FIELDS, **COLLECTORS_FIELDS}
+                        current_field = combined_fields.get(header)
 
-                if not current_field:
-                    continue
+                        if not current_field:
+                            continue
 
-                is_not_image = current_field["type"] != "IMAGE"
+                        is_not_image = current_field["type"] != "IMAGE"
 
-                is_not_required_and_empty = not current_field.get("required") and cell.value is None and is_not_image
-                if header in excluded:
-                    continue
-                if is_not_required_and_empty:
-                    continue
-
-                if header == "household_id":
-                    temp_value = cell.value
-                    if isinstance(temp_value, float) and temp_value.is_integer():
-                        temp_value = int(temp_value)
-                    household_id = str(temp_value)
-                    if sheet_title == "individuals":
-                        obj_to_create.household = self.households.get(household_id)
-
-                if header in complex_fields[sheet_title]:
-                    fn = complex_fields[sheet_title].get(header)
-                    value = fn(
-                        value=cell.value,
-                        cell=cell,
-                        header=header,
-                        row_num=cell.row,
-                        individual=obj_to_create if sheet_title == "individuals" else None,
-                        household=obj_to_create if sheet_title == "households" else None,
-                        is_field_required=current_field.get("required", False),
-                    )
-                    if value is not None:
-                        setattr(
-                            obj_to_create,
-                            combined_fields[header]["name"],
-                            value,
+                        is_not_required_and_empty = (
+                            not current_field.get("required") and cell.value is None and is_not_image
                         )
-                elif (
-                    hasattr(
-                        obj_to_create,
-                        combined_fields[header]["name"],
-                    )
-                    and header != "household_id"
-                ):
-                    value = self._cast_value(cell.value, header)
-                    if value in (None, ""):
-                        continue
+                        if header in excluded:
+                            continue
+                        if is_not_required_and_empty:
+                            continue
 
-                    if header == "relationship_i_c" and value == HEAD:
-                        household = self.households.get(household_id)
-                        if household is not None:
-                            household.head_of_household = obj_to_create
-                            households_to_update.append(household)
+                        if header == "household_id":
+                            temp_value = cell.value
+                            if isinstance(temp_value, float) and temp_value.is_integer():
+                                temp_value = int(temp_value)
+                            household_id = str(temp_value)
+                            if sheet_title == "individuals":
+                                obj_to_create.household = self.households.get(household_id)
 
-                    setattr(
-                        obj_to_create,
-                        combined_fields[header]["name"],
-                        value,
-                    )
-                elif header in self.FLEX_FIELDS[sheet_title]:
-                    value = self._cast_value(cell.value, header)
-                    type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
-                    if type_name in complex_types:
-                        fn = complex_types[type_name]
-                        value = fn(
-                            value=cell.value,
-                            cell=cell,
-                            header=header,
-                            is_flex_field=True,
-                            is_field_required=current_field.get("required", False),
-                        )
-                    if value is not None:
-                        obj_to_create.flex_fields[header] = value
+                        if header in complex_fields[sheet_title]:
+                            fn = complex_fields[sheet_title].get(header)
+                            value = fn(
+                                value=cell.value,
+                                cell=cell,
+                                header=header,
+                                row_num=cell.row,
+                                individual=obj_to_create if sheet_title == "individuals" else None,
+                                household=obj_to_create if sheet_title == "households" else None,
+                                is_field_required=current_field.get("required", False),
+                            )
+                            if value is not None:
+                                setattr(
+                                    obj_to_create,
+                                    combined_fields[header]["name"],
+                                    value,
+                                )
+                        elif (
+                            hasattr(
+                                obj_to_create,
+                                combined_fields[header]["name"],
+                            )
+                            and header != "household_id"
+                        ):
+                            value = self._cast_value(cell.value, header)
+                            if value in (None, ""):
+                                continue
 
-            obj_to_create.last_registration_date = obj_to_create.first_registration_date
+                            if header == "relationship_i_c" and value == HEAD:
+                                household = self.households.get(household_id)
+                                if household is not None:
+                                    household.head_of_household = obj_to_create
+                                    households_to_update.append(household)
 
-            if sheet_title == "households":
-                obj_to_create = self._assign_admin_areas_titles(obj_to_create)
-                self.households[household_id] = obj_to_create
-            else:
-                if household_id is None:
-                    obj_to_create.relationship = NON_BENEFICIARY
-                self.individuals.append(obj_to_create)
+                            setattr(
+                                obj_to_create,
+                                combined_fields[header]["name"],
+                                value,
+                            )
+                        elif header in self.FLEX_FIELDS[sheet_title]:
+                            value = self._cast_value(cell.value, header)
+                            type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
+                            if type_name in complex_types:
+                                fn = complex_types[type_name]
+                                value = fn(
+                                    value=cell.value,
+                                    cell=cell,
+                                    header=header,
+                                    is_flex_field=True,
+                                    is_field_required=current_field.get("required", False),
+                                )
+                            if value is not None:
+                                obj_to_create.flex_fields[header] = value
+                    except Exception as e:
+                        logger.exception(e)
+                        raise Exception(
+                            f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
+                        ) from e
+
+                obj_to_create.last_registration_date = obj_to_create.first_registration_date
+
+                if sheet_title == "households":
+                    obj_to_create = self._assign_admin_areas_titles(obj_to_create)
+                    self.households[household_id] = obj_to_create
+                else:
+                    if household_id is None:
+                        obj_to_create.relationship = NON_BENEFICIARY
+                    self.individuals.append(obj_to_create)
+            except Exception as e:
+                logger.exception(e)
+                raise Exception(f"Error processing row {row}: {e.__class__.__name__}({e})") from e
 
         if sheet_title == "households":
             ImportedHousehold.objects.bulk_create(self.households.values())
