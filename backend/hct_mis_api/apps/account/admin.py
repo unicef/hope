@@ -960,8 +960,6 @@ from django.contrib.auth.models import Group
 
 site.unregister(Group)
 
-from smart_admin.smart_auth.admin import GroupAdmin as SmartGroupAdmin
-
 
 @smart_register(Group)
 class GroupAdmin(ExtraUrlMixin, _GroupAdmin):
