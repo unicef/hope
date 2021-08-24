@@ -10,7 +10,11 @@ from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.helpers import AdminForm
 from django.contrib.admin.models import LogEntry
-from django.contrib.admin.options import IncorrectLookupParameters
+from django.contrib.admin.options import (
+    IncorrectLookupParameters,
+    get_content_type_for_model,
+)
+from django.contrib.admin.utils import construct_change_message
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
@@ -43,6 +47,7 @@ from adminfilters.filters import (
 from constance import config
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
+from smart_admin.decorators import smart_register
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm, KoboLoginForm
@@ -86,27 +91,6 @@ class UserRoleAdminForm(ModelForm):
         business_area = self.cleaned_data["business_area"]
 
         account_models.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
-        # incompatible_roles = list(
-        #     account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-        # ) + list(account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
-        # incompatible_userroles = account_models.UserRole.objects.filter(
-        #     business_area=self.cleaned_data["business_area"],
-        #     role__id__in=incompatible_roles,
-        #     user=self.cleaned_data["user"],
-        # )
-        # if self.instance.id:
-        #     incompatible_userroles = incompatible_userroles.exclude(id=self.instance.id)
-        # if incompatible_userroles.exists():
-        #     logger.error(
-        #         f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
-        #     )
-        #     raise ValidationError(
-        #         {
-        #             "role": _(
-        #                 f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
-        #             )
-        #         }
-        #     )
 
 
 class UserRoleInlineFormSet(BaseInlineFormSet):
@@ -924,6 +908,23 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         ctx["matrix2"] = matrix2
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
+    def _perms(self, request, object_id) -> set:
+        return set(self.get_object(request, object_id).permissions)
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        self.existing_perms = self._perms(request, object_id)
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def construct_change_message(self, request, form, formsets, add=False):
+        change_message = construct_change_message(form, formsets, add)
+        if not add and "permissions" in form.changed_data:
+            new_perms = self._perms(request, form.instance.id)
+            change_message[0]["changed"]["permissions"] = {
+                "added": sorted(new_perms.difference(self.existing_perms)),
+                "removed": sorted(self.existing_perms.difference(new_perms)),
+            }
+        return change_message
+
 
 @admin.register(account_models.UserRole)
 class UserRoleAdmin(HOPEModelAdminBase):
@@ -965,21 +966,34 @@ class IncompatibleRolesAdmin(HOPEModelAdminBase):
 
 
 from django.contrib.admin import site
-from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.models import Group
 
 site.unregister(Group)
 
+from smart_admin.smart_auth.admin import GroupAdmin as SmartGroupAdmin
 
-@admin.register(Group)
-class GroupAdmin(ExtraUrlMixin, _GroupAdmin):
+
+@smart_register(Group)
+class GroupAdmin(SmartGroupAdmin):
     @button(permission=lambda request, group: request.user.is_superuser)
     def import_fixture(self, request):
         from adminactions.helpers import import_fixture as _import_fixture
 
         return _import_fixture(self, request)
 
-    @button()
-    def show_members(self, request, pk):
-        ctx = self.get_common_context(request, pk)
-        return TemplateResponse(request, "admin/account/group/members.html", ctx)
+    def _perms(self, request, object_id) -> set:
+        return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        self.existing_perms = self._perms(request, object_id)
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def construct_change_message(self, request, form, formsets, add=False):
+        change_message = construct_change_message(form, formsets, add)
+        if not add and "permissions" in form.changed_data:
+            new_perms = self._perms(request, form.instance.id)
+            change_message[0]["changed"]["permissions"] = {
+                "added": sorted(new_perms.difference(self.existing_perms)),
+                "removed": sorted(self.existing_perms.difference(new_perms)),
+            }
+        return change_message
