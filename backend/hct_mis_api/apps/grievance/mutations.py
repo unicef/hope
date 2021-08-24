@@ -1,4 +1,6 @@
 import logging
+from enum import Enum
+from typing import Dict, List, Union
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -513,7 +515,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: close_system_flagging_ticket,
     }
 
-    MOVE_TO_STATUS_PERMISSION_MAPPING = {
+    MOVE_TO_STATUS_PERMISSION_MAPPING: Dict[str, Dict[Union[str, int], List[Enum]]] = {
         GrievanceTicket.STATUS_ASSIGNED: {
             "any": [
                 Permissions.GRIEVANCES_UPDATE,
@@ -614,6 +616,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket, info)
         if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
+            cls.has_permission(info, Permissions.GRIEVANCE_ASSIGN, grievance_ticket.business_area)
             grievance_ticket.assigned_to = info.context.user
         grievance_ticket.status = status
         grievance_ticket.save()
