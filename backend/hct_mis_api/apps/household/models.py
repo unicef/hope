@@ -9,8 +9,10 @@ from django.core.validators import MinLengthValidator, validate_image_file_exten
 from django.db import models
 from django.db.models import F, Sum
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -788,6 +790,7 @@ class Agency(models.Model):
     country = CountryField()
 
     class Meta:
+        verbose_name_plural = "Agencies"
         constraints = [
             UniqueConstraint(
                 fields=["type", "country"],
@@ -1052,6 +1055,12 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     def count_all_roles(self):
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
+
+    @cached_property
+    def parents(self):
+        if self.household:
+            return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
+        return []
 
 
 class EntitlementCard(TimeStampedUUIDModel):
