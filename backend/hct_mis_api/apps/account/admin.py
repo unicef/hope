@@ -3,27 +3,24 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from urllib.parse import unquote, urlencode
+from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
-from django.contrib.admin.helpers import AdminForm
-from django.contrib.admin.models import LogEntry
-from django.contrib.admin.options import (
-    IncorrectLookupParameters,
-    get_content_type_for_model,
-)
+from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.utils import construct_change_message
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
-from django.db import models, router, transaction
+from django.db import router, transaction
 from django.db.models import Q
 from django.db.transaction import atomic
-from django.forms import Form, ModelChoiceField, MultipleChoiceField
+from django.forms import ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
@@ -36,14 +33,8 @@ from django.utils.translation import gettext_lazy as _
 import requests
 from admin_extra_urls.api import ExtraUrlMixin, button
 from adminactions.helpers import AdminActionPermMixin
-from adminactions.perms import get_permission_codename
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    AllValuesComboFilter,
-    ChoicesFieldComboFilter,
-    ForeignKeyFieldFilter,
-    RelatedFieldComboFilter,
-)
+from adminfilters.filters import RelatedFieldComboFilter
 from constance import config
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
@@ -54,7 +45,6 @@ from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm, KoboLogin
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -974,7 +964,7 @@ from smart_admin.smart_auth.admin import GroupAdmin as SmartGroupAdmin
 
 
 @smart_register(Group)
-class GroupAdmin(SmartGroupAdmin):
+class GroupAdmin(ExtraUrlMixin, _GroupAdmin):
     @button(permission=lambda request, group: request.user.is_superuser)
     def import_fixture(self, request):
         from adminactions.helpers import import_fixture as _import_fixture
@@ -983,6 +973,17 @@ class GroupAdmin(SmartGroupAdmin):
 
     def _perms(self, request, object_id) -> set:
         return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
+
+    @button()
+    def users(self, request, pk):
+        User = get_user_model()
+        context = self.get_common_context(request, pk, aeu_groups=["1"])
+        group = context["original"]
+        users = User.objects.filter(groups=group).distinct()
+        context["title"] = _('Users in group "%s"') % group.name
+        context["user_opts"] = User._meta
+        context["data"] = users
+        return render(request, "admin/account/group/members.html", context)
 
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         self.existing_perms = self._perms(request, object_id)
