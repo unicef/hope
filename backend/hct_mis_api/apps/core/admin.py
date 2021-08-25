@@ -6,7 +6,6 @@ from io import StringIO
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
-from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -15,7 +14,6 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
-from django.db.models import Count, F, Func
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -33,10 +31,11 @@ from adminfilters.filters import (
     TextFieldFilter,
 )
 from constance import config
+from django_countries.fields import Country
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
-from hct_mis_api.apps.account.models import INACTIVE, Role, User
+from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
@@ -543,6 +542,61 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                 context["form"] = form
 
         return TemplateResponse(request, "core/admin/load_admin_areas.html", context)
+
+    @button()
+    def export(self, request):
+        changelist_filters = request.GET.get("_changelist_filters", "")
+
+        if not changelist_filters:
+            self.message_user(request, "Filter 'By Country' should be selected", messages.ERROR)
+            return
+
+        params = dict(tuple(param.split("=") for param in changelist_filters.split("&")))
+
+        if "country" not in params.keys():
+            self.message_user(request, "Filter 'By Country' should be selected", messages.ERROR)
+            return
+
+        country_name = params.get("country")
+        country = AdminArea.objects.get(id=country_name)
+        queryset = AdminArea.objects.filter(tree_id=country.tree_id, admin_area_level__admin_level__in=[1, 2]).order_by(
+            "admin_area_level__admin_level"
+        )
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename=locations.csv"
+
+        fields = [
+            "list_name",
+            "name",
+            "label:English(EN)",
+            "label:French(FR)",
+            "label:Arabic(AR)",
+            "label:Spanish(ES)",
+            "filter",
+        ]
+        matrix = [fields]
+
+        filter_field = {1: lambda area: Country(area.parent.p_code).alpha3, 2: lambda area: area.parent.p_code}
+
+        for admin_area in queryset:
+            admin_area_data = {
+                "list_name": f"admin{admin_area.admin_area_level.admin_level}",
+                "name": admin_area.p_code,
+                "label:English(EN)": f"{admin_area.title} - {admin_area.p_code}",
+                "label:French(FR)": "",
+                "label:Arabic(AR)": "",
+                "label:Spanish(ES)": "",
+                "filter": filter_field[admin_area.admin_area_level.admin_level](admin_area),
+            }
+
+            matrix.append(admin_area_data)
+
+        writer = csv.DictWriter(response, matrix[0], extrasaction="ignore")
+        writer.writeheader()
+        for row in matrix[1:]:
+            writer.writerow(row)
+        return response
 
 
 class FlexibleAttributeInline(admin.TabularInline):
