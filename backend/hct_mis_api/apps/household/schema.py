@@ -208,7 +208,7 @@ class IndividualFilter(FilterSet):
         if NEEDS_ADJUDICATION in value:
             q_obj |= Q(deduplication_golden_record_status=NEEDS_ADJUDICATION)
         if DUPLICATE in value:
-            q_obj |= Q(deduplication_golden_record_status=DUPLICATE)
+            q_obj |= Q(duplicate=True)
         if SANCTION_LIST_POSSIBLE_MATCH in value:
             q_obj |= Q(sanction_list_possible_match=True, sanction_list_confirmed_match=False)
         if SANCTION_LIST_CONFIRMED_MATCH in value:
