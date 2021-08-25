@@ -260,19 +260,17 @@ export const GrievanceDetailsToolbar = ({
     >
       <Box display='flex' alignItems='center'>
         {isEditable && canEdit && (
-          <>
-            <Button
-              color='primary'
-              variant='outlined'
-              component={Link}
-              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
-              startIcon={<EditIcon />}
-            >
-              {t('Edit')}
-            </Button>
-            <Separator />
-          </>
+          <Button
+            color='primary'
+            variant='outlined'
+            component={Link}
+            to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
+            startIcon={<EditIcon />}
+          >
+            {t('Edit')}
+          </Button>
         )}
+        {isNew && canEdit && canAssign && <Separator />}
         {isNew && canEdit && canAssign && (
           <>
             <Button

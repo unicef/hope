@@ -13,10 +13,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { BlackLink } from '../../../components/BlackLink';
-import { Pointer } from '../../../components/Pointer';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { MiśTheme } from '../../../theme';
 import { decodeIdString } from '../../../utils/utils';
@@ -67,7 +65,6 @@ export function DedupeResults({
 }: DedupeResultsProps): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const history = useHistory();
   const businessArea = useBusinessArea();
   const useStyles = makeStyles(() => ({
     table: {
