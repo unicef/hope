@@ -55,6 +55,7 @@ export const GrievanceDetailsToolbar = ({
   canSendForApproval,
   canSendBack,
   canClose,
+  canAssign,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canEdit: boolean;
@@ -63,6 +64,7 @@ export const GrievanceDetailsToolbar = ({
   canSendForApproval: boolean;
   canSendBack: boolean;
   canClose: boolean;
+  canAssign: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -258,20 +260,18 @@ export const GrievanceDetailsToolbar = ({
     >
       <Box display='flex' alignItems='center'>
         {isEditable && canEdit && (
-          <>
-            <Button
-              color='primary'
-              variant='outlined'
-              component={Link}
-              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
-              startIcon={<EditIcon />}
-            >
-              {t('Edit')}
-            </Button>
-            <Separator />
-          </>
+          <Button
+            color='primary'
+            variant='outlined'
+            component={Link}
+            to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
+            startIcon={<EditIcon />}
+          >
+            {t('Edit')}
+          </Button>
         )}
-        {isNew && canEdit && (
+        {isNew && canEdit && canAssign && <Separator />}
+        {isNew && canEdit && canAssign && (
           <>
             <Button
               color='primary'
