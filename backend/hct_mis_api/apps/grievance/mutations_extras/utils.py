@@ -328,6 +328,3 @@ def log_and_withdraw_household_if_needed(
     if removed_individual_household:
         if removed_individual_household.individuals.count() == 0:
             removed_individual_household.withdraw()
-        else:
-            removed_individual_household.size -= 1
-            removed_individual_household.save()
