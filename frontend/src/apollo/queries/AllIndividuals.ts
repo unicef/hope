@@ -20,6 +20,7 @@ export const AllIndividuals = gql`
     $adminArea: ID
     $withdrawn: Boolean
     $admin2: [ID]
+    $flags: [String]
   ) {
     allIndividuals(
       before: $before
@@ -40,6 +41,7 @@ export const AllIndividuals = gql`
       household_AdminArea: $adminArea
       withdrawn: $withdrawn
       admin2: $admin2
+      flags: $flags
     ) {
       totalCount
       pageInfo {

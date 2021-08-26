@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Button,
   Dialog,
@@ -7,17 +5,20 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { programCompare } from '../../../utils/utils';
 import {
   AllProgramsQuery,
   ProgramNode,
   ProgramStatus,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { programCompare } from '../../../utils/utils';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 import { DialogActions } from '../DialogActions';
 
 const DialogTitleWrapper = styled.div`
@@ -44,6 +45,7 @@ interface FinishProgramProps {
 export function FinishProgram({
   program,
 }: FinishProgramProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -79,13 +81,13 @@ export function FinishProgram({
       },
     });
     if (!response.errors && response.data.updateProgram) {
-      showMessage('Programme finished.', {
+      showMessage(t('Programme finished.'), {
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
         dataCy: 'snackbar-program-finish-success',
       });
       setOpen(false);
     } else {
-      showMessage('Programme finish action failed.', {
+      showMessage(t('Programme finish action failed.'), {
         dataCy: 'snackbar-program-finish-failure',
       });
     }
@@ -97,7 +99,7 @@ export function FinishProgram({
         onClick={() => setOpen(true)}
         data-cy='button-finish-program'
       >
-        Finish Programme
+        {t('Finish Programme')}
       </Button>
       <Dialog
         open={open}
@@ -107,17 +109,17 @@ export function FinishProgram({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>Finish Programme</Typography>
+            <Typography variant='h6'> {t('Finish Programme')}</Typography>
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            Are you sure you want to finish this Programme?
+            {t('Are you sure you want to finish this Programme?')}
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <Button
               type='submit'
               color='primary'
@@ -125,7 +127,7 @@ export function FinishProgram({
               onClick={finishProgram}
               data-cy='button-finish-program'
             >
-              FINISH
+              {t('FINISH')}
             </Button>
           </DialogActions>
         </DialogFooter>

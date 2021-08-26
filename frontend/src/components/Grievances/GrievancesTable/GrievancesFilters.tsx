@@ -1,6 +1,3 @@
-import React from 'react';
-import styled from 'styled-components';
-import moment from 'moment';
 import {
   Box,
   FormControl,
@@ -10,14 +7,18 @@ import {
   MenuItem,
   Select,
 } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardDatePicker } from '@material-ui/pickers';
-import { ContainerWithBorder } from '../../ContainerWithBorder';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { FieldLabel } from '../../FieldLabel';
+import moment from 'moment';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import TextField from '../../../shared/TextField';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import { ContainerWithBorder } from '../../ContainerWithBorder';
+import { FieldLabel } from '../../FieldLabel';
+import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 
 const SearchTextField = styled(TextField)`
   flex: 1;
@@ -43,6 +44,7 @@ export function GrievancesFilters({
   choicesData,
   usersChoices,
 }: GrievancesFiltersProps): React.ReactElement {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
@@ -67,7 +69,7 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
+            <InputLabel>{t('Status')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
@@ -106,7 +108,7 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Creation Date</FieldLabel>
+            <FieldLabel>{t('Creation Date')}</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
               inputVariant='outlined'
@@ -118,7 +120,9 @@ export function GrievancesFilters({
                   ...filter,
                   createdAtRange: {
                     ...filter.createdAtRange,
-                    min: moment(date).set({ hour: 0, minute: 0 }).toISOString(),
+                    min: moment(date)
+                      .set({ hour: 0, minute: 0 })
+                      .toISOString(),
                   },
                 })
               }
@@ -140,7 +144,9 @@ export function GrievancesFilters({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  max: moment(date).set({ hour: 23, minute: 59 }).toISOString(),
+                  max: moment(date)
+                    .set({ hour: 23, minute: 59 })
+                    .toISOString(),
                 },
               })
             }
@@ -179,15 +185,15 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Assignee</InputLabel>
+            <InputLabel>{t('Assignee')}</InputLabel>
             <Select
               onChange={(e) => handleFilterChange(e, 'assignedTo')}
               variant='outlined'
-              label='Assignee'
+              label={t('Assignee')}
               value={filter.assignedTo || ''}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {usersChoices.map((item) => {
                 return (

@@ -29,7 +29,14 @@ export function LookUpIndividualTableRow({
     return programNames?.length ? programNames.join(', ') : '-';
   };
   return (
-    <ClickableTableRow hover role='checkbox' key={individual.id}>
+    <ClickableTableRow
+      onClick={() => {
+        radioChangeHandler(individual);
+      }}
+      hover
+      role='checkbox'
+      key={individual.id}
+    >
       <TableCell padding='checkbox'>
         <Radio
           color='primary'
@@ -44,8 +51,6 @@ export function LookUpIndividualTableRow({
       </TableCell>
       <TableCell align='left'>
         <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
           to={`/${businessArea}/population/individuals/${individual.id}`}
         >
           {individual.unicefId}

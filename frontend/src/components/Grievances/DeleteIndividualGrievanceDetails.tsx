@@ -1,17 +1,18 @@
-import React from 'react';
-import snakeCase from 'lodash/snakeCase';
 import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
+import snakeCase from 'lodash/snakeCase';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { LabelizedField } from '../LabelizedField';
 import { ConfirmationDialog } from '../ConfirmationDialog';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
 import { UniversalMoment } from '../UniversalMoment';
 
@@ -33,6 +34,7 @@ export function DeleteIndividualGrievanceDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const { showMessage } = useSnackbar();
 
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
@@ -115,7 +117,7 @@ export function DeleteIndividualGrievanceDetails({
           <Grid key={key} item xs={6}>
             <LabelizedField
               label={
-                snakeKey === 'sex' ? 'GENDER' : snakeKey.replace(/_/g, ' ')
+                snakeKey === 'sex' ? t('GENDER') : snakeKey.replace(/_/g, ' ')
               }
               value={textValue}
             />
@@ -137,19 +139,23 @@ export function DeleteIndividualGrievanceDetails({
     }) || [];
   const allLabels = [...labels, ...documentLabels];
 
-  let dialogText =
-    'You did not approve the following individual to be withdrawn. Are you sure you want to continue?';
+  let dialogText = t(
+    'You did not approve the following individual to be withdrawn. Are you sure you want to continue?',
+  );
   if (!ticket.deleteIndividualTicketDetails.approveStatus) {
-    dialogText =
-      'You are approving the following individual to be withdrawn. Are you sure you want to continue?';
+    dialogText = t(
+      'You are approving the following individual to be withdrawn. Are you sure you want to continue?',
+    );
   }
   return (
     <StyledBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Individual to be withdrawn</Typography>
+          <Typography variant='h6'>
+            {t('Individual to be withdrawn')}
+          </Typography>
           {canApproveDataChange && (
-            <ConfirmationDialog title='Warning' content={dialogText}>
+            <ConfirmationDialog title={t('Warning')} content={dialogText}>
               {(confirm) => (
                 <Button
                   onClick={confirm(async () => {
@@ -168,10 +174,10 @@ export function DeleteIndividualGrievanceDetails({
                         ],
                       });
                       if (ticket.deleteIndividualTicketDetails.approveStatus) {
-                        showMessage('Changes Disapproved');
+                        showMessage(t('Changes Disapproved'));
                       }
                       if (!ticket.deleteIndividualTicketDetails.approveStatus) {
-                        showMessage('Changes Approved');
+                        showMessage(t('Changes Approved'));
                       }
                     } catch (e) {
                       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -186,8 +192,8 @@ export function DeleteIndividualGrievanceDetails({
                   disabled={!approveEnabled}
                 >
                   {ticket.deleteIndividualTicketDetails?.approveStatus
-                    ? 'Disapprove'
-                    : 'Approve'}
+                    ? t('Disapprove')
+                    : t('Approve')}
                 </Button>
               )}
             </ConfirmationDialog>

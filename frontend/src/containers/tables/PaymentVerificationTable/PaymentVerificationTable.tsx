@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AllCashPlansQuery,
   AllCashPlansQueryVariables,
@@ -18,6 +19,7 @@ export function PaymentVerificationTable({
   canViewDetails,
   businessArea,
 }: PaymentVerificationTableProps): ReactElement {
+  const { t } = useTranslation();
   const initialVariables: AllCashPlansQueryVariables = {
     businessArea,
     program: filter.program,
@@ -33,7 +35,7 @@ export function PaymentVerificationTable({
       AllCashPlansQuery['allCashPlans']['edges'][number]['node'],
       AllCashPlansQueryVariables
     >
-      title='List of Cash Plans'
+      title={t('List of Cash Plans')}
       headCells={headCells}
       query={useAllCashPlansQuery}
       queriedObjectName='allCashPlans'

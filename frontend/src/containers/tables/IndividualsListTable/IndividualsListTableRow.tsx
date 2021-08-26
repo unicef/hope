@@ -58,13 +58,7 @@ export function IndividualsListTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={individualDetailsPath}
-        >
-          {individual.unicefId}
-        </BlackLink>
+        <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>

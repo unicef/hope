@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import { Paper, Tab } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
-import { useRegistrationDataImportQuery } from '../../../__generated__/graphql';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 import { LoadingComponent } from '../../../components/LoadingComponent';
+import { PermissionDenied } from '../../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../../utils/utils';
+import { useRegistrationDataImportQuery } from '../../../__generated__/graphql';
 import { ImportedHouseholdTable } from '../tables/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../tables/ImportedIndividualsTable';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { PermissionDenied } from '../../../components/PermissionDenied';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { isPermissionDeniedError } from '../../../utils/utils';
-import { RegistrationDetails } from './RegistrationDetails';
 import { RegistrationDataImportDetailsPageHeader } from './RegistrationDataImportDetailsPageHeader';
+import { RegistrationDetails } from './RegistrationDetails';
 
 const Container = styled.div`
   && {
@@ -57,6 +58,7 @@ function TabPanel({
   return <div style={style}>{children}</div>;
 }
 export function RegistrationDataImportDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
@@ -85,7 +87,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
         <RegistrationDetails registration={data.registrationDataImport} />
         <TableWrapper>
           <Paper>
-            <Title variant='h6'>Import Preview</Title>
+            <Title variant='h6'>{t('Import Preview')}</Title>
             <TabsContainer>
               <StyledTabs
                 value={selectedTab}
@@ -97,8 +99,8 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
                 variant='fullWidth'
                 aria-label='full width tabs example'
               >
-                <Tab label='Households' />
-                <Tab label='Individuals' />
+                <Tab label={t('Households')} />
+                <Tab label={t('Individuals')} />
               </StyledTabs>
             </TabsContainer>
             <TabPanel value={selectedTab} index={0}>

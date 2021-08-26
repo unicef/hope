@@ -5,18 +5,21 @@ from factory import fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
-    TicketSensitiveDetails,
-    TicketComplaintDetails,
-    TicketNote,
     TicketAddIndividualDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketHouseholdDataUpdateDetails,
+    TicketComplaintDetails,
     TicketDeleteIndividualDetails,
-    TicketSystemFlaggingDetails,
+    TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
+    TicketNote,
+    TicketPositiveFeedbackDetails,
+    TicketReferralDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
@@ -223,3 +226,30 @@ class TicketNeedsAdjudicationDetailsFactory(factory.DjangoModelFactory):
             issue_type=None,
         ),
     )
+
+
+class PositiveFeedbackTicketWithoutExtrasFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketPositiveFeedbackDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK)
+    household = None
+    individual = None
+
+
+class NegativeFeedbackTicketWithoutExtrasFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketNegativeFeedbackDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)
+    household = None
+    individual = None
+
+
+class ReferralTicketWithoutExtrasFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketReferralDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_REFERRAL)
+    household = None
+    individual = None

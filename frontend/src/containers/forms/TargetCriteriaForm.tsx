@@ -124,6 +124,9 @@ interface TargetCriteriaFormPropTypes {
   shouldShowWarningForIndividualFilter?: boolean;
 }
 
+const associatedWith = (type) => (item) => item.associatedWith === type;
+const isNot = (type) => (item) => item.type !== type;
+
 export function TargetCriteriaForm({
   criteria,
   addCriteria,
@@ -141,15 +144,15 @@ export function TargetCriteriaForm({
   useEffect(() => {
     if (loading) return;
     const filteredIndividualData = {
-      allFieldsAttributes: data.allFieldsAttributes.filter(
-        (item) => item.associatedWith === 'Individual',
-      ),
+      allFieldsAttributes: data.allFieldsAttributes
+        .filter(associatedWith('Individual'))
+        .filter(isNot('IMAGE')),
     };
     setIndividualData(filteredIndividualData);
 
     const filteredHouseholdData = {
       allFieldsAttributes: data.allFieldsAttributes.filter(
-        (item) => item.associatedWith === 'Household',
+        associatedWith('Household'),
       ),
     };
     setHouseholdData(filteredHouseholdData);

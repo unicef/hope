@@ -547,6 +547,14 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     )
 
 
+def is_approved(item):
+    return item.get("approve_status") is True
+
+
+def convert_to_empty_string_if_null(value):
+    return value or ""
+
+
 def close_update_individual_grievance_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.individual_data_update_ticket_details
     if not ticket_details:
@@ -558,29 +566,25 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     role_data = individual_data.pop("role", {})
     flex_fields_with_additional_data = individual_data.pop("flex_fields", {})
     flex_fields = {
-        field: data.get("value")
-        for field, data in flex_fields_with_additional_data.items()
-        if data.get("approve_status") is True
+        field: data.get("value") for field, data in flex_fields_with_additional_data.items() if is_approved(data)
     }
     documents = individual_data.pop("documents", [])
     documents_to_remove_encoded = individual_data.pop("documents_to_remove", [])
     documents_to_remove = [
         decode_id_string(document_data["value"])
         for document_data in documents_to_remove_encoded
-        if document_data["approve_status"] is True
+        if is_approved(document_data)
     ]
     identities = individual_data.pop("identities", [])
     identities_to_remove_encoded = individual_data.pop("identities_to_remove", [])
     identities_to_remove = [
-        identity_data["value"]
-        for identity_data in identities_to_remove_encoded
-        if identity_data["approve_status"] is True
+        identity_data["value"] for identity_data in identities_to_remove_encoded if is_approved(identity_data)
     ]
 
     only_approved_data = {
-        field: value_and_approve_status.get("value")
+        field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
         for field, value_and_approve_status in individual_data.items()
-        if value_and_approve_status.get("approve_status") is True and field != "previous_documents"
+        if is_approved(value_and_approve_status) and field != "previous_documents"
     }
     old_individual = copy_model_object(individual)
     merged_flex_fields = {}
@@ -595,7 +599,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         household
         and relationship_to_head_of_household
         and relationship_to_head_of_household.get("value") == HEAD
-        and relationship_to_head_of_household.get("approve_status")
+        and is_approved(relationship_to_head_of_household)
         and individual.relationship != HEAD
     ):
         if household.individuals.filter(relationship=HEAD).count() > 1:
@@ -604,18 +608,18 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         household.save()
 
     reassign_roles_on_update(individual, ticket_details.role_reassign_data, info)
-    if role_data.get("approve_status") is True:
+    if is_approved(role_data):
         handle_role(role_data.get("value"), household, individual)
 
     documents_to_create = [
         handle_add_document(document_data["value"], individual)
         for document_data in documents
-        if document_data["approve_status"] is True
+        if is_approved(document_data)
     ]
     identities_to_create = [
         handle_add_identity(identity_data["value"], individual)
         for identity_data in identities
-        if identity_data["approve_status"] is True
+        if is_approved(identity_data)
     ]
     Document.objects.bulk_create(documents_to_create)
     Document.objects.filter(id__in=documents_to_remove).delete()
@@ -635,14 +639,16 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         )
     )
 
+
 def cast_flex_fields(flex_fields):
-    decimals_flex_attrs_name_list=FlexibleAttribute.objects.filter(type="DECIMAL").values_list("name", flat=True)
+    decimals_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="DECIMAL").values_list("name", flat=True)
     integer_flex_attrs_name_list = FlexibleAttribute.objects.filter(type="INTEGER").values_list("name", flat=True)
     for key, value in flex_fields.items():
         if key in decimals_flex_attrs_name_list:
             flex_fields[key] = float(value)
         if key in integer_flex_attrs_name_list:
             flex_fields[key] = int(value)
+
 
 def close_update_household_grievance_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.household_data_update_ticket_details

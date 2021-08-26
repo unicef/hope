@@ -1,14 +1,15 @@
-import React, { ReactElement } from 'react';
-import styled from 'styled-components';
 import moment from 'moment';
+import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { decodeIdString } from '../../../../utils/utils';
 import {
   AllRegistrationDataImportsQueryVariables,
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../tables/UniversalTable';
-import { decodeIdString } from '../../../../utils/utils';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
 
@@ -20,6 +21,7 @@ export function RegistrationDataImportTable({
   filter,
   canViewDetails,
 }): ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const initialVariables = {
     // eslint-disable-next-line @typescript-eslint/camelcase
@@ -40,9 +42,11 @@ export function RegistrationDataImportTable({
         RegistrationDataImportNode,
         AllRegistrationDataImportsQueryVariables
       >
-        title='List of Imports'
+        title={t('List of Imports')}
         getTitle={(data) =>
-          `List of Imports (${data.allRegistrationDataImports.totalCount})`
+          `${t('List of Imports')} (${
+            data.allRegistrationDataImports.totalCount
+          })`
         }
         headCells={headCells}
         defaultOrderBy='importDate'

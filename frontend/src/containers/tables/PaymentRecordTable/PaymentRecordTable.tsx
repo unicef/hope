@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AllPaymentRecordsQueryVariables,
   CashPlanNode,
@@ -19,13 +20,14 @@ export function PaymentRecordTable({
   openInNewTab = false,
   businessArea,
 }: PaymentRecordTableProps): ReactElement {
+  const { t } = useTranslation();
   const initialVariables = {
     cashPlan: cashPlan.id,
     businessArea,
   };
   return (
     <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>
-      title='Payment Records'
+      title={t('Payment Records')}
       headCells={headCells}
       query={useAllPaymentRecordsQuery}
       queriedObjectName='allPaymentRecords'

@@ -1,8 +1,9 @@
 import { Box, Grid } from '@material-ui/core';
-import React from 'react';
-import styled from 'styled-components';
-import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { decodeIdString } from '../../../utils/utils';
 
 const StyledBox = styled.div`
@@ -40,6 +41,7 @@ export const LookUpPaymentRecordDisplay = ({
   onValueChange;
   disabled?;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const handleRemove = (): void => {
     onValueChange('selectedPaymentRecords', []);
   };
@@ -56,8 +58,7 @@ export const LookUpPaymentRecordDisplay = ({
       <Grid container>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            Payment ID:
-            {renderPaymentRecords()}
+            {t('Payment ID')}:{renderPaymentRecords()}
           </Box>
         </Grid>
         {disabled || (

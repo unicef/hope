@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Box,
   Button,
@@ -11,19 +9,22 @@ import {
   Tabs,
 } from '@material-ui/core';
 import { Field, Formik } from 'formik';
-import { TabPanel } from '../../TabPanel';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
+import { GRIEVANCE_ISSUE_TYPES } from '../../../utils/constants';
 import {
   ProgramNode,
   useAllProgramsQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
+import { TabPanel } from '../../TabPanel';
 import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdFilters';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { GRIEVANCE_ISSUE_TYPES } from '../../../utils/constants';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -60,6 +61,7 @@ export const LookUpHouseholdIndividualModal = ({
   setSelectedIndividual;
   setSelectedHousehold;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState(0);
   const householdFilterInitial = {
     search: '',
@@ -165,13 +167,13 @@ export const LookUpHouseholdIndividualModal = ({
                 variant='fullWidth'
                 aria-label='look up tabs'
               >
-                <Tab label='LOOK UP HOUSEHOLD' />
+                <Tab label={t('LOOK UP HOUSEHOLD')} />
                 <Tab
                   disabled={
                     initialValues.issueType ===
                     GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
                   }
-                  label='LOOK UP INDIVIDUAL'
+                  label={t('LOOK UP INDIVIDUAL')}
                 />
               </StyledTabs>
             </DialogTitle>
@@ -222,11 +224,11 @@ export const LookUpHouseholdIndividualModal = ({
                 <Box mr={1}>
                   <Field
                     name='identityVerified'
-                    label='Identity Verified*'
+                    label={t('Identity Verified*')}
                     component={FormikCheckboxField}
                   />
                 </Box>
-                <Button onClick={() => handleCancel()}>CANCEL</Button>
+                <Button onClick={() => handleCancel()}>{t('CANCEL')}</Button>
                 <Button
                   color='primary'
                   variant='contained'
@@ -236,7 +238,7 @@ export const LookUpHouseholdIndividualModal = ({
                   disabled={shouldBeDisabled(values)}
                   data-cy='button-submit'
                 >
-                  SAVE
+                  {t('SAVE')}
                 </Button>
               </Box>
             </DialogActions>
