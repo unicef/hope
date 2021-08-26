@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './TargetPopulationHouseholdHeadCells';
@@ -23,6 +24,7 @@ export const TargetPopulationHouseholdTable = ({
   variables,
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement => {
+  const { t } = useTranslation();
   const initialVariables = {
     ...(id && { targetPopulation: id }),
     ...variables,
@@ -30,7 +32,7 @@ export const TargetPopulationHouseholdTable = ({
   return (
     <TableWrapper>
       <UniversalTable
-        title='Households'
+        title={t('Households')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={query}

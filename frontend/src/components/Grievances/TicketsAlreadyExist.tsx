@@ -1,6 +1,7 @@
 import { Box, Paper, Typography } from '@material-ui/core';
 import WarningIcon from '@material-ui/icons/Warning';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { decodeIdString } from '../../utils/utils';
@@ -29,7 +30,7 @@ const WarnIcon = styled(WarningIcon)`
 
 export function TicketsAlreadyExist({ values }): React.ReactElement {
   const businessArea = useBusinessArea();
-
+  const { t } = useTranslation();
   const { data, loading } = useExistingGrievanceTicketsQuery({
     variables: {
       businessArea,
@@ -63,8 +64,9 @@ export function TicketsAlreadyExist({ values }): React.ReactElement {
         </Typography>
       </Title>
       <Typography variant='body2'>
-        There is an open ticket(s) in the same category for the related entity.
-        Please review them before proceeding.
+        {t(
+          'There is an open ticket(s) in the same category for the related entity. Please review them before proceeding.',
+        )}
       </Typography>
       <Box mt={3} display='flex' flexDirection='column'>
         {mappedTickets}

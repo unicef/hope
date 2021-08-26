@@ -1,14 +1,15 @@
-import React from 'react';
-import styled from 'styled-components';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
 import { Typography } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
 import {
   IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
 } from '../../__generated__/graphql';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
+import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
 
 const Overview = styled(Paper)`
@@ -34,6 +35,7 @@ interface IndividualVulnerabilitesProps {
 export function IndividualVulnerabilities({
   individual,
 }: IndividualVulnerabilitesProps): React.ReactElement {
+  const { t } = useTranslation();
   const { data, loading } = useAllIndividualsFlexFieldsAttributesQuery();
   const flexAttributesDict = useArrayToDict(
     data?.allIndividualsFlexFieldsAttributes,
@@ -99,7 +101,7 @@ export function IndividualVulnerabilities({
     <div>
       <Overview>
         <Title>
-          <Typography variant='h6'>Vulnerabilities</Typography>
+          <Typography variant='h6'>{t('Vulnerabilities')}</Typography>
         </Title>
         <Grid container spacing={6}>
           {fields.map((field) => (

@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
-  InputAdornment,
-  TextField,
-  Grid,
-  Typography,
   Box,
   Button,
   FormControl,
+  Grid,
+  InputAdornment,
   InputLabel,
-  Select,
   MenuItem,
+  Select,
+  TextField,
+  Typography,
 } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+import SearchIcon from '@material-ui/icons/Search';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { usePaymentVerificationStatusChoicesQuery } from '../../../__generated__/graphql';
 
 const Container = styled.div`
@@ -50,6 +51,7 @@ export function VerificationRecordsFilters({
   onFilterChange,
   filter,
 }: VerificationRecordsFiltersProps): React.ReactElement {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -62,7 +64,7 @@ export function VerificationRecordsFilters({
   return (
     <>
       <Box display='flex' justifyContent='space-between'>
-        <Typography variant='h6'>Filters</Typography>
+        <Typography variant='h6'>{t('Filters')}</Typography>
         {show ? (
           <Button
             endIcon={<KeyboardArrowUp />}
@@ -71,7 +73,7 @@ export function VerificationRecordsFilters({
             onClick={() => setShow(false)}
             data-cy='button-show'
           >
-            HIDE
+            {t('HIDE')}
           </Button>
         ) : (
           <Button
@@ -81,7 +83,7 @@ export function VerificationRecordsFilters({
             onClick={() => setShow(true)}
             data-cy='button-show'
           >
-            SHOW
+            {t('SHOW')}
           </Button>
         )}
       </Box>
@@ -90,7 +92,7 @@ export function VerificationRecordsFilters({
           <Grid container spacing={3}>
             <Grid item>
               <SearchTextField
-                label='Search'
+                label={t('Search')}
                 variant='outlined'
                 margin='dense'
                 onChange={(e) => handleFilterChange(e, 'search')}
@@ -106,13 +108,13 @@ export function VerificationRecordsFilters({
             </Grid>
             <Grid item>
               <StyledFormControl variant='outlined' margin='dense'>
-                <InputLabel>Verification Status</InputLabel>
+                <InputLabel>{t('Verification Status')}</InputLabel>
                 <Select
                   /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
                   // @ts-ignore
                   onChange={(e) => handleFilterChange(e, 'status')}
                   variant='outlined'
-                  label='Verification Status'
+                  label={t('Verification Status')}
                   value={filter.status || ''}
                 >
                   <MenuItem value=''>

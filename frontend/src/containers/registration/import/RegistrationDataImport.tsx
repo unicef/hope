@@ -1,8 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
-import * as Yup from 'yup';
-import { useTranslation } from 'react-i18next';
 import {
   Button,
   Checkbox,
@@ -15,9 +11,19 @@ import {
   Select,
 } from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import { useDropzone } from 'react-dropzone';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
+import React, { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import * as Yup from 'yup';
+import { LoadingComponent } from '../../../components/LoadingComponent';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
+import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { handleValidationErrors } from '../../../utils/utils';
 import {
   KoboErrorNode,
   SaveKoboImportDataMutation,
@@ -29,14 +35,8 @@ import {
   useUploadImportDataXlsxFileMutation,
   XlsxRowErrorNode,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { LoadingComponent } from '../../../components/LoadingComponent';
 import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
-import { handleValidationErrors } from '../../../utils/utils';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { ErrorsKobo } from './errors/KoboErrors';
 import { Errors } from './errors/PlainErrors';
 
@@ -116,6 +116,7 @@ const validationSchema = Yup.object().shape({
 });
 
 export function RegistrationDataImport(): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState();
   const [koboProject, setKoboProject] = useState();
@@ -140,7 +141,6 @@ export function RegistrationDataImport(): React.ReactElement {
   const { data: koboProjectsData } = useAllKoboProjectsQuery({
     variables: { businessAreaSlug: businessArea },
   });
-  const { t } = useTranslation();
   const xlsxErrors: UploadImportDataXlsxFileMutation['uploadImportDataXlsxFile']['errors'] = get(
     uploadData,
     'uploadImportDataXlsxFile.errors',
@@ -154,11 +154,11 @@ export function RegistrationDataImport(): React.ReactElement {
       <>
         <div data-cy='import-available-households-counter'>
           {uploadData.uploadImportDataXlsxFile.importData.numberOfHouseholds}{' '}
-          Households available to Import
+          {t('Households available to Import')}
         </div>
         <div data-cy='import-available-individuals-counter'>
           {uploadData.uploadImportDataXlsxFile.importData.numberOfIndividuals}{' '}
-          Individuals available to Import
+          {t('Individuals available to Import')}
         </div>
       </>
     );
@@ -168,11 +168,11 @@ export function RegistrationDataImport(): React.ReactElement {
       <>
         <div>
           {koboImportData?.saveKoboImportData?.importData.numberOfHouseholds}{' '}
-          Households available to Import
+          {t('Households available to Import')}
         </div>
         <div>
           {koboImportData?.saveKoboImportData?.importData.numberOfIndividuals}{' '}
-          Individuals available to Import
+          {t('Individuals available to Import')}
         </div>
       </>
     );
@@ -192,7 +192,9 @@ export function RegistrationDataImport(): React.ReactElement {
             const fileSizeMB = file.size / (1024 * 1024);
             if (fileSizeMB > 200) {
               showMessage(
-                `File size is to big. It should be under 200MB, File size is ${fileSizeMB}MB`,
+                `${t('File size is to big. It should be under 200MB')}, ${t(
+                  'File size is',
+                )} ${fileSizeMB}MB`,
               );
               return;
             }
@@ -233,13 +235,13 @@ export function RegistrationDataImport(): React.ReactElement {
                 }}
               />
             }
-            label='Only approved submissions'
+            label={t('Only approved submissions')}
           />
         </div>
         <div>
           <Field
             name='pullPictures'
-            label='Pull pictures'
+            label={t('Pull pictures')}
             color='primary'
             component={FormikCheckboxField}
           />
@@ -257,11 +259,11 @@ export function RegistrationDataImport(): React.ReactElement {
           {/*/>*/}
         </div>
         <FormControl variant='outlined' margin='dense'>
-          <StyledInputLabel>Import from</StyledInputLabel>
+          <StyledInputLabel>{t('Import from')}</StyledInputLabel>
           <ComboBox
             value={koboProject}
             variant='outlined'
-            label='Kobo Project'
+            label={t('Kobo Project')}
             onChange={(e) => {
               setKoboProject(e.target.value);
               saveKoboImportDataMutate({
@@ -302,7 +304,7 @@ export function RegistrationDataImport(): React.ReactElement {
         onClick={() => setOpen(true)}
         data-cy='button-import'
       >
-        IMPORT
+        {t('IMPORT')}
       </Button>
       <Dialog
         open={open}
@@ -344,7 +346,7 @@ export function RegistrationDataImport(): React.ReactElement {
                   data?.registrationXlsxImport?.registrationDataImport?.id;
               }
 
-              showMessage('Registration', {
+              showMessage(t('Registration'), {
                 pathname: `/${businessArea}/registration-data-import/${rdiId}`,
                 historyMethod: 'push',
               });
@@ -368,7 +370,9 @@ export function RegistrationDataImport(): React.ReactElement {
 
               if (nonValidationErrors.length > 0) {
                 showMessage(
-                  'Unexpected problem while creating Registration Data Import',
+                  t(
+                    'Unexpected problem while creating Registration Data Import',
+                  ),
                 );
               }
             }
@@ -384,7 +388,7 @@ export function RegistrationDataImport(): React.ReactElement {
               </DialogTitleWrapper>
               <DialogContent>
                 <FormControl variant='outlined' margin='dense'>
-                  <StyledInputLabel>Import from</StyledInputLabel>
+                  <StyledInputLabel>{t('Import from')}</StyledInputLabel>
                   <ComboBox
                     value={importType}
                     variant='outlined'
@@ -411,7 +415,7 @@ export function RegistrationDataImport(): React.ReactElement {
                 <Field
                   name='name'
                   fullWidth
-                  label='Title'
+                  label={t('Title')}
                   required
                   variant='outlined'
                   component={FormikTextField}
@@ -432,10 +436,10 @@ export function RegistrationDataImport(): React.ReactElement {
                   }}
                   data-cy='a-download-template'
                 >
-                  DOWNLOAD TEMPLATE
+                  {t('DOWNLOAD TEMPLATE')}
                 </Button>
                 <DialogActions>
-                  <Button onClick={() => setOpen(false)}>CANCEL</Button>
+                  <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
                   <Button
                     type='submit'
                     color='primary'

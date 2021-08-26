@@ -1,14 +1,15 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Button } from '@material-ui/core';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
+import { PageHeader } from '../../../components/PageHeader';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
 } from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/PageHeader';
-import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 
@@ -29,6 +30,7 @@ export function RegistrationDataImportDetailsPageHeader({
   canRerunDedupe,
   canViewList,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   let buttons = null;
   // eslint-disable-next-line default-case
@@ -66,7 +68,7 @@ export function RegistrationDataImportDetailsPageHeader({
                 component={Link}
                 to={`/${businessArea}/grievance-and-feedback/rdi/${registration.id}`}
               >
-                View Tickets
+                {t('View Tickets')}
               </Button>
             </MergeButtonContainer>
           )}
@@ -77,7 +79,7 @@ export function RegistrationDataImportDetailsPageHeader({
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Registration Data import',
+      title: t('Registration Data import'),
       to: `/${businessArea}/registration-data-import/`,
     },
   ];

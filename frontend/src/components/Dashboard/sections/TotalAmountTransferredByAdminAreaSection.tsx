@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useCountryChartsLazyQuery } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../LoadingComponent';
 import { CardTextLightLarge } from '../DashboardCard';
 import { DashboardPaper } from '../DashboardPaper';
-import { useCountryChartsLazyQuery } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { TotalAmountTransferredByAdminAreaTable } from '../TotalAmountTransferredByAdminAreaTable';
-import { LoadingComponent } from '../../LoadingComponent';
 
 interface TotalAmountTransferredSectionByAdminAreaSectionProps {
   year: string;
@@ -15,7 +16,7 @@ export const TotalAmountTransferredSectionByAdminAreaSection = ({
   filter,
 }: TotalAmountTransferredSectionByAdminAreaSectionProps): React.ReactElement => {
   const businessArea = useBusinessArea();
-
+  const { t } = useTranslation();
   const [orderBy, setOrderBy] = useState('totalCashTransferred');
   const [order, setOrder] = useState('desc');
 
@@ -72,10 +73,10 @@ export const TotalAmountTransferredSectionByAdminAreaSection = ({
 
   return (
     <DashboardPaper
-      title='Total Transferred by Administrative Area'
+      title={t('Total Transferred by Administrative Area')}
       extraPaddingTitle={false}
     >
-      <CardTextLightLarge>IN USD</CardTextLightLarge>
+      <CardTextLightLarge>{t('IN USD')}</CardTextLightLarge>
       <TotalAmountTransferredByAdminAreaTable
         data={countryData?.tableTotalCashTransferredByAdministrativeArea?.data}
         handleSort={handleSortAdminArea}

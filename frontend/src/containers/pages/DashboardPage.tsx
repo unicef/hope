@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
 import { Tab, Tabs, Typography } from '@material-ui/core';
-import { PageHeader } from '../../components/PageHeader';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
-import { ExportModal } from '../../components/Dashboard/ExportModal';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useDashboardYearsChoiceDataQuery } from '../../__generated__/graphql';
-import { LoadingComponent } from '../../components/LoadingComponent';
 import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
+import { ExportModal } from '../../components/Dashboard/ExportModal';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { PageHeader } from '../../components/PageHeader';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
+import { useDashboardYearsChoiceDataQuery } from '../../__generated__/graphql';
 import { DashboardYearPage } from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {
+  const { t } = useTranslation();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const [selectedTab, setSelectedTab] = useState(0);
@@ -55,7 +57,7 @@ export function DashboardPage(): React.ReactElement {
   );
   return (
     <>
-      <PageHeader tabs={tabs} title='Dashboard'>
+      <PageHeader tabs={tabs} title={t('Dashboard')}>
         {hasPermissionToExport && (
           <ExportModal filter={filter} year={years[selectedTab]} />
         )}
@@ -67,7 +69,9 @@ export function DashboardPage(): React.ReactElement {
           ) : (
             <DashboardPaper noMarginTop extraPaddingLeft color='#6f6f6f'>
               <Typography variant='body2'>
-                All charts below show total numbers for the selected year.
+                {t(
+                  'All charts below show total numbers for the selected year.',
+                )}
               </Typography>
             </DashboardPaper>
           )}

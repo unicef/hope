@@ -1,6 +1,7 @@
+import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import {
@@ -31,6 +32,7 @@ interface IndividualPhotoModalProps {
 export const IndividualPhotoModal = ({
   individual,
 }: IndividualPhotoModalProps): React.ReactElement => {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [getPhotos, { data }] = useIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
@@ -47,7 +49,7 @@ export const IndividualPhotoModal = ({
           getPhotos();
         }}
       >
-        Show Photo
+        {t('Show Photo')}
       </Button>
       <Dialog
         open={dialogOpen}
@@ -56,17 +58,17 @@ export const IndividualPhotoModal = ({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            Individual&apos;s Photo
+            {t('Individual')}&apos;s {t('Photo')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box p={3}>
-            <StyledImage alt='Individual' src={data?.individual?.photo} />
+            <StyledImage alt={t('Individual')} src={data?.individual?.photo} />
           </Box>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setDialogOpen(false)}>{t('CANCEL')}</Button>
           </DialogActions>
         </DialogFooter>
       </Dialog>

@@ -1,10 +1,11 @@
-import React from 'react';
 import { Grid, Typography } from '@material-ui/core';
-import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { LabelizedField } from '../../../../components/LabelizedField';
-import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
+import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
 
 const Title = styled.div`
   width: 100%;
@@ -32,6 +33,7 @@ export function RegistrationDetails({
   deviceid,
   start,
 }: RegistrationDetailsProps): React.ReactElement {
+  const { t } = useTranslation();
   const { data } = useRegistrationDataImportQuery({
     variables: {
       id: btoa(`RegistrationDataImportNode:${hctId}`),
@@ -44,21 +46,21 @@ export function RegistrationDetails({
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>Registration Details</Typography>
+        <Typography variant='h6'>{t('Registration Details')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={4}>
-          <LabelizedField label='Source'>
+          <LabelizedField label={t('Source')}>
             {registrationDataImport.dataSource}
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
-          <LabelizedField label='Title'>
+          <LabelizedField label={t('Title')}>
             {registrationDataImport.name}
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
-          <LabelizedField label='Registered Date'>
+          <LabelizedField label={t('Registered Date')}>
             <UniversalMoment>{registrationDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
@@ -66,25 +68,23 @@ export function RegistrationDetails({
       {registrationDataImport.dataSource === 'XLS' ? null : (
         <>
           <hr />
-          <Typography variant='h6'>Data Collection</Typography>
+          <Typography variant='h6'>{t('Data Collection')}</Typography>
           <Grid container spacing={6}>
             <Grid item xs={4}>
-              <LabelizedField label='Start time'>
+              <LabelizedField label={t('Start time')}>
                 <UniversalMoment>{start}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
-              <LabelizedField label='End time'>
+              <LabelizedField label={t('End time')}>
                 <UniversalMoment>{registrationDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
-              <LabelizedField label='Device ID'>
-                {deviceid}
-              </LabelizedField>
+              <LabelizedField label={t('Device ID')}>{deviceid}</LabelizedField>
             </Grid>
             <Grid item xs={4}>
-              <LabelizedField label='User name'>
+              <LabelizedField label={t('User name')}>
                 {`${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`}
               </LabelizedField>
             </Grid>

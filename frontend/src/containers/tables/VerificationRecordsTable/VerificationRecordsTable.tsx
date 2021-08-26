@@ -86,7 +86,7 @@ export function VerificationRecordsTable({
 
         if (!errors && !data?.importXlsxCashPlanVerification?.errors.length) {
           setOpenImport(false);
-          showMessage('Your import was successful!');
+          showMessage(t('Your import was successful!'));
         }
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -109,7 +109,7 @@ export function VerificationRecordsTable({
             variant='outlined'
             data-cy='button-export'
           >
-            EXPORT
+            {t('EXPORT')}
           </Button>
         </a>
       </Box>
@@ -125,7 +125,7 @@ export function VerificationRecordsTable({
           data-cy='button-import'
           onClick={() => setOpenImport(true)}
         >
-          IMPORT
+          {t('IMPORT')}
         </Button>
       </Box>
     ) : null;
@@ -166,7 +166,7 @@ export function VerificationRecordsTable({
         PaymentVerificationNode,
         AllPaymentVerificationsQueryVariables
       >
-        title='Verification Records'
+        title={t('Verification Records')}
         actions={[exportButton, importButton]}
         headCells={headCells}
         query={useAllPaymentVerificationsQuery}

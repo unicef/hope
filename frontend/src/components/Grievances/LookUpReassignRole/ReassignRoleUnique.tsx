@@ -1,12 +1,13 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
 import { Formik } from 'formik';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   GrievanceTicketDocument,
   useReassignRoleGrievanceMutation,
 } from '../../../__generated__/graphql';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const ReassignRoleButton = styled.button`
   padding: 25px;
@@ -29,6 +30,7 @@ export const ReassignRoleUnique = ({
   household,
   individual,
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
@@ -71,7 +73,7 @@ export const ReassignRoleUnique = ({
           onClick={submitForm}
           data-cy='button-submit'
         >
-          Reassign To Unique Individual
+          {t('Reassign To Unique Individual')}
         </ReassignRoleButton>
       )}
     </Formik>
