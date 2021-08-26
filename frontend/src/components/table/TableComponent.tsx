@@ -1,4 +1,5 @@
-import React from 'react';
+import { Box } from '@material-ui/core';
+import Paper from '@material-ui/core/Paper';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -6,12 +7,12 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
 import FindInPageIcon from '@material-ui/icons/FindInPage';
-import { Box } from '@material-ui/core';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '../LoadingComponent';
-import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
+import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 
 export type Order = 'asc' | 'desc';
 
@@ -93,6 +94,7 @@ export function TableComponent<T>({
   onSelectAllClick,
   numSelected = 0,
 }: TableComponentProps<T>): React.ReactElement {
+  const { t } = useTranslation();
   const classes = useStyles({});
 
   const emptyRows = itemsCount
@@ -115,8 +117,9 @@ export function TableComponent<T>({
             <FindInPageIcon className={classes.icon} fontSize='inherit' />
             <Box mt={2}>No results</Box>
             <Box className={classes.smallerText} mt={2}>
-              Try adjusting your search or your filters to find what you&apos;re
-              looking for.
+              {t(
+                'Try adjusting your search or your filters to find what you are looking for.',
+              )}
             </Box>
           </div>
         </TableCell>

@@ -1,13 +1,9 @@
 import logging
 import re
-from datetime import date, datetime, timedelta
 from collections import defaultdict
-from datetime import date
+from datetime import date, datetime, timedelta
 
-from dateutil.relativedelta import relativedelta
-from django.contrib.gis.db.models import PointField, UniqueConstraint, Q, Count
-from django.contrib.postgres.fields import JSONField, CICharField
-from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
+from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
@@ -32,7 +28,6 @@ from hct_mis_api.apps.utils.models import (
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
-from dateutil.relativedelta import relativedelta
 
 BLANK = ""
 IDP = "IDP"
@@ -248,6 +243,14 @@ DISABILITY_CHOICES = (
         "not disabled",
     ),
 )
+SANCTION_LIST_POSSIBLE_MATCH = "SANCTION_LIST_POSSIBLE_MATCH"
+SANCTION_LIST_CONFIRMED_MATCH = "SANCTION_LIST_CONFIRMED_MATCH"
+INDIVIDUAL_FLAGS_CHOICES = (
+    (NEEDS_ADJUDICATION, "Needs adjudication"),
+    (DUPLICATE, "Duplicate"),
+    (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
+    (SANCTION_LIST_CONFIRMED_MATCH, "Sanction list match"),
+)
 
 logger = logging.getLogger(__name__)
 
@@ -407,6 +410,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
+
     @property
     def admin1(self):
         if self.admin_area is None:
@@ -729,7 +733,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class DocumentType(TimeStampedUUIDModel):
-    country = CountryField()
+    country = CountryField(default="U")
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
@@ -866,6 +870,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             "deduplication_batch_results",
             "imported_individual_id",
             "sanction_list_possible_match",
+            "sanction_list_confirmed_match",
             "sanction_list_last_check",
             "pregnant",
             "observed_disability",

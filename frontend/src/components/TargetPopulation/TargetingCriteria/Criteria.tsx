@@ -1,10 +1,11 @@
-import React from 'react';
-import styled from 'styled-components';
 import { IconButton } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
-import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
+import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
 
 const CriteriaElement = styled.div`
   width: auto;
@@ -57,6 +58,7 @@ const CriteriaSetBox = styled.div`
 `;
 
 const CriteriaField = ({ field }): React.ReactElement => {
+  const { t } = useTranslation();
   let fieldElement;
   switch (field.comparisionMethod) {
     case 'NOT_EQUALS':
@@ -82,7 +84,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           {field.fieldAttribute.type === 'BOOL' ? (
-            <span>{field.arguments[0] === 'True' ? 'Yes' : 'No'}</span>
+            <span>{field.arguments[0] === 'True' ? t('Yes') : t('No')}</span>
           ) : (
             <span>
               {field.fieldAttribute.choices?.length

@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllProgramsQueryVariables,
@@ -10,10 +11,9 @@ import { UniversalTable } from '../UniversalTable';
 import { headCells } from './ProgrammesHeadCells';
 import { ProgrammesTableRow } from './ProgrammesTableRow';
 
-
 const TableWrapper = styled.div`
-    padding: 20px;
-  `;
+  padding: 20px;
+`;
 
 interface ProgrammesTableProps {
   businessArea: string;
@@ -26,6 +26,7 @@ export function ProgrammesTable({
   filter,
   choicesData,
 }: ProgrammesTableProps): ReactElement {
+  const { t } = useTranslation();
   const initialVariables: AllProgramsQueryVariables = {
     businessArea,
     search: filter.search,
@@ -39,7 +40,7 @@ export function ProgrammesTable({
   return (
     <TableWrapper>
       <UniversalTable<ProgramNode, AllProgramsQueryVariables>
-        title='Programmes'
+        title={t('Programmes')}
         headCells={headCells}
         query={useAllProgramsQuery}
         queriedObjectName='allPrograms'

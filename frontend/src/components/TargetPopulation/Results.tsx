@@ -92,7 +92,7 @@ export function Results({
                 <Grid item xs={6}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
-                      label='Female Children'
+                      label={t('Female Children')}
                       value={resultsData.childFemale}
                     />
                   </FieldBorder>
@@ -100,7 +100,7 @@ export function Results({
                 <Grid item xs={6}>
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
-                      label='Female Adults'
+                      label={t('Female Adults')}
                       value={resultsData.adultFemale}
                     />
                   </FieldBorder>
@@ -108,7 +108,7 @@ export function Results({
                 <Grid item xs={6}>
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
-                      label='Male Children'
+                      label={t('Male Children')}
                       value={resultsData.childMale}
                     />
                   </FieldBorder>
@@ -116,7 +116,7 @@ export function Results({
                 <Grid item xs={6}>
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
-                      label='Male Adults'
+                      label={t('Male Adults')}
                       value={resultsData.adultMale}
                     />
                   </FieldBorder>
@@ -140,10 +140,10 @@ export function Results({
                       }}
                       data={{
                         labels: [
-                          'Female Children',
-                          'Female Adults',
-                          'Male Children',
-                          'Male Adults',
+                          t('Female Children'),
+                          t('Female Adults'),
+                          t('Male Children'),
+                          t('Male Adults'),
                         ],
                         datasets: [
                           {
@@ -168,19 +168,19 @@ export function Results({
               </Grid>
               <Grid container spacing={0} justify='flex-end'>
                 <SummaryBorder>
-                  <LabelizedField label='Total Number of Households'>
+                  <LabelizedField label={t('Total Number of Households')}>
                     <SummaryValue>{totalNumOfHouseholds || '0'}</SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
                 <SummaryBorder>
-                  <LabelizedField label='Targeted Individuals'>
+                  <LabelizedField label={t('Targeted Individuals')}>
                     <SummaryValue>{totalNumOfIndividuals || '0'}</SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
               </Grid>
             </>
           ) : (
-            <Label>Add targeting criteria to see results.</Label>
+            <Label>{t('Add targeting criteria to see results.')}</Label>
           )}
         </ContentWrapper>
       </PaperContainer>

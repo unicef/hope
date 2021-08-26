@@ -1,9 +1,9 @@
+import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useSnackbar } from '../../hooks/useSnackBar';
 
 export interface Props {
   disabled: boolean;
@@ -28,6 +28,7 @@ export function CreateGrievanceTickets({
   disabled,
   grievanceTicketsNumber,
 }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [DialogOpen, setDialogOpen] = useState(false);
 
   const createGrievanceTickets = (): void => {
@@ -41,7 +42,7 @@ export function CreateGrievanceTickets({
         onClick={() => setDialogOpen(true)}
         data-cy='button-ed-plan'
       >
-        CREATE GRIEVANCE TICKETS
+        {t('CREATE GRIEVANCE TICKETS')}
       </Button>
       <Dialog
         open={DialogOpen}
@@ -51,23 +52,24 @@ export function CreateGrievanceTickets({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            Create Grievance Tickets
+            {t('Create Grievance Tickets')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
             <Box p={5}>
               <div>
-                You will generate {grievanceTicketsNumber} grievance ticket
-                {grievanceTicketsNumber === 1 ? null : 's'}. Are you sure you
-                want to continue?
+                {t('You will generate')} {grievanceTicketsNumber}{' '}
+                {t('grievance ticket')}
+                {grievanceTicketsNumber === 1 ? null : 's'}.{' '}
+                {t('Are you sure you want to continue?')}
               </div>
             </Box>
           </DialogContainer>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setDialogOpen(false)}>{t('CANCEL')}</Button>
             <Button
               type='submit'
               color='primary'
@@ -75,7 +77,7 @@ export function CreateGrievanceTickets({
               onClick={() => createGrievanceTickets()}
               data-cy='button-submit'
             >
-              Continue
+              {t('Continue')}
             </Button>
           </DialogActions>
         </DialogFooter>

@@ -1,23 +1,24 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Button } from '@material-ui/core';
-import { useParams } from 'react-router-dom';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import { PageHeader } from '../../components/PageHeader';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { CashPlanDetails } from '../../components/CashPlanDetails';
-import { PaymentRecordTable } from '../tables/PaymentRecordTable';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { PageHeader } from '../../components/PageHeader';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../utils/utils';
 import {
-  useCashPlanQuery,
   CashPlanNode,
   useCashAssistUrlPrefixQuery,
+  useCashPlanQuery,
 } from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { isPermissionDeniedError } from '../../utils/utils';
+import { PaymentRecordTable } from '../tables/PaymentRecordTable';
 
 const Container = styled.div`
   && {
@@ -35,12 +36,16 @@ const TableWrapper = styled.div`
 `;
 
 export function CashPlanDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
   });
-  const { data: caData, loading: caPrefixLoading, } = useCashAssistUrlPrefixQuery();
+  const {
+    data: caData,
+    loading: caPrefixLoading,
+  } = useCashAssistUrlPrefixQuery();
   const businessArea = useBusinessArea();
 
   if (loading || caPrefixLoading) return <LoadingComponent />;
@@ -49,7 +54,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Programme Management',
+      title: t('Programme Management'),
       to: `/${businessArea}/programs/`,
     },
     {
@@ -61,7 +66,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Cash Plan #${data.cashPlan.caId}`}
+        title={`${t('Cash Plan')} #${data.cashPlan.caId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
@@ -76,11 +81,11 @@ export function CashPlanDetailsPage(): React.ReactElement {
           color='primary'
           component='a'
           disabled={!data.cashPlan.caHashId}
-          target="_blank"
+          target='_blank'
           href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_cashplan&id=${data.cashPlan.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
-          Open in CashAssist
+          {t('Open in CashAssist')}
         </Button>
       </PageHeader>
       <Container>

@@ -1,19 +1,20 @@
-import React from 'react';
 import {
-  Paper,
-  Grid,
-  MenuItem,
-  InputAdornment,
   FormControl,
+  Grid,
+  InputAdornment,
+  MenuItem,
+  Paper,
 } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import { useAllProgramsQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
+import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
 
 const Container = styled(Paper)`
   display: flex;
@@ -42,6 +43,7 @@ export const DashboardFilters = ({
   onFilterChange,
   filter,
 }: DashboardFiltersProps): React.ReactElement => {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
@@ -57,7 +59,7 @@ export const DashboardFilters = ({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Programme</InputLabel>
+            <InputLabel>{t('Programme')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore

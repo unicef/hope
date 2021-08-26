@@ -1,18 +1,19 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
-import GroupIcon from '@material-ui/icons/Group';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
+import GroupIcon from '@material-ui/icons/Group';
+import SearchIcon from '@material-ui/icons/Search';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import InputLabel from '../../shared/InputLabel';
+import Select from '../../shared/Select';
+import TextField from '../../shared/TextField';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
-import TextField from '../../shared/TextField';
-import InputLabel from '../../shared/InputLabel';
-import Select from '../../shared/Select';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { FieldLabel } from '../FieldLabel';
 import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
@@ -55,6 +56,7 @@ export function HouseholdFilters({
   programs,
   choicesData,
 }: HouseholdFiltersProps): React.ReactElement {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
@@ -62,7 +64,7 @@ export function HouseholdFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
+            label={t('Search')}
             variant='outlined'
             value={filter.text || ''}
             margin='dense'
@@ -79,13 +81,13 @@ export function HouseholdFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Programme</InputLabel>
+            <InputLabel>{t('Programme')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'program')}
               variant='outlined'
-              label='Programme'
+              label={t('Programme')}
               value={filter.program || ''}
               InputProps={{
                 startAdornment: (
@@ -96,7 +98,7 @@ export function HouseholdFilters({
               }}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {programs.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
@@ -108,7 +110,7 @@ export function HouseholdFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Residence Status</InputLabel>
+            <InputLabel>{t('Residence Status')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
@@ -146,13 +148,13 @@ export function HouseholdFilters({
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>Household size</FieldLabel>
+            <FieldLabel>{t('Household size')}</FieldLabel>
             <TextContainer
               id='minFilter'
               value={filter.householdSize.min}
               variant='outlined'
               margin='dense'
-              placeholder='From'
+              placeholder={t('From')}
               onChange={(e) =>
                 onFilterChange({
                   ...filter,
@@ -179,7 +181,7 @@ export function HouseholdFilters({
             value={filter.householdSize.max}
             variant='outlined'
             margin='dense'
-            placeholder='To'
+            placeholder={t('To')}
             onChange={(e) =>
               onFilterChange({
                 ...filter,

@@ -1,9 +1,10 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
 import { Button, Typography } from '@material-ui/core';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { Logo } from '../../components/Logo';
 import { LOGIN_URL } from '../../config';
-import { Logo } from '../../components/Logo'
 
 const Container = styled.div`
   width: 100vw;
@@ -45,6 +46,7 @@ const LoginButton = styled(Button)`
 `;
 
 export function LoginPage(): React.ReactElement {
+  const { t } = useTranslation();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const next = params.get('next');
@@ -53,7 +55,7 @@ export function LoginPage(): React.ReactElement {
     <Container>
       <LoginBox>
         <Logo transparent={false} displayLogoWithoutSubtitle={false} />
-        <SubTitle>Login via Active Directory</SubTitle>
+        <SubTitle>{t('Login via Active Directory')}</SubTitle>
         <LoginButtonContainer>
           <LoginButton
             variant='contained'
@@ -65,7 +67,7 @@ export function LoginPage(): React.ReactElement {
                 : LOGIN_URL
             }
           >
-            Sign in
+            {t('Sign in')}
           </LoginButton>
         </LoginButtonContainer>
       </LoginBox>

@@ -1,20 +1,28 @@
-import graphene
 import logging
+
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
-from hct_mis_api.apps.account.permissions import PermissionMutation, PermissionRelayMutation, Permissions
-from hct_mis_api.apps.core import utils
-
+from hct_mis_api.apps.account.permissions import (
+    PermissionMutation,
+    PermissionRelayMutation,
+    Permissions,
+)
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core import utils
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
-from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
 from hct_mis_api.apps.core.scalars import BigInt
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+)
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
@@ -22,21 +30,24 @@ from hct_mis_api.apps.steficon.interpreters import mapping
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.targeting.models import (
-    TargetPopulation,
     HouseholdSelection,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetingIndividualRuleFilterBlock,
     TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
+    TargetPopulation,
 )
-from hct_mis_api.apps.targeting.schema import TargetPopulationNode, TargetingCriteriaObjectType
+from hct_mis_api.apps.targeting.schema import (
+    TargetingCriteriaObjectType,
+    TargetPopulationNode,
+)
 from hct_mis_api.apps.targeting.validators import (
-    TargetValidator,
     ApproveTargetPopulationValidator,
     FinalizeTargetPopulationValidator,
-    UnapproveTargetPopulationValidator,
     TargetingCriteriaInputValidator,
+    TargetValidator,
+    UnapproveTargetPopulationValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
@@ -309,7 +320,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root, info, **kwargs):
         with transaction.atomic():
             user = info.context.user
-            target_population = kwargs.get("model_object")
+            target_population: TargetPopulation = kwargs.get("model_object")
             old_target_population = kwargs.get("old_model_object")
             target_population.status = TargetPopulation.STATUS_FINALIZED
             target_population.finalized_by = user
@@ -325,6 +336,11 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                     household__id__in=households_ids_queryset,
                     target_population=target_population,
                 ).update(final=False)
+
+            HouseholdSelection.objects.filter(target_population=target_population,).exclude(
+                household__id__in=target_population.vulnerability_score_filtered_households.values_list("id")
+            ).update(final=False)
+
             target_population.save()
         send_target_population_task.delay()
         log_create(

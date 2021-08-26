@@ -1,30 +1,31 @@
-import React from 'react';
-import styled from 'styled-components';
-import Paper from '@material-ui/core/Paper';
 import { Grid, Typography } from '@material-ui/core';
+import Paper from '@material-ui/core/Paper';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { HouseholdDetails } from '../../components/population/HouseholdDetails';
+import styled from 'styled-components';
+import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { LabelizedField } from '../../components/LabelizedField';
+import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { HouseholdDetails } from '../../components/population/HouseholdDetails';
+import { HouseholdVulnerabilities } from '../../components/population/HouseholdVulnerabilities';
+import { UniversalMoment } from '../../components/UniversalMoment';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../utils/utils';
 import {
   HouseholdDetailedFragment,
   HouseholdNode,
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { HouseholdVulnerabilities } from '../../components/population/HouseholdVulnerabilities';
-import { LabelizedField } from '../../components/LabelizedField';
-import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
-import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
-import { UniversalMoment } from '../../components/UniversalMoment';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { usePermissions } from '../../hooks/usePermissions';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { isPermissionDeniedError } from '../../utils/utils';
 import { HouseholdCompositionTable } from '../tables/HouseholdCompositionTable';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
+import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
+import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -59,6 +60,7 @@ const SubTitle = styled(Typography)`
 `;
 
 export function PopulationHouseholdDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -79,7 +81,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Households',
+      title: t('Households'),
       to: `/${businessArea}/population/household`,
     },
   ];
@@ -89,7 +91,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Household ID: ${household.unicefId}`}
+        title={`${t('Household ID')}: ${household.unicefId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
@@ -133,21 +135,21 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
         />
         <Overview>
           <Title>
-            <Typography variant='h6'>Registration Details</Typography>
+            <Typography variant='h6'>{t('Registration Details')}</Typography>
           </Title>
           <Grid container spacing={6}>
             <Grid item xs={3}>
-              <LabelizedField label='Source'>
+              <LabelizedField label={t('Source')}>
                 <div>{household.registrationDataImport.dataSource}</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Import name'>
+              <LabelizedField label={t('Import name')}>
                 <div>{household.registrationDataImport.name}</div>
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Registration Date'>
+              <LabelizedField label={t('Registration Date')}>
                 <div>
                   <UniversalMoment>
                     {household.lastRegistrationDate}
@@ -156,7 +158,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='User name'>
+              <LabelizedField label={t('User name')}>
                 {household.registrationDataImport.importedBy.email}
               </LabelizedField>
             </Grid>
@@ -164,22 +166,22 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           {household.registrationDataImport.dataSource === 'XLS' ? null : (
             <>
               <hr />
-              <SubTitle variant='h6'>Data Collection</SubTitle>
+              <SubTitle variant='h6'>{t('Data Collection')}</SubTitle>
               <Grid container spacing={6}>
                 <Grid item xs={3}>
-                  <LabelizedField label='Start time'>
+                  <LabelizedField label={t('Start time')}>
                     <UniversalMoment>{household.start}</UniversalMoment>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={3}>
-                  <LabelizedField label='End time'>
+                  <LabelizedField label={t('End time')}>
                     <UniversalMoment>
                       {household.firstRegistrationDate}
                     </UniversalMoment>
                   </LabelizedField>
                 </Grid>
                 <Grid item xs={3}>
-                  <LabelizedField label='Device ID'>
+                  <LabelizedField label={t('Device ID')}>
                     {household.deviceid}
                   </LabelizedField>
                 </Grid>
