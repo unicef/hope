@@ -55,7 +55,7 @@ class TestIndividualFlagQuery(APITestCase):
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
                 "id": "8ef39244-2884-459b-ad14-8d63a6fe4a4a",
-                "deduplication_golden_record_status": DUPLICATE,
+                "duplicate": True,
             },
             {
                 "full_name": "Timothy Perry",
