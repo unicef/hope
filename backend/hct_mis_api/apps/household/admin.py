@@ -111,7 +111,7 @@ class HouseholdAdmin(LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFie
                 ),
             },
         ),
-        ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
+        ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
 
     @button()
@@ -278,7 +278,7 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedF
                 ),
             },
         ),
-        ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
+        ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
 
     @button()
