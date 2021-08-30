@@ -527,7 +527,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             if isinstance(value, bool):
                 return True
-
             if self.all_fields[header]["required"] is False and (value is None or value == ""):
                 return True
             if type(value) is str:
