@@ -899,10 +899,11 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
     def _perms(self, request, object_id) -> set:
-        return set(self.get_object(request, object_id).permissions)
+        return set(self.get_object(request, object_id).permissions or [])
 
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
-        self.existing_perms = self._perms(request, object_id)
+        if object_id:
+            self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def construct_change_message(self, request, form, formsets, add=False):
@@ -958,7 +959,7 @@ class IncompatibleRolesAdmin(HOPEModelAdminBase):
 from django.contrib.admin import site
 from django.contrib.auth.models import Group
 
-site.unregister(Group)
+from smart_admin.smart_auth.admin import GroupAdmin
 
 
 @smart_register(Group)
@@ -984,7 +985,8 @@ class GroupAdmin(ExtraUrlMixin, _GroupAdmin):
         return render(request, "admin/account/group/members.html", context)
 
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
-        self.existing_perms = self._perms(request, object_id)
+        if object_id:
+            self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
     def construct_change_message(self, request, form, formsets, add=False):
