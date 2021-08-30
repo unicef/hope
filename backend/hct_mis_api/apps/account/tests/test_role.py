@@ -16,7 +16,7 @@ class RoleTest(WebTest):
         self.user = UserFactory()
         self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
 
-    def test_user_role_history(self):
+    def test_role_history(self):
         url = reverse("admin:account_role_change", args=[self.role_1.pk])
         res = self.app.get(url, user=self.superuser)
         url = reverse("admin:account_role_change", args=[self.role_1.pk])
@@ -31,3 +31,10 @@ class RoleTest(WebTest):
         res = res.click("History")
         assert "Added permissions" in res.content.decode()
         assert "Removed permissions" in res.content.decode()
+
+    def test_role_matrix(self):
+        url = reverse("admin:account_role_change", args=[self.role_1.pk])
+        res = self.app.get(url, user=self.superuser)
+        url = reverse("admin:account_role_change", args=[self.role_1.pk])
+
+        res = res.click("Matrix")
