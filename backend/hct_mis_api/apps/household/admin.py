@@ -1,11 +1,14 @@
+from itertools import chain
+
 from django.contrib import admin, messages
+from django.contrib.admin import TabularInline
 from django.contrib.messages import DEFAULT_TAGS
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-from admin_extra_urls.decorators import button
+from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
@@ -14,6 +17,7 @@ from adminfilters.filters import (
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.household.models import (
@@ -28,10 +32,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.admin import (
-    HOPEModelAdminBase,
-    LastSyncDateResetMixin,
-)
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, LastSyncDateResetMixin
 
 
 @admin.register(Agency)
@@ -52,7 +53,16 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Household)
-class HouseholdAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminBase):
+class HouseholdAdmin(LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase):
+    advanced_filter_fields = (
+        "name",
+        "country",
+        "head_of_household",
+        "size",
+        "unhcr_id",
+        ("business_area__name", "business area"),
+    )
+
     list_display = (
         "unicef_id",
         "country",
@@ -103,6 +113,16 @@ class HouseholdAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminB
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
+
+    @button()
+    def tickets(self, request, pk):
+        context = self.get_common_context(request, pk, title="Tickets")
+        obj = context["original"]
+        tickets = []
+        for entry in chain(obj.sensitive_ticket_details.all(), obj.complaint_ticket_details.all()):
+            tickets.append(entry.ticket)
+        context["tickets"] = tickets
+        return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
     @button()
     def members(self, request, pk):
@@ -170,8 +190,21 @@ class HouseholdAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminB
         return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
 
 
+class IndividualRoleInHouseholdInline(TabularInline):
+    model = IndividualRoleInHousehold
+    extra = 0
+    readonly_fields = ("household", "role")
+    fields = ("household", "role")
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Individual)
-class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminBase):
+class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "given_name",
@@ -181,10 +214,19 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdmin
         "relationship",
         "birth_date",
     )
+    advanced_filter_fields = (
+        "updated_at",
+        "last_sync_at",
+        "deduplication_golden_record_status",
+        "deduplication_batch_status",
+        "duplicate",
+        ("business_area__name", "business area"),
+    )
+
     search_fields = ("family_name",)
     readonly_fields = ("created_at", "updated_at")
     exclude = ("created_at", "updated_at")
-
+    inlines = [IndividualRoleInHouseholdInline]
     list_filter = (
         TextFieldFilter.factory("unicef_id__iexact", "UNICEF ID"),
         TextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
@@ -244,6 +286,14 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdmin
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.household.unicef_id}")
+
+    @button()
+    def sanity_check(self, request, pk):
+        context = self.get_common_context(request, pk)
+        obj = context["original"]
+        context["roles"] = obj.households_and_roles.all()
+
+        return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
 
 @admin.register(IndividualRoleInHousehold)
