@@ -37,6 +37,7 @@ class Household(SessionModel):
     country = models.CharField(null=True, max_length=3)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True)
     registration_date = models.DateField(null=True)
+    village = models.CharField(max_length=250, blank=True, null=True)
 
     class Meta:
         unique_together = ("session", "mis_id")

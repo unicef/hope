@@ -21,12 +21,13 @@ def handle_geom(geometry):
 
 
 @app.task
-def load_admin_area(country, geom, page_size, max_records, notify_to=None, rebuild_mptt=True):
+def load_admin_area(country_id: int, geom, page_size, max_records, notify_to=None, rebuild_mptt=True):
     results = {"created": 0, "updated": 0, "errors": []}
     api = DatamartAPI()
     parents_list = []
     areas_dict = {}
     gateways = {}
+    country = AdminAreaLevel.objects.get(id=country_id)
     try:
         with transaction.atomic():
             data = list(

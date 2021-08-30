@@ -179,7 +179,10 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(PROJECT_ROOT, "apps", "core", "templates")],
+        "DIRS": [
+            os.path.join(PROJECT_ROOT, "apps", "administration", "templates"),
+            os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
+        ],
         "OPTIONS": {
             "loaders": ["django.template.loaders.filesystem.Loader", "django.template.loaders.app_directories.Loader"],
             "context_processors": [
@@ -221,9 +224,13 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
+    # "hct_mis_api.apps.administration.apps.TemplateConfig",
+    # "smart_admin.templates",
+    "advanced_filters",
     "smart_admin.logs",
-    "smart_admin.templates",
-    "smart_admin",
+    "smart_admin.apps.SmartTemplateConfig",
+    "hct_mis_api.apps.administration.apps.Config",
+    # "smart_admin",
     "django_sysinfo",
     "django.contrib.auth",
     "django.contrib.humanize",
@@ -237,6 +244,7 @@ DJANGO_APPS = [
 ]
 
 OTHER_APPS = [
+    "jsoneditor",
     "django_countries",
     "phonenumber_field",
     "compressor",
@@ -336,7 +344,6 @@ if "CACHE_URL" not in os.environ:
     else:
         os.environ["CACHE_URL"] = f"dummycache://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
 
-
 CACHES = {
     "default": env.cache(),
 }
@@ -431,16 +438,16 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 
 CONSTANCE_CONFIG = {
     # BATCH SETTINGS
-    "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
+    "DEDUPLICATION_DUPLICATE_SCORE": (
         6.0,
         "Results equal or above this score are considered duplicates",
         "positive_floats",
     ),
-    # "DEDUPLICATION_BATCH_MIN_SCORE": (
-    #     15.0,
-    #     "Results below the minimum score will not be taken into account",
-    #     "positive_integers",
-    # ),
+    "DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE": (
+        6.0,
+        "Results equal or above this score are considered possible duplicates (needs adjudication) must be lower than DEDUPLICATION_DUPLICATE_SCORE",
+        "positive_floats",
+    ),
     "DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE": (
         50,
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
@@ -459,16 +466,6 @@ CONSTANCE_CONFIG = {
     ),
     "KOBO_APP_API_TOKEN": ("", "Kobo KPI token", str),
     # GOLDEN RECORDS SETTINGS
-    "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
-        6.0,
-        "Results below the minimum score will not be taken into account",
-        "positive_floats",
-    ),
-    "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
-        11.0,
-        "Results equal or above this score are considered duplicates",
-        "positive_floats",
-    ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE": (
         50,
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
@@ -493,6 +490,23 @@ CONSTANCE_CONFIG = {
         False,
         "Should send grievances notification",
         bool,
+    ),
+    "IGNORED_USER_LINKED_OBJECTS": (
+        "created_advanced_filters,advancedfilter,logentry,social_auth,query,querylog,logs",
+        "list of relation to hide in 'linked objects' user page",
+        str,
+    ),
+    "QUICK_LINKS": (
+        """Kobo,https://kf-hope.unitst.org/;
+CashAssist,https://cashassist-trn.crm4.dynamics.com/;
+Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/;
+elasticsearch,hope-elasticsearch-coordinating-only:9200;
+Datamart,https://datamart.unicef.io;
+Flower,https://stg-hope.unitst.org/flower/;
+Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
+""",
+        "",
+        str,
     ),
 }
 
@@ -596,6 +610,18 @@ SMART_ADMIN_SECTIONS = {
     ],
 }
 
+# SMART_ADMIN_BOOKMARKS = [('GitHub', 'https://github.com/saxix/django-smart-admin'),
+#                          'https://github.com/saxix/django-adminactions',
+#                          'https://github.com/saxix/django-sysinfo',
+#                          'https://github.com/saxix/django-adminfilters',
+#                          'https://github.com/saxix/django-admin-extra-urls',
+#                          ]
+SMART_ADMIN_BOOKMARKS = "hct_mis_api.apps.administration.site.get_bookmarks"
+
+SMART_ADMIN_BOOKMARKS_PERMISSION = None
+SMART_ADMIN_PROFILE_LINK = True
+SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root-token") == env("ROOT_TOKEN")
+
 EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
 
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
@@ -609,7 +635,10 @@ def filter_environment(key):
     return False
 
 
-SYSINFO = {"filter_environment": "hct_mis_api.settings.base.filter_environment"}
+SYSINFO = {
+    "filter_environment": "hct_mis_api.settings.base.filter_environment",
+    "ttl": 60,
+}
 
 EXPLORER_CONNECTIONS = {
     "default": "default",

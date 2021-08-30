@@ -6,15 +6,14 @@ from io import StringIO
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
-from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
-from django.db.models import Count, F, Func
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -25,15 +24,18 @@ from django.utils.html import format_html
 
 import xlrd
 from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     AllValuesComboFilter,
     ChoicesFieldComboFilter,
     TextFieldFilter,
 )
 from constance import config
+from django_countries.fields import Country
+from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
-from hct_mis_api.apps.account.models import INACTIVE, Role, User
+from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
@@ -219,9 +221,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
     @button(label="Send DOAP", group="doap")
     def send_doap(self, request, pk):
+        context = self.get_common_context(request, pk, title="Members")
+        obj = context["original"]
         try:
-            context = self.get_common_context(request, pk, title="Members")
-            obj = context["original"]
             matrix = self._get_doap_matrix(obj)
             buffer = StringIO()
             writer = csv.DictWriter(buffer, matrix[0], extrasaction="ignore")
@@ -292,24 +294,6 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         context["title"] = f"Test `{self.object.name}` RapidPRO connection"
 
         if request.method == "GET":
-            # phone_number = request.GET.get("phone_number", None)
-            # flow_uuid = request.GET.get("flow_uuid", None)
-            # flow_name = request.GET.get("flow_name", None)
-            # timestamp = request.GET.get("timestamp", None)
-            #
-            # if all([phone_number, flow_uuid, flow_name, timestamp]):
-            #     error, result = api.test_connection_flow_run(flow_uuid, phone_number, timestamp)
-            #     context["run_result"] = result
-            #     context["phone_number"] = phone_number
-            #     context["flow_uuid"] = flow_uuid
-            #     context["flow_name"] = flow_name
-            #     context["timestamp"] = timestamp
-            #
-            #     if error:
-            #         messages.error(request, error)
-            #     else:
-            #         messages.success(request, "Connection successful")
-            # else:
             context["form"] = TestRapidproForm()
         else:
             form = TestRapidproForm(request.POST)
@@ -537,7 +521,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                     max_records = form.cleaned_data["max_records"]
                     if form.cleaned_data["run_in_background"]:
                         load_admin_area.delay(
-                            country,
+                            country.id,
                             geom,
                             page_size=page_size,
                             max_records=max_records,
@@ -547,16 +531,72 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                         context["run_in_background"] = True
                     else:
                         results = load_admin_area(
-                            country, geom, page_size, max_records, rebuild_mptt=not form.cleaned_data["skip_rebuild"]
+                            country.id, geom, page_size, max_records, rebuild_mptt=not form.cleaned_data["skip_rebuild"]
                         )
                         context["admin_areas"] = results
                 except Exception as e:
+                    logger.exception(e)
                     context["form"] = form
-                    self.message_user(request, str(e), messages.ERROR)
+                    self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             else:
                 context["form"] = form
 
         return TemplateResponse(request, "core/admin/load_admin_areas.html", context)
+
+    @button()
+    def export(self, request):
+        changelist_filters = request.GET.get("_changelist_filters", "")
+
+        if not changelist_filters:
+            self.message_user(request, "Filter 'By Country' should be selected", messages.ERROR)
+            return
+
+        params = dict(tuple(param.split("=") for param in changelist_filters.split("&")))
+
+        if "country" not in params.keys():
+            self.message_user(request, "Filter 'By Country' should be selected", messages.ERROR)
+            return
+
+        country_name = params.get("country")
+        country = AdminArea.objects.get(id=country_name)
+        queryset = AdminArea.objects.filter(tree_id=country.tree_id, admin_area_level__admin_level__in=[1, 2]).order_by(
+            "admin_area_level__admin_level"
+        )
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename=locations.csv"
+
+        fields = [
+            "list_name",
+            "name",
+            "label:English(EN)",
+            "label:French(FR)",
+            "label:Arabic(AR)",
+            "label:Spanish(ES)",
+            "filter",
+        ]
+        matrix = [fields]
+
+        filter_field = {1: lambda area: Country(area.parent.p_code).alpha3, 2: lambda area: area.parent.p_code}
+
+        for admin_area in queryset:
+            admin_area_data = {
+                "list_name": f"admin{admin_area.admin_area_level.admin_level}",
+                "name": admin_area.p_code,
+                "label:English(EN)": f"{admin_area.title} - {admin_area.p_code}",
+                "label:French(FR)": "",
+                "label:Arabic(AR)": "",
+                "label:Spanish(ES)": "",
+                "filter": filter_field[admin_area.admin_area_level.admin_level](admin_area),
+            }
+
+            matrix.append(admin_area_data)
+
+        writer = csv.DictWriter(response, matrix[0], extrasaction="ignore")
+        writer.writeheader()
+        for row in matrix[1:]:
+            writer.writerow(row)
+        return response
 
 
 class FlexibleAttributeInline(admin.TabularInline):
@@ -575,15 +615,22 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
         "is_removed",
     )
     search_fields = ("name",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 @admin.register(FlexibleAttributeGroup)
 class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
-    autocomplete_fields = ("parent",)
+    # autocomplete_fields = ("parent",)
+    raw_id_fields = ("parent",)
     list_filter = ("repeatable", "required", "is_removed")
     search_fields = ("name",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 @admin.register(FlexibleAttributeChoice)
@@ -595,14 +642,21 @@ class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
     search_fields = ("name", "list_name")
     list_filter = ("is_removed",)
     filter_horizontal = ("flex_attributes",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 @admin.register(XLSXKoboTemplate)
 class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
-
+    list_filter = (
+        "status",
+        ("uploaded_by", AutoCompleteFilter),
+    )
+    search_fields = ("file_name",)
+    date_hierarchy = "created_at"
     exclude = ("is_removed", "file_name", "status", "template_id")
-
     readonly_fields = ("original_file_name", "uploaded_by", "file", "import_status", "error_description")
 
     def import_status(self, obj):

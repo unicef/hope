@@ -9,6 +9,6 @@ class CoreConfig(AppConfig):
 
         import hct_mis_api.apps.core.tasks.admin_areas  # noqa
 
-        site.site_title = "HOPE"
-        site.site_header = "HOPE Administration"
-        site.index_title = "Index"
+        # site.site_title = "HOPE"
+        # site.site_header = "HOPE Administration"
+        # site.index_title = "Index"
