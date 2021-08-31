@@ -49,6 +49,7 @@ class SendTPToDatahubTask:
         "admin2": "admin_area.parent.title",
         "residence_status": "residence_status",
         "registration_date": "last_registration_date",
+        "village": "village",
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
