@@ -1,10 +1,11 @@
 from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -53,6 +54,15 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             created_by=self.user,
             business_area=self.business_area,
         )
+        self.grievance_ticket3 = GrievanceTicket.objects.create(
+            description="Test",
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            consent=True,
+            language="PL",
+            status=GrievanceTicket.STATUS_NEW,
+            created_by=self.user,
+            business_area=self.business_area,
+        )
 
     @parameterized.expand(
         [
@@ -91,6 +101,28 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         variables = {
             "status": GrievanceTicket.STATUS_CLOSED,
             "grievanceTicketId": self.id_to_base64(self.grievance_ticket2.id, "GrievanceTicketNode"),
+        }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCE_ASSIGN],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_assign_user(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        variables = {
+            "status": GrievanceTicket.STATUS_ASSIGNED,
+            "grievanceTicketId": self.id_to_base64(self.grievance_ticket3.id, "GrievanceTicketNode"),
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,

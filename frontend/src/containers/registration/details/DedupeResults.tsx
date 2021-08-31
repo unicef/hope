@@ -13,9 +13,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Pointer } from '../../../components/Pointer';
+import { BlackLink } from '../../../components/BlackLink';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { MiśTheme } from '../../../theme';
 import { decodeIdString } from '../../../utils/utils';
@@ -66,7 +65,6 @@ export function DedupeResults({
 }: DedupeResultsProps): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const history = useHistory();
   const businessArea = useBusinessArea();
   const useStyles = makeStyles(() => ({
     table: {
@@ -101,14 +99,14 @@ export function DedupeResults({
       result.proximityToScore,
     );
   });
-  const handleClickBatch = (id): void => {
+  const handleClickBatch = (id): string => {
     const path = `/${businessArea}/registration-data-import/individual/${id}`;
-    history.push(path);
+    return path;
   };
 
-  const handleClickGoldenRecord = (id): void => {
+  const handleClickGoldenRecord = (id): string => {
     const path = `/${businessArea}/population/individuals/${id}`;
-    history.push(path);
+    return path;
   };
   return (
     <>
@@ -164,16 +162,16 @@ export function DedupeResults({
             <TableBody>
               {rows.map((row) => (
                 <TableRow key={row.hitId}>
-                  <TableCell
-                    onClick={() =>
-                      isInBatch
-                        ? handleClickBatch(row.hitId)
-                        : handleClickGoldenRecord(row.hitId)
-                    }
-                    component='th'
-                    scope='row'
-                  >
-                    <Pointer>{decodeIdString(row.hitId)}</Pointer>
+                  <TableCell>
+                    <BlackLink
+                      to={
+                        isInBatch
+                          ? handleClickBatch(row.hitId)
+                          : handleClickGoldenRecord(row.hitId)
+                      }
+                    >
+                      {decodeIdString(row.hitId)}
+                    </BlackLink>
                   </TableCell>
                   <TableCell align='left'>{row.fullName}</TableCell>
                   <TableCell align='left'>
