@@ -322,7 +322,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     size = models.PositiveIntegerField(db_index=True)
     address = CICharField(max_length=255, blank=True)
     """location contains lowest administrative area info"""
-    admin_area = models.ForeignKey("core.AdminArea", null=True, on_delete=models.SET_NULL)
+    admin_area = models.ForeignKey("core.AdminArea", null=True, on_delete=models.SET_NULL, blank=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -387,6 +387,13 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     class Meta:
         verbose_name = "Household"
 
+    def save(self, *args, **kwargs):
+        from hct_mis_api.apps.targeting.models import HouseholdSelection
+
+        if self.withdrawn:
+            HouseholdSelection.objects.filter(household=self, target_population__status="APPROVED").delete()
+        super().save(*args, **kwargs)
+
     @property
     def status(self):
         if self.withdrawn:
@@ -407,6 +414,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
+
     @property
     def admin1(self):
         if self.admin_area is None:
