@@ -516,6 +516,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
     )
     role_reassign_data = JSONField(default=dict)
+    extra_data = JSONField(default=dict)
 
     @property
     def has_duplicated_document(self):

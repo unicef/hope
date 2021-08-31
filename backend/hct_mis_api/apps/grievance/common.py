@@ -2,7 +2,10 @@ from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
 
 def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
-    from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+    from hct_mis_api.apps.grievance.models import (
+        GrievanceTicket,
+        TicketNeedsAdjudicationDetails,
+    )
 
     registration_data_import = kwargs.pop("registration_data_import", None)
 
@@ -29,11 +32,16 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         area=area,
         registration_data_import=registration_data_import,
     )
+    extra_data = {
+        "golden_records": main_individual.get_deduplication_golden_record(),
+        "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
+    }
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
         golden_records_individual=main_individual,
         possible_duplicate=possible_duplicate,
         selected_individual=None,
+        extra_data=extra_data,
     )
     GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
 
