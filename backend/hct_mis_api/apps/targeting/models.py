@@ -380,14 +380,14 @@ class TargetingCriteriaQueryingMixin:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self):
-        return Q(widthdrawn=False)
+        return Q(withdrawn=False)
 
     def get_query(self):
         query = Q()
         rules = self.rules if isinstance(self.rules, list) else self.rules.all()
         for rule in rules:
             query |= rule.get_query()
-        return query
+        return self.get_basic_query() & Q(query)
 
 
 class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
