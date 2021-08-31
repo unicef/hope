@@ -260,15 +260,17 @@ export const GrievanceDetailsToolbar = ({
     >
       <Box display='flex' alignItems='center'>
         {isEditable && canEdit && (
-          <Button
-            color='primary'
-            variant='outlined'
-            component={Link}
-            to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
-            startIcon={<EditIcon />}
-          >
-            {t('Edit')}
-          </Button>
+          <Box mr={3}>
+            <Button
+              color='primary'
+              variant='outlined'
+              component={Link}
+              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
+              startIcon={<EditIcon />}
+            >
+              {t('Edit')}
+            </Button>
+          </Box>
         )}
         {isNew && canEdit && canAssign && <Separator />}
         {isNew && canEdit && canAssign && (
@@ -283,13 +285,15 @@ export const GrievanceDetailsToolbar = ({
           </>
         )}
         {isAssigned && canSetInProgress && (
-          <Button
-            color='primary'
-            variant='contained'
-            onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
-          >
-            {t('Set to in progress')}
-          </Button>
+          <Box mr={3}>
+            <Button
+              color='primary'
+              variant='contained'
+              onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
+            >
+              {t('Set to in progress')}
+            </Button>
+          </Box>
         )}
         {isInProgress && (
           <>
