@@ -3,22 +3,24 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from urllib.parse import unquote, urlencode
+from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
-from django.contrib.admin.helpers import AdminForm
-from django.contrib.admin.models import LogEntry
 from django.contrib.admin.options import IncorrectLookupParameters
+from django.contrib.admin.utils import construct_change_message
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
-from django.db import models, router, transaction
+from django.db import router, transaction
 from django.db.models import Q
 from django.db.transaction import atomic
-from django.forms import Form, ModelChoiceField, MultipleChoiceField
+from django.forms import ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
@@ -31,22 +33,18 @@ from django.utils.translation import gettext_lazy as _
 import requests
 from admin_extra_urls.api import ExtraUrlMixin, button
 from adminactions.helpers import AdminActionPermMixin
-from adminactions.perms import get_permission_codename
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-    ForeignKeyFieldFilter,
-    RelatedFieldComboFilter,
-)
+from adminfilters.filters import RelatedFieldComboFilter
 from constance import config
+from jsoneditor.forms import JSONEditor
 from requests import HTTPError
+from smart_admin.decorators import smart_register
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm, KoboLoginForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -83,27 +81,6 @@ class UserRoleAdminForm(ModelForm):
         business_area = self.cleaned_data["business_area"]
 
         account_models.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
-        # incompatible_roles = list(
-        #     account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-        # ) + list(account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
-        # incompatible_userroles = account_models.UserRole.objects.filter(
-        #     business_area=self.cleaned_data["business_area"],
-        #     role__id__in=incompatible_roles,
-        #     user=self.cleaned_data["user"],
-        # )
-        # if self.instance.id:
-        #     incompatible_userroles = incompatible_userroles.exclude(id=self.instance.id)
-        # if incompatible_userroles.exists():
-        #     logger.error(
-        #         f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
-        #     )
-        #     raise ValidationError(
-        #         {
-        #             "role": _(
-        #                 f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
-        #             )
-        #         }
-        #     )
 
 
 class UserRoleInlineFormSet(BaseInlineFormSet):
@@ -318,6 +295,20 @@ class HasKoboAccount(SimpleListFilter):
         return queryset
 
 
+class BusinessAreaFilter(SimpleListFilter):
+    parameter_name = "ba"
+    title = "Business Area"
+    template = "adminfilters/combobox.html"
+
+    def lookups(self, request, model_admin):
+        return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(user_roles__business_area=self.value())
+        return queryset
+
+
 @admin.register(account_models.Partner)
 class PartnerAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_filter = ("is_un",)
@@ -329,6 +320,7 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
     list_filter = (
         ("partner", AutoCompleteFilter),
+        BusinessAreaFilter,
         "is_staff",
         HasKoboAccount,
         "is_superuser",
@@ -396,6 +388,9 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     )
     inlines = (UserRoleInline,)
     actions = ["create_kobo_user_qs", "add_business_area_role"]
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
     def get_fields(self, request, obj=None):
         return ["last_name", "first_name", "email", "partner", "job_title"]
@@ -406,9 +401,14 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         return [(None, {"fields": self.get_fields(request, obj)})]
 
     @button()
-    def inspect(self, request, pk):
+    def linked_objects(self, request, pk):
+        ignored = config.IGNORED_USER_LINKED_OBJECTS.split(",")
         context = self.get_common_context(request, pk, title="Inspect")
-        context["reverse"] = [f for f in self.model._meta.get_fields() if f.auto_created and not f.concrete]
+        reverse = []
+        for f in self.model._meta.get_fields():
+            if f.auto_created and not f.concrete and not f.name in ignored:
+                reverse.append(f)
+        context["reverse"] = reverse
         return TemplateResponse(request, "admin/account/user/inspect.html", context)
 
     def kobo_user(self, obj):
@@ -476,9 +476,11 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     def get_actions(self, request):
         actions = super(UserAdmin, self).get_actions(request)
         if not request.user.has_perm("account.can_create_kobo_user"):
-            del actions["_create_kobo_user_qs"]
+            if "create_kobo_user_qs" in actions:
+                del actions["create_kobo_user_qs"]
         if not request.user.has_perm("account.add_userrole"):
-            del actions["add_business_area_role"]
+            if "add_business_area_role" in actions:
+                del actions["add_business_area_role"]
         return actions
 
     def add_business_area_role(self, request, queryset):
@@ -645,11 +647,14 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
                                     email=email, partner=partner, defaults={"username": username}
                                 )
                                 if isnew:
-                                    u.user_roles.create(business_area=business_area, role=role)
+                                    ur = u.user_roles.create(business_area=business_area, role=role)
+                                    self.log_addition(request, u, "User imported by CSV")
+                                    self.log_addition(request, ur, "User Role added")
                                 else:  # check role validity
                                     try:
                                         IncompatibleRoles.objects.validate_user_role(u, business_area, role)
                                         u.user_roles.get_or_create(business_area=business_area, role=role)
+                                        self.log_addition(request, ur, "User Role added")
                                     except ValidationError as e:
                                         self.message_user(request, f"Error on {u}: {e}", messages.ERROR)
 
@@ -714,14 +719,22 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
     def _sync_ad_data(self, user):
         ms_graph = MicrosoftGraphAPI()
         if user.ad_uuid:
-            filters = {"uuid": user.ad_uuid}
+            filters = [{"uuid": user.ad_uuid}, {"email": user.email}]
         else:
-            filters = {"email": user.email}
-        user_data = ms_graph.get_user_data(**filters)
-        user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-        for field, value in user_args.items():
-            setattr(user, field, value or "")
-        user.save()
+            filters = [{"email": user.email}]
+
+        for _filter in filters:
+            try:
+                user_data = ms_graph.get_user_data(**_filter)
+                user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+                for field, value in user_args.items():
+                    setattr(user, field, value or "")
+                user.save()
+                break
+            except Http404:
+                pass
+        else:
+            raise Http404
 
     @button(label="Sync", permission="account.can_sync_with_ad")
     def sync_multi(self, request):
@@ -885,6 +898,24 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         ctx["matrix2"] = matrix2
         return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
+    def _perms(self, request, object_id) -> set:
+        return set(self.get_object(request, object_id).permissions or [])
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        if object_id:
+            self.existing_perms = self._perms(request, object_id)
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def construct_change_message(self, request, form, formsets, add=False):
+        change_message = construct_change_message(form, formsets, add)
+        if not add and "permissions" in form.changed_data:
+            new_perms = self._perms(request, form.instance.id)
+            change_message[0]["changed"]["permissions"] = {
+                "added": sorted(new_perms.difference(self.existing_perms)),
+                "removed": sorted(self.existing_perms.difference(new_perms)),
+            }
+        return change_message
+
 
 @admin.register(account_models.UserRole)
 class UserRoleAdmin(HOPEModelAdminBase):
@@ -926,13 +957,12 @@ class IncompatibleRolesAdmin(HOPEModelAdminBase):
 
 
 from django.contrib.admin import site
-from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.models import Group
 
-site.unregister(Group)
+from smart_admin.smart_auth.admin import GroupAdmin
 
 
-@admin.register(Group)
+@smart_register(Group)
 class GroupAdmin(ExtraUrlMixin, _GroupAdmin):
     @button(permission=lambda request, group: request.user.is_superuser)
     def import_fixture(self, request):
@@ -940,7 +970,31 @@ class GroupAdmin(ExtraUrlMixin, _GroupAdmin):
 
         return _import_fixture(self, request)
 
+    def _perms(self, request, object_id) -> set:
+        return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
+
     @button()
-    def show_members(self, request, pk):
-        ctx = self.get_common_context(request, pk)
-        return TemplateResponse(request, "admin/account/group/members.html", ctx)
+    def users(self, request, pk):
+        User = get_user_model()
+        context = self.get_common_context(request, pk, aeu_groups=["1"])
+        group = context["original"]
+        users = User.objects.filter(groups=group).distinct()
+        context["title"] = _('Users in group "%s"') % group.name
+        context["user_opts"] = User._meta
+        context["data"] = users
+        return render(request, "admin/account/group/members.html", context)
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        if object_id:
+            self.existing_perms = self._perms(request, object_id)
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def construct_change_message(self, request, form, formsets, add=False):
+        change_message = construct_change_message(form, formsets, add)
+        if not add and "permissions" in form.changed_data:
+            new_perms = self._perms(request, form.instance.id)
+            change_message[0]["changed"]["permissions"] = {
+                "added": sorted(new_perms.difference(self.existing_perms)),
+                "removed": sorted(self.existing_perms.difference(new_perms)),
+            }
+        return change_message

@@ -37,12 +37,11 @@ log = logging.getLogger(__name__)
 @dataclass
 class Thresholds:
     # use 0 to check django-constance values are loaded
-    DEDUPLICATION_BATCH_DUPLICATE_SCORE: float = 0.0
+    DEDUPLICATION_DUPLICATE_SCORE: float = 0.0
+    DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE: int = 0
     DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE: int = 0
     DEDUPLICATION_BATCH_DUPLICATES_ALLOWED: int = 0
 
-    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE: float = 0.0
-    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE: int = 0
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE: int = 0
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED: int = 0
 
@@ -364,7 +363,7 @@ class DeduplicateTask:
             elif document == IndividualDocument:
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
-                results_core_data["proximity_to_score"] = score - cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
+                results_core_data["proximity_to_score"] = score - cls.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE
                 results_data["possible_duplicates"].append(results_core_data)
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])
@@ -452,7 +451,7 @@ class DeduplicateTask:
         query_dict = cls._prepare_query_dict(
             individual,
             fields,
-            cls.thresholds.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
+            cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
         )
         # noinspection PyTypeChecker
         query_dict["query"]["bool"]["filter"] = [
@@ -460,7 +459,7 @@ class DeduplicateTask:
         ]
         return cls._get_duplicates_tuple(
             query_dict,
-            cls.thresholds.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
+            cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
             ImportedIndividualDocument,
             individual,
         )
@@ -525,14 +524,14 @@ class DeduplicateTask:
         query_dict = cls._prepare_query_dict(
             individual,
             fields,
-            cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE,
+            cls.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE,
         )
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"business_area": cls.business_area.slug}},
         ]
         return cls._get_duplicates_tuple(
             query_dict,
-            cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE,
+            cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE,
             IndividualDocument,
             individual,
         )
