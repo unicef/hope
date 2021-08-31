@@ -1,9 +1,4 @@
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid,
-} from '@material-ui/core';
+import { Box, Button, FormHelperText, Grid } from '@material-ui/core';
 import { Field, Formik } from 'formik';
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -238,7 +233,7 @@ export function CreateGrievancePage(): React.ReactElement {
               }
             >
               <Box display='flex' alignContent='center'>
-                <Box mr={1}>
+                <Box mr={3}>
                   <Button
                     component={Link}
                     to={`/${businessArea}/grievance-and-feedback`}
