@@ -148,6 +148,18 @@ export const GrievanceTicket = gql`
       needsAdjudicationTicketDetails {
         id
         hasDuplicatedDocument
+        extraData {
+          goldenRecords {
+            hitId
+            proximityToScore
+            score
+          }
+          possibleDuplicate {
+            hitId
+            proximityToScore
+            score
+          }
+        }
         goldenRecordsIndividual {
           id
           unicefId
