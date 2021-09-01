@@ -27,12 +27,17 @@ from hct_mis_api.apps.household.models import (
     Agency,
     Document,
     DocumentType,
+    EntitlementCard,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, LastSyncDateResetMixin
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    LinkedObjectMixin,
+)
 
 
 @admin.register(Agency)
@@ -53,7 +58,9 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Household)
-class HouseholdAdmin(LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase):
+class HouseholdAdmin(
+    LinkedObjectMixin, LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
+):
     advanced_filter_fields = (
         "name",
         "country",
@@ -204,7 +211,9 @@ class IndividualRoleInHouseholdInline(TabularInline):
 
 
 @admin.register(Individual)
-class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class IndividualAdmin(
+    LinkedObjectMixin, LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase
+):
     list_display = (
         "unicef_id",
         "given_name",
@@ -308,4 +317,9 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
+    pass
+
+
+@admin.register(EntitlementCard)
+class HouseholdAdmin(HOPEModelAdminBase):
     pass

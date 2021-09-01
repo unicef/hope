@@ -3,18 +3,18 @@
 {% block content %}
 
     {% for e in reverse %}
-        {% get_related original e as related %}
-        <div>
-            <h3>{{ related.related_name }} ({{ related.field_name }})</h3>
+{#        {% get_related original e as related %}#}
+        <fieldset class="module">
+            <h2 class="">{{ e.related_name }} ({{ e.field_name }})</h2>
             <table>
-                {% for row in related.data %}
+                {% for row in e.data %}
                     <tr>
                         <td><a href="{{ row|get_admin_link }}">{{ row.pk }}</a></td>
                         <td>{{ row }}</td>
                     </tr>
                 {% endfor %}
             </table>
-        </div>
+        </fieldset>
     {% endfor %}
 {% endblock content %}
 {% block footer %}

@@ -47,7 +47,7 @@ from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, User, Us
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, LinkedObjectMixin
 
 logger = logging.getLogger(__name__)
 
@@ -316,7 +316,7 @@ class PartnerAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
 
 @admin.register(account_models.User)
-class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
+class UserAdmin(LinkedObjectMixin, AdminActionPermMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
     list_filter = (
         ("partner", AutoCompleteFilter),
@@ -399,17 +399,6 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         if request.user.is_superuser:
             return super().get_fieldsets(request, obj)
         return [(None, {"fields": self.get_fields(request, obj)})]
-
-    @button()
-    def linked_objects(self, request, pk):
-        ignored = config.IGNORED_USER_LINKED_OBJECTS.split(",")
-        context = self.get_common_context(request, pk, title="Inspect")
-        reverse = []
-        for f in self.model._meta.get_fields():
-            if f.auto_created and not f.concrete and not f.name in ignored:
-                reverse.append(f)
-        context["reverse"] = reverse
-        return TemplateResponse(request, "admin/account/user/inspect.html", context)
 
     def kobo_user(self, obj):
         return obj.custom_fields.get("kobo_username")

@@ -7,20 +7,25 @@ register = template.Library()
 
 
 @register.simple_tag()
-def get_related(user, field):
-    related = []
+def get_related(context, field):
     info = {
         "to": field.model._meta.model_name,
         "field_name": field.name,
-        # 'related_name': field.related_name,
-        # 'related_query_name': field.related_query_name,
     }
 
     if field.related_name:
-        related = getattr(user, field.related_name).all()
+        related_attr = getattr(context, field.related_name)
     else:
-        related = getattr(user, f"{field.name}_set").all()
-    info["related_name"] = related.model._meta.verbose_name
+        related_attr = getattr(context, f"{field.name}_set")
+
+    if hasattr(related_attr, "all") and callable(related_attr.all):
+        related = related_attr.all()
+        opts = related_attr.model._meta
+        info["related_name"] = opts.verbose_name
+    else:
+        opts = related_attr._meta
+        related = [related_attr]
+        info["related_name"] = opts.verbose_name
     info["data"] = related
 
     return info
