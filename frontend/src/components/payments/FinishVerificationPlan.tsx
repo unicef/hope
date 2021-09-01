@@ -1,22 +1,23 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import {
+  Box,
   Button,
   DialogContent,
   DialogTitle,
-  Box,
   Typography,
 } from '@material-ui/core';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useSnackbar } from '../../hooks/useSnackBar';
+import { getPercentage } from '../../utils/utils';
 import {
-  useFinishCashPlanPaymentVerificationMutation,
   useCashPlanQuery,
+  useFinishCashPlanPaymentVerificationMutation,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
-import { getPercentage } from '../../utils/utils';
 
 export interface Props {
   cashPlanVerificationId: string;
@@ -39,6 +40,7 @@ const DialogContainer = styled.div`
 export function FinishVerificationPlan({
   cashPlanVerificationId,
 }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useFinishCashPlanPaymentVerificationMutation();
@@ -62,10 +64,10 @@ export function FinishVerificationPlan({
       variables: { cashPlanVerificationId },
     });
     if (errors) {
-      showMessage('Error while submitting');
+      showMessage(t('Error while submitting'));
       return;
     }
-    showMessage('Verification plan has been finished');
+    showMessage(t('Verification plan has been finished'));
   };
 
   const beneficiariesPercent = (): string => {
@@ -90,7 +92,9 @@ export function FinishVerificationPlan({
         ? 1
         : 0;
       return (
-        pendingTicketsCount + notReceivedTicketsCount + receivedWithProblemsTicketsCount
+        pendingTicketsCount +
+        notReceivedTicketsCount +
+        receivedWithProblemsTicketsCount
       );
     }
     return null;
@@ -105,7 +109,7 @@ export function FinishVerificationPlan({
           onClick={() => setFinishDialogOpen(true)}
           data-cy='button-ed-plan'
         >
-          Finish
+          {t('Finish')}
         </Button>
       </Box>
       <Dialog
@@ -116,7 +120,7 @@ export function FinishVerificationPlan({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            Finish Verification Plan
+            {t('Finish Verification Plan')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
@@ -124,20 +128,22 @@ export function FinishVerificationPlan({
             <Box>
               {beneficiariesPercent() && (
                 <Typography variant='body2' style={{ marginTop: '20px' }}>
-                  Only {beneficiariesPercent()} of the beneficiaries have
-                  responded to this payment verification.
+                  {t('Only')} {beneficiariesPercent()}{' '}
+                  {t(
+                    'of the beneficiaries have responded to this payment verification.',
+                  )}
                 </Typography>
               )}
               <Typography variant='body2'>
-                Are you sure that you want to finish?
+                {t('Are you sure that you want to finish?')}
               </Typography>
               {grievanceTickets() ? (
                 <Typography
                   style={{ marginTop: '20px', marginBottom: '20px' }}
                   variant='body2'
                 >
-                  Closing this verification will generate {grievanceTickets()}{' '}
-                  grievance tickets.
+                  {t('Closing this verification will generate')}{' '}
+                  {grievanceTickets()} {t('grievance tickets')}.
                 </Typography>
               ) : null}
             </Box>
@@ -145,7 +151,9 @@ export function FinishVerificationPlan({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setFinishDialogOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setFinishDialogOpen(false)}>
+              {t('CANCEL')}
+            </Button>
             <Button
               type='submit'
               color='primary'
@@ -153,7 +161,7 @@ export function FinishVerificationPlan({
               onClick={() => finish()}
               data-cy='button-submit'
             >
-              FINISH
+              {t('FINISH')}
             </Button>
           </DialogActions>
         </DialogFooter>

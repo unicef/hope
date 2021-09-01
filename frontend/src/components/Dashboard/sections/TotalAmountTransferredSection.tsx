@@ -1,6 +1,9 @@
 import { Grid } from '@material-ui/core';
-import React from 'react';
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { formatCurrencyWithSymbol } from '../../../utils/utils';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 import {
   CardAmount,
   CardTextLight,
@@ -8,8 +11,6 @@ import {
   DashboardCard,
   IconContainer,
 } from '../DashboardCard';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { formatCurrencyWithSymbol } from '../../../utils/utils';
 
 interface TotalAmountTransferredSectionProps {
   data: AllChartsQuery['sectionTotalTransferred'];
@@ -17,13 +18,14 @@ interface TotalAmountTransferredSectionProps {
 export const TotalAmountTransferredSection = ({
   data,
 }: TotalAmountTransferredSectionProps): React.ReactElement => {
+  const { t } = useTranslation();
   if (!data) return null;
   return (
     <DashboardCard color='#1E877D'>
       <Grid container justify='space-between' alignItems='center'>
         <Grid item>
-          <CardTitle>TOTAL AMOUNT TRANSFERRED</CardTitle>
-          <CardTextLight>IN USD</CardTextLight>
+          <CardTitle>{t('TOTAL AMOUNT TRANSFERRED')}</CardTitle>
+          <CardTextLight>{t('IN USD')}</CardTextLight>
         </Grid>
         <Grid item>
           <Grid container spacing={3} alignItems='center'>

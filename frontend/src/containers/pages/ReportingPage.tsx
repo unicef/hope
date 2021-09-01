@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { NewReportForm } from '../../components/Reporting/NewReportForm';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
+import { usePermissions } from '../../hooks/usePermissions';
+import { useReportChoiceDataQuery } from '../../__generated__/graphql';
 import { ReportingFilters } from '../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../tables/ReportingTable/ReportingTable';
-import { NewReportForm } from '../../components/Reporting/NewReportForm';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { useReportChoiceDataQuery } from '../../__generated__/graphql';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { PermissionDenied } from '../../components/PermissionDenied';
 
 export const ReportingPage = (): React.ReactElement => {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
@@ -36,7 +38,7 @@ export const ReportingPage = (): React.ReactElement => {
 
   return (
     <>
-      <PageHeader title='Reporting'>
+      <PageHeader title={t('Reporting')}>
         <NewReportForm />
       </PageHeader>
       <ReportingFilters

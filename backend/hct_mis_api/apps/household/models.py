@@ -1,20 +1,17 @@
 import logging
 import re
-from datetime import date, datetime, timedelta
-from collections import defaultdict
-from datetime import date
+from datetime import date, datetime
 
-from dateutil.relativedelta import relativedelta
-from django.contrib.gis.db.models import PointField, UniqueConstraint, Q, Count
-from django.contrib.postgres.fields import JSONField, CICharField
-from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
+from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.db.models import F, Sum
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -32,7 +29,6 @@ from hct_mis_api.apps.utils.models import (
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
-from dateutil.relativedelta import relativedelta
 
 BLANK = ""
 IDP = "IDP"
@@ -247,6 +243,14 @@ DISABILITY_CHOICES = (
         NOT_DISABLED,
         "not disabled",
     ),
+)
+SANCTION_LIST_POSSIBLE_MATCH = "SANCTION_LIST_POSSIBLE_MATCH"
+SANCTION_LIST_CONFIRMED_MATCH = "SANCTION_LIST_CONFIRMED_MATCH"
+INDIVIDUAL_FLAGS_CHOICES = (
+    (NEEDS_ADJUDICATION, "Needs adjudication"),
+    (DUPLICATE, "Duplicate"),
+    (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
+    (SANCTION_LIST_CONFIRMED_MATCH, "Sanction list match"),
 )
 
 logger = logging.getLogger(__name__)
@@ -503,231 +507,75 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         date_12_years_ago = datetime.now() - relativedelta(years=+12)
         date_18_years_ago = datetime.now() - relativedelta(years=+18)
         date_60_years_ago = datetime.now() - relativedelta(years=+60)
+
+        is_beneficiary = ~Q(relationship=NON_BENEFICIARY)
+        active_beneficiary = Q(withdrawn=False, duplicate=False)
+        female_beneficiary = Q(Q(sex=FEMALE) & active_beneficiary & is_beneficiary)
+        male_beneficiary = Q(Q(sex=MALE) & active_beneficiary & is_beneficiary)
+        disabled_disability = Q(disability=DISABLED)
+        female_disability_beneficiary = Q(disabled_disability & female_beneficiary)
+        male_disability_beneficiary = Q(disabled_disability & male_beneficiary)
+
+        to_6_years = Q(birth_date__gt=date_6_years_ago)
+        from_6_to_12_years = Q(birth_date__lte=date_6_years_ago, birth_date__gt=date_12_years_ago)
+        from_12_to_18_years = Q(birth_date__lte=date_12_years_ago, birth_date__gt=date_18_years_ago)
+        from_18_to_60_years = Q(birth_date__lte=date_18_years_ago, birth_date__gt=date_60_years_ago)
+        from_60_years = Q(birth_date__lte=date_60_years_ago)
+
         age_groups = self.individuals.aggregate(
-            female_age_group_0_5_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(withdrawn=False, duplicate=False, birth_date__gt=date_6_years_ago, sex=FEMALE),
-            ),
-            female_age_group_6_11_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_6_years_ago,
-                    birth_date__gt=date_12_years_ago,
-                    sex=FEMALE,
-                ),
-            ),
-            female_age_group_12_17_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_12_years_ago,
-                    birth_date__gt=date_18_years_ago,
-                    sex=FEMALE,
-                ),
-            ),
-            female_age_group_18_59_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(birth_date__lte=date_18_years_ago, birth_date__gt=date_60_years_ago, sex=FEMALE),
-            ),
-            female_age_group_60_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(withdrawn=False, duplicate=False, birth_date__lte=date_60_years_ago, sex=FEMALE),
-            ),
-            male_age_group_0_5_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(withdrawn=False, duplicate=False, birth_date__gt=date_6_years_ago, sex=MALE),
-            ),
-            male_age_group_6_11_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_6_years_ago,
-                    birth_date__gt=date_12_years_ago,
-                    sex=MALE,
-                ),
-            ),
-            male_age_group_12_17_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_12_years_ago,
-                    birth_date__gt=date_18_years_ago,
-                    sex=MALE,
-                ),
-            ),
-            male_age_group_18_59_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_18_years_ago,
-                    birth_date__gt=date_60_years_ago,
-                    sex=MALE,
-                ),
-            ),
-            male_age_group_60_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(withdrawn=False, duplicate=False, birth_date__lte=date_60_years_ago, sex=MALE),
-            ),
+            female_age_group_0_5_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_6_years)),
+            female_age_group_6_11_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_6_to_12_years)),
+            female_age_group_12_17_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_12_to_18_years)),
+            female_age_group_18_59_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_18_to_60_years)),
+            female_age_group_60_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_60_years)),
+            male_age_group_0_5_count=Count("id", distinct=True, filter=Q(male_beneficiary & to_6_years)),
+            male_age_group_6_11_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_6_to_12_years)),
+            male_age_group_12_17_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_12_to_18_years)),
+            male_age_group_18_59_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_18_to_60_years)),
+            male_age_group_60_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_60_years)),
             female_age_group_0_5_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False, duplicate=False, birth_date__gt=date_6_years_ago, sex=FEMALE, disability=True
-                ),
+                "id", distinct=True, filter=Q(female_disability_beneficiary & to_6_years)
             ),
             female_age_group_6_11_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_6_years_ago,
-                    birth_date__gt=date_12_years_ago,
-                    sex=FEMALE,
-                    disability=True,
-                ),
+                "id", distinct=True, filter=Q(female_disability_beneficiary & from_6_to_12_years)
             ),
             female_age_group_12_17_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_12_years_ago,
-                    birth_date__gt=date_18_years_ago,
-                    sex=FEMALE,
-                    disability=True,
-                ),
+                "id", distinct=True, filter=Q(female_disability_beneficiary & from_12_to_18_years)
             ),
             female_age_group_18_59_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_18_years_ago,
-                    birth_date__gt=date_60_years_ago,
-                    sex=FEMALE,
-                    disability=True,
-                ),
+                "id", distinct=True, filter=Q(female_disability_beneficiary & from_18_to_60_years)
             ),
             female_age_group_60_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False, duplicate=False, birth_date__lte=date_60_years_ago, sex=FEMALE, disability=True
-                ),
+                "id", distinct=True, filter=Q(female_disability_beneficiary & from_60_years)
             ),
             male_age_group_0_5_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(withdrawn=False, duplicate=False, birth_date__gt=date_6_years_ago, sex=MALE, disability=True),
+                "id", distinct=True, filter=Q(male_disability_beneficiary & to_6_years)
             ),
             male_age_group_6_11_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_6_years_ago,
-                    birth_date__gt=date_12_years_ago,
-                    sex=MALE,
-                    disability=True,
-                ),
+                "id", distinct=True, filter=Q(male_disability_beneficiary & from_6_to_12_years)
             ),
             male_age_group_12_17_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_12_years_ago,
-                    birth_date__gt=date_18_years_ago,
-                    sex=MALE,
-                    disability=True,
-                ),
+                "id", distinct=True, filter=Q(male_disability_beneficiary & from_12_to_18_years)
             ),
             male_age_group_18_59_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                    birth_date__lte=date_18_years_ago,
-                    birth_date__gt=date_60_years_ago,
-                    sex=MALE,
-                    disability=True,
-                ),
+                "id", distinct=True, filter=Q(male_disability_beneficiary & from_18_to_60_years)
             ),
             male_age_group_60_disabled_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False, duplicate=False, birth_date__lte=date_60_years_ago, sex=MALE, disability=True
-                ),
+                "id", distinct=True, filter=Q(male_disability_beneficiary & from_60_years)
             ),
-            size=Count(
-                "id",
-                distinct=True,
-                filter=Q(
-                    withdrawn=False,
-                    duplicate=False,
-                ),
-            ),
-            pregnant_count=Count(
-                "id",
-                distinct=True,
-                filter=Q(withdrawn=False, pregnant=True),
-            ),
+            size=Count("id", distinct=True, filter=Q(is_beneficiary & active_beneficiary)),
+            pregnant_count=Count("id", distinct=True, filter=Q(is_beneficiary & active_beneficiary & Q(pregnant=True))),
         )
-        self.female_age_group_0_5_disabled_count = age_groups.get("female_age_group_0_5_disabled_count")
-        self.female_age_group_6_11_disabled_count = age_groups.get("female_age_group_6_11_disabled_count")
-        self.female_age_group_12_17_disabled_count = age_groups.get("female_age_group_12_17_disabled_count")
-        self.female_age_group_18_59_disabled_count = age_groups.get("female_age_group_18_59_disabled_count")
-        self.female_age_group_60_disabled_count = age_groups.get("female_age_group_60_disabled_count")
 
-        self.male_age_group_0_5_disabled_count = age_groups.get("male_age_group_0_5_disabled_count")
-        self.male_age_group_6_11_disabled_count = age_groups.get("male_age_group_6_11_disabled_count")
-        self.male_age_group_12_17_disabled_count = age_groups.get("male_age_group_12_17_disabled_count")
-        self.male_age_group_18_59_disabled_count = age_groups.get("male_age_group_18_59_disabled_count")
-        self.male_age_group_60_disabled_count = age_groups.get("male_age_group_60_disabled_count")
+        for key, value in age_groups.items():
+            setattr(self, key, value)
 
-        self.female_age_group_0_5_count = age_groups.get("female_age_group_0_5_count")
-        self.female_age_group_6_11_count = age_groups.get("female_age_group_6_11_count")
-        self.female_age_group_12_17_count = age_groups.get("female_age_group_12_17_count")
-        self.female_age_group_18_59_count = age_groups.get("female_age_group_18_59_count")
-        self.female_age_group_60_count = age_groups.get("female_age_group_60_count")
-
-        self.male_age_group_0_5_count = age_groups.get("male_age_group_0_5_count")
-        self.male_age_group_6_11_count = age_groups.get("male_age_group_6_11_count")
-        self.male_age_group_12_17_count = age_groups.get("male_age_group_12_17_count")
-        self.male_age_group_18_59_count = age_groups.get("male_age_group_18_59_count")
-        self.male_age_group_60_count = age_groups.get("male_age_group_60_count")
-        self.pregnant_count = age_groups.get("pregnant_count")
-        self.size = age_groups.get("size")
         self.child_hoh = False
         self.fchild_hoh = False
         if self.head_of_household.age < 18:
             if self.head_of_household.sex == FEMALE:
                 self.fchild_hoh = True
-            else:
-                self.child_hoh = True
+            self.child_hoh = True
         self.save()
 
 
@@ -737,7 +585,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class DocumentType(TimeStampedUUIDModel):
-    country = CountryField()
+    country = CountryField(default="U")
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
@@ -793,6 +641,7 @@ class Agency(models.Model):
     country = CountryField()
 
     class Meta:
+        verbose_name_plural = "Agencies"
         constraints = [
             UniqueConstraint(
                 fields=["type", "country"],
@@ -874,6 +723,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             "deduplication_batch_results",
             "imported_individual_id",
             "sanction_list_possible_match",
+            "sanction_list_confirmed_match",
             "sanction_list_last_check",
             "pregnant",
             "observed_disability",
@@ -1056,6 +906,12 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     def count_all_roles(self):
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
+
+    @cached_property
+    def parents(self):
+        if self.household:
+            return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
+        return []
 
 
 class EntitlementCard(TimeStampedUUIDModel):

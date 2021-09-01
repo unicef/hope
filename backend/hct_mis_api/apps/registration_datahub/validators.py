@@ -9,34 +9,41 @@ from pathlib import Path
 from typing import List, Union
 from zipfile import BadZipfile
 
+from django.core import validators as django_core_validators
+
 import openpyxl
 import phonenumbers
 import pycountry
 from dateutil import parser
-from django.core import validators as django_core_validators
 from openpyxl import load_workbook
 
 from hct_mis_api.apps.core.core_fields_attributes import (
     COLLECTORS_FIELDS,
     CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
+    KOBO_ONLY_HOUSEHOLD_FIELDS,
+    KOBO_ONLY_INDIVIDUAL_FIELDS,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
     core_fields_to_separated_dict,
-    KOBO_ONLY_INDIVIDUAL_FIELDS,
-    KOBO_ONLY_HOUSEHOLD_FIELDS,
 )
-from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
+from hct_mis_api.apps.core.kobo.common import (
+    KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
+    get_field_name,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
+    SheetImageLoader,
     get_combined_attributes,
     rename_dict_keys,
     serialize_flex_attributes,
-    SheetImageLoader,
 )
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
-from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
+from hct_mis_api.apps.registration_datahub.tasks.utils import (
+    collectors_str_ids_to_list,
+    get_submission_metadata,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -784,6 +791,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             except BadZipfile:
                 return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
             errors.extend(self.validate_file_with_template(wb))
+            errors.extend(self.validate_collectors_size(wb))
             errors.extend(self.validate_collectors(wb))
             individuals_sheet = wb["Individuals"]
             household_sheet = wb["Households"]
@@ -879,6 +887,56 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:
             logger.exception(e)
             raise
+
+    def validate_collectors_size(self, wb):
+        try:
+            errors = []
+
+            individuals_sheet = wb["Individuals"]
+            households_sheet = wb["Households"]
+
+            household_count = self._count_households(households_sheet)
+            individuals_count = self._count_individuals(individuals_sheet)
+
+            if household_count == 0:
+                errors.append(
+                    {
+                        "row_number": 1,
+                        "header": "Households",
+                        "message": "There aren't households in the file.",
+                    }
+                )
+
+            if individuals_count == 0:
+                errors.append(
+                    {
+                        "row_number": 1,
+                        "header": "Individuals",
+                        "message": "There aren't individuals in the file.",
+                    }
+                )
+
+            return errors
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+    def _count_individuals(self, individuals_sheet):
+        first_row = individuals_sheet[1]
+        individuals_count = 0
+        for cell in first_row:
+            if cell.value == "full_name_i_c":
+                for c in individuals_sheet[cell.column_letter][2:]:
+                    if c.value:
+                        individuals_count += 1
+        return individuals_count
+
+    def _count_households(self, households_sheet):
+        household_count = 0
+        for cell in households_sheet["A"][2:]:
+            if cell.value:
+                household_count += 1
+        return household_count
 
 
 class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):

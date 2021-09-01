@@ -1,4 +1,4 @@
-{% extends "admin/base.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
 {% block extrahead %}
     <style>
             table.messagelist tr.warning {
@@ -54,12 +54,12 @@
             <th></th><th>Name</th><th>Unicef ID</th>
         <tr>
             <td>Primary</td>
-            <td>{{ primary.individual.full_name }}</td>
+            <td><a href="{% url "admin:household_individual_change"  primary.individual.pk %}">{{ primary.individual.full_name }}</a></td>
             <td>{{ primary.individual.unicef_id }}</td>
         </tr>
         <tr>
             <td>Alternate</td>
-            <td>{{ alternate.individual.full_name }}</td>
+            <td><a href="{% url "admin:household_individual_change" alternate.individual.pk %}">{{ alternate.individual.full_name }}</a></td>
             <td>{{ alternate.individual.unicef_id }}</td>
         </tr>
         {#    </table>#}

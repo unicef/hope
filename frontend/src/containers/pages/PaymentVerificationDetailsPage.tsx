@@ -1,38 +1,39 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import { Box, Grid, Typography } from '@material-ui/core';
+import React, { useState } from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { PageHeader } from '../../components/PageHeader';
-import { LabelizedField } from '../../components/LabelizedField';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import styled from 'styled-components';
+import { BlackLink } from '../../components/BlackLink';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { EditVerificationPlan } from '../../components/payments/EditVerificationPlan';
-import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
-import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
-import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
-import {
-  useCashPlanQuery,
-  useCashPlanVerificationSamplingChoicesQuery,
-} from '../../__generated__/graphql';
+import { LabelizedField } from '../../components/LabelizedField';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { PageHeader } from '../../components/PageHeader';
+import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
+import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
+import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
+import { EditVerificationPlan } from '../../components/payments/EditVerificationPlan';
+import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { StatusBox } from '../../components/StatusBox';
+import { UniversalMoment } from '../../components/UniversalMoment';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useDebounce } from '../../hooks/useDebounce';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
   choicesToDict,
   countPercentage,
   isPermissionDeniedError,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
-import { StatusBox } from '../../components/StatusBox';
+import {
+  useCashPlanQuery,
+  useCashPlanVerificationSamplingChoicesQuery,
+} from '../../__generated__/graphql';
+import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
-import { useDebounce } from '../../hooks/useDebounce';
 import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
-import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
-import { UniversalMoment } from '../../components/UniversalMoment';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { BlackLink } from '../../components/BlackLink';
 
 const Container = styled.div`
   display: flex;
@@ -83,6 +84,7 @@ const StatusContainer = styled.div`
 `;
 
 export function PaymentVerificationDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
@@ -159,12 +161,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const toolbar = (
     <PageHeader
       title={
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={`/${businessArea}/cashplans/${cashPlan.id}`}
-        >
-          Cash Plan {cashPlan.caId}
+        <BlackLink to={`/${businessArea}/cashplans/${cashPlan.id}`}>
+          {t('Cash Plan')} {cashPlan.caId}
         </BlackLink>
       }
       breadCrumbs={
@@ -217,17 +215,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         <Grid container>
           <Grid item xs={9}>
             <Title>
-              <Typography variant='h6'>Cash Plan Details</Typography>
+              <Typography variant='h6'>{t('Cash Plan Details')}</Typography>
             </Title>
             <Grid container>
               {[
-                { label: 'PROGRAMME NAME', value: cashPlan.program.name },
+                { label: t('PROGRAMME NAME'), value: cashPlan.program.name },
                 {
-                  label: 'PROGRAMME ID',
+                  label: t('PROGRAMME ID'),
                   value: (
                     <BlackLink
-                      target='_blank'
-                      rel='noopener noreferrer'
                       to={`/${businessArea}/programs/${cashPlan.program.id}`}
                     >
                       {cashPlan.program?.caId}
@@ -235,17 +231,17 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   ),
                 },
                 {
-                  label: 'PAYMENT RECORDS',
+                  label: t('PAYMENT RECORDS'),
                   value: cashPlan.paymentRecords.totalCount,
                 },
                 {
-                  label: 'START DATE',
+                  label: t('START DATE'),
                   value: (
                     <UniversalMoment>{cashPlan.startDate}</UniversalMoment>
                   ),
                 },
                 {
-                  label: 'END DATE',
+                  label: t('END DATE'),
                   value: <UniversalMoment>{cashPlan.endDate}</UniversalMoment>,
                 },
               ].map((el) => (
@@ -260,15 +256,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           <Grid item xs={3}>
             <BorderLeftBox>
               <Title>
-                <Typography variant='h6'>Bank reconciliation</Typography>
+                <Typography variant='h6'>{t('Bank reconciliation')}</Typography>
               </Title>
               <Grid container>
                 <Grid item xs={6}>
                   <Grid container direction='column'>
-                    <LabelizedField label='SUCCESSFUL'>
+                    <LabelizedField label={t('SUCCESSFUL')}>
                       <p>{bankReconciliationSuccessPercentage}%</p>
                     </LabelizedField>
-                    <LabelizedField label='ERRONEUS'>
+                    <LabelizedField label={t('ERRONEUS')}>
                       <p>{bankReconciliationErrorPercentage}%</p>
                     </LabelizedField>
                   </Grid>
@@ -286,7 +282,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         },
                       }}
                       data={{
-                        labels: ['Successful', 'Erroneus'],
+                        labels: [t('SUCCESSFUL'), t('ERRONEUS')],
                         datasets: [
                           {
                             data: [
@@ -309,13 +305,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       {cashPlan.verifications && cashPlan.verifications.edges.length ? (
         <Container>
           <Title>
-            <Typography variant='h6'>Verification Plan Details</Typography>
+            <Typography variant='h6'>
+              {t('Verification Plan Details')}
+            </Typography>
           </Title>
           <Grid container>
             <Grid item xs={11}>
               <Grid container>
                 <Grid item xs={3}>
-                  <LabelizedField label='STATUS'>
+                  <LabelizedField label={t('STATUS')}>
                     <StatusContainer>
                       <StatusBox
                         status={verificationPlan.status}
@@ -326,32 +324,35 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 </Grid>
                 {[
                   {
-                    label: 'SAMPLING',
+                    label: t('SAMPLING'),
                     value: samplingChoicesDict[verificationPlan.sampling],
                   },
                   {
-                    label: 'RESPONDED',
+                    label: t('RESPONDED'),
                     value: verificationPlan.respondedCount,
                   },
                   {
-                    label: 'RECEIVED WITH ISSUES',
+                    label: t('RECEIVED WITH ISSUES'),
                     value: verificationPlan.receivedWithProblemsCount,
                   },
                   {
-                    label: 'VERIFICATION METHOD',
+                    label: t('VERIFICATION METHOD'),
                     value: verificationPlan.verificationMethod,
                   },
-                  { label: 'SAMPLE SIZE', value: verificationPlan.sampleSize },
                   {
-                    label: 'RECEIVED',
+                    label: t('SAMPLE SIZE'),
+                    value: verificationPlan.sampleSize,
+                  },
+                  {
+                    label: t('RECEIVED'),
                     value: verificationPlan.receivedCount,
                   },
                   {
-                    label: 'NOT RECEIVED',
+                    label: t('NOT RECEIVED'),
                     value: verificationPlan.notReceivedCount,
                   },
                   {
-                    label: 'ACTIVATION DATE',
+                    label: t('ACTIVATION DATE'),
                     value: (
                       <UniversalMoment>
                         {verificationPlan.activationDate}
@@ -359,7 +360,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                     ),
                   },
                   {
-                    label: 'COMPLETION DATE',
+                    label: t('COMPLETION DATE'),
                     value: (
                       <UniversalMoment>
                         {verificationPlan.completionDate}
@@ -389,10 +390,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   }}
                   data={{
                     labels: [
-                      'RECEIVED',
-                      'RECEIVED WITH ISSUES',
-                      'NOT RECEIVED',
-                      'PENDING',
+                      t('RECEIVED'),
+                      t('RECEIVED WITH ISSUES'),
+                      t('NOT RECEIVED'),
+                      t('PENDING'),
                     ],
                     datasets: [
                       {
@@ -461,13 +462,13 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       cashPlan.verificationStatus !== 'ACTIVE' &&
       cashPlan.verificationStatus !== 'FINISHED' ? (
         <BottomTitle>
-          To see more details please activate Verification Plan
+          {t('To see more details please activate Verification Plan')}
         </BottomTitle>
       ) : null}
       {!cashPlan.verifications.edges.length &&
       cashPlan.verificationStatus !== 'ACTIVE' ? (
         <BottomTitle>
-          To see more details please create Verification Plan
+          {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
       {cashPlan.verifications?.edges[0]?.node?.id &&

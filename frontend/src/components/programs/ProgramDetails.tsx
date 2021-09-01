@@ -1,17 +1,18 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import { StatusBox } from '../StatusBox';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { MiśTheme } from '../../theme';
 import { choicesToDict, programStatusToColor } from '../../utils/utils';
-import { LabelizedField } from '../LabelizedField';
 import {
   ProgrammeChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
-import { MiśTheme } from '../../theme';
-import { UniversalMoment } from '../UniversalMoment';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
+import { LabelizedField } from '../LabelizedField';
 import { OverviewContainer } from '../OverviewContainer';
+import { StatusBox } from '../StatusBox';
+import { UniversalMoment } from '../UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -46,6 +47,7 @@ export function ProgramDetails({
   program,
   choices,
 }: ProgramDetailsProps): React.ReactElement {
+  const { t } = useTranslation();
   const {
     programFrequencyOfPaymentsChoices,
     programSectorChoices,
@@ -59,12 +61,12 @@ export function ProgramDetails({
   return (
     <ContainerColumnWithBorder data-cy='program-details-container'>
       <Title>
-        <Typography variant='h6'>Programme Details</Typography>
+        <Typography variant='h6'>{t('Programme Details')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
           <Grid item xs={4}>
-            <LabelizedField label='status'>
+            <LabelizedField label={t('status')}>
               <StatusContainer>
                 <StatusBox
                   status={program.status}
@@ -75,32 +77,32 @@ export function ProgramDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='START DATE'
+              label={t('START DATE')}
               value={<UniversalMoment>{program.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='END DATE'
+              label={t('END DATE')}
               value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
 
           <Grid item xs={4}>
             <LabelizedField
-              label='Sector'
+              label={t('Sector')}
               value={programSectorChoicesDict[program.sector]}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='Scope'
+              label={t('Scope')}
               value={programScopeChoicesDict[program.scope]}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='Frequency of Payment'
+              label={t('Frequency of Payment')}
               value={
                 programFrequencyOfPaymentsChoicesDict[
                   program.frequencyOfPayments
@@ -111,28 +113,33 @@ export function ProgramDetails({
 
           <Grid item xs={4}>
             <LabelizedField
-              label='Administrative Areas of implementation'
+              label={t('Administrative Areas of implementation')}
               value={program.administrativeAreasOfImplementation}
             />
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label='Description' value={program.description} />
-          </Grid>
-          <Grid item xs={4}>
             <LabelizedField
-              label='CASH+'
-              value={program.cashPlus ? 'Yes' : 'No'}
+              label={t('Description')}
+              value={program.description}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label='Does this programme use individuals’ data for targeting or entitlement calculation?'
-              value={program.individualDataNeeded ? 'Yes' : 'No'}
+              label={t('CASH+')}
+              value={program.cashPlus ? t('Yes') : t('No')}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t(
+                'Does this programme use individuals’ data for targeting or entitlement calculation?',
+              )}
+              value={program.individualDataNeeded ? t('Yes') : t('No')}
             />
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
-          <LabelizedField label='Total Number of Households'>
+          <LabelizedField label={t('Total Number of Households')}>
             <NumberOfHouseHoldsValue>
               {program.totalNumberOfHouseholds}
             </NumberOfHouseHoldsValue>

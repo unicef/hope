@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
 import {
+  Box,
   Button,
   DialogContent,
   DialogTitle,
-  Box,
   Grid,
 } from '@material-ui/core';
+import { Field, Form, Formik } from 'formik';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Formik, Form, Field } from 'formik';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -32,12 +33,13 @@ const DialogContainer = styled.div`
 
 export interface Props {
   paymentVerificationId: string;
-  enabled:boolean;
+  enabled: boolean;
 }
 export function VerifyManual({
   paymentVerificationId,
-  enabled
+  enabled,
 }: Props): React.ReactElement {
+  const { t } = useTranslation();
   const [VerifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [
@@ -63,7 +65,7 @@ export function VerifyManual({
     }
     if (!error) {
       setVerifyManualDialogOpen(false);
-      showMessage('Payment has been verified.');
+      showMessage(t('Payment has been verified.'));
     }
   };
 
@@ -85,7 +87,7 @@ export function VerifyManual({
               data-cy='button-ed-plan'
               disabled={!enabled}
             >
-              Verify
+              {t('Verify')}
             </Button>
           </Box>
           <Dialog
@@ -95,7 +97,9 @@ export function VerifyManual({
             aria-labelledby='form-dialog-title'
           >
             <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>Verify Payment</DialogTitle>
+              <DialogTitle id='scroll-dialog-title'>
+                {t('Verify Payment')}
+              </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
@@ -106,8 +110,8 @@ export function VerifyManual({
                       label='Status'
                       style={{ flexDirection: 'row' }}
                       choices={[
-                        { value: 'RECEIVED', name: 'Received' },
-                        { value: 'NOT_RECEIVED', name: 'Not Received' },
+                        { value: 'RECEIVED', name: t('Received') },
+                        { value: 'NOT_RECEIVED', name: t('Not Received') },
                       ]}
                       component={FormikRadioGroup}
                     />
@@ -117,7 +121,7 @@ export function VerifyManual({
                       <Field
                         name='receivedAmount'
                         type='number'
-                        label='Amount Received'
+                        label={t('Amount Received')}
                         color='primary'
                         component={FormikTextField}
                       />
@@ -129,7 +133,7 @@ export function VerifyManual({
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setVerifyManualDialogOpen(false)}>
-                  CANCEL
+                  {t('CANCEL')}
                 </Button>
                 <Button
                   type='submit'
@@ -138,7 +142,7 @@ export function VerifyManual({
                   onClick={() => submit(values)}
                   data-cy='button-submit'
                 >
-                  Verify
+                  {t('Verify')}
                 </Button>
               </DialogActions>
             </DialogFooter>

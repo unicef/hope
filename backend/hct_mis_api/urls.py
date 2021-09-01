@@ -30,6 +30,7 @@ urlpatterns = [
     path("api/admin/", admin.site.urls),
     path("api/explorer/", include("explorer.urls")),
     path("api/admin/adminactions/", include("adminactions.urls")),
+    path("api/admin/advanced_filters/", include("advanced_filters.urls")),
     path("", homepage),
     path("_health", homepage),
     path("api/_health", homepage),

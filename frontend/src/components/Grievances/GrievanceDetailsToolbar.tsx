@@ -1,10 +1,12 @@
 import { Box, Button } from '@material-ui/core';
-import { useParams, Link } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useSnackbar } from '../../hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
-import { BreadCrumbsItem } from '../BreadCrumbs';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -15,11 +17,10 @@ import {
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
-import { PageHeader } from '../PageHeader';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { BreadCrumbsItem } from '../BreadCrumbs';
 import { ButtonDialog } from '../ButtonDialog';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { ConfirmationDialog } from '../ConfirmationDialog';
+import { PageHeader } from '../PageHeader';
 
 const Separator = styled.div`
   width: 1px;
@@ -54,6 +55,7 @@ export const GrievanceDetailsToolbar = ({
   canSendForApproval,
   canSendBack,
   canClose,
+  canAssign,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canEdit: boolean;
@@ -62,13 +64,15 @@ export const GrievanceDetailsToolbar = ({
   canSendForApproval: boolean;
   canSendBack: boolean;
   canClose: boolean;
+  canAssign: boolean;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Grievance and Feedback',
+      title: t('Grievance and Feedback'),
       to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
@@ -110,7 +114,9 @@ export const GrievanceDetailsToolbar = ({
 
     // no changes were approved
     if (!approved)
-      return `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`;
+      return t(
+        `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
+      );
 
     // some changes were approved
     return `You approved ${approved} change${
@@ -135,13 +141,14 @@ export const GrievanceDetailsToolbar = ({
         GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
       ticket.deleteIndividualTicketDetails?.approveStatus === false
     ) {
-      confirmationMessage =
-        'You did not approve any changes. Are you sure you want to close the ticket?';
+      confirmationMessage = t(
+        'You did not approve any changes. Are you sure you want to close the ticket?',
+      );
     } else if (
       ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
       ticket.addIndividualTicketDetails?.approveStatus === false
     ) {
-      confirmationMessage = 'You did not approve any changes.';
+      confirmationMessage = t('You did not approve any changes.');
     } else if (
       ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
       ticket.systemFlaggingTicketDetails?.approveStatus === false
@@ -151,8 +158,9 @@ export const GrievanceDetailsToolbar = ({
       ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
       !ticket.needsAdjudicationTicketDetails?.selectedIndividual
     ) {
-      confirmationMessage =
-        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found';
+      confirmationMessage = t(
+        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
+      );
     }
 
     return confirmationMessage;
@@ -169,7 +177,9 @@ export const GrievanceDetailsToolbar = ({
     }
   };
 
-  const closingConfirmationText = 'Are you sure you want to close the ticket?';
+  const closingConfirmationText = t(
+    'Are you sure you want to close the ticket?',
+  );
 
   const changeState = async (status): Promise<void> => {
     try {
@@ -197,8 +207,9 @@ export const GrievanceDetailsToolbar = ({
     if (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
       let additionalContent = '';
       if (!ticket.systemFlaggingTicketDetails.approveStatus) {
-        additionalContent =
-          ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found';
+        additionalContent = t(
+          ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found',
+        );
       }
       return `${closingConfirmationText}${additionalContent}`;
     }
@@ -222,7 +233,7 @@ export const GrievanceDetailsToolbar = ({
           variant='contained'
           onClick={confirm(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))}
         >
-          Close Ticket
+          {t('Close Ticket')}
         </Button>
       )}
     </ConfirmationDialog>
@@ -234,9 +245,11 @@ export const GrievanceDetailsToolbar = ({
   ) {
     closeButton = (
       <ButtonDialog
-        title='Duplicate Document Conflict'
-        buttonText='Close Ticket'
-        message='The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.'
+        title={t('Duplicate Document Conflict')}
+        buttonText={t('Close Ticket')}
+        message={t(
+          'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
+        )}
       />
     );
   }
@@ -247,27 +260,25 @@ export const GrievanceDetailsToolbar = ({
     >
       <Box display='flex' alignItems='center'>
         {isEditable && canEdit && (
-          <>
-            <Button
-              color='primary'
-              variant='outlined'
-              component={Link}
-              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
-              startIcon={<EditIcon />}
-            >
-              Edit
-            </Button>
-            <Separator />
-          </>
+          <Button
+            color='primary'
+            variant='outlined'
+            component={Link}
+            to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
+            startIcon={<EditIcon />}
+          >
+            {t('Edit')}
+          </Button>
         )}
-        {isNew && canEdit && (
+        {isNew && canEdit && canAssign && <Separator />}
+        {isNew && canEdit && canAssign && (
           <>
             <Button
               color='primary'
               variant='contained'
               onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
             >
-              ASSIGN TO ME
+              {t('ASSIGN TO ME')}
             </Button>
           </>
         )}
@@ -277,7 +288,7 @@ export const GrievanceDetailsToolbar = ({
             variant='contained'
             onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
           >
-            Set to in progress
+            {t('Set to in progress')}
           </Button>
         )}
         {isInProgress && (
@@ -289,7 +300,7 @@ export const GrievanceDetailsToolbar = ({
                   variant='outlined'
                   onClick={() => changeState(GRIEVANCE_TICKET_STATES.ON_HOLD)}
                 >
-                  Set On Hold
+                  {t('Set On Hold')}
                 </Button>
               </Box>
             )}
@@ -302,7 +313,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
                 >
-                  Send For Approval
+                  {t('Send For Approval')}
                 </Button>
               </Box>
             )}
@@ -321,7 +332,7 @@ export const GrievanceDetailsToolbar = ({
                       changeState(GRIEVANCE_TICKET_STATES.CLOSED),
                     )}
                   >
-                    Close Ticket
+                    {t('Close Ticket')}
                   </Button>
                 )}
               </ConfirmationDialog>
@@ -339,7 +350,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
                 >
-                  Set to in progress
+                  {t('Set to in progress')}
                 </Button>
               </Box>
             )}
@@ -352,7 +363,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
                 >
-                  Send For Approval
+                  {t('Send For Approval')}
                 </Button>
               </Box>
             )}
@@ -371,7 +382,7 @@ export const GrievanceDetailsToolbar = ({
                       changeState(GRIEVANCE_TICKET_STATES.CLOSED),
                     )}
                   >
-                    Close Ticket
+                    {t('Close Ticket')}
                   </Button>
                 )}
               </ConfirmationDialog>
@@ -389,7 +400,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
                 >
-                  Send Back
+                  {t('Send Back')}
                 </Button>
               </Box>
             )}

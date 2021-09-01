@@ -1,18 +1,19 @@
 import React from 'react';
-import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { PageHeader } from '../../../../components/PageHeader';
+import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
+import { PageHeader } from '../../../../components/PageHeader';
+import { PermissionDenied } from '../../../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../../hooks/usePermissions';
 import {
   decodeIdString,
   isPermissionDeniedError,
 } from '../../../../utils/utils';
 import { useImportedIndividualQuery } from '../../../../__generated__/graphql';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { LoadingComponent } from '../../../../components/LoadingComponent';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { PermissionDenied } from '../../../../components/PermissionDenied';
 import { RegistrationIndividualsBioData } from './RegistrationIndividualBioData';
 import { RegistrationIndividualVulnerabilities } from './RegistrationIndividualVulnerabilities';
 
@@ -26,6 +27,7 @@ const Container = styled.div`
 `;
 
 export function RegistrationIndividualDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -44,7 +46,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
           {
-            title: 'Registration Data import',
+            title: t('Registration Data import'),
             to: `/${businessArea}/registration-data-import/`,
           },
         ]
@@ -59,7 +61,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
 
   if (importedIndividual?.household?.id) {
     breadCrumbsItems.push({
-      title: `HOUSEHOLD ID: ${decodeIdString(
+      title: `${t('HOUSEHOLD ID')}: ${decodeIdString(
         importedIndividual?.household?.id,
       )}`,
       to: `/${businessArea}/registration-data-import/household/${importedIndividual?.household?.id}`,
@@ -69,7 +71,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Individual ID: ${decodeIdString(id)}`}
+        title={`${t('Individual ID')}: ${decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
       />
       <Container>

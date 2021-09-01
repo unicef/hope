@@ -17,6 +17,8 @@ class PartnerFactory(factory.DjangoModelFactory):
 
 
 class BusinessAreaFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda x: "BusinessArea%s" % x)
+
     class Meta:
         model = BusinessArea
         django_get_or_create = ("name",)
@@ -30,7 +32,7 @@ class UserFactory(factory.DjangoModelFactory):
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
     partner = factory.SubFactory(PartnerFactory)
-    email = factory.LazyAttribute(lambda o: f"{o.first_name.lower()}.{o.last_name.lower()}@unicef.com")
+    email = factory.LazyAttribute(lambda o: f"{o.first_name.lower()}.{o.last_name.lower()}_{time.time_ns()}@unicef.com")
     username = factory.LazyAttribute(lambda o: f"{o.first_name}{o.last_name}_{time.time_ns()}")
 
 

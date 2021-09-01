@@ -32,7 +32,14 @@ export function LookUpHouseholdTableRow({
     return programNames?.length ? programNames.join(', ') : '-';
   };
   return (
-    <ClickableTableRow hover role='checkbox' key={household.id}>
+    <ClickableTableRow
+      onClick={() => {
+        radioChangeHandler(household);
+      }}
+      hover
+      role='checkbox'
+      key={household.id}
+    >
       <TableCell padding='checkbox'>
         <Radio
           color='primary'
@@ -46,11 +53,7 @@ export function LookUpHouseholdTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <BlackLink
-          target='_blank'
-          rel='noopener noreferrer'
-          to={`/${businessArea}/population/household/${household.id}`}
-        >
+        <BlackLink to={`/${businessArea}/population/household/${household.id}`}>
           {household.unicefId}
         </BlackLink>
       </TableCell>
