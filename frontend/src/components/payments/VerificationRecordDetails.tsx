@@ -64,16 +64,6 @@ export function VerificationRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('STATUS DATE')}
-              value={
-                <UniversalMoment>
-                  {paymentVerification.paymentRecord.statusDate}
-                </UniversalMoment>
-              }
-            />
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
               label={t('REGISTRATION GROUP')}
               value={paymentVerification.paymentRecord.registrationCaId}
             />
@@ -106,16 +96,6 @@ export function VerificationRecordDetails({
                 />
               </StatusContainer>
             </LabelizedField>
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField
-              label={t('STATUS DATE')}
-              value={
-                <UniversalMoment>
-                  {paymentVerification.statusDate}
-                </UniversalMoment>
-              }
-            />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
