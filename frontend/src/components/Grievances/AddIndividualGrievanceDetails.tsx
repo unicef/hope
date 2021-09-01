@@ -66,8 +66,9 @@ export function AddIndividualGrievanceDetails({
         textValue = renderBoolean(value as boolean);
       }
       if (fieldAttribute.type === 'SELECT_ONE') {
-        textValue = fieldAttribute.choices.find((item) => item.value === value)
-          .labelEn;
+        textValue =
+          fieldAttribute.choices.find((item) => item.value === value)
+            ?.labelEn || '-';
       }
       return (
         <Grid key={key} item xs={6}>
