@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
-import { ProgrammeTableRow } from '../SentTargeting/ProgrammeTableRow';
 import { headCells as programmeHeadCells } from '../SentTargeting/ProgrammeHeadCells';
+import { ProgrammeTableRow } from '../SentTargeting/ProgrammeTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -21,6 +22,7 @@ export const ApprovedTargetPopulationTable = ({
   variables,
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement => {
+  const { t } = useTranslation();
   const initialVariables = {
     ...(id && { targetPopulation: id }),
     ...variables,
@@ -28,7 +30,7 @@ export const ApprovedTargetPopulationTable = ({
   return (
     <TableWrapper>
       <UniversalTable
-        title='Households'
+        title={t('Households')}
         headCells={programmeHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useCandidateHouseholdsListByTargetingCriteriaQuery}

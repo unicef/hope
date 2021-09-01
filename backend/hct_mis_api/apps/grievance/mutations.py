@@ -1,4 +1,6 @@
 import logging
+from enum import Enum
+from typing import Dict, List, Union
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -32,6 +34,8 @@ from hct_mis_api.apps.grievance.mutations_extras.data_change import (
 from hct_mis_api.apps.grievance.mutations_extras.feedback import (
     save_negative_feedback_extras,
     save_positive_feedback_extras,
+    update_negative_feedback_extras,
+    update_positive_feedback_extras,
 )
 from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
     save_grievance_complaint_extras,
@@ -44,7 +48,10 @@ from hct_mis_api.apps.grievance.mutations_extras.main import (
 from hct_mis_api.apps.grievance.mutations_extras.payment_verification import (
     save_payment_verification_extras,
 )
-from hct_mis_api.apps.grievance.mutations_extras.referral import save_referral_extras
+from hct_mis_api.apps.grievance.mutations_extras.referral import (
+    save_referral_extras,
+    update_referral_extras,
+)
 from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import (
     save_sensitive_grievance_extras,
 )
@@ -363,16 +370,20 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if update_extra_method:
                 grievance_ticket = update_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
 
+        update_extra_methods = {
+            GrievanceTicket.CATEGORY_REFERRAL: update_referral_extras,
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK: update_positive_feedback_extras,
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: update_negative_feedback_extras,
+        }
+        update_extra_method = update_extra_methods.get(grievance_ticket.category)
+        if update_extra_method:
+            grievance_ticket = update_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
+
         if grievance_ticket.category in [
             GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
             GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
         ]:
-            ticket_details_fields = {
-                GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: lambda ticket: ticket.sensitive_ticket_details,
-                GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: lambda ticket: ticket.complaint_ticket_details,
-            }
-
-            ticket_details = ticket_details_fields.get(grievance_ticket.category)(grievance_ticket)
+            ticket_details = grievance_ticket.ticket_details
 
             if ticket_details.household and ticket_details.household != household:
                 raise GraphQLError("Cannot change household")
@@ -384,7 +395,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if individual:
                 ticket_details.individual = individual
             ticket_details.save()
-            grievance_ticket.save()
+            # grievance_ticket.save()
 
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
@@ -504,7 +515,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: close_system_flagging_ticket,
     }
 
-    MOVE_TO_STATUS_PERMISSION_MAPPING = {
+    MOVE_TO_STATUS_PERMISSION_MAPPING: Dict[str, Dict[Union[str, int], List[Enum]]] = {
         GrievanceTicket.STATUS_ASSIGNED: {
             "any": [
                 Permissions.GRIEVANCES_UPDATE,
@@ -605,6 +616,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket, info)
         if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
+            cls.has_permission(info, Permissions.GRIEVANCE_ASSIGN, grievance_ticket.business_area)
             grievance_ticket.assigned_to = info.context.user
         grievance_ticket.status = status
         grievance_ticket.save()

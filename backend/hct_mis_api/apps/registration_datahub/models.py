@@ -312,7 +312,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class ImportedDocumentType(TimeStampedUUIDModel):
-    country = CountryField()
+    country = CountryField(default="U")
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 

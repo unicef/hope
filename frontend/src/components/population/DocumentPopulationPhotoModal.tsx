@@ -1,13 +1,14 @@
+import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { BlackLink } from '../BlackLink';
 import {
   IndividualNode,
   useIndividualPhotosLazyQuery,
 } from '../../__generated__/graphql';
+import { BlackLink } from '../BlackLink';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -36,6 +37,7 @@ export const DocumentPopulationPhotoModal = ({
   documentNumber,
   documentId,
 }: DocumentPopulationPhotoModalProps): React.ReactElement => {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [getPhotos, { data }] = useIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
@@ -72,7 +74,7 @@ export const DocumentPopulationPhotoModal = ({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setDialogOpen(false)}>{t('CANCEL')}</Button>
           </DialogActions>
         </DialogFooter>
       </Dialog>

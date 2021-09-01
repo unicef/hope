@@ -46,6 +46,7 @@ class UpdateGrievanceTicketExtrasInput(graphene.InputObjectType):
     household_data_update_issue_type_extras = UpdateHouseholdDataUpdateIssueTypeExtras()
     individual_data_update_issue_type_extras = UpdateIndividualDataUpdateIssueTypeExtras()
     add_individual_issue_type_extras = UpdateAddIndividualIssueTypeExtras()
+    category = CategoryExtrasInput()
 
 
 def _no_operation_close_method(*args, **kwargs):

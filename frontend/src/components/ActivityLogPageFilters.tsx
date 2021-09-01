@@ -1,12 +1,13 @@
-import React from 'react';
-import styled from 'styled-components';
 import { Grid, InputAdornment, MenuItem } from '@material-ui/core';
+import FormControl from '@material-ui/core/FormControl';
 import SearchIcon from '@material-ui/icons/Search';
 import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
-import FormControl from '@material-ui/core/FormControl';
-import TextField from '../shared/TextField';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import InputLabel from '../shared/InputLabel';
 import Select from '../shared/Select';
+import TextField from '../shared/TextField';
 import { ContainerWithBorder } from './ContainerWithBorder';
 
 const StyledFormControl = styled(FormControl)`
@@ -34,6 +35,7 @@ export function ActivityLogPageFilters({
   onFilterChange,
   filter,
 }: ActivityLogPageFiltersProps): React.ReactElement {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
 
@@ -51,7 +53,7 @@ export function ActivityLogPageFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
+            label={t('Search')}
             variant='outlined'
             value={filter.search || ''}
             margin='dense'
@@ -68,13 +70,13 @@ export function ActivityLogPageFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Module</InputLabel>
+            <InputLabel>{t('Module')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'module')}
               variant='outlined'
-              label='Module'
+              label={t('Module')}
               value={filter.module || ''}
               InputProps={{
                 startAdornment: (
@@ -91,7 +93,7 @@ export function ActivityLogPageFilters({
               }}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {Object.entries(modules).map(([key, value]) => (
                 <MenuItem key={key} value={key}>

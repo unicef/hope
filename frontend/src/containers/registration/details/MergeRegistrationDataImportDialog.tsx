@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Button,
   Dialog,
@@ -9,11 +7,14 @@ import {
   Typography,
 } from '@material-ui/core';
 import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   RegistrationDetailedFragment,
   useMergeRdiMutation,
 } from '../../../__generated__/graphql';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -39,6 +40,7 @@ interface MergeRegistrationDataImportDialogProps {
 export function MergeRegistrationDataImportDialog({
   registration,
 }: MergeRegistrationDataImportDialogProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useMergeRdiMutation({
@@ -47,10 +49,10 @@ export function MergeRegistrationDataImportDialog({
   const merge = async (): Promise<void> => {
     const { errors } = await mutate();
     if (errors) {
-      showMessage('Error while merging Registration Data Import');
+      showMessage(t('Error while merging Registration Data Import'));
       return;
     }
-    showMessage('Registration Data Import Merging started');
+    showMessage(t('Registration Data Import Merging started'));
   };
   return (
     <span>
@@ -60,7 +62,7 @@ export function MergeRegistrationDataImportDialog({
         variant='contained'
         onClick={() => setOpen(true)}
       >
-        Merge
+        {t('Merge')}
       </Button>
       <Dialog
         open={open}
@@ -70,31 +72,32 @@ export function MergeRegistrationDataImportDialog({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>Merge Import</Typography>
+            <Typography variant='h6'>{t('Merge Import')}</Typography>
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            <div>Are your sure you want to merge this data import?</div>
+            <div>{t('Are your sure you want to merge this data import?')}</div>
             <div>
               <strong>
-                {registration.numberOfHouseholds} households and{' '}
-                {registration.numberOfIndividuals} individuals will be merged.{' '}
+                {registration.numberOfHouseholds} {t('households and')}{' '}
+                {registration.numberOfIndividuals}{' '}
+                {t('individuals will be merged.')}{' '}
               </strong>
-              Do you want to proceed?
+              {t('Do you want to proceed?')}
             </div>
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <Button
               type='submit'
               color='primary'
               variant='contained'
               onClick={merge}
             >
-              MERGE
+              {t('MERGE')}
             </Button>
           </DialogActions>
         </DialogFooter>

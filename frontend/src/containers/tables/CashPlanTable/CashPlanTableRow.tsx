@@ -39,7 +39,7 @@ export function CashPlanTableRow({
       key={cashPlan.id}
     >
       <TableCell align='left'>
-        <BlackLink target='_blank' rel='noopener noreferrer' to={cashPlanPath}>
+        <BlackLink to={cashPlanPath}>
           <div
             style={{
               textOverflow: 'ellipsis',

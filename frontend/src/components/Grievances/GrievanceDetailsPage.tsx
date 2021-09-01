@@ -1,12 +1,21 @@
 import { Box, Grid, Typography } from '@material-ui/core';
+import { isEmpty } from 'lodash';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash';
+import {
+  hasCreatorOrOwnerPermissions,
+  hasPermissions,
+  PERMISSIONS,
+} from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { LabelizedField } from '../LabelizedField';
-import { OverviewContainer } from '../OverviewContainer';
+import { usePermissions } from '../../hooks/usePermissions';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_TICKET_STATES,
+} from '../../utils/constants';
 import {
   decodeIdString,
   grievanceTicketStatusToColor,
@@ -14,37 +23,30 @@ import {
   reduceChoices,
   renderUserName,
 } from '../../utils/utils';
-import { LoadingComponent } from '../LoadingComponent';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
   useMeQuery,
 } from '../../__generated__/graphql';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { ContentLink } from '../ContentLink';
+import { LabelizedField } from '../LabelizedField';
+import { LoadingComponent } from '../LoadingComponent';
+import { OverviewContainer } from '../OverviewContainer';
+import { PermissionDenied } from '../PermissionDenied';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
-import { usePermissions } from '../../hooks/usePermissions';
-import {
-  hasCreatorOrOwnerPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
-import { PermissionDenied } from '../PermissionDenied';
-import { Notes } from './Notes';
-import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
-import { PaymentIds } from './PaymentIds';
-import { OtherRelatedTickets } from './OtherRelatedTickets';
 import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
-import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
-import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
-import { ReassignRoleBox } from './ReassignRoleBox';
 import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
 import { FlagDetails } from './FlagDetails';
+import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
 import { NeedsAdjudicationDetails } from './NeedsAdjudicationDetails';
+import { Notes } from './Notes';
+import { OtherRelatedTickets } from './OtherRelatedTickets';
+import { PaymentIds } from './PaymentIds';
+import { ReassignRoleBox } from './ReassignRoleBox';
+import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
+import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -60,6 +62,7 @@ const StatusContainer = styled.div`
 `;
 
 export function GrievanceDetailsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const {
@@ -209,6 +212,8 @@ export function GrievanceDetailsPage(): React.ReactElement {
     permissions,
   );
 
+  const canAssign = hasPermissions(PERMISSIONS.GRIEVANCES_ASSIGN, permissions);
+
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -223,7 +228,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
     size: boolean | 3 | 6 | 8 | 11 | 'auto' | 1 | 2 | 4 | 5 | 7 | 9 | 10 | 12;
   }[] = [
     {
-      label: 'STATUS',
+      label: t('STATUS'),
       value: (
         <StatusContainer>
           <StatusBox
@@ -235,17 +240,17 @@ export function GrievanceDetailsPage(): React.ReactElement {
       size: 3,
     },
     {
-      label: 'CATEGORY',
+      label: t('CATEGORY'),
       value: <span>{categoryChoices[ticket.category]}</span>,
       size: 3,
     },
     {
-      label: 'Issue Type',
+      label: t('Issue Type'),
       value: <span>{issueType}</span>,
       size: 6,
     },
     {
-      label: 'HOUSEHOLD ID',
+      label: t('HOUSEHOLD ID'),
       value: (
         <span>
           {ticket.household?.id ? (
@@ -266,7 +271,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
       size: 3,
     },
     {
-      label: 'INDIVIDUAL ID',
+      label: t('INDIVIDUAL ID'),
       value: (
         <span>
           {ticket.individual?.id ? (
@@ -287,7 +292,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
       size: 3,
     },
     {
-      label: 'PAYMENT ID',
+      label: t('PAYMENT ID'),
       value: (
         <span>
           {ticket.paymentRecord?.id ? (
@@ -304,47 +309,47 @@ export function GrievanceDetailsPage(): React.ReactElement {
       size: 6,
     },
     {
-      label: 'CONSENT',
+      label: t('CONSENT'),
       value: <span>{ticket.consent ? 'Yes' : 'No'}</span>,
       size: 3,
     },
     {
-      label: 'CREATED BY',
+      label: t('CREATED BY'),
       value: <span>{renderUserName(ticket.createdBy)}</span>,
       size: 3,
     },
     {
-      label: 'DATE CREATED',
+      label: t('DATE CREATED'),
       value: <UniversalMoment>{ticket.createdAt}</UniversalMoment>,
       size: 3,
     },
     {
-      label: 'LAST MODIFIED DATE',
+      label: t('LAST MODIFIED DATE'),
       value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
       size: 3,
     },
     {
-      label: 'DESCRIPTION',
+      label: t('DESCRIPTION'),
       value: <span>{ticket.description || '-'}</span>,
       size: 6,
     },
     {
-      label: 'ASSIGNED TO',
+      label: t('ASSIGNED TO'),
       value: <span>{renderUserName(ticket.assignedTo) || '-'}</span>,
       size: 6,
     },
     {
-      label: 'ADMINISTRATIVE LEVEL 2',
+      label: t('ADMINISTRATIVE LEVEL 2'),
       value: <span>{ticket.admin}</span>,
       size: 3,
     },
     {
-      label: 'AREA / VILLAGE / PAY POINT',
+      label: t('AREA / VILLAGE / PAY POINT'),
       value: <span>{ticket.area}</span>,
       size: 3,
     },
     {
-      label: 'LANGUAGES SPOKEN',
+      label: t('LANGUAGES SPOKEN'),
       value: <span>{ticket.language || '-'}</span>,
       size: 3,
     },
@@ -474,12 +479,13 @@ export function GrievanceDetailsPage(): React.ReactElement {
         canSendForApproval={canSendForApproval}
         canSendBack={canSendBack}
         canClose={canClose}
+        canAssign={canAssign}
       />
       <Grid container>
         <Grid item xs={12}>
           <ContainerColumnWithBorder>
             <Title>
-              <Typography variant='h6'>Details</Typography>
+              <Typography variant='h6'>{t('Details')}</Typography>
             </Title>
             <OverviewContainer>
               <Grid container spacing={6}>

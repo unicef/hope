@@ -1,10 +1,11 @@
-import React from 'react';
-import styled from 'styled-components';
-import { InputAdornment, Grid, FormControl, MenuItem } from '@material-ui/core';
+import { FormControl, Grid, InputAdornment, MenuItem } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import TextField from '../../shared/TextField';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
+import TextField from '../../shared/TextField';
 import { useUserChoiceDataQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 
@@ -29,6 +30,7 @@ export function UsersListFilters({
   onFilterChange,
   filter,
 }: UsersListFiltersProps): React.ReactElement {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   const { data: choices } = useUserChoiceDataQuery();
@@ -41,7 +43,7 @@ export function UsersListFilters({
       <Grid container spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
+            label={t('Search')}
             variant='outlined'
             margin='dense'
             onChange={(e) => handleFilterChange(e, 'search')}
@@ -56,17 +58,17 @@ export function UsersListFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Partner</InputLabel>
+            <InputLabel>{t('Partner')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'partner')}
               variant='outlined'
-              label='Partner'
+              label={t('Partner')}
               value={filter.partner || ''}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {choices.userPartnerChoices.map((item) => {
                 return (
@@ -80,17 +82,17 @@ export function UsersListFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Role</InputLabel>
+            <InputLabel>{t('Role')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'roles')}
               variant='outlined'
-              label='Role'
+              label={t('Role')}
               value={filter.roles || ''}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {choices.userRolesChoices.map((item) => {
                 return (
@@ -104,17 +106,17 @@ export function UsersListFilters({
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
+            <InputLabel>{t('Status')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'status')}
               variant='outlined'
-              label='Status'
+              label={t('Status')}
               value={filter.status || ''}
             >
               <MenuItem value=''>
-                <em>None</em>
+                <em>{t('None')}</em>
               </MenuItem>
               {choices.userStatusChoices.map((item) => {
                 return (

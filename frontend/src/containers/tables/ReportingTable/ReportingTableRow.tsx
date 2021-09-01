@@ -1,14 +1,15 @@
-import styled from 'styled-components';
 import { TableCell, TableRow } from '@material-ui/core';
 import { GetApp } from '@material-ui/icons';
-import { useHistory } from 'react-router-dom';
 import React from 'react';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+import { Pointer } from '../../../components/Pointer';
 import { StatusBox } from '../../../components/StatusBox';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { formatNumber, reportStatusToColor } from '../../../utils/utils';
 import { ReportNode } from '../../../__generated__/graphql';
-import { Pointer } from '../../../components/Pointer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -35,6 +36,7 @@ export const ReportingTableRow = ({
   typeChoices,
   statusChoices,
 }: ReportingTableRowProps): React.ReactElement => {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const history = useHistory();
   const handleClick = (): void => {
@@ -75,7 +77,7 @@ export const ReportingTableRow = ({
         {report.fileUrl && (
           <Pointer>
             <GetApp />
-            DOWNLOAD
+            {t('DOWNLOAD')}
           </Pointer>
         )}
       </DownloadTableCell>

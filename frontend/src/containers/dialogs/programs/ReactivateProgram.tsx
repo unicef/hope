@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Button,
   Dialog,
@@ -8,17 +6,20 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { programCompare } from '../../../utils/utils';
 import {
   AllProgramsQuery,
   ProgramNode,
   ProgramStatus,
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { programCompare } from '../../../utils/utils';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -44,6 +45,7 @@ interface ReactivateProgramProps {
 export function ReactivateProgram({
   program,
 }: ReactivateProgramProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -75,22 +77,22 @@ export function ReactivateProgram({
           id: program.id,
           status: ProgramStatus.Active,
         },
-        version: program.version
+        version: program.version,
       },
     });
     if (!response.errors && response.data.updateProgram) {
-      showMessage('Programme reactivated.', {
+      showMessage(t('Programme reactivated.'), {
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
       });
       setOpen(false);
     } else {
-      showMessage('Programme reactivate action failed.');
+      showMessage(t('Programme reactivate action failed.'));
     }
   };
   return (
     <span>
       <Button variant='outlined' color='primary' onClick={() => setOpen(true)}>
-        Reactivate
+        {t('Reactivate')}
       </Button>
       <Dialog
         open={open}
@@ -100,24 +102,24 @@ export function ReactivateProgram({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>Reactivate Programme</Typography>
+            <Typography variant='h6'>{t('Reactivate Programme')}</Typography>
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            Are you sure you want to reactivate this Programme?
+            {t('Are you sure you want to reactivate this Programme?')}
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>CANCEL</Button>
+            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <Button
               type='submit'
               color='primary'
               variant='contained'
               onClick={reactivateProgram}
             >
-              REACTIVATE
+              {t('REACTIVATE')}
             </Button>
           </DialogActions>
         </DialogFooter>

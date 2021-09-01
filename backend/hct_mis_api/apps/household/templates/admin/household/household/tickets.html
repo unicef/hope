@@ -1,0 +1,32 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% block extrahead %}
+    <style>
+            table.messagelist tr.warning {
+            background: #ffc url({% static 'admin/img/icon-alert.svg' %}) 40px 14px no-repeat;
+            background-size: 14px auto;
+        }
+        table.messagelist tr.error {
+            background: #ffefef url({% static 'admin/img/icon-no.svg' %}) 40px 12px no-repeat;
+            background-size: 14px auto;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <table>
+        <tr>
+            <td>ID</td>
+            <td>status</td>
+            <td>assigned to</td>
+            <td>category</td>
+            <td>issue_type</td>
+        </tr>{% for xx in tickets %}
+        <tr>
+            <td><a href="{% url "admin:grievance_grievanceticket_change" xx.pk %}">{{ xx.unicef_id }}</a></td>
+        <td>{{ xx.get_status_display }}</td>
+        <td>{{ xx.assigned_to }}</td>
+        <td>{{ xx.get_category_display }}</td>
+        <td>{{ xx.issue_type|default_if_none:"" }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}
