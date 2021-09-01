@@ -59,6 +59,7 @@ def create_registration_data_import_objects(registration_data_import_data, user,
 
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
+    screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
         business_area_slug=business_area.slug,
         import_data=import_data_obj,
@@ -72,6 +73,7 @@ def create_registration_data_import_objects(registration_data_import_data, user,
         number_of_households=import_data_obj.number_of_households,
         business_area=business_area,
         pull_pictures=pull_pictures,
+        screen_beneficiary=screen_beneficiary,
         **registration_data_import_data,
     )
     created_obj_hct.full_clean()
@@ -95,6 +97,7 @@ class RegistrationXlsxImportMutationInput(graphene.InputObjectType):
     import_data_id = graphene.ID()
     name = graphene.String()
     business_area_slug = graphene.String()
+    screen_beneficiary = graphene.Boolean()
 
 
 class RegistrationKoboImportMutationInput(graphene.InputObjectType):
@@ -102,6 +105,7 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     name = graphene.String()
     pull_pictures = graphene.Boolean()
     business_area_slug = graphene.String()
+    screen_beneficiary = graphene.Boolean()
 
 
 class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
@@ -111,6 +115,8 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationXlsxImportMutationInput(required=True)
 
     @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     def processed_mutate(cls, root, info, registration_data_import_data):
         (
@@ -121,6 +127,12 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
+
+        if (
+            created_obj_hct.should_check_against_sanction_list()
+            and not business_area.should_check_against_sanction_list()
+        ):
+            raise ValidationError("Cannot check against sanction list")
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
@@ -185,6 +197,8 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             raise ValidationError("Cannot import empty KoBo form")
 
     @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     def processed_mutate(cls, root, info, registration_data_import_data):
         cls.check_is_not_empty(registration_data_import_data.import_data_id)
@@ -197,6 +211,13 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
+
+        if (
+            created_obj_hct.should_check_against_sanction_list()
+            and not business_area.should_check_against_sanction_list()
+        ):
+            raise ValidationError("Cannot check against sanction list")
+
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )

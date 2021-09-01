@@ -87,6 +87,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
 
     pull_pictures = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
+    screen_beneficiary = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -98,3 +99,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     class Meta:
         unique_together = ("name", "business_area")
         verbose_name = "Registration data import"
+
+    def should_check_against_sanction_list(self):
+        return self.screen_beneficiary
