@@ -4,30 +4,34 @@ import operator
 import time
 from io import BytesIO
 
-import graphene
-import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+
+import graphene
+import openpyxl
 from graphene_file_upload.scalars import Upload
 
-from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
+from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
-from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+)
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    registration_xlsx_import_task,
     merge_registration_data_import_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
+    registration_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -35,12 +39,12 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
-    XlsxRowErrorNode,
     KoboErrorNode,
+    XlsxRowErrorNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
-    UploadXLSXInstanceValidator,
     KoboProjectImportDataInstanceValidator,
+    UploadXLSXInstanceValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
