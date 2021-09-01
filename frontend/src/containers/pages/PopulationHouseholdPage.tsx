@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
 import get from 'lodash/get';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
+import { PermissionDenied } from '../../components/PermissionDenied';
 import { HouseholdFilters } from '../../components/population/HouseholdFilter';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { HouseholdTable } from '../tables/HouseholdTable';
+import { useDebounce } from '../../hooks/useDebounce';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
   ProgramNode,
   useAllProgramsQuery,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { useDebounce } from '../../hooks/useDebounce';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { usePermissions } from '../../hooks/usePermissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { HouseholdTable } from '../tables/HouseholdTable';
 
 const Container = styled.div`
   display: flex;
@@ -23,6 +24,7 @@ const Container = styled.div`
 `;
 
 export function PopulationHouseholdPage(): React.ReactElement {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState({
     householdSize: { min: undefined, max: undefined },
   });
@@ -53,7 +55,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   return (
     <div>
-      <PageHeader title='Households' />
+      <PageHeader title={t('Households')} />
       <HouseholdFilters
         programs={programs as ProgramNode[]}
         filter={filter}

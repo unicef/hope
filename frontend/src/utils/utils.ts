@@ -519,3 +519,10 @@ export function renderBoolean(booleanValue: boolean): string {
       return 'No';
   }
 }
+
+export const formatAge = (age): string | number => {
+  if (age > 0) {
+    return age;
+  }
+  return '<1';
+};

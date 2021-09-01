@@ -5,6 +5,7 @@ from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -16,12 +17,19 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(PaymentRecord)
-class PaymentRecordAdmin(HOPEModelAdminBase):
+class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("household", "status", "cash_plan_name", "target_population")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         TextFieldFilter.factory("cash_plan__id", "CashPlan ID"),
         TextFieldFilter.factory("target_population__id", "TargetPopulation ID"),
+    )
+    advanced_filter_fields = (
+        "status",
+        "delivery_date",
+        ("service_provider__name", "Service Provider"),
+        ("cash_plan__name", "CashPlan"),
+        ("target_population__name", "TargetPopulation"),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = (

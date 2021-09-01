@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
+    PositiveFeedbackTicketWithoutExtrasFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
     TicketAddIndividualDetailsFactory,
     TicketHouseholdDataUpdateDetailsFactory,
@@ -221,6 +222,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             description="",
             language="Spanish",
         )
+        PositiveFeedbackTicketWithoutExtrasFactory(ticket=self.positive_feedback_grievance_ticket)
 
     @parameterized.expand(
         [

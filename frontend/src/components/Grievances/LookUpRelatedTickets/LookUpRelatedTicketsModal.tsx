@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Button,
   Dialog,
@@ -8,11 +6,14 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 import { Formik } from 'formik';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../LoadingComponent';
 import { LookUpRelatedTicketsFilters } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
 import { LookUpRelatedTicketsTable } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
-import { LoadingComponent } from '../../LoadingComponent';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -31,7 +32,7 @@ export const LookUpRelatedTicketsModal = ({
   setLookUpDialogOpen,
 }): React.ReactElement => {
   const businessArea = useBusinessArea();
-
+  const { t } = useTranslation();
   const filterInitial = {
     search: '',
     status: '',
@@ -68,7 +69,7 @@ export const LookUpRelatedTicketsModal = ({
         >
           <DialogTitleWrapper>
             <DialogTitle id='scroll-dialog-title'>
-              Look up Related Tickets
+              {t('Look up Related Tickets')}
             </DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
@@ -88,7 +89,9 @@ export const LookUpRelatedTicketsModal = ({
           </DialogContent>
           <DialogFooter>
             <DialogActions>
-              <Button onClick={() => setLookUpDialogOpen(false)}>CANCEL</Button>
+              <Button onClick={() => setLookUpDialogOpen(false)}>
+                {t('CANCEL')}
+              </Button>
               <Button
                 type='submit'
                 color='primary'
@@ -96,7 +99,7 @@ export const LookUpRelatedTicketsModal = ({
                 onClick={submitForm}
                 data-cy='button-submit'
               >
-                SAVE
+                {t('SAVE')}
               </Button>
             </DialogActions>
           </DialogFooter>

@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
 import {
-  IconButton,
   Dialog,
   DialogContent,
-  Tabs,
+  IconButton,
   Tab,
+  Tabs,
 } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TabPanel } from '../../../../components/TabPanel';
 import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';
+import { TabPanel } from '../../../../components/TabPanel';
 import { FlexFieldTab } from './FlexFieldTab';
 
 export interface FinalizeTargetPopulationPropTypes {
@@ -58,6 +59,7 @@ const StyledTabPanel = styled(TabPanel)`
 `;
 
 export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
+  const { t } = useTranslation();
   const [selectedTab, setTab] = useState(0);
   const changeTab = (event: React.ChangeEvent<{}>, newValue: number): void => {
     setTab(newValue);
@@ -70,8 +72,8 @@ export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
       indicatorColor='primary'
       textColor='primary'
     >
-      <Tab label='Field List' />
-      <Tab label='Targeting Diagram' />
+      <Tab label={t('Field List')} />
+      <Tab label={t('Targeting Diagram')} />
     </Tabs>
   );
   return (

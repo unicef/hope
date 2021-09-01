@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
   Button,
   Dialog,
@@ -8,20 +6,22 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { useHistory } from 'react-router-dom';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import { decodeIdString } from '../../../utils/utils';
-import { MiśTheme } from '../../../theme';
-import {
-  ImportedIndividualMinimalFragment,
-  DeduplicationResultNode,
-} from '../../../__generated__/graphql';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { BlackLink } from '../../../components/BlackLink';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { Pointer } from '../../../components/Pointer';
+import { MiśTheme } from '../../../theme';
+import { decodeIdString } from '../../../utils/utils';
+import {
+  DeduplicationResultNode,
+  ImportedIndividualMinimalFragment,
+} from '../../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -63,8 +63,8 @@ export function DedupeResults({
   results,
   isInBatch = false,
 }: DedupeResultsProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const history = useHistory();
   const businessArea = useBusinessArea();
   const useStyles = makeStyles(() => ({
     table: {
@@ -99,14 +99,14 @@ export function DedupeResults({
       result.proximityToScore,
     );
   });
-  const handleClickBatch = (id): void => {
+  const handleClickBatch = (id): string => {
     const path = `/${businessArea}/registration-data-import/individual/${id}`;
-    history.push(path);
+    return path;
   };
 
-  const handleClickGoldenRecord = (id): void => {
+  const handleClickGoldenRecord = (id): string => {
     const path = `/${businessArea}/population/individuals/${id}`;
-    history.push(path);
+    return path;
   };
   return (
     <>
@@ -127,53 +127,55 @@ export function DedupeResults({
         aria-labelledby='form-dialog-title'
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>Duplicates</DialogTitle>
+          <DialogTitle id='scroll-dialog-title'>{t('Duplicates')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
             <div>
-              Duplicates of{' '}
+              {t('Duplicates of')}{' '}
               <Bold>
                 {individual.fullName} ({decodeIdString(individual.id)})
               </Bold>{' '}
-              {isInBatch ? 'within batch ' : 'against population '}are listed
-              below.
+              {isInBatch ? t('within batch ') : t('against population ')}
+              {t('are listed below.')}
             </div>
           </DialogDescription>
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <TableCell style={{ width: 100 }}>Individual ID</TableCell>
-                <TableCell style={{ width: 100 }}>Full Name</TableCell>
-                <TableCell style={{ width: 100 }}>Age</TableCell>
                 <TableCell style={{ width: 100 }}>
-                  Administrative Level 2
+                  {t('Individual ID')}
+                </TableCell>
+                <TableCell style={{ width: 100 }}>{t('Full Name')}</TableCell>
+                <TableCell style={{ width: 100 }}>{t('Age')}</TableCell>
+                <TableCell style={{ width: 100 }}>
+                  {t('Administrative Level 2')}
                 </TableCell>
                 <TableCell style={{ width: 100 }} align='left'>
-                  Similarity Score
+                  {t('Similarity Score')}
                 </TableCell>
                 <TableCell style={{ width: 100 }} align='left'>
-                  Proximity to the Score
+                  {t('Proximity to the Score')}
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.map((row) => (
                 <TableRow key={row.hitId}>
-                  <TableCell
-                    onClick={() =>
-                      isInBatch
-                        ? handleClickBatch(row.hitId)
-                        : handleClickGoldenRecord(row.hitId)
-                    }
-                    component='th'
-                    scope='row'
-                  >
-                    <Pointer>{decodeIdString(row.hitId)}</Pointer>
+                  <TableCell>
+                    <BlackLink
+                      to={
+                        isInBatch
+                          ? handleClickBatch(row.hitId)
+                          : handleClickGoldenRecord(row.hitId)
+                      }
+                    >
+                      {decodeIdString(row.hitId)}
+                    </BlackLink>
                   </TableCell>
                   <TableCell align='left'>{row.fullName}</TableCell>
                   <TableCell align='left'>
-                    {row.age || 'Not provided'}
+                    {row.age || t('Not provided')}
                   </TableCell>
                   <TableCell align='left'>{row.location}</TableCell>
                   <TableCell align='left'>{row.score}</TableCell>
@@ -193,7 +195,7 @@ export function DedupeResults({
                 e.stopPropagation();
               }}
             >
-              CLOSE
+              {t('CLOSE')}
             </Button>
           </DialogActions>
         </DialogFooter>

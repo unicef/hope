@@ -1,5 +1,3 @@
-import React from 'react';
-import styled from 'styled-components';
 import {
   Button,
   DialogActions,
@@ -7,6 +5,8 @@ import {
   DialogTitle,
   Typography,
 } from '@material-ui/core';
+import React from 'react';
+import styled from 'styled-components';
 import { Dialog } from '../containers/dialogs/Dialog';
 
 interface ConfirmationDialogProps {
@@ -29,7 +29,9 @@ export const DialogFooter = styled.div`
   text-align: right;
 `;
 
-export class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
+export class ConfirmationDialog extends React.Component<
+  ConfirmationDialogProps
+> {
   //eslint-disable-next-line
   state = {
     open: false,

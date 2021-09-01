@@ -3,6 +3,7 @@ import sys
 
 from django.db import transaction
 from django.db.models import Count
+from django.utils.functional import cached_property
 
 from sentry_sdk import configure_scope
 
@@ -19,7 +20,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class PullFromDatahubTask:
@@ -131,6 +132,7 @@ class PullFromDatahubTask:
                             self.copy_payment_records(session)
                             STATUS = session.STATUS_COMPLETED
                         except Exception as e:
+                            logger.exception(e)
                             session.process_exception(e)
                             STATUS = session.status
                             TB = session.traceback
@@ -158,7 +160,7 @@ class PullFromDatahubTask:
                     cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, exchange_rates_client)
                     cash_plan.save(update_fields=["exchange_rate"])
             except Exception as e:
-                log.exception(e)
+                logger.exception(e)
 
     def set_cash_plan_service_provider(self, cash_plan_args):
         assistance_through = cash_plan_args.get("assistance_through")
@@ -168,6 +170,10 @@ class PullFromDatahubTask:
         if service_provider is None:
             return
         cash_plan_args["service_provider"] = service_provider
+
+    @cached_property
+    def exchange_rates_client(self):
+        return ExchangeRates()
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
@@ -190,12 +196,11 @@ class PullFromDatahubTask:
             # FIXME: Slow methods, HOTFIX
             if False:
                 try:
-                    exchange_rates_client = ExchangeRates()
                     payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
-                        payment_record, exchange_rates_client
+                        payment_record, self.exchange_rates_client
                     )
                 except Exception as e:
-                    log.exception(e)
+                    logger.exception(e)
                 payment_record.save(update_fields=["delivered_quantity_usd"])
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
                 payment_record.household.programs.add(payment_record.cash_plan.program)

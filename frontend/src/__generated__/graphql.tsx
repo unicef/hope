@@ -1186,6 +1186,7 @@ export type HouseholdNode = Node & {
   collectIndividualData: HouseholdCollectIndividualData,
   currency?: Maybe<Scalars['String']>,
   unhcrId: Scalars['String'],
+  userFields: Scalars['JSONString'],
   paymentRecords: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
@@ -3276,6 +3277,7 @@ export type Query = {
   countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   observedDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   severityOfDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  flagChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allHouseholdsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   allIndividualsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   me?: Maybe<UserNode>,
@@ -3782,6 +3784,7 @@ export type QueryAllIndividualsArgs = {
   admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   excludedId?: Maybe<Scalars['String']>,
+  flags?: Maybe<Array<Maybe<Scalars['String']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5051,6 +5054,7 @@ export type UpdateGrievanceTicketExtrasInput = {
   householdDataUpdateIssueTypeExtras?: Maybe<UpdateHouseholdDataUpdateIssueTypeExtras>,
   individualDataUpdateIssueTypeExtras?: Maybe<UpdateIndividualDataUpdateIssueTypeExtras>,
   addIndividualIssueTypeExtras?: Maybe<UpdateAddIndividualIssueTypeExtras>,
+  category?: Maybe<CategoryExtrasInput>,
 };
 
 export type UpdateGrievanceTicketInput = {
@@ -5332,12 +5336,12 @@ export type UserNode = Node & {
   username: Scalars['String'],
   firstName: Scalars['String'],
   lastName: Scalars['String'],
-  email: Scalars['String'],
   isStaff: Scalars['Boolean'],
   isActive: Scalars['Boolean'],
   dateJoined: Scalars['DateTime'],
   status: UserStatus,
   partner?: Maybe<PartnerType>,
+  email: Scalars['String'],
   availableForExport: Scalars['Boolean'],
   customFields: Scalars['JSONString'],
   jobTitle: Scalars['String'],
@@ -6839,7 +6843,8 @@ export type AllIndividualsQueryVariables = {
   businessArea?: Maybe<Scalars['String']>,
   adminArea?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
-  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>
+  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  flags?: Maybe<Array<Maybe<Scalars['String']>>>
 };
 
 
@@ -7747,6 +7752,17 @@ export type IndividualQuery = (
     { __typename?: 'IndividualNode' }
     & IndividualDetailedFragment
   )> }
+);
+
+export type IndividualChoiceDataQueryVariables = {};
+
+
+export type IndividualChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { flagChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 export type IndividualPhotosQueryVariables = {
@@ -12052,8 +12068,8 @@ export type AllHouseholdsFlexFieldsAttributesQueryHookResult = ReturnType<typeof
 export type AllHouseholdsFlexFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllHouseholdsFlexFieldsAttributesLazyQuery>;
 export type AllHouseholdsFlexFieldsAttributesQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID]) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
     totalCount
     pageInfo {
       startCursor
@@ -12116,6 +12132,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      adminArea: // value for 'adminArea'
  *      withdrawn: // value for 'withdrawn'
  *      admin2: // value for 'admin2'
+ *      flags: // value for 'flags'
  *   },
  * });
  */
@@ -14129,6 +14146,56 @@ export function useIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type IndividualQueryHookResult = ReturnType<typeof useIndividualQuery>;
 export type IndividualLazyQueryHookResult = ReturnType<typeof useIndividualLazyQuery>;
 export type IndividualQueryResult = ApolloReactCommon.QueryResult<IndividualQuery, IndividualQueryVariables>;
+export const IndividualChoiceDataDocument = gql`
+    query individualChoiceData {
+  flagChoices {
+    name
+    value
+  }
+}
+    `;
+export type IndividualChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>, 'query'>;
+
+    export const IndividualChoiceDataComponent = (props: IndividualChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables> query={IndividualChoiceDataDocument} {...props} />
+    );
+    
+export type IndividualChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables> & TChildProps;
+export function withIndividualChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  IndividualChoiceDataQuery,
+  IndividualChoiceDataQueryVariables,
+  IndividualChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables, IndividualChoiceDataProps<TChildProps>>(IndividualChoiceDataDocument, {
+      alias: 'individualChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useIndividualChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useIndividualChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIndividualChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIndividualChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useIndividualChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>(IndividualChoiceDataDocument, baseOptions);
+      }
+export function useIndividualChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>(IndividualChoiceDataDocument, baseOptions);
+        }
+export type IndividualChoiceDataQueryHookResult = ReturnType<typeof useIndividualChoiceDataQuery>;
+export type IndividualChoiceDataLazyQueryHookResult = ReturnType<typeof useIndividualChoiceDataLazyQuery>;
+export type IndividualChoiceDataQueryResult = ApolloReactCommon.QueryResult<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>;
 export const IndividualPhotosDocument = gql`
     query IndividualPhotos($id: ID!) {
   individual(id: $id) {
@@ -17615,6 +17682,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   collectIndividualData?: Resolver<ResolversTypes['HouseholdCollectIndividualData'], ParentType, ContextType>,
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeSensitiveTicketDetailsArgs>,
@@ -18313,6 +18381,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   observedDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   severityOfDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  flagChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allHouseholdsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   allIndividualsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
@@ -19167,12 +19236,12 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   isStaff?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>,
   partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>,
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   jobTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>,

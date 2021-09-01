@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useGoldenRecordByTargetingCriteriaQuery } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
@@ -22,6 +23,7 @@ export const CreateTable = ({
   program,
   businessArea,
 }: TargetPopulationHouseholdProps): ReactElement => {
+  const { t } = useTranslation();
   const initialVariables = {
     ...(id && { targetPopulation: id }),
     ...variables,
@@ -31,7 +33,7 @@ export const CreateTable = ({
   return (
     <TableWrapper>
       <UniversalTable
-        title='Households'
+        title={t('Households')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useGoldenRecordByTargetingCriteriaQuery}
