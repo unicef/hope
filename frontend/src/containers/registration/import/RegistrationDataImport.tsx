@@ -326,6 +326,7 @@ export function RegistrationDataImport(): React.ReactElement {
                       name: values.name,
                       businessAreaSlug: businessArea,
                       pullPictures: values.pullPictures,
+                      screenBeneficiary: values.screenBeneficiary,
                     },
                   },
                 });
@@ -339,6 +340,7 @@ export function RegistrationDataImport(): React.ReactElement {
                         uploadData.uploadImportDataXlsxFile.importData.id,
                       name: values.name,
                       businessAreaSlug: businessArea,
+                      screenBeneficiary: values.screenBeneficiary,
                     },
                   },
                 });
@@ -377,7 +379,11 @@ export function RegistrationDataImport(): React.ReactElement {
               }
             }
           }}
-          initialValues={{ name: '', pullPictures: true }}
+          initialValues={{
+            name: '',
+            pullPictures: true,
+            screenBeneficiary: false,
+          }}
         >
           {() => (
             <Form>
@@ -419,6 +425,12 @@ export function RegistrationDataImport(): React.ReactElement {
                   required
                   variant='outlined'
                   component={FormikTextField}
+                />
+                <Field
+                  name='screenBeneficiary'
+                  label={t('Screen Beneficiary')}
+                  color='primary'
+                  component={FormikCheckboxField}
                 />
               </DialogContent>
               <StyledDialogFooter data-cy='dialog-actions-container'>
