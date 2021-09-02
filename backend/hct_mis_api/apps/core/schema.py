@@ -269,7 +269,7 @@ class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AdminAreaNode)
     business_area = graphene.Field(
         BusinessAreaNode,
-        slug=graphene.String(required=True, description="The business area slug"),
+        business_area_slug=graphene.String(required=True, description="The business area slug"),
         description="Single business area",
     )
     all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
@@ -302,8 +302,8 @@ class Query(graphene.ObjectType):
     )
     cash_assist_url_prefix = graphene.String()
 
-    def resolve_business_area(parent, info, slug):
-        return BusinessArea.objects.get(slug=slug)
+    def resolve_business_area(parent, info, business_area_slug):
+        return BusinessArea.objects.get(slug=business_area_slug)
 
     def resolve_all_business_areas(parent, info):
         return BusinessArea.objects.filter(is_split=False)
