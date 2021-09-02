@@ -73,6 +73,7 @@ stages:
                 backend.secret.KOBO_KF_URL=$(KOBO_KF_URL),\
                 backend.secret.KOBO_KC_URL=$(KOBO_KC_URL),\
                 backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
+                backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
                 backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
                 frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion)-trn,\
                 ingress.host=trn-hope.unitst.org,\
