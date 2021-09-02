@@ -29,6 +29,7 @@ import {
   SaveKoboImportDataMutation,
   UploadImportDataXlsxFileMutation,
   useAllKoboProjectsQuery,
+  useBusinessAreaDataQuery,
   useCreateRegistrationKoboImportMutation,
   useCreateRegistrationXlsxImportMutation,
   useSaveKoboImportDataMutation,
@@ -123,6 +124,9 @@ export function RegistrationDataImport(): React.ReactElement {
   const [onlyActiveSubmissions, setOnlyActiveSubmissions] = useState(true);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
+  const { data: businessAreaData } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const [
     uploadMutate,
     { data: uploadData, loading: fileLoading },
@@ -426,12 +430,14 @@ export function RegistrationDataImport(): React.ReactElement {
                   variant='outlined'
                   component={FormikTextField}
                 />
-                <Field
-                  name='screenBeneficiary'
-                  label={t('Screen Beneficiary')}
-                  color='primary'
-                  component={FormikCheckboxField}
-                />
+                {businessAreaData?.businessArea?.screenBeneficiary ? (
+                  <Field
+                    name='screenBeneficiary'
+                    label={t('Screen Beneficiary')}
+                    color='primary'
+                    component={FormikCheckboxField}
+                  />
+                ) : null}
               </DialogContent>
               <StyledDialogFooter data-cy='dialog-actions-container'>
                 <Button
