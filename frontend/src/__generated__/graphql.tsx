@@ -276,13 +276,13 @@ export type BusinessAreaNode = Node & {
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
   countries: AdminAreaTypeNodeConnection,
-  deduplicationBatchDuplicateScore: Scalars['Float'],
+  deduplicationDuplicateScore: Scalars['Float'],
+  deduplicationPossibleDuplicateScore: Scalars['Float'],
   deduplicationBatchDuplicatesPercentage: Scalars['Int'],
   deduplicationBatchDuplicatesAllowed: Scalars['Int'],
-  deduplicationGoldenRecordDuplicateScore: Scalars['Float'],
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int'],
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
-  deduplicationGoldenRecordMinScore: Scalars['Float'],
+  screenBeneficiary: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -4046,6 +4046,7 @@ export type RegistrationDataImportNode = Node & {
   sentryId?: Maybe<Scalars['String']>,
   pullPictures: Scalars['Boolean'],
   businessArea?: Maybe<UserBusinessAreaNode>,
+  screenBeneficiary: Scalars['Boolean'],
   grievanceticketSet: GrievanceTicketNodeConnection,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
@@ -4122,6 +4123,7 @@ export type RegistrationKoboImportMutationInput = {
   name?: Maybe<Scalars['String']>,
   pullPictures?: Maybe<Scalars['Boolean']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
+  screenBeneficiary?: Maybe<Scalars['Boolean']>,
 };
 
 export type RegistrationXlsxImportMutation = {
@@ -4134,6 +4136,7 @@ export type RegistrationXlsxImportMutationInput = {
   importDataId?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
+  screenBeneficiary?: Maybe<Scalars['Boolean']>,
 };
 
 export type ReportNode = Node & {
@@ -5157,13 +5160,13 @@ export type UserBusinessAreaNode = Node & {
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
   countries: AdminAreaTypeNodeConnection,
-  deduplicationBatchDuplicateScore: Scalars['Float'],
+  deduplicationDuplicateScore: Scalars['Float'],
+  deduplicationPossibleDuplicateScore: Scalars['Float'],
   deduplicationBatchDuplicatesPercentage: Scalars['Int'],
   deduplicationBatchDuplicatesAllowed: Scalars['Int'],
-  deduplicationGoldenRecordDuplicateScore: Scalars['Float'],
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int'],
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
-  deduplicationGoldenRecordMinScore: Scalars['Float'],
+  screenBeneficiary: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -8230,7 +8233,7 @@ export type CreateRegistrationKoboImportMutation = (
     & Pick<RegistrationKoboImportMutation, 'validationErrors'>
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
-      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
+      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId' | 'screenBeneficiary'>
     )> }
   )> }
 );
@@ -8247,7 +8250,7 @@ export type CreateRegistrationXlsxImportMutation = (
     & Pick<RegistrationXlsxImportMutation, 'validationErrors'>
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
-      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
+      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId' | 'screenBeneficiary'>
     )> }
   )> }
 );
@@ -15434,6 +15437,7 @@ export const CreateRegistrationKoboImportDocument = gql`
       name
       dataSource
       datahubId
+      screenBeneficiary
     }
     validationErrors
   }
@@ -15489,6 +15493,7 @@ export const CreateRegistrationXlsxImportDocument = gql`
       name
       dataSource
       datahubId
+      screenBeneficiary
     }
     validationErrors
   }
@@ -17192,13 +17197,13 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   countries?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeCountriesArgs>,
-  deduplicationBatchDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deduplicationDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationBatchDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationBatchDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordMinScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
@@ -18480,6 +18485,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   sentryId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
@@ -19193,13 +19199,13 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   countries?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeCountriesArgs>,
-  deduplicationBatchDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deduplicationDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationBatchDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationBatchDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordMinScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
