@@ -110,6 +110,7 @@ social-auth-core = "3.3.3"
 sorl-thumbnail = "12.5.0"
 urllib3 = "1.26.2"
 xlrd = "1.2.0"
+argh = "^0.26.2"
 
 [tool.poetry.dev-dependencies]
 django-webtest = "^1.9.7"

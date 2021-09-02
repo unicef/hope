@@ -10,7 +10,7 @@ from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import (
     populate_index,
-    remove_document_by_matching_ids,
+    remove_elasticsearch_documents_by_matching_ids,
 )
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
@@ -311,5 +311,5 @@ class RdiMergeTask:
                     DeduplicateTask.hard_deduplicate_documents(documents_to_create, registration_data_import=obj_hct)
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
         except:
-            remove_document_by_matching_ids(individual_ids, IndividualDocument)
+            remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise
