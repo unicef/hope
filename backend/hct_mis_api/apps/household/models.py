@@ -818,6 +818,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    fchild_hoh = models.BooleanField(default=False)
+    child_hoh = models.BooleanField(default=False)
 
     @property
     def age(self):
