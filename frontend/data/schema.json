@@ -8465,7 +8465,23 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationBatchDuplicateScore",
+            "name": "deduplicationDuplicateScore",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deduplicationPossibleDuplicateScore",
             "description": null,
             "args": [],
             "type": {
@@ -8513,22 +8529,6 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationGoldenRecordDuplicateScore",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "deduplicationGoldenRecordDuplicatesPercentage",
             "description": null,
             "args": [],
@@ -8561,7 +8561,7 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationGoldenRecordMinScore",
+            "name": "screenBeneficiary",
             "description": null,
             "args": [],
             "type": {
@@ -8569,7 +8569,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Float",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -11812,6 +11812,22 @@
               "kind": "OBJECT",
               "name": "UserBusinessAreaNode",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "screenBeneficiary",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -30687,7 +30703,23 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationBatchDuplicateScore",
+            "name": "deduplicationDuplicateScore",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deduplicationPossibleDuplicateScore",
             "description": null,
             "args": [],
             "type": {
@@ -30735,22 +30767,6 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationGoldenRecordDuplicateScore",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "deduplicationGoldenRecordDuplicatesPercentage",
             "description": null,
             "args": [],
@@ -30783,7 +30799,7 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationGoldenRecordMinScore",
+            "name": "screenBeneficiary",
             "description": null,
             "args": [],
             "type": {
@@ -30791,7 +30807,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Float",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -44058,6 +44074,16 @@
               "ofType": null
             },
             "defaultValue": null
+          },
+          {
+            "name": "screenBeneficiary",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -44141,6 +44167,16 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "screenBeneficiary",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null

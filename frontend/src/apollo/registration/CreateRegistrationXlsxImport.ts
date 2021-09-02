@@ -12,6 +12,7 @@ export const CREATE_REGISTRATION_DATA_IMPORT_QUERY = gql`
         name
         dataSource
         datahubId
+        screenBeneficiary
       }
       validationErrors
     }
