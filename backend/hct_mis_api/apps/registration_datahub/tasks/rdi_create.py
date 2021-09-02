@@ -448,6 +448,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "primary_collector_id": self._handle_collectors,
                 "alternate_collector_id": self._handle_collectors,
                 "pregnant_i_c": self._handle_bool_field,
+                "fchild_hoh_i_c": self._handle_bool_field,
+                "child_hoh_i_c": self._handle_bool_field,
             },
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
