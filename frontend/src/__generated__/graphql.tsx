@@ -3232,6 +3232,7 @@ export type Query = {
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
   sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>,
   adminArea?: Maybe<AdminAreaNode>,
+  businessArea?: Maybe<BusinessAreaNode>,
   allAdminAreas?: Maybe<AdminAreaNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
@@ -3545,6 +3546,11 @@ export type QueryAdminAreaArgs = {
 };
 
 
+export type QueryBusinessAreaArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
 export type QueryAllAdminAreasArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -3562,7 +3568,8 @@ export type QueryAllBusinessAreasArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['UUID']>
+  id?: Maybe<Scalars['UUID']>,
+  slug?: Maybe<Scalars['String']>
 };
 
 
@@ -7261,6 +7268,19 @@ export type AllUsersQuery = (
         )> }
       )> }
     )>> }
+  )> }
+);
+
+export type BusinessAreaDataQueryVariables = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type BusinessAreaDataQuery = (
+  { __typename?: 'Query' }
+  & { businessArea: Maybe<(
+    { __typename?: 'BusinessAreaNode' }
+    & Pick<BusinessAreaNode, 'id' | 'screenBeneficiary'>
   )> }
 );
 
@@ -13026,6 +13046,57 @@ export function useAllUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
+export const BusinessAreaDataDocument = gql`
+    query BusinessAreaData($businessAreaSlug: String!) {
+  businessArea(businessAreaSlug: $businessAreaSlug) {
+    id
+    screenBeneficiary
+  }
+}
+    `;
+export type BusinessAreaDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>, 'query'> & ({ variables: BusinessAreaDataQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const BusinessAreaDataComponent = (props: BusinessAreaDataComponentProps) => (
+      <ApolloReactComponents.Query<BusinessAreaDataQuery, BusinessAreaDataQueryVariables> query={BusinessAreaDataDocument} {...props} />
+    );
+    
+export type BusinessAreaDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<BusinessAreaDataQuery, BusinessAreaDataQueryVariables> & TChildProps;
+export function withBusinessAreaData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  BusinessAreaDataQuery,
+  BusinessAreaDataQueryVariables,
+  BusinessAreaDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, BusinessAreaDataQuery, BusinessAreaDataQueryVariables, BusinessAreaDataProps<TChildProps>>(BusinessAreaDataDocument, {
+      alias: 'businessAreaData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useBusinessAreaDataQuery__
+ *
+ * To run a query within a React component, call `useBusinessAreaDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBusinessAreaDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBusinessAreaDataQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useBusinessAreaDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, baseOptions);
+      }
+export function useBusinessAreaDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, baseOptions);
+        }
+export type BusinessAreaDataQueryHookResult = ReturnType<typeof useBusinessAreaDataQuery>;
+export type BusinessAreaDataLazyQueryHookResult = ReturnType<typeof useBusinessAreaDataLazyQuery>;
+export type BusinessAreaDataQueryResult = ApolloReactCommon.QueryResult<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>;
 export const CashAssistUrlPrefixDocument = gql`
     query CashAssistUrlPrefix {
   cashAssistUrlPrefix
@@ -16607,9 +16678,9 @@ export type ResolversTypes = {
   AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
+  BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
   BusinessAreaNodeConnection: ResolverTypeWrapper<BusinessAreaNodeConnection>,
   BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>,
-  BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
@@ -16945,9 +17016,9 @@ export type ResolversParentTypes = {
   AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
+  BusinessAreaNode: BusinessAreaNode,
   BusinessAreaNodeConnection: BusinessAreaNodeConnection,
   BusinessAreaNodeEdge: BusinessAreaNodeEdge,
-  BusinessAreaNode: BusinessAreaNode,
   GroupAttributeNode: GroupAttributeNode,
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
@@ -18341,6 +18412,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
   sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
+  businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
