@@ -1,9 +1,12 @@
+from django.conf import settings
 from django.contrib import admin
 
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
+def is_root(request, obj):
+    return request.user.is_superuser and request.headers.get("x-root-token") == settings.ROOT_TOKEN
 
 class HOPEModelAdminBase(SmartDisplayAllMixin, admin.ModelAdmin):
     list_per_page = 50
