@@ -83,3 +83,9 @@ def remove_document_by_matching_ids(id_list, document):
     search = Search(index="individuals")
     search.update_from_dict(query_dict)
     search.delete()
+
+def remove_elasticsearch_documents_by_matching_ids(id_list, document):
+    query_dict = {"query": {"terms": {"id": id_list}}}
+    search = Search(index=document.Index.name)
+    search.update_from_dict(query_dict)
+    search.delete()
