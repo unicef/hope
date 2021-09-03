@@ -79,7 +79,7 @@ class BusinessArea(TimeStampedUUIDModel):
     deduplication_golden_record_duplicates_allowed = models.IntegerField(
         default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
     )
-
+    screen_beneficiary = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
@@ -112,6 +112,9 @@ class BusinessArea(TimeStampedUUIDModel):
             {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
             for business_area in cls.objects.all()
         ]
+
+    def should_check_against_sanction_list(self):
+        return self.screen_beneficiary
 
 
 class AdminAreaLevelManager(models.Manager):

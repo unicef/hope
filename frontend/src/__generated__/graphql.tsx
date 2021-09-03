@@ -276,13 +276,13 @@ export type BusinessAreaNode = Node & {
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
   countries: AdminAreaTypeNodeConnection,
-  deduplicationBatchDuplicateScore: Scalars['Float'],
+  deduplicationDuplicateScore: Scalars['Float'],
+  deduplicationPossibleDuplicateScore: Scalars['Float'],
   deduplicationBatchDuplicatesPercentage: Scalars['Int'],
   deduplicationBatchDuplicatesAllowed: Scalars['Int'],
-  deduplicationGoldenRecordDuplicateScore: Scalars['Float'],
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int'],
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
-  deduplicationGoldenRecordMinScore: Scalars['Float'],
+  screenBeneficiary: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -3232,6 +3232,7 @@ export type Query = {
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
   sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>,
   adminArea?: Maybe<AdminAreaNode>,
+  businessArea?: Maybe<BusinessAreaNode>,
   allAdminAreas?: Maybe<AdminAreaNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
@@ -3545,6 +3546,11 @@ export type QueryAdminAreaArgs = {
 };
 
 
+export type QueryBusinessAreaArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
 export type QueryAllAdminAreasArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -3562,7 +3568,8 @@ export type QueryAllBusinessAreasArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['UUID']>
+  id?: Maybe<Scalars['UUID']>,
+  slug?: Maybe<Scalars['String']>
 };
 
 
@@ -4046,6 +4053,7 @@ export type RegistrationDataImportNode = Node & {
   sentryId?: Maybe<Scalars['String']>,
   pullPictures: Scalars['Boolean'],
   businessArea?: Maybe<UserBusinessAreaNode>,
+  screenBeneficiary: Scalars['Boolean'],
   grievanceticketSet: GrievanceTicketNodeConnection,
   households: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
@@ -4122,6 +4130,7 @@ export type RegistrationKoboImportMutationInput = {
   name?: Maybe<Scalars['String']>,
   pullPictures?: Maybe<Scalars['Boolean']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
+  screenBeneficiary?: Maybe<Scalars['Boolean']>,
 };
 
 export type RegistrationXlsxImportMutation = {
@@ -4134,6 +4143,7 @@ export type RegistrationXlsxImportMutationInput = {
   importDataId?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
+  screenBeneficiary?: Maybe<Scalars['Boolean']>,
 };
 
 export type ReportNode = Node & {
@@ -5157,13 +5167,13 @@ export type UserBusinessAreaNode = Node & {
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
   countries: AdminAreaTypeNodeConnection,
-  deduplicationBatchDuplicateScore: Scalars['Float'],
+  deduplicationDuplicateScore: Scalars['Float'],
+  deduplicationPossibleDuplicateScore: Scalars['Float'],
   deduplicationBatchDuplicatesPercentage: Scalars['Int'],
   deduplicationBatchDuplicatesAllowed: Scalars['Int'],
-  deduplicationGoldenRecordDuplicateScore: Scalars['Float'],
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int'],
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
-  deduplicationGoldenRecordMinScore: Scalars['Float'],
+  screenBeneficiary: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -7261,6 +7271,19 @@ export type AllUsersQuery = (
   )> }
 );
 
+export type BusinessAreaDataQueryVariables = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type BusinessAreaDataQuery = (
+  { __typename?: 'Query' }
+  & { businessArea: Maybe<(
+    { __typename?: 'BusinessAreaNode' }
+    & Pick<BusinessAreaNode, 'id' | 'screenBeneficiary'>
+  )> }
+);
+
 export type CashAssistUrlPrefixQueryVariables = {};
 
 
@@ -8230,7 +8253,7 @@ export type CreateRegistrationKoboImportMutation = (
     & Pick<RegistrationKoboImportMutation, 'validationErrors'>
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
-      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
+      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId' | 'screenBeneficiary'>
     )> }
   )> }
 );
@@ -8247,7 +8270,7 @@ export type CreateRegistrationXlsxImportMutation = (
     & Pick<RegistrationXlsxImportMutation, 'validationErrors'>
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
-      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
+      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId' | 'screenBeneficiary'>
     )> }
   )> }
 );
@@ -13023,6 +13046,57 @@ export function useAllUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
+export const BusinessAreaDataDocument = gql`
+    query BusinessAreaData($businessAreaSlug: String!) {
+  businessArea(businessAreaSlug: $businessAreaSlug) {
+    id
+    screenBeneficiary
+  }
+}
+    `;
+export type BusinessAreaDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>, 'query'> & ({ variables: BusinessAreaDataQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const BusinessAreaDataComponent = (props: BusinessAreaDataComponentProps) => (
+      <ApolloReactComponents.Query<BusinessAreaDataQuery, BusinessAreaDataQueryVariables> query={BusinessAreaDataDocument} {...props} />
+    );
+    
+export type BusinessAreaDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<BusinessAreaDataQuery, BusinessAreaDataQueryVariables> & TChildProps;
+export function withBusinessAreaData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  BusinessAreaDataQuery,
+  BusinessAreaDataQueryVariables,
+  BusinessAreaDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, BusinessAreaDataQuery, BusinessAreaDataQueryVariables, BusinessAreaDataProps<TChildProps>>(BusinessAreaDataDocument, {
+      alias: 'businessAreaData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useBusinessAreaDataQuery__
+ *
+ * To run a query within a React component, call `useBusinessAreaDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBusinessAreaDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBusinessAreaDataQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useBusinessAreaDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, baseOptions);
+      }
+export function useBusinessAreaDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, baseOptions);
+        }
+export type BusinessAreaDataQueryHookResult = ReturnType<typeof useBusinessAreaDataQuery>;
+export type BusinessAreaDataLazyQueryHookResult = ReturnType<typeof useBusinessAreaDataLazyQuery>;
+export type BusinessAreaDataQueryResult = ApolloReactCommon.QueryResult<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>;
 export const CashAssistUrlPrefixDocument = gql`
     query CashAssistUrlPrefix {
   cashAssistUrlPrefix
@@ -15434,6 +15508,7 @@ export const CreateRegistrationKoboImportDocument = gql`
       name
       dataSource
       datahubId
+      screenBeneficiary
     }
     validationErrors
   }
@@ -15489,6 +15564,7 @@ export const CreateRegistrationXlsxImportDocument = gql`
       name
       dataSource
       datahubId
+      screenBeneficiary
     }
     validationErrors
   }
@@ -16602,9 +16678,9 @@ export type ResolversTypes = {
   AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
+  BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
   BusinessAreaNodeConnection: ResolverTypeWrapper<BusinessAreaNodeConnection>,
   BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>,
-  BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
@@ -16940,9 +17016,9 @@ export type ResolversParentTypes = {
   AgeInput: AgeInput,
   RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
+  BusinessAreaNode: BusinessAreaNode,
   BusinessAreaNodeConnection: BusinessAreaNodeConnection,
   BusinessAreaNodeEdge: BusinessAreaNodeEdge,
-  BusinessAreaNode: BusinessAreaNode,
   GroupAttributeNode: GroupAttributeNode,
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
@@ -17192,13 +17268,13 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   countries?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeCountriesArgs>,
-  deduplicationBatchDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deduplicationDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationBatchDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationBatchDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordMinScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
@@ -18336,6 +18412,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
   sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
+  businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
@@ -18480,6 +18557,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   sentryId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
@@ -19193,13 +19271,13 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   countries?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeCountriesArgs>,
-  deduplicationBatchDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deduplicationDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationBatchDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationBatchDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  deduplicationGoldenRecordMinScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
