@@ -40,3 +40,5 @@ def copy_model_object(model_object):
     model_dict.update(model_object.__dict__)
     del model_dict["_state"]
     return model_object.__class__(**model_dict)
+
+

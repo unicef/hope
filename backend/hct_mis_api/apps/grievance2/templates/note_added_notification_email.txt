@@ -1,0 +1,6 @@
+{% extends 'base_notification_email.txt' %}
+{% block content %}
+    A note has been left by {{created_by}} in Grievance & Feedback ticket {{ ticket_url }}.
+
+    {{ ticket_note.description }}
+{% endblock %}
