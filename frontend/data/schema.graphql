@@ -1741,6 +1741,8 @@ type IndividualNode implements Node {
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
   businessArea: UserBusinessAreaNode!
+  fchildHoh: Boolean!
+  childHoh: Boolean!
   paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -3021,6 +3023,11 @@ type TicketIndividualDataUpdateDetailsNodeEdge {
   cursor: String!
 }
 
+type TicketNeedsAdjudicationDetailsExtraDataNode {
+  goldenRecords: [DeduplicationResultNode]
+  possibleDuplicate: [DeduplicationResultNode]
+}
+
 type TicketNeedsAdjudicationDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -3029,6 +3036,7 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   possibleDuplicate: IndividualNode!
   selectedIndividual: IndividualNode
   roleReassignData: JSONString!
+  extraData: TicketNeedsAdjudicationDetailsExtraDataNode
   hasDuplicatedDocument: Boolean
 }
 
