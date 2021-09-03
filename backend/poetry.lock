@@ -408,7 +408,6 @@ python-dateutil = "2.6.0"
 [package.source]
 type = "url"
 url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip"
-
 [[package]]
 name = "django-braces"
 version = "1.14.0"
@@ -1810,7 +1809,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "e8c4fbe2e2cbc4233e6e87eed36c2121d1cceff5fba4031d46aa809714821678"
+content-hash = "81d25ec6ac21260e6c23092a26b9d5486f24d03ae95fc51c69e911983ea268b4"
 
 [metadata.files]
 amqp = [
