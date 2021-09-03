@@ -42,6 +42,7 @@ from hct_mis_api.apps.core.utils import (
     chart_get_filtered_qs,
     chart_permission_decorator,
     choices_to_dict,
+    encode_ids,
     nested_getattr,
     to_choice_object,
 )
@@ -65,6 +66,7 @@ from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
@@ -451,14 +453,31 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
+    golden_records = graphene.List(DeduplicationResultNode)
+    possible_duplicate = graphene.List(DeduplicationResultNode)
+
+    def resolve_golden_records(self, info):
+        return encode_ids(self.golden_records, "Individual", "hit_id")
+
+    def resolve_possible_duplicate(self, info):
+        return encode_ids(self.possible_duplicate, "Individual", "hit_id")
+
+
 class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     has_duplicated_document = graphene.Boolean()
+    extra_data = graphene.Field(TicketNeedsAdjudicationDetailsExtraDataNode)
 
     class Meta:
         model = TicketNeedsAdjudicationDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_extra_data(parent, info):
+        golden_records = parent.extra_data.get("golden_records")
+        possible_duplicate = parent.extra_data.get("possible_duplicate")
+        return TicketNeedsAdjudicationDetailsExtraDataNode(golden_records, possible_duplicate)
 
 
 class TicketSystemFlaggingDetailsNode(DjangoObjectType):
