@@ -156,13 +156,13 @@ type BusinessAreaNode implements Node {
   parent: UserBusinessAreaNode
   isSplit: Boolean!
   countries(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
-  deduplicationBatchDuplicateScore: Float!
+  deduplicationDuplicateScore: Float!
+  deduplicationPossibleDuplicateScore: Float!
   deduplicationBatchDuplicatesPercentage: Int!
   deduplicationBatchDuplicatesAllowed: Int!
-  deduplicationGoldenRecordDuplicateScore: Float!
   deduplicationGoldenRecordDuplicatesPercentage: Int!
   deduplicationGoldenRecordDuplicatesAllowed: Int!
-  deduplicationGoldenRecordMinScore: Float!
+  screenBeneficiary: Boolean!
   children(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
@@ -2243,8 +2243,9 @@ type Query {
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
   adminArea(id: ID!): AdminAreaNode
+  businessArea(businessAreaSlug: String!): BusinessAreaNode
   allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Istartswith: String, businessArea: String, level: Int): AdminAreaNodeConnection
-  allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
+  allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
   allIndividualFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
@@ -2415,6 +2416,7 @@ type RegistrationDataImportNode implements Node {
   sentryId: String
   pullPictures: Boolean!
   businessArea: UserBusinessAreaNode
+  screenBeneficiary: Boolean!
   grievanceticketSet(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -2463,6 +2465,7 @@ input RegistrationKoboImportMutationInput {
   name: String
   pullPictures: Boolean
   businessAreaSlug: String
+  screenBeneficiary: Boolean
 }
 
 type RegistrationXlsxImportMutation {
@@ -2474,6 +2477,7 @@ input RegistrationXlsxImportMutationInput {
   importDataId: ID
   name: String
   businessAreaSlug: String
+  screenBeneficiary: Boolean
 }
 
 type ReportNode implements Node {
@@ -3289,13 +3293,13 @@ type UserBusinessAreaNode implements Node {
   parent: UserBusinessAreaNode
   isSplit: Boolean!
   countries(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
-  deduplicationBatchDuplicateScore: Float!
+  deduplicationDuplicateScore: Float!
+  deduplicationPossibleDuplicateScore: Float!
   deduplicationBatchDuplicatesPercentage: Int!
   deduplicationBatchDuplicatesAllowed: Int!
-  deduplicationGoldenRecordDuplicateScore: Float!
   deduplicationGoldenRecordDuplicatesPercentage: Int!
   deduplicationGoldenRecordDuplicatesAllowed: Int!
-  deduplicationGoldenRecordMinScore: Float!
+  screenBeneficiary: Boolean!
   children(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!

@@ -29,6 +29,7 @@ import {
   SaveKoboImportDataMutation,
   UploadImportDataXlsxFileMutation,
   useAllKoboProjectsQuery,
+  useBusinessAreaDataQuery,
   useCreateRegistrationKoboImportMutation,
   useCreateRegistrationXlsxImportMutation,
   useSaveKoboImportDataMutation,
@@ -123,6 +124,9 @@ export function RegistrationDataImport(): React.ReactElement {
   const [onlyActiveSubmissions, setOnlyActiveSubmissions] = useState(true);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
+  const { data: businessAreaData } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const [
     uploadMutate,
     { data: uploadData, loading: fileLoading },
@@ -326,6 +330,7 @@ export function RegistrationDataImport(): React.ReactElement {
                       name: values.name,
                       businessAreaSlug: businessArea,
                       pullPictures: values.pullPictures,
+                      screenBeneficiary: values.screenBeneficiary,
                     },
                   },
                 });
@@ -339,6 +344,7 @@ export function RegistrationDataImport(): React.ReactElement {
                         uploadData.uploadImportDataXlsxFile.importData.id,
                       name: values.name,
                       businessAreaSlug: businessArea,
+                      screenBeneficiary: values.screenBeneficiary,
                     },
                   },
                 });
@@ -377,7 +383,11 @@ export function RegistrationDataImport(): React.ReactElement {
               }
             }
           }}
-          initialValues={{ name: '', pullPictures: true }}
+          initialValues={{
+            name: '',
+            pullPictures: true,
+            screenBeneficiary: false,
+          }}
         >
           {() => (
             <Form>
@@ -420,6 +430,14 @@ export function RegistrationDataImport(): React.ReactElement {
                   variant='outlined'
                   component={FormikTextField}
                 />
+                {businessAreaData?.businessArea?.screenBeneficiary ? (
+                  <Field
+                    name='screenBeneficiary'
+                    label={t('Screen Beneficiary')}
+                    color='primary'
+                    component={FormikCheckboxField}
+                  />
+                ) : null}
               </DialogContent>
               <StyledDialogFooter data-cy='dialog-actions-container'>
                 <Button
