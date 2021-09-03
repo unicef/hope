@@ -2266,6 +2266,8 @@ export type IndividualNode = Node & {
   whoAnswersPhone: Scalars['String'],
   whoAnswersAltPhone: Scalars['String'],
   businessArea: UserBusinessAreaNode,
+  fchildHoh: Scalars['Boolean'],
+  childHoh: Scalars['Boolean'],
   paymentRecords: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
@@ -4860,6 +4862,12 @@ export type TicketIndividualDataUpdateDetailsNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type TicketNeedsAdjudicationDetailsExtraDataNode = {
+   __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode',
+  goldenRecords?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  possibleDuplicate?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+};
+
 export type TicketNeedsAdjudicationDetailsNode = Node & {
    __typename?: 'TicketNeedsAdjudicationDetailsNode',
   id: Scalars['ID'],
@@ -4869,6 +4877,7 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   possibleDuplicate: IndividualNode,
   selectedIndividual?: Maybe<IndividualNode>,
   roleReassignData: Scalars['JSONString'],
+  extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>,
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
 };
 
@@ -7590,7 +7599,16 @@ export type GrievanceTicketQuery = (
     )>, needsAdjudicationTicketDetails: Maybe<(
       { __typename?: 'TicketNeedsAdjudicationDetailsNode' }
       & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'hasDuplicatedDocument' | 'roleReassignData'>
-      & { goldenRecordsIndividual: (
+      & { extraData: Maybe<(
+        { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode' }
+        & { goldenRecords: Maybe<Array<Maybe<(
+          { __typename?: 'DeduplicationResultNode' }
+          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
+        )>>>, possibleDuplicate: Maybe<Array<Maybe<(
+          { __typename?: 'DeduplicationResultNode' }
+          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
+        )>>> }
+      )>, goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
         & { documents: (
@@ -13765,6 +13783,18 @@ export const GrievanceTicketDocument = gql`
     needsAdjudicationTicketDetails {
       id
       hasDuplicatedDocument
+      extraData {
+        goldenRecords {
+          hitId
+          proximityToScore
+          score
+        }
+        possibleDuplicate {
+          hitId
+          proximityToScore
+          score
+        }
+      }
       goldenRecordsIndividual {
         id
         unicefId
@@ -16648,6 +16678,7 @@ export type ResolversTypes = {
   TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
   TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
   TicketNeedsAdjudicationDetailsNode: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNode>,
+  TicketNeedsAdjudicationDetailsExtraDataNode: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsExtraDataNode>,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
@@ -16986,6 +17017,7 @@ export type ResolversParentTypes = {
   TicketNoteNodeEdge: TicketNoteNodeEdge,
   TicketNoteNode: TicketNoteNode,
   TicketNeedsAdjudicationDetailsNode: TicketNeedsAdjudicationDetailsNode,
+  TicketNeedsAdjudicationDetailsExtraDataNode: TicketNeedsAdjudicationDetailsExtraDataNode,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
@@ -18063,6 +18095,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  fchildHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentRecordsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, IndividualNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, IndividualNodeSensitiveTicketDetailsArgs>,
@@ -19064,6 +19098,11 @@ export type TicketIndividualDataUpdateDetailsNodeEdgeResolvers<ContextType = any
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type TicketNeedsAdjudicationDetailsExtraDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsExtraDataNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsExtraDataNode']> = {
+  goldenRecords?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  possibleDuplicate?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+};
+
 export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -19072,6 +19111,7 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>,
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
@@ -19565,6 +19605,7 @@ export type Resolvers<ContextType = any> = {
   TicketIndividualDataUpdateDetailsNode?: TicketIndividualDataUpdateDetailsNodeResolvers<ContextType>,
   TicketIndividualDataUpdateDetailsNodeConnection?: TicketIndividualDataUpdateDetailsNodeConnectionResolvers<ContextType>,
   TicketIndividualDataUpdateDetailsNodeEdge?: TicketIndividualDataUpdateDetailsNodeEdgeResolvers<ContextType>,
+  TicketNeedsAdjudicationDetailsExtraDataNode?: TicketNeedsAdjudicationDetailsExtraDataNodeResolvers<ContextType>,
   TicketNeedsAdjudicationDetailsNode?: TicketNeedsAdjudicationDetailsNodeResolvers<ContextType>,
   TicketNegativeFeedbackDetailsNode?: TicketNegativeFeedbackDetailsNodeResolvers<ContextType>,
   TicketNegativeFeedbackDetailsNodeConnection?: TicketNegativeFeedbackDetailsNodeConnectionResolvers<ContextType>,

@@ -126,6 +126,7 @@ unittest-xml-reporting = "3.0.4"
 watchdog = "^2.0.2"
 wasmer = "0.4.1"
 parso = "0.7.1"
+argh = "^0.26.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
