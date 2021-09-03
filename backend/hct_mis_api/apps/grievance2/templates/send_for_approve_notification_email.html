@@ -1,0 +1,4 @@
+{% extends 'base_notification_email.html' %}
+{% block content %}
+    A Grievance & Feedback ticket <a href="{{ ticket_url }}">{{ ticket_id }}</a> for {{ ticket_category }} has been sent for approval. Please take action.
+{% endblock %}
