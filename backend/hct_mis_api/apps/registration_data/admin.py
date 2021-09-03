@@ -198,13 +198,13 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                             Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
                         )
                         rdi_datahub.delete()
+                        GrievanceTicket.objects.filter(
+                            RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
+                        ).filter(business_area=rdi.business_area).delete()
                         rdi.delete()
                         # remove elastic search records linked to individuals
                         remove_elasticsearch_documents_by_matching_ids(datahub_individuals_ids, ImportedIndividualDocument)
                         remove_elasticsearch_documents_by_matching_ids(individuals_ids, IndividualDocument)
-                        GrievanceTicket.objects.filter(
-                            RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
-                        ).delete()
                         self.message_user(request, "RDI Deleted")
                         LogEntry.objects.log_action(
                             user_id=request.user.pk,
