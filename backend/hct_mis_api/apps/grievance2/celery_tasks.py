@@ -45,12 +45,12 @@ def restore_backup():
             ).all():
                 try:
                     if (
-                        hasattr(obj_backup, "main_ticket")
+                        hasattr(obj_backup, "main_ticket_id")
                         and (
-                            obj_backup.main_ticket.pk in ignored_ticket_ids
-                            or obj_backup.linked_ticket.pk in ignored_ticket_ids
+                            obj_backup.main_ticket_id in ignored_ticket_ids
+                            or obj_backup.linked_ticket_id in ignored_ticket_ids
                         )
-                        or (hasattr(obj_backup, "ticket") and obj_backup.ticket.pk in ignored_ticket_ids)
+                        or (hasattr(obj_backup, "ticket_id") and obj_backup.ticket_id in ignored_ticket_ids)
                     ):
                         continue
                     obj_destination = copy_model_object(obj_backup, model_destination)
