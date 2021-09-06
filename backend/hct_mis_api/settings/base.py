@@ -147,7 +147,7 @@ if "DATABASE_URL_HUB_REGISTRATION" not in os.environ:
         f'{os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB")}'
     )
 os.environ["DATABASE_URL_BACKUP"] = (
-    f'postgis://hctappprdusr'
+    f'postgis://hctappprdusr@pgsql-10-reserved-hctmis-prd-restore'
     f':{os.getenv("POSTGRES_PASSWORD")}'
     f'@pgsql-10-reserved-hctmis-prd-restore090321.postgres.database.azure.com:5432/'
     f'{os.getenv("POSTGRES_DB")}'
