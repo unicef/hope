@@ -8,6 +8,7 @@ from adminfilters.filters import (
     TextFieldFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from adminfilters.autocomplete import AutoCompleteFilter
 
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -63,6 +64,7 @@ class GrievanceTicketAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("category", ChoicesFieldComboFilter),
         ("business_area", RelatedFieldComboFilter),
+        ("registration_data_import", AutoCompleteFilter),
         TextFieldFilter.factory("created_by__username__istartswith"),
         TextFieldFilter.factory("created_by__username__istartswith"),
         TextFieldFilter.factory("assigned_to__username__istartswith"),
