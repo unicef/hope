@@ -19,6 +19,7 @@ from hct_mis_api.apps.grievance2.models import (
     TicketPositiveFeedbackDetails,
     TicketNegativeFeedbackDetails,
     TicketReferralDetails,
+    GrievanceTicketThrough,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -50,6 +51,7 @@ class GrievanceTicketAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAd
         TicketPositiveFeedbackDetails,
         TicketNegativeFeedbackDetails,
         TicketReferralDetails,
+        GrievanceTicketThrough,
     )
 )
 class TicketNoteAdmin(HOPEModelAdminBase):
