@@ -159,7 +159,7 @@ DATABASES = {
     "cash_assist_datahub_ca": env.db("DATABASE_URL_HUB_CA"),
     "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
     "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
-    "backup_database":env.db("DATABASE_URL_BACKUP")
+    # "backup_database": env.db("DATABASE_URL_BACKUP")
 }
 
 # If app is not specified here it will use default db
@@ -168,7 +168,7 @@ DATABASE_APPS_MAPPING = {
     "mis_datahub": "cash_assist_datahub_mis",
     "erp_datahub": "cash_assist_datahub_erp",
     "registration_datahub": "registration_datahub",
-    "grievance2": "backup_database",
+    "grievance2": "registration_datahub",
 }
 
 DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
