@@ -47,7 +47,15 @@ class TicketSensitiveDetailsInline(GrievanceInline):
 @admin.register(GrievanceTicket)
 class GrievanceTicketAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     inlines = [GrievanceNoteInline, TicketComplaintInline, TicketSensitiveDetailsInline]
-    list_display = ("unicef_id", "created_at", "created_by", "assigned_to", "status", "category")
+    list_display = (
+        "unicef_id",
+        "created_at",
+        "created_by",
+        "assigned_to",
+        "status",
+        "category",
+        "registration_data_import",
+    )
     raw_id_fields = ("created_by", "assigned_to", "admin2", "business_area", "registration_data_import")
     search_fields = ("unicef_id",)
     date_hierarchy = "created_at"
@@ -70,7 +78,6 @@ class GrievanceTicketAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     )
 
     readonly_fields = ("unicef_id",)
-
 
 
 @admin.register(TicketNote)
