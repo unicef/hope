@@ -54,3 +54,4 @@ def restore_backup():
                         raise
     except Exception as e:
         logger.exception(e)
+        raise

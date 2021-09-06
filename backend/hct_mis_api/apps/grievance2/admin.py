@@ -41,8 +41,13 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 @admin.register(GrievanceTicket)
 class GrievanceTicketAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     @button()
-    def copy_to_old_db(self, request):
+    def copy_to_old_db_async(self, request):
         restore_backup.delay()
+        self.message_user(request, "Copy started")
+
+    @button()
+    def copy_to_old_db(self, request):
+        restore_backup()
         self.message_user(request, "Copy started")
 
 
