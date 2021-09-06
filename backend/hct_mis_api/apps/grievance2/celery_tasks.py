@@ -56,8 +56,9 @@ def restore_backup():
                     obj_destination = copy_model_object(obj_backup, model_destination)
                     obj_destination.save()
                 except ValidationError as e:
-                    ignored_ticket_ids.append(obj_backup.pk)
-                    pass
+                    if len(e.message_dict.keys()) == 1 and "registration_data_import" in e.message_dict:
+                        ignored_ticket_ids.append(obj_backup.pk)
+                        pass
                 except Exception as e:
                     if 'is not present in table "household_individual"' in str(e):
                         if model_name == "GrievanceTicket":
