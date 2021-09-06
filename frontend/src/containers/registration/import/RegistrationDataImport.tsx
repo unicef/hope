@@ -398,7 +398,7 @@ export function RegistrationDataImport(): React.ReactElement {
               </DialogTitleWrapper>
               <DialogContent>
                 <FormControl variant='outlined' margin='dense'>
-                  <StyledInputLabel>{t('Select Project')}</StyledInputLabel>
+                  <StyledInputLabel>{t('Import From')}</StyledInputLabel>
                   <ComboBox
                     value={importType}
                     variant='outlined'
