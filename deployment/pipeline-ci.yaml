@@ -96,30 +96,30 @@ stages:
                 $(Build.BuildId)
                 $(Build.SourceVersion)
 
-          - task: Docker@2
-            displayName: Build frontend for TRN
-            condition: and(succeeded(), eq(variables.isTraining, true))
-            inputs:
-              command: build
-              dockerfile: $(Docker.frontend.filePath)
-              repository: $(Docker.frontend.repository)
-              arguments: --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.trn_dsn)
-              containerRegistry: $(Docker.registry_trn)
-              tags: |
-                $(Build.BuildId)-trn
-                $(Build.SourceVersion)-trn
-
-          - task: Docker@2
-            displayName: Push frontend for TRN
-            condition: and(succeeded(), eq(variables.isTraining, true))
-            inputs:
-              command: push
-              dockerfile: $(Docker.frontend.filePath)
-              repository: $(Docker.frontend.repository)
-              containerRegistry: $(Docker.registry_trn)
-              tags: |
-                $(Build.BuildId)-trn
-                $(Build.SourceVersion)-trn
+#          - task: Docker@2
+#            displayName: Build frontend for TRN
+#            condition: and(succeeded(), eq(variables.isTraining, true))
+#            inputs:
+#              command: build
+#              dockerfile: $(Docker.frontend.filePath)
+#              repository: $(Docker.frontend.repository)
+#              arguments: --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.trn_dsn)
+#              containerRegistry: $(Docker.registry_trn)
+#              tags: |
+#                $(Build.BuildId)-trn
+#                $(Build.SourceVersion)-trn
+#
+#          - task: Docker@2
+#            displayName: Push frontend for TRN
+#            condition: and(succeeded(), eq(variables.isTraining, true))
+#            inputs:
+#              command: push
+#              dockerfile: $(Docker.frontend.filePath)
+#              repository: $(Docker.frontend.repository)
+#              containerRegistry: $(Docker.registry_trn)
+#              tags: |
+#                $(Build.BuildId)-trn
+#                $(Build.SourceVersion)-trn
 
   - stage: test
     displayName: TEST
