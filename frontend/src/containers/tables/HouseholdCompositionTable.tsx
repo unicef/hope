@@ -51,58 +51,58 @@ export function HouseholdCompositionTable({
         </TableHead>
         <TableBody>
           <TableRow>
-            <TableCell align='left'>0 -&lt; 5</TableCell>
+            <TableCell align='left'>0 - 4</TableCell>
             <GreyTableCell align='left'>
-              {household.femaleAgeGroup05Count}
+              {household.femaleAgeGroup04Count}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              {household.femaleAgeGroup05DisabledCount}
+              {household.femaleAgeGroup04DisabledCount}
             </GreyTableCell>
             <GreyTableCell align='left'>-</GreyTableCell>
             <TableCell align='left' />
             <GreyTableCell align='left'>
-              {household.maleAgeGroup05Count}
+              {household.maleAgeGroup04Count}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              {household.maleAgeGroup05DisabledCount}
+              {household.maleAgeGroup04DisabledCount}
             </GreyTableCell>
           </TableRow>
           <TableRow>
             <TableCell align='left'>5 - 12</TableCell>
             <GreyTableCell align='left'>
-              {household.femaleAgeGroup611Count}
+              {household.femaleAgeGroup512Count}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              {household.femaleAgeGroup611DisabledCount}
+              {household.femaleAgeGroup512DisabledCount}
             </GreyTableCell>
             <GreyTableCell align='left'>-</GreyTableCell>
             <TableCell align='left' />
             <GreyTableCell align='left'>
-              {household.maleAgeGroup611Count}
+              {household.maleAgeGroup512Count}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              {household.maleAgeGroup611DisabledCount}
+              {household.maleAgeGroup512DisabledCount}
             </GreyTableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left'>12 -&lt; 17</TableCell>
+            <TableCell align='left'>13 - 17</TableCell>
             <GreyTableCell align='left'>
-              {household.femaleAgeGroup1217Count}
+              {household.femaleAgeGroup1317Count}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              {household.femaleAgeGroup1217DisabledCount}
+              {household.femaleAgeGroup1317DisabledCount}
             </GreyTableCell>
             <GreyTableCell align='left'>-</GreyTableCell>
             <TableCell align='left' />
             <GreyTableCell align='left'>
-              {household.maleAgeGroup1217Count}
+              {household.maleAgeGroup1317Count}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              {household.maleAgeGroup1217DisabledCount}
+              {household.maleAgeGroup1317DisabledCount}
             </GreyTableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left'>18 -&lt; 59</TableCell>
+            <TableCell align='left'>18 - 59</TableCell>
             <GreyTableCell align='left'>
               {household.femaleAgeGroup1859Count}
             </GreyTableCell>
