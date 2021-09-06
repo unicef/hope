@@ -65,3 +65,19 @@ except ImportError:
 logging.disable(logging.CRITICAL)
 
 EXCHANGE_RATE_CACHE_EXPIRY = 0
+
+DATABASES = {
+    "default": env.db(),
+    "cash_assist_datahub_mis": env.db("DATABASE_URL_HUB_MIS"),
+    "cash_assist_datahub_ca": env.db("DATABASE_URL_HUB_CA"),
+    "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
+    "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
+}
+
+DATABASE_APPS_MAPPING = {
+    "cash_assist_datahub": "cash_assist_datahub_ca",
+    "mis_datahub": "cash_assist_datahub_mis",
+    "erp_datahub": "cash_assist_datahub_erp",
+    "registration_datahub": "registration_datahub",
+    # "grievance2": "backup_database",
+}
