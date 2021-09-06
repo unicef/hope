@@ -1,17 +1,7 @@
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin
-from django.contrib import admin
-from django.contrib.admin import TabularInline
-
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-    RelatedFieldComboFilter,
-    TextFieldFilter,
-)
 from advanced_filters.admin import AdminAdvancedFiltersMixin
-from django.core.exceptions import ValidationError
-from django.db.transaction import atomic, savepoint, savepoint_commit, savepoint_rollback
-from psycopg2._psycopg import IntegrityError
+from django.contrib import admin
 from smart_admin.decorators import smart_register
 
 from hct_mis_api.apps.grievance2.celery_tasks import restore_backup
@@ -30,12 +20,7 @@ from hct_mis_api.apps.grievance2.models import (
     TicketNegativeFeedbackDetails,
     TicketReferralDetails,
 )
-from hct_mis_api.apps.grievance2 import models as models_backup
-from hct_mis_api.apps.grievance import models as models_destination
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
-
-
-
 
 
 @admin.register(GrievanceTicket)
