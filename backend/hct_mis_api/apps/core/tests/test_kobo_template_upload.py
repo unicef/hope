@@ -12,6 +12,7 @@ from django.urls import reverse
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.admin import XLSXKoboTemplateAdmin
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     UploadNewKoboTemplateAndUpdateFlexFieldsTask, KoboRetriableError,
@@ -43,7 +44,7 @@ def raise_as_func(exception):
     return _raise
 
 
-class TestKoboTemplateUpload(TestCase):
+class TestKoboTemplateUpload(APITestCase):
     def setUp(self):
         self.client = Client()
         self.factory = RequestFactory()
@@ -71,6 +72,8 @@ class TestKoboTemplateUpload(TestCase):
         expected_errors = {
             "__all__": [
                 "Field: size_h_c - Field must be required",
+                "Field: fchild_hoh_i_c - Field is missing",
+                "Field: child_hoh_i_c - Field is missing",
                 "Field: marital_status_i_c - Choice: MARRIED is not present in the file",
                 "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE",
                 "Field: currency_h_c - Choice: BOV is not present in the file",
@@ -94,7 +97,6 @@ class TestKoboTemplateUpload(TestCase):
                 "Field: currency_h_c - Choice: XXX is not present in HOPE",
             ]
         }
-
         self.assertEqual(form.errors, expected_errors)
 
     @patch(
@@ -116,7 +118,7 @@ class TestKoboTemplateUpload(TestCase):
         )
 
 
-class TestKoboErrorHandling(TestCase):
+class TestKoboErrorHandling(APITestCase):
     def generate_empty_template(self):
         with NamedTemporaryFile(mode="w+b") as tmp_file:
             tmp_file.write("abcdefg".encode())
