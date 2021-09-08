@@ -818,6 +818,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    fchild_hoh = models.BooleanField(default=False)
+    child_hoh = models.BooleanField(default=False)
 
     @property
     def age(self):
@@ -912,6 +914,13 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         if self.household:
             return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
         return []
+
+    def is_golden_record_duplicated(self):
+        return self.deduplication_golden_record_status == DUPLICATE
+
+    def get_deduplication_golden_record(self):
+        status_key = "duplicates" if self.is_golden_record_duplicated() else "possible_duplicates"
+        return self.deduplication_golden_record_results.get(status_key, [])
 
 
 class EntitlementCard(TimeStampedUUIDModel):
