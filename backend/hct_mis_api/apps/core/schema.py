@@ -74,7 +74,7 @@ class AdminAreaTypeNode(DjangoObjectType):
 class BusinessAreaNode(DjangoObjectType):
     class Meta:
         model = BusinessArea
-        filter_fields = ["id"]
+        filter_fields = ["id", "slug"]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -267,6 +267,11 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
 
 class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AdminAreaNode)
+    business_area = graphene.Field(
+        BusinessAreaNode,
+        business_area_slug=graphene.String(required=True, description="The business area slug"),
+        description="Single business area",
+    )
     all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
     all_fields_attributes = graphene.List(
@@ -296,6 +301,9 @@ class Query(graphene.ObjectType):
         description="All Kobo projects/assets.",
     )
     cash_assist_url_prefix = graphene.String()
+
+    def resolve_business_area(parent, info, business_area_slug):
+        return BusinessArea.objects.get(slug=business_area_slug)
 
     def resolve_all_business_areas(parent, info):
         return BusinessArea.objects.filter(is_split=False)
