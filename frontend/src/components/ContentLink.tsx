@@ -19,9 +19,5 @@ export const ContentLink = ({
   target?: string;
   rel?: string;
 }): React.ReactElement => {
-  return (
-    <Link target='_blank' rel='noopener noreferrer' href={href}>
-      {children}
-    </Link>
-  );
+  return <Link href={href}>{children}</Link>;
 };
