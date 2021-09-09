@@ -265,7 +265,25 @@ export function EditGrievancePage(): React.ReactElement {
             <PageHeader
               title={`${t('Edit Ticket')} #${ticket.unicefId}`}
               breadCrumbs={breadCrumbsItems}
-            />
+            >
+              <Box display='flex' alignContent='center'>
+                <Box mr={3}>
+                  <Button
+                    component={Link}
+                    to={`/${businessArea}/grievance-and-feedback`}
+                  >
+                    {t('Cancel')}
+                  </Button>
+                </Box>
+                <Button
+                  color='primary'
+                  variant='contained'
+                  onClick={submitForm}
+                >
+                  {t('Save')}
+                </Button>
+              </Box>
+            </PageHeader>
             <Grid container spacing={3}>
               <Grid item xs={8}>
                 <NewTicket>
@@ -401,24 +419,6 @@ export function EditGrievancePage(): React.ReactElement {
                         {dataChangeErrors(errors, touched)}
                       </BoxPadding>
                     )}
-
-                    <DialogFooter>
-                      <DialogActions>
-                        <Button
-                          component={Link}
-                          to={`/${businessArea}/grievance-and-feedback`}
-                        >
-                          {t('Cancel')}
-                        </Button>
-                        <Button
-                          color='primary'
-                          variant='contained'
-                          onClick={submitForm}
-                        >
-                          {t('Save')}
-                        </Button>
-                      </DialogActions>
-                    </DialogFooter>
                   </ContainerColumnWithBorder>
                 </NewTicket>
               </Grid>
