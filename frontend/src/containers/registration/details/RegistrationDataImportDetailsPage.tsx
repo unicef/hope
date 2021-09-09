@@ -62,7 +62,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
-  const { data, loading, error } = useRegistrationDataImportQuery({
+  const { data, loading, error, stopPolling } = useRegistrationDataImportQuery({
     variables: { id },
     pollInterval: 30000,
   });
@@ -71,6 +71,9 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   if (loading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || permissions === null) return null;
+  if (data.registrationDataImport.status !== 'IMPORTING') {
+    stopPolling();
+  }
 
   return (
     <div>
@@ -104,13 +107,18 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
               </StyledTabs>
             </TabsContainer>
             <TabPanel value={selectedTab} index={0}>
-              <ImportedHouseholdTable rdiId={id} businessArea={businessArea} />
+              <ImportedHouseholdTable
+                key={`${data.registrationDataImport.status}-household`}
+                rdiId={id}
+                businessArea={businessArea}
+              />
             </TabPanel>
             <TabPanel value={selectedTab} index={1}>
               <ImportedIndividualsTable
                 showCheckbox
                 rdiId={id}
                 businessArea={businessArea}
+                key={`${data.registrationDataImport.status}-individual`}
               />
             </TabPanel>
           </Paper>
