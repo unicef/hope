@@ -64,12 +64,12 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const { data, loading, error } = useRegistrationDataImportQuery({
     variables: { id },
+    pollInterval: 30000,
   });
   const [selectedTab, setSelectedTab] = useState(0);
 
   if (loading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-
   if (!data || permissions === null) return null;
 
   return (
