@@ -92,7 +92,7 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
           <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
             <StyledLink
               target='_blank'
-              href='https://unicef.service-now.com/cc/?id=sc_cat_item&sys_id=35b00b1bdb255f00085184735b9619e6&sysparm_category=c6ab1444db5b5700085184735b961920'
+              href='https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=c8e43760db622450f65a2aea4b9619ad&sysparm_category=99c51053db0a6f40f65a2aea4b9619af'
             >
               Support
             </StyledLink>
