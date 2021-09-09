@@ -106,7 +106,7 @@ export function DeleteIndividualGrievanceDetails({
             textValue = textValue === 'A_' ? null : textValue;
             textValue = textValue
               ? fieldAttribute.choices.find((item) => item.value === textValue)
-                  .labelEn
+                  ?.labelEn
               : '-';
           }
         }
