@@ -6,6 +6,7 @@ import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
 import { Flag } from './Flag';
 import { FlagTooltip } from './FlagTooltip';
+import { useTranslation } from 'react-i18next';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
@@ -76,6 +77,7 @@ export function PageHeader({
   confirmedMatch = false,
 }: Props): React.ReactElement {
   const history = useHistory();
+  const { t } = useTranslation();
   return (
     <Wrapper data-cy='page-header-container'>
       <Container>
@@ -94,9 +96,15 @@ export function PageHeader({
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
                 <Typography variant='h5'>
-                  {title} {withTriangle && <FlagTooltip />}{' '}
+                  {title}{' '}
+                  {withTriangle && (
+                    <FlagTooltip message={t('Possible Duplicate')} />
+                  )}{' '}
                   {(possibleMatch || confirmedMatch) && (
-                    <Flag confirmed={confirmedMatch} />
+                    <Flag
+                      message={t('Sanction List Confirmed Match')}
+                      confirmed={confirmedMatch}
+                    />
                   )}
                 </Typography>
               </>
