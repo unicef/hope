@@ -251,7 +251,7 @@ export function CreateGrievancePage(): React.ReactElement {
               </Box>
             </PageHeader>
             <Grid container spacing={3}>
-              <Grid item xs={8}>
+              <Grid item xs={12}>
                 <NewTicket>
                   <ContainerColumnWithBorder>
                     <Grid container spacing={3}>
