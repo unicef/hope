@@ -10,6 +10,18 @@ def is_root(request, *args, **kwargs):
     return request.user.is_superuser and request.headers.get("x-root-token") == settings.ROOT_TOKEN
 
 
+class SoftDeletableAdminMixin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        qs = self.model.all_objects.get_queryset()
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
+
+    def get_list_filter(self, request):
+        return super().get_list_filter(request) + ("is_removed",)
+
+
 class HOPEModelAdminBase(SmartDisplayAllMixin, admin.ModelAdmin):
     list_per_page = 50
 
