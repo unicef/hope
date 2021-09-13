@@ -333,6 +333,7 @@ class EntitlementCardAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("id", "card_number", "status", "card_type", "service_provider")
     search_fields = ("card_number",)
     date_hierarchy = "created_at"
+    raw_id_fields = ("household",)
     list_filter = (
         "status",
         TextFieldFilter.factory("card_type"),
