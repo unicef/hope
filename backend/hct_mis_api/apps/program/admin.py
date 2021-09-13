@@ -7,19 +7,22 @@ from adminfilters.filters import (
     TextFieldFilter,
 )
 
-from ..utils.admin import HOPEModelAdminBase, LastSyncDateResetMixin
+from ..utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    SoftDeletableAdminMixin,
+)
 from .models import CashPlan, Program
 
 
 @admin.register(Program)
-class ProgramAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
+class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "start_date", "end_date", "business_area")
     date_hierarchy = "start_date"
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("scope", ChoicesFieldComboFilter),
-        "is_removed",
     )
     raw_id_fields = ("business_area",)
     filter_horizontal = ("admin_areas",)

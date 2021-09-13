@@ -56,6 +56,7 @@ from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.utils.admin import is_root
+from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
 from mptt.admin import MPTTModelAdmin
 
 logger = logging.getLogger(__name__)
@@ -634,13 +635,12 @@ class FlexibleAttributeInline(admin.TabularInline):
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(admin.ModelAdmin):
+class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
     list_display = ("type", "name", "required")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
         ("associated_with", ChoicesFieldComboFilter),
         "required",
-        "is_removed",
     )
     search_fields = ("name",)
     formfield_overrides = {
@@ -649,12 +649,15 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
+class FlexibleAttributeGroupAdmin(SoftDeletableAdminMixin, MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
     # autocomplete_fields = ("parent",)
     raw_id_fields = ("parent",)
-    list_filter = ("repeatable", "required", "is_removed")
+    list_filter = (
+        "repeatable",
+        "required",
+    )
     search_fields = ("name",)
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
@@ -662,13 +665,12 @@ class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
+class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
     list_display = (
         "list_name",
         "name",
     )
     search_fields = ("name", "list_name")
-    list_filter = ("is_removed",)
     filter_horizontal = ("flex_attributes",)
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
@@ -676,7 +678,7 @@ class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
     list_filter = (
         "status",
