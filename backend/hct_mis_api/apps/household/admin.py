@@ -1,7 +1,6 @@
 import logging
 from functools import wraps
 from inspect import isclass
-import logging
 from itertools import chain
 
 from django.contrib import admin, messages
@@ -68,7 +67,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Household)
 class HouseholdAdmin(
-    SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin, LinkedObjectsMixin, LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
 ):
     advanced_filter_fields = (
         "name",
