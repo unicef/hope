@@ -67,7 +67,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Household)
 class HouseholdAdmin(
-    SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin, LastSyncDateResetMixin, LinkedObjectsMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
 ):
     advanced_filter_fields = (
         "name",
@@ -223,7 +223,8 @@ class IndividualRoleInHouseholdInline(TabularInline):
 
 @admin.register(Individual)
 class IndividualAdmin(
-    SoftDeletableAdminMixin, LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin,
+    LastSyncDateResetMixin, LinkedObjectsMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase
 ):
     list_display = (
         "unicef_id",
