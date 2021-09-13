@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 # from hct_mis_api.apps.administration.site import site
 from smart_admin.apps import SmartConfig
+from smart_admin.decorators import smart_register
 
 
 class TemplateConfig(AppConfig):
@@ -20,4 +21,12 @@ class Config(SmartConfig):
         super().ready()
         django.contrib.admin.autodiscover()
         self.module.autodiscover()
-        # autodiscover_modules("admin", register_to=site)
+        from django.contrib.admin.models import LogEntry
+        from django.contrib.contenttypes.models import ContentType
+
+        from smart_admin.smart_auth.admin import ContentTypeAdmin
+
+        from .admin import LogEntryAdmin
+
+        smart_register(ContentType)(ContentTypeAdmin)
+        smart_register(LogEntry)(LogEntryAdmin)
