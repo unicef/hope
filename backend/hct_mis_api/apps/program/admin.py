@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
@@ -16,7 +17,7 @@ class ProgramAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     date_hierarchy = "start_date"
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        ("business_area", RelatedFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
         ("scope", ChoicesFieldComboFilter),
         "is_removed",
     )
@@ -29,7 +30,7 @@ class CashPlanAdmin(HOPEModelAdminBase):
     list_display = ("name", "program", "delivery_type", "status")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        ("business_area", RelatedFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
         ("delivery_type", ChoicesFieldComboFilter),
         TextFieldFilter.factory("program__id", "Program ID"),
         TextFieldFilter.factory("vision_id", "Vision ID"),

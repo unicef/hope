@@ -696,7 +696,7 @@ sftp = ["paramiko"]
 
 [[package]]
 name = "django-sysinfo"
-version = "2.5.1"
+version = "2.6.0"
 description = "Simple django app to expose system infos: libraries version, databae server infos..."
 category = "main"
 optional = false
@@ -1814,7 +1814,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "49c26b8c0e37a68f7cbf2a0d40f0f39c964507a64e01cb69c6403fb49a796164"
+content-hash = "ecf9a420ca4009e266e55fc438fe4272c3ea085095b2dcc74d93711d687376a4"
 
 [metadata.files]
 amqp = [
@@ -2081,7 +2081,7 @@ django-storages = [
     {file = "django_storages-1.8-py2.py3-none-any.whl", hash = "sha256:0a9b7e620e969fb0797523695329ed223bf540bbfdf6cd163b061fc11dab2d1c"},
 ]
 django-sysinfo = [
-    {file = "django-sysinfo-2.5.1.tar.gz", hash = "sha256:bf904b57cdc436ede0c7349c206703005312564b8dc6c4a14eaa35564a916b41"},
+    {file = "django-sysinfo-2.6.0.tar.gz", hash = "sha256:396f0c69f3b40daaac1f8d3dd374714f985576e907e828c4f1087ad255980433"},
 ]
 django-timezone-field = [
     {file = "django-timezone-field-4.2.1.tar.gz", hash = "sha256:97780cde658daa5094ae515bb55ca97c1352928ab554041207ad515dee3fe971"},

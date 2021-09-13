@@ -6,7 +6,7 @@ from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 
-def is_root(request, obj):
+def is_root(request, *args, **kwargs):
     return request.user.is_superuser and request.headers.get("x-root-token") == settings.ROOT_TOKEN
 
 

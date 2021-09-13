@@ -641,13 +641,34 @@ VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 AA_PERMISSION_HANDLER = 3
 
 
-def filter_environment(key):
-    return False
+def filter_environment(key, config, request):
+    return key in ["ROOT_ACCESS_TOKEN"]
+
+
+def masker(key, value, config, request):
+    from django_sysinfo.utils import cleanse_setting
+
+    from hct_mis_api.apps.utils.admin import is_root
+
+    if not is_root(request):
+        if key.startswith("DATABASE_URL"):
+            from urllib.parse import urlparse
+
+            try:
+                c = urlparse(value)
+                value = f"{c.scheme}://****:****@{c.hostname}{c.path}?{c.query}"
+            except Exception:
+                value = "<wrong url>"
+            return value
+        return cleanse_setting(key, value, config, request)
+    return value
 
 
 SYSINFO = {
-    "filter_environment": "hct_mis_api.settings.base.filter_environment",
+    "masked_environment": "API|TOKEN|KEY|SECRET|PASS|SIGNATURE|AUTH|_ID|SID|DATABASE_URL",
+    "filter_environment": filter_environment,
     "ttl": 60,
+    "masker": masker,
 }
 
 EXPLORER_CONNECTIONS = {
