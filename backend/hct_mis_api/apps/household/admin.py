@@ -39,7 +39,11 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, LastSyncDateResetMixin
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    SoftDeletableAdminMixin,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +54,7 @@ class AgencyTypeAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Document)
-class DocumentAdmin(HOPEModelAdminBase):
+class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_display = ("document_number", "type", "status", "individual")
     raw_id_fields = ("individual",)
     list_filter = (("type", RelatedFieldComboFilter),)
@@ -63,7 +67,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Household)
 class HouseholdAdmin(
-    LastSyncDateResetMixin, LinkedObjectsMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
 ):
     advanced_filter_fields = (
         "name",
@@ -219,7 +223,7 @@ class IndividualRoleInHouseholdInline(TabularInline):
 
 @admin.register(Individual)
 class IndividualAdmin(
-    LastSyncDateResetMixin, LinkedObjectsMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin, LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase
 ):
     list_display = (
         "unicef_id",
