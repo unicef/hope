@@ -1,12 +1,12 @@
-import React from 'react';
 import { Typography } from '@material-ui/core';
-import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
 import { Flag } from './Flag';
 import { FlagTooltip } from './FlagTooltip';
-import { useTranslation } from 'react-i18next';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
