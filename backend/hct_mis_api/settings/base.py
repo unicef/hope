@@ -582,14 +582,24 @@ SMART_ADMIN_SECTIONS = {
         "targeting",
         "payment",
     ],
+    "RDI": [
+        regex(r"registration_data\..*"),
+        regex(r"registration_datahub\..*"),
+    ],
     "Grievance": ["grievance"],
-    "Configuration": ["core", "constance", "household", "household.agency"],
+    "Configuration": [
+        "core",
+        "constance",
+        # "household",
+        "household.agency",
+    ],
     "Rule Engine": [
         "steficon",
     ],
     "Security": ["account", "auth"],
     "Logs": [
         "admin.LogEntry",
+        "activity_log",
     ],
     "Kobo": [
         "core.FlexibleAttributeChoice",
