@@ -801,9 +801,9 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         default=UNIQUE_IN_BATCH,
         choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
     )
-    deduplication_golden_record_results = JSONField(default=dict)
-    deduplication_batch_results = JSONField(default=dict)
-    imported_individual_id = models.UUIDField(null=True)
+    deduplication_golden_record_results = JSONField(default=dict, blank=True)
+    deduplication_batch_results = JSONField(default=dict, blank=True)
+    imported_individual_id = models.UUIDField(null=True, blank=True)
     sanction_list_possible_match = models.BooleanField(default=False)
     sanction_list_confirmed_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
