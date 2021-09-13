@@ -67,7 +67,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Household)
 class HouseholdAdmin(
-    SoftDeletableAdminMixin, LinkedObjectsMixin, LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin, LastSyncDateResetMixin, LinkedObjectsMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
 ):
     advanced_filter_fields = (
         "name",
