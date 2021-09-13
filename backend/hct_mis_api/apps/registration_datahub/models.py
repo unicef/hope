@@ -377,3 +377,9 @@ class KoboImportedSubmission(models.Model):
     kobo_submission_uuid = models.UUIDField()
     kobo_asset_id = models.CharField(max_length=150)
     kobo_submission_time = models.DateTimeField()
+    registration_data_import = models.ForeignKey(
+        RegistrationDataImportDatahub,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
