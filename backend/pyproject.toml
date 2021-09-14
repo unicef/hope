@@ -83,7 +83,7 @@ django-redis = "^5.0.0"
 django-smart-admin = "1.4.1"
 django-sql-explorer = {extras = ["xls"], version = "^2.2"}
 django-storages = { version = "1.8", extras = ["azure"] }
-django-sysinfo = "2.6.0"
+django-sysinfo = ">=2.6.0"
 django_compressor = "2.3"
 elasticsearch ="<7.14"
 elasticsearch-dsl ="^7.0.0"
