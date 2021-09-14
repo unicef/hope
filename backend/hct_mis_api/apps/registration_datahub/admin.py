@@ -163,16 +163,19 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
         "kobo_submission_time",
         "kobo_submission_uuid",
         "kobo_asset_id",
+        "amended",
         "imported_household_id",
         "registration_data_import_id",
     )
     date_hierarchy = "created_at"
     list_filter = (
+        "amended",
         ("registration_data_import", AutoCompleteFilter),
         ("imported_household", AutoCompleteFilter),
     )
     advanced_filter_fields = (
         "created_at",
+        "amended",
         "kobo_submission_time",
         "registration_data_import_id",
     )
