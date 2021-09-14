@@ -822,6 +822,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         external_collectors = []
         for household in self.reduced_submissions:
             submission_meta_data = get_submission_metadata(household)
+            if self.business_area.custom_fields.get("ignore_amended_kobo_submissions", False):
+                submission_meta_data["amended"] = False
+
             submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
             if submission_exists is True:
                 continue
