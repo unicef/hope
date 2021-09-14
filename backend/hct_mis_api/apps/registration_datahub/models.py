@@ -381,6 +381,7 @@ class KoboImportedSubmission(models.Model):
     # we use on_delete=models.SET_NULL because we want to be able to delete
     # ImportedHousehold without loosing track of importing
     imported_household = models.ForeignKey(ImportedHousehold, blank=True, null=True, on_delete=models.SET_NULL)
+    amended = models.BooleanField(default=False, blank=True)
 
     registration_data_import = models.ForeignKey(
         RegistrationDataImportDatahub,
