@@ -14,11 +14,13 @@ from admin_extra_urls.decorators import button, href
 from admin_extra_urls.extras import ExtraUrlMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from admin_extra_urls.mixins import _confirm_action
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -42,16 +44,23 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImport)
-class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "import_date", "data_source", "business_area")
     search_fields = ("name",)
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("data_source", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
+        ("imported_by", AutoCompleteFilter),
     )
     date_hierarchy = "updated_at"
-    raw_id_fields = ("imported_by",)
+    raw_id_fields = ("imported_by", "business_area")
+    advanced_filter_fields = (
+        "status",
+        "updated_at",
+        ("imported_by__username", "imported by"),
+        ("business_area__name", "business area"),
+    )
 
     @href(
         label="HUB RDI",
