@@ -38,11 +38,13 @@ class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     )
     def hub(self, button):
         obj = button.context.get("original")
-        if obj and obj.hct_id:
-            return reverse("admin:registration_data_registrationdataimport_change", args=[obj.hct_id])
-        else:
-            button.html_attrs = {"style": "background-color:#CCCCCC;cursor:not-allowed"}
-            return "javascript:alert('RDI not imported');"
+        if obj:
+            if obj.hct_id:
+                return reverse("admin:registration_data_registrationdataimport_change", args=[obj.hct_id])
+            else:
+                button.html_attrs = {"style": "background-color:#CCCCCC;cursor:not-allowed"}
+                return "javascript:alert('RDI not imported');"
+        button.visible = False
 
     @button()
     def inspect(self, request, pk):
