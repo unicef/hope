@@ -21,8 +21,12 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("household", "status", "cash_plan_name", "target_population")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        TextFieldFilter.factory("cash_plan__id", "CashPlan ID"),
-        TextFieldFilter.factory("target_population__id", "TargetPopulation ID"),
+        ("business_area", AutoCompleteFilter),
+        ("target_population", AutoCompleteFilter),
+        ("cash_plan", AutoCompleteFilter),
+        ("service_provider", AutoCompleteFilter),
+        # TextFieldFilter.factory("cash_plan__id", "CashPlan ID"),
+        # TextFieldFilter.factory("target_population__id", "TargetPopulation ID"),
     )
     advanced_filter_fields = (
         "status",
@@ -91,8 +95,11 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
 
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        TextFieldFilter.factory("cash_plan_payment_verification__cash_plan__id", "CashPlan ID"),
-        TextFieldFilter.factory("payment_record__household__unicef_id", "Household ID"),
+        ("business_area", AutoCompleteFilter),
+        ("target_population", AutoCompleteFilter),
+        ("cash_plan", AutoCompleteFilter),
+        # TextFieldFilter.factory("cash_plan_payment_verification__cash_plan__id", "CashPlan ID"),
+        # TextFieldFilter.factory("payment_record__household__unicef_id", "Household ID"),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_record", "cash_plan_payment_verification")
