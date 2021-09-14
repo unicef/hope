@@ -922,6 +922,11 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         status_key = "duplicates" if self.is_golden_record_duplicated() else "possible_duplicates"
         return self.deduplication_golden_record_results.get(status_key, [])
 
+    @cached_property
+    def active_record(self):
+        if self.duplicate:
+            return Individual.objects.filter(unicef_id=self.unicef_id, duplicate=False, is_removed=False).first()
+
 
 class EntitlementCard(TimeStampedUUIDModel):
     ACTIVE = "ACTIVE"
