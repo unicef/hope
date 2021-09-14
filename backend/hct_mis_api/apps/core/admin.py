@@ -55,7 +55,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.utils.admin import is_root
+from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin, is_root
 from mptt.admin import MPTTModelAdmin
 
 logger = logging.getLogger(__name__)
@@ -634,13 +634,12 @@ class FlexibleAttributeInline(admin.TabularInline):
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(admin.ModelAdmin):
+class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
     list_display = ("type", "name", "required")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
         ("associated_with", ChoicesFieldComboFilter),
         "required",
-        "is_removed",
     )
     search_fields = ("name",)
     formfield_overrides = {
@@ -676,7 +675,7 @@ class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
     list_filter = (
         "status",
