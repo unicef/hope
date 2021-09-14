@@ -15,11 +15,8 @@ from adminfilters.filters import (
 )
 
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.models import (
-    HouseholdSelection,
-    TargetPopulation,
-)
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
 
 class RuleTestForm(forms.Form):
@@ -28,7 +25,7 @@ class RuleTestForm(forms.Form):
 
 
 @admin.register(TargetPopulation)
-class TargetPopulationAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class TargetPopulationAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "status",
@@ -41,7 +38,6 @@ class TargetPopulationAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
-        "is_removed",
         "sent_to_datahub",
     )
     raw_id_fields = (
