@@ -334,7 +334,6 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
                 MarkSubmissions,
             )
-
             try:
                 task = MarkSubmissions(business_area)
                 result = task.execute()

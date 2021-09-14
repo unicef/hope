@@ -39,7 +39,7 @@ class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixi
     )
 
     raw_id_fields = ("import_data",)
-    date_hierarchy = "import_date"
+    date_hierarchy = "created_at"
     search_fields = ("name",)
 
     @href(
