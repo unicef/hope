@@ -13,8 +13,6 @@ from django.utils.safestring import mark_safe
 from admin_extra_urls.decorators import button, href
 from admin_extra_urls.extras import ExtraUrlMixin
 from admin_extra_urls.mixins import _confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.autocomplete import AutoCompleteFilter
 from admin_extra_urls.mixins import _confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (

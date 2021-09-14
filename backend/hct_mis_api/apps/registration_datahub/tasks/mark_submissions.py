@@ -35,6 +35,7 @@ class MarkSubmissions:
         rows = submissions.update(amended=True)
         return {"message": f"{rows} submissions successfully amended", "submissions": rows}
 
+
     def _get_submissions(self, submission_ids):
         return KoboImportedSubmission.objects.exclude(
             reduce(operator.or_, (Q(kobo_submission_uuid=submission_id) for submission_id in submission_ids))
