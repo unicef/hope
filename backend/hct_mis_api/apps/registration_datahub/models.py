@@ -377,6 +377,10 @@ class KoboImportedSubmission(models.Model):
     kobo_submission_uuid = models.UUIDField()
     kobo_asset_id = models.CharField(max_length=150)
     kobo_submission_time = models.DateTimeField()
+    # we use on_delete=models.SET_NULL because we want to be able to delete
+    # ImportedHousehold without loosing track of importing
+    imported_household = models.ForeignKey(ImportedHousehold, blank=True, null=True, on_delete=models.SET_NULL)
+
     registration_data_import = models.ForeignKey(
         RegistrationDataImportDatahub,
         null=True,
