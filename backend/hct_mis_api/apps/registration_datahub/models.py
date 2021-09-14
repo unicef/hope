@@ -374,6 +374,7 @@ class ImportedIndividualIdentity(models.Model):
 
 
 class KoboImportedSubmission(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, null=True, blank=True)
     kobo_submission_uuid = models.UUIDField()
     kobo_asset_id = models.CharField(max_length=150)
     kobo_submission_time = models.DateTimeField()
