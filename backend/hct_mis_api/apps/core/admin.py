@@ -55,8 +55,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.utils.admin import is_root
-from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
+from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin, is_root
 from mptt.admin import MPTTModelAdmin
 
 logger = logging.getLogger(__name__)
@@ -133,6 +132,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
     @button(label="Create Business Office", permission="core.can_split_business_area")
     def split_business_area(self, request, pk):
@@ -333,10 +335,14 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 MarkSubmissions,
             )
 
-            task = MarkSubmissions(business_area)
-            task.execute()
-            self.message_user(request, "Marked submissions", messages.SUCCESS)
-            return HttpResponseRedirect(reverse("admin:core_businessarea_changelist"))
+            try:
+                task = MarkSubmissions(business_area)
+                result = task.execute()
+                self.message_user(request, result["message"], messages.SUCCESS)
+            except Exception as e:
+                logger.exception(e)
+                self.message_user(request, str(e), messages.ERROR)
+            return HttpResponseRedirect(reverse("admin:core_businessarea_change", args=[business_area.id]))
         else:
             return _confirm_action(
                 self,
