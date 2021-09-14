@@ -3,8 +3,9 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button
+from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
 
 from hct_mis_api.apps.registration_datahub.models import (
@@ -23,12 +24,25 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 @admin.register(RegistrationDataImportDatahub)
 class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("name", "import_date", "import_done", "business_area_slug")
+    list_display = ("name", "import_date", "import_done", "business_area_slug", "hct_id")
     list_filter = (
         "import_done",
         TextFieldFilter.factory("business_area_slug__istartswith"),
     )
+    raw_id_fields = ("import_data",)
     date_hierarchy = "import_date"
+    search_fields = ("name",)
+
+    @href(
+        label="RDI",
+    )
+    def hub(self, button):
+        obj = button.context.get("original")
+        if obj and obj.hct_id:
+            return reverse("admin:registration_data_registrationdataimport_change", args=[obj.hct_id])
+        else:
+            button.html_attrs = {"style": "background-color:#CCCCCC;cursor:not-allowed"}
+            return "javascript:alert('RDI not imported');"
 
     @button()
     def inspect(self, request, pk):
@@ -133,4 +147,16 @@ class ImportedIndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
 
 @admin.register(KoboImportedSubmission)
 class KoboImportedSubmissionAdmin(HOPEModelAdminBase):
-    pass
+    list_display = (
+        "kobo_submission_time",
+        "kobo_submission_uuid",
+        "kobo_asset_id",
+        "imported_household_id",
+        "registration_data_import_id",
+    )
+    date_hierarchy = "kobo_submission_time"
+    list_filter = (
+        ("registration_data_import", AutoCompleteFilter),
+        ("imported_household", AutoCompleteFilter),
+    )
+    raw_id_fields = ("registration_data_import", "imported_household")
