@@ -7,6 +7,7 @@ from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -23,14 +24,22 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(RegistrationDataImportDatahub)
-class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("name", "import_date", "import_done", "business_area_slug", "hct_id")
     list_filter = (
+        "created_at",
         "import_done",
+        ("registration_data_import", AutoCompleteFilter),
         TextFieldFilter.factory("business_area_slug__istartswith"),
     )
+    advanced_filter_fields = (
+        "created_at",
+        "import_done",
+        ("business_area__name", "business area"),
+    )
+
     raw_id_fields = ("import_data",)
-    date_hierarchy = "import_date"
+    date_hierarchy = "created_at"
     search_fields = ("name",)
 
     @href(
@@ -148,17 +157,23 @@ class ImportedIndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
 
 
 @admin.register(KoboImportedSubmission)
-class KoboImportedSubmissionAdmin(HOPEModelAdminBase):
+class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = (
+        "created_at",
         "kobo_submission_time",
         "kobo_submission_uuid",
         "kobo_asset_id",
         "imported_household_id",
         "registration_data_import_id",
     )
-    date_hierarchy = "kobo_submission_time"
+    date_hierarchy = "created_at"
     list_filter = (
         ("registration_data_import", AutoCompleteFilter),
         ("imported_household", AutoCompleteFilter),
+    )
+    advanced_filter_fields = (
+        "created_at",
+        "kobo_submission_time",
+        "registration_data_import_id",
     )
     raw_id_fields = ("registration_data_import", "imported_household")
