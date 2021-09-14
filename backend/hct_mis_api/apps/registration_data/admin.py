@@ -10,10 +10,10 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button
+from admin_extra_urls.decorators import button, href
 from admin_extra_urls.extras import ExtraUrlMixin
-from admin_extra_urls.mixins import _confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
+from admin_extra_urls.mixins import _confirm_action
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
@@ -52,6 +52,18 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("imported_by",)
+
+    @href(
+        label="HUB RDI",
+        # permission=lambda r, o: r.user.is_superuser,
+        # visible=lambda o, r: o.status == RegistrationDataImport.IMPORT_ERROR,
+    )
+    def hub(self, button):
+        obj = button.context.get("original")
+        if obj:
+            return reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
+
+        button.visible = False
 
     @button(
         label="Re-run RDI",

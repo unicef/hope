@@ -274,6 +274,7 @@ class RdiMergeTask:
                                 kobo_asset_id=kobo_asset_id,
                                 kobo_submission_time=kobo_submission_time,
                                 registration_data_import=obj_hub,
+                                imported_household=imported_household,
                             )
                             kobo_submissions.append(submission)
                     if kobo_submissions:
