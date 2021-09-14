@@ -38,6 +38,7 @@ from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import Role, User
+from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
@@ -132,9 +133,23 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
-    formfield_overrides = {
-        JSONField: {"widget": JSONEditor},
-    }
+    # formfield_overrides = {
+    #     JSONField: {"widget": JSONEditor},
+    # }
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "custom_fields":
+            if is_root(request):
+                kwargs = {"widget": JSONEditor}
+            else:
+                kwargs = {"widget": JsonWidget}
+            return db_field.formfield(**kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    # def get_readonly_fields(self, request, obj=None):
+    #     if not is_root(request):
+    #         return self.readonly_fields + ('slug')
+    #     return super().get_readonly_fields(request, obj)
 
     @button(label="Create Business Office", permission="core.can_split_business_area")
     def split_business_area(self, request, pk):
@@ -334,6 +349,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
                 MarkSubmissions,
             )
+
             try:
                 task = MarkSubmissions(business_area)
                 result = task.execute()

@@ -224,7 +224,7 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
-    # "hct_mis_api.apps.administration.apps.TemplateConfig",
+    "hct_mis_api.apps.administration.apps.TemplateConfig",
     # "smart_admin.templates",
     "advanced_filters",
     "smart_admin.logs",
