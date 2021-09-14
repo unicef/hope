@@ -19,20 +19,21 @@ class MarkSubmissions:
         # Filter rdi with status done and following business area slug
         rdi_ids = self._get_rdi_ids()
         if not rdi_ids:
-            return
+            return {"message": "No suitable RDI found", "submissions": 0}
 
         # Filter households submissions_id for following rdi id
         submission_ids = self._get_submissions_ids(rdi_ids)
         if not submission_ids:
-            return
+            return {"message": "No suitable Submissions found", "submissions": 0}
 
         # Exclude submissions for merged rdi
         submissions = self._get_submissions(submission_ids)
         if not submissions:
-            return
+            return {"message": "No suitable (unmerged) Submissions found", "submissions": 0}
 
         # Mark as amended
-        submissions.update(amended=True)
+        rows = submissions.update(amended=True)
+        return {"message": f"{rows} submissions successfully amended", "submissions": rows}
 
     def _get_submissions(self, submission_ids):
         return KoboImportedSubmission.objects.exclude(
