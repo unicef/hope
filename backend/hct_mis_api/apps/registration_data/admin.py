@@ -1,28 +1,30 @@
 import logging
 
-from admin_extra_urls.mixins import _confirm_action
 from django.contrib import admin, messages
-from django.contrib.admin.models import LogEntry, DELETION
+from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button
+from admin_extra_urls.decorators import button, href
 from admin_extra_urls.extras import ExtraUrlMixin
+from admin_extra_urls.mixins import _confirm_action
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
-from django.urls import reverse
-from django.utils.safestring import mark_safe
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.documents import IndividualDocument
-from hct_mis_api.apps.household.elasticsearch_utils import remove_elasticsearch_documents_by_matching_ids
+from hct_mis_api.apps.household.elasticsearch_utils import (
+    remove_elasticsearch_documents_by_matching_ids,
+)
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -49,6 +51,18 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("imported_by",)
+
+    @href(
+        label="HUB RDI",
+        # permission=lambda r, o: r.user.is_superuser,
+        # visible=lambda o, r: o.status == RegistrationDataImport.IMPORT_ERROR,
+    )
+    def hub(self, button):
+        obj = button.context.get("original")
+        if obj:
+            return reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
+
+        button.visible = False
 
     @button(
         label="Re-run RDI",
@@ -112,14 +126,16 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                         rdi_name = rdi.name
                         rdi_datahub = datahub_models.RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
                         datahub_individuals_ids = list(
-                            datahub_models.ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).values_list(
-                                "id", flat=True
-                            )
+                            datahub_models.ImportedIndividual.objects.filter(
+                                registration_data_import=rdi_datahub
+                            ).values_list("id", flat=True)
                         )
                         rdi_datahub.delete()
                         rdi.delete()
                         # remove elastic search records linked to individuals
-                        remove_elasticsearch_documents_by_matching_ids(datahub_individuals_ids, ImportedIndividualDocument)
+                        remove_elasticsearch_documents_by_matching_ids(
+                            datahub_individuals_ids, ImportedIndividualDocument
+                        )
                         self.message_user(request, "RDI Deleted")
                         LogEntry.objects.log_action(
                             user_id=request.user.pk,
@@ -129,7 +145,9 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                             action_flag=DELETION,
                             change_message="RDI removed",
                         )
-                        return HttpResponseRedirect(reverse("admin:registration_data_registrationdataimport_changelist"))
+                        return HttpResponseRedirect(
+                            reverse("admin:registration_data_registrationdataimport_changelist")
+                        )
             else:
                 return _confirm_action(
                     self,
@@ -190,9 +208,9 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                         rdi_name = rdi.name
                         rdi_datahub = datahub_models.RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
                         datahub_individuals_ids = list(
-                            datahub_models.ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).values_list(
-                                "id", flat=True
-                            )
+                            datahub_models.ImportedIndividual.objects.filter(
+                                registration_data_import=rdi_datahub
+                            ).values_list("id", flat=True)
                         )
                         individuals_ids = list(
                             Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
@@ -203,7 +221,9 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                         ).filter(business_area=rdi.business_area).delete()
                         rdi.delete()
                         # remove elastic search records linked to individuals
-                        remove_elasticsearch_documents_by_matching_ids(datahub_individuals_ids, ImportedIndividualDocument)
+                        remove_elasticsearch_documents_by_matching_ids(
+                            datahub_individuals_ids, ImportedIndividualDocument
+                        )
                         remove_elasticsearch_documents_by_matching_ids(individuals_ids, IndividualDocument)
                         self.message_user(request, "RDI Deleted")
                         LogEntry.objects.log_action(
@@ -214,7 +234,9 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                             action_flag=DELETION,
                             change_message="RDI removed",
                         )
-                        return HttpResponseRedirect(reverse("admin:registration_data_registrationdataimport_changelist"))
+                        return HttpResponseRedirect(
+                            reverse("admin:registration_data_registrationdataimport_changelist")
+                        )
             else:
                 return _confirm_action(
                     self,
