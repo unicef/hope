@@ -21,9 +21,11 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 import xlrd
 from admin_extra_urls.api import ExtraUrlMixin, button
+from admin_extra_urls.mixins import _confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     AllValuesComboFilter,
@@ -53,6 +55,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.utils.admin import is_root
 from mptt.admin import MPTTModelAdmin
 
 logger = logging.getLogger(__name__)
@@ -320,6 +323,31 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             context["form"] = form
 
         return TemplateResponse(request, "core/test_rapidpro.html", context)
+
+    @button(permission=is_root)
+    def mark_submissions(self, request, pk):
+        business_area = self.get_queryset(request).get(pk=pk)
+        if request.method == "POST":
+            from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
+                MarkSubmissions,
+            )
+
+            task = MarkSubmissions(business_area)
+            task.execute()
+            self.message_user(request, "Marked submissions", messages.SUCCESS)
+            return HttpResponseRedirect(reverse("admin:core_businessarea_changelist"))
+        else:
+            return _confirm_action(
+                self,
+                request,
+                self.mark_submissions,
+                mark_safe(
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
+                <h3>All ImportedSubmission for not merged rdi will be marked.</h3> 
+                """
+                ),
+                "Successfully executed",
+            )
 
 
 class CountryFilter(SimpleListFilter):
