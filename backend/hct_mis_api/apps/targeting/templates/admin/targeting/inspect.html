@@ -1,0 +1,37 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% block action-content %}
+    <h1>{{ original }}</h1>
+    <table width="100%">
+    <tr>
+    <th>Household</th>
+    <th>head_of_household</th>
+    <th>collectors</th>
+    <th>Selected</th>
+    </tr>
+    {% for entry in original.selections.all %}
+        <tr>
+        <td>{{ entry.household }}</td>
+        <td>{{ entry.household.head_of_household }}</td>
+        <td><ul>
+            {% for r in entry.household.individuals_and_roles.all %}
+                <li>
+                    <a target="_new"
+                       href={% url "admin:household_individual_change" r.individual.pk %}>{{ r.individual }} {{  r.role }}</a>
+                    {% if r.individual.duplicate %}
+                        ( <b>DUPLICATE OF
+                            {% if r.individual.active_record %}
+                            <a target="_new"
+                               href={% url "admin:household_individual_change" r.individual.active_record.pk %}>{{ r.individual.active_record }}</a>
+                            {% else %}
+                                MISSING
+                            {% endif %})
+                    {% endif %}
+
+                </li>
+            {% endfor %}
+        </ul></td>
+        <td>{{ entry.final }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}

@@ -65,9 +65,10 @@
     <h3>Duplicates</h3>
     <table>
         <tr><th>Id</th><th>Name</th></tr>
-        {% for duplicate in duplicate %}
+        {% for duplicate in duplicates %}
             <tr><td><a href="{% url "admin:household_individual_change" duplicate.pk %}">{{ duplicate }}</a></td>
-                <td>{{ parent.full_name }}</td>
+                <td>{{ duplicate.full_name }}</td>
+                <td>{{ duplicate.id }}</td>
             </tr>
         {% endfor %}
     </table>
