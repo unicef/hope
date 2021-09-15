@@ -116,14 +116,12 @@ class ScoreFilter(FieldListFilter):
     title = "score"
     parameter_name = "score"
 
+    def __init__(self, field, request, params, model, model_admin, field_path):
+        super().__init__(field, request, params, model, model_admin, field_path)
+        self.original_title = self.title
+
     def expected_parameters(self):
         return [self.parameter_name]
-
-    def has_output(self):
-        return True
-
-    def lookups(self, request, model_admin):
-        return []
 
     def value(self):
         return self.used_parameters.get(self.parameter_name, "")
@@ -131,9 +129,8 @@ class ScoreFilter(FieldListFilter):
     def queryset(self, request, queryset):
         op, value = math_to_django(self.value())
         if value:
-            self.title = f"score {op} {value}"
-            queryset = queryset.filter(**{f"deduplication_golden_record_results__score__max__{op}": float(value)})
-            # queryset = queryset.filter(**{f"deduplication_golden_record_results__score__max__exact": 11.0})
+            self.title = f"{self.original_title} {op} {value}"
+            queryset = queryset.filter(**{f"{self.field_path}__score__max__{op}": float(value)})
         return queryset
 
     def choices(self, changelist):
@@ -160,13 +157,15 @@ class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         "sex",
         "dedupe_status",
         "score",
+        "batch_score",
     )
     list_filter = (
+        ("deduplication_batch_results", ScoreFilter),
         ("deduplication_golden_record_results", ScoreFilter),
-        # TextFieldFilter.factory("registration_data_import__name__istartswith"),
-        # TextFieldFilter.factory("individual_id__istartswith"),
-        # "deduplication_batch_status",
-        # "deduplication_golden_record_status",
+        TextFieldFilter.factory("registration_data_import__name__istartswith"),
+        TextFieldFilter.factory("individual_id__istartswith"),
+        "deduplication_batch_status",
+        "deduplication_golden_record_status",
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("household", "registration_data_import")
@@ -175,6 +174,12 @@ class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     def score(self, obj):
         try:
             return obj.deduplication_golden_record_results["score"]["max"]
+        except KeyError:
+            return ""
+
+    def batch_score(self, obj):
+        try:
+            return obj.deduplication_batch_results["score"]["max"]
         except KeyError:
             return ""
 
