@@ -15,13 +15,13 @@
                        href={% url "admin:household_household_change" entry.household.pk %}>{{ entry.household }}</a>
                 </td>
                 <td>
-                    {% include "admin/targeting/_ind.html" with individual=entry.household.head_of_household %}
+                    {% include "admin/targeting/targetpopulation/_ind.html" with individual=entry.household.head_of_household %}
                 </td>
                 <td>
                     <ul>
                         {% for r in entry.household.individuals_and_roles.all %}
                             <li>
-                                {% include "admin/targeting/_ind.html" with individual=r.individual role=r.role %}
+                                {% include "admin/targeting/targetpopulation/_ind.html" with individual=r.individual role=r.role %}
                             </li>
                         {% endfor %}
                     </ul>
