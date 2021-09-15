@@ -34,7 +34,7 @@ import requests
 from admin_extra_urls.api import ExtraUrlMixin, button
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import RelatedFieldComboFilter
+from adminfilters.filters import AllValuesComboFilter, RelatedFieldComboFilter
 from constance import config
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
@@ -925,7 +925,8 @@ class UserRoleAdmin(HOPEModelAdminBase):
     search_fields = ("user__username__istartswith",)
     list_filter = (
         ("business_area", AutoCompleteFilter),
-        ("role", RelatedFieldComboFilter),
+        ("role", AutoCompleteFilter),
+        ("role__subsystem", AllValuesComboFilter),
     )
 
 
