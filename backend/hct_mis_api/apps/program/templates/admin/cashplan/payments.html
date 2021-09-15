@@ -20,8 +20,11 @@
                     </a>
                 </td>
                 <td>{{ payment.status }}</td>
-                <td>{{ payment.household }}</td>
-                <td>{{ payment.head_of_household }}</td>
+                <td>
+                    <a target="_new" href="{% url "admin:household_household_change" payment.household.pk %}">
+                        {{ payment.household }}
+                    </a>
+                </td>                <td>{{ payment.head_of_household }}</td>
                 <td>
                     <a target="_new" href="{% url "admin:targeting_targetpopulation_change" payment.target_population.pk %}">
                         {{ payment.target_population }}
