@@ -1,0 +1,33 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% block content_title %}
+    <h1>Payments for Target Population: <b>{{ original.name }}</b> in {{ original.business_area }}</h1>
+
+{% endblock %}
+{% block action-content %}
+    <table width="100%">
+        <tr>
+            <th>payment</th>
+            <th>status</th>
+            <th>household</th>
+            <th>head_of_household</th>
+            <th>cash plan</th>
+        </tr>
+        {% for payment in original.payment_records.all %}
+            <tr>
+            <td>
+                <a target="_new" href="{% url "admin:payment_paymentrecord_change" payment.pk %}">
+                    {{ payment }}
+                </a>
+            </td>
+            <td>{{ payment.status }}</td>
+            <td>{{ payment.household }}</td>
+            <td>{{ payment.head_of_household }}</td>
+            <td>
+                <a target="_new" href="{% url "admin:program_cashplan_change" payment.cash_plan.pk %}">
+                {{ payment.cash_plan.name }}
+                </a>
+            </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

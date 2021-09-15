@@ -59,9 +59,15 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, LinkedObjectsMixin, ExtraUr
 
     @button()
     def inspect(self, request, pk):
-        context = self.get_common_context(request, pk, title="Inspect")
+        context = self.get_common_context(request, pk, aeu_groups=[None], action="Inspect")
 
-        return TemplateResponse(request, "admin/targeting/inspect.html", context)
+        return TemplateResponse(request, "admin/targeting/targetpopulation/inspect.html", context)
+
+    @button()
+    def payments(self, request, pk):
+        context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
+
+        return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
     @button()
     def test_steficon(self, request, pk):

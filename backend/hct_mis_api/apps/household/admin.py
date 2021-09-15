@@ -6,6 +6,7 @@ from itertools import chain
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.messages import DEFAULT_TAGS
+from django.contrib.postgres.fields import JSONField
 from django.db.models import Count, Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -23,9 +24,11 @@ from adminfilters.filters import (
     TextFieldFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -43,6 +46,7 @@ from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
+    is_root,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,7 +71,12 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Household)
 class HouseholdAdmin(
-    SoftDeletableAdminMixin, LastSyncDateResetMixin, LinkedObjectsMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin,
+    LastSyncDateResetMixin,
+    LinkedObjectsMixin,
+    AdminAdvancedFiltersMixin,
+    SmartFieldsetMixin,
+    HOPEModelAdminBase,
 ):
     advanced_filter_fields = (
         "name",
@@ -224,7 +233,11 @@ class IndividualRoleInHouseholdInline(TabularInline):
 @admin.register(Individual)
 class IndividualAdmin(
     SoftDeletableAdminMixin,
-    LastSyncDateResetMixin, LinkedObjectsMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase
+    LastSyncDateResetMixin,
+    LinkedObjectsMixin,
+    SmartFieldsetMixin,
+    AdminAdvancedFiltersMixin,
+    HOPEModelAdminBase,
 ):
     list_display = (
         "unicef_id",
@@ -301,6 +314,15 @@ class IndividualAdmin(
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if isinstance(db_field, JSONField):
+            if is_root(request):
+                kwargs = {"widget": JSONEditor}
+            else:
+                kwargs = {"widget": JsonWidget}
+            return db_field.formfield(**kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @button()
     def household_members(self, request, pk):
