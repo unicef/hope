@@ -30,6 +30,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 
 log = logging.getLogger(__name__)
 
@@ -698,6 +699,8 @@ class DeduplicateTask:
                 results_data_imported,
             ) = cls.deduplicate_single_imported_individual(imported_individual)
             imported_individual.deduplication_batch_results = results_data_imported
+            post_process_dedupe_results(imported_individual)
+
             if results_data_imported["duplicates"]:
                 imported_individual.deduplication_batch_status = DUPLICATE_IN_BATCH
             else:
