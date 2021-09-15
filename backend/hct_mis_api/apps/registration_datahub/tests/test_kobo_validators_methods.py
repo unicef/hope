@@ -1,7 +1,10 @@
 from operator import itemgetter
 from unittest import TestCase
 
-from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataInstanceValidator
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.registration_datahub.validators import (
+    KoboProjectImportDataInstanceValidator,
+)
 
 
 class TestKoboSaveValidatorsMethods(TestCase):
@@ -586,10 +589,12 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
     def test_validate_everything(self):
         validator = KoboProjectImportDataInstanceValidator()
-        result = validator.validate_everything(self.VALID_JSON, "Afghanistan")
+        business_area = BusinessArea.objects.first()
+
+        result = validator.validate_everything(self.VALID_JSON, business_area)
         self.assertEqual(result, [])
 
-        result = validator.validate_everything(self.INVALID_JSON, "Afghanistan")
+        result = validator.validate_everything(self.INVALID_JSON, business_area)
 
         result.sort(key=itemgetter("header"))
 
