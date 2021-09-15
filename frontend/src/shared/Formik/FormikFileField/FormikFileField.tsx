@@ -14,6 +14,7 @@ export const FormikFileField = ({
       </Box>
       <input
         type='file'
+        accept='image/*'
         onChange={(event) => {
           form.setFieldValue(field.name, event.currentTarget.files[0]);
         }}
