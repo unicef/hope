@@ -647,7 +647,7 @@ redis = ">=3.0.0"
 
 [[package]]
 name = "django-smart-admin"
-version = "1.4.1"
+version = "1.4.2"
 description = ""
 category = "main"
 optional = false
@@ -655,7 +655,7 @@ python-versions = "==3.*,>=3.0.0,>=3.6"
 
 [package.extras]
 dev = ["django-webtest", "django-environ", "whitenoise", "factory-boy", "django-constance", "django-picklefield", "bump2version", "factory-boy", "tox", "flake8", "isort", "pytest", "pyquery", "pytest-echo", "pytest-cov (>=2.11.1,<3.0.0)", "pytest-django (>=4.1.0,<5.0.0)", "pytest-pythonpath (>=0.7.3,<1.0.0)"]
-full = ["django-adminfilters (>=1.7)", "django-admin-extra-urls (>=3.5.1)", "django-adminactions (>=1.13)", "django-sysinfo (>=2.5.1)"]
+full = ["django-adminfilters (>=1.7.1)", "django-admin-extra-urls (>=3.5.1)", "django-adminactions (>=1.13)", "django-sysinfo (>=2.5.1)"]
 
 [[package]]
 name = "django-sql-explorer"
@@ -1814,7 +1814,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "ecf9a420ca4009e266e55fc438fe4272c3ea085095b2dcc74d93711d687376a4"
+content-hash = "4b06b77b863433798dccc2c626cbefbb64702c7c6ea7836ea320ed563e2bd45c"
 
 [metadata.files]
 amqp = [
@@ -2070,7 +2070,7 @@ django-redis = [
     {file = "django_redis-5.0.0-py3-none-any.whl", hash = "sha256:97739ca9de3f964c51412d1d7d8aecdfd86737bb197fce6e1ff12620c63c97ee"},
 ]
 django-smart-admin = [
-    {file = "django-smart-admin-1.4.1.tar.gz", hash = "sha256:ca8d38b0e8c7cd303c11ad96a93140d9e6321e27a0f360bcf4180acf97168328"},
+    {file = "django-smart-admin-1.4.2.tar.gz", hash = "sha256:de485b766644f7fd1e47603e666e21800320a34bc32d36f14e42a8b608466f1a"},
 ]
 django-sql-explorer = [
     {file = "django-sql-explorer-2.3.tar.gz", hash = "sha256:031788a88938102c454679b0d97a41d0e177280fd4c39aebf73b157ece62c960"},
