@@ -1,0 +1,33 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% block content_title %}<h1>Inspect Target Population: {{ original }}</h1>{% endblock %}
+{% block action-content %}
+    <table width="100%">
+        <tr>
+            <th>Household</th>
+            <th>head_of_household</th>
+            <th>collectors</th>
+            <th>Selected</th>
+        </tr>
+        {% for entry in original.selections.all %}
+            <tr>
+                <td>
+                    <a target="_new"
+                       href={% url "admin:household_household_change" entry.household.pk %}>{{ entry.household }}</a>
+                </td>
+                <td>
+                    {% include "admin/targeting/_ind.html" with individual=entry.household.head_of_household %}
+                </td>
+                <td>
+                    <ul>
+                        {% for r in entry.household.individuals_and_roles.all %}
+                            <li>
+                                {% include "admin/targeting/_ind.html" with individual=r.individual role=r.role %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>{{ entry.final }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

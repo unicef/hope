@@ -224,7 +224,7 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
-    # "hct_mis_api.apps.administration.apps.TemplateConfig",
+    "hct_mis_api.apps.administration.apps.TemplateConfig",
     # "smart_admin.templates",
     "advanced_filters",
     "smart_admin.logs",
@@ -582,14 +582,24 @@ SMART_ADMIN_SECTIONS = {
         "targeting",
         "payment",
     ],
+    "RDI": [
+        regex(r"registration_data\..*"),
+        regex(r"registration_datahub\..*"),
+    ],
     "Grievance": ["grievance"],
-    "Configuration": ["core", "constance", "household", "household.agency"],
+    "Configuration": [
+        "core",
+        "constance",
+        # "household",
+        "household.agency",
+    ],
     "Rule Engine": [
         "steficon",
     ],
     "Security": ["account", "auth"],
     "Logs": [
         "admin.LogEntry",
+        "activity_log",
     ],
     "Kobo": [
         "core.FlexibleAttributeChoice",
@@ -631,13 +641,34 @@ VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 AA_PERMISSION_HANDLER = 3
 
 
-def filter_environment(key):
-    return False
+def filter_environment(key, config, request):
+    return key in ["ROOT_ACCESS_TOKEN"]
+
+
+def masker(key, value, config, request):
+    from django_sysinfo.utils import cleanse_setting
+
+    from hct_mis_api.apps.utils.admin import is_root
+
+    if not is_root(request):
+        if key.startswith("DATABASE_URL"):
+            from urllib.parse import urlparse
+
+            try:
+                c = urlparse(value)
+                value = f"{c.scheme}://****:****@{c.hostname}{c.path}?{c.query}"
+            except Exception:
+                value = "<wrong url>"
+            return value
+        return cleanse_setting(key, value, config, request)
+    return value
 
 
 SYSINFO = {
-    "filter_environment": "hct_mis_api.settings.base.filter_environment",
+    "masked_environment": "API|TOKEN|KEY|SECRET|PASS|SIGNATURE|AUTH|_ID|SID|DATABASE_URL",
+    "filter_environment": filter_environment,
     "ttl": 60,
+    "masker": masker,
 }
 
 EXPLORER_CONNECTIONS = {

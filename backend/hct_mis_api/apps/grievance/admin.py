@@ -1,14 +1,15 @@
-from admin_extra_urls.decorators import button
 from django.contrib import admin
 from django.contrib.admin import TabularInline
 
+from admin_extra_urls.mixins import ExtraUrlMixin
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
-from adminfilters.autocomplete import AutoCompleteFilter
+from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -46,7 +47,7 @@ class TicketSensitiveDetailsInline(GrievanceInline):
 
 
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     inlines = [GrievanceNoteInline, TicketComplaintInline, TicketSensitiveDetailsInline]
     list_display = (
         "unicef_id",

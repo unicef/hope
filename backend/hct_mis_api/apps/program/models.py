@@ -235,6 +235,9 @@ class CashPlan(TimeStampedUUIDModel):
         db_index=True,
     )
 
+    def __str__(self):
+        return self.name
+
     @property
     def payment_records_count(self):
         return self.payment_records.count()
