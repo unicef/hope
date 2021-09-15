@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -27,8 +29,9 @@ class MarkSubmissions:
             return {"message": "No suitable (unmerged) Submissions found", "submissions": 0}
 
         # Mark as amended
-        rows = submissions.update(amended=True)
-        return {"message": f"{rows} submissions successfully amended", "submissions": rows}
+        with transaction.atomic(using="registration_datahub"):
+            rows = submissions.update(amended=True)
+            return {"message": f"{rows} submissions successfully amended", "submissions": rows}
 
     def _get_submissions(self, submission_ids):
         return KoboImportedSubmission.objects.exclude(kobo_submission_uuid__in=list(submission_ids))
