@@ -116,6 +116,11 @@ class BusinessArea(TimeStampedUUIDModel):
     def should_check_against_sanction_list(self):
         return self.screen_beneficiary
 
+    def get_sys_option(self, key, default=None):
+        if "hope" in self.custom_fields:
+            return self.custom_fields["hope"].get(key, default)
+        return default
+
 
 class AdminAreaLevelManager(models.Manager):
     def get_countries(self):
