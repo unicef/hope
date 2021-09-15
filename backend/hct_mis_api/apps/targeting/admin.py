@@ -13,6 +13,7 @@ from adminfilters.filters import (
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
+from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
@@ -25,7 +26,7 @@ class RuleTestForm(forms.Form):
 
 
 @admin.register(TargetPopulation)
-class TargetPopulationAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, HOPEModelAdminBase):
+class TargetPopulationAdmin(SoftDeletableAdminMixin, LinkedObjectsMixin, ExtraUrlMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "status",
@@ -55,6 +56,18 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, HOPEModelAdm
         obj = self.get_object(request, pk)
         url = reverse("admin:targeting_householdselection_changelist")
         return HttpResponseRedirect(f"{url}?target_population|id={obj.id}")
+
+    @button()
+    def inspect(self, request, pk):
+        context = self.get_common_context(request, pk, aeu_groups=[None], action="Inspect")
+
+        return TemplateResponse(request, "admin/targeting/targetpopulation/inspect.html", context)
+
+    @button()
+    def payments(self, request, pk):
+        context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
+
+        return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
     @button()
     def test_steficon(self, request, pk):
