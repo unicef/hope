@@ -15,13 +15,9 @@ class MarkSubmissions:
     def execute(self):
         # Filter rdi with status done and following business area slug
         datahub_ids = self._get_datahub_ids()
-        if not datahub_ids:
-            return {"message": "No suitable RDI found", "submissions": 0}
 
         # Filter households submissions_id for following rdi id
         submission_ids = self._get_submissions_ids(datahub_ids)
-        if not submission_ids:
-            return {"message": "No suitable Submissions found", "submissions": 0}
 
         # Exclude submissions for merged rdi
         submissions = self._get_submissions(submission_ids)
