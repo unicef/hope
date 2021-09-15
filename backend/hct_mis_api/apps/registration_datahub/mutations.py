@@ -339,13 +339,13 @@ class SaveKoboProjectImportDataMutation(PermissionMutation):
 
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         validator = KoboProjectImportDataInstanceValidator()
-        errors = validator.validate_everything(submissions, business_area.name)
+        errors = validator.validate_everything(submissions, business_area)
 
         if errors:
             errors.sort(key=operator.itemgetter("header"))
             return UploadImportDataXLSXFile(None, errors)
 
-        number_of_households, number_of_individuals = count_population(submissions)
+        number_of_households, number_of_individuals = count_population(submissions, business_area)
 
         import_file_name = f"project-uid-{uid}-{time.time()}.json"
         file = File(BytesIO(json.dumps(submissions).encode()), name=import_file_name)
