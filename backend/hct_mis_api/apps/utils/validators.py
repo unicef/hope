@@ -1,6 +1,7 @@
+import json
+
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
-
 
 DoubleSpaceValidator = RegexValidator(
     r"\s{2,}",
@@ -14,3 +15,11 @@ StartEndSpaceValidator = RegexValidator(
     inverse_match=True,
     code="leading_trailing_spaces_characters_not_allowed",
 )
+
+
+def is_jsonable(x):
+    try:
+        json.dumps(x)
+        return True
+    except (TypeError, OverflowError):
+        return False

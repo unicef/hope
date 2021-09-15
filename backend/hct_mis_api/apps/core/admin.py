@@ -264,7 +264,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     User.objects.filter(email=row["Email"]).update(doap_hash="")
                 else:
                     User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
-            obj.custom_fields.update({"hope": {"last_doap_sync": str(timezone.now())}})
+            obj.set_sys_option("last_doap_sync", str(timezone.now()))
             obj.save()
             self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
         except Exception as e:

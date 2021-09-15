@@ -13,6 +13,7 @@ from model_utils.models import SoftDeletableModel
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
 from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.validators import is_jsonable
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
@@ -117,9 +118,20 @@ class BusinessArea(TimeStampedUUIDModel):
         return self.screen_beneficiary
 
     def get_sys_option(self, key, default=None):
-        if "hope" in self.custom_fields:
-            return self.custom_fields["hope"].get(key, default)
+        return self._get_custom_field("hope", key, default)
+
+    def set_sys_option(self, key, value):
+        return self._set_custom_field("hope", key, value)
+
+    def _get_custom_field(self, namespace, key, default=None):
+        if namespace in self.custom_fields:
+            return self.custom_fields[namespace].get(key, default)
         return default
+
+    def _set_custom_field(self, namespace, key, value):
+        if not is_jsonable(value):
+            value = str(value)
+        self.custom_fields.update({namespace: {key: value}})
 
 
 class AdminAreaLevelManager(models.Manager):
