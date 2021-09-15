@@ -38,6 +38,7 @@ from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import Role, User
+from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
@@ -132,6 +133,23 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
+    # formfield_overrides = {
+    #     JSONField: {"widget": JSONEditor},
+    # }
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "custom_fields":
+            if is_root(request):
+                kwargs = {"widget": JSONEditor}
+            else:
+                kwargs = {"widget": JsonWidget}
+            return db_field.formfield(**kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    # def get_readonly_fields(self, request, obj=None):
+    #     if not is_root(request):
+    #         return self.readonly_fields + ('slug')
+    #     return super().get_readonly_fields(request, obj)
 
     @button(label="Create Business Office", permission="core.can_split_business_area")
     def split_business_area(self, request, pk):
@@ -332,10 +350,14 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 MarkSubmissions,
             )
 
-            task = MarkSubmissions(business_area)
-            task.execute()
-            self.message_user(request, "Marked submissions", messages.SUCCESS)
-            return HttpResponseRedirect(reverse("admin:core_businessarea_changelist"))
+            try:
+                task = MarkSubmissions(business_area)
+                result = task.execute()
+                self.message_user(request, result["message"], messages.SUCCESS)
+            except Exception as e:
+                logger.exception(e)
+                self.message_user(request, str(e), messages.ERROR)
+            return HttpResponseRedirect(reverse("admin:core_businessarea_change", args=[business_area.id]))
         else:
             return _confirm_action(
                 self,
@@ -648,12 +670,15 @@ class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
+class FlexibleAttributeGroupAdmin(SoftDeletableAdminMixin, MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
     # autocomplete_fields = ("parent",)
     raw_id_fields = ("parent",)
-    list_filter = ("repeatable", "required", "is_removed")
+    list_filter = (
+        "repeatable",
+        "required",
+    )
     search_fields = ("name",)
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
@@ -661,13 +686,12 @@ class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
+class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
     list_display = (
         "list_name",
         "name",
     )
     search_fields = ("name", "list_name")
-    list_filter = ("is_removed",)
     filter_horizontal = ("flex_attributes",)
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
