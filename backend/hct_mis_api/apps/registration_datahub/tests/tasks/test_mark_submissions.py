@@ -9,6 +9,7 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedHouseholdFactory,
     RegistrationDataImportDatahubFactory,
@@ -27,12 +28,10 @@ class TestMarkSubmissions(TestCase):
         call_command("loadbusinessareas")
 
         self.business_area = BusinessArea.objects.first()
-        self.business_area.custom_fields = {"ignore_amended_kobo_submissions": False}
-        self.business_area.save()
 
         self._create_submission_with_merged_rdi()
         self._create_submission_with_merged_rdi()
-        self._create_submission_with_not_started_rdi()
+        self._create_submission_with_in_review_rdi()
 
     def test_mark_submissions(self):
         task = MarkSubmissions(self.business_area)
@@ -40,13 +39,13 @@ class TestMarkSubmissions(TestCase):
 
         self.assertEqual(KoboImportedSubmission.objects.filter(amended=True).count(), 1)
 
-    def _create_submission_with_not_started_rdi(self):
-        self._create_submission("NOT_STARTED")
+    def _create_submission_with_in_review_rdi(self):
+        self._create_submission("IN_REVIEW")
 
     def _create_submission_with_merged_rdi(self):
-        self._create_submission("DONE")
+        self._create_submission("MERGED")
 
-    def _create_submission(self, import_dane):
+    def _create_submission(self, status):
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions.json"
         ).read_bytes()
@@ -56,16 +55,23 @@ class TestMarkSubmissions(TestCase):
             number_of_households=1,
             number_of_individuals=2,
         )
-        registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=import_data, business_area_slug=self.business_area.slug, import_done=import_dane
+        datahub_id = uuid.uuid4()
+
+        registration_data_import = RegistrationDataImportFactory(status=status, datahub_id=datahub_id)
+        registration_data_import_data_hub = RegistrationDataImportDatahubFactory(
+            id=datahub_id,
+            import_data=import_data,
+            business_area_slug=self.business_area.slug,
+            hct_id=registration_data_import.pk,
         )
+
         submission_uuid = uuid.uuid4()
         imported_household = ImportedHouseholdFactory(
-            registration_data_import=registration_data_import,
+            registration_data_import=registration_data_import_data_hub,
             kobo_submission_uuid=submission_uuid,
         )
         KoboImportedSubmission.objects.create(
-            registration_data_import=registration_data_import,
+            registration_data_import=registration_data_import_data_hub,
             kobo_submission_uuid=submission_uuid,
             kobo_asset_id="test",
             kobo_submission_time=datetime.datetime.now(),
