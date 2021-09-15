@@ -829,6 +829,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             if submission_exists is True:
                 continue
 
+            submission_meta_data.pop("amended", None)
             household_obj = ImportedHousehold(**submission_meta_data)
             self.attachments = household.get("_attachments", [])
             registration_date = None
