@@ -1,6 +1,8 @@
 from operator import itemgetter
 from unittest import TestCase
 
+from django.core.management import call_command
+
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
@@ -354,7 +356,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     ]
 
     def setUp(self) -> None:
-        pass
+        call_command("loadbusinessareas")
 
     def test_image_validator(self):
         # test for valid value
