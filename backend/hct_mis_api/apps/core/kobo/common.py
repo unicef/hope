@@ -2,6 +2,7 @@ from typing import Tuple
 
 from dateutil.parser import parse
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
 
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
@@ -65,17 +66,24 @@ def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> l
     return [reduce_asset(asset) for asset in assets]
 
 
-def count_population(results: list) -> Tuple[int, int]:
+def count_population(results: list, business_area: BusinessArea) -> Tuple[int, int]:
     from hashlib import sha256
+
     from hct_mis_api.apps.core.utils import rename_dict_keys
-    from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
     from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
+    from hct_mis_api.apps.registration_datahub.tasks.utils import (
+        get_submission_metadata,
+    )
 
     total_households_count = 0
     total_individuals_count = 0
     seen_hash_keys = []
     for result in results:
         submission_meta_data = get_submission_metadata(result)
+
+        if business_area.get_sys_option("ignore_amended_kobo_submissions"):
+            submission_meta_data["amended"] = False
+
         submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
         if submission_exists is False:
             total_households_count += 1
