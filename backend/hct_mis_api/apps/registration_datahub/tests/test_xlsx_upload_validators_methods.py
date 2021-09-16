@@ -6,11 +6,12 @@ from django.core.management import call_command
 
 import openpyxl
 
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.utils import SheetImageLoader
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 
-class TestXLSXValidatorsMethods(TestCase):
+class TestXLSXValidatorsMethods(APITestCase):
     FILES_DIR_PATH = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
 
     def setUp(self) -> None:

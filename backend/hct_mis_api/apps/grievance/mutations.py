@@ -395,7 +395,6 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if individual:
                 ticket_details.individual = individual
             ticket_details.save()
-            # grievance_ticket.save()
 
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,

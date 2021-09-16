@@ -1,25 +1,34 @@
+import logging
+from functools import wraps
+from inspect import isclass
 from itertools import chain
 
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.messages import DEFAULT_TAGS
-from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.contrib.postgres.fields import JSONField
+from django.db.models import Count, Q
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
+    AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
+from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -27,12 +36,20 @@ from hct_mis_api.apps.household.models import (
     Agency,
     Document,
     DocumentType,
+    EntitlementCard,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, LastSyncDateResetMixin
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    SoftDeletableAdminMixin,
+    is_root,
+)
+
+logger = logging.getLogger(__name__)
 
 
 @admin.register(Agency)
@@ -41,7 +58,7 @@ class AgencyTypeAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Document)
-class DocumentAdmin(HOPEModelAdminBase):
+class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_display = ("document_number", "type", "status", "individual")
     raw_id_fields = ("individual",)
     list_filter = (("type", RelatedFieldComboFilter),)
@@ -53,7 +70,14 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Household)
-class HouseholdAdmin(LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFieldsetMixin, HOPEModelAdminBase):
+class HouseholdAdmin(
+    SoftDeletableAdminMixin,
+    LastSyncDateResetMixin,
+    LinkedObjectsMixin,
+    AdminAdvancedFiltersMixin,
+    SmartFieldsetMixin,
+    HOPEModelAdminBase,
+):
     advanced_filter_fields = (
         "name",
         "country",
@@ -113,6 +137,9 @@ class HouseholdAdmin(LastSyncDateResetMixin, AdminAdvancedFiltersMixin, SmartFie
         ),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
+
+    def get_ignored_linked_objects(self):
+        return []
 
     @button()
     def tickets(self, request, pk):
@@ -204,7 +231,14 @@ class IndividualRoleInHouseholdInline(TabularInline):
 
 
 @admin.register(Individual)
-class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class IndividualAdmin(
+    SoftDeletableAdminMixin,
+    LastSyncDateResetMixin,
+    LinkedObjectsMixin,
+    SmartFieldsetMixin,
+    AdminAdvancedFiltersMixin,
+    HOPEModelAdminBase,
+):
     list_display = (
         "unicef_id",
         "given_name",
@@ -281,6 +315,15 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedF
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if isinstance(db_field, JSONField):
+            if is_root(request):
+                kwargs = {"widget": JSONEditor}
+            else:
+                kwargs = {"widget": JsonWidget}
+            return db_field.formfield(**kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
     @button()
     def household_members(self, request, pk):
         obj = Individual.objects.get(pk=pk)
@@ -289,9 +332,10 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, AdminAdvancedF
 
     @button()
     def sanity_check(self, request, pk):
-        context = self.get_common_context(request, pk)
+        context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]
         context["roles"] = obj.households_and_roles.all()
+        context["duplicates"] = Individual.objects.filter(unicef_id=obj.unicef_id)
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
@@ -309,3 +353,16 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     pass
+
+
+@admin.register(EntitlementCard)
+class EntitlementCardAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+    list_display = ("id", "card_number", "status", "card_type", "service_provider")
+    search_fields = ("card_number",)
+    date_hierarchy = "created_at"
+    raw_id_fields = ("household",)
+    list_filter = (
+        "status",
+        TextFieldFilter.factory("card_type"),
+        TextFieldFilter.factory("service_provider"),
+    )

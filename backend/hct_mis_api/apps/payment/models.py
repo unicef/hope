@@ -156,6 +156,9 @@ class ServiceProvider(TimeStampedUUIDModel):
     country = models.CharField(max_length=3)
     vision_id = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.full_name
+
 
 class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(

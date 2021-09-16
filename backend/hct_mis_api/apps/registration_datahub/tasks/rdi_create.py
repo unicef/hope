@@ -448,6 +448,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "primary_collector_id": self._handle_collectors,
                 "alternate_collector_id": self._handle_collectors,
                 "pregnant_i_c": self._handle_bool_field,
+                "fchild_hoh_i_c": self._handle_bool_field,
+                "child_hoh_i_c": self._handle_bool_field,
             },
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
@@ -820,10 +822,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         external_collectors = []
         for household in self.reduced_submissions:
             submission_meta_data = get_submission_metadata(household)
+            if self.business_area.get_sys_option("ignore_amended_kobo_submissions"):
+                submission_meta_data["amended"] = False
+
             submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
             if submission_exists is True:
                 continue
 
+            submission_meta_data.pop("amended", None)
             household_obj = ImportedHousehold(**submission_meta_data)
             self.attachments = household.get("_attachments", [])
             registration_date = None
