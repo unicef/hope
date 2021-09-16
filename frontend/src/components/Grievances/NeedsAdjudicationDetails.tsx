@@ -74,6 +74,40 @@ export function NeedsAdjudicationDetails({
     return ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   };
 
+  const findRecord = (itemId) => (record) => record.hitId === itemId;
+
+  const getSimilarity = (records, individualId): number => {
+    return records?.find(findRecord(individualId))?.score;
+  }
+
+  const getGoldenRecordSimilarity = (): number | string => {
+    const { extraData, goldenRecordsIndividual, possibleDuplicate } = details;
+    const individualId = possibleDuplicate?.id;
+    const extraDataGoldenRecords = extraData?.goldenRecords;
+    const deduplicationGoldenRecordResults =
+      goldenRecordsIndividual?.deduplicationGoldenRecordResults;
+
+    return (
+      getSimilarity(extraDataGoldenRecords, individualId) ||
+      getSimilarity(deduplicationGoldenRecordResults, individualId) ||
+      '-'
+    );
+  };
+
+  const getPossibleDuplicateSimilarity = (): number | string => {
+    const { extraData, goldenRecordsIndividual, possibleDuplicate } = details;
+    const individualId = goldenRecordsIndividual?.id;
+    const extraDataPossibleDuplicate1 = extraData?.possibleDuplicate;
+    const deduplicationGoldenRecordResults =
+      possibleDuplicate?.deduplicationGoldenRecordResults;
+
+    return (
+      getSimilarity(extraDataPossibleDuplicate1, individualId) ||
+      getSimilarity(deduplicationGoldenRecordResults, individualId) ||
+      '-'
+    );
+  };
+
   return (
     <StyledBox>
       <Title>
@@ -197,9 +231,7 @@ export function NeedsAdjudicationDetails({
               </UniversalMoment>
             </TableCell>
             <TableCell align='left'>
-              {details.goldenRecordsIndividual?.deduplicationGoldenRecordResults.find(
-                (item) => item.hitId === details.possibleDuplicate?.id,
-              )?.score || '-'}
+              {getGoldenRecordSimilarity()}
             </TableCell>
             <TableCell align='left'>
               <UniversalMoment>
@@ -265,9 +297,7 @@ export function NeedsAdjudicationDetails({
               </UniversalMoment>
             </TableCell>
             <TableCell align='left'>
-              {details.possibleDuplicate?.deduplicationGoldenRecordResults.find(
-                (item) => item.hitId === details.goldenRecordsIndividual?.id,
-              )?.score || '-'}
+              {getPossibleDuplicateSimilarity()}
             </TableCell>
             <TableCell align='left'>
               <UniversalMoment>

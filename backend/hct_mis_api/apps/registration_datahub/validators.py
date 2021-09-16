@@ -527,7 +527,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             if isinstance(value, bool):
                 return True
-
             if self.all_fields[header]["required"] is False and (value is None or value == ""):
                 return True
             if type(value) is str:
@@ -1192,7 +1191,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(self, submissions: list, business_area_name: str):
+    def validate_everything(self, submissions: list, business_area: BusinessArea):
         try:
             reduced_submissions = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
@@ -1246,6 +1245,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
             for household in reduced_submissions:
                 submission_meta_data = get_submission_metadata(household)
+
+                if business_area.get_sys_option("ignore_amended_kobo_submissions"):
+                    submission_meta_data["amended"] = False
+
                 submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
                 if submission_exists is True:
                     continue

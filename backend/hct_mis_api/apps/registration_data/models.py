@@ -10,6 +10,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -86,7 +87,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
 
     pull_pictures = models.BooleanField(default=True)
-    business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
+    business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
+    screen_beneficiary = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -98,3 +100,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     class Meta:
         unique_together = ("name", "business_area")
         verbose_name = "Registration data import"
+
+    def should_check_against_sanction_list(self):
+        return self.screen_beneficiary

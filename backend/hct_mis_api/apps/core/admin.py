@@ -21,9 +21,11 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 import xlrd
 from admin_extra_urls.api import ExtraUrlMixin, button
+from admin_extra_urls.mixins import _confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     AllValuesComboFilter,
@@ -36,6 +38,7 @@ from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import Role, User
+from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
@@ -53,6 +56,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin, is_root
 from mptt.admin import MPTTModelAdmin
 
 logger = logging.getLogger(__name__)
@@ -129,6 +133,23 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
+    # formfield_overrides = {
+    #     JSONField: {"widget": JSONEditor},
+    # }
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "custom_fields":
+            if is_root(request):
+                kwargs = {"widget": JSONEditor}
+            else:
+                kwargs = {"widget": JsonWidget}
+            return db_field.formfield(**kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    # def get_readonly_fields(self, request, obj=None):
+    #     if not is_root(request):
+    #         return self.readonly_fields + ('slug')
+    #     return super().get_readonly_fields(request, obj)
 
     @button(label="Create Business Office", permission="core.can_split_business_area")
     def split_business_area(self, request, pk):
@@ -320,6 +341,35 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             context["form"] = form
 
         return TemplateResponse(request, "core/test_rapidpro.html", context)
+
+    @button(permission=is_root)
+    def mark_submissions(self, request, pk):
+        business_area = self.get_queryset(request).get(pk=pk)
+        if request.method == "POST":
+            from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import (
+                MarkSubmissions,
+            )
+
+            try:
+                task = MarkSubmissions(business_area)
+                result = task.execute()
+                self.message_user(request, result["message"], messages.SUCCESS)
+            except Exception as e:
+                logger.exception(e)
+                self.message_user(request, str(e), messages.ERROR)
+            return HttpResponseRedirect(reverse("admin:core_businessarea_change", args=[business_area.id]))
+        else:
+            return _confirm_action(
+                self,
+                request,
+                self.mark_submissions,
+                mark_safe(
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
+                <h3>All ImportedSubmission for not merged rdi will be marked.</h3> 
+                """
+                ),
+                "Successfully executed",
+            )
 
 
 class CountryFilter(SimpleListFilter):
@@ -606,13 +656,12 @@ class FlexibleAttributeInline(admin.TabularInline):
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(admin.ModelAdmin):
+class FlexibleAttributeAdmin(SoftDeletableAdminMixin):
     list_display = ("type", "name", "required")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
         ("associated_with", ChoicesFieldComboFilter),
         "required",
-        "is_removed",
     )
     search_fields = ("name",)
     formfield_overrides = {
@@ -621,12 +670,15 @@ class FlexibleAttributeAdmin(admin.ModelAdmin):
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
+class FlexibleAttributeGroupAdmin(SoftDeletableAdminMixin, MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
     # autocomplete_fields = ("parent",)
     raw_id_fields = ("parent",)
-    list_filter = ("repeatable", "required", "is_removed")
+    list_filter = (
+        "repeatable",
+        "required",
+    )
     search_fields = ("name",)
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
@@ -634,13 +686,12 @@ class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
+class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
     list_display = (
         "list_name",
         "name",
     )
     search_fields = ("name", "list_name")
-    list_filter = ("is_removed",)
     filter_horizontal = ("flex_attributes",)
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
@@ -648,7 +699,7 @@ class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
     list_filter = (
         "status",

@@ -4,30 +4,34 @@ import operator
 import time
 from io import BytesIO
 
-import graphene
-import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+
+import graphene
+import openpyxl
 from graphene_file_upload.scalars import Upload
 
-from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
+from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
-from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+)
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    registration_xlsx_import_task,
     merge_registration_data_import_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
+    registration_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -35,12 +39,12 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
-    XlsxRowErrorNode,
     KoboErrorNode,
+    XlsxRowErrorNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
-    UploadXLSXInstanceValidator,
     KoboProjectImportDataInstanceValidator,
+    UploadXLSXInstanceValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -55,6 +59,7 @@ def create_registration_data_import_objects(registration_data_import_data, user,
 
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
+    screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
         business_area_slug=business_area.slug,
         import_data=import_data_obj,
@@ -68,6 +73,7 @@ def create_registration_data_import_objects(registration_data_import_data, user,
         number_of_households=import_data_obj.number_of_households,
         business_area=business_area,
         pull_pictures=pull_pictures,
+        screen_beneficiary=screen_beneficiary,
         **registration_data_import_data,
     )
     created_obj_hct.full_clean()
@@ -91,6 +97,7 @@ class RegistrationXlsxImportMutationInput(graphene.InputObjectType):
     import_data_id = graphene.ID()
     name = graphene.String()
     business_area_slug = graphene.String()
+    screen_beneficiary = graphene.Boolean()
 
 
 class RegistrationKoboImportMutationInput(graphene.InputObjectType):
@@ -98,6 +105,7 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     name = graphene.String()
     pull_pictures = graphene.Boolean()
     business_area_slug = graphene.String()
+    screen_beneficiary = graphene.Boolean()
 
 
 class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
@@ -107,6 +115,8 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationXlsxImportMutationInput(required=True)
 
     @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     def processed_mutate(cls, root, info, registration_data_import_data):
         (
@@ -117,6 +127,12 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
+
+        if (
+            created_obj_hct.should_check_against_sanction_list()
+            and not business_area.should_check_against_sanction_list()
+        ):
+            raise ValidationError("Cannot check against sanction list")
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
@@ -181,6 +197,8 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             raise ValidationError("Cannot import empty KoBo form")
 
     @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     def processed_mutate(cls, root, info, registration_data_import_data):
         cls.check_is_not_empty(registration_data_import_data.import_data_id)
@@ -193,6 +211,13 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
+
+        if (
+            created_obj_hct.should_check_against_sanction_list()
+            and not business_area.should_check_against_sanction_list()
+        ):
+            raise ValidationError("Cannot check against sanction list")
+
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )
@@ -314,13 +339,13 @@ class SaveKoboProjectImportDataMutation(PermissionMutation):
 
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         validator = KoboProjectImportDataInstanceValidator()
-        errors = validator.validate_everything(submissions, business_area.name)
+        errors = validator.validate_everything(submissions, business_area)
 
         if errors:
             errors.sort(key=operator.itemgetter("header"))
             return UploadImportDataXLSXFile(None, errors)
 
-        number_of_households, number_of_individuals = count_population(submissions)
+        number_of_households, number_of_individuals = count_population(submissions, business_area)
 
         import_file_name = f"project-uid-{uid}-{time.time()}.json"
         file = File(BytesIO(json.dumps(submissions).encode()), name=import_file_name)
