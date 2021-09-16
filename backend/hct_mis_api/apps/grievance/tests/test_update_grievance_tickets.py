@@ -370,7 +370,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         if name == "with_permission":
             expected_result = {
                 "sex": {"value": "MALE", "approve_status": False, "previous_value": "FEMALE"},
-                "role": {"value": "PRIMARY", "approve_status": False, "previous_value": None},
+                "role": {"value": "PRIMARY", "approve_status": False, "previous_value": "NO_ROLE"},
                 "documents": [
                     {
                         "value": {"type": "NATIONAL_ID", "number": "111-222-777", "country": "POL"},
