@@ -23,6 +23,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.geo.compat import GeoCountryField
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -322,7 +323,11 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField(blank=True, db_index=True)
+    country_origin_new = models.ForeignKey(
+        "geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT
+    )
     country = CountryField(db_index=True)
+    country_new = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     size = models.PositiveIntegerField(db_index=True)
     address = CICharField(max_length=255, blank=True)
     """location contains lowest administrative area info"""
@@ -587,6 +592,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 class DocumentType(TimeStampedUUIDModel):
     country = CountryField(default="U")
+    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
@@ -640,6 +646,7 @@ class Agency(models.Model):
         max_length=100,
     )
     country = CountryField()
+    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Agencies"
