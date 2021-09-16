@@ -1,0 +1,11 @@
+<a target="_new"
+   href={% url "admin:household_individual_change" individual.pk %}>{{ individual }} {{  role }}</a>
+{% if individual.duplicate %}
+( <b style="color:red">DUPLICATE OF
+    {% if r.individual.active_record %}
+        <a target="_new"
+           href={% url "admin:household_individual_change" individual.active_record.pk %}>{{ individual.active_record }}</a>
+    {% else %}
+        <i>&lt;record not found&gt;</i>
+    {% endif %})
+{% endif %}

@@ -801,9 +801,9 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         default=UNIQUE_IN_BATCH,
         choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
     )
-    deduplication_golden_record_results = JSONField(default=dict)
-    deduplication_batch_results = JSONField(default=dict)
-    imported_individual_id = models.UUIDField(null=True)
+    deduplication_golden_record_results = JSONField(default=dict, blank=True)
+    deduplication_batch_results = JSONField(default=dict, blank=True)
+    imported_individual_id = models.UUIDField(null=True, blank=True)
     sanction_list_possible_match = models.BooleanField(default=False)
     sanction_list_confirmed_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
@@ -818,6 +818,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    fchild_hoh = models.BooleanField(default=False)
+    child_hoh = models.BooleanField(default=False)
 
     @property
     def age(self):
@@ -912,6 +914,18 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         if self.household:
             return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
         return []
+
+    def is_golden_record_duplicated(self):
+        return self.deduplication_golden_record_status == DUPLICATE
+
+    def get_deduplication_golden_record(self):
+        status_key = "duplicates" if self.is_golden_record_duplicated() else "possible_duplicates"
+        return self.deduplication_golden_record_results.get(status_key, [])
+
+    @cached_property
+    def active_record(self):
+        if self.duplicate:
+            return Individual.objects.filter(unicef_id=self.unicef_id, duplicate=False, is_removed=False).first()
 
 
 class EntitlementCard(TimeStampedUUIDModel):

@@ -2096,6 +2096,33 @@
             "deprecationReason": null
           },
           {
+            "name": "businessArea",
+            "description": null,
+            "args": [
+              {
+                "name": "businessAreaSlug",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "BusinessAreaNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "allAdminAreas",
             "description": null,
             "args": [
@@ -2238,6 +2265,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "UUID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "slug",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -8465,7 +8502,23 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationBatchDuplicateScore",
+            "name": "deduplicationDuplicateScore",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deduplicationPossibleDuplicateScore",
             "description": null,
             "args": [],
             "type": {
@@ -8513,22 +8566,6 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationGoldenRecordDuplicateScore",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "deduplicationGoldenRecordDuplicatesPercentage",
             "description": null,
             "args": [],
@@ -8561,7 +8598,7 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationGoldenRecordMinScore",
+            "name": "screenBeneficiary",
             "description": null,
             "args": [],
             "type": {
@@ -8569,7 +8606,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Float",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -11812,6 +11849,22 @@
               "kind": "OBJECT",
               "name": "UserBusinessAreaNode",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "screenBeneficiary",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -15152,6 +15205,38 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "UserBusinessAreaNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "fchildHoh",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "childHoh",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -28627,6 +28712,18 @@
             "deprecationReason": null
           },
           {
+            "name": "extraData",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "TicketNeedsAdjudicationDetailsExtraDataNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hasDuplicatedDocument",
             "description": null,
             "args": [],
@@ -28647,6 +28744,49 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "TicketNeedsAdjudicationDetailsExtraDataNode",
+        "description": null,
+        "fields": [
+          {
+            "name": "goldenRecords",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DeduplicationResultNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "possibleDuplicate",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DeduplicationResultNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -30276,116 +30416,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "BusinessAreaNodeConnection",
-        "description": null,
-        "fields": [
-          {
-            "name": "pageInfo",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PageInfo",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "edges",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "BusinessAreaNodeEdge",
-                  "ofType": null
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "totalCount",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "edgeCount",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "BusinessAreaNodeEdge",
-        "description": null,
-        "fields": [
-          {
-            "name": "node",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "BusinessAreaNode",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "cursor",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "BusinessAreaNode",
         "description": null,
         "fields": [
@@ -30687,7 +30717,23 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationBatchDuplicateScore",
+            "name": "deduplicationDuplicateScore",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deduplicationPossibleDuplicateScore",
             "description": null,
             "args": [],
             "type": {
@@ -30735,22 +30781,6 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationGoldenRecordDuplicateScore",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "deduplicationGoldenRecordDuplicatesPercentage",
             "description": null,
             "args": [],
@@ -30783,7 +30813,7 @@
             "deprecationReason": null
           },
           {
-            "name": "deduplicationGoldenRecordMinScore",
+            "name": "screenBeneficiary",
             "description": null,
             "args": [],
             "type": {
@@ -30791,7 +30821,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Float",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -31790,6 +31820,116 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "BusinessAreaNodeConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "BusinessAreaNodeEdge",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "edgeCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "BusinessAreaNodeEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "BusinessAreaNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -44058,6 +44198,16 @@
               "ofType": null
             },
             "defaultValue": null
+          },
+          {
+            "name": "screenBeneficiary",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -44141,6 +44291,16 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "screenBeneficiary",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
               "ofType": null
             },
             "defaultValue": null

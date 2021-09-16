@@ -274,6 +274,7 @@ class RdiMergeTask:
                                 kobo_asset_id=kobo_asset_id,
                                 kobo_submission_time=kobo_submission_time,
                                 registration_data_import=obj_hub,
+                                imported_household=imported_household,
                             )
                             kobo_submissions.append(submission)
                     if kobo_submissions:
@@ -305,7 +306,8 @@ class RdiMergeTask:
                     )
 
                     # SANCTION LIST CHECK
-                    CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
+                    if obj_hct.should_check_against_sanction_list():
+                        CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()

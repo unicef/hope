@@ -3,9 +3,11 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button
+from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -22,13 +24,36 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(RegistrationDataImportDatahub)
-class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("name", "import_date", "import_done", "business_area_slug")
+class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+    list_display = ("name", "import_date", "import_done", "business_area_slug", "hct_id")
     list_filter = (
+        "created_at",
         "import_done",
+        ("registration_data_import", AutoCompleteFilter),
         TextFieldFilter.factory("business_area_slug__istartswith"),
     )
-    date_hierarchy = "import_date"
+    advanced_filter_fields = (
+        "created_at",
+        "import_done",
+        ("business_area__name", "business area"),
+    )
+
+    raw_id_fields = ("import_data",)
+    date_hierarchy = "created_at"
+    search_fields = ("name",)
+
+    @href(
+        label="RDI",
+    )
+    def hub(self, button):
+        obj = button.context.get("original")
+        if obj:
+            if obj.hct_id:
+                return reverse("admin:registration_data_registrationdataimport_change", args=[obj.hct_id])
+            else:
+                button.html_attrs = {"style": "background-color:#CCCCCC;cursor:not-allowed"}
+                return "javascript:alert('RDI not imported');"
+        button.visible = False
 
     @button()
     def inspect(self, request, pk):
@@ -132,5 +157,26 @@ class ImportedIndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
 
 
 @admin.register(KoboImportedSubmission)
-class KoboImportedSubmissionAdmin(HOPEModelAdminBase):
-    pass
+class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+    list_display = (
+        "created_at",
+        "kobo_submission_time",
+        "kobo_submission_uuid",
+        "kobo_asset_id",
+        "amended",
+        "imported_household_id",
+        "registration_data_import_id",
+    )
+    # date_hierarchy = "created_at"
+    list_filter = (
+        "amended",
+        ("registration_data_import", AutoCompleteFilter),
+        ("imported_household", AutoCompleteFilter),
+    )
+    advanced_filter_fields = (
+        # "created_at",
+        "amended",
+        "kobo_submission_time",
+        "registration_data_import_id",
+    )
+    raw_id_fields = ("registration_data_import", "imported_household")
