@@ -1,18 +1,19 @@
-import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { BlackLink } from '../../../components/BlackLink';
+import { Flag } from '../../../components/Flag';
+import { FlagTooltip } from '../../../components/FlagTooltip';
+import { LoadingComponent } from '../../../components/LoadingComponent';
+import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { choicesToDict, sexToCapitalize } from '../../../utils/utils';
 import {
   IndividualNode,
   useHouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { Flag } from '../../../components/Flag';
-import { choicesToDict, sexToCapitalize } from '../../../utils/utils';
-import { FlagTooltip } from '../../../components/FlagTooltip';
-import { LoadingComponent } from '../../../components/LoadingComponent';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
-import { BlackLink } from '../../../components/BlackLink';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -25,6 +26,7 @@ export function IndividualsListTableRow({
 }: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const { t } = useTranslation();
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -50,11 +52,14 @@ export function IndividualsListTableRow({
     >
       <TableCell align='left'>
         {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && (
-          <FlagTooltip />
+          <FlagTooltip message={t('Possible Duplicate')} />
         )}
         {(individual.sanctionListPossibleMatch ||
           individual.sanctionListConfirmedMatch) && (
-          <Flag confirmed={individual.sanctionListConfirmedMatch} />
+          <Flag
+            message={t('Sanction List Confirmed Match')}
+            confirmed={individual.sanctionListConfirmedMatch}
+          />
         )}
       </TableCell>
       <TableCell align='left'>

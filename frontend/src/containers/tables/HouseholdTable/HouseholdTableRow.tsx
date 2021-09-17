@@ -1,18 +1,19 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { BlackLink } from '../../../components/BlackLink';
+import { Flag } from '../../../components/Flag';
+import { FlagTooltip } from '../../../components/FlagTooltip';
+import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
+import { UniversalMoment } from '../../../components/UniversalMoment';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
-import { Flag } from '../../../components/Flag';
-import { UniversalMoment } from '../../../components/UniversalMoment';
-import { FlagTooltip } from '../../../components/FlagTooltip';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
-import { BlackLink } from '../../../components/BlackLink';
 
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
@@ -26,6 +27,7 @@ export function HouseHoldTableRow({
   canViewDetails,
 }: HouseHoldTableRowProps): React.ReactElement {
   const history = useHistory();
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const residenceStatusChoiceDict = choicesToDict(
     choicesData.residenceStatusChoices,
@@ -42,10 +44,15 @@ export function HouseHoldTableRow({
       key={household.unicefId}
     >
       <TableCell align='left'>
-        {household.hasDuplicates && <FlagTooltip />}
+        {household.hasDuplicates && (
+          <FlagTooltip message={t('Possible Duplicates')} />
+        )}
         {(household.sanctionListPossibleMatch ||
           household.sanctionListConfirmedMatch) && (
-          <Flag confirmed={household.sanctionListConfirmedMatch} />
+          <Flag
+            message={t('Sanction List Confirmed Match')}
+            confirmed={household.sanctionListConfirmedMatch}
+          />
         )}
       </TableCell>
       <TableCell align='left'>
