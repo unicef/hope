@@ -1,8 +1,8 @@
 import logging
 
+from concurrency.exceptions import RecordModifiedError
+
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.core.models import XLSXKoboTemplate
-from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import KoboRetriableError
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +13,25 @@ def recalculate_population_fields_task():
 
     try:
         from hct_mis_api.apps.household.models import Household
+
         for hh in Household.objects.all():
-            hh.recalculate_data()
+            recalculate_household_data(hh)
     except Exception as e:
         logger.exception(e)
         raise
 
-    logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry end")
+    logger.info("recalculate_population_fields end")
 
 
+def recalculate_household_data(household, retry=True):
+    try:
+        household.recalculate_data()
+    except RecordModifiedError:
+        recalculate_error_handler(household, retry)
 
+
+def recalculate_error_handler(household, retry):
+    if not retry:
+        raise
+    household.refresh_from_db()
+    recalculate_household_data(household, False)
