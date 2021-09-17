@@ -9,6 +9,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
+  useRefuseRdiMutation,
 } from '../../../__generated__/graphql';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
@@ -18,6 +19,7 @@ export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   canMerge: boolean;
   canRerunDedupe: boolean;
   canViewList: boolean;
+  canRefuse: boolean;
 }
 
 const MergeButtonContainer = styled.span`
@@ -29,15 +31,30 @@ export function RegistrationDataImportDetailsPageHeader({
   canMerge,
   canRerunDedupe,
   canViewList,
+  canRefuse,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
+  const [mutate] = useRefuseRdiMutation();
   let buttons = null;
   // eslint-disable-next-line default-case
   switch (registration?.status) {
     case RegistrationDataImportStatus.InReview:
       buttons = (
         <div>
+          {canMerge && canRefuse && (
+            <Button
+              onClick={() =>
+                mutate({
+                  variables: { id: registration.id },
+                })
+              }
+              variant='contained'
+              color='primary'
+            >
+              {t('Refuse Import')}
+            </Button>
+          )}
           {canMerge && (
             <MergeButtonContainer>
               <MergeRegistrationDataImportDialog registration={registration} />
