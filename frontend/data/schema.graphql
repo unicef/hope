@@ -1970,6 +1970,7 @@ type Mutations {
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportData(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataMutation
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
+  refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
@@ -2364,6 +2365,10 @@ input ReferralTicketExtras {
   individual: ID
 }
 
+type RefuseRegistrationDataImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
@@ -2449,6 +2454,7 @@ enum RegistrationDataImportStatus {
   IMPORTING
   DEDUPLICATION_FAILED
   DEDUPLICATION
+  REFUSE
   IMPORT_ERROR
   MERGE_ERROR
 }
