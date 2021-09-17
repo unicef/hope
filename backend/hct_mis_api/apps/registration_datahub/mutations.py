@@ -272,6 +272,43 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         return MergeRegistrationDataImportMutation(obj_hct)
 
 
+class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
+    registration_data_import = graphene.Field(RegistrationDataImportNode)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    def validate_object_status(cls, *args, **kwargs):
+        status = kwargs.get("status")
+        if status != RegistrationDataImport.IN_REVIEW:
+            logger.error("Only In Review Registration Data Import can be refused")
+            raise ValidationError("Only In Review Registration Data Import can be refused")
+
+    @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
+    @is_authenticated
+    def mutate(cls, root, info, id, **kwargs):
+        decode_id = decode_id_string(id)
+        old_obj_hct = RegistrationDataImport.objects.get(id=decode_id)
+        obj_hct = RegistrationDataImport.objects.get(id=decode_id)
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), obj_hct)
+
+        cls.has_permission(info, Permissions.RDI_REFUSE_IMPORT, obj_hct.business_area)
+
+        cls.validate(status=obj_hct.status)
+        obj_hct.status = RegistrationDataImport.REFUSE_IMPORT
+        obj_hct.save()
+
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
+        )
+        return RefuseRegistrationDataImportMutation(obj_hct)
+
+
 class UploadImportDataXLSXFile(PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(XlsxRowErrorNode)
@@ -383,4 +420,5 @@ class Mutations(graphene.ObjectType):
     registration_kobo_import = RegistrationKoboImportMutation.Field()
     save_kobo_import_data = SaveKoboProjectImportDataMutation.Field()
     merge_registration_data_import = MergeRegistrationDataImportMutation.Field()
+    refuse_registration_data_import = RefuseRegistrationDataImportMutation.Field()
     rerun_dedupe = RegistrationDeduplicationMutation.Field()
