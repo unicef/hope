@@ -300,7 +300,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         cls.has_permission(info, Permissions.RDI_REFUSE_IMPORT, obj_hct.business_area)
 
         cls.validate(status=obj_hct.status)
-        obj_hct.status = RegistrationDataImport.REFUSE_IMPORT
+        obj_hct.status = RegistrationDataImport.REFUSED_IMPORT
         obj_hct.save()
 
         log_create(

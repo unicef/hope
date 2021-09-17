@@ -10,7 +10,7 @@ snapshots['TestRefuseRdiMutation::test_refuse_registration_data_import_0_with_pe
     'data': {
         'refuseRegistrationDataImport': {
             'registrationDataImport': {
-                'status': 'REFUSE'
+                'status': 'REFUSED'
             }
         }
     }
