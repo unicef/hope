@@ -826,6 +826,13 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         return relativedelta(date.today(), self.birth_date).years
 
     @property
+    def role(self):
+        role = self.households_and_roles.first()
+        if role is not None:
+            return role.role
+        return ROLE_NO_ROLE
+
+    @property
     def get_hash_key(self):
         from hashlib import sha256
 

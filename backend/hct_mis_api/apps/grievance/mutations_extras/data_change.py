@@ -334,6 +334,8 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
             current_value = current_value.isoformat()
         elif field in ("phone_no", "phone_no_alternative"):
             current_value = str(current_value)
+        elif field == "role":
+            current_value = individual.role
         individual_data_with_approve_status[field]["previous_value"] = current_value
 
     documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
@@ -398,6 +400,8 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
             current_value = current_value.isoformat()
         elif field in ("phone_no", "phone_no_alternative"):
             current_value = str(current_value)
+        elif field == "role":
+            current_value = individual.role
         individual_data_with_approve_status[field]["previous_value"] = current_value
 
     documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
