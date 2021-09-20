@@ -85,6 +85,7 @@ class Command(BaseCommand):
                     Permissions.RDI_VIEW_LIST,
                     Permissions.RDI_VIEW_DETAILS,
                     Permissions.RDI_MERGE_IMPORT,
+                    Permissions.RDI_REFUSE_IMPORT,
                     Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
                     Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
                     Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,

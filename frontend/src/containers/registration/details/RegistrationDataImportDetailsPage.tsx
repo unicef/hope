@@ -85,6 +85,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
           permissions,
         )}
         canViewList={hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)}
+        canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
       />
       <Container>
         <RegistrationDetails registration={data.registrationDataImport} />
