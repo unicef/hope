@@ -195,13 +195,11 @@ class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         return mark_safe(ret)
 
     def enrich_deduplication(self, request, queryset):
-        # TODO: exclude already processed
-        for record in queryset:
+        for record in queryset.exclude(deduplication_batch_results__has_key="score"):
             post_process_dedupe_results(record)
 
     @button()
     def post_process_dedupe_results(self, request, pk):
-        # TODO: exclude already processed
         record = self.get_queryset(request).get(id=pk)
         post_process_dedupe_results(record)
         record.save()

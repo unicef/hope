@@ -13,16 +13,10 @@ def post_process_dedupe_results(record):
     #  }
     max_score = 0
     min_score = sys.maxsize
-    if "duplicates" in record.deduplication_batch_results:
-        for entry in record.deduplication_batch_results["duplicates"]:
-            max_score = max(max_score, entry["score"])
-            min_score = min(min_score, entry["score"])
-        record.deduplication_batch_results["score"] = {"max": max_score, "min": min_score}
-
-    max_score = 0
-    min_score = sys.maxsize
-    if "duplicates" in record.deduplication_golden_record_results:
-        for entry in record.deduplication_golden_record_results["duplicates"]:
-            max_score = max(max_score, entry["score"])
-            min_score = min(min_score, entry["score"])
-        record.deduplication_golden_record_results["score"] = {"max": max_score, "min": min_score}
+    for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
+        if "duplicates" in field:
+            duplicates = field["duplicates"]
+            for entry in field["duplicates"]:
+                max_score = max(max_score, entry["score"])
+                min_score = min(min_score, entry["score"])
+            field["score"] = {"max": max_score, "min": min_score, "qty": len(duplicates)}
