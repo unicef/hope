@@ -98,7 +98,7 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, LinkedObjectsMixin, ExtraUr
 
 
 @admin.register(HouseholdSelection)
-class HouseholdSelectionAdmin(HOPEModelAdminBase):
+class HouseholdSelectionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = (
         "household",
         "target_population",
@@ -115,3 +115,9 @@ class HouseholdSelectionAdmin(HOPEModelAdminBase):
         "final",
         ("vulnerability_score", MaxMinFilter),
     )
+    actions = ["reset_sync_date"]
+
+    def reset_sync_date(self, request, queryset):
+        from hct_mis_api.apps.household.models import Household
+
+        Household.objects.filter(selections__in=queryset).update(last_sync_at=None)

@@ -27,10 +27,10 @@ from hct_mis_api.apps.core.views import (
 actions.add_to_site(site, exclude=["export_delete_tree"])
 
 urlpatterns = [
-    path("api/admin/", admin.site.urls),
+    path(f"api/{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("api/explorer/", include("explorer.urls")),
-    path("api/admin/adminactions/", include("adminactions.urls")),
-    path("api/admin/advanced_filters/", include("advanced_filters.urls")),
+    path(f"api/{settings.ADMIN_PANEL_URL}/adminactions/", include("adminactions.urls")),
+    path(f"api/{settings.ADMIN_PANEL_URL}/advanced_filters/", include("advanced_filters.urls")),
     path("", homepage),
     path("_health", homepage),
     path("api/_health", homepage),
