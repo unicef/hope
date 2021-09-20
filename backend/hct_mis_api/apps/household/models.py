@@ -390,6 +390,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     class Meta:
         verbose_name = "Household"
+        permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
     def save(self, *args, **kwargs):
         from hct_mis_api.apps.targeting.models import HouseholdSelection

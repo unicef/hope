@@ -5,12 +5,15 @@ from itertools import chain
 
 from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
+from django.contrib.admin.models import LogEntry
 from django.contrib.messages import DEFAULT_TAGS
 from django.contrib.postgres.fields import JSONField
 from django.db.models import Count, Q
+from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from admin_extra_urls.decorators import button, href
@@ -29,6 +32,10 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.grievance.models import (
+    TicketNeedsAdjudicationDetails,
+    TicketSystemFlaggingDetails,
+)
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -140,6 +147,57 @@ class HouseholdAdmin(
 
     def get_ignored_linked_objects(self):
         return []
+
+    @button(permission="can_withdrawn")
+    def withdrawn(self, request, pk):
+        from hct_mis_api.apps.grievance.models import GrievanceTicket
+
+        context = self.get_common_context(request, pk, title="Withdrawn")
+        obj = context["original"]
+        new_withdrawn_status = "" if obj.withdrawn else "checked"
+        context["status"] = new_withdrawn_status
+        tickets = GrievanceTicket.objects.belong_household(obj)
+        if obj.withdrawn:
+            tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
+        else:
+            tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
+
+        context["tickets"] = tickets
+        if request.method == "POST":
+            try:
+                with atomic():
+                    withdrawn = not obj.withdrawn
+                    if withdrawn:
+                        obj.withdrawn_date = timezone.now()
+                        message = "{} has been withdrawn"
+                    else:
+                        obj.withdrawn_date = None
+                        message = "{} has been restored"
+                    obj.withdrawn = withdrawn
+                    withdrawns = list(obj.individuals.values_list("id", flat=True))
+                    for ind in Individual.objects.filter(id__in=withdrawns, duplicate=False):
+                        ind.withdrawn = withdrawn
+                        ind.save()
+                        self.log_change(request, ind, message.format("Individual"))
+                    for tkt in context["tickets"]:
+                        if withdrawn:
+                            tkt.ticket.extras["status_before_withdrawn"] = tkt.ticket.status
+                            tkt.ticket.status = GrievanceTicket.STATUS_CLOSED
+                            self.log_change(request, tkt.ticket, "Ticket closed due to Household withdrawn")
+                        else:
+                            if tkt.ticket.extras.get("status_before_withdrawn"):
+                                tkt.ticket.status = tkt.ticket.extras["status_before_withdrawn"]
+                                tkt.ticket.extras["status_before_withdrawn"] = ""
+                            self.log_change(request, tkt.ticket, "Ticket reopened due to Household restore")
+                        tkt.ticket.save()
+
+                    obj.save()
+                    self.log_change(request, obj, message.format("Household"))
+                    return HttpResponseRedirect(request.path)
+            except Exception as e:
+                self.message_user(request, str(e), messages.ERROR)
+
+        return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
 
     @button()
     def tickets(self, request, pk):
