@@ -1,5 +1,13 @@
 import { useQuery } from '@apollo/react-hooks';
-import { makeStyles } from '@material-ui/core';
+import styled from 'styled-components';
+import {
+  Box,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  makeStyles,
+  Typography,
+} from '@material-ui/core';
 import Divider from '@material-ui/core/Divider';
 import DrawerMaterial from '@material-ui/core/Drawer';
 import IconButton from '@material-ui/core/IconButton';
@@ -14,6 +22,7 @@ import { theme as themeObj } from '../../theme';
 import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
+import { resourcesItems } from './menuItems';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
@@ -84,6 +93,34 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     textAlign: 'center',
   },
 }));
+
+const StyledLink = styled.a`
+  color: #233944;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  text-decoration: none;
+`;
+
+const Text = styled(ListItemText)`
+  .MuiTypography-body1 {
+    color: #233944;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+  }
+`;
+
+const ResourcesBox = styled(Box)`
+  border-right: 2px solid #e1e1e1;
+`;
+
+const Icon = styled(ListItemIcon)`
+  && {
+    min-width: 0;
+    padding-right: ${({ theme }) => theme.spacing(4)}px;
+  }
+`;
 interface Props {
   open: boolean;
   handleDrawerClose: () => void;
@@ -144,6 +181,26 @@ export function Drawer({
       <List className={classes.list}>
         <DrawerItems currentLocation={currentLocation} />
       </List>
+      <ResourcesBox mb={4}>
+        <Box mb={2}>
+          <Divider />
+        </Box>
+        <Box mb={2}>
+          <Typography variant='subtitle2' align='center'>
+            {t('Resources')}
+          </Typography>
+        </Box>
+        {resourcesItems.map((item) => (
+          <ListItem button key={item.name + item.href}>
+            <StyledLink target='_blank' href={item.href}>
+              <Box display='flex'>
+                <Icon>{item.icon}</Icon>
+                <Text primary={item.name} />
+              </Box>
+            </StyledLink>
+          </ListItem>
+        ))}
+      </ResourcesBox>
       <div className={classes.version}>
         <div>Backend Version: {backendVersion}</div>
         <div>Frontend Version: {frontendVersion}</div>
