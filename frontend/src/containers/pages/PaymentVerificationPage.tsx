@@ -19,6 +19,10 @@ const Container = styled.div`
   width: 100%;
 `;
 
+const TableWrapper = styled.div`
+  padding: 20px;
+`;
+
 export function PaymentVerificationPage(): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -54,14 +58,16 @@ export function PaymentVerificationPage(): React.ReactElement {
         onFilterChange={setFilter}
       />
       <Container data-cy='page-details-container'>
-        <PaymentVerificationTable
-          filter={debouncedFilter}
-          businessArea={businessArea}
-          canViewDetails={hasPermissions(
-            PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
-            permissions,
-          )}
-        />
+        <TableWrapper>
+          <PaymentVerificationTable
+            filter={debouncedFilter}
+            businessArea={businessArea}
+            canViewDetails={hasPermissions(
+              PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
+              permissions,
+            )}
+          />
+        </TableWrapper>
       </Container>
     </div>
   );
