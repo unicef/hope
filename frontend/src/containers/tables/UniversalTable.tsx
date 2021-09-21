@@ -66,9 +66,7 @@ export function UniversalTable<T, K>({
     // eslint-disable-next-line no-console
     console.error(error);
   }
-  if (!loading && !data) {
-    return <EmptyTable />;
-  }
+
   if (!data && loading) return <LoadingComponent />;
 
   let correctTitle = title;
