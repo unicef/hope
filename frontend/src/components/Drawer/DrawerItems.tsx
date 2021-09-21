@@ -4,16 +4,16 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ExpandLess from '@material-ui/icons/ExpandLess';
-import { Link, useHistory } from 'react-router-dom';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import styled from 'styled-components';
 import React from 'react';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { usePermissions } from '../../hooks/usePermissions';
+import { Link, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../config/permissions';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
 import { menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
@@ -24,6 +24,7 @@ const Text = styled(ListItemText)`
     line-height: 16px;
   }
 `;
+
 const Icon = styled(ListItemIcon)`
   && {
     min-width: 0;
