@@ -2,12 +2,12 @@
 {% block action-content %}
     {% if original.withdrawn %}
     <h1 style="color: red">Warning: Household already withdrawn</h1>
-        <h2>Continuing will restore this household and all its members (not the external collectors) and
+        <h2>Continuing will restore this household and all his  members (not the external collectors) and
             will reopen all tickets closed when it was withdrew.
         </h2>
     {% else %}
-        <h2>Continuing will withdrawn household and all its members (not the external collectors) and
-            will close any ticket related to the household or its members
+        <h2>Continuing will withdrawn household and all his members (not the external collectors) and
+            will close any ticket related to the household or his members
         </h2>
     {% endif %}
     <form method="post">{% csrf_token %}
