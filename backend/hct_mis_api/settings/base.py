@@ -172,6 +172,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
@@ -202,7 +203,7 @@ TEMPLATES = [
     },
 ]
 PROJECT_APPS = [
-    "hct_mis_api.apps.account",
+    "hct_mis_api.apps.account.apps.AccountConfig",
     "hct_mis_api.apps.core.apps.CoreConfig",
     "hct_mis_api.apps.grievance",
     "hct_mis_api.apps.household",
@@ -226,12 +227,10 @@ PROJECT_APPS = [
 
 DJANGO_APPS = [
     "hct_mis_api.apps.administration.apps.TemplateConfig",
-    # "smart_admin.templates",
     "advanced_filters",
     "smart_admin.logs",
     "smart_admin.apps.SmartTemplateConfig",
     "hct_mis_api.apps.administration.apps.Config",
-    # "smart_admin",
     "django_sysinfo",
     "django.contrib.auth",
     "django.contrib.humanize",
@@ -245,6 +244,8 @@ DJANGO_APPS = [
 ]
 
 OTHER_APPS = [
+    "hijack",
+    # "hijack.contrib.admin",
     "jsoneditor",
     "django_countries",
     "phonenumber_field",
@@ -266,6 +267,8 @@ OTHER_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
+
+# LOGIN_REDIRECT_URL = f'/api/{ADMIN_PANEL_URL}/'
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -682,6 +685,13 @@ EXPLORER_CONNECTIONS = {
 EXPLORER_DEFAULT_CONNECTION = "default"
 EXPLORER_PERMISSION_VIEW = lambda r: r.user.is_superuser
 EXPLORER_PERMISSION_CHANGE = lambda r: r.user.is_superuser
+
+IMPERSONATE = {
+    "REDIRECT_URL": f"/api/{ADMIN_PANEL_URL}/",
+    "PAGINATE_COUNT": 50,
+    "DISABLE_LOGGING": False,
+}
+
 
 # EXPLORER_SCHEMA_INCLUDE_TABLE_PREFIXES = (
 #     'hct_mis_api',
