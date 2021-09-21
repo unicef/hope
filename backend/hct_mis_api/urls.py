@@ -29,6 +29,7 @@ actions.add_to_site(site, exclude=["export_delete_tree"])
 urlpatterns = [
     path(f"api/{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("api/explorer/", include("explorer.urls")),
+    path(f"api/{settings.ADMIN_PANEL_URL}/hijack/", include("hijack.urls")),
     path(f"api/{settings.ADMIN_PANEL_URL}/adminactions/", include("adminactions.urls")),
     path(f"api/{settings.ADMIN_PANEL_URL}/advanced_filters/", include("advanced_filters.urls")),
     path("", homepage),

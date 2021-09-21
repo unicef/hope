@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin
+from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, TextFieldFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
