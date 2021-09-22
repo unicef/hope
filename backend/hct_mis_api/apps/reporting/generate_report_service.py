@@ -1,24 +1,33 @@
-from datetime import datetime, timedelta
-
-import logging
-import openpyxl
 import copy
-from django.core.files import File
-from openpyxl.utils import get_column_letter
-from django.db.models import Min, Max, Sum, Q, Count
-from django.contrib.postgres.aggregates.general import ArrayAgg
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
+import logging
+from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
+from django.conf import settings
+from django.contrib.postgres.aggregates.general import ArrayAgg
+from django.core.files import File
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Count, Max, Min, Q, Sum
+from django.template.loader import render_to_string
+
+import openpyxl
+from openpyxl.utils import get_column_letter
+
 from hct_mis_api.apps.core.models import AdminArea
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.reporting.models import Report
-from hct_mis_api.apps.household.models import Individual, Household, WORK_STATUS_CHOICE, NONE
-from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
+from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+from hct_mis_api.apps.household.models import (
+    NONE,
+    WORK_STATUS_CHOICE,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
-from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.program.models import (
+    CashPlan,
+    CashPlanPaymentVerification,
+    Program,
+)
+from hct_mis_api.apps.reporting.models import Report
 
 logger = logging.getLogger(__name__)
 
@@ -98,23 +107,23 @@ class GenerateReportContentHelpers:
             household.returnee,
             household.status,
             household.village,
-            household.female_age_group_0_5_count,
-            household.female_age_group_0_5_disabled_count,
-            household.female_age_group_6_11_count,
-            household.female_age_group_6_11_disabled_count,
-            household.female_age_group_12_17_count,
-            household.female_age_group_12_17_disabled_count,
+            household.female_age_group_0_4_count,
+            household.female_age_group_0_4_disabled_count,
+            household.female_age_group_5_12_count,
+            household.female_age_group_5_12_disabled_count,
+            household.female_age_group_13_17_count,
+            household.female_age_group_13_17_disabled_count,
             household.female_age_group_18_59_count,
             household.female_age_group_18_59_disabled_count,
             household.female_age_group_60_count,
             household.female_age_group_60_disabled_count,
             household.pregnant_count,
-            household.male_age_group_0_5_count,
-            household.male_age_group_0_5_disabled_count,
-            household.male_age_group_6_11_count,
-            household.male_age_group_6_11_disabled_count,
-            household.male_age_group_12_17_count,
-            household.male_age_group_12_17_disabled_count,
+            household.male_age_group_0_4_count,
+            household.male_age_group_0_4_disabled_count,
+            household.male_age_group_5_12_count,
+            household.male_age_group_5_12_disabled_count,
+            household.male_age_group_13_17_count,
+            household.male_age_group_13_17_disabled_count,
             household.male_age_group_18_59_count,
             household.male_age_group_18_59_disabled_count,
             household.male_age_group_60_count,
