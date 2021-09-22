@@ -236,7 +236,7 @@ class HouseholdAdmin(
 
         total_in_ranges = 0
         for gender in ["male", "female"]:
-            for num_range in ["0_5", "6_11", "12_17", "18_59", "60"]:
+            for num_range in ["0_4", "5_12", "13_17", "18_59", "60"]:
                 field = f"{gender}_age_group_{num_range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 

@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_1_without_permission 1'] = {
@@ -83,7 +82,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                                 'previous_value': 'AFG',
                                 'value': 'AFG'
                             },
-                            'female_age_group_6_11_count': {
+                            'female_age_group_5_12_count': {
                                 'approve_status': False,
                                 'previous_value': 2,
                                 'value': 14
