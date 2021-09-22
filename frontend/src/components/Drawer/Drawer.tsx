@@ -115,6 +115,11 @@ const ResourcesBox = styled(Box)`
   border-right: 2px solid #e1e1e1;
 `;
 
+const BorderBox = styled(Box)`
+  border-right: 2px solid #e1e1e1;
+  height: 30px;
+`;
+
 const Icon = styled(ListItemIcon)`
   && {
     min-width: 0;
@@ -181,7 +186,7 @@ export function Drawer({
       <List className={classes.list}>
         <DrawerItems currentLocation={currentLocation} />
       </List>
-      <ResourcesBox mb={4}>
+      <ResourcesBox>
         <Box mb={2}>
           <Divider />
         </Box>
@@ -201,6 +206,7 @@ export function Drawer({
           </ListItem>
         ))}
       </ResourcesBox>
+      <BorderBox />
       <div className={classes.version}>
         <div>Backend Version: {backendVersion}</div>
         <div>Frontend Version: {frontendVersion}</div>
