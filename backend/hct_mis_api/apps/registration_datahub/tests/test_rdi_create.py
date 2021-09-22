@@ -19,11 +19,11 @@ from django.test import TestCase
 from django_countries.fields import Country
 from PIL import Image
 
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea, AdminAreaLevel
+from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    DocumentType,
     IDENTIFICATION_TYPE_CHOICE,
+    DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -62,7 +62,10 @@ class TestRdiCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+            RdiKoboCreateTask,
+            RdiXlsxCreateTask,
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -342,7 +345,10 @@ class TestRdiKoboCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+            RdiKoboCreateTask,
+            RdiXlsxCreateTask,
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -596,7 +602,9 @@ class TestRdiKoboCreateTask(TestCase):
     )
     @unittest.skip("Remove this and run manually only!")
     def test_performance(self):
-        from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataValidator
+        from hct_mis_api.apps.registration_datahub.validators import (
+            KoboProjectImportDataValidator,
+        )
 
         self._generate_huge_file()
         content = Path(
@@ -631,10 +639,10 @@ class TestRdiKoboCreateTask(TestCase):
         base_form = {
             "_notes": [],
             "household_questions/household_location/address_h_c": "Some Address 12",
-            "household_questions/group_qo2zo48/f_0_5_age_group_h_c": "0",
+            "household_questions/group_qo2zo48/f_0_4_age_group_h_c": "0",
             "monthly_income_questions/total_inc_h_f": "0",
-            "household_questions/group_qo2zo48/m_6_11_age_group_h_c": "0",
-            "household_questions/group_cu1lc89/m_6_11_disability_h_c": "0",
+            "household_questions/group_qo2zo48/m_5_12_age_group_h_c": "0",
+            "household_questions/group_cu1lc89/m_5_12_disability_h_c": "0",
             "_xform_id_string": "ayp9jVNe5crcGerVjCjGj4",
             "_bamboo_dataset_id": "",
             "_tags": [],
@@ -660,13 +668,13 @@ class TestRdiKoboCreateTask(TestCase):
                     "individual_questions/birth_date_i_c": "1955-07-28",
                 }
             ],
-            "household_questions/group_cu1lc89/f_12_17_disability_h_c": "0",
+            "household_questions/group_cu1lc89/f_13_17_disability_h_c": "0",
             "meta/instanceID": "uuid:84366d01-770a-42f0-b0f8-d498e35dd9e8",
-            "household_questions/group_qo2zo48/f_12_17_age_group_h_c": "0",
+            "household_questions/group_qo2zo48/f_13_17_age_group_h_c": "0",
             "end": "2020-06-18T12:05:31.700+02:00",
-            "household_questions/group_qo2zo48/f_6_11_age_group_h_c": "0",
+            "household_questions/group_qo2zo48/f_5_12_age_group_h_c": "0",
             "household_questions/group_cu1lc89/f_adults_disability_h_c": "0",
-            "household_questions/group_qo2zo48/m_0_5_age_group_h_c": "0",
+            "household_questions/group_qo2zo48/m_0_4_age_group_h_c": "0",
             "household_questions/group_qo2zo48/f_adults_h_c": "0",
             "household_questions/group_cu1lc89/m_adults_disability_h_c": "0",
             "start": "2020-06-15T11:49:14.246+02:00",
@@ -743,12 +751,12 @@ class TestRdiKoboCreateTask(TestCase):
             "_uuid": "84366d01-770a-42f0-b0f8-d498e35dd9e8",
             "consent/consent_sign_h_c": "signature-11_53_11.png",
             "household_questions/household_location/country_h_c": "POL",
-            "household_questions/group_cu1lc89/f_6_11_disability_h_c": "0",
+            "household_questions/group_cu1lc89/f_5_12_disability_h_c": "0",
             "_submitted_by": None,
             "household_questions/size_h_c": "1",
-            "household_questions/group_cu1lc89/f_0_5_disability_h_c": "0",
+            "household_questions/group_cu1lc89/f_0_4_disability_h_c": "0",
             "household_questions/household_location/country_origin_h_c": "AFG",
-            "household_questions/group_cu1lc89/m_0_5_disability_h_c": "0",
+            "household_questions/group_cu1lc89/m_0_4_disability_h_c": "0",
             "formhub/uuid": "a716ab3cdfbc411aac9fa081874b6aa1",
             "enumerator/group_fl9ht28/org_enumerator": "unicef",
             "household_questions/household_location/hh_geopoint_h_c": "51.106648 17.033256 0 0",
@@ -758,11 +766,11 @@ class TestRdiKoboCreateTask(TestCase):
             "_geolocation": [51.106648, 17.033256],
             "monthly_expenditures_questions/round_total_expense_h_f": "0",
             "deviceid": "ee.humanitarianresponse.info:AqAb03KLuEfWXes0",
-            "household_questions/group_qo2zo48/m_12_17_age_group_h_c": "0",
+            "household_questions/group_qo2zo48/m_13_17_age_group_h_c": "0",
             "individual_questions_count": "1",
             "_id": 104545171,
             "household_questions/group_qo2zo48/m_adults_h_c": "1",
-            "household_questions/group_cu1lc89/m_12_17_disability_h_c": "0",
+            "household_questions/group_cu1lc89/m_13_17_disability_h_c": "0",
         }
 
         result = []
