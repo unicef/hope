@@ -21,6 +21,7 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.core_fields_attributes import (
     COLLECTORS_FIELDS,
     TYPE_DATE,
+    TYPE_DECIMAL,
     TYPE_INTEGER,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
@@ -103,6 +104,9 @@ class RdiBaseCreateTask:
 
         if value_type == TYPE_INTEGER:
             return int(value)
+
+        if value_type == TYPE_DECIMAL:
+            return float(value)
 
         if value_type in (TYPE_SELECT_ONE, TYPE_SELECT_MANY):
             custom_cast_method = self.COMBINED_FIELDS[header].get("custom_cast_value")
