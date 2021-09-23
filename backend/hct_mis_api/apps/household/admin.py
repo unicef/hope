@@ -88,9 +88,10 @@ class HouseholdAdmin(
     advanced_filter_fields = (
         "name",
         "country",
-        "head_of_household",
         "size",
-        "unhcr_id",
+        "admin_area",
+        "last_registration_date",
+        "registration_data_import",
         ("business_area__name", "business area"),
     )
 
