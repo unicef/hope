@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField
 
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
+from adminactions.helpers import AdminActionPermMixin
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
@@ -66,7 +67,7 @@ class LastSyncDateResetMixin(ExtraUrlMixin):
             )
 
 
-class HOPEModelAdminBase(SmartDisplayAllMixin, JSONWidgetMixin, admin.ModelAdmin):
+class HOPEModelAdminBase(SmartDisplayAllMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin):
     list_per_page = 50
 
     def get_fields(self, request, obj=None):
