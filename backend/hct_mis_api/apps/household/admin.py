@@ -53,8 +53,8 @@ from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
-    is_root,
 )
+from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 
