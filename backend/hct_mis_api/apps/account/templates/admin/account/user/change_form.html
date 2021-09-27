@@ -1,7 +1,7 @@
-{% extends "admin_extra_urls/change_form.html" %}{% load staticfiles hijack i18n %}
+{% extends "admin_extra_urls/change_form.html" %}{% load staticfiles accounts i18n %}
 {% block object-tools-items %}
     {{ block.super }}
-    {% if request.user|can_hijack:original %}
+    {% if request|is_root %}
         <li><a href="#"
                style="background-color: chocolate"
                class="btn extra-link btn-action btn-danger" data-hijack-user="{{ original.pk }}"

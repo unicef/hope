@@ -13,7 +13,6 @@ from django.utils.safestring import mark_safe
 from admin_extra_urls.decorators import button, href
 from admin_extra_urls.extras import ExtraUrlMixin
 from admin_extra_urls.mixins import _confirm_action
-from admin_extra_urls.mixins import _confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
@@ -38,7 +37,8 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
 from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
 from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 from hct_mis_api.apps.targeting.models import HouseholdSelection
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, is_root
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 

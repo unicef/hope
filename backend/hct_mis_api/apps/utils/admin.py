@@ -9,10 +9,7 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
-
-
-def is_root(request, *args, **kwargs):
-    return request.user.is_superuser and request.headers.get("x-root-token") == settings.ROOT_TOKEN
+from hct_mis_api.apps.utils.security import is_root
 
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
