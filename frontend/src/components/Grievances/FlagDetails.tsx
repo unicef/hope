@@ -117,7 +117,11 @@ export function FlagDetails({
         <TableBody>
           <TableRow>
             <TableCell align='left'>
-              {isFlagConfirmed ? <Flag confirmed /> : ''}
+              {isFlagConfirmed ? (
+                <Flag message={t('Sanction List Confirmed Match')} confirmed />
+              ) : (
+                ''
+              )}
             </TableCell>
             <TableCell align='left'>-</TableCell>
             <TableCell align='left'>

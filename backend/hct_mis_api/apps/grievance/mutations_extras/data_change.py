@@ -55,25 +55,25 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     country = graphene.String()
     size = graphene.Int()
     address = graphene.String()
-    female_age_group_0_5_count = graphene.Int()
-    female_age_group_6_11_count = graphene.Int()
-    female_age_group_12_17_count = graphene.Int()
+    female_age_group_0_4_count = graphene.Int()
+    female_age_group_5_12_count = graphene.Int()
+    female_age_group_13_17_count = graphene.Int()
     female_age_group_18_59_count = graphene.Int()
     female_age_group_60_count = graphene.Int()
     pregnant_count = graphene.Int()
-    male_age_group_0_5_count = graphene.Int()
-    male_age_group_6_11_count = graphene.Int()
-    male_age_group_12_17_count = graphene.Int()
+    male_age_group_0_4_count = graphene.Int()
+    male_age_group_5_12_count = graphene.Int()
+    male_age_group_13_17_count = graphene.Int()
     male_age_group_18_59_count = graphene.Int()
     male_age_group_60_count = graphene.Int()
-    female_age_group_0_5_disabled_count = graphene.Int()
-    female_age_group_6_11_disabled_count = graphene.Int()
-    female_age_group_12_17_disabled_count = graphene.Int()
+    female_age_group_0_4_disabled_count = graphene.Int()
+    female_age_group_5_12_disabled_count = graphene.Int()
+    female_age_group_13_17_disabled_count = graphene.Int()
     female_age_group_18_59_disabled_count = graphene.Int()
     female_age_group_60_disabled_count = graphene.Int()
     male_age_group_0_5_disabled_count = graphene.Int()
-    male_age_group_6_11_disabled_count = graphene.Int()
-    male_age_group_12_17_disabled_count = graphene.Int()
+    male_age_group_5_12_disabled_count = graphene.Int()
+    male_age_group_13_17_disabled_count = graphene.Int()
     male_age_group_18_59_disabled_count = graphene.Int()
     male_age_group_60_disabled_count = graphene.Int()
     returnee = graphene.Boolean()
@@ -334,6 +334,8 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
             current_value = current_value.isoformat()
         elif field in ("phone_no", "phone_no_alternative"):
             current_value = str(current_value)
+        elif field == "role":
+            current_value = individual.role
         individual_data_with_approve_status[field]["previous_value"] = current_value
 
     documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
@@ -398,6 +400,8 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
             current_value = current_value.isoformat()
         elif field in ("phone_no", "phone_no_alternative"):
             current_value = str(current_value)
+        elif field == "role":
+            current_value = individual.role
         individual_data_with_approve_status[field]["previous_value"] = current_value
 
     documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]

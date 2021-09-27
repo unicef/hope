@@ -2,7 +2,6 @@
 {% block content %}
     {% if kobo_failed %}
         <h2>This user cannot be deleted because it has a linked Kobo account</h2>
-        <h3><a href="{% url opts|admin_urlname:'kobo_login' %}">Login to Kobo and try again</a></h3>
     {% else %}
         {{ block.super }}
     {% endif %}

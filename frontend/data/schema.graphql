@@ -778,25 +778,25 @@ type HouseholdNode implements Node {
   adminArea: AdminAreaNode
   representatives(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   geopoint: GeoJSON
-  femaleAgeGroup05Count: Int
-  femaleAgeGroup611Count: Int
-  femaleAgeGroup1217Count: Int
+  femaleAgeGroup04Count: Int
+  femaleAgeGroup512Count: Int
+  femaleAgeGroup1317Count: Int
   femaleAgeGroup1859Count: Int
   femaleAgeGroup60Count: Int
   pregnantCount: Int
-  maleAgeGroup05Count: Int
-  maleAgeGroup611Count: Int
-  maleAgeGroup1217Count: Int
+  maleAgeGroup04Count: Int
+  maleAgeGroup512Count: Int
+  maleAgeGroup1317Count: Int
   maleAgeGroup1859Count: Int
   maleAgeGroup60Count: Int
-  femaleAgeGroup05DisabledCount: Int
-  femaleAgeGroup611DisabledCount: Int
-  femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup04DisabledCount: Int
+  femaleAgeGroup512DisabledCount: Int
+  femaleAgeGroup1317DisabledCount: Int
   femaleAgeGroup1859DisabledCount: Int
   femaleAgeGroup60DisabledCount: Int
-  maleAgeGroup05DisabledCount: Int
-  maleAgeGroup611DisabledCount: Int
-  maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup04DisabledCount: Int
+  maleAgeGroup512DisabledCount: Int
+  maleAgeGroup1317DisabledCount: Int
   maleAgeGroup1859DisabledCount: Int
   maleAgeGroup60DisabledCount: Int
   registrationDataImport: RegistrationDataImportNode!
@@ -898,25 +898,25 @@ input HouseholdUpdateDataObjectType {
   country: String
   size: Int
   address: String
-  femaleAgeGroup05Count: Int
-  femaleAgeGroup611Count: Int
-  femaleAgeGroup1217Count: Int
+  femaleAgeGroup04Count: Int
+  femaleAgeGroup512Count: Int
+  femaleAgeGroup1317Count: Int
   femaleAgeGroup1859Count: Int
   femaleAgeGroup60Count: Int
   pregnantCount: Int
-  maleAgeGroup05Count: Int
-  maleAgeGroup611Count: Int
-  maleAgeGroup1217Count: Int
+  maleAgeGroup04Count: Int
+  maleAgeGroup512Count: Int
+  maleAgeGroup1317Count: Int
   maleAgeGroup1859Count: Int
   maleAgeGroup60Count: Int
-  femaleAgeGroup05DisabledCount: Int
-  femaleAgeGroup611DisabledCount: Int
-  femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup04DisabledCount: Int
+  femaleAgeGroup512DisabledCount: Int
+  femaleAgeGroup1317DisabledCount: Int
   femaleAgeGroup1859DisabledCount: Int
   femaleAgeGroup60DisabledCount: Int
   maleAgeGroup05DisabledCount: Int
-  maleAgeGroup611DisabledCount: Int
-  maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup512DisabledCount: Int
+  maleAgeGroup1317DisabledCount: Int
   maleAgeGroup1859DisabledCount: Int
   maleAgeGroup60DisabledCount: Int
   returnee: Boolean
@@ -1447,25 +1447,25 @@ type ImportedHouseholdNode implements Node {
   admin2: String!
   admin2Title: String!
   geopoint: GeoJSON
-  femaleAgeGroup05Count: Int
-  femaleAgeGroup611Count: Int
-  femaleAgeGroup1217Count: Int
+  femaleAgeGroup04Count: Int
+  femaleAgeGroup512Count: Int
+  femaleAgeGroup1317Count: Int
   femaleAgeGroup1859Count: Int
   femaleAgeGroup60Count: Int
   pregnantCount: Int
-  maleAgeGroup05Count: Int
-  maleAgeGroup611Count: Int
-  maleAgeGroup1217Count: Int
+  maleAgeGroup04Count: Int
+  maleAgeGroup512Count: Int
+  maleAgeGroup1317Count: Int
   maleAgeGroup1859Count: Int
   maleAgeGroup60Count: Int
-  femaleAgeGroup05DisabledCount: Int
-  femaleAgeGroup611DisabledCount: Int
-  femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup04DisabledCount: Int
+  femaleAgeGroup512DisabledCount: Int
+  femaleAgeGroup1317DisabledCount: Int
   femaleAgeGroup1859DisabledCount: Int
   femaleAgeGroup60DisabledCount: Int
-  maleAgeGroup05DisabledCount: Int
-  maleAgeGroup611DisabledCount: Int
-  maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup04DisabledCount: Int
+  maleAgeGroup512DisabledCount: Int
+  maleAgeGroup1317DisabledCount: Int
   maleAgeGroup1859DisabledCount: Int
   maleAgeGroup60DisabledCount: Int
   headOfHousehold: ImportedIndividualNode
@@ -1970,6 +1970,7 @@ type Mutations {
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportData(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataMutation
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
+  refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
@@ -2364,6 +2365,10 @@ input ReferralTicketExtras {
   individual: ID
 }
 
+type RefuseRegistrationDataImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
@@ -2449,6 +2454,7 @@ enum RegistrationDataImportStatus {
   IMPORTING
   DEDUPLICATION_FAILED
   DEDUPLICATION
+  REFUSE
   IMPORT_ERROR
   MERGE_ERROR
 }

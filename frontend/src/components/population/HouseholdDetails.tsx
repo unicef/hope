@@ -9,6 +9,7 @@ import {
   HouseholdNode,
 } from '../../__generated__/graphql';
 import { ContentLink } from '../ContentLink';
+import { CardAmount } from '../Dashboard/DashboardCard';
 import { LabelizedField } from '../LabelizedField';
 
 const Container = styled.div`
@@ -184,16 +185,20 @@ export function HouseholdDetails({
                       ? household.programsWithDeliveredQuantity.map((item) => (
                           <Box display='flex' flexDirection='column'>
                             <Box>
-                              {formatCurrencyWithSymbol(
-                                item.quantity.totalDeliveredQuantity,
-                                item.quantity.currency,
-                              )}
+                              <CardAmount>
+                                {formatCurrencyWithSymbol(
+                                  item.quantity.totalDeliveredQuantity,
+                                  item.quantity.currency,
+                                )}
+                              </CardAmount>
                             </Box>
                             <Box>
-                              {formatCurrencyWithSymbol(
-                                item.quantity.totalDeliveredQuantityUsd,
-                                'USD',
-                              )}
+                              <CardAmount>
+                                {formatCurrencyWithSymbol(
+                                  item.quantity.totalDeliveredQuantityUsd,
+                                  'USD',
+                                )}
+                              </CardAmount>
                             </Box>
                           </Box>
                         ))
@@ -205,10 +210,12 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label={t('Total Cash Received')}>
-              {formatCurrencyWithSymbol(
-                household.totalCashReceived,
-                household.currency,
-              )}
+              <CardAmount>
+                {formatCurrencyWithSymbol(
+                  household.totalCashReceived,
+                  household.currency,
+                )}
+              </CardAmount>
             </LabelizedField>
           </Grid>
         </Grid>

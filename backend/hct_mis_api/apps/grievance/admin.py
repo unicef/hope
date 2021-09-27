@@ -18,37 +18,19 @@ from hct_mis_api.apps.grievance.models import (
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
     TicketNote,
+    TicketPaymentVerificationDetails,
+    TicketPositiveFeedbackDetails,
+    TicketReferralDetails,
     TicketSensitiveDetails,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
-class GrievanceInline(TabularInline):
-    extra = 0
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request, obj):
-        return False
-
-
-class GrievanceNoteInline(GrievanceInline):
-    model = TicketNote
-
-
-class TicketComplaintInline(GrievanceInline):
-    model = TicketComplaintDetails
-
-
-class TicketSensitiveDetailsInline(GrievanceInline):
-    model = TicketSensitiveDetails
-
-
 @admin.register(GrievanceTicket)
 class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    inlines = [GrievanceNoteInline, TicketComplaintInline, TicketSensitiveDetailsInline]
     list_display = (
         "unicef_id",
         "created_at",
@@ -95,24 +77,49 @@ class TicketComplaintDetailsAdmin(HOPEModelAdminBase):
 
 @admin.register(TicketSensitiveDetails)
 class TicketSensitiveDetailsAdmin(HOPEModelAdminBase):
-    pass
+    raw_id_fields = ("ticket", "payment_record", "household", "individual")
 
 
 @admin.register(TicketHouseholdDataUpdateDetails)
 class TicketHouseholdDataUpdateDetailsAdmin(HOPEModelAdminBase):
-    pass
+    raw_id_fields = ("ticket", "household")
 
 
 @admin.register(TicketIndividualDataUpdateDetails)
 class TicketIndividualDataUpdateDetailsAdmin(HOPEModelAdminBase):
-    pass
+    raw_id_fields = ("ticket", "individual")
 
 
 @admin.register(TicketAddIndividualDetails)
 class TicketAddIndividualDetailsAdmin(HOPEModelAdminBase):
-    pass
+    raw_id_fields = ("ticket", "household")
 
 
 @admin.register(TicketDeleteIndividualDetails)
 class TicketDeleteIndividualDetailsAdmin(HOPEModelAdminBase):
-    pass
+    raw_id_fields = ("ticket", "individual")
+
+
+@admin.register(TicketNeedsAdjudicationDetails)
+class TicketNeedsAdjudicationDetailsAdmin(HOPEModelAdminBase):
+    raw_id_fields = ("ticket", "golden_records_individual", "possible_duplicate", "selected_individual")
+
+
+@admin.register(TicketPaymentVerificationDetails)
+class TicketPaymentVerificationDetailsAdmin(HOPEModelAdminBase):
+    raw_id_fields = ("ticket",)
+
+
+@admin.register(TicketPositiveFeedbackDetails)
+class TicketPositiveFeedbackDetailsAdmin(HOPEModelAdminBase):
+    raw_id_fields = ("ticket", "household", "individual")
+
+
+@admin.register(TicketNegativeFeedbackDetails)
+class TicketNegativeFeedbackDetailsAdmin(HOPEModelAdminBase):
+    raw_id_fields = ("ticket", "household", "individual")
+
+
+@admin.register(TicketReferralDetails)
+class TicketReferralDetailsAdmin(HOPEModelAdminBase):
+    raw_id_fields = ("ticket", "household", "individual")
