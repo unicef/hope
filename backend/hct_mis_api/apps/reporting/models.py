@@ -1,9 +1,10 @@
 from datetime import datetime
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.account.models import ChoiceArrayField
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class Report(TimeStampedUUIDModel):
@@ -44,6 +45,7 @@ class Report(TimeStampedUUIDModel):
         "program.Program", on_delete=models.CASCADE, blank=True, null=True, related_name="reports"
     )
     admin_area = models.ManyToManyField("core.AdminArea", blank=True, related_name="reports")
+    admin_area_new = models.ManyToManyField("geo.Area", blank=True, related_name="reports")
 
     def __str__(self):
         return f"[{self.report_type}] Report for [{self.business_area}]"
@@ -90,4 +92,7 @@ class DashboardReport(TimeStampedUUIDModel):
     )
     admin_area = models.ForeignKey(
         "core.AdminArea", on_delete=models.CASCADE, blank=True, null=True, related_name="dashboard_reports"
+    )
+    admin_area_new = models.ForeignKey(
+        "geo.Area", on_delete=models.CASCADE, blank=True, null=True, related_name="dashboard_reports"
     )
