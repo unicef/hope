@@ -451,6 +451,30 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return current_admin
 
     @property
+    def admin1_new(self):
+        if self.admin_area_new is None:
+            return None
+        if self.admin_area_new.area_type.area_level == 0:
+            return None
+        current_admin = self.admin_area_new
+        while current_admin.area_type.area_level != 1:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
+    def admin2_new(self):
+        if self.admin_area_new is None:
+            return None
+        if self.admin_area_new.area_type.area_level == 0:
+            return None
+        if self.admin_area_new.area_type.area_level == 1:
+            return None
+        current_admin = self.admin_area_new
+        while current_admin.area_type.area_level != 2:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
     def sanction_list_possible_match(self):
         return self.individuals.filter(sanction_list_possible_match=True).count() > 0
 
