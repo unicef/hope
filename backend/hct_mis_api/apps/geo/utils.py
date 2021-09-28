@@ -44,8 +44,10 @@ def initialise_areas():
             area_type = AreaType.objects.get(original_id=old_area.admin_area_level.id)
             Area.objects.update_or_create(
                 name=old_area.title,
-                p_code=old_area.p_code,
                 area_type=area_type,
+                defaults={
+                    "p_code": old_area.p_code,
+                },
             )
         except Country.DoesNotExist as e:
             logger.exception(e)
