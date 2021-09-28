@@ -1,24 +1,26 @@
 import contextlib
 import os
 import xml.etree.ElementTree as ET
-from datetime import datetime, date
-from typing import Union, Any, Set, List, Iterable, Dict
+from datetime import date, datetime
+from typing import Any, Dict, Iterable, List, Set, Union
 from urllib.request import urlopen
 
-import dateutil.parser
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
+import dateutil.parser
+
 from hct_mis_api.apps.core.countries import SanctionListCountries as Countries
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
+    SanctionListIndividualAliasName,
+    SanctionListIndividualCountries,
+    SanctionListIndividualDateOfBirth,
     SanctionListIndividualDocument,
     SanctionListIndividualNationalities,
-    SanctionListIndividualCountries,
-    SanctionListIndividualAliasName,
-    SanctionListIndividualDateOfBirth,
 )
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
@@ -158,6 +160,7 @@ class LoadSanctionListXMLTask:
         countries = set()
         for tag in tags:
             if isinstance(tag, ET.Element) and tag.text:
+                # TODO fetch data from geo.Country model after change to a new structure
                 alpha_2_code = Countries.get_country_value(tag.text)
                 if alpha_2_code is not None:
                     countries.add(alpha_2_code)
@@ -181,6 +184,7 @@ class LoadSanctionListXMLTask:
                 SanctionListIndividualCountries(
                     individual=self._get_individual_from_db_or_file(individual),
                     country=alpha2,
+                    country_new=geo_models.Country.objects.get(iso_code2=alpha2),
                 )
                 for alpha2 in result
             )
@@ -208,6 +212,7 @@ class LoadSanctionListXMLTask:
                 SanctionListIndividualNationalities(
                     individual=self._get_individual_from_db_or_file(individual),
                     nationality=alpha2,
+                    nationality_new=geo_models.Country.objects.get(iso_code2=alpha2),
                 )
                 for alpha2 in result
             )
@@ -423,6 +428,10 @@ class LoadSanctionListXMLTask:
                 .strip()
                 .title()
             )
+            if individual.country_of_birth:
+                individual.country_of_birth_new = geo_models.Country.objects.get(
+                    iso_code2=individual.country_of_birth.code
+                )
             individuals_from_file.add(individual)
 
             documents_from_file.update(individual_data_dict.get("documents"))
@@ -457,6 +466,7 @@ class LoadSanctionListXMLTask:
                     type_of_document=single_doc.type_of_document,
                     date_of_issue=single_doc.date_of_issue,
                     issuing_country=single_doc.issuing_country,
+                    issuing_country_new=geo_models.Country.objects.get(iso_code2=single_doc.issuing_country.code),
                     note=single_doc.note,
                 )
                 if created is True:
