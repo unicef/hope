@@ -46,7 +46,9 @@ def initialise_areas():
                 name=old_area.title,
                 area_type=area_type,
                 defaults={
+                    "original_id": old_area.id,
                     "p_code": old_area.p_code,
+                    "parent": Area.objects.filter(p_code=old_area.parent.p_code).first(),
                 },
             )
         except Country.DoesNotExist as e:
