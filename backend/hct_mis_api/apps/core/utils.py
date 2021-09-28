@@ -6,10 +6,11 @@ import string
 from collections import MutableMapping, OrderedDict
 from typing import List
 
-from PIL import Image
 from django.db.models import QuerySet
+
 from django_filters import OrderingFilter
 from graphql import GraphQLError
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
@@ -211,7 +212,9 @@ def serialize_flex_attributes():
 
 
 def get_combined_attributes():
-    from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+    from hct_mis_api.apps.core.core_fields_attributes import (
+        CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
+    )
 
     flex_attrs = serialize_flex_attributes()
     return {
@@ -683,3 +686,12 @@ class SheetImageLoader:
         else:
             image = io.BytesIO(self._images[cell]())
             return Image.open(image)
+
+
+def fix_flex_type_fields(items, flex_fields):
+    for item in items:
+        for key, value in item.flex_fields.items():
+            if key in flex_fields:
+                item.flex_fields[key] = float(value)
+
+    return items
