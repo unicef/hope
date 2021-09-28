@@ -5,6 +5,8 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
+from hct_mis_api.apps.utils.security import is_root
+
 register = template.Library()
 
 
@@ -33,3 +35,8 @@ def get_admin_link(record):
     opts = record._meta
     url_name = admin_urlname(opts, "change")
     return reverse(url_name, args=[record.pk])
+
+
+@register.filter(name="is_root")
+def _is_root(request):
+    return is_root(request)
