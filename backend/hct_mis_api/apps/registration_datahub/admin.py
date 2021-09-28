@@ -34,7 +34,6 @@ class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixi
     list_filter = (
         "created_at",
         "import_done",
-        ("registration_data_import", AutoCompleteFilter),
         TextFieldFilter.factory("business_area_slug__istartswith"),
     )
     advanced_filter_fields = (
