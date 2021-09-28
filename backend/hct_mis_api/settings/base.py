@@ -325,7 +325,7 @@ LOGGING = {
 }
 
 GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
-
+HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security"
 # REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
 #
 # if REDIS_INSTANCE:
@@ -652,7 +652,7 @@ def filter_environment(key, config, request):
 def masker(key, value, config, request):
     from django_sysinfo.utils import cleanse_setting
 
-    from hct_mis_api.apps.utils.admin import is_root
+    from ..apps.utils.security import is_root
 
     if not is_root(request):
         if key.startswith("DATABASE_URL"):
