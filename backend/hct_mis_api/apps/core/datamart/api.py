@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 import requests
 
 from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel
+from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +81,10 @@ class DatamartAPI:
         return MultiPolygon([Polygon(polygon) for polygon in geometry.get("coordinates")[0]])
 
     def generate_admin_areas(self, locations, business_area):
+        self.generate_admin_areas_old_models(locations, business_area)
+        self.generate_admin_areas_new_models(locations, business_area)
+
+    def generate_admin_areas_old_models(self, locations, business_area):
         admin_areas_to_create = []
         admin_areas_external_id_dict = {}
         admin_area_level_dict = {}
@@ -125,6 +130,50 @@ class DatamartAPI:
         for admin_area in admin_areas_to_create:
             self.recursive_save(admin_area)
         AdminArea.objects.rebuild()
+        return admin_areas_to_create
+
+    def generate_admin_areas_new_models(self, locations, business_area):
+        admin_areas_to_create = []
+        admin_areas_external_id_dict = {}
+        admin_area_level_dict = {}
+        for location in locations:
+            properties = location.get("properties")
+            gateway = properties.get("gateway")
+            external_id = location.get("id")
+            admin_area_level = admin_area_level_dict.get(gateway)
+            if admin_area_level is None:
+                admin_area_level = AreaType.objects.filter(area_level=gateway, country__name=business_area.name).first()
+            if admin_area_level is None:
+                country = Country.objects.get(name=business_area.name)
+                admin_area_level = AreaType(area_level=gateway, country=country, name=f"{business_area.name}-{gateway}")
+            admin_area_level_dict[gateway] = admin_area_level
+
+            admin_area = Area.objects.filter(p_code=properties.get("p_code")).first()
+            if admin_area is None:
+                admin_area = Area()
+            admin_area.name = properties.get("name")
+            admin_area.area_type = admin_area_level
+            admin_area.p_code = properties.get("p_code")
+            admin_area.point = Point(properties.get("longitude"), properties.get("latitude"))
+            admin_area.geom = self._features_to_multi_polygon(location.get("geometry"))
+            admin_areas_to_create.append(admin_area)
+            admin_areas_external_id_dict[external_id] = admin_area
+
+        # parent assigment
+        for location in locations:
+            properties = location.get("properties")
+            external_id = location.get("id")
+            parent_external_id = properties.get("parent")
+            if parent_external_id is None:
+                continue
+            admin_area = admin_areas_external_id_dict.get(external_id)
+            admin_area.parent = admin_areas_external_id_dict.get(parent_external_id)
+
+        for _, admin_area_level in admin_area_level_dict.items():
+            admin_area_level.save()
+        for admin_area in admin_areas_to_create:
+            self.recursive_save(admin_area)
+        Area.objects.rebuild()
         return admin_areas_to_create
 
     def recursive_save(self, admin_area):
