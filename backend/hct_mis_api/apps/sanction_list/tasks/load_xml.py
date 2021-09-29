@@ -429,9 +429,9 @@ class LoadSanctionListXMLTask:
                 .title()
             )
             if individual.country_of_birth:
-                individual.country_of_birth_new = geo_models.Country.objects.get(
+                individual.country_of_birth_new = geo_models.Country.objects.filter(
                     iso_code2=individual.country_of_birth.code
-                )
+                ).first()
             individuals_from_file.add(individual)
 
             documents_from_file.update(individual_data_dict.get("documents"))
@@ -466,7 +466,9 @@ class LoadSanctionListXMLTask:
                     type_of_document=single_doc.type_of_document,
                     date_of_issue=single_doc.date_of_issue,
                     issuing_country=single_doc.issuing_country,
-                    issuing_country_new=geo_models.Country.objects.get(iso_code2=single_doc.issuing_country.code),
+                    issuing_country_new=geo_models.Country.objects.filter(
+                        iso_code2=single_doc.issuing_country.code
+                    ).first(),
                     note=single_doc.note,
                 )
                 if created is True:
