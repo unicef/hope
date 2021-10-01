@@ -692,6 +692,9 @@ def fix_flex_type_fields(items, flex_fields):
     for item in items:
         for key, value in item.flex_fields.items():
             if key in flex_fields:
-                item.flex_fields[key] = float(value)
+                if value is not None and value != "":
+                    item.flex_fields[key] = float(value)
+                else:
+                    item.flex_fields[key] = None
 
     return items
