@@ -1,4 +1,5 @@
 import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -8,7 +9,6 @@ import {
   IndividualNode,
   useIndividualPhotosLazyQuery,
 } from '../../__generated__/graphql';
-import { BlackLink } from '../BlackLink';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -24,6 +24,10 @@ const DialogFooter = styled.div`
 const StyledImage = styled.img`
   max-width: 100%;
   max-height: 100%;
+`;
+
+export const StyledLink = styled(Link)`
+  color: #000;
 `;
 
 interface DocumentPopulationPhotoModalProps {
@@ -49,14 +53,14 @@ export const DocumentPopulationPhotoModal = ({
 
   return (
     <>
-      <BlackLink
+      <StyledLink
         onClick={() => {
           setDialogOpen(true);
           getPhotos();
         }}
       >
         {documentNumber}
-      </BlackLink>
+      </StyledLink>
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
