@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
+import { PhotoPreview } from '../../../../components/PhotoPreview';
 import { useArrayToDict } from '../../../../hooks/useArrayToDict';
 import {
   ImportedIndividualDetailedFragment,
@@ -63,7 +64,11 @@ export function RegistrationIndividualVulnerabilities({
       let children;
 
       if (type === 'IMAGE') {
-        children = <Image src={value} />;
+        children = (
+          <PhotoPreview src={value}>
+            <Image src={value} />
+          </PhotoPreview>
+        );
       } else if (type === 'SELECT_MANY' || type === 'SELECT_ONE') {
         newValue = getLabelOrDash(choices, value);
         if (value instanceof Array) {
