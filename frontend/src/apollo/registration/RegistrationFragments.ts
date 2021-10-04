@@ -133,6 +133,7 @@ export const importedIndividualMinimal = gql`
 export const importedIndividualDetailed = gql`
   fragment importedIndividualDetailed on ImportedIndividualNode {
     ...importedIndividualMinimal
+    photo
     givenName
     familyName
     middleName
