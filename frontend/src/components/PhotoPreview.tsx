@@ -26,7 +26,10 @@ interface PhotoPreviewProps {
   src: string | string[];
 }
 
-export const PhotoPreview = ({ children, src }: PhotoPreviewProps) => (
+export const PhotoPreview = ({
+  children,
+  src,
+}: PhotoPreviewProps): React.ReactElement => (
   <ZoomContainer>
     <ZoomPhoto $src={src}>{children}</ZoomPhoto>
   </ZoomContainer>
