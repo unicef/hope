@@ -701,6 +701,7 @@ type GrievanceTicketNode implements Node {
   linkedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   registrationDataImport: RegistrationDataImportNode
   unicefId: String!
+  extras: JSONString!
   linkedTicketsRelated(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -2454,7 +2455,7 @@ enum RegistrationDataImportStatus {
   IMPORTING
   DEDUPLICATION_FAILED
   DEDUPLICATION
-  REFUSE
+  REFUSED
   IMPORT_ERROR
   MERGE_ERROR
 }
