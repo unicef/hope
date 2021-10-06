@@ -1,8 +1,11 @@
+import { Box } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { Flag } from '../../components/Flag';
+import { FlagTooltip } from '../../components/FlagTooltip';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
 import { PermissionDenied } from '../../components/PermissionDenied';
@@ -54,6 +57,14 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   ];
 
   const { individual } = data;
+
+  let duplicateTooltip = null;
+  if (individual.status === 'DUPLICATE') {
+    duplicateTooltip = <FlagTooltip message={t('Confirmed Duplicate')} />;
+  } else if (individual.deduplicationGoldenRecordStatus !== 'UNIQUE') {
+    duplicateTooltip = <FlagTooltip message={t('Possible Duplicate')} />;
+  }
+
   return (
     <div>
       <PageHeader
@@ -66,13 +77,31 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
-        possibleMatch={individual.sanctionListPossibleMatch}
-        confirmedMatch={individual.sanctionListConfirmedMatch}
-        withTriangle={individual.deduplicationGoldenRecordStatus !== 'UNIQUE'}
       >
-        {individual.photo ? (
-          <IndividualPhotoModal individual={individual as IndividualNode} />
-        ) : null}
+        <>
+          <Box mr={2}>{duplicateTooltip}</Box>
+          <Box mr={2}>
+            {individual.sanctionListPossibleMatch && (
+              <Flag
+                message={t('Sanction List Possible Match')}
+                confirmed={individual.sanctionListConfirmedMatch}
+              />
+            )}
+          </Box>
+          <Box mr={2}>
+            {individual.sanctionListConfirmedMatch && (
+              <Flag
+                message={t('Sanction List Confirmed Match')}
+                confirmed={individual.sanctionListConfirmedMatch}
+              />
+            )}
+          </Box>
+          <Box mr={2}>
+            {individual.photo ? (
+              <IndividualPhotoModal individual={individual as IndividualNode} />
+            ) : null}
+          </Box>
+        </>
       </PageHeader>
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />
