@@ -35,7 +35,7 @@ export function ImportedHouseholdTableRow({
     >
       <TableCell align='left'>
         {household.hasDuplicates && (
-          <FlagTooltip message={t('Possible Duplicates')} />
+          <FlagTooltip message={t('Houesehold has Duplicates')} />
         )}
       </TableCell>
       <TableCell align='left'>
