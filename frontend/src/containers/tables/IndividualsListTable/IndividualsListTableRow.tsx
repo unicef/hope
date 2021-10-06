@@ -44,6 +44,13 @@ export function IndividualsListTableRow({
   const handleClick = (): void => {
     history.push(individualDetailsPath);
   };
+
+  let duplicateTooltip = null;
+  if (individual.status === 'DUPLICATE') {
+    duplicateTooltip = <FlagTooltip message={t('Confirmed Duplicate')} />;
+  } else if (individual.deduplicationGoldenRecordStatus !== 'UNIQUE') {
+    duplicateTooltip = <FlagTooltip message={t('Possible Duplicate')} />;
+  }
   return (
     <ClickableTableRow
       hover
@@ -53,11 +60,7 @@ export function IndividualsListTableRow({
     >
       <TableCell align='left'>
         <>
-          <Box mr={2}>
-            {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && (
-              <FlagTooltip message={t('Possible Duplicate')} />
-            )}
-          </Box>
+          <Box mr={2}>{duplicateTooltip}</Box>
           <Box mr={2}>
             {individual.sanctionListPossibleMatch && (
               <Flag
