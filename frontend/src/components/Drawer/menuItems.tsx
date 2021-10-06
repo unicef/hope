@@ -7,6 +7,7 @@ import Feedback from '@material-ui/icons/Feedback';
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import PaymentIcon from '@material-ui/icons/Payment';
 import PeopleIcon from '@material-ui/icons/PeopleRounded';
 import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
@@ -74,6 +75,12 @@ export const menuItems = [
       PERMISSIONS.TARGETING_VIEW_LIST,
       PERMISSIONS.TARGETING_VIEW_DETAILS,
     ],
+  },
+  {
+    name: 'Payment Management',
+    selectedRegexp: /^\/unique.*$/,
+    icon: <PaymentIcon />,
+    external: true,
   },
   {
     name: 'Payment Verification',
