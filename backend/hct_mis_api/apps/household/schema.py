@@ -325,7 +325,6 @@ class HouseholdSelection(DjangoObjectType):
 
 class DeliveredQuantityNode(graphene.ObjectType):
     total_delivered_quantity = graphene.Decimal()
-    total_delivered_quantity_usd = graphene.Decimal()
     currency = graphene.String()
 
 
@@ -335,7 +334,7 @@ class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
 
     id = graphene.ID()
     name = graphene.String()
-    quantity = graphene.Field(DeliveredQuantityNode)
+    quantity = graphene.List(DeliveredQuantityNode)
 
 
 class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
