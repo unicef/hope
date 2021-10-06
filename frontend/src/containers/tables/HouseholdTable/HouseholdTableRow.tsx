@@ -1,3 +1,4 @@
+import { Box } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -44,16 +45,29 @@ export function HouseHoldTableRow({
       key={household.unicefId}
     >
       <TableCell align='left'>
-        {household.hasDuplicates && (
-          <FlagTooltip message={t('Possible Duplicates')} />
-        )}
-        {(household.sanctionListPossibleMatch ||
-          household.sanctionListConfirmedMatch) && (
-          <Flag
-            message={t('Sanction List Confirmed Match')}
-            confirmed={household.sanctionListConfirmedMatch}
-          />
-        )}
+        <>
+          <Box mr={2}>
+            {household.hasDuplicates && (
+              <FlagTooltip message={t('Houesehold has Duplicates')} />
+            )}
+          </Box>
+          <Box mr={2}>
+            {household.sanctionListPossibleMatch && (
+              <Flag
+                message={t('Sanction List Possible Match')}
+                confirmed={household.sanctionListConfirmedMatch}
+              />
+            )}
+          </Box>
+          <Box mr={2}>
+            {household.sanctionListConfirmedMatch && (
+              <Flag
+                message={t('Sanction List Confirmed Match')}
+                confirmed={household.sanctionListConfirmedMatch}
+              />
+            )}
+          </Box>
+        </>
       </TableCell>
       <TableCell align='left'>
         <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>

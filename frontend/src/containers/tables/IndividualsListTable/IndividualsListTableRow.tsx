@@ -1,3 +1,4 @@
+import { Box } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -43,6 +44,13 @@ export function IndividualsListTableRow({
   const handleClick = (): void => {
     history.push(individualDetailsPath);
   };
+
+  let duplicateTooltip = null;
+  if (individual.status === 'DUPLICATE') {
+    duplicateTooltip = <FlagTooltip message={t('Confirmed Duplicate')} />;
+  } else if (individual.deduplicationGoldenRecordStatus !== 'UNIQUE') {
+    duplicateTooltip = <FlagTooltip message={t('Possible Duplicate')} />;
+  }
   return (
     <ClickableTableRow
       hover
@@ -51,16 +59,25 @@ export function IndividualsListTableRow({
       key={individual.id}
     >
       <TableCell align='left'>
-        {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && (
-          <FlagTooltip message={t('Possible Duplicate')} />
-        )}
-        {(individual.sanctionListPossibleMatch ||
-          individual.sanctionListConfirmedMatch) && (
-          <Flag
-            message={t('Sanction List Confirmed Match')}
-            confirmed={individual.sanctionListConfirmedMatch}
-          />
-        )}
+        <>
+          <Box mr={2}>{duplicateTooltip}</Box>
+          <Box mr={2}>
+            {individual.sanctionListPossibleMatch && (
+              <Flag
+                message={t('Sanction List Possible Match')}
+                confirmed={individual.sanctionListConfirmedMatch}
+              />
+            )}
+          </Box>
+          <Box mr={2}>
+            {individual.sanctionListConfirmedMatch && (
+              <Flag
+                message={t('Sanction List Confirmed Match')}
+                confirmed={individual.sanctionListConfirmedMatch}
+              />
+            )}
+          </Box>
+        </>
       </TableCell>
       <TableCell align='left'>
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
