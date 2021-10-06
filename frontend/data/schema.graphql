@@ -532,7 +532,6 @@ type DeleteTargetPopulationMutationPayload {
 
 type DeliveredQuantityNode {
   totalDeliveredQuantity: Decimal
-  totalDeliveredQuantityUsd: Decimal
   currency: String
 }
 
@@ -2199,7 +2198,7 @@ enum ProgramStatus {
 type ProgramsWithDeliveredQuantityNode {
   id: ID
   name: String
-  quantity: DeliveredQuantityNode
+  quantity: [DeliveredQuantityNode]
 }
 
 type Query {
