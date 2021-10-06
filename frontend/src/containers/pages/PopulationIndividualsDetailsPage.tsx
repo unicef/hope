@@ -57,6 +57,14 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   ];
 
   const { individual } = data;
+
+  let duplicateTooltip = null;
+  if (individual.status === 'DUPLICATE') {
+    duplicateTooltip = <FlagTooltip message={t('Confirmed Duplicate')} />;
+  } else if (individual.deduplicationGoldenRecordStatus !== 'UNIQUE') {
+    duplicateTooltip = <FlagTooltip message={t('Possible Duplicate')} />;
+  }
+
   return (
     <div>
       <PageHeader
@@ -71,11 +79,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         }
       >
         <>
-          <Box mr={2}>
-            {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && (
-              <FlagTooltip message={t('Possible Duplicate')} />
-            )}
-          </Box>
+          <Box mr={2}>{duplicateTooltip}</Box>
           <Box mr={2}>
             {individual.sanctionListPossibleMatch && (
               <Flag
