@@ -12,19 +12,25 @@ snapshots['TestHouseholdWithProgramsQuantityQuery::test_household_query_single_0
             'programsWithDeliveredQuantity': [
                 {
                     'name': 'Test program ONE',
-                    'quantity': {
-                        'currency': 'AFG',
-                        'totalDeliveredQuantity': '900.00',
-                        'totalDeliveredQuantityUsd': '450.00'
-                    }
+                    'quantity': [
+                        {
+                            'currency': 'USD',
+                            'totalDeliveredQuantity': '450.00'
+                        },
+                        {
+                            'currency': 'AFG',
+                            'totalDeliveredQuantity': '900.00',
+                        },
+                    ]
                 },
                 {
                     'name': 'Test program TWO',
-                    'quantity': {
-                        'currency': 'USD',
-                        'totalDeliveredQuantity': '900.00',
-                        'totalDeliveredQuantityUsd': '900.00'
-                    }
+                    'quantity': [
+                        {
+                            'currency': 'USD',
+                            'totalDeliveredQuantity': '900.00',
+                        },
+                    ]
 
                 }
             ]
