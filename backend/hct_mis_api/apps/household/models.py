@@ -23,6 +23,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.geo.compat import GeoCountryField
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -322,11 +323,16 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField(blank=True, db_index=True)
+    country_origin_new = models.ForeignKey(
+        "geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT
+    )
     country = CountryField(db_index=True)
+    country_new = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     size = models.PositiveIntegerField(db_index=True)
     address = CICharField(max_length=255, blank=True)
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("core.AdminArea", null=True, on_delete=models.SET_NULL, blank=True)
+    admin_area_new = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -441,6 +447,30 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             return None
         current_admin = self.admin_area
         while current_admin.level != 2:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
+    def admin1_new(self):
+        if self.admin_area_new is None:
+            return None
+        if self.admin_area_new.area_type.area_level == 0:
+            return None
+        current_admin = self.admin_area_new
+        while current_admin.area_type.area_level != 1:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
+    def admin2_new(self):
+        if self.admin_area_new is None:
+            return None
+        if self.admin_area_new.area_type.area_level == 0:
+            return None
+        if self.admin_area_new.area_type.area_level == 1:
+            return None
+        current_admin = self.admin_area_new
+        while current_admin.area_type.area_level != 2:
             current_admin = current_admin.parent
         return current_admin
 
@@ -587,6 +617,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 class DocumentType(TimeStampedUUIDModel):
     country = CountryField(default="U")
+    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
@@ -640,6 +671,7 @@ class Agency(models.Model):
         max_length=100,
     )
     country = CountryField()
+    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Agencies"

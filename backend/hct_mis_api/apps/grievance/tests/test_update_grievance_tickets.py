@@ -10,6 +10,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
@@ -74,6 +76,7 @@ class TestUpdateGrievanceTickets(APITestCase):
     def setUp(self):
         super().setUp()
         call_command("loadbusinessareas")
+        call_command("loadcountries")
         self.generate_document_types_for_all_countries()
         self.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         self.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
@@ -85,6 +88,16 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123333")
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="2343123")
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
+            name="Admin type one",
+            country=country,
+            area_level=2,
+        )
+        AreaFactory(name="City Test", area_type=area_type, p_code="123333")
+        AreaFactory(name="City Example", area_type=area_type, p_code="2343123")
+
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),

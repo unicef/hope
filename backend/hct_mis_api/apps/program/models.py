@@ -120,6 +120,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         related_name="programs",
         blank=True,
     )
+    admin_areas_new = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     budget = models.DecimalField(
         decimal_places=2, max_digits=11, validators=[MinValueValidator(Decimal("0.00"))], db_index=True
