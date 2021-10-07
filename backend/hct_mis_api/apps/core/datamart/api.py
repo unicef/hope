@@ -148,7 +148,7 @@ class DatamartAPI:
                 admin_area_level = AreaType(area_level=gateway, country=country, name=f"{business_area.name}-{gateway}")
             admin_area_level_dict[gateway] = admin_area_level
 
-            admin_area = Area.objects.filter(p_code=properties.get("p_code")).first()
+            admin_area = Area.objects.filter(area_type=admin_area_level, name=properties.get("name")).first()
             if admin_area is None:
                 admin_area = Area()
             admin_area.name = properties.get("name")
