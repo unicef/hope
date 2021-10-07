@@ -225,6 +225,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
     )
     excluded_ids = models.TextField(blank=True)
+    exclusion_reason = models.TextField(blank=True)
 
     @property
     def excluded_household_ids(self):

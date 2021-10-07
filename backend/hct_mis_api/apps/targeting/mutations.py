@@ -95,12 +95,13 @@ class ValidatedMutation(PermissionMutation):
 class UpdateTargetPopulationInput(graphene.InputObjectType):
 
     id = graphene.ID(required=True)
-    excluded_ids = graphene.String()
     name = graphene.String()
     targeting_criteria = TargetingCriteriaObjectType()
     program_id = graphene.ID()
     vulnerability_score_min = graphene.Decimal()
     vulnerability_score_max = graphene.Decimal()
+    excluded_ids = graphene.String()
+    exclusion_reason = graphene.String()
 
 
 class CreateTargetPopulationInput(graphene.InputObjectType):
@@ -109,6 +110,7 @@ class CreateTargetPopulationInput(graphene.InputObjectType):
     business_area_slug = graphene.String(required=True)
     program_id = graphene.ID(required=True)
     excluded_ids = graphene.String(required=True)
+    exclusion_reason = graphene.String()
 
 
 def from_input_to_targeting_criteria(targeting_criteria_input, program: Program):
@@ -159,7 +161,11 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
-            name=input.get("name"), created_by=user, business_area=business_area, excluded_ids=input.get("excluded_ids")
+            name=input.get("name"),
+            created_by=user,
+            business_area=business_area,
+            excluded_ids=input.get("excluded_ids"),
+            exclusion_reason=input.get("exclusion_reason"),
         )
         target_population.candidate_list_targeting_criteria = targeting_criteria
         target_population.program = program
@@ -193,6 +199,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         vulnerability_score_min = input.get("vulnerability_score_min")
         vulnerability_score_max = input.get("vulnerability_score_max")
         excluded_ids = input.get("excluded_ids")
+        exclusion_reason = input.get("exclusion_reason")
         if target_population.status != TargetPopulation.STATUS_APPROVED and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
@@ -233,6 +240,8 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
                 target_population.final_list_targeting_criteria = targeting_criteria
         if excluded_ids is not None:
             target_population.excluded_ids = excluded_ids
+        if exclusion_reason is not None:
+            target_population.exclusion_reason = exclusion_reason
         target_population.full_clean()
         target_population.save()
         log_create(
