@@ -148,7 +148,6 @@ export const householdDetailed = gql`
       name
       quantity {
         totalDeliveredQuantity
-        totalDeliveredQuantityUsd
         currency
       }
     }

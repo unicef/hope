@@ -844,7 +844,6 @@ export type DeleteTargetPopulationMutationPayload = {
 export type DeliveredQuantityNode = {
    __typename?: 'DeliveredQuantityNode',
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
-  totalDeliveredQuantityUsd?: Maybe<Scalars['Decimal']>,
   currency?: Maybe<Scalars['String']>,
 };
 
@@ -3193,7 +3192,7 @@ export type ProgramsWithDeliveredQuantityNode = {
    __typename?: 'ProgramsWithDeliveredQuantityNode',
   id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
-  quantity?: Maybe<DeliveredQuantityNode>,
+  quantity?: Maybe<Array<Maybe<DeliveredQuantityNode>>>,
 };
 
 export type Query = {
@@ -5657,10 +5656,10 @@ export type HouseholdDetailedFragment = (
   ), programsWithDeliveredQuantity: Maybe<Array<Maybe<(
     { __typename?: 'ProgramsWithDeliveredQuantityNode' }
     & Pick<ProgramsWithDeliveredQuantityNode, 'id' | 'name'>
-    & { quantity: Maybe<(
+    & { quantity: Maybe<Array<Maybe<(
       { __typename?: 'DeliveredQuantityNode' }
-      & Pick<DeliveredQuantityNode, 'totalDeliveredQuantity' | 'totalDeliveredQuantityUsd' | 'currency'>
-    )> }
+      & Pick<DeliveredQuantityNode, 'totalDeliveredQuantity' | 'currency'>
+    )>>> }
   )>>> }
   & HouseholdMinimalFragment
 );
@@ -8912,7 +8911,6 @@ export const HouseholdDetailedFragmentDoc = gql`
     name
     quantity {
       totalDeliveredQuantity
-      totalDeliveredQuantityUsd
       currency
     }
   }
@@ -17640,7 +17638,6 @@ export type DeleteTargetPopulationMutationPayloadResolvers<ContextType = any, Pa
 
 export type DeliveredQuantityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveredQuantityNode'] = ResolversParentTypes['DeliveredQuantityNode']> = {
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -18485,7 +18482,7 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 export type ProgramsWithDeliveredQuantityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramsWithDeliveredQuantityNode'] = ResolversParentTypes['ProgramsWithDeliveredQuantityNode']> = {
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  quantity?: Resolver<Maybe<ResolversTypes['DeliveredQuantityNode']>, ParentType, ContextType>,
+  quantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveredQuantityNode']>>>, ParentType, ContextType>,
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {

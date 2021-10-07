@@ -11,6 +11,7 @@ import {
 import { ContentLink } from '../ContentLink';
 import { CardAmount } from '../Dashboard/DashboardCard';
 import { LabelizedField } from '../LabelizedField';
+import {MiśTheme} from "../../theme";
 
 const Container = styled.div`
   display: flex;
@@ -42,6 +43,9 @@ const OverviewPaper = styled(Paper)`
 const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
+`;
+const Label = styled.span`
+  ${({ theme }: { theme: MiśTheme }) => theme.styledMixins.label}
 `;
 
 interface HouseholdDetailsProps {
@@ -163,50 +167,52 @@ export function HouseholdDetails({
           <Grid item xs={4}>
             <Grid container>
               <Grid item xs={6}>
-                <LabelizedField label={t('PrOgRAmmE(S) ENROLLED')}>
-                  <div>
-                    {household.programsWithDeliveredQuantity.length
-                      ? household.programsWithDeliveredQuantity.map((item) => (
-                          <ContentLink
-                            key={item.id}
-                            href={`/${businessArea}/programs/${item.id}`}
-                          >
-                            {item.name}
-                          </ContentLink>
-                        ))
-                      : '-'}
-                  </div>
-                </LabelizedField>
+                <Label color='textSecondary'>
+                  {t('PrOgRAmmE(S) ENROLLED')}
+                </Label>
               </Grid>
               <Grid item xs={6}>
-                <LabelizedField label={t('Cash received')}>
-                  <div>
-                    {household.programsWithDeliveredQuantity.length
-                      ? household.programsWithDeliveredQuantity.map((item) => (
-                          <Box display='flex' flexDirection='column'>
-                            <Box>
-                              <CardAmount>
-                                {formatCurrencyWithSymbol(
-                                  item.quantity.totalDeliveredQuantity,
-                                  item.quantity.currency,
-                                )}
-                              </CardAmount>
-                            </Box>
-                            <Box>
-                              <CardAmount>
-                                {formatCurrencyWithSymbol(
-                                  item.quantity.totalDeliveredQuantityUsd,
-                                  'USD',
-                                )}
-                              </CardAmount>
-                            </Box>
-                          </Box>
-                        ))
-                      : '-'}
-                  </div>
-                </LabelizedField>
+                <Label color='textSecondary'>{t('Cash received')}</Label>
               </Grid>
             </Grid>
+            {household.programsWithDeliveredQuantity.length ? (
+              household.programsWithDeliveredQuantity.map((item) => (
+                <Grid container key={item.id}>
+                  <Grid item xs={6}>
+                    <ContentLink
+                      href={`/${businessArea}/programs/${item.id}`}
+                    >
+                      {item.name}
+                    </ContentLink>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Box display='flex' flexDirection='column'>
+                      {item.quantity.map((qty) => (
+                        <Box
+                          key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
+                        >
+                          <CardAmount>
+                            {formatCurrencyWithSymbol(
+                              qty.totalDeliveredQuantity,
+                              qty.currency,
+                            )}
+                          </CardAmount>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Grid>
+                </Grid>
+              ))
+            ) : (
+              <Grid container>
+                <Grid item xs={6}>
+                  -
+                </Grid>
+                <Grid item xs={6}>
+                  -
+                </Grid>
+              </Grid>
+            )}
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label={t('Total Cash Received')}>
