@@ -203,6 +203,7 @@ TEMPLATES = [
     },
 ]
 PROJECT_APPS = [
+    "hct_mis_api.apps.geo",
     "hct_mis_api.apps.account.apps.AccountConfig",
     "hct_mis_api.apps.core.apps.CoreConfig",
     "hct_mis_api.apps.grievance",
