@@ -1,4 +1,4 @@
-import { Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +28,7 @@ import {
 } from '../../__generated__/graphql';
 import { CreateTable } from '../tables/TargetPopulation/Create';
 
-const PaperContainer = styled(Paper)`
+export const PaperContainer = styled(Paper)`
   display: flex;
   padding: ${({ theme }) => theme.spacing(3)}px
     ${({ theme }) => theme.spacing(4)}px;
@@ -161,6 +161,19 @@ export function CreateTargetPopulation(): React.ReactElement {
                 'Excluded Target Population Entries (Households or Individuals)',
               )}
             </Typography>
+            <Box mt={2}>
+              <Grid container>
+                <Grid xs={6}>
+                  <Field
+                    name='excludedIds'
+                    fullWidth
+                    variant='outlined'
+                    label={t('Excluded Ids')}
+                    component={FormikTextField}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
           </PaperContainer>
           {values.program ? (
             <FieldArray
