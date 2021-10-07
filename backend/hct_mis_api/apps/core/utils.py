@@ -698,3 +698,19 @@ def fix_flex_type_fields(items, flex_fields):
                     item.flex_fields[key] = None
 
     return items
+
+
+def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
+    excluded_ids_array = excluded_ids_string.split(",")
+    excluded_household_ids_array = [
+        excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")
+    ]
+    excluded_individuals_ids_array = [
+        excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("IND")
+    ]
+    from hct_mis_api.apps.household.models import Individual
+    excluded_household_ids_from_individuals_array = Individual.objects.filter(
+        unicef_id__in=excluded_individuals_ids_array, household_id__isnull=False
+    ).values_list("unicef_id", flat=True)
+    excluded_household_ids_array.extend(excluded_household_ids_from_individuals_array)
+    return excluded_household_ids_array
