@@ -45,6 +45,7 @@ export function EditTargetPopulation({
     name: targetPopulation.name || '',
     program: targetPopulation.program?.id || '',
     criterias: targetPopulationCriterias.rules || [],
+    excludedIds: targetPopulation.excludedIds || '',
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
     targetPopulationCriterias:
@@ -103,6 +104,7 @@ export function EditTargetPopulation({
               input: {
                 id: values.id,
                 programId: values.program,
+                excludedIds:values.excludedIds,
                 ...(targetPopulation.status === 'DRAFT' && {
                   name: values.name,
                 }),

@@ -9,6 +9,7 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
     $before: String
     $last: Int
     $orderBy: String
+    $excludedIds: String!
     $businessArea: String
   ) {
     finalHouseholdsListByTargetingCriteria(
@@ -19,6 +20,7 @@ export const FinalHouseholdsListByTargetingCriteria = gql`
       first: $first
       last: $last
       orderBy: $orderBy
+      excludedIds: $excludedIds
       businessArea: $businessArea
     ) {
       edges {
