@@ -30,6 +30,7 @@ export const targetPopulationDetailed = gql`
     finalListTotalHouseholds
     finalListTotalIndividuals
     caHashId
+    excludedIds
     steficonRule {
       id
       name

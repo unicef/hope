@@ -51,6 +51,7 @@ export function CreateTargetPopulation(): React.ReactElement {
     name: '',
     criterias: [],
     program: null,
+    excludedIds: '',
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -92,6 +93,7 @@ export function CreateTargetPopulation(): React.ReactElement {
               input: {
                 programId: values.program,
                 name: values.name,
+                excludedIds: values.excludedIds,
                 businessAreaSlug: businessArea,
                 ...getTargetingCriteriaVariables(values),
               },
@@ -196,7 +198,10 @@ export function CreateTargetPopulation(): React.ReactElement {
           <Results />
           {values.criterias.length ? (
             <CreateTable
-              variables={getTargetingCriteriaVariables(values)}
+              variables={{
+                ...getTargetingCriteriaVariables(values),
+                excludedIds: values.excludedIds,
+              }}
               program={values.program}
               businessArea={businessArea}
             />
