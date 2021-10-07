@@ -26,12 +26,12 @@ def copy_admin_area_data(apps, schema_editor):
                         geo_name = field.name
                         records = Model.objects.all()
                         for record in records:
-                            source = getattr(record, old_field_name).p_code
+                            source = getattr(record, old_field_name)
                             if source:
-                                if source not in areas:
-                                    area = Area.objects.get(p_code=source)
-                                    areas[source] = area
-                                setattr(record, geo_name, areas[source])
+                                p_code = source.p_code
+                                if p_code not in areas.keys():
+                                    areas[p_code] = Area.objects.get(p_code=p_code)
+                                setattr(record, geo_name, areas[p_code])
                         Model.objects.bulk_update(records, [geo_name])
         except Exception as e:
             raise
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('geo', '0004_migration'),
         ('grievance', '0034_migration'),
-        ('household', '0086_migration'),
+        ('household', '0087_migration'),
         ('program', '0029_migration'),
         ('reporting', '0008_migration'),
     ]
