@@ -155,6 +155,13 @@ export function CreateTargetPopulation(): React.ReactElement {
             loading={loadingPrograms}
             program={values.program}
           />
+          <PaperContainer>
+            <Typography variant='h6'>
+              {t(
+                'Excluded Target Population Entries (Households or Individuals)',
+              )}
+            </Typography>
+          </PaperContainer>
           {values.program ? (
             <FieldArray
               name='criterias'
