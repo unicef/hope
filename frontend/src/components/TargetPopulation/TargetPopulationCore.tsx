@@ -1,4 +1,4 @@
-import { Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -31,6 +31,16 @@ export function TargetPopulationCore({
   const { rules: candidateListRules } = candidateList;
   return (
     <>
+      <PaperContainer>
+        <Typography variant='h6'>
+          {t('Excluded Target Population Entries (Households or Individuals)')}
+        </Typography>
+        <Box mt={2}>
+          <Grid container>
+            <Grid xs={6}>{targetPopulation?.excludedIds?.join(', ')}</Grid>
+          </Grid>
+        </Box>
+      </PaperContainer>
       <TargetingCriteria
         candidateListRules={candidateListRules}
         targetPopulation={targetPopulation}
