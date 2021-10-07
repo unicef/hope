@@ -3431,6 +3431,20 @@
                 "defaultValue": null
               },
               {
+                "name": "excludedIds",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "before",
                 "description": null,
                 "type": {
@@ -3611,6 +3625,20 @@
                   "kind": "INPUT_OBJECT",
                   "name": "TargetingCriteriaObjectType",
                   "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "excludedIds",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -19494,6 +19522,22 @@
               "kind": "SCALAR",
               "name": "Float",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "excludedIds",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -43227,6 +43271,20 @@
               }
             },
             "defaultValue": null
+          },
+          {
+            "name": "excludedIds",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -43285,6 +43343,16 @@
                 "name": "ID",
                 "ofType": null
               }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "excludedIds",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null
           },

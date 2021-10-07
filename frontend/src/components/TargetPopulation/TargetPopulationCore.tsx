@@ -37,7 +37,7 @@ export function TargetPopulationCore({
         </Typography>
         <Box mt={2}>
           <Grid container>
-            <Grid xs={6}>{targetPopulation?.excludedIds?.join(', ')}</Grid>
+            <Grid xs={6}>{targetPopulation?.excludedIds}</Grid>
           </Grid>
         </Box>
       </PaperContainer>
