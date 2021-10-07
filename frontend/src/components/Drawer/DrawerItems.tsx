@@ -1,3 +1,4 @@
+import { Box } from '@material-ui/core';
 import Collapse from '@material-ui/core/Collapse';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -14,6 +15,7 @@ import {
 } from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useCashAssistUrlPrefixQuery } from '../../__generated__/graphql';
 import { menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
@@ -36,10 +38,19 @@ const SubList = styled(List)`
   padding-left: ${({ theme }) => theme.spacing(10)}px !important;
 `;
 
+export const StyledLink = styled.a`
+  color: #233944;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  text-decoration: none;
+`;
+
 interface Props {
   currentLocation: string;
 }
 export function DrawerItems({ currentLocation }: Props): React.ReactElement {
+  const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const clearLocation = currentLocation.replace(`/${businessArea}`, '');
@@ -58,6 +69,12 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
     initialIndex !== -1 ? initialIndex : null,
   );
   if (permissions === null) return null;
+
+  const cashAssistIndex = menuItems.findIndex(
+    (item) => item.name === 'Payment Management',
+  );
+
+  menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
 
   const getInitialHrefForCollapsible = (secondaryActions): string => {
     let resultHref = '';
@@ -88,6 +105,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
           const hrefForCollapsibleItem = getInitialHrefForCollapsible(
             item.secondaryActions,
           );
+
           return (
             <div key={item.name + hrefForCollapsibleItem}>
               <ListItem
@@ -140,7 +158,16 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
             </div>
           );
         }
-        return (
+        return item.external ? (
+          <ListItem button key={item.name + item.href}>
+            <StyledLink target='_blank' href={item.href}>
+              <Box display='flex'>
+                <Icon>{item.icon}</Icon>
+                <Text primary={item.name} />
+              </Box>
+            </StyledLink>
+          </ListItem>
+        ) : (
           <ListItem
             button
             component={Link}
