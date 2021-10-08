@@ -564,5 +564,6 @@
   "Sanction List Possible Match": "Sanction List Possible Match",
   "Houesehold has Duplicates": "Houesehold has Duplicates",
   "Excluded Target Population Entries (Households or Individuals)": "Excluded Target Population Entries (Households or Individuals)",
-  "Excluded Ids": "Excluded Ids"
+  "Excluded Ids": "Excluded Ids",
+  "Exclusion Reason": "Exclusion Reason"
 }
