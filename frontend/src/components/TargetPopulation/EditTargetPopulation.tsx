@@ -46,6 +46,7 @@ export function EditTargetPopulation({
     program: targetPopulation.program?.id || '',
     criterias: targetPopulationCriterias.rules || [],
     excludedIds: targetPopulation.excludedIds || '',
+    exclusionReason: targetPopulation.exclusionReason || '',
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
     targetPopulationCriterias:
@@ -90,6 +91,8 @@ export function EditTargetPopulation({
     name: Yup.string()
       .min(2, 'Too short')
       .max(255, 'Too long'),
+    excludedIds: Yup.string().max(500, t('Too long')),
+    exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
   return (
@@ -104,7 +107,8 @@ export function EditTargetPopulation({
               input: {
                 id: values.id,
                 programId: values.program,
-                excludedIds:values.excludedIds,
+                excludedIds: values.excludedIds,
+                exclusionReason: values.exclusionReason,
                 ...(targetPopulation.status === 'DRAFT' && {
                   name: values.name,
                 }),
@@ -209,6 +213,20 @@ export function EditTargetPopulation({
                     fullWidth
                     variant='outlined'
                     label={t('Excluded Ids')}
+                    component={FormikTextField}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+            <Box mt={2}>
+              <Grid container>
+                <Grid xs={6}>
+                  <Field
+                    name='exclusionReason'
+                    fullWidth
+                    multiline
+                    variant='outlined'
+                    label={t('Exclusion Reason')}
                     component={FormikTextField}
                   />
                 </Grid>

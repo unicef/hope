@@ -790,6 +790,7 @@ export type CreateTargetPopulationInput = {
   businessAreaSlug: Scalars['String'],
   programId: Scalars['ID'],
   excludedIds: Scalars['String'],
+  exclusionReason?: Maybe<Scalars['String']>,
 };
 
 export type CreateTargetPopulationMutation = {
@@ -4706,6 +4707,7 @@ export type TargetPopulationNode = Node & {
   vulnerabilityScoreMin?: Maybe<Scalars['Float']>,
   vulnerabilityScoreMax?: Maybe<Scalars['Float']>,
   excludedIds: Scalars['String'],
+  exclusionReason: Scalars['String'],
   paymentRecords: PaymentRecordNodeConnection,
   selections: Array<HouseholdSelection>,
   totalHouseholds?: Maybe<Scalars['Int']>,
@@ -5154,12 +5156,13 @@ export type UpdateProgramInput = {
 
 export type UpdateTargetPopulationInput = {
   id: Scalars['ID'],
-  excludedIds?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
   programId?: Maybe<Scalars['ID']>,
   vulnerabilityScoreMin?: Maybe<Scalars['Decimal']>,
   vulnerabilityScoreMax?: Maybe<Scalars['Decimal']>,
+  excludedIds?: Maybe<Scalars['String']>,
+  exclusionReason?: Maybe<Scalars['String']>,
 };
 
 export type UpdateTargetPopulationMutation = {
@@ -5769,7 +5772,7 @@ export type TargetPopulationMinimalFragment = (
 
 export type TargetPopulationDetailedFragment = (
   { __typename?: 'TargetPopulationNode' }
-  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'excludedIds' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'excludedIds' | 'exclusionReason' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
   & { steficonRule: Maybe<(
     { __typename?: 'SteficonRuleNode' }
     & Pick<SteficonRuleNode, 'id' | 'name'>
@@ -9035,6 +9038,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   finalListTotalIndividuals
   caHashId
   excludedIds
+  exclusionReason
   steficonRule {
     id
     name
@@ -19071,6 +19075,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   vulnerabilityScoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,

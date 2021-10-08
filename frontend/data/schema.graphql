@@ -482,6 +482,7 @@ input CreateTargetPopulationInput {
   businessAreaSlug: String!
   programId: ID!
   excludedIds: String!
+  exclusionReason: String
 }
 
 type CreateTargetPopulationMutation {
@@ -2806,6 +2807,7 @@ type TargetPopulationNode implements Node {
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
   excludedIds: String!
+  exclusionReason: String!
   paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
   totalHouseholds: Int
@@ -3272,12 +3274,13 @@ input UpdateProgramInput {
 
 input UpdateTargetPopulationInput {
   id: ID!
-  excludedIds: String
   name: String
   targetingCriteria: TargetingCriteriaObjectType
   programId: ID
   vulnerabilityScoreMin: Decimal
   vulnerabilityScoreMax: Decimal
+  excludedIds: String
+  exclusionReason: String
 }
 
 type UpdateTargetPopulationMutation {
