@@ -40,6 +40,11 @@ export function TargetPopulationCore({
             <Grid xs={6}>{targetPopulation?.excludedIds}</Grid>
           </Grid>
         </Box>
+        <Box mt={2}>
+          <Grid container>
+            <Grid xs={6}>{targetPopulation?.exclusionReason}</Grid>
+          </Grid>
+        </Box>
       </PaperContainer>
       <TargetingCriteria
         candidateListRules={candidateListRules}

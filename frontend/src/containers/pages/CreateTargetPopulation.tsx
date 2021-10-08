@@ -52,6 +52,7 @@ export function CreateTargetPopulation(): React.ReactElement {
     criterias: [],
     program: null,
     excludedIds: '',
+    exclusionReason: '',
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -80,6 +81,8 @@ export function CreateTargetPopulation(): React.ReactElement {
     name: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
+    excludedIds: Yup.string().max(500, t('Too long')),
+    exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
   return (
@@ -94,6 +97,7 @@ export function CreateTargetPopulation(): React.ReactElement {
                 programId: values.program,
                 name: values.name,
                 excludedIds: values.excludedIds,
+                exclusionReason: values.exclusionReason,
                 businessAreaSlug: businessArea,
                 ...getTargetingCriteriaVariables(values),
               },
@@ -171,6 +175,20 @@ export function CreateTargetPopulation(): React.ReactElement {
                     fullWidth
                     variant='outlined'
                     label={t('Excluded Ids')}
+                    component={FormikTextField}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+            <Box mt={2}>
+              <Grid container>
+                <Grid xs={6}>
+                  <Field
+                    name='exclusionReason'
+                    fullWidth
+                    multiline
+                    variant='outlined'
+                    label={t('Exclusion Reason')}
                     component={FormikTextField}
                   />
                 </Grid>
