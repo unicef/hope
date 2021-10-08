@@ -2,7 +2,7 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BlackLink } from '../../../../components/BlackLink';
-import { FlagTooltip } from '../../../../components/FlagTooltip';
+import { WarningTooltip } from '../../../../components/WarningTooltip';
 import { AnonTableCell } from '../../../../components/table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
@@ -35,7 +35,7 @@ export function ImportedHouseholdTableRow({
     >
       <TableCell align='left'>
         {household.hasDuplicates && (
-          <FlagTooltip message={t('Houesehold has Duplicates')} />
+          <WarningTooltip confirmed message={t('Houesehold has Duplicates')} />
         )}
       </TableCell>
       <TableCell align='left'>
