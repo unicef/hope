@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import SearchIcon from '@material-ui/icons/Search';
+import AddIcon from '@material-ui/icons/Add';
 
 const LookUp = styled.div`
   display: flex;
@@ -36,22 +37,24 @@ export function LookUpButton({
   title,
   handleClick,
   placeholder,
+  addIcon,
 }: {
   title: string;
   handleClick?: () => void;
   placeholder?: boolean;
+  addIcon?: boolean;
 }): React.ReactElement {
   return placeholder ? (
     <LookUpPlaceholder onClick={() => null}>
       <MarginRightSpan>
-        <SearchIcon />
+        {addIcon ? <AddIcon /> : <SearchIcon />}
       </MarginRightSpan>
       <span>{title}</span>
     </LookUpPlaceholder>
   ) : (
     <LookUp onClick={handleClick}>
       <MarginRightSpan>
-        <SearchIcon />
+        {addIcon ? <AddIcon /> : <SearchIcon />}
       </MarginRightSpan>
       <span>{title}</span>
     </LookUp>

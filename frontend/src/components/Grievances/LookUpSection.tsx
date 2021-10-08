@@ -2,6 +2,7 @@ import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../utils/utils';
+import { AddDocumentation } from './AddDocumentation';
 import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual/LookUpHouseholdIndividual';
 import { LookUpPaymentRecord } from './LookUpPaymentRecord/LookUpPaymentRecord';
 import { LookUpRelatedTickets } from './LookUpRelatedTickets/LookUpRelatedTickets';
@@ -41,6 +42,11 @@ export const LookUpSection = ({
           <LookUpRelatedTickets values={values} onValueChange={onValueChange} />
         </Box>
       </Grid>
+      <Grid item xs={6}>
+        <Box p={3}>
+          <AddDocumentation values={values} onValueChange={onValueChange} />
+        </Box>
+      </Grid>
     </Grid>
   );
   const renderedLookupPaymentRecords = (
@@ -64,7 +70,7 @@ export const LookUpSection = ({
 
   const householdIndividualRelatedTicketsLookups = (
     <Grid container alignItems='center'>
-      <Grid container>{renderedLookupHouseholdIndividual}</Grid>
+      {renderedLookupHouseholdIndividual}
       {renderedLookupRelatedTickets}
     </Grid>
   );

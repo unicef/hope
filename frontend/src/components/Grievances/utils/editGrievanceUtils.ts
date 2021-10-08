@@ -23,6 +23,7 @@ interface EditValuesTypes {
   selectedIndividual?;
   selectedPaymentRecords: string[];
   selectedRelatedTickets: string[];
+  selectedDocumentation: File[];
   individualData?;
   householdDataUpdateFields?;
 }
@@ -165,6 +166,9 @@ export function prepareInitialValues(
     selectedRelatedTickets: ticket.relatedTickets.map(
       (relatedTicket) => relatedTicket.id,
     ),
+    //TODO: add this line
+    // selectedDocumentation: ticket.selectedDocumentation || [],
+    selectedDocumentation: [],
   };
   const prepareInitialValueFunction = thingForSpecificGrievanceType(
     ticket,
