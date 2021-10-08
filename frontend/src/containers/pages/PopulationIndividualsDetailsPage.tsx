@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { Flag } from '../../components/Flag';
 import { FlagTooltip } from '../../components/FlagTooltip';
+import { WarningTooltip } from '../../components/WarningTooltip';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
 import { PermissionDenied } from '../../components/PermissionDenied';
@@ -60,9 +60,11 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
 
   let duplicateTooltip = null;
   if (individual.status === 'DUPLICATE') {
-    duplicateTooltip = <FlagTooltip message={t('Confirmed Duplicate')} />;
+    duplicateTooltip = (
+      <WarningTooltip confirmed message={t('Confirmed Duplicate')} />
+    );
   } else if (individual.deduplicationGoldenRecordStatus !== 'UNIQUE') {
-    duplicateTooltip = <FlagTooltip message={t('Possible Duplicate')} />;
+    duplicateTooltip = <WarningTooltip message={t('Possible Duplicate')} />;
   }
 
   return (
@@ -82,17 +84,14 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
           <Box mr={2}>{duplicateTooltip}</Box>
           <Box mr={2}>
             {individual.sanctionListPossibleMatch && (
-              <Flag
-                message={t('Sanction List Possible Match')}
-                confirmed={individual.sanctionListConfirmedMatch}
-              />
+              <FlagTooltip message={t('Sanction List Possible Match')} />
             )}
           </Box>
           <Box mr={2}>
             {individual.sanctionListConfirmedMatch && (
-              <Flag
+              <FlagTooltip
                 message={t('Sanction List Confirmed Match')}
-                confirmed={individual.sanctionListConfirmedMatch}
+                confirmed
               />
             )}
           </Box>

@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { Flag } from '../../components/Flag';
 import { FlagTooltip } from '../../components/FlagTooltip';
+import { WarningTooltip } from '../../components/WarningTooltip';
 import { LabelizedField } from '../../components/LabelizedField';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
@@ -106,22 +106,22 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
         <>
           <Box mr={2}>
             {household.hasDuplicates && (
-              <FlagTooltip message={t('Houesehold has Duplicates')} />
-            )}
-          </Box>
-          <Box mr={2}>
-            {household.sanctionListPossibleMatch && (
-              <Flag
-                message={t('Sanction List Possible Match')}
-                confirmed={household.sanctionListConfirmedMatch}
+              <WarningTooltip
+                confirmed
+                message={t('Houesehold has Duplicates')}
               />
             )}
           </Box>
           <Box mr={2}>
+            {household.sanctionListPossibleMatch && (
+              <FlagTooltip message={t('Sanction List Possible Match')} />
+            )}
+          </Box>
+          <Box mr={2}>
             {household.sanctionListConfirmedMatch && (
-              <Flag
+              <FlagTooltip
                 message={t('Sanction List Confirmed Match')}
-                confirmed={household.sanctionListConfirmedMatch}
+                confirmed
               />
             )}
           </Box>
