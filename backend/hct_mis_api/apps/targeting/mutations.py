@@ -165,7 +165,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             created_by=user,
             business_area=business_area,
             excluded_ids=input.get("excluded_ids"),
-            exclusion_reason=input.get("exclusion_reason"),
+            exclusion_reason=input.get("exclusion_reason", ""),
         )
         target_population.candidate_list_targeting_criteria = targeting_criteria
         target_population.program = program
