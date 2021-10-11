@@ -385,14 +385,25 @@ class TargetingCriteriaQueryingMixin:
         if rules is None:
             return
         self.rules = rules
-        self._excluded_household_ids = excluded_household_ids
+        if excluded_household_ids is None:
+            self._excluded_household_ids = []
+        else:
+            self._excluded_household_ids = excluded_household_ids
 
     @property
     def excluded_household_ids(self):
+        if not isinstance(self, models.Model):
+            return self._excluded_household_ids
         try:
             return self.target_population_candidate.excluded_household_ids
-        except AttributeError:
-            return self._excluded_household_ids
+        except TargetPopulation.DoesNotExist:
+            pass
+
+        try:
+            return self.target_population_final.excluded_household_ids
+        except TargetPopulation.DoesNotExist:
+            pass
+        return []
 
     def get_criteria_string(self):
         rules = self.rules if isinstance(self.rules, list) else self.rules.all()
