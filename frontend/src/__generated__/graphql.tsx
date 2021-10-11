@@ -789,6 +789,8 @@ export type CreateTargetPopulationInput = {
   targetingCriteria: TargetingCriteriaObjectType,
   businessAreaSlug: Scalars['String'],
   programId: Scalars['ID'],
+  excludedIds: Scalars['String'],
+  exclusionReason?: Maybe<Scalars['String']>,
 };
 
 export type CreateTargetPopulationMutation = {
@@ -3710,6 +3712,7 @@ export type QueryAllTargetPopulationArgs = {
 export type QueryGoldenRecordByTargetingCriteriaArgs = {
   targetingCriteria: TargetingCriteriaObjectType,
   program: Scalars['ID'],
+  excludedIds: Scalars['String'],
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3733,6 +3736,7 @@ export type QueryCandidateHouseholdsListByTargetingCriteriaArgs = {
 export type QueryFinalHouseholdsListByTargetingCriteriaArgs = {
   targetPopulation: Scalars['ID'],
   targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+  excludedIds: Scalars['String'],
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4702,6 +4706,8 @@ export type TargetPopulationNode = Node & {
   steficonRule?: Maybe<SteficonRuleNode>,
   vulnerabilityScoreMin?: Maybe<Scalars['Float']>,
   vulnerabilityScoreMax?: Maybe<Scalars['Float']>,
+  excludedIds: Scalars['String'],
+  exclusionReason: Scalars['String'],
   paymentRecords: PaymentRecordNodeConnection,
   selections: Array<HouseholdSelection>,
   totalHouseholds?: Maybe<Scalars['Int']>,
@@ -5155,6 +5161,8 @@ export type UpdateTargetPopulationInput = {
   programId?: Maybe<Scalars['ID']>,
   vulnerabilityScoreMin?: Maybe<Scalars['Decimal']>,
   vulnerabilityScoreMax?: Maybe<Scalars['Decimal']>,
+  excludedIds?: Maybe<Scalars['String']>,
+  exclusionReason?: Maybe<Scalars['String']>,
 };
 
 export type UpdateTargetPopulationMutation = {
@@ -5764,7 +5772,7 @@ export type TargetPopulationMinimalFragment = (
 
 export type TargetPopulationDetailedFragment = (
   { __typename?: 'TargetPopulationNode' }
-  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'excludedIds' | 'exclusionReason' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
   & { steficonRule: Maybe<(
     { __typename?: 'SteficonRuleNode' }
     & Pick<SteficonRuleNode, 'id' | 'name'>
@@ -8595,6 +8603,7 @@ export type FinalHouseholdsListByTargetingCriteriaQueryVariables = {
   before?: Maybe<Scalars['String']>,
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
+  excludedIds: Scalars['String'],
   businessArea?: Maybe<Scalars['String']>
 };
 
@@ -8648,6 +8657,7 @@ export type GoldenRecordByTargetingCriteriaQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
   program: Scalars['ID'],
+  excludedIds: Scalars['String'],
   businessArea?: Maybe<Scalars['String']>
 };
 
@@ -9027,6 +9037,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   finalListTotalHouseholds
   finalListTotalIndividuals
   caHashId
+  excludedIds
+  exclusionReason
   steficonRule {
     id
     name
@@ -16229,8 +16241,8 @@ export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnTy
 export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
 export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
-    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $businessArea: String) {
-  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
+    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $excludedIds: String!, $businessArea: String) {
+  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, excludedIds: $excludedIds, businessArea: $businessArea) {
     edges {
       node {
         id
@@ -16295,6 +16307,7 @@ export function withFinalHouseholdsListByTargetingCriteria<TProps, TChildProps =
  *      before: // value for 'before'
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
+ *      excludedIds: // value for 'excludedIds'
  *      businessArea: // value for 'businessArea'
  *   },
  * });
@@ -16364,8 +16377,8 @@ export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
 export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
 export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
-    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $program: ID!, $businessArea: String) {
-  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, program: $program, businessArea: $businessArea) {
+    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $program: ID!, $excludedIds: String!, $businessArea: String) {
+  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, program: $program, excludedIds: $excludedIds, businessArea: $businessArea) {
     edges {
       node {
         id
@@ -16427,6 +16440,7 @@ export function withGoldenRecordByTargetingCriteria<TProps, TChildProps = {}>(op
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
  *      program: // value for 'program'
+ *      excludedIds: // value for 'excludedIds'
  *      businessArea: // value for 'businessArea'
  *   },
  * });
@@ -18552,9 +18566,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
-  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria' | 'program'>>,
+  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria' | 'program' | 'excludedIds'>>,
   candidateHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryCandidateHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
-  finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
+  finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation' | 'excludedIds'>>,
   targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
@@ -19060,6 +19074,8 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   steficonRule?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
   vulnerabilityScoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
