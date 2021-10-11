@@ -274,7 +274,7 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
 
 
 def targeting_criteria_object_type_to_query(
-    targeting_criteria_object_type, program: Union[str, Program], excluded_ids=[]
+    targeting_criteria_object_type, program: Union[str, Program], excluded_ids=""
 ):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     if not isinstance(program, Program):
