@@ -1,4 +1,4 @@
-import { Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +28,7 @@ import {
 } from '../../__generated__/graphql';
 import { CreateTable } from '../tables/TargetPopulation/Create';
 
-const PaperContainer = styled(Paper)`
+export const PaperContainer = styled(Paper)`
   display: flex;
   padding: ${({ theme }) => theme.spacing(3)}px
     ${({ theme }) => theme.spacing(4)}px;
@@ -51,6 +51,8 @@ export function CreateTargetPopulation(): React.ReactElement {
     name: '',
     criterias: [],
     program: null,
+    excludedIds: '',
+    exclusionReason: '',
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -79,6 +81,8 @@ export function CreateTargetPopulation(): React.ReactElement {
     name: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
+    excludedIds: Yup.string().max(500, t('Too long')),
+    exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
   return (
@@ -92,6 +96,8 @@ export function CreateTargetPopulation(): React.ReactElement {
               input: {
                 programId: values.program,
                 name: values.name,
+                excludedIds: values.excludedIds,
+                exclusionReason: values.exclusionReason,
                 businessAreaSlug: businessArea,
                 ...getTargetingCriteriaVariables(values),
               },
@@ -155,6 +161,40 @@ export function CreateTargetPopulation(): React.ReactElement {
             loading={loadingPrograms}
             program={values.program}
           />
+          <PaperContainer>
+            <Typography variant='h6'>
+              {t(
+                'Excluded Target Population Entries (Households or Individuals)',
+              )}
+            </Typography>
+            <Box mt={2}>
+              <Grid container>
+                <Grid xs={6}>
+                  <Field
+                    name='excludedIds'
+                    fullWidth
+                    variant='outlined'
+                    label={t('Excluded Ids')}
+                    component={FormikTextField}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+            <Box mt={2}>
+              <Grid container>
+                <Grid xs={6}>
+                  <Field
+                    name='exclusionReason'
+                    fullWidth
+                    multiline
+                    variant='outlined'
+                    label={t('Exclusion Reason')}
+                    component={FormikTextField}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          </PaperContainer>
           {values.program ? (
             <FieldArray
               name='criterias'
@@ -176,7 +216,10 @@ export function CreateTargetPopulation(): React.ReactElement {
           <Results />
           {values.criterias.length ? (
             <CreateTable
-              variables={getTargetingCriteriaVariables(values)}
+              variables={{
+                ...getTargetingCriteriaVariables(values),
+                excludedIds: values.excludedIds,
+              }}
               program={values.program}
               businessArea={businessArea}
             />
