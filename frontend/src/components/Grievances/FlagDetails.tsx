@@ -22,7 +22,7 @@ import {
   useApproveSystemFlaggingMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../ConfirmationDialog';
-import { Flag } from '../Flag';
+import { FlagTooltip } from '../FlagTooltip';
 import { UniversalMoment } from '../UniversalMoment';
 import { ViewSanctionList } from './ViewSanctionList';
 
@@ -118,7 +118,10 @@ export function FlagDetails({
           <TableRow>
             <TableCell align='left'>
               {isFlagConfirmed ? (
-                <Flag message={t('Sanction List Confirmed Match')} confirmed />
+                <FlagTooltip
+                  message={t('Sanction List Confirmed Match')}
+                  confirmed
+                />
               ) : (
                 ''
               )}
