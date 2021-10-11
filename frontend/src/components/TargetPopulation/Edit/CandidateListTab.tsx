@@ -50,6 +50,7 @@ export function CandidateListTab({
               criterias: values.candidateListCriterias,
             }),
             program: selectedProgram.id,
+            excludedIds: values.excludedIds,
             businessArea,
           }}
           query={useGoldenRecordByTargetingCriteriaQuery}
