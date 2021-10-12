@@ -91,7 +91,12 @@ export function CreateTargetPopulation(): React.ReactElement {
     name: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
-    excludedIds: Yup.string().max(500, t('Too long')),
+    excludedIds: Yup.string()
+      .max(500, t('Too long'))
+      .test('testName', 'ID is not in the correct format', (ids) => {
+        const idsArr = ids.split(', ');
+        return idsArr.every((el) => /^(IND|HH)-\d{2}-\d{4}\.\d{4}$/.test(el));
+      }),
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
@@ -209,21 +214,19 @@ export function CreateTargetPopulation(): React.ReactElement {
             </Box>
             <Collapse in={isExclusionsOpen}>
               <Box mt={2}>
-                <Grid container>
-                  <Grid xs={6}>
-                    <Field
-                      name='excludedIds'
-                      fullWidth
-                      variant='outlined'
-                      label={t('Household or Individual IDs to exclude')}
-                      component={FormikTextField}
-                    />
-                  </Grid>
+                <Grid item xs={6}>
+                  <Field
+                    name='excludedIds'
+                    fullWidth
+                    variant='outlined'
+                    label={t('Household or Individual IDs to exclude')}
+                    component={FormikTextField}
+                  />
                 </Grid>
               </Box>
               <Box mt={2}>
                 <Grid container>
-                  <Grid xs={6}>
+                  <Grid item xs={6}>
                     <Field
                       name='exclusionReason'
                       fullWidth

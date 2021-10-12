@@ -76,7 +76,7 @@ export function CandidateListTab({
         <Collapse in={isExclusionsOpen}>
           <Box mt={2}>
             <Grid container>
-              <Grid xs={6}>
+              <Grid item xs={6}>
                 <Field
                   name='excludedIds'
                   fullWidth
@@ -89,7 +89,7 @@ export function CandidateListTab({
           </Box>
           <Box mt={2}>
             <Grid container>
-              <Grid xs={6}>
+              <Grid item xs={6}>
                 <Field
                   name='exclusionReason'
                   fullWidth
