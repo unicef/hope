@@ -90,7 +90,12 @@ export function EditTargetPopulation({
     name: Yup.string()
       .min(2, 'Too short')
       .max(255, 'Too long'),
-    excludedIds: Yup.string().max(500, t('Too long')),
+    excludedIds: Yup.string()
+      .max(500, t('Too long'))
+      .test('testName', 'ID is not in the correct format', (ids) => {
+        const idsArr = ids.split(', ');
+        return idsArr.every((el) => /^(IND|HH)-\d{2}-\d{4}\.\d{4}$/.test(el));
+      }),
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
