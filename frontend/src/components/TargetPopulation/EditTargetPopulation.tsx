@@ -93,6 +93,9 @@ export function EditTargetPopulation({
     excludedIds: Yup.string()
       .max(500, t('Too long'))
       .test('testName', 'ID is not in the correct format', (ids) => {
+        if (!ids?.length) {
+          return true;
+        }
         const idsArr = ids.split(', ');
         return idsArr.every((el) => /^(IND|HH)-\d{2}-\d{4}\.\d{4}$/.test(el));
       }),
