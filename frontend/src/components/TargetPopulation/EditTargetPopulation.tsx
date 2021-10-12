@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,6 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
-import { PaperContainer } from '../../containers/pages/CreateTargetPopulation';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
@@ -91,7 +90,12 @@ export function EditTargetPopulation({
     name: Yup.string()
       .min(2, 'Too short')
       .max(255, 'Too long'),
-    excludedIds: Yup.string().max(500, t('Too long')),
+    excludedIds: Yup.string()
+      .max(500, t('Too long'))
+      .test('testName', 'ID is not in the correct format', (ids) => {
+        const idsArr = ids.split(', ');
+        return idsArr.every((el) => /^(IND|HH)-\d{2}-\d{4}\.\d{4}$/.test(el));
+      }),
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
@@ -199,40 +203,6 @@ export function EditTargetPopulation({
             loading={loadingPrograms}
             program={values.program}
           />
-          <PaperContainer>
-            <Typography variant='h6'>
-              {t(
-                'Excluded Target Population Entries (Households or Individuals)',
-              )}
-            </Typography>
-            <Box mt={2}>
-              <Grid container>
-                <Grid xs={6}>
-                  <Field
-                    name='excludedIds'
-                    fullWidth
-                    variant='outlined'
-                    label={t('Excluded Ids')}
-                    component={FormikTextField}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-            <Box mt={2}>
-              <Grid container>
-                <Grid xs={6}>
-                  <Field
-                    name='exclusionReason'
-                    fullWidth
-                    multiline
-                    variant='outlined'
-                    label={t('Exclusion Reason')}
-                    component={FormikTextField}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          </PaperContainer>
           <CandidateListTab
             values={values}
             selectedProgram={getFullNodeFromEdgesById(
