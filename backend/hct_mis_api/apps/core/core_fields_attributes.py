@@ -3,6 +3,7 @@ from datetime import datetime
 from functools import reduce
 
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
@@ -67,7 +68,10 @@ FIELD_TYPES_TO_INTERNAL_TYPE = {
     TYPE_LIST_OF_IDS: list,
     TYPE_BOOL: bool,
     TYPE_DATE: datetime,
-    TYPE_IMAGE: str,
+    TYPE_IMAGE: (
+        str,
+        InMemoryUploadedFile,
+    ),
     TYPE_SELECT_ONE: str,
     TYPE_SELECT_MANY: list,
     TYPE_GEOPOINT: str,
