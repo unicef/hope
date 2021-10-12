@@ -1,4 +1,10 @@
 import logging
+import random
+import string
+
+from django.core.files.storage import default_storage
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils import timezone
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN
@@ -333,3 +339,24 @@ def log_and_withdraw_household_if_needed(
     if removed_individual_household:
         if removed_individual_household.individuals.count() == 0:
             removed_individual_household.withdraw()
+
+
+def save_images(flex_fields, associated_with):
+    from hct_mis_api.apps.core.core_fields_attributes import TYPE_IMAGE
+    from hct_mis_api.apps.core.utils import serialize_flex_attributes
+
+    if associated_with not in ("households", "individuals"):
+        logger.error("associated_with argument must be one of ['household', 'individual']")
+        raise ValueError("associated_with argument must be one of ['household', 'individual']")
+
+    all_flex_fields = serialize_flex_attributes().get(associated_with, {})
+
+    for name, value in flex_fields.items():
+        flex_field = all_flex_fields.get(name)
+        if flex_field is None:
+            logger.error(f"{name} is not a correct `flex field")
+            raise ValueError(f"{name} is not a correct `flex field")
+
+        if flex_field["type"] == TYPE_IMAGE and isinstance(value, InMemoryUploadedFile):
+            file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
+            flex_fields[name] = default_storage.save(f"{file_name}-{timezone.now()}.jpg", value)

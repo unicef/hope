@@ -29,6 +29,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     prepare_previous_documents,
     prepare_previous_identities,
     reassign_roles_on_update,
+    save_images,
     verify_flex_fields,
     withdraw_individual_and_reassign_roles,
 )
@@ -324,6 +325,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     to_date_string(individual_data, "birth_date")
     flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
+    save_images(flex_fields, "individuals")
     individual_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
     }
@@ -389,6 +391,7 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     to_phone_number_str(new_individual_data, "phone_no_alternative")
     to_date_string(new_individual_data, "birth_date")
     verify_flex_fields(flex_fields, "individuals")
+    save_images(flex_fields, "individuals")
 
     individual_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_individual_data.items()
@@ -465,6 +468,7 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
     flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
+    save_images(flex_fields, "individuals")
     individual_data["flex_fields"] = flex_fields
     ticket_add_individual_details = TicketAddIndividualDetails(
         individual_data=individual_data,
@@ -487,6 +491,7 @@ def update_add_individual_extras(root, info, input, grievance_ticket, extras, **
     new_individual_data = {to_snake_case(key): value for key, value in new_individual_data.items()}
     flex_fields = {to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
+    save_images(flex_fields, "individuals")
     new_individual_data["flex_fields"] = flex_fields
 
     ticket_details.individual_data = new_individual_data
