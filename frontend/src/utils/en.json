@@ -565,5 +565,6 @@
   "Houesehold has Duplicates": "Houesehold has Duplicates",
   "Excluded Target Population Entries (Households or Individuals)": "Excluded Target Population Entries (Households or Individuals)",
   "Exclusion Reason": "Exclusion Reason",
-  "Household or Individual IDs to exclude": "Household or Individual IDs to exclude"
+  "Household or Individual IDs to exclude": "Household or Individual IDs to exclude",
+  "ID is not in the correct format": "ID is not in the correct format"
 }
