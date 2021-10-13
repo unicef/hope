@@ -30,7 +30,10 @@ def copy_admin_area_data(apps, schema_editor):
                             if source:
                                 p_code = source.p_code
                                 if p_code not in areas.keys():
-                                    areas[p_code] = Area.objects.get(p_code=p_code)
+                                    area = Area.objects.filter(p_code=p_code).first()
+                                    if not area:
+                                        continue
+                                    areas[p_code] = area
                                 setattr(record, geo_name, areas[p_code])
                         Model.objects.bulk_update(records, [geo_name])
         except Exception as e:
