@@ -1,12 +1,9 @@
 import { Typography } from '@material-ui/core';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
-import { Flag } from './Flag';
-import { FlagTooltip } from './FlagTooltip';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
@@ -61,9 +58,6 @@ interface Props {
   breadCrumbs?: BreadCrumbsItem[];
   tabs?: React.ReactElement;
   hasInputComponent?: boolean;
-  withTriangle?: boolean;
-  possibleMatch?: boolean;
-  confirmedMatch?: boolean;
 }
 
 export function PageHeader({
@@ -72,12 +66,8 @@ export function PageHeader({
   breadCrumbs = null,
   tabs = null,
   hasInputComponent,
-  possibleMatch = false,
-  withTriangle = false,
-  confirmedMatch = false,
 }: Props): React.ReactElement {
   const history = useHistory();
-  const { t } = useTranslation();
   return (
     <Wrapper data-cy='page-header-container'>
       <Container>
@@ -95,18 +85,7 @@ export function PageHeader({
             ) : (
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
-                <Typography variant='h5'>
-                  {title}{' '}
-                  {withTriangle && (
-                    <FlagTooltip message={t('Possible Duplicate')} />
-                  )}{' '}
-                  {(possibleMatch || confirmedMatch) && (
-                    <Flag
-                      message={t('Sanction List Confirmed Match')}
-                      confirmed={confirmedMatch}
-                    />
-                  )}
-                </Typography>
+                <Typography variant='h5'>{title}</Typography>
               </>
             )}
           </div>

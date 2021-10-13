@@ -6,6 +6,7 @@ import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { PageHeader } from '../../../../components/PageHeader';
 import { PermissionDenied } from '../../../../components/PermissionDenied';
+import { ImportedIndividualPhotoModal } from '../../../../components/population/ImportedIndividualPhotoModal';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
@@ -13,7 +14,10 @@ import {
   decodeIdString,
   isPermissionDeniedError,
 } from '../../../../utils/utils';
-import { useImportedIndividualQuery } from '../../../../__generated__/graphql';
+import {
+  ImportedIndividualNode,
+  useImportedIndividualQuery,
+} from '../../../../__generated__/graphql';
 import { RegistrationIndividualsBioData } from './RegistrationIndividualBioData';
 import { RegistrationIndividualVulnerabilities } from './RegistrationIndividualVulnerabilities';
 
@@ -73,7 +77,13 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
       <PageHeader
         title={`${t('Individual ID')}: ${decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
-      />
+      >
+        {importedIndividual.photo ? (
+          <ImportedIndividualPhotoModal
+            individual={importedIndividual as ImportedIndividualNode}
+          />
+        ) : null}
+      </PageHeader>
       <Container>
         <RegistrationIndividualsBioData individual={importedIndividual} />
         <RegistrationIndividualVulnerabilities

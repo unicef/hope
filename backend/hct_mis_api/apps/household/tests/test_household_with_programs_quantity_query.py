@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.core.management import call_command
 
 from parameterized import parameterized
@@ -10,7 +8,6 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 
 
@@ -22,7 +19,6 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
               name
               quantity {
                 totalDeliveredQuantity
-                totalDeliveredQuantityUsd
                 currency
               }
             }

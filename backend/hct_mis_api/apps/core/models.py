@@ -56,6 +56,7 @@ class BusinessArea(TimeStampedUUIDModel):
     countries = models.ManyToManyField(
         "AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0}, related_name="business_areas"
     )
+    countries_new = models.ManyToManyField("geo.Country", related_name="business_areas")
     deduplication_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
@@ -415,6 +416,7 @@ class CountryCodeMapManager(models.Manager):
 
 class CountryCodeMap(models.Model):
     country = CountryField(unique=True)
+    country_new = models.ForeignKey("geo.Country", blank=True, null=True, unique=True, on_delete=models.PROTECT)
     ca_code = models.CharField(max_length=5, unique=True)
 
     objects = CountryCodeMapManager()

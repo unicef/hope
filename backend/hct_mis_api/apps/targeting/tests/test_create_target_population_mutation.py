@@ -64,6 +64,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 "name": "Example name 5",
                 "businessAreaSlug": "afghanistan",
                 "programId": self.id_to_base64(self.program.id, "ProgramNode"),
+                "excludedIds": "",
                 "targetingCriteria": {
                     "rules": [
                         {

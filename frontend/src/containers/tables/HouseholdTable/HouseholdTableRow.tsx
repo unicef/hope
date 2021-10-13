@@ -1,10 +1,11 @@
+import { Box } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { BlackLink } from '../../../components/BlackLink';
-import { Flag } from '../../../components/Flag';
 import { FlagTooltip } from '../../../components/FlagTooltip';
+import { WarningTooltip } from '../../../components/WarningTooltip';
 import { AnonTableCell } from '../../../components/table/AnonTableCell';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { UniversalMoment } from '../../../components/UniversalMoment';
@@ -44,16 +45,29 @@ export function HouseHoldTableRow({
       key={household.unicefId}
     >
       <TableCell align='left'>
-        {household.hasDuplicates && (
-          <FlagTooltip message={t('Possible Duplicates')} />
-        )}
-        {(household.sanctionListPossibleMatch ||
-          household.sanctionListConfirmedMatch) && (
-          <Flag
-            message={t('Sanction List Confirmed Match')}
-            confirmed={household.sanctionListConfirmedMatch}
-          />
-        )}
+        <>
+          <Box mr={2}>
+            {household.hasDuplicates && (
+              <WarningTooltip
+                confirmed
+                message={t('Houesehold has Duplicates')}
+              />
+            )}
+          </Box>
+          <Box mr={2}>
+            {household.sanctionListPossibleMatch && (
+              <FlagTooltip message={t('Sanction List Possible Match')} />
+            )}
+          </Box>
+          <Box mr={2}>
+            {household.sanctionListConfirmedMatch && (
+              <FlagTooltip
+                message={t('Sanction List Confirmed Match')}
+                confirmed
+              />
+            )}
+          </Box>
+        </>
       </TableCell>
       <TableCell align='left'>
         <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
