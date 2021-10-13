@@ -1,15 +1,20 @@
-from constance.test import override_config
 from django.conf import settings
+from django.core.management import call_command
+
+from constance.test import override_config
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals, DocumentFactory
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import (
-    Individual,
-    DocumentType,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
+    DocumentType,
+    Individual,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -27,6 +32,8 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
+
+        call_command("loadcountries")
 
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
         task = LoadSanctionListXMLTask(full_sanction_list_path)

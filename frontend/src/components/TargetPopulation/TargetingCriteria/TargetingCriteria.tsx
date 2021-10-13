@@ -122,7 +122,7 @@ export function TargetingCriteria({
             <>
               {!!candidateListRules.length && (
                 <Button
-                  variant='contained'
+                  variant='outlined'
                   color='primary'
                   onClick={() => setOpen(true)}
                 >

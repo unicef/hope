@@ -306,6 +306,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         help_text=_("The content of the customers query."),
     )
     admin2 = models.ForeignKey("core.AdminArea", null=True, blank=True, on_delete=models.SET_NULL)
+    admin2_new = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
     area = models.CharField(max_length=250, blank=True)
     language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
