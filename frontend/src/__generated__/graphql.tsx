@@ -789,6 +789,8 @@ export type CreateTargetPopulationInput = {
   targetingCriteria: TargetingCriteriaObjectType,
   businessAreaSlug: Scalars['String'],
   programId: Scalars['ID'],
+  excludedIds: Scalars['String'],
+  exclusionReason?: Maybe<Scalars['String']>,
 };
 
 export type CreateTargetPopulationMutation = {
@@ -844,7 +846,6 @@ export type DeleteTargetPopulationMutationPayload = {
 export type DeliveredQuantityNode = {
    __typename?: 'DeliveredQuantityNode',
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
-  totalDeliveredQuantityUsd?: Maybe<Scalars['Decimal']>,
   currency?: Maybe<Scalars['String']>,
 };
 
@@ -1033,6 +1034,7 @@ export type GrievanceTicketNode = Node & {
   linkedTickets: GrievanceTicketNodeConnection,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
   unicefId: Scalars['String'],
+  extras: Scalars['JSONString'],
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -3192,7 +3194,7 @@ export type ProgramsWithDeliveredQuantityNode = {
    __typename?: 'ProgramsWithDeliveredQuantityNode',
   id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
-  quantity?: Maybe<DeliveredQuantityNode>,
+  quantity?: Maybe<Array<Maybe<DeliveredQuantityNode>>>,
 };
 
 export type Query = {
@@ -3710,6 +3712,7 @@ export type QueryAllTargetPopulationArgs = {
 export type QueryGoldenRecordByTargetingCriteriaArgs = {
   targetingCriteria: TargetingCriteriaObjectType,
   program: Scalars['ID'],
+  excludedIds: Scalars['String'],
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3733,6 +3736,7 @@ export type QueryCandidateHouseholdsListByTargetingCriteriaArgs = {
 export type QueryFinalHouseholdsListByTargetingCriteriaArgs = {
   targetPopulation: Scalars['ID'],
   targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+  excludedIds: Scalars['String'],
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4124,7 +4128,7 @@ export enum RegistrationDataImportStatus {
   Importing = 'IMPORTING',
   DeduplicationFailed = 'DEDUPLICATION_FAILED',
   Deduplication = 'DEDUPLICATION',
-  Refuse = 'REFUSE',
+  Refused = 'REFUSED',
   ImportError = 'IMPORT_ERROR',
   MergeError = 'MERGE_ERROR'
 }
@@ -4702,6 +4706,8 @@ export type TargetPopulationNode = Node & {
   steficonRule?: Maybe<SteficonRuleNode>,
   vulnerabilityScoreMin?: Maybe<Scalars['Float']>,
   vulnerabilityScoreMax?: Maybe<Scalars['Float']>,
+  excludedIds: Scalars['String'],
+  exclusionReason: Scalars['String'],
   paymentRecords: PaymentRecordNodeConnection,
   selections: Array<HouseholdSelection>,
   totalHouseholds?: Maybe<Scalars['Int']>,
@@ -5155,6 +5161,8 @@ export type UpdateTargetPopulationInput = {
   programId?: Maybe<Scalars['ID']>,
   vulnerabilityScoreMin?: Maybe<Scalars['Decimal']>,
   vulnerabilityScoreMax?: Maybe<Scalars['Decimal']>,
+  excludedIds?: Maybe<Scalars['String']>,
+  exclusionReason?: Maybe<Scalars['String']>,
 };
 
 export type UpdateTargetPopulationMutation = {
@@ -5656,10 +5664,10 @@ export type HouseholdDetailedFragment = (
   ), programsWithDeliveredQuantity: Maybe<Array<Maybe<(
     { __typename?: 'ProgramsWithDeliveredQuantityNode' }
     & Pick<ProgramsWithDeliveredQuantityNode, 'id' | 'name'>
-    & { quantity: Maybe<(
+    & { quantity: Maybe<Array<Maybe<(
       { __typename?: 'DeliveredQuantityNode' }
-      & Pick<DeliveredQuantityNode, 'totalDeliveredQuantity' | 'totalDeliveredQuantityUsd' | 'currency'>
-    )> }
+      & Pick<DeliveredQuantityNode, 'totalDeliveredQuantity' | 'currency'>
+    )>>> }
   )>>> }
   & HouseholdMinimalFragment
 );
@@ -5764,7 +5772,7 @@ export type TargetPopulationMinimalFragment = (
 
 export type TargetPopulationDetailedFragment = (
   { __typename?: 'TargetPopulationNode' }
-  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'excludedIds' | 'exclusionReason' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
   & { steficonRule: Maybe<(
     { __typename?: 'SteficonRuleNode' }
     & Pick<SteficonRuleNode, 'id' | 'name'>
@@ -8467,7 +8475,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8595,6 +8603,7 @@ export type FinalHouseholdsListByTargetingCriteriaQueryVariables = {
   before?: Maybe<Scalars['String']>,
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
+  excludedIds: Scalars['String'],
   businessArea?: Maybe<Scalars['String']>
 };
 
@@ -8648,6 +8657,7 @@ export type GoldenRecordByTargetingCriteriaQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   orderBy?: Maybe<Scalars['String']>,
   program: Scalars['ID'],
+  excludedIds: Scalars['String'],
   businessArea?: Maybe<Scalars['String']>
 };
 
@@ -8911,7 +8921,6 @@ export const HouseholdDetailedFragmentDoc = gql`
     name
     quantity {
       totalDeliveredQuantity
-      totalDeliveredQuantityUsd
       currency
     }
   }
@@ -9028,6 +9037,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   finalListTotalHouseholds
   finalListTotalIndividuals
   caHashId
+  excludedIds
+  exclusionReason
   steficonRule {
     id
     name
@@ -9278,6 +9289,7 @@ ${ImportedIndividualMinimalFragmentDoc}`;
 export const ImportedIndividualDetailedFragmentDoc = gql`
     fragment importedIndividualDetailed on ImportedIndividualNode {
   ...importedIndividualMinimal
+  photo
   givenName
   familyName
   middleName
@@ -16229,8 +16241,8 @@ export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnTy
 export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
 export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
 export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
-    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $businessArea: String) {
-  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
+    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $excludedIds: String!, $businessArea: String) {
+  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, excludedIds: $excludedIds, businessArea: $businessArea) {
     edges {
       node {
         id
@@ -16295,6 +16307,7 @@ export function withFinalHouseholdsListByTargetingCriteria<TProps, TChildProps =
  *      before: // value for 'before'
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
+ *      excludedIds: // value for 'excludedIds'
  *      businessArea: // value for 'businessArea'
  *   },
  * });
@@ -16364,8 +16377,8 @@ export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
 export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
 export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
-    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $program: ID!, $businessArea: String) {
-  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, program: $program, businessArea: $businessArea) {
+    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $program: ID!, $excludedIds: String!, $businessArea: String) {
+  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, program: $program, excludedIds: $excludedIds, businessArea: $businessArea) {
     edges {
       node {
         id
@@ -16427,6 +16440,7 @@ export function withGoldenRecordByTargetingCriteria<TProps, TChildProps = {}>(op
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
  *      program: // value for 'program'
+ *      excludedIds: // value for 'excludedIds'
  *      businessArea: // value for 'businessArea'
  *   },
  * });
@@ -17638,7 +17652,6 @@ export type DeleteTargetPopulationMutationPayloadResolvers<ContextType = any, Pa
 
 export type DeliveredQuantityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveredQuantityNode'] = ResolversParentTypes['DeliveredQuantityNode']> = {
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -17765,6 +17778,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   linkedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsArgs>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
@@ -18482,7 +18496,7 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 export type ProgramsWithDeliveredQuantityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramsWithDeliveredQuantityNode'] = ResolversParentTypes['ProgramsWithDeliveredQuantityNode']> = {
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  quantity?: Resolver<Maybe<ResolversTypes['DeliveredQuantityNode']>, ParentType, ContextType>,
+  quantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveredQuantityNode']>>>, ParentType, ContextType>,
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
@@ -18552,9 +18566,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
-  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria' | 'program'>>,
+  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria' | 'program' | 'excludedIds'>>,
   candidateHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryCandidateHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
-  finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
+  finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation' | 'excludedIds'>>,
   targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
@@ -19060,6 +19074,8 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   steficonRule?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
   vulnerabilityScoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,

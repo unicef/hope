@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
 import {
   ImportedIndividualDetailedFragment,
   useImportedIndividualPhotosLazyQuery,
 } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../../components/BlackLink';
 import { Dialog } from '../../../dialogs/Dialog';
 import { DialogActions } from '../../../dialogs/DialogActions';
 
@@ -23,6 +23,10 @@ const DialogFooter = styled.div`
 const StyledImage = styled.img`
   max-width: 100%;
   max-height: 100%;
+`;
+
+export const StyledLink = styled(Link)`
+  color: #000;
 `;
 
 interface DocumentRegistrationPhotoModalProps {
@@ -47,14 +51,14 @@ export const DocumentRegistrationPhotoModal = ({
 
   return (
     <>
-      <BlackLink
+      <StyledLink
         onClick={() => {
           setDialogOpen(true);
           getPhotos();
         }}
       >
         {documentNumber}
-      </BlackLink>
+      </StyledLink>
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}

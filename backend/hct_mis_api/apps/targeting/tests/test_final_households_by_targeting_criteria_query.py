@@ -23,6 +23,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
       finalHouseholdsListByTargetingCriteria (
         targetPopulation:$targetPopulation, targetingCriteria: $targetingCriteria,
         businessArea: $businessArea
+        excludedIds: ""
       ){
         totalCount
         edges {

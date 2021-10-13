@@ -1,10 +1,12 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { FlagTooltip } from '../../components/FlagTooltip';
+import { WarningTooltip } from '../../components/WarningTooltip';
 import { LabelizedField } from '../../components/LabelizedField';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
@@ -100,10 +102,31 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
-        possibleMatch={household.sanctionListPossibleMatch}
-        confirmedMatch={household.sanctionListConfirmedMatch}
-        withTriangle={household.hasDuplicates}
-      />
+      >
+        <>
+          <Box mr={2}>
+            {household.hasDuplicates && (
+              <WarningTooltip
+                confirmed
+                message={t('Houesehold has Duplicates')}
+              />
+            )}
+          </Box>
+          <Box mr={2}>
+            {household.sanctionListPossibleMatch && (
+              <FlagTooltip message={t('Sanction List Possible Match')} />
+            )}
+          </Box>
+          <Box mr={2}>
+            {household.sanctionListConfirmedMatch && (
+              <FlagTooltip
+                message={t('Sanction List Confirmed Match')}
+                confirmed
+              />
+            )}
+          </Box>
+        </>
+      </PageHeader>
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}

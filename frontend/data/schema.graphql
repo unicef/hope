@@ -481,6 +481,8 @@ input CreateTargetPopulationInput {
   targetingCriteria: TargetingCriteriaObjectType!
   businessAreaSlug: String!
   programId: ID!
+  excludedIds: String!
+  exclusionReason: String
 }
 
 type CreateTargetPopulationMutation {
@@ -532,7 +534,6 @@ type DeleteTargetPopulationMutationPayload {
 
 type DeliveredQuantityNode {
   totalDeliveredQuantity: Decimal
-  totalDeliveredQuantityUsd: Decimal
   currency: String
 }
 
@@ -701,6 +702,7 @@ type GrievanceTicketNode implements Node {
   linkedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   registrationDataImport: RegistrationDataImportNode
   unicefId: String!
+  extras: JSONString!
   linkedTicketsRelated(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -2198,7 +2200,7 @@ enum ProgramStatus {
 type ProgramsWithDeliveredQuantityNode {
   id: ID
   name: String
-  quantity: DeliveredQuantityNode
+  quantity: [DeliveredQuantityNode]
 }
 
 type Query {
@@ -2268,9 +2270,9 @@ type Query {
   cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
-  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, excludedIds: String!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
-  finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, excludedIds: String!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
   household(id: ID!): HouseholdNode
   allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, countryOrigin: String, countryOrigin_Startswith: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: Int, size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, admin2: [ID], orderBy: String): HouseholdNodeConnection
@@ -2454,7 +2456,7 @@ enum RegistrationDataImportStatus {
   IMPORTING
   DEDUPLICATION_FAILED
   DEDUPLICATION
-  REFUSE
+  REFUSED
   IMPORT_ERROR
   MERGE_ERROR
 }
@@ -2804,6 +2806,8 @@ type TargetPopulationNode implements Node {
   steficonRule: SteficonRuleNode
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
+  excludedIds: String!
+  exclusionReason: String!
   paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
   totalHouseholds: Int
@@ -3275,6 +3279,8 @@ input UpdateTargetPopulationInput {
   programId: ID
   vulnerabilityScoreMin: Decimal
   vulnerabilityScoreMax: Decimal
+  excludedIds: String
+  exclusionReason: String
 }
 
 type UpdateTargetPopulationMutation {

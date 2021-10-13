@@ -6,6 +6,8 @@ from django.forms import model_to_dict
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import (
@@ -133,21 +135,37 @@ class RdiMergeTask:
         try:
             if admin2 is not None:
                 admin_area = AdminArea.objects.filter(p_code=admin2).first()
+                admin_area_new = Area.objects.filter(p_code=admin2).first()
                 household.admin_area = admin_area
+                household.admin_area_new = admin_area_new
                 return
             if admin1 is not None:
                 admin_area = AdminArea.objects.filter(p_code=admin1).first()
+                admin_area_new = Area.objects.filter(p_code=admin1).first()
                 household.admin_area = admin_area
+                household.admin_area_new = admin_area_new
                 return
         except AdminArea.DoesNotExist as e:
+            logger.exception(e)
+        except Area.DoesNotExist as e:
             logger.exception(e)
 
     def _prepare_households(self, imported_households, obj_hct):
         households_dict = {}
         business_area = obj_hct.business_area
+        countries = {}
         for imported_household in imported_households:
+            household_data = {**model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS)}
+            country_code = household_data["country"].code
+            country_origin_code = household_data["country_origin"].code
+            if country_code not in countries:
+                countries[country_code] = geo_models.Country.objects.get(iso_code2=country_code)
+            if country_origin_code not in countries:
+                countries[country_origin_code] = geo_models.Country.objects.get(iso_code2=country_origin_code)
+            household_data["country_new"] = countries[country_code]
+            household_data["country_origin_new"] = countries[country_origin_code]
             household = Household(
-                **model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS),
+                **household_data,
                 registration_data_import=obj_hct,
                 business_area=business_area,
             )
@@ -162,6 +180,9 @@ class RdiMergeTask:
             document_type, _ = DocumentType.objects.get_or_create(
                 country=imported_document.type.country,
                 type=imported_document.type.type,
+                defaults={
+                    "country_new": geo_models.Country.objects.get(iso_code2=imported_document.type.country.code),
+                },
             )
             document = Document(
                 document_number=imported_document.document_number,
@@ -175,6 +196,9 @@ class RdiMergeTask:
                 type=imported_identity.agency.type,
                 country=imported_identity.agency.country,
                 label=imported_identity.agency.label,
+                defaults={
+                    "country_new": geo_models.Country.objects.get(iso_code2=imported_identity.agency.country.code),
+                },
             )
             identity = IndividualIdentity(
                 agency=agency,

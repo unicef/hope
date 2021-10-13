@@ -3431,6 +3431,20 @@
                 "defaultValue": null
               },
               {
+                "name": "excludedIds",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "before",
                 "description": null,
                 "type": {
@@ -3611,6 +3625,20 @@
                   "kind": "INPUT_OBJECT",
                   "name": "TargetingCriteriaObjectType",
                   "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "excludedIds",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -11261,6 +11289,22 @@
             "deprecationReason": null
           },
           {
+            "name": "extras",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONString",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "linkedTicketsRelated",
             "description": null,
             "args": [
@@ -12169,7 +12213,7 @@
             "deprecationReason": null
           },
           {
-            "name": "REFUSE",
+            "name": "REFUSED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -19478,6 +19522,38 @@
               "kind": "SCALAR",
               "name": "Float",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "excludedIds",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "exclusionReason",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -28306,9 +28382,13 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "OBJECT",
-              "name": "DeliveredQuantityNode",
-              "ofType": null
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DeliveredQuantityNode",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -28326,18 +28406,6 @@
         "fields": [
           {
             "name": "totalDeliveredQuantity",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Decimal",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "totalDeliveredQuantityUsd",
             "description": null,
             "args": [],
             "type": {
@@ -43219,6 +43287,30 @@
               }
             },
             "defaultValue": null
+          },
+          {
+            "name": "excludedIds",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "exclusionReason",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -43326,6 +43418,26 @@
             "type": {
               "kind": "SCALAR",
               "name": "Decimal",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "excludedIds",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "exclusionReason",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null
