@@ -702,6 +702,7 @@ def fix_flex_type_fields(items, flex_fields):
 
 def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
     excluded_ids_array = excluded_ids_string.split(",")
+    excluded_ids_array = [excluded_id.strip() for excluded_id in excluded_ids_array]
     excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]
     excluded_individuals_ids_array = [
         excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("IND")

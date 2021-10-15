@@ -97,8 +97,10 @@ export function CreateTargetPopulation(): React.ReactElement {
         if (!ids?.length) {
           return true;
         }
-        const idsArr = ids.split(', ');
-        return idsArr.every((el) => /^(IND|HH)-\d{2}-\d{4}\.\d{4}$/.test(el));
+        const idsArr = ids.split(',');
+        return idsArr.every((el) =>
+          /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
+        );
       }),
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
