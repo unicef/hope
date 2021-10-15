@@ -12,7 +12,7 @@ from smart_admin.mixins import FieldsetMixin
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 from .models import Area, AreaType, Country
-from .utils import initialise_area_types, initialise_areas
+from .utils import initialise_area_types, initialise_areas, initialise_countries
 
 
 class ActiveRecordFilter(ListFilter):
@@ -87,6 +87,11 @@ class CountryAdmin(ExtraUrlMixin, ValidityManagerMixin, FieldsetMixin, HOPEModel
     def get_list_display(self, request):
         ret = super().get_list_display(request)
         return ret
+
+    @button()
+    def initialise(self, request):
+        results = initialise_countries()
+        self.message_user(request, str(results))
 
 
 @admin.register(AreaType)
