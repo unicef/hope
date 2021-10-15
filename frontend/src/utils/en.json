@@ -555,5 +555,16 @@
   "with disability": "with disability",
   "Males": "Males",
   "Flags": "Flags",
-  "Select Project": "Select Project"
+  "Select Project": "Select Project",
+  "Sanction List Confirmed Match": "Sanction List Confirmed Match",
+  "Possible Duplicate": "Possible Duplicate",
+  "Possible Duplicates": "Possible Duplicates",
+  "Refuse Import": "Refuse Import",
+  "Resources": "Resources",
+  "Sanction List Possible Match": "Sanction List Possible Match",
+  "Houesehold has Duplicates": "Houesehold has Duplicates",
+  "Excluded Target Population Entries (Households or Individuals)": "Excluded Target Population Entries (Households or Individuals)",
+  "Exclusion Reason": "Exclusion Reason",
+  "Household or Individual IDs to exclude": "Household or Individual IDs to exclude",
+  "ID is not in the correct format": "ID is not in the correct format"
 }

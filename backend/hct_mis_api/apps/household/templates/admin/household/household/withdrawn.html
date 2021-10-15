@@ -1,0 +1,73 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load hope i18n admin_urls static admin_modify %}
+{% block action-content %}
+    {% if original.withdrawn %}
+    <h1 style="color: red">Warning: Household already withdrawn</h1>
+        <h2>Continuing will restore this household and all his  members (not the external collectors) and
+            will reopen all tickets closed when it was withdrew.
+        </h2>
+    {% else %}
+        <h2>Continuing will withdrawn household and all his members (not the external collectors) and
+            will close any ticket related to the household or his members
+        </h2>
+    {% endif %}
+    <form method="post">{% csrf_token %}
+        <input type="checkbox" checked="{{ status }}" disabled="disabled">
+            {{ original }}
+        <table>
+        <tr><td colspan="3">Members</td> </tr>
+
+            <tr>
+                <th colspan="3">individual</th>
+                <th>is withdrawn</th><th>is duplicate</th>
+            </tr>
+        {% for member in original.individuals.all %}
+            <tr>
+                <td style="display: none"><input type="checkbox" checked="{{ status }}" disabled="disabled"></td>
+                <td>
+                    <a target="_blank" href="{% url "admin:household_individual_change" member.pk %}">
+                    {{ member }}</a>
+                </td>
+                <td>{{ member.full_name }}</td>
+                <td>{{ member.relationship }}</td>
+                <td>
+                <img src="{{ member.withdrawn|bool_to_icon }}">
+                </td>
+                <td>
+                    <img src="{{ member.duplicate|bool_to_icon }}">
+                </td>
+            </tr>
+        {% endfor %}
+        <tr><td colspan="3">Collectors</td> </tr>
+        {% for collector in original.individuals_and_roles.all %}
+            <tr><td style="display: none"></td>
+               <td>
+                    <a target="_blank" href="{% url "admin:household_individual_change" collector.pk %}">
+                        {{ collector.individual }}</a>
+                </td>
+                <td>{{ collector.individual.full_name }}</td>
+                <td>{{ collector.role }}</td>
+                <td>
+                    <img src="{{ collector.individual.withdrawn|bool_to_icon }}">
+                </td>
+                <td>
+                    <img src="{{ collector.individual.duplicate|bool_to_icon }}">
+                </td>
+            </tr>
+        {% endfor %}
+        <tr><td colspan="3">Tickets</td> </tr>
+            {% for ticket in tickets %}
+                <tr>
+                <td style="display: none"></td>
+                    <td><a target="_blank" href="{% url "admin:grievance_grievanceticket_change" ticket.ticket.id %}">{{ ticket.ticket.unicef_id }}</a></td>
+                <td>{{ ticket.ticket.description }}</td>
+                <td>{{ ticket.ticket.get_issue_type_display }}</td>
+                <td>{{ ticket.ticket.get_status_display }}</td>
+                <td>{{ ticket.ticket.get_category_display }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    <input type="submit"
+           value="{% if original.withdrawn %}Restore{% else %}Withdrawn{% endif %} Household"
+           class="btn btn-default">
+    </form>
+{% endblock action-content %}

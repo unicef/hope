@@ -1,14 +1,15 @@
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.postgres.fields import JSONField
 
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
+from adminactions.helpers import AdminActionPermMixin
+from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
-
-
-def is_root(request, *args, **kwargs):
-    return request.user.is_superuser and request.headers.get("x-root-token") == settings.ROOT_TOKEN
+from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.utils.security import is_root
 
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
@@ -23,11 +24,15 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
         return super().get_list_filter(request) + ("is_removed",)
 
 
-class HOPEModelAdminBase(SmartDisplayAllMixin, admin.ModelAdmin):
-    list_per_page = 50
-
-    def get_fields(self, request, obj=None):
-        return super().get_fields(request, obj)
+class JSONWidgetMixin:
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if isinstance(db_field, JSONField):
+            if is_root(request) or settings.DEBUG:
+                kwargs = {"widget": JSONEditor}
+            else:
+                kwargs = {"widget": JsonWidget}
+            return db_field.formfield(**kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
 class LastSyncDateResetMixin(ExtraUrlMixin):
@@ -57,3 +62,10 @@ class LastSyncDateResetMixin(ExtraUrlMixin):
                 "Continuing will reset last_sync_date field.",
                 "Successfully executed",
             )
+
+
+class HOPEModelAdminBase(SmartDisplayAllMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin):
+    list_per_page = 50
+
+    def get_fields(self, request, obj=None):
+        return super().get_fields(request, obj)

@@ -30,10 +30,10 @@ from hct_mis_api.apps.mis_datahub.models import (
 )
 from hct_mis_api.apps.program import models as programs
 from hct_mis_api.apps.targeting import models as targeting
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, is_root
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
-
 
 
 class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):

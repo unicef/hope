@@ -39,6 +39,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     MERGED = "MERGED"
     DEDUPLICATION_FAILED = "DEDUPLICATION_FAILED"
     DEDUPLICATION = "DEDUPLICATION"
+    REFUSED_IMPORT = "REFUSED"
     IMPORT_ERROR = "IMPORT_ERROR"
     MERGE_ERROR = "MERGE_ERROR"
     STATUS_CHOICE = (
@@ -48,6 +49,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         (IMPORTING, _("Importing")),
         (DEDUPLICATION_FAILED, _("Deduplication Failed")),
         (DEDUPLICATION, _("Deduplication")),
+        (REFUSED_IMPORT, _("Refused import")),
         (IMPORT_ERROR, _("Import Error")),
         (MERGE_ERROR, _("Merge Error")),
     )

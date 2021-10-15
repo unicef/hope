@@ -23,6 +23,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.geo.compat import GeoCountryField
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -272,25 +273,25 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             "admin_area",
             "representatives",
             "geopoint",
-            "female_age_group_0_5_count",
-            "female_age_group_6_11_count",
-            "female_age_group_12_17_count",
+            "female_age_group_0_4_count",
+            "female_age_group_5_12_count",
+            "female_age_group_13_17_count",
             "female_age_group_18_59_count",
             "female_age_group_60_count",
             "pregnant_count",
-            "male_age_group_0_5_count",
-            "male_age_group_6_11_count",
-            "male_age_group_12_17_count",
+            "male_age_group_0_4_count",
+            "male_age_group_5_12_count",
+            "male_age_group_13_17_count",
             "male_age_group_18_59_count",
             "male_age_group_60_count",
-            "female_age_group_0_5_disabled_count",
-            "female_age_group_6_11_disabled_count",
-            "female_age_group_12_17_disabled_count",
+            "female_age_group_0_4_disabled_count",
+            "female_age_group_5_12_disabled_count",
+            "female_age_group_13_17_disabled_count",
             "female_age_group_18_59_disabled_count",
             "female_age_group_60_disabled_count",
-            "male_age_group_0_5_disabled_count",
-            "male_age_group_6_11_disabled_count",
-            "male_age_group_12_17_disabled_count",
+            "male_age_group_0_4_disabled_count",
+            "male_age_group_5_12_disabled_count",
+            "male_age_group_13_17_disabled_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
             "registration_data_import",
@@ -322,11 +323,16 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField(blank=True, db_index=True)
+    country_origin_new = models.ForeignKey(
+        "geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT
+    )
     country = CountryField(db_index=True)
+    country_new = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     size = models.PositiveIntegerField(db_index=True)
     address = CICharField(max_length=255, blank=True)
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("core.AdminArea", null=True, on_delete=models.SET_NULL, blank=True)
+    admin_area_new = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -336,25 +342,25 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         related_name="represented_households",
     )
     geopoint = PointField(blank=True, null=True)
-    female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_0_4_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_5_12_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_13_17_count = models.PositiveIntegerField(default=None, null=True)
     female_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
     female_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
     pregnant_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_0_4_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_5_12_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_13_17_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_0_4_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_5_12_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_13_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
     female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
     female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_0_4_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_5_12_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_13_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
     registration_data_import = models.ForeignKey(
@@ -390,6 +396,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     class Meta:
         verbose_name = "Household"
+        permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
     def save(self, *args, **kwargs):
         from hct_mis_api.apps.targeting.models import HouseholdSelection
@@ -444,6 +451,30 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return current_admin
 
     @property
+    def admin1_new(self):
+        if self.admin_area_new is None:
+            return None
+        if self.admin_area_new.area_type.area_level == 0:
+            return None
+        current_admin = self.admin_area_new
+        while current_admin.area_type.area_level != 1:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
+    def admin2_new(self):
+        if self.admin_area_new is None:
+            return None
+        if self.admin_area_new.area_type.area_level == 0:
+            return None
+        if self.admin_area_new.area_type.area_level == 1:
+            return None
+        current_admin = self.admin_area_new
+        while current_admin.area_type.area_level != 2:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
     def sanction_list_possible_match(self):
         return self.individuals.filter(sanction_list_possible_match=True).count() > 0
 
@@ -479,21 +510,28 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             .order_by("cash_plan__program__created_at")
         )
 
-        programs_dict = []
+        programs_dict = {}
 
         for program in programs:
-            programs_dict.append(
-                {
+            if program["program_id"] not in programs_dict.keys():
+                programs_dict[program["program_id"]] = {
                     "id": program["program_id"],
                     "name": program["program_name"],
-                    "quantity": {
-                        "total_delivered_quantity": program["total_delivered_quantity"],
-                        "total_delivered_quantity_usd": program["total_delivered_quantity_usd"],
-                        "currency": program["currency"],
-                    },
+                    "quantity": [
+                        {
+                            "total_delivered_quantity": program["total_delivered_quantity_usd"],
+                            "currency": "USD",
+                        }
+                    ],
                 }
-            )
-        return programs_dict
+            if program["currency"] != "USD":
+                programs_dict[program["program_id"]]["quantity"].append(
+                    {
+                        "total_delivered_quantity": program["total_delivered_quantity"],
+                        "currency": program["currency"],
+                    }
+                )
+        return programs_dict.values()
 
     def __str__(self):
         return f"{self.unicef_id}"
@@ -503,8 +541,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             return
         for individual in self.individuals.all():
             individual.recalculate_data()
-        date_6_years_ago = datetime.now() - relativedelta(years=+6)
-        date_12_years_ago = datetime.now() - relativedelta(years=+12)
+        date_5_years_ago = datetime.now() - relativedelta(years=+5)
+        date_13_years_ago = datetime.now() - relativedelta(years=+13)
         date_18_years_ago = datetime.now() - relativedelta(years=+18)
         date_60_years_ago = datetime.now() - relativedelta(years=+60)
 
@@ -516,31 +554,31 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         female_disability_beneficiary = Q(disabled_disability & female_beneficiary)
         male_disability_beneficiary = Q(disabled_disability & male_beneficiary)
 
-        to_6_years = Q(birth_date__gt=date_6_years_ago)
-        from_6_to_12_years = Q(birth_date__lte=date_6_years_ago, birth_date__gt=date_12_years_ago)
-        from_12_to_18_years = Q(birth_date__lte=date_12_years_ago, birth_date__gt=date_18_years_ago)
+        to_5_years = Q(birth_date__gt=date_5_years_ago)
+        from_5_to_13_years = Q(birth_date__lte=date_5_years_ago, birth_date__gt=date_13_years_ago)
+        from_13_to_18_years = Q(birth_date__lte=date_13_years_ago, birth_date__gt=date_18_years_ago)
         from_18_to_60_years = Q(birth_date__lte=date_18_years_ago, birth_date__gt=date_60_years_ago)
         from_60_years = Q(birth_date__lte=date_60_years_ago)
 
         age_groups = self.individuals.aggregate(
-            female_age_group_0_5_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_6_years)),
-            female_age_group_6_11_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_6_to_12_years)),
-            female_age_group_12_17_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_12_to_18_years)),
+            female_age_group_0_4_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_5_years)),
+            female_age_group_5_12_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_5_to_13_years)),
+            female_age_group_13_17_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_13_to_18_years)),
             female_age_group_18_59_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_18_to_60_years)),
             female_age_group_60_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_60_years)),
-            male_age_group_0_5_count=Count("id", distinct=True, filter=Q(male_beneficiary & to_6_years)),
-            male_age_group_6_11_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_6_to_12_years)),
-            male_age_group_12_17_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_12_to_18_years)),
+            male_age_group_0_4_count=Count("id", distinct=True, filter=Q(male_beneficiary & to_5_years)),
+            male_age_group_5_12_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_5_to_13_years)),
+            male_age_group_13_17_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_13_to_18_years)),
             male_age_group_18_59_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_18_to_60_years)),
             male_age_group_60_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_60_years)),
-            female_age_group_0_5_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & to_6_years)
+            female_age_group_0_4_disabled_count=Count(
+                "id", distinct=True, filter=Q(female_disability_beneficiary & to_5_years)
             ),
-            female_age_group_6_11_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_6_to_12_years)
+            female_age_group_5_12_disabled_count=Count(
+                "id", distinct=True, filter=Q(female_disability_beneficiary & from_5_to_13_years)
             ),
-            female_age_group_12_17_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_12_to_18_years)
+            female_age_group_13_17_disabled_count=Count(
+                "id", distinct=True, filter=Q(female_disability_beneficiary & from_13_to_18_years)
             ),
             female_age_group_18_59_disabled_count=Count(
                 "id", distinct=True, filter=Q(female_disability_beneficiary & from_18_to_60_years)
@@ -548,14 +586,14 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             female_age_group_60_disabled_count=Count(
                 "id", distinct=True, filter=Q(female_disability_beneficiary & from_60_years)
             ),
-            male_age_group_0_5_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & to_6_years)
+            male_age_group_0_4_disabled_count=Count(
+                "id", distinct=True, filter=Q(male_disability_beneficiary & to_5_years)
             ),
-            male_age_group_6_11_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_6_to_12_years)
+            male_age_group_5_12_disabled_count=Count(
+                "id", distinct=True, filter=Q(male_disability_beneficiary & from_5_to_13_years)
             ),
-            male_age_group_12_17_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_12_to_18_years)
+            male_age_group_13_17_disabled_count=Count(
+                "id", distinct=True, filter=Q(male_disability_beneficiary & from_13_to_18_years)
             ),
             male_age_group_18_59_disabled_count=Count(
                 "id", distinct=True, filter=Q(male_disability_beneficiary & from_18_to_60_years)
@@ -586,6 +624,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 class DocumentType(TimeStampedUUIDModel):
     country = CountryField(default="U")
+    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
@@ -639,6 +678,7 @@ class Agency(models.Model):
         max_length=100,
     )
     country = CountryField()
+    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Agencies"
@@ -824,6 +864,13 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     @property
     def age(self):
         return relativedelta(date.today(), self.birth_date).years
+
+    @property
+    def role(self):
+        role = self.households_and_roles.first()
+        if role is not None:
+            return role.role
+        return ROLE_NO_ROLE
 
     @property
     def get_hash_key(self):

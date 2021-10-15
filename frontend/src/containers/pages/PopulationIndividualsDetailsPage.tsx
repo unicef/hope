@@ -1,8 +1,11 @@
+import { Box } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
+import { FlagTooltip } from '../../components/FlagTooltip';
+import { WarningTooltip } from '../../components/WarningTooltip';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
 import { PermissionDenied } from '../../components/PermissionDenied';
@@ -54,6 +57,16 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   ];
 
   const { individual } = data;
+
+  let duplicateTooltip = null;
+  if (individual.status === 'DUPLICATE') {
+    duplicateTooltip = (
+      <WarningTooltip confirmed message={t('Confirmed Duplicate')} />
+    );
+  } else if (individual.deduplicationGoldenRecordStatus !== 'UNIQUE') {
+    duplicateTooltip = <WarningTooltip message={t('Possible Duplicate')} />;
+  }
+
   return (
     <div>
       <PageHeader
@@ -66,13 +79,28 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
-        possibleMatch={individual.sanctionListPossibleMatch}
-        confirmedMatch={individual.sanctionListConfirmedMatch}
-        withTriangle={individual.deduplicationGoldenRecordStatus !== 'UNIQUE'}
       >
-        {individual.photo ? (
-          <IndividualPhotoModal individual={individual as IndividualNode} />
-        ) : null}
+        <>
+          <Box mr={2}>{duplicateTooltip}</Box>
+          <Box mr={2}>
+            {individual.sanctionListPossibleMatch && (
+              <FlagTooltip message={t('Sanction List Possible Match')} />
+            )}
+          </Box>
+          <Box mr={2}>
+            {individual.sanctionListConfirmedMatch && (
+              <FlagTooltip
+                message={t('Sanction List Confirmed Match')}
+                confirmed
+              />
+            )}
+          </Box>
+          <Box mr={2}>
+            {individual.photo ? (
+              <IndividualPhotoModal individual={individual as IndividualNode} />
+            ) : null}
+          </Box>
+        </>
       </PageHeader>
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />
