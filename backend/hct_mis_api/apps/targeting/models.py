@@ -106,6 +106,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "steficon_rule",
             "vulnerability_score_min",
             "vulnerability_score_max",
+            "exclusion_reason",
+            "excluded_ids"
         ]
     )
 
