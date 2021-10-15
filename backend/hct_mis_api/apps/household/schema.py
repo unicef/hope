@@ -325,7 +325,6 @@ class HouseholdSelection(DjangoObjectType):
 
 class DeliveredQuantityNode(graphene.ObjectType):
     total_delivered_quantity = graphene.Decimal()
-    total_delivered_quantity_usd = graphene.Decimal()
     currency = graphene.String()
 
 
@@ -335,7 +334,7 @@ class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
 
     id = graphene.ID()
     name = graphene.String()
-    quantity = graphene.Field(DeliveredQuantityNode)
+    quantity = graphene.List(DeliveredQuantityNode)
 
 
 class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -670,14 +669,14 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_individuals_reached(self, info, business_area_slug, year, **kwargs):
         households_individuals_params = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
+            "household__female_age_group_0_4_count",
+            "household__female_age_group_5_12_count",
+            "household__female_age_group_13_17_count",
             "household__female_age_group_18_59_count",
             "household__female_age_group_60_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
+            "household__male_age_group_0_4_count",
+            "household__male_age_group_5_12_count",
+            "household__male_age_group_13_17_count",
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
@@ -694,12 +693,12 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
         households_child_params = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
+            "household__female_age_group_0_4_count",
+            "household__female_age_group_5_12_count",
+            "household__female_age_group_13_17_count",
+            "household__male_age_group_0_4_count",
+            "household__male_age_group_5_12_count",
+            "household__male_age_group_13_17_count",
         ]
         payment_records_qs = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
@@ -715,14 +714,14 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
         households_params = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
+            "household__female_age_group_0_4_count",
+            "household__female_age_group_5_12_count",
+            "household__female_age_group_13_17_count",
             "household__female_age_group_18_59_count",
             "household__female_age_group_60_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
+            "household__male_age_group_0_4_count",
+            "household__male_age_group_5_12_count",
+            "household__male_age_group_13_17_count",
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
@@ -742,26 +741,26 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_individuals_with_disability_reached_by_age(self, info, business_area_slug, year, **kwargs):
         households_params_with_disability = [
-            "household__female_age_group_0_5_disabled_count",
-            "household__female_age_group_6_11_disabled_count",
-            "household__female_age_group_12_17_disabled_count",
+            "household__female_age_group_0_4_disabled_count",
+            "household__female_age_group_5_12_disabled_count",
+            "household__female_age_group_13_17_disabled_count",
             "household__female_age_group_18_59_disabled_count",
             "household__female_age_group_60_disabled_count",
-            "household__male_age_group_0_5_disabled_count",
-            "household__male_age_group_6_11_disabled_count",
-            "household__male_age_group_12_17_disabled_count",
+            "household__male_age_group_0_4_disabled_count",
+            "household__male_age_group_5_12_disabled_count",
+            "household__male_age_group_13_17_disabled_count",
             "household__male_age_group_18_59_disabled_count",
             "household__male_age_group_60_disabled_count",
         ]
         households_params_total = [
-            "household__female_age_group_0_5_count",
-            "household__female_age_group_6_11_count",
-            "household__female_age_group_12_17_count",
+            "household__female_age_group_0_4_count",
+            "household__female_age_group_5_12_count",
+            "household__female_age_group_13_17_count",
             "household__female_age_group_18_59_count",
             "household__female_age_group_60_count",
-            "household__male_age_group_0_5_count",
-            "household__male_age_group_6_11_count",
-            "household__male_age_group_12_17_count",
+            "household__male_age_group_0_4_count",
+            "household__male_age_group_5_12_count",
+            "household__male_age_group_13_17_count",
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]

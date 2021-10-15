@@ -6,7 +6,7 @@ export function usePermissions(): string[] {
     fetchPolicy: 'cache-and-network',
   });
   const businessArea = useBusinessArea();
-  if (loading) {
+  if (loading || !data) {
     return null;
   }
   // eslint-disable-next-line no-restricted-syntax

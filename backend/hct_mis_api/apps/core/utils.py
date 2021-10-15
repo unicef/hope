@@ -6,10 +6,11 @@ import string
 from collections import MutableMapping, OrderedDict
 from typing import List
 
-from PIL import Image
 from django.db.models import QuerySet
+
 from django_filters import OrderingFilter
 from graphql import GraphQLError
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
@@ -211,7 +212,9 @@ def serialize_flex_attributes():
 
 
 def get_combined_attributes():
-    from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+    from hct_mis_api.apps.core.core_fields_attributes import (
+        CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
+    )
 
     flex_attrs = serialize_flex_attributes()
     return {
@@ -683,3 +686,30 @@ class SheetImageLoader:
         else:
             image = io.BytesIO(self._images[cell]())
             return Image.open(image)
+
+
+def fix_flex_type_fields(items, flex_fields):
+    for item in items:
+        for key, value in item.flex_fields.items():
+            if key in flex_fields:
+                if value is not None and value != "":
+                    item.flex_fields[key] = float(value)
+                else:
+                    item.flex_fields[key] = None
+
+    return items
+
+
+def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
+    excluded_ids_array = excluded_ids_string.split(",")
+    excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]
+    excluded_individuals_ids_array = [
+        excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("IND")
+    ]
+    from hct_mis_api.apps.household.models import Household
+
+    excluded_household_ids_from_individuals_array = Household.objects.filter(
+        individuals__unicef_id__in=excluded_individuals_ids_array
+    ).values_list("unicef_id", flat=True)
+    excluded_household_ids_array.extend(excluded_household_ids_from_individuals_array)
+    return excluded_household_ids_array

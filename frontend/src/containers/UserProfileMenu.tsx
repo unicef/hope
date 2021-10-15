@@ -28,9 +28,18 @@ export function UserProfileMenu({
 }: UserProfileMenuProps): React.ReactElement {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLButtonElement>(null);
+  // return focus to the button when we transitioned from !open -> open
+  const prevOpen = React.useRef(open);
+  React.useEffect(() => {
+    if (prevOpen.current === true && open === false) {
+      anchorRef.current.focus();
+    }
+
+    prevOpen.current = open;
+  }, [open]);
 
   const handleToggle = (): void => {
-    setOpen((prevOpen) => !prevOpen);
+    setOpen((previousOpen) => !previousOpen);
   };
 
   const handleClose = (event: React.MouseEvent<EventTarget>): void => {
@@ -54,16 +63,10 @@ export function UserProfileMenu({
       setOpen(false);
     }
   }
+  if (!meData) {
+    return null;
+  }
 
-  // return focus to the button when we transitioned from !open -> open
-  const prevOpen = React.useRef(open);
-  React.useEffect(() => {
-    if (prevOpen.current === true && open === false) {
-      anchorRef.current.focus();
-    }
-
-    prevOpen.current = open;
-  }, [open]);
   return (
     <>
       <UserProfileButton

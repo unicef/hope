@@ -5,19 +5,20 @@ import io
 import logging
 from itertools import chain
 
-import openpyxl
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import Sum, Count, F, Q
+from django.db.models import Count, F, Q, Sum
 from django.template.loader import render_to_string
 from django.urls import reverse
+
+import openpyxl
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
@@ -32,12 +33,12 @@ class GenerateDashboardReportContentHelpers:
     def get_beneficiaries(cls, report: DashboardReport):
 
         children_count_fields = [
-            "female_age_group_0_5_count",
-            "female_age_group_6_11_count",
-            "female_age_group_12_17_count",
-            "male_age_group_0_5_count",
-            "male_age_group_6_11_count",
-            "male_age_group_12_17_count",
+            "female_age_group_0_4_count",
+            "female_age_group_5_12_count",
+            "female_age_group_13_17_count",
+            "male_age_group_0_4_count",
+            "male_age_group_5_12_count",
+            "male_age_group_13_17_count",
         ]
         individual_count_fields = cls._get_all_individual_count_fields()
         valid_payment_records = cls._get_payment_records_for_report(report)
@@ -298,21 +299,21 @@ class GenerateDashboardReportContentHelpers:
                 received=Count(
                     path_to_payment_record_verifications,
                     filter=format_status_filter(PaymentVerification.STATUS_RECEIVED),
-                    distinct=True
+                    distinct=True,
                 )
             )
             .annotate(
                 not_received=Count(
                     path_to_payment_record_verifications,
                     filter=format_status_filter(PaymentVerification.STATUS_NOT_RECEIVED),
-                    distinct=True
+                    distinct=True,
                 )
             )
             .annotate(
                 received_with_issues=Count(
                     path_to_payment_record_verifications,
                     filter=format_status_filter(PaymentVerification.STATUS_RECEIVED_WITH_ISSUES),
-                    distinct=True
+                    distinct=True,
                 )
             )
             .annotate(
@@ -591,22 +592,22 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def _get_all_with_disabled_individual_count_fields():
         return [
-            "female_age_group_0_5_count",
-            "female_age_group_0_5_disabled_count",
-            "female_age_group_6_11_count",
-            "female_age_group_6_11_disabled_count",
-            "female_age_group_12_17_count",
-            "female_age_group_12_17_disabled_count",
+            "female_age_group_0_4_count",
+            "female_age_group_0_4_disabled_count",
+            "female_age_group_5_12_count",
+            "female_age_group_5_12_disabled_count",
+            "female_age_group_13_17_count",
+            "female_age_group_13_17_disabled_count",
             "female_age_group_18_59_count",
             "female_age_group_18_59_disabled_count",
             "female_age_group_60_count",
             "female_age_group_60_disabled_count",
-            "male_age_group_0_5_count",
-            "male_age_group_0_5_disabled_count",
-            "male_age_group_6_11_count",
-            "male_age_group_6_11_disabled_count",
-            "male_age_group_12_17_count",
-            "male_age_group_12_17_disabled_count",
+            "male_age_group_0_4_count",
+            "male_age_group_0_4_disabled_count",
+            "male_age_group_5_12_count",
+            "male_age_group_5_12_disabled_count",
+            "male_age_group_13_17_count",
+            "male_age_group_13_17_disabled_count",
             "male_age_group_18_59_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_count",
@@ -616,14 +617,14 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def _get_all_individual_count_fields():
         return [
-            "female_age_group_0_5_count",
-            "female_age_group_6_11_count",
-            "female_age_group_12_17_count",
+            "female_age_group_0_4_count",
+            "female_age_group_5_12_count",
+            "female_age_group_13_17_count",
             "female_age_group_18_59_count",
             "female_age_group_60_count",
-            "male_age_group_0_5_count",
-            "male_age_group_6_11_count",
-            "male_age_group_12_17_count",
+            "male_age_group_0_4_count",
+            "male_age_group_5_12_count",
+            "male_age_group_13_17_count",
             "male_age_group_18_59_count",
             "male_age_group_60_count",
         ]

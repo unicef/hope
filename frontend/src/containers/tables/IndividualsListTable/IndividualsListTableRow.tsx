@@ -1,18 +1,20 @@
-import React from 'react';
+import { Box } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { BlackLink } from '../../../components/BlackLink';
+import { FlagTooltip } from '../../../components/FlagTooltip';
+import { WarningTooltip } from '../../../components/WarningTooltip';
+import { LoadingComponent } from '../../../components/LoadingComponent';
+import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { choicesToDict, sexToCapitalize } from '../../../utils/utils';
 import {
   IndividualNode,
   useHouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { Flag } from '../../../components/Flag';
-import { choicesToDict, sexToCapitalize } from '../../../utils/utils';
-import { FlagTooltip } from '../../../components/FlagTooltip';
-import { LoadingComponent } from '../../../components/LoadingComponent';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
-import { BlackLink } from '../../../components/BlackLink';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -25,6 +27,7 @@ export function IndividualsListTableRow({
 }: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const { t } = useTranslation();
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -41,6 +44,15 @@ export function IndividualsListTableRow({
   const handleClick = (): void => {
     history.push(individualDetailsPath);
   };
+
+  let duplicateTooltip = null;
+  if (individual.status === 'DUPLICATE') {
+    duplicateTooltip = (
+      <WarningTooltip confirmed message={t('Confirmed Duplicate')} />
+    );
+  } else if (individual.deduplicationGoldenRecordStatus !== 'UNIQUE') {
+    duplicateTooltip = <WarningTooltip message={t('Possible Duplicate')} />;
+  }
   return (
     <ClickableTableRow
       hover
@@ -49,13 +61,22 @@ export function IndividualsListTableRow({
       key={individual.id}
     >
       <TableCell align='left'>
-        {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && (
-          <FlagTooltip />
-        )}
-        {(individual.sanctionListPossibleMatch ||
-          individual.sanctionListConfirmedMatch) && (
-          <Flag confirmed={individual.sanctionListConfirmedMatch} />
-        )}
+        <>
+          <Box mr={2}>{duplicateTooltip}</Box>
+          <Box mr={2}>
+            {individual.sanctionListPossibleMatch && (
+              <FlagTooltip message={t('Sanction List Possible Match')} />
+            )}
+          </Box>
+          <Box mr={2}>
+            {individual.sanctionListConfirmedMatch && (
+              <FlagTooltip
+                message={t('Sanction List Confirmed Match')}
+                confirmed
+              />
+            )}
+          </Box>
+        </>
       </TableCell>
       <TableCell align='left'>
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>

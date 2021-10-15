@@ -1,9 +1,11 @@
 import logging
+from itertools import chain
 
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -12,6 +14,28 @@ from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 
 logger = logging.getLogger(__name__)
+
+
+class GrievanceTicketManager(models.Manager):
+    def belong_household(self, household):
+        individuals = household.individuals.values_list("id", flat=True)
+        # models = [TicketReferralDetails, TicketNegativeFeedbackDetails, TicketPositiveFeedbackDetails,
+        #           TicketPaymentVerificationDetails, TicketNeedsAdjudicationDetails, TicketSystemFlaggingDetails,
+        #           TicketDeleteIndividualDetails, TicketAddIndividualDetails, TicketIndividualDataUpdateDetails,
+        #           TicketHouseholdDataUpdateDetails, TicketSensitiveDetails, TicketComplaintDetails, TicketNote]
+        return chain(
+            (TicketReferralDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+            (TicketNegativeFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+            (TicketPositiveFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+            (TicketNeedsAdjudicationDetails.objects.filter(selected_individual__in=individuals)),
+            (TicketSystemFlaggingDetails.objects.filter(golden_records_individual__in=individuals)),
+            (TicketDeleteIndividualDetails.objects.filter(individual__in=individuals)),
+            (TicketAddIndividualDetails.objects.filter(household=household)),
+            (TicketIndividualDataUpdateDetails.objects.filter(individual__in=individuals)),
+            (TicketHouseholdDataUpdateDetails.objects.filter(household=household)),
+            (TicketSensitiveDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+            (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+        )
 
 
 class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
@@ -282,6 +306,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         help_text=_("The content of the customers query."),
     )
     admin2 = models.ForeignKey("core.AdminArea", null=True, blank=True, on_delete=models.SET_NULL)
+    admin2_new = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
     area = models.CharField(max_length=250, blank=True)
     language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
@@ -293,6 +318,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         "registration_data.RegistrationDataImport", null=True, blank=True, on_delete=models.CASCADE
     )
     unicef_id = models.CharField(max_length=250, blank=True, default="")
+    extras = JSONField(blank=True, default=dict)
+
+    objects = GrievanceTicketManager()
 
     @property
     def related_tickets(self):
