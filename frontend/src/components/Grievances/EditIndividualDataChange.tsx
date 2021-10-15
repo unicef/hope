@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
@@ -19,13 +20,12 @@ import {
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
+import { PhotoPreview } from '../PhotoPreview';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
-import {PhotoPreview} from "../PhotoPreview";
-import {FormikFileField} from "../../shared/Formik/FormikFileField";
 
 const Title = styled.div`
   width: 100%;
