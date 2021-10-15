@@ -2,21 +2,11 @@
 
 from django.db import migrations
 
-from django_countries import countries
+from hct_mis_api.apps.geo.utils import initialise_countries
 
 
 def initialise_geo(apps, schema_editor):
-    Country = apps.get_model("geo", "Country")
-    for c in countries:
-        data = dict(name=c.name,
-                    short_name=c.name,
-                    iso_code3=countries.alpha3(c.code),
-                    iso_num=str(countries.numeric(c.code)).rjust(4, '0'),
-                    lft=0,
-                    rght=0,
-                    tree_id=0,
-                    level=0, )
-        Country.objects.get_or_create(iso_code2=c.code, defaults=data)
+    initialise_countries()
 
 
 def rebuild(apps, schema_editor):
