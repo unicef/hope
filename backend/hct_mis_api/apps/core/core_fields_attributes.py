@@ -272,7 +272,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "size_h_c",
     },
     {
-        "id": "8d9df01a-ce7c-4e78-b8ec-6f3eec8f30ce",
+        "id": "ee54d921-e11d-46a2-8a1f-3ebf17485dd6",
         "type": TYPE_BOOL,
         "name": "fchild_hoh",
         "lookup": "fchild_hoh",
@@ -284,7 +284,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "fchild_hoh_i_c",
     },
     {
-        "id": "8d9df01a-ce7c-4e78-b8ec-6f3eec8f30ce",
+        "id": "f9d16bda-4823-425d-b30e-ce35030bc5c0",
         "type": TYPE_BOOL,
         "name": "child_hoh",
         "lookup": "child_hoh",
