@@ -21,6 +21,7 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.core_fields_attributes import (
     COLLECTORS_FIELDS,
     TYPE_DATE,
+    TYPE_DECIMAL,
     TYPE_INTEGER,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
@@ -80,9 +81,15 @@ class RdiBaseCreateTask:
     def _assign_admin_areas_titles(household_obj):
         if household_obj.admin1:
             admin_area_level_1 = AdminArea.objects.filter(p_code=household_obj.admin1).first()
+            # TODO part of the new structure
+            if False:
+                admin_area_level_1 = Area.objects.filter(p_code=household_obj.admin1).first()
             household_obj.admin1_title = admin_area_level_1.title if admin_area_level_1 else ""
         if household_obj.admin2:
             admin_area_level_2 = AdminArea.objects.filter(p_code=household_obj.admin2).first()
+            # TODO part of the new structure
+            if False:
+                admin_area_level_2 = Area.objects.filter(p_code=household_obj.admin2).first()
             household_obj.admin2_title = admin_area_level_2.title if admin_area_level_2 else ""
 
         return household_obj
@@ -103,6 +110,9 @@ class RdiBaseCreateTask:
 
         if value_type == TYPE_INTEGER:
             return int(value)
+
+        if value_type == TYPE_DECIMAL:
+            return float(value)
 
         if value_type in (TYPE_SELECT_ONE, TYPE_SELECT_MANY):
             custom_cast_method = self.COMBINED_FIELDS[header].get("custom_cast_value")
@@ -865,9 +875,15 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             elif i_field == "role_i_c":
                                 role = i_value.upper()
                             elif i_field.endswith("_h_c") or i_field.endswith("_h_f"):
-                                self._cast_and_assign(i_value, i_field, household_obj)
+                                try:
+                                    self._cast_and_assign(i_value, i_field, household_obj)
+                                except Exception as e:
+                                    self._handle_exception("Household", i_field, e)
                             else:
-                                self._cast_and_assign(i_value, i_field, individual_obj)
+                                try:
+                                    self._cast_and_assign(i_value, i_field, individual_obj)
+                                except Exception as e:
+                                    self._handle_exception("Individual", i_field, e)
                         individual_obj.last_registration_date = individual_obj.first_registration_date
                         individual_obj.registration_data_import = registration_data_import
                         if individual_obj.relationship == HEAD:
@@ -897,7 +913,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 elif hh_field == "_submission_time":
                     household_obj.kobo_submission_time = parse(hh_value)
                 else:
-                    self._cast_and_assign(hh_value, hh_field, household_obj)
+                    try:
+                        self._cast_and_assign(hh_value, hh_field, household_obj)
+                    except Exception as e:
+                        self._handle_exception("Household", hh_field, e)
 
             household_obj.first_registration_date = registration_date
             household_obj.last_registration_date = registration_date
@@ -932,3 +951,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
 
         DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
+
+    def _handle_exception(self, assigned_to, field_name, e):
+        logger.exception(e)
+        raise Exception(f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})") from e

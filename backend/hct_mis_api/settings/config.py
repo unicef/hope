@@ -33,6 +33,7 @@ DEFAULTS = {
     "CELERY_BROKER_URL": (str, ""),
     "CELERY_RESULT_BACKEND": (str, ""),
     "CELERY_TASK_ALWAYS_EAGER": (bool, False),
+    "ADMIN_PANEL_URL": (str, "unicorn"),
 }
 
 env = Env(**DEFAULTS)

@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
@@ -43388,14 +43387,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 0 -< 5',
+                'labelEn': 'Females Age 0 - 4',
                 'labels': [
                     {
-                        'label': 'Females Age 0 -< 5',
+                        'label': 'Females Age 0 - 4',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'female_age_group_0_5_count',
+                'name': 'female_age_group_0_4_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43412,7 +43411,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'female_age_group_6_11_count',
+                'name': 'female_age_group_5_12_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43422,14 +43421,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 12 -< 17',
+                'labelEn': 'Females Age 13 - 17',
                 'labels': [
                     {
-                        'label': 'Females Age 12 -< 17',
+                        'label': 'Females Age 13 - 17',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'female_age_group_12_17_count',
+                'name': 'female_age_group_13_17_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43439,10 +43438,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 18 -< 59',
+                'labelEn': 'Females Age 18 - 59',
                 'labels': [
                     {
-                        'label': 'Females Age 18 -< 59',
+                        'label': 'Females Age 18 - 59',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43490,14 +43489,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 0 -< 5',
+                'labelEn': 'Males Age 0 - 4',
                 'labels': [
                     {
-                        'label': 'Males Age 0 -< 5',
+                        'label': 'Males Age 0 - 4',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'male_age_group_0_5_count',
+                'name': 'male_age_group_0_4_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43514,7 +43513,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'male_age_group_6_11_count',
+                'name': 'male_age_group_5_12_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43524,14 +43523,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 12 -< 17',
+                'labelEn': 'Males Age 13 - 17',
                 'labels': [
                     {
-                        'label': 'Males Age 12 -< 17',
+                        'label': 'Males Age 13 - 17',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'male_age_group_12_17_count',
+                'name': 'male_age_group_13_17_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43541,10 +43540,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 18 -< 59',
+                'labelEn': 'Males Age 18 - 59',
                 'labels': [
                     {
-                        'label': 'Males Age 18 -< 59',
+                        'label': 'Males Age 18 - 59',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43575,14 +43574,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females age 0 -< 5 with disability',
+                'labelEn': 'Females age 0 - 4 with disability',
                 'labels': [
                     {
-                        'label': 'Females age 0 -< 5 with disability',
+                        'label': 'Females age 0 - 4 with disability',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'female_age_group_0_5_disabled_count',
+                'name': 'female_age_group_0_4_disabled_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43599,7 +43598,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'female_age_group_6_11_disabled_count',
+                'name': 'female_age_group_5_12_disabled_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43609,14 +43608,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females age 12 -< 17 with disability',
+                'labelEn': 'Females age 13 - 17 with disability',
                 'labels': [
                     {
-                        'label': 'Females age 12 -< 17 with disability',
+                        'label': 'Females age 13 - 17 with disability',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'female_age_group_12_17_disabled_count',
+                'name': 'female_age_group_13_17_disabled_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43626,10 +43625,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 18 -< 59 with disability',
+                'labelEn': 'Females Age 18 - 59 with disability',
                 'labels': [
                     {
-                        'label': 'Females Age 18 -< 59 with disability',
+                        'label': 'Females Age 18 - 59 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43660,14 +43659,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males age 0 -< 5 with disability',
+                'labelEn': 'Males age 0 - 4 with disability',
                 'labels': [
                     {
-                        'label': 'Males age 0 -< 5 with disability',
+                        'label': 'Males age 0 - 4 with disability',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'male_age_group_0_5_disabled_count',
+                'name': 'male_age_group_0_4_disabled_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43684,7 +43683,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'male_age_group_6_11_disabled_count',
+                'name': 'male_age_group_5_12_disabled_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43694,14 +43693,14 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males age 12 -< 17 with disability',
+                'labelEn': 'Males age 13 - 17 with disability',
                 'labels': [
                     {
-                        'label': 'Males age 12 -< 17 with disability',
+                        'label': 'Males age 13 - 17 with disability',
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'male_age_group_12_17_disabled_count',
+                'name': 'male_age_group_13_17_disabled_count',
                 'required': False,
                 'type': 'INTEGER'
             },
@@ -43711,10 +43710,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 18 -< 59 with disability',
+                'labelEn': 'Males Age 18 - 59 with disability',
                 'labels': [
                     {
-                        'label': 'Males Age 18 -< 59 with disability',
+                        'label': 'Males Age 18 - 59 with disability',
                         'language': 'English(EN)'
                     }
                 ],

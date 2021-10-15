@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+from django.core.files.storage import default_storage
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Coalesce
@@ -32,6 +33,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     _INDIVIDUAL,
     CORE_FIELDS_ATTRIBUTES,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
+    TYPE_IMAGE,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
@@ -67,7 +69,7 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
-from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
+from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode, FlexFieldsScalar
 
 logger = logging.getLogger(__name__)
 
@@ -422,6 +424,21 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    def resolve_individual_data(self, info):
+        individual_data = self.individual_data
+        flex_fields = individual_data.get("flex_fields")
+        if flex_fields:
+            images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
+            for name, value in flex_fields.items():
+                if name in images_flex_fields_names:
+                    try:
+                        flex_fields[name]["previous_value"] = default_storage.url(value.get("previous_value"))
+                        flex_fields[name]["value"] = default_storage.url(value.get("value"))
+                    except Exception:
+                        pass
+            individual_data["flex_fields"] = flex_fields
+        return individual_data
+
 
 class TicketAddIndividualDetailsNode(DjangoObjectType):
     individual_data = Arg()
@@ -431,6 +448,20 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_individual_data(self, info):
+        individual_data = self.individual_data
+        flex_fields = individual_data.get("flex_fields")
+        if flex_fields:
+            images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
+            for name, value in flex_fields.items():
+                if value and name in images_flex_fields_names:
+                    try:
+                        flex_fields[name] = default_storage.url(value)
+                    except Exception:
+                        pass
+            individual_data["flex_fields"] = flex_fields
+        return individual_data
 
 
 class TicketDeleteIndividualDetailsNode(DjangoObjectType):
@@ -658,25 +689,25 @@ class Query(graphene.ObjectType):
             "country",
             "size",
             "address",
-            "female_age_group_0_5_count",
-            "female_age_group_6_11_count",
-            "female_age_group_12_17_count",
+            "female_age_group_0_4_count",
+            "female_age_group_5_12_count",
+            "female_age_group_13_17_count",
             "female_age_group_18_59_count",
             "female_age_group_60_count",
             "pregnant_count",
-            "male_age_group_0_5_count",
-            "male_age_group_6_11_count",
-            "male_age_group_12_17_count",
+            "male_age_group_0_4_count",
+            "male_age_group_5_12_count",
+            "male_age_group_13_17_count",
             "male_age_group_18_59_count",
             "male_age_group_60_count",
-            "female_age_group_0_5_disabled_count",
-            "female_age_group_6_11_disabled_count",
-            "female_age_group_12_17_disabled_count",
+            "female_age_group_0_4_disabled_count",
+            "female_age_group_5_12_disabled_count",
+            "female_age_group_13_17_disabled_count",
             "female_age_group_18_59_disabled_count",
             "female_age_group_60_disabled_count",
-            "male_age_group_0_5_disabled_count",
-            "male_age_group_6_11_disabled_count",
-            "male_age_group_12_17_disabled_count",
+            "male_age_group_0_4_disabled_count",
+            "male_age_group_5_12_disabled_count",
+            "male_age_group_13_17_disabled_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
             "returnee",

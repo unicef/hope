@@ -55,25 +55,25 @@ export const householdDetailed = gql`
     ...householdMinimal
     countryOrigin
     country
-    femaleAgeGroup05Count
-    femaleAgeGroup611Count
-    femaleAgeGroup1217Count
+    femaleAgeGroup04Count
+    femaleAgeGroup512Count
+    femaleAgeGroup1317Count
     femaleAgeGroup1859Count
     femaleAgeGroup60Count
     pregnantCount
-    maleAgeGroup05Count
-    maleAgeGroup611Count
-    maleAgeGroup1217Count
+    maleAgeGroup04Count
+    maleAgeGroup512Count
+    maleAgeGroup1317Count
     maleAgeGroup1859Count
     maleAgeGroup60Count
-    femaleAgeGroup05DisabledCount
-    femaleAgeGroup611DisabledCount
-    femaleAgeGroup1217DisabledCount
+    femaleAgeGroup04DisabledCount
+    femaleAgeGroup512DisabledCount
+    femaleAgeGroup1317DisabledCount
     femaleAgeGroup1859DisabledCount
     femaleAgeGroup60DisabledCount
-    maleAgeGroup05DisabledCount
-    maleAgeGroup611DisabledCount
-    maleAgeGroup1217DisabledCount
+    maleAgeGroup04DisabledCount
+    maleAgeGroup512DisabledCount
+    maleAgeGroup1317DisabledCount
     maleAgeGroup1859DisabledCount
     maleAgeGroup60DisabledCount
     fchildHoh
@@ -148,7 +148,6 @@ export const householdDetailed = gql`
       name
       quantity {
         totalDeliveredQuantity
-        totalDeliveredQuantityUsd
         currency
       }
     }

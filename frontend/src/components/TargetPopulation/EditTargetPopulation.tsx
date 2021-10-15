@@ -44,6 +44,8 @@ export function EditTargetPopulation({
     name: targetPopulation.name || '',
     program: targetPopulation.program?.id || '',
     criterias: targetPopulationCriterias.rules || [],
+    excludedIds: targetPopulation.excludedIds || '',
+    exclusionReason: targetPopulation.exclusionReason || '',
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
     targetPopulationCriterias:
@@ -88,6 +90,16 @@ export function EditTargetPopulation({
     name: Yup.string()
       .min(2, 'Too short')
       .max(255, 'Too long'),
+    excludedIds: Yup.string()
+      .max(500, t('Too long'))
+      .test('testName', 'ID is not in the correct format', (ids) => {
+        if (!ids?.length) {
+          return true;
+        }
+        const idsArr = ids.split(', ');
+        return idsArr.every((el) => /^(IND|HH)-\d{2}-\d{4}\.\d{4}$/.test(el));
+      }),
+    exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
   return (
@@ -102,6 +114,8 @@ export function EditTargetPopulation({
               input: {
                 id: values.id,
                 programId: values.program,
+                excludedIds: values.excludedIds,
+                exclusionReason: values.exclusionReason,
                 ...(targetPopulation.status === 'DRAFT' && {
                   name: values.name,
                 }),

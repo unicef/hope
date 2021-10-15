@@ -24,6 +24,8 @@ import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
+import {PhotoPreview} from "../PhotoPreview";
+import {FormikFileField} from "../../shared/Formik/FormikFileField";
 
 const Title = styled.div`
   width: 100%;
@@ -37,6 +39,10 @@ const BoxWithBorders = styled.div`
 
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
+`;
+
+const Image = styled.img`
+  max-width: 150px;
 `;
 
 export interface EditIndividualDataChangeField {
@@ -103,6 +109,11 @@ export const EditIndividualDataChangeField = ({
         required: field.required,
       };
       break;
+    case 'IMAGE':
+      fieldProps = {
+        component: FormikFileField,
+      };
+      break;
     default:
       fieldProps = {};
   }
@@ -154,6 +165,14 @@ export function CurrentValue({
       /* eslint-disable-next-line no-nested-ternary */
       displayValue = value === null ? '-' : value ? t('Yes') : t('No');
       break;
+    case 'IMAGE':
+      return (
+        <Grid item xs={3}>
+          <PhotoPreview src={value}>
+            <Image src={value} />
+          </PhotoPreview>
+        </Grid>
+      );
     default:
       displayValue = value;
   }
