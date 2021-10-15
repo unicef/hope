@@ -9,9 +9,12 @@ import {
   HouseholdNode,
 } from '../../__generated__/graphql';
 import { ContentLink } from '../ContentLink';
-import { CardAmount } from '../Dashboard/DashboardCard';
 import { LabelizedField } from '../LabelizedField';
-import {MiśTheme} from "../../theme";
+import { MiśTheme } from '../../theme';
+import {
+  BigValue,
+  BigValueContainer,
+} from '../../containers/registration/details/RegistrationDetails';
 
 const Container = styled.div`
   display: flex;
@@ -179,9 +182,7 @@ export function HouseholdDetails({
               household.programsWithDeliveredQuantity.map((item) => (
                 <Grid container key={item.id}>
                   <Grid item xs={6}>
-                    <ContentLink
-                      href={`/${businessArea}/programs/${item.id}`}
-                    >
+                    <ContentLink href={`/${businessArea}/programs/${item.id}`}>
                       {item.name}
                     </ContentLink>
                   </Grid>
@@ -191,12 +192,14 @@ export function HouseholdDetails({
                         <Box
                           key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
                         >
-                          <CardAmount>
-                            {formatCurrencyWithSymbol(
-                              qty.totalDeliveredQuantity,
-                              qty.currency,
-                            )}
-                          </CardAmount>
+                          <BigValueContainer>
+                            <BigValue>
+                              {formatCurrencyWithSymbol(
+                                qty.totalDeliveredQuantity,
+                                qty.currency,
+                              )}
+                            </BigValue>
+                          </BigValueContainer>
                         </Box>
                       ))}
                     </Box>
@@ -216,12 +219,14 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label={t('Total Cash Received')}>
-              <CardAmount>
-                {formatCurrencyWithSymbol(
-                  household.totalCashReceived,
-                  household.currency,
-                )}
-              </CardAmount>
+              <BigValueContainer>
+                <BigValue>
+                  {formatCurrencyWithSymbol(
+                    household.totalCashReceived,
+                    household.currency,
+                  )}
+                </BigValue>
+              </BigValueContainer>
             </LabelizedField>
           </Grid>
         </Grid>
