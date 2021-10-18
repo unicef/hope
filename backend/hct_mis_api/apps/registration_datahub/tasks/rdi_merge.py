@@ -188,6 +188,7 @@ class RdiMergeTask:
                 document_number=imported_document.document_number,
                 type=document_type,
                 individual=individual,
+                photo=imported_document.photo,
             )
             documents_to_create.append(document)
         identities_to_create = []
