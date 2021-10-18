@@ -1146,25 +1146,25 @@ export type HouseholdNode = Node & {
   adminArea?: Maybe<AdminAreaNode>,
   representatives: IndividualNodeConnection,
   geopoint?: Maybe<Scalars['GeoJSON']>,
-  femaleAgeGroup04Count?: Maybe<Scalars['Int']>,
-  femaleAgeGroup512Count?: Maybe<Scalars['Int']>,
-  femaleAgeGroup1317Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup1859Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup60Count?: Maybe<Scalars['Int']>,
   pregnantCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup04Count?: Maybe<Scalars['Int']>,
-  maleAgeGroup512Count?: Maybe<Scalars['Int']>,
-  maleAgeGroup1317Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217Count?: Maybe<Scalars['Int']>,
   maleAgeGroup1859Count?: Maybe<Scalars['Int']>,
   maleAgeGroup60Count?: Maybe<Scalars['Int']>,
-  femaleAgeGroup04DisabledCount?: Maybe<Scalars['Int']>,
-  femaleAgeGroup512DisabledCount?: Maybe<Scalars['Int']>,
-  femaleAgeGroup1317DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
   femaleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
   femaleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup04DisabledCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup512DisabledCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup1317DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
   registrationDataImport: RegistrationDataImportNode,
@@ -1385,25 +1385,25 @@ export type HouseholdUpdateDataObjectType = {
   country?: Maybe<Scalars['String']>,
   size?: Maybe<Scalars['Int']>,
   address?: Maybe<Scalars['String']>,
-  femaleAgeGroup04Count?: Maybe<Scalars['Int']>,
-  femaleAgeGroup512Count?: Maybe<Scalars['Int']>,
-  femaleAgeGroup1317Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup1859Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup60Count?: Maybe<Scalars['Int']>,
   pregnantCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup04Count?: Maybe<Scalars['Int']>,
-  maleAgeGroup512Count?: Maybe<Scalars['Int']>,
-  maleAgeGroup1317Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217Count?: Maybe<Scalars['Int']>,
   maleAgeGroup1859Count?: Maybe<Scalars['Int']>,
   maleAgeGroup60Count?: Maybe<Scalars['Int']>,
-  femaleAgeGroup04DisabledCount?: Maybe<Scalars['Int']>,
-  femaleAgeGroup512DisabledCount?: Maybe<Scalars['Int']>,
-  femaleAgeGroup1317DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
   femaleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
   femaleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup512DisabledCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup1317DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
   returnee?: Maybe<Scalars['Boolean']>,
@@ -1943,25 +1943,25 @@ export type ImportedHouseholdNode = Node & {
   admin2: Scalars['String'],
   admin2Title: Scalars['String'],
   geopoint?: Maybe<Scalars['GeoJSON']>,
-  femaleAgeGroup04Count?: Maybe<Scalars['Int']>,
-  femaleAgeGroup512Count?: Maybe<Scalars['Int']>,
-  femaleAgeGroup1317Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup1859Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup60Count?: Maybe<Scalars['Int']>,
   pregnantCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup04Count?: Maybe<Scalars['Int']>,
-  maleAgeGroup512Count?: Maybe<Scalars['Int']>,
-  maleAgeGroup1317Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217Count?: Maybe<Scalars['Int']>,
   maleAgeGroup1859Count?: Maybe<Scalars['Int']>,
   maleAgeGroup60Count?: Maybe<Scalars['Int']>,
-  femaleAgeGroup04DisabledCount?: Maybe<Scalars['Int']>,
-  femaleAgeGroup512DisabledCount?: Maybe<Scalars['Int']>,
-  femaleAgeGroup1317DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
   femaleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
   femaleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup04DisabledCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup512DisabledCount?: Maybe<Scalars['Int']>,
-  maleAgeGroup1317DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
   headOfHousehold?: Maybe<ImportedIndividualNode>,
@@ -5612,7 +5612,7 @@ export type HouseholdMinimalFragment = (
 
 export type HouseholdDetailedFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'countryOrigin' | 'country' | 'femaleAgeGroup04Count' | 'femaleAgeGroup512Count' | 'femaleAgeGroup1317Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup04Count' | 'maleAgeGroup512Count' | 'maleAgeGroup1317Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup04DisabledCount' | 'femaleAgeGroup512DisabledCount' | 'femaleAgeGroup1317DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup04DisabledCount' | 'maleAgeGroup512DisabledCount' | 'maleAgeGroup1317DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'flexFields'>
+  & Pick<HouseholdNode, 'countryOrigin' | 'country' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'flexFields'>
   & { individuals: (
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -8830,25 +8830,25 @@ export const HouseholdDetailedFragmentDoc = gql`
   ...householdMinimal
   countryOrigin
   country
-  femaleAgeGroup04Count
-  femaleAgeGroup512Count
-  femaleAgeGroup1317Count
+  femaleAgeGroup05Count
+  femaleAgeGroup611Count
+  femaleAgeGroup1217Count
   femaleAgeGroup1859Count
   femaleAgeGroup60Count
   pregnantCount
-  maleAgeGroup04Count
-  maleAgeGroup512Count
-  maleAgeGroup1317Count
+  maleAgeGroup05Count
+  maleAgeGroup611Count
+  maleAgeGroup1217Count
   maleAgeGroup1859Count
   maleAgeGroup60Count
-  femaleAgeGroup04DisabledCount
-  femaleAgeGroup512DisabledCount
-  femaleAgeGroup1317DisabledCount
+  femaleAgeGroup05DisabledCount
+  femaleAgeGroup611DisabledCount
+  femaleAgeGroup1217DisabledCount
   femaleAgeGroup1859DisabledCount
   femaleAgeGroup60DisabledCount
-  maleAgeGroup04DisabledCount
-  maleAgeGroup512DisabledCount
-  maleAgeGroup1317DisabledCount
+  maleAgeGroup05DisabledCount
+  maleAgeGroup611DisabledCount
+  maleAgeGroup1217DisabledCount
   maleAgeGroup1859DisabledCount
   maleAgeGroup60DisabledCount
   fchildHoh
@@ -17846,25 +17846,25 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
   representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
-  femaleAgeGroup04Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup512Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1317Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   pregnantCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup04Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup512Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1317Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   maleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   maleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup04DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup512DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1317DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup04DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup512DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1317DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   maleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   maleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
@@ -17997,25 +17997,25 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
-  femaleAgeGroup04Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup512Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1317Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   pregnantCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup04Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup512Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1317Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   maleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   maleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup04DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup512DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  femaleAgeGroup1317DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup04DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup512DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  maleAgeGroup1317DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   maleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   maleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   headOfHousehold?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType>,

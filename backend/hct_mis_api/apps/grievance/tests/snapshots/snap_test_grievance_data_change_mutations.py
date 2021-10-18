@@ -82,7 +82,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                                 'previous_value': 'AFG',
                                 'value': 'AFG'
                             },
-                            'female_age_group_5_12_count': {
+                            'female_age_group_6_11_count': {
                                 'approve_status': False,
                                 'previous_value': 2,
                                 'value': 14

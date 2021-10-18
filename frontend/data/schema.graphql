@@ -780,25 +780,25 @@ type HouseholdNode implements Node {
   adminArea: AdminAreaNode
   representatives(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   geopoint: GeoJSON
-  femaleAgeGroup04Count: Int
-  femaleAgeGroup512Count: Int
-  femaleAgeGroup1317Count: Int
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
   femaleAgeGroup1859Count: Int
   femaleAgeGroup60Count: Int
   pregnantCount: Int
-  maleAgeGroup04Count: Int
-  maleAgeGroup512Count: Int
-  maleAgeGroup1317Count: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
   maleAgeGroup1859Count: Int
   maleAgeGroup60Count: Int
-  femaleAgeGroup04DisabledCount: Int
-  femaleAgeGroup512DisabledCount: Int
-  femaleAgeGroup1317DisabledCount: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
   femaleAgeGroup1859DisabledCount: Int
   femaleAgeGroup60DisabledCount: Int
-  maleAgeGroup04DisabledCount: Int
-  maleAgeGroup512DisabledCount: Int
-  maleAgeGroup1317DisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
   maleAgeGroup1859DisabledCount: Int
   maleAgeGroup60DisabledCount: Int
   registrationDataImport: RegistrationDataImportNode!
@@ -900,25 +900,25 @@ input HouseholdUpdateDataObjectType {
   country: String
   size: Int
   address: String
-  femaleAgeGroup04Count: Int
-  femaleAgeGroup512Count: Int
-  femaleAgeGroup1317Count: Int
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
   femaleAgeGroup1859Count: Int
   femaleAgeGroup60Count: Int
   pregnantCount: Int
-  maleAgeGroup04Count: Int
-  maleAgeGroup512Count: Int
-  maleAgeGroup1317Count: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
   maleAgeGroup1859Count: Int
   maleAgeGroup60Count: Int
-  femaleAgeGroup04DisabledCount: Int
-  femaleAgeGroup512DisabledCount: Int
-  femaleAgeGroup1317DisabledCount: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
   femaleAgeGroup1859DisabledCount: Int
   femaleAgeGroup60DisabledCount: Int
   maleAgeGroup05DisabledCount: Int
-  maleAgeGroup512DisabledCount: Int
-  maleAgeGroup1317DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
   maleAgeGroup1859DisabledCount: Int
   maleAgeGroup60DisabledCount: Int
   returnee: Boolean
@@ -1449,25 +1449,25 @@ type ImportedHouseholdNode implements Node {
   admin2: String!
   admin2Title: String!
   geopoint: GeoJSON
-  femaleAgeGroup04Count: Int
-  femaleAgeGroup512Count: Int
-  femaleAgeGroup1317Count: Int
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
   femaleAgeGroup1859Count: Int
   femaleAgeGroup60Count: Int
   pregnantCount: Int
-  maleAgeGroup04Count: Int
-  maleAgeGroup512Count: Int
-  maleAgeGroup1317Count: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
   maleAgeGroup1859Count: Int
   maleAgeGroup60Count: Int
-  femaleAgeGroup04DisabledCount: Int
-  femaleAgeGroup512DisabledCount: Int
-  femaleAgeGroup1317DisabledCount: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
   femaleAgeGroup1859DisabledCount: Int
   femaleAgeGroup60DisabledCount: Int
-  maleAgeGroup04DisabledCount: Int
-  maleAgeGroup512DisabledCount: Int
-  maleAgeGroup1317DisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
   maleAgeGroup1859DisabledCount: Int
   maleAgeGroup60DisabledCount: Int
   headOfHousehold: ImportedIndividualNode
