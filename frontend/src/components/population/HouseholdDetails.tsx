@@ -192,14 +192,10 @@ export function HouseholdDetails({
                         <Box
                           key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
                         >
-                          <BigValueContainer>
-                            <BigValue>
-                              {formatCurrencyWithSymbol(
-                                qty.totalDeliveredQuantity,
-                                qty.currency,
-                              )}
-                            </BigValue>
-                          </BigValueContainer>
+                          {formatCurrencyWithSymbol(
+                            qty.totalDeliveredQuantity,
+                            qty.currency,
+                          )}
                         </Box>
                       ))}
                     </Box>
