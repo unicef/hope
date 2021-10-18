@@ -13,7 +13,8 @@ from hct_mis_api.apps.utils.models import AbstractSession
 
 
 class Session(AbstractSession):
-    pass
+    def __str__(self):
+        return f"{self.business_area} / {self.timestamp}"
 
 
 class SessionModel(models.Model):
@@ -196,20 +197,6 @@ class Document(SessionModel):
     number = models.CharField(max_length=255, null=True)
     individual_mis_id = models.UUIDField(null=True)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class FundsCommitment(models.Model):

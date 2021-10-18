@@ -16,6 +16,7 @@ from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
 from adminfilters.filters import TextFieldFilter
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class RollbackException(Exception):
 class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area", "run_time")
     date_hierarchy = "timestamp"
-    list_filter = ("status", "source", "last_modified_date", TextFieldFilter.factory("business_area"))
+    list_filter = ("status", "source", "last_modified_date", BusinessAreaFilter)
     ordering = ("-timestamp",)
     exclude = ("traceback",)
     readonly_fields = ("timestamp", "last_modified_date", "sentry_id", "source", "business_area")
@@ -208,7 +209,7 @@ class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         "status",
         TextFieldFilter.factory("cash_plan_id"),
         TextFieldFilter.factory("session__id"),
-        TextFieldFilter.factory("business_area"),
+        BusinessAreaFilter,
     )
     date_hierarchy = "session__timestamp"
     raw_id_fields = ("session",)
@@ -235,7 +236,7 @@ class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
         TextFieldFilter.factory("ca_id"),
         TextFieldFilter.factory("cash_plan_ca_id"),
         TextFieldFilter.factory("session__id"),
-        TextFieldFilter.factory("business_area"),
+        BusinessAreaFilter,
     )
 
     @button(permission="account.can_inspect")
@@ -279,7 +280,7 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
     search_fields = ("full_name",)
-    list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    list_filter = (TextFieldFilter.factory("session__id"), BusinessAreaFilter)
 
 
 @admin.register(Programme)
