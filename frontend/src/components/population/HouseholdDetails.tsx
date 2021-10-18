@@ -218,8 +218,8 @@ export function HouseholdDetails({
               <BigValueContainer>
                 <BigValue>
                   {formatCurrencyWithSymbol(
-                    household.totalCashReceived,
-                    household.currency,
+                    household.totalCashReceivedUsd,
+                    'USD',
                   )}
                 </BigValue>
               </BigValueContainer>
