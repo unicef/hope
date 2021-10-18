@@ -56,25 +56,25 @@ export const householdDetailed = gql`
     ...householdMinimal
     countryOrigin
     country
-    femaleAgeGroup04Count
-    femaleAgeGroup512Count
-    femaleAgeGroup1317Count
+    femaleAgeGroup05Count
+    femaleAgeGroup611Count
+    femaleAgeGroup1217Count
     femaleAgeGroup1859Count
     femaleAgeGroup60Count
     pregnantCount
-    maleAgeGroup04Count
-    maleAgeGroup512Count
-    maleAgeGroup1317Count
+    maleAgeGroup05Count
+    maleAgeGroup611Count
+    maleAgeGroup1217Count
     maleAgeGroup1859Count
     maleAgeGroup60Count
-    femaleAgeGroup04DisabledCount
-    femaleAgeGroup512DisabledCount
-    femaleAgeGroup1317DisabledCount
+    femaleAgeGroup05DisabledCount
+    femaleAgeGroup611DisabledCount
+    femaleAgeGroup1217DisabledCount
     femaleAgeGroup1859DisabledCount
     femaleAgeGroup60DisabledCount
-    maleAgeGroup04DisabledCount
-    maleAgeGroup512DisabledCount
-    maleAgeGroup1317DisabledCount
+    maleAgeGroup05DisabledCount
+    maleAgeGroup611DisabledCount
+    maleAgeGroup1217DisabledCount
     maleAgeGroup1859DisabledCount
     maleAgeGroup60DisabledCount
     fchildHoh
