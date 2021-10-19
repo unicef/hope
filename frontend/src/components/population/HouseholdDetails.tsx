@@ -180,27 +180,31 @@ export function HouseholdDetails({
             </Grid>
             {household.programsWithDeliveredQuantity.length ? (
               household.programsWithDeliveredQuantity.map((item) => (
-                <Grid container key={item.id}>
-                  <Grid item xs={6}>
-                    <ContentLink href={`/${businessArea}/programs/${item.id}`}>
-                      {item.name}
-                    </ContentLink>
+                <Box mb={2}>
+                  <Grid container key={item.id}>
+                    <Grid item xs={6}>
+                      <ContentLink
+                        href={`/${businessArea}/programs/${item.id}`}
+                      >
+                        {item.name}
+                      </ContentLink>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box display='flex' flexDirection='column'>
+                        {item.quantity.map((qty) => (
+                          <Box
+                            key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
+                          >
+                            {formatCurrencyWithSymbol(
+                              qty.totalDeliveredQuantity,
+                              qty.currency,
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={6}>
-                    <Box display='flex' flexDirection='column'>
-                      {item.quantity.map((qty) => (
-                        <Box
-                          key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
-                        >
-                          {formatCurrencyWithSymbol(
-                            qty.totalDeliveredQuantity,
-                            qty.currency,
-                          )}
-                        </Box>
-                      ))}
-                    </Box>
-                  </Grid>
-                </Grid>
+                </Box>
               ))
             ) : (
               <Grid container>
