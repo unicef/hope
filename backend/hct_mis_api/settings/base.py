@@ -215,11 +215,11 @@ PROJECT_APPS = [
     # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
     "hct_mis_api.apps.utils",
-    "hct_mis_api.apps.registration_datahub",
+    "hct_mis_api.apps.registration_datahub.apps.Config",
     "hct_mis_api.apps.registration_data",
-    "hct_mis_api.apps.cash_assist_datahub",
-    "hct_mis_api.apps.mis_datahub",
-    "hct_mis_api.apps.erp_datahub",
+    "hct_mis_api.apps.cash_assist_datahub.apps.Config",
+    "hct_mis_api.apps.mis_datahub.apps.Config",
+    "hct_mis_api.apps.erp_datahub.apps.Config",
     "hct_mis_api.apps.sanction_list",
     "hct_mis_api.apps.steficon",
     "hct_mis_api.apps.reporting",
@@ -589,13 +589,12 @@ SMART_ADMIN_SECTIONS = {
     ],
     "RDI": [
         regex(r"registration_data\..*"),
-        regex(r"registration_datahub\..*"),
+        # regex(r"registration_datahub\..*"),
     ],
     "Grievance": ["grievance"],
     "Configuration": [
         "core",
         "constance",
-        # "household",
         "household.agency",
     ],
     "Rule Engine": [
@@ -612,11 +611,23 @@ SMART_ADMIN_SECTIONS = {
         "core.FlexibleAttribute",
         "core.FlexibleAttributeGroup",
     ],
-    "HUBs": [
-        "cash_assist_datahub",
-        "erp_datahub",
+    # "HUBs": [
+    #     "cash_assist_datahub",
+    #     "erp_datahub",
+    #     "mis_datahub",
+    #     "registration_datahub",
+    # ],
+    "HUB (Hope->CA)": [
         "mis_datahub",
+    ],
+    "HUB (CA->Hope)": [
+        "cash_assist_datahub",
+    ],
+    "HUB (Kobo->Hope)": [
         "registration_datahub",
+    ],
+    "HUB (Vision->Hope)": [
+        "erp_datahub",
     ],
     "System": [
         "social_django",

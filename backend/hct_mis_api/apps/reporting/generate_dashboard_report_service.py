@@ -33,12 +33,12 @@ class GenerateDashboardReportContentHelpers:
     def get_beneficiaries(cls, report: DashboardReport):
 
         children_count_fields = [
-            "female_age_group_0_4_count",
-            "female_age_group_5_12_count",
-            "female_age_group_13_17_count",
-            "male_age_group_0_4_count",
-            "male_age_group_5_12_count",
-            "male_age_group_13_17_count",
+            "female_age_group_0_5_count",
+            "female_age_group_6_11_count",
+            "female_age_group_12_17_count",
+            "male_age_group_0_5_count",
+            "male_age_group_6_11_count",
+            "male_age_group_12_17_count",
         ]
         individual_count_fields = cls._get_all_individual_count_fields()
         valid_payment_records = cls._get_payment_records_for_report(report)
@@ -592,22 +592,22 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def _get_all_with_disabled_individual_count_fields():
         return [
-            "female_age_group_0_4_count",
-            "female_age_group_0_4_disabled_count",
-            "female_age_group_5_12_count",
-            "female_age_group_5_12_disabled_count",
-            "female_age_group_13_17_count",
-            "female_age_group_13_17_disabled_count",
+            "female_age_group_0_5_count",
+            "female_age_group_0_5_disabled_count",
+            "female_age_group_6_11_count",
+            "female_age_group_6_11_disabled_count",
+            "female_age_group_12_17_count",
+            "female_age_group_12_17_disabled_count",
             "female_age_group_18_59_count",
             "female_age_group_18_59_disabled_count",
             "female_age_group_60_count",
             "female_age_group_60_disabled_count",
-            "male_age_group_0_4_count",
-            "male_age_group_0_4_disabled_count",
-            "male_age_group_5_12_count",
-            "male_age_group_5_12_disabled_count",
-            "male_age_group_13_17_count",
-            "male_age_group_13_17_disabled_count",
+            "male_age_group_0_5_count",
+            "male_age_group_0_5_disabled_count",
+            "male_age_group_6_11_count",
+            "male_age_group_6_11_disabled_count",
+            "male_age_group_12_17_count",
+            "male_age_group_12_17_disabled_count",
             "male_age_group_18_59_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_count",
@@ -617,14 +617,14 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def _get_all_individual_count_fields():
         return [
-            "female_age_group_0_4_count",
-            "female_age_group_5_12_count",
-            "female_age_group_13_17_count",
+            "female_age_group_0_5_count",
+            "female_age_group_6_11_count",
+            "female_age_group_12_17_count",
             "female_age_group_18_59_count",
             "female_age_group_60_count",
-            "male_age_group_0_4_count",
-            "male_age_group_5_12_count",
-            "male_age_group_13_17_count",
+            "male_age_group_0_5_count",
+            "male_age_group_6_11_count",
+            "male_age_group_12_17_count",
             "male_age_group_18_59_count",
             "male_age_group_60_count",
         ]
