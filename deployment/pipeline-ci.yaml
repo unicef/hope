@@ -26,7 +26,7 @@ variables:
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-DEV-ACR"
     Docker.repository: "uniappsk8shopedev"
-    Docker.url: "uniappsakshopedev.azurecr.io"
+    Docker.url: "uniappsk8sdevacr.azurecr.io"
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-PRD-ACR"
     Docker.repository: "uniappsakshope"
