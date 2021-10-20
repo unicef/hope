@@ -45,6 +45,8 @@ stages:
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
+        pool:
+          vmImage: ubuntu-latest
         displayName: "[BACKEND]"
         steps:
           - task: Docker@2
@@ -59,6 +61,8 @@ stages:
                 $(Build.SourceVersion)
 
           - task: Docker@2
+            pool:
+              vmImage: ubuntu-latest
             displayName: Build&Push
             condition: and(succeeded(), eq(variables.isTraining, true))
             inputs:
@@ -71,6 +75,8 @@ stages:
                 $(Build.SourceVersion)
 
       - job: build_push_frontend
+        pool:
+          vmImage: ubuntu-latest
         displayName: "[FRONTEND]"
         steps:
           - task: Docker@2
@@ -125,6 +131,8 @@ stages:
     displayName: TEST
     jobs:
       - job: django_tests
+        pool:
+          vmImage: ubuntu-latest
         displayName: "[DJANGO TEST]"
         variables:
           backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.SourceVersion)
