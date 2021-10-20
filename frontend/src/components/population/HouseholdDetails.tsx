@@ -9,9 +9,12 @@ import {
   HouseholdNode,
 } from '../../__generated__/graphql';
 import { ContentLink } from '../ContentLink';
-import { CardAmount } from '../Dashboard/DashboardCard';
 import { LabelizedField } from '../LabelizedField';
-import {MiśTheme} from "../../theme";
+import { MiśTheme } from '../../theme';
+import {
+  BigValue,
+  BigValueContainer,
+} from '../../containers/registration/details/RegistrationDetails';
 
 const Container = styled.div`
   display: flex;
@@ -177,31 +180,31 @@ export function HouseholdDetails({
             </Grid>
             {household.programsWithDeliveredQuantity.length ? (
               household.programsWithDeliveredQuantity.map((item) => (
-                <Grid container key={item.id}>
-                  <Grid item xs={6}>
-                    <ContentLink
-                      href={`/${businessArea}/programs/${item.id}`}
-                    >
-                      {item.name}
-                    </ContentLink>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Box display='flex' flexDirection='column'>
-                      {item.quantity.map((qty) => (
-                        <Box
-                          key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
-                        >
-                          <CardAmount>
+                <Box mb={2}>
+                  <Grid container key={item.id}>
+                    <Grid item xs={6}>
+                      <ContentLink
+                        href={`/${businessArea}/programs/${item.id}`}
+                      >
+                        {item.name}
+                      </ContentLink>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box display='flex' flexDirection='column'>
+                        {item.quantity.map((qty) => (
+                          <Box
+                            key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
+                          >
                             {formatCurrencyWithSymbol(
                               qty.totalDeliveredQuantity,
                               qty.currency,
                             )}
-                          </CardAmount>
-                        </Box>
-                      ))}
-                    </Box>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Grid>
                   </Grid>
-                </Grid>
+                </Box>
               ))
             ) : (
               <Grid container>
@@ -216,12 +219,14 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label={t('Total Cash Received')}>
-              <CardAmount>
-                {formatCurrencyWithSymbol(
-                  household.totalCashReceived,
-                  household.currency,
-                )}
-              </CardAmount>
+              <BigValueContainer>
+                <BigValue>
+                  {formatCurrencyWithSymbol(
+                    household.totalCashReceivedUsd,
+                    'USD',
+                  )}
+                </BigValue>
+              </BigValueContainer>
             </LabelizedField>
           </Grid>
         </Grid>
