@@ -61,8 +61,6 @@ stages:
                 $(Build.SourceVersion)
 
           - task: Docker@2
-            pool:
-              vmImage: ubuntu-latest
             displayName: Build&Push
             condition: and(succeeded(), eq(variables.isTraining, true))
             inputs:
