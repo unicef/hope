@@ -488,7 +488,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
-    @button(permission="core.import_from_csv_adminarea")
+    @button(permission="core.import_from_csv")
     def import_file(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
@@ -562,7 +562,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
 
         return TemplateResponse(request, "core/admin/import_locations.html", context)
 
-    @button(permission="core.load_from_datamart_adminarea")
+    @button(permission="core.load_from_datamart")
     def load_from_datamart(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
