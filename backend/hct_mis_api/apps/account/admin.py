@@ -311,7 +311,7 @@ class BusinessAreaFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value():
-            return queryset.filter(user_roles__business_area=self.value())
+            return queryset.filter(user_roles__business_area=self.value()).distinct()
         return queryset
 
 
