@@ -290,7 +290,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     )
     def test_grievance_update_household_data_change(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        self.household_one.female_age_group_5_12_count = 2
+        self.household_one.female_age_group_6_11_count = 2
         self.household_one.save()
 
         variables = {
@@ -307,7 +307,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                         "householdDataUpdateIssueTypeExtras": {
                             "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
                             "householdData": {
-                                "femaleAgeGroup512Count": 14,
+                                "femaleAgeGroup611Count": 14,
                                 "country": "AFG",
                                 "size": 4,
                             },
