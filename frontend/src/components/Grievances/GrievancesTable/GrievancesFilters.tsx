@@ -68,6 +68,25 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
+          <SearchTextField
+            label='Cash Plan ID'
+            variant='outlined'
+            margin='dense'
+            onChange={(e) =>
+              handleFilterChange(e, 'cashPlanPaymentVerification')
+            }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+            data-cy='filters-cashPlanPaymentVerification'
+            value={filter.cashPlanPaymentVerification || ''}
+          />
+        </Grid>
+        <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>{t('Status')}</InputLabel>
             <Select
