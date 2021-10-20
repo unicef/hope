@@ -326,7 +326,7 @@ LOGGING = {
 }
 
 GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
-HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security"
+HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
 # REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
 #
 # if REDIS_INSTANCE:
