@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from django.contrib.postgres.fields import JSONField
 
 from admin_extra_urls.decorators import button
@@ -69,3 +70,19 @@ class HOPEModelAdminBase(SmartDisplayAllMixin, AdminActionPermMixin, JSONWidgetM
 
     def get_fields(self, request, obj=None):
         return super().get_fields(request, obj)
+
+
+class HUBBusinessAreaFilter(SimpleListFilter):
+    parameter_name = "ba"
+    title = "Business Area"
+    template = "adminfilters/combobox.html"
+
+    def lookups(self, request, model_admin):
+        from hct_mis_api.apps.core.models import BusinessArea
+
+        return BusinessArea.objects.values_list("code", "name").distinct()
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(business_area=self.value()).distinct()
+        return queryset
