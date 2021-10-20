@@ -695,8 +695,8 @@ EXPLORER_CONNECTIONS = {
     "HUB Reg": "registration_datahub",
 }
 EXPLORER_DEFAULT_CONNECTION = "default"
-EXPLORER_PERMISSION_VIEW = lambda r: r.user.is_superuser
-EXPLORER_PERMISSION_CHANGE = lambda r: r.user.is_superuser
+EXPLORER_PERMISSION_VIEW = lambda r: r.user.has_perm("explorer.view_query")
+EXPLORER_PERMISSION_CHANGE = lambda r: r.user.has_perm("explorer.change_query")
 
 IMPERSONATE = {
     "REDIRECT_URL": f"/api/{ADMIN_PANEL_URL}/",
