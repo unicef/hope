@@ -24,6 +24,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import {
   choicesToDict,
   countPercentage,
+  decodeIdString,
   isPermissionDeniedError,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
@@ -211,7 +212,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${businessArea}/grievance-and-feedback/payment-verification/${cashPlan.id}`}
+            to={`/${businessArea}/grievance-and-feedback/payment-verification/${decodeIdString(
+              cashPlan.verifications.edges[0].node.id,
+            )}`}
           >
             {t('View Tickets')}
           </Button>
