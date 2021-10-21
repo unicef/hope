@@ -198,6 +198,18 @@ export function HomeRouter(): React.ReactElement {
               <GrievancesTablePage key='rdi' />
             </Sentry.ErrorBoundary>
           </Route>
+          <Route path='/:businessArea/grievance-and-feedback/payment-verification/:verificationId'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag(
+                  'location',
+                  '/:businessArea/grievance-and-feedback',
+                );
+              }}
+            >
+              <GrievancesTablePage key='verificationId' />
+            </Sentry.ErrorBoundary>
+          </Route>
           <Route path='/:businessArea/grievance-and-feedback/:id'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
