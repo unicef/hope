@@ -17,6 +17,7 @@ export const AllGrievanceTicket = gql`
     $orderBy: String
     $registrationDataImport: ID
     $assignedTo: ID
+    $cashPlanPaymentVerification: String
   ) {
     allGrievanceTicket(
       before: $before
@@ -34,6 +35,7 @@ export const AllGrievanceTicket = gql`
       admin: $admin
       registrationDataImport: $registrationDataImport
       assignedTo: $assignedTo
+      cashPlanPaymentVerification: $cashPlanPaymentVerification
     ) {
       totalCount
       pageInfo {
