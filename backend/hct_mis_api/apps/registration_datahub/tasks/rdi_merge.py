@@ -158,12 +158,18 @@ class RdiMergeTask:
             household_data = {**model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS)}
             country_code = household_data["country"].code
             country_origin_code = household_data["country_origin"].code
-            if country_code not in countries:
+            if country_code and country_code not in countries:
                 countries[country_code] = geo_models.Country.objects.get(iso_code2=country_code)
-            if country_origin_code not in countries:
+            if country_origin_code and country_origin_code not in countries:
                 countries[country_origin_code] = geo_models.Country.objects.get(iso_code2=country_origin_code)
-            household_data["country_new"] = countries[country_code]
-            household_data["country_origin_new"] = countries[country_origin_code]
+
+            country_code = countries.get(country_code)
+            if country_code:
+                household_data["country_new"] = country_code
+
+            country_code_origin = countries.get(country_origin_code)
+            if country_code_origin:
+                household_data["country_origin_new"] = country_code_origin
             household = Household(
                 **household_data,
                 registration_data_import=obj_hct,
