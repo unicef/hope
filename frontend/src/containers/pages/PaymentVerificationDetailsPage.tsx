@@ -1,8 +1,8 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BlackLink } from '../../components/BlackLink';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
@@ -24,6 +24,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import {
   choicesToDict,
   countPercentage,
+  decodeIdString,
   isPermissionDeniedError,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
@@ -158,6 +159,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_DISCARD, permissions) &&
     canFinishAndDiscard;
 
+  const isFinished = cashPlan.verificationStatus === 'FINISHED';
+
   const toolbar = (
     <PageHeader
       title={
@@ -203,6 +206,18 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               />
             )}
           </Box>
+        )}
+        {isFinished && (
+          <Button
+            variant='contained'
+            color='primary'
+            component={Link}
+            to={`/${businessArea}/grievance-and-feedback/payment-verification/${decodeIdString(
+              cashPlan.verifications.edges[0].node.id,
+            )}`}
+          >
+            {t('View Tickets')}
+          </Button>
         )}
       </>
     </PageHeader>
