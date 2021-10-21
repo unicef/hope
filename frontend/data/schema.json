@@ -716,6 +716,16 @@
                 "defaultValue": null
               },
               {
+                "name": "cashPlanPaymentVerification",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "createdAtRange",
                 "description": null,
                 "type": {

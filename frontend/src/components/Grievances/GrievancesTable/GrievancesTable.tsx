@@ -44,6 +44,7 @@ export const GrievancesTable = ({
     registrationDataImport: filter.registrationDataImport,
     category: filter.category,
     assignedTo: filter.assignedTo,
+    cashPlanPaymentVerification: filter.cashPlanPaymentVerification,
   };
 
   const {
