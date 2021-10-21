@@ -22,6 +22,8 @@ stages:
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
+        pool:
+          vmImage: ubuntu-latest
         displayName: "[Build]"
         steps:
           - task: Docker@2
@@ -39,6 +41,8 @@ stages:
     displayName: TEST
     jobs:
       - job: django_tests
+        pool:
+          vmImage: ubuntu-latest
         displayName: "[DJANGO TEST]"
         variables:
           backend_image: uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
