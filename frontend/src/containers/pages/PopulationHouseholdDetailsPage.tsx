@@ -102,31 +102,32 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
-      >
-        <>
-          <Box mr={2}>
-            {household.hasDuplicates && (
-              <WarningTooltip
-                confirmed
-                message={t('Houesehold has Duplicates')}
-              />
-            )}
-          </Box>
-          <Box mr={2}>
-            {household.sanctionListPossibleMatch && (
-              <FlagTooltip message={t('Sanction List Possible Match')} />
-            )}
-          </Box>
-          <Box mr={2}>
-            {household.sanctionListConfirmedMatch && (
-              <FlagTooltip
-                message={t('Sanction List Confirmed Match')}
-                confirmed
-              />
-            )}
-          </Box>
-        </>
-      </PageHeader>
+        flags={
+          <>
+            <Box mr={2}>
+              {household.hasDuplicates && (
+                <WarningTooltip
+                  confirmed
+                  message={t('Houesehold has Duplicates')}
+                />
+              )}
+            </Box>
+            <Box mr={2}>
+              {household.sanctionListPossibleMatch && (
+                <FlagTooltip message={t('Sanction List Possible Match')} />
+              )}
+            </Box>
+            <Box mr={2}>
+              {household.sanctionListConfirmedMatch && (
+                <FlagTooltip
+                  message={t('Sanction List Confirmed Match')}
+                  confirmed
+                />
+              )}
+            </Box>
+          </>
+        }
+      />
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}
