@@ -326,7 +326,7 @@ LOGGING = {
 }
 
 GIT_VERSION = os.getenv("GIT_VERSION", "UNKNOWN")
-HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security"
+HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
 # REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis")
 #
 # if REDIS_INSTANCE:
@@ -695,8 +695,8 @@ EXPLORER_CONNECTIONS = {
     "HUB Reg": "registration_datahub",
 }
 EXPLORER_DEFAULT_CONNECTION = "default"
-EXPLORER_PERMISSION_VIEW = lambda r: r.user.is_superuser
-EXPLORER_PERMISSION_CHANGE = lambda r: r.user.is_superuser
+EXPLORER_PERMISSION_VIEW = lambda r: r.user.has_perm("explorer.view_query")
+EXPLORER_PERMISSION_CHANGE = lambda r: r.user.has_perm("explorer.change_query")
 
 IMPERSONATE = {
     "REDIRECT_URL": f"/api/{ADMIN_PANEL_URL}/",
