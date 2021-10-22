@@ -18,12 +18,17 @@ import {
   useAllEditHouseholdFieldsQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
+import { PhotoPreview } from '../PhotoPreview';
 
 const Capitalize = styled.span`
   text-transform: capitalize;
 `;
 const GreenIcon = styled.div`
   color: #28cb15;
+`;
+
+const Image = styled.img`
+  max-width: 150px;
 `;
 
 export interface CurrentValueProps {
@@ -65,6 +70,13 @@ export function CurrentValue({
         displayValue = value;
     }
   }
+  if (displayValue?.includes('/api/uploads/')) {
+    return (
+      <PhotoPreview src={displayValue}>
+        <Image src={displayValue} />
+      </PhotoPreview>
+    );
+  }
   return <>{displayValue || '-'}</>;
 }
 export function NewValue({
@@ -96,6 +108,13 @@ export function NewValue({
       break;
     default:
       displayValue = value;
+  }
+  if (displayValue?.includes('/api/uploads/')) {
+    return (
+      <PhotoPreview src={displayValue}>
+        <Image src={displayValue} />
+      </PhotoPreview>
+    );
   }
   return <>{displayValue || '-'}</>;
 }
