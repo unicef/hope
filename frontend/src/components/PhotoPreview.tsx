@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 const ZoomPhoto = styled.div<{ $src: string }>`
   width: 64px;
-  height: 64px;
   &:hover::after {
     content: '';
     background-image: url(${({ $src }) => $src});
@@ -13,7 +12,6 @@ const ZoomPhoto = styled.div<{ $src: string }>`
     position: absolute;
     z-index: 2;
     top: 0;
-    left: 80px;
   }
 `;
 
