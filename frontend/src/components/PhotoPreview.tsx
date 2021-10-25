@@ -12,6 +12,7 @@ const ZoomPhoto = styled.div<{ $src: string }>`
     position: absolute;
     z-index: 2;
     top: 0;
+    right: 120px;
   }
 `;
 
