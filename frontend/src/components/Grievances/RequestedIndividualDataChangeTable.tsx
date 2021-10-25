@@ -68,15 +68,15 @@ export function CurrentValue({
       /* eslint-disable-next-line no-nested-ternary */
       displayValue = value === null ? '-' : value ? 'Yes' : 'No';
       break;
+    case 'IMAGE':
+      displayValue = (
+        <PhotoPreview src={value}>
+          <Image src={value} />
+        </PhotoPreview>
+      );
+      break;
     default:
       displayValue = value;
-  }
-  if (displayValue?.includes('/api/uploads/')) {
-    return (
-      <PhotoPreview src={displayValue}>
-        <Image src={displayValue} />
-      </PhotoPreview>
-    );
   }
   return <>{displayValue || '-'}</>;
 }
