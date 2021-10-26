@@ -64,6 +64,7 @@ export function IndividualsBioData({
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
   );
+
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
     <Grid item xs={3} key={edge.node.id}>
       <Box flexDirection='column'>
@@ -97,6 +98,18 @@ export function IndividualsBioData({
       </Box>
     </Grid>
   ));
+
+  const mappedRoles = (
+    <Grid item xs={3}>
+      <LabelizedField label={t('Linked Households')}>
+        {individual.householdsAndRoles?.map((item) => (
+          <Box key={item.id}>
+            {item.household.unicefId} - {roleChoicesDict[item.role]}
+          </Box>
+        ))}
+      </LabelizedField>
+    </Grid>
+  );
 
   return (
     <Overview>
@@ -182,6 +195,7 @@ export function IndividualsBioData({
             {relationshipChoicesDict[individual.relationship]}
           </LabelizedField>
         </Grid>
+        {mappedRoles}
         <Grid item xs={12}>
           <BorderBox />
         </Grid>
