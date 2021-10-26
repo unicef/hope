@@ -102,11 +102,13 @@ export function IndividualsBioData({
   const mappedRoles = (
     <Grid item xs={3}>
       <LabelizedField label={t('Linked Households')}>
-        {individual.householdsAndRoles?.map((item) => (
-          <Box key={item.id}>
-            {item.household.unicefId} - {roleChoicesDict[item.role]}
-          </Box>
-        ))}
+        {individual.householdsAndRoles.length
+          ? individual.householdsAndRoles?.map((item) => (
+              <Box key={item.id}>
+                {item.household.unicefId} - {roleChoicesDict[item.role]}
+              </Box>
+            ))
+          : '-'}
       </LabelizedField>
     </Grid>
   );
