@@ -426,10 +426,17 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
             for name, value in flex_fields.items():
-                if name in images_flex_fields_names:
+                if value and name in images_flex_fields_names:
                     try:
-                        flex_fields[name]["previous_value"] = default_storage.url(value.get("previous_value"))
-                        flex_fields[name]["value"] = default_storage.url(value.get("value"))
+                        previous_value = value.get("previous_value", "")
+                        if previous_value:
+                            previous_value = default_storage.url(previous_value)
+                        flex_fields[name]["previous_value"] = previous_value
+
+                        current_value = value.get("value", "")
+                        if current_value:
+                            current_value = default_storage.url(current_value)
+                        flex_fields[name]["value"] = current_value
                     except Exception:
                         pass
             individual_data["flex_fields"] = flex_fields
