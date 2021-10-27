@@ -18,17 +18,13 @@ import {
   useAllEditHouseholdFieldsQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
-import { PhotoPreview } from '../PhotoPreview';
+import { GrievanceFlexFieldPhotoModal } from './GrievanceFlexFieldPhotoModal';
 
 const Capitalize = styled.span`
   text-transform: capitalize;
 `;
 const GreenIcon = styled.div`
   color: #28cb15;
-`;
-
-const Image = styled.img`
-  max-width: 150px;
 `;
 
 export interface CurrentValueProps {
@@ -67,11 +63,7 @@ export function CurrentValue({
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
         break;
       case 'IMAGE':
-        displayValue = (
-          <PhotoPreview src={value}>
-            <Image src={value} />
-          </PhotoPreview>
-        );
+        displayValue = <GrievanceFlexFieldPhotoModal field={field} isCurrent />;
         break;
       default:
         displayValue = value;
@@ -107,11 +99,7 @@ export function NewValue({
       displayValue = value === null ? '-' : value ? 'Yes' : 'No';
       break;
     case 'IMAGE':
-      displayValue = (
-        <PhotoPreview src={value}>
-          <Image src={value} />
-        </PhotoPreview>
-      );
+      displayValue = <GrievanceFlexFieldPhotoModal field={field} />;
       break;
     default:
       displayValue = value;
