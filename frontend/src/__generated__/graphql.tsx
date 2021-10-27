@@ -7872,6 +7872,19 @@ export type IndividualChoiceDataQuery = (
   )>>> }
 );
 
+export type IndividualFlexFieldsQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type IndividualFlexFieldsQuery = (
+  { __typename?: 'Query' }
+  & { individual: Maybe<(
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'flexFields'>
+  )> }
+);
+
 export type IndividualPhotosQueryVariables = {
   id: Scalars['ID']
 };
@@ -14490,6 +14503,57 @@ export function useIndividualChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.
 export type IndividualChoiceDataQueryHookResult = ReturnType<typeof useIndividualChoiceDataQuery>;
 export type IndividualChoiceDataLazyQueryHookResult = ReturnType<typeof useIndividualChoiceDataLazyQuery>;
 export type IndividualChoiceDataQueryResult = ApolloReactCommon.QueryResult<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>;
+export const IndividualFlexFieldsDocument = gql`
+    query IndividualFlexFields($id: ID!) {
+  individual(id: $id) {
+    id
+    flexFields
+  }
+}
+    `;
+export type IndividualFlexFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>, 'query'> & ({ variables: IndividualFlexFieldsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const IndividualFlexFieldsComponent = (props: IndividualFlexFieldsComponentProps) => (
+      <ApolloReactComponents.Query<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables> query={IndividualFlexFieldsDocument} {...props} />
+    );
+    
+export type IndividualFlexFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables> & TChildProps;
+export function withIndividualFlexFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  IndividualFlexFieldsQuery,
+  IndividualFlexFieldsQueryVariables,
+  IndividualFlexFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables, IndividualFlexFieldsProps<TChildProps>>(IndividualFlexFieldsDocument, {
+      alias: 'individualFlexFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useIndividualFlexFieldsQuery__
+ *
+ * To run a query within a React component, call `useIndividualFlexFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIndividualFlexFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIndividualFlexFieldsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useIndividualFlexFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>(IndividualFlexFieldsDocument, baseOptions);
+      }
+export function useIndividualFlexFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>(IndividualFlexFieldsDocument, baseOptions);
+        }
+export type IndividualFlexFieldsQueryHookResult = ReturnType<typeof useIndividualFlexFieldsQuery>;
+export type IndividualFlexFieldsLazyQueryHookResult = ReturnType<typeof useIndividualFlexFieldsLazyQuery>;
+export type IndividualFlexFieldsQueryResult = ApolloReactCommon.QueryResult<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>;
 export const IndividualPhotosDocument = gql`
     query IndividualPhotos($id: ID!) {
   individual(id: $id) {
