@@ -147,16 +147,15 @@ class HouseholdFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(head_of_household__full_name__startswith=value)
-            q_obj |= Q(head_of_household__given_name__startswith=value)
-            q_obj |= Q(head_of_household__middle_name__startswith=value)
-            q_obj |= Q(head_of_household__family_name__startswith=value)
-            q_obj |= Q(unicef_id__startswith=value)
-            q_obj |= Q(unicef_id__startswith=value)
-            q_obj |= Q(unicef_id__endswith=value)
-            q_obj |= Q(id__startswith=value)
-            q_obj |= Q(id__endswith=value)
-        return qs.filter(q_obj)
+            inner_query = Q()
+            inner_query |= Q(head_of_household__full_name__startswith=value)
+            inner_query |= Q(head_of_household__given_name__startswith=value)
+            inner_query |= Q(head_of_household__middle_name__startswith=value)
+            inner_query |= Q(head_of_household__family_name__startswith=value)
+            inner_query |= Q(unicef_id__startswith=value)
+            inner_query |= Q(unicef_id__endswith=value)
+            q_obj &= inner_query
+        return qs.filter(q_obj).distinct()
 
 
 class IndividualFilter(FilterSet):
@@ -220,16 +219,17 @@ class IndividualFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
+            inner_query = Q()
             q_obj |= Q(household__admin_area__title__startswith=value)
             q_obj |= Q(unicef_id__startswith=value)
             q_obj |= Q(unicef_id__endswith=value)
-            q_obj |= Q(household__id__startswith=value)
             q_obj |= Q(household__unicef_id__startswith=value)
             q_obj |= Q(full_name__startswith=value)
             q_obj |= Q(given_name__startswith=value)
             q_obj |= Q(middle_name__startswith=value)
             q_obj |= Q(family_name__startswith=value)
-        return qs.filter(q_obj)
+            q_obj &= inner_query
+        return qs.filter(q_obj).distinct()
 
     def status_filter(self, qs, name, value):
         q_obj = Q()
