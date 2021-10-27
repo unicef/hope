@@ -11,7 +11,7 @@ import {
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
-import { PhotoPreview } from '../PhotoPreview';
+import { IndividualFlexFieldPhotoModal } from './IndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -60,9 +60,7 @@ export function IndividualVulnerabilities({
             key={key}
             label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
           >
-            <PhotoPreview src={value}>
-              <Image src={value} />
-            </PhotoPreview>
+            <IndividualFlexFieldPhotoModal field={flexAttributesDict[key]} />
           </LabelizedField>
         );
       }
