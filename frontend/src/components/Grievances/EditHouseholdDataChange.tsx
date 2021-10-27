@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
@@ -20,6 +21,7 @@ import {
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import { GrievanceFlexFieldPhotoModal } from './GrievanceFlexFieldPhotoModal';
 
 const Title = styled.div`
   width: 100%;
@@ -80,11 +82,15 @@ export const EditHouseholdDataChangeField = ({
         decoratorEnd: <CalendarTodayRoundedIcon color='disabled' />,
       };
       break;
-
     case 'BOOL':
       fieldProps = {
         component: FormikBoolFieldGrievances,
         required: field.required,
+      };
+      break;
+    case 'IMAGE':
+      fieldProps = {
+        component: FormikFileField,
       };
       break;
     default:
@@ -142,6 +148,12 @@ export function CurrentValue({
         /* eslint-disable-next-line no-nested-ternary */
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
         break;
+      case 'IMAGE':
+        return (
+          <Grid item xs={3}>
+            <GrievanceFlexFieldPhotoModal isCurrent field={field} />
+          </Grid>
+        );
       default:
         displayValue = value;
     }
