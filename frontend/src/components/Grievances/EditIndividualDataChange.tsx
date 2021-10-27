@@ -20,10 +20,10 @@ import {
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
-import { PhotoPreview } from '../PhotoPreview';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import { GrievanceFlexFieldPhotoModal } from './GrievanceFlexFieldPhotoModal';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 
@@ -168,9 +168,7 @@ export function CurrentValue({
     case 'IMAGE':
       return (
         <Grid item xs={3}>
-          <PhotoPreview src={value}>
-            <Image src={value} />
-          </PhotoPreview>
+          <GrievanceFlexFieldPhotoModal isCurrent isIndividual field={field} />
         </Grid>
       );
     default:

@@ -7743,6 +7743,26 @@ export type GrievanceTicketQuery = (
   )> }
 );
 
+export type GrievanceTicketFlexFieldsQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type GrievanceTicketFlexFieldsQuery = (
+  { __typename?: 'Query' }
+  & { grievanceTicket: Maybe<(
+    { __typename?: 'GrievanceTicketNode' }
+    & Pick<GrievanceTicketNode, 'id'>
+    & { individualDataUpdateTicketDetails: Maybe<(
+      { __typename?: 'TicketIndividualDataUpdateDetailsNode' }
+      & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData'>
+    )>, householdDataUpdateTicketDetails: Maybe<(
+      { __typename?: 'TicketHouseholdDataUpdateDetailsNode' }
+      & Pick<TicketHouseholdDataUpdateDetailsNode, 'id' | 'householdData'>
+    )> }
+  )> }
+);
+
 export type GrievanceTicketUnicefIdQueryVariables = {
   id: Scalars['ID']
 };
@@ -14063,6 +14083,64 @@ export function useGrievanceTicketLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type GrievanceTicketQueryHookResult = ReturnType<typeof useGrievanceTicketQuery>;
 export type GrievanceTicketLazyQueryHookResult = ReturnType<typeof useGrievanceTicketLazyQuery>;
 export type GrievanceTicketQueryResult = ApolloReactCommon.QueryResult<GrievanceTicketQuery, GrievanceTicketQueryVariables>;
+export const GrievanceTicketFlexFieldsDocument = gql`
+    query GrievanceTicketFlexFields($id: ID!) {
+  grievanceTicket(id: $id) {
+    id
+    individualDataUpdateTicketDetails {
+      id
+      individualData
+    }
+    householdDataUpdateTicketDetails {
+      id
+      householdData
+    }
+  }
+}
+    `;
+export type GrievanceTicketFlexFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>, 'query'> & ({ variables: GrievanceTicketFlexFieldsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GrievanceTicketFlexFieldsComponent = (props: GrievanceTicketFlexFieldsComponentProps) => (
+      <ApolloReactComponents.Query<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables> query={GrievanceTicketFlexFieldsDocument} {...props} />
+    );
+    
+export type GrievanceTicketFlexFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables> & TChildProps;
+export function withGrievanceTicketFlexFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievanceTicketFlexFieldsQuery,
+  GrievanceTicketFlexFieldsQueryVariables,
+  GrievanceTicketFlexFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables, GrievanceTicketFlexFieldsProps<TChildProps>>(GrievanceTicketFlexFieldsDocument, {
+      alias: 'grievanceTicketFlexFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievanceTicketFlexFieldsQuery__
+ *
+ * To run a query within a React component, call `useGrievanceTicketFlexFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGrievanceTicketFlexFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGrievanceTicketFlexFieldsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGrievanceTicketFlexFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>(GrievanceTicketFlexFieldsDocument, baseOptions);
+      }
+export function useGrievanceTicketFlexFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>(GrievanceTicketFlexFieldsDocument, baseOptions);
+        }
+export type GrievanceTicketFlexFieldsQueryHookResult = ReturnType<typeof useGrievanceTicketFlexFieldsQuery>;
+export type GrievanceTicketFlexFieldsLazyQueryHookResult = ReturnType<typeof useGrievanceTicketFlexFieldsLazyQuery>;
+export type GrievanceTicketFlexFieldsQueryResult = ApolloReactCommon.QueryResult<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>;
 export const GrievanceTicketUnicefIdDocument = gql`
     query GrievanceTicketUnicefId($id: ID!) {
   grievanceTicket(id: $id) {
