@@ -2,6 +2,7 @@ import logging
 
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
@@ -12,9 +13,11 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import TextFieldFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household import models as households
 from hct_mis_api.apps.mis_datahub.models import (
     Document,
@@ -30,10 +33,11 @@ from hct_mis_api.apps.mis_datahub.models import (
 )
 from hct_mis_api.apps.program import models as programs
 from hct_mis_api.apps.targeting import models as targeting
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, is_root
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
+from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
-
 
 
 class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):
@@ -101,11 +105,11 @@ class HouseholdAdmin(HUBAdminMixin):
 class IndividualAdmin(HUBAdminMixin):
     list_display = ("session", "unicef_id", "mis_id", "household_mis_id", "family_name", "given_name")
     list_filter = (
+        BusinessAreaFilter,
         TextFieldFilter.factory("session__id"),
         TextFieldFilter.factory("unicef_id"),
         TextFieldFilter.factory("mis_id"),
         TextFieldFilter.factory("household_mis_id"),
-        TextFieldFilter.factory("business_area"),
     )
     raw_id_fields = ("session",)
 
@@ -122,25 +126,35 @@ class IndividualAdmin(HUBAdminMixin):
 
 @admin.register(FundsCommitment)
 class FundsCommitmentAdmin(HUBAdminMixin):
-    pass
+    filters = (BusinessAreaFilter,)
 
 
 @admin.register(DownPayment)
 class DownPaymentAdmin(HUBAdminMixin):
-    pass
+    filters = (
+        BusinessAreaFilter,
+        TextFieldFilter.factory("rec_serial_number"),
+        "create_date",
+        "mis_sync_flag",
+        "ca_sync_flag",
+    )
 
 
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(HUBAdminMixin):
-    list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    list_filter = (TextFieldFilter.factory("session__id"),)
 
 
 @admin.register(Session)
 class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
     list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area")
     date_hierarchy = "timestamp"
-    list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
+    list_filter = (
+        "status",
+        BusinessAreaFilter,
+    )
     ordering = ("-timestamp",)
+    search_fields = ("id",)
 
     @href()
     def target_population(self, button):
@@ -226,14 +240,20 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
 
 @admin.register(TargetPopulationEntry)
 class TargetPopulationEntryAdmin(HUBAdminMixin):
-    list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    list_filter = (TextFieldFilter.factory("session__id"),)
     raw_id_fields = ("session",)
 
 
 @admin.register(TargetPopulation)
 class TargetPopulationAdmin(HUBAdminMixin):
-    list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    # list_display = ('name', )
+    list_filter = (TextFieldFilter.factory("session__id"), BusinessAreaFilter)
     raw_id_fields = ("session",)
+    search_fields = ("name",)
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        return queryset, use_distinct
 
     @href()
     def individuals(self, button):
@@ -256,11 +276,13 @@ class TargetPopulationAdmin(HUBAdminMixin):
 
 @admin.register(Program)
 class ProgramAdmin(HUBAdminMixin):
-    list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    list_filter = (TextFieldFilter.factory("session__id"), BusinessAreaFilter)
+    search_fields = ("name",)
+    raw_id_fields = ("session",)
 
 
 @admin.register(Document)
 class DocumentAdmin(HUBAdminMixin):
     list_display = ("type", "number")
-    list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    list_filter = (TextFieldFilter.factory("session__id"), BusinessAreaFilter)
     raw_id_fields = ("session",)

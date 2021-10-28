@@ -1,15 +1,18 @@
-from parameterized import parameterized
 from django.core.management import call_command
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory, CashPlanFactory
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 
 
 class TestGrievanceCreateComplaintTicketQuery(APITestCase):
@@ -41,6 +44,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     def setUp(self):
         super().setUp()
         call_command("loadbusinessareas")
+        call_command("loadcountries")
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
@@ -49,6 +53,15 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             business_area=self.business_area,
         )
         self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
+            name="Admin type one",
+            country=country,
+            area_level=2,
+        )
+        AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+
         self.household, self.individuals = create_household(
             {"size": 1, "business_area": self.business_area},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},

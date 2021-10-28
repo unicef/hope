@@ -1,6 +1,15 @@
-import { Button, Paper, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Collapse,
+  Grid,
+  Paper,
+  Typography,
+} from '@material-ui/core';
+import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
+import KeyboardArrowUp from '@material-ui/icons/KeyboardArrowUp';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -28,7 +37,7 @@ import {
 } from '../../__generated__/graphql';
 import { CreateTable } from '../tables/TargetPopulation/Create';
 
-const PaperContainer = styled(Paper)`
+export const PaperContainer = styled(Paper)`
   display: flex;
   padding: ${({ theme }) => theme.spacing(3)}px
     ${({ theme }) => theme.spacing(4)}px;
@@ -46,11 +55,14 @@ const Label = styled.p`
 `;
 
 export function CreateTargetPopulation(): React.ReactElement {
+  const [isExclusionsOpen, setExclusionsOpen] = useState(false);
   const { t } = useTranslation();
   const initialValues = {
     name: '',
     criterias: [],
     program: null,
+    excludedIds: '',
+    exclusionReason: '',
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -79,6 +91,18 @@ export function CreateTargetPopulation(): React.ReactElement {
     name: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
+    excludedIds: Yup.string()
+      .max(500, t('Too long'))
+      .test('testName', 'ID is not in the correct format', (ids) => {
+        if (!ids?.length) {
+          return true;
+        }
+        const idsArr = ids.split(',');
+        return idsArr.every((el) =>
+          /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
+        );
+      }),
+    exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
   return (
@@ -92,6 +116,8 @@ export function CreateTargetPopulation(): React.ReactElement {
               input: {
                 programId: values.program,
                 name: values.name,
+                excludedIds: values.excludedIds,
+                exclusionReason: values.exclusionReason,
                 businessAreaSlug: businessArea,
                 ...getTargetingCriteriaVariables(values),
               },
@@ -173,10 +199,59 @@ export function CreateTargetPopulation(): React.ReactElement {
           ) : (
             <TargetingCriteriaDisabled />
           )}
+          <PaperContainer>
+            <Box display='flex' justifyContent='space-between'>
+              <Typography variant='h6'>
+                {t(
+                  'Excluded Target Population Entries (Households or Individuals)',
+                )}
+              </Typography>
+              <Button
+                variant='outlined'
+                color='primary'
+                onClick={() => setExclusionsOpen(!isExclusionsOpen)}
+                endIcon={
+                  isExclusionsOpen ? <KeyboardArrowUp /> : <KeyboardArrowDown />
+                }
+              >
+                {isExclusionsOpen ? t('HIDE') : t('SHOW')}
+              </Button>
+            </Box>
+            <Collapse in={isExclusionsOpen}>
+              <Box mt={2}>
+                <Grid item xs={6}>
+                  <Field
+                    name='excludedIds'
+                    fullWidth
+                    variant='outlined'
+                    label={t('Household or Individual IDs to exclude')}
+                    component={FormikTextField}
+                  />
+                </Grid>
+              </Box>
+              <Box mt={2}>
+                <Grid container>
+                  <Grid item xs={6}>
+                    <Field
+                      name='exclusionReason'
+                      fullWidth
+                      multiline
+                      variant='outlined'
+                      label={t('Exclusion Reason')}
+                      component={FormikTextField}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+            </Collapse>
+          </PaperContainer>
           <Results />
           {values.criterias.length ? (
             <CreateTable
-              variables={getTargetingCriteriaVariables(values)}
+              variables={{
+                ...getTargetingCriteriaVariables(values),
+                excludedIds: values.excludedIds,
+              }}
               program={values.program}
               businessArea={businessArea}
             />

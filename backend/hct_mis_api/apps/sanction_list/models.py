@@ -1,4 +1,5 @@
 from django.db import models
+
 from django_countries.fields import CountryField
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -52,6 +53,7 @@ class SanctionListIndividual(TimeStampedUUIDModel):
     state_province = models.CharField(max_length=255, blank=True, default="")
     address_note = models.CharField(max_length=255, blank=True, default="")
     country_of_birth = CountryField(blank=True, default="")
+    country_of_birth_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
 
     objects = ActiveIndividualsManager()
@@ -63,6 +65,7 @@ class SanctionListIndividualDocument(TimeStampedUUIDModel):
     type_of_document = models.CharField(max_length=255)
     date_of_issue = models.CharField(max_length=255, blank=True, null=True, default="")
     issuing_country = CountryField(blank=True, default="")
+    issuing_country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     note = models.CharField(max_length=255, blank=True, default="")
     individual = models.ForeignKey(
         "SanctionListIndividual",
@@ -73,6 +76,7 @@ class SanctionListIndividualDocument(TimeStampedUUIDModel):
 
 class SanctionListIndividualNationalities(TimeStampedUUIDModel):
     nationality = CountryField()
+    nationality_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     individual = models.ForeignKey(
         "SanctionListIndividual",
         on_delete=models.CASCADE,
@@ -82,6 +86,7 @@ class SanctionListIndividualNationalities(TimeStampedUUIDModel):
 
 class SanctionListIndividualCountries(TimeStampedUUIDModel):
     country = CountryField()
+    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     individual = models.ForeignKey(
         "SanctionListIndividual",
         on_delete=models.CASCADE,

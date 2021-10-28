@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+from django.core.files.storage import default_storage
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Coalesce
@@ -32,6 +33,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     _INDIVIDUAL,
     CORE_FIELDS_ATTRIBUTES,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
+    TYPE_IMAGE,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
@@ -67,7 +69,7 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
-from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
+from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode, FlexFieldsScalar
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +108,7 @@ class GrievanceTicketFilter(FilterSet):
     admin = ModelMultipleChoiceFilter(
         field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
     )
+    cash_plan_payment_verification = CharFilter(field_name='payment_verification_ticket_details',lookup_expr='payment_verifications__cash_plan_payment_verification')
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
 
@@ -422,6 +425,21 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    def resolve_individual_data(self, info):
+        individual_data = self.individual_data
+        flex_fields = individual_data.get("flex_fields")
+        if flex_fields:
+            images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
+            for name, value in flex_fields.items():
+                if name in images_flex_fields_names:
+                    try:
+                        flex_fields[name]["previous_value"] = default_storage.url(value.get("previous_value"))
+                        flex_fields[name]["value"] = default_storage.url(value.get("value"))
+                    except Exception:
+                        pass
+            individual_data["flex_fields"] = flex_fields
+        return individual_data
+
 
 class TicketAddIndividualDetailsNode(DjangoObjectType):
     individual_data = Arg()
@@ -431,6 +449,20 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_individual_data(self, info):
+        individual_data = self.individual_data
+        flex_fields = individual_data.get("flex_fields")
+        if flex_fields:
+            images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
+            for name, value in flex_fields.items():
+                if value and name in images_flex_fields_names:
+                    try:
+                        flex_fields[name] = default_storage.url(value)
+                    except Exception:
+                        pass
+            individual_data["flex_fields"] = flex_fields
+        return individual_data
 
 
 class TicketDeleteIndividualDetailsNode(DjangoObjectType):

@@ -1,16 +1,23 @@
 from datetime import date
-from parameterized import parameterized
 
 from django.core.management import call_command
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import SINGLE, FEMALE, WIDOWED, RELATIONSHIP_UNKNOWN, ROLE_NO_ROLE
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    RELATIONSHIP_UNKNOWN,
+    ROLE_NO_ROLE,
+    SINGLE,
+    WIDOWED,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 

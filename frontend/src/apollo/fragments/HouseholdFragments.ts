@@ -7,6 +7,7 @@ export const householdMinimal = gql`
     residenceStatus
     size
     totalCashReceived
+    totalCashReceivedUsd
     currency
     firstRegistrationDate
     lastRegistrationDate
@@ -148,7 +149,6 @@ export const householdDetailed = gql`
       name
       quantity {
         totalDeliveredQuantity
-        totalDeliveredQuantityUsd
         currency
       }
     }

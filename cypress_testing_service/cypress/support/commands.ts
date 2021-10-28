@@ -17,7 +17,7 @@ Cypress.Commands.add('generateUser', () => {
 });
 
 Cypress.Commands.add('visitDjangoAdmin', () => {
-  cy.visit('/api/admin');
+  cy.visit('/api/unicorn');
   cy.get('input[name=username]').type(Cypress.env('daUsername'));
   cy.get('input[name=password]').type(Cypress.env('daPassword'));
   cy.get('input[type=submit]').click();
@@ -26,7 +26,7 @@ Cypress.Commands.add('visitDjangoAdmin', () => {
 Cypress.Commands.add(
   'addUser',
   ({ username, password, email, firstName, lastName, permissions }) => {
-    cy.visit('/api/admin/account/user/add');
+    cy.visit('/api/unicorn/account/user/add');
     cy.get('input[name=username]').type(username);
     cy.get('input[name=password1]').type(password);
     cy.get('input[name=password2]').type(password);
@@ -59,7 +59,7 @@ Cypress.Commands.add(
 
     cy.get('input[name=_save]').click();
 
-    cy.visit('/api/admin/logout');
+    cy.visit('/api/unicorn/logout');
   },
 );
 

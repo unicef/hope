@@ -28,10 +28,12 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     TARGETING_CORE_FIELDS,
-    TYPE_SELECT_MANY, TYPE_DECIMAL, TYPE_INTEGER,
+    TYPE_SELECT_MANY,
+    TYPE_DECIMAL,
+    TYPE_INTEGER,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.utils import get_attr_value
+from hct_mis_api.apps.core.utils import get_attr_value, map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -104,6 +106,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "steficon_rule",
             "vulnerability_score_min",
             "vulnerability_score_max",
+            "exclusion_reason",
+            "excluded_ids"
         ]
     )
 
@@ -222,6 +226,13 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     vulnerability_score_max = models.DecimalField(
         null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
     )
+    excluded_ids = models.TextField(blank=True)
+    exclusion_reason = models.TextField(blank=True)
+
+    @property
+    def excluded_household_ids(self):
+        excluded_household_ids_array = map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
+        return excluded_household_ids_array
 
     @property
     def vulnerability_score_filtered_households(self):
@@ -230,6 +241,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             queryset = queryset.filter(selections__vulnerability_score__lte=self.vulnerability_score_max)
         if self.vulnerability_score_min is not None:
             queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
+
+        queryset = queryset.filter(~Q(unicef_id__in=self.excluded_household_ids))
         return queryset.distinct()
 
     @property
@@ -370,10 +383,29 @@ class HouseholdSelection(TimeStampedUUIDModel):
 
 
 class TargetingCriteriaQueryingMixin:
-    def __init__(self, rules=None):
+    def __init__(self, rules=None, excluded_household_ids=None):
         if rules is None:
             return
         self.rules = rules
+        if excluded_household_ids is None:
+            self._excluded_household_ids = []
+        else:
+            self._excluded_household_ids = excluded_household_ids
+
+    @property
+    def excluded_household_ids(self):
+        if not isinstance(self, models.Model):
+            return self._excluded_household_ids
+        try:
+            return self.target_population_candidate.excluded_household_ids
+        except TargetPopulation.DoesNotExist:
+            pass
+
+        try:
+            return self.target_population_final.excluded_household_ids
+        except TargetPopulation.DoesNotExist:
+            pass
+        return []
 
     def get_criteria_string(self):
         rules = self.rules if isinstance(self.rules, list) else self.rules.all()
@@ -381,7 +413,7 @@ class TargetingCriteriaQueryingMixin:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self):
-        return Q(withdrawn=False)
+        return Q(withdrawn=False) & ~Q(unicef_id__in=self.excluded_household_ids)
 
     def get_query(self):
         query = Q()
@@ -573,7 +605,7 @@ class TargetingCriteriaFilterMixin:
         is_flex_field = get_attr_value("is_flex_field", field_attr, False)
         if not is_flex_field:
             return arguments
-        type =get_attr_value("type", field_attr, None)
+        type = get_attr_value("type", field_attr, None)
         if type == TYPE_DECIMAL:
             return [float(arg) for arg in arguments]
         if type == TYPE_INTEGER:
