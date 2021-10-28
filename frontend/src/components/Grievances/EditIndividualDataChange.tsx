@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
-import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
@@ -24,6 +23,7 @@ import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModal } from './GrievanceFlexFieldPhotoModal';
+import { GrievanceFlexFieldPhotoModalEditable } from './GrievanceFlexFieldPhotoModalEditable';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 
@@ -107,7 +107,9 @@ export const EditIndividualDataChangeField = ({
       break;
     case 'IMAGE':
       fieldProps = {
-        component: FormikFileField,
+        component: GrievanceFlexFieldPhotoModalEditable,
+        flexField: field,
+        isIndividual: true,
       };
       break;
     default:
