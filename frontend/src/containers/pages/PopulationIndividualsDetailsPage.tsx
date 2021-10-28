@@ -79,29 +79,33 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
-      >
-        <>
-          <Box mr={2}>{duplicateTooltip}</Box>
-          <Box mr={2}>
-            {individual.sanctionListPossibleMatch && (
-              <FlagTooltip message={t('Sanction List Possible Match')} />
-            )}
-          </Box>
-          <Box mr={2}>
-            {individual.sanctionListConfirmedMatch && (
-              <FlagTooltip
-                message={t('Sanction List Confirmed Match')}
-                confirmed
-              />
-            )}
-          </Box>
-          <Box mr={2}>
-            {individual.photo ? (
-              <IndividualPhotoModal individual={individual as IndividualNode} />
-            ) : null}
-          </Box>
-        </>
-      </PageHeader>
+        flags={
+          <>
+            <Box mr={2}>{duplicateTooltip}</Box>
+            <Box mr={2}>
+              {individual.sanctionListPossibleMatch && (
+                <FlagTooltip message={t('Sanction List Possible Match')} />
+              )}
+            </Box>
+            <Box mr={2}>
+              {individual.sanctionListConfirmedMatch && (
+                <FlagTooltip
+                  message={t('Sanction List Confirmed Match')}
+                  confirmed
+                />
+              )}
+            </Box>
+            <Box mr={2}>
+              {individual.photo ? (
+                <IndividualPhotoModal
+                  individual={individual as IndividualNode}
+                />
+              ) : null}
+            </Box>
+          </>
+        }
+      />
+
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />
         <IndividualVulnerabilities individual={individual as IndividualNode} />

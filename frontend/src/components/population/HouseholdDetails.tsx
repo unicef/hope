@@ -218,16 +218,16 @@ export function HouseholdDetails({
             )}
           </Grid>
           <Grid item xs={4}>
-            <LabelizedField label={t('Total Cash Received')}>
-              <BigValueContainer>
+            <BigValueContainer>
+              <LabelizedField label={t('Total Cash Received')}>
                 <BigValue>
                   {formatCurrencyWithSymbol(
                     household.totalCashReceivedUsd,
                     'USD',
                   )}
                 </BigValue>
-              </BigValueContainer>
-            </LabelizedField>
+              </LabelizedField>
+            </BigValueContainer>
           </Grid>
         </Grid>
       </OverviewPaper>
