@@ -2,9 +2,9 @@ import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useIndividualFlexFieldsQuery } from '../../__generated__/graphql';
+import { useImportedIndividualFlexFieldsQuery } from '../../../../__generated__/graphql';
+import { Dialog } from '../../../dialogs/Dialog';
+import { DialogActions } from '../../../dialogs/DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -32,11 +32,11 @@ export const StyledLink = styled(Link)`
   color: #000;
 `;
 
-export const IndividualFlexFieldPhotoModal = ({
+export const ImportedIndividualFlexFieldPhotoModal = ({
   field,
 }): React.ReactElement => {
   const { id } = useParams();
-  const { data } = useIndividualFlexFieldsQuery({
+  const { data } = useImportedIndividualFlexFieldsQuery({
     variables: { id },
     fetchPolicy: 'network-only',
   });
@@ -46,8 +46,9 @@ export const IndividualFlexFieldPhotoModal = ({
     return null;
   }
 
-  const { flexFields } = data.individual;
+  const { flexFields } = data.importedIndividual;
   const picUrl = flexFields[field.name];
+
   return (
     <>
       <MiniImage alt='photo' src={picUrl} onClick={() => setDialogOpen(true)} />

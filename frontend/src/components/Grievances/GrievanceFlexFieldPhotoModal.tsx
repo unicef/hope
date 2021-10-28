@@ -47,7 +47,10 @@ export const GrievanceFlexFieldPhotoModal = ({
   isIndividual,
 }: GrievanceFlexFieldPhotoModalProps): React.ReactElement => {
   const { id } = useParams();
-  const { data } = useGrievanceTicketFlexFieldsQuery({ variables: { id } });
+  const { data } = useGrievanceTicketFlexFieldsQuery({
+    variables: { id },
+    fetchPolicy: 'network-only',
+  });
   const [dialogOpen, setDialogOpen] = useState(false);
   if (!data) {
     return null;
@@ -62,7 +65,8 @@ export const GrievanceFlexFieldPhotoModal = ({
   const picUrl: string = isCurrent
     ? flexFields[field.name]?.previous_value
     : flexFields[field.name]?.value;
-  return (
+
+  return picUrl ? (
     <>
       <MiniImage alt='photo' src={picUrl} onClick={() => setDialogOpen(true)} />
       <Dialog
@@ -85,5 +89,7 @@ export const GrievanceFlexFieldPhotoModal = ({
         </DialogFooter>
       </Dialog>
     </>
+  ) : (
+    <>-</>
   );
 };
