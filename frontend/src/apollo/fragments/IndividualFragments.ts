@@ -146,5 +146,13 @@ export const individualDetailed = gql`
       }
     }
     flexFields
+    householdsAndRoles {
+      id
+      role
+      household {
+        id
+        unicefId
+      }
+    }
   }
 `;

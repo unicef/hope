@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -58,6 +58,7 @@ interface Props {
   breadCrumbs?: BreadCrumbsItem[];
   tabs?: React.ReactElement;
   hasInputComponent?: boolean;
+  flags?: React.ReactElement;
 }
 
 export function PageHeader({
@@ -66,6 +67,7 @@ export function PageHeader({
   breadCrumbs = null,
   tabs = null,
   hasInputComponent,
+  flags,
 }: Props): React.ReactElement {
   const history = useHistory();
   return (
@@ -85,7 +87,12 @@ export function PageHeader({
             ) : (
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
-                <Typography variant='h5'>{title}</Typography>
+                <Box display='flex' alignItems='center'>
+                  <Typography variant='h5'>{title}</Typography>
+                  <Box display='flex' ml={2}>
+                    {flags}
+                  </Box>
+                </Box>
               </>
             )}
           </div>

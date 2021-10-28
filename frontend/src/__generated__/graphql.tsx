@@ -5755,6 +5755,13 @@ export type IndividualDetailedFragment = (
       { __typename?: 'IndividualNode' }
       & Pick<IndividualNode, 'id'>
     ) }
+  )>, householdsAndRoles: Array<(
+    { __typename?: 'IndividualRoleInHouseholdNode' }
+    & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
+    & { household: (
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'unicefId'>
+    ) }
   )> }
   & IndividualMinimalFragment
 );
@@ -9008,6 +9015,14 @@ export const IndividualDetailedFragmentDoc = gql`
     }
   }
   flexFields
+  householdsAndRoles {
+    id
+    role
+    household {
+      id
+      unicefId
+    }
+  }
 }
     ${IndividualMinimalFragmentDoc}`;
 export const TargetPopulationMinimalFragmentDoc = gql`
