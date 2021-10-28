@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
+import { PhotoPreview } from '../PhotoPreview';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
@@ -37,6 +39,10 @@ const BoxWithBorders = styled.div`
 
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
+`;
+
+const Image = styled.img`
+  max-width: 150px;
 `;
 
 export interface EditIndividualDataChangeField {
@@ -103,6 +109,11 @@ export const EditIndividualDataChangeField = ({
         required: field.required,
       };
       break;
+    case 'IMAGE':
+      fieldProps = {
+        component: FormikFileField,
+      };
+      break;
     default:
       fieldProps = {};
   }
@@ -154,6 +165,14 @@ export function CurrentValue({
       /* eslint-disable-next-line no-nested-ternary */
       displayValue = value === null ? '-' : value ? t('Yes') : t('No');
       break;
+    case 'IMAGE':
+      return (
+        <Grid item xs={3}>
+          <PhotoPreview src={value}>
+            <Image src={value} />
+          </PhotoPreview>
+        </Grid>
+      );
     default:
       displayValue = value;
   }

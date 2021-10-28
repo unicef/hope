@@ -18,3 +18,4 @@ def send_target_population_task():
         raise
 
     logger.info("send_target_population_task end")
+

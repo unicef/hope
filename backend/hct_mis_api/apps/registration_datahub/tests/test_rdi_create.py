@@ -19,11 +19,11 @@ from django.test import TestCase
 from django_countries.fields import Country
 from PIL import Image
 
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea, AdminAreaLevel
+from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    DocumentType,
     IDENTIFICATION_TYPE_CHOICE,
+    DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -62,7 +62,10 @@ class TestRdiCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+            RdiKoboCreateTask,
+            RdiXlsxCreateTask,
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -342,7 +345,10 @@ class TestRdiKoboCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+            RdiKoboCreateTask,
+            RdiXlsxCreateTask,
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -596,7 +602,9 @@ class TestRdiKoboCreateTask(TestCase):
     )
     @unittest.skip("Remove this and run manually only!")
     def test_performance(self):
-        from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataValidator
+        from hct_mis_api.apps.registration_datahub.validators import (
+            KoboProjectImportDataValidator,
+        )
 
         self._generate_huge_file()
         content = Path(

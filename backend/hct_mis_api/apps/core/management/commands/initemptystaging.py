@@ -1,6 +1,6 @@
 import subprocess
 
-from django.core.management import call_command, BaseCommand
+from django.core.management import BaseCommand, call_command
 from django.db import connections
 
 from hct_mis_api.apps.core.management.sql import sql_drop_tables
@@ -27,6 +27,7 @@ class Command(BaseCommand):
         call_command("generateroles")
         call_command("loaddata", "hct_mis_api/apps/account/fixtures/superuser.json")
 
+        call_command("loadcountries")
         call_command("loadcountrycodes")
         call_command("loadadminareas", "--business_area", "Afghanistan")
         call_command("loadadminareas", "--business_area", "Somalia")

@@ -12,7 +12,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
     QUERY = """
     query GoldenRecordFilter($targetingCriteria: TargetingCriteriaObjectType!, $program: ID!, $businessArea: String) {
-      goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, program: $program, businessArea: $businessArea) {
+      goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, program: $program, businessArea: $businessArea, excludedIds: "") {
         totalCount
         edges {
           node {
@@ -32,7 +32,7 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
                     ]
                 }
             ]
-        }
+        },
     }
 
     RESIDENCE_STATUS_REFUGEE_VARIABLES = {

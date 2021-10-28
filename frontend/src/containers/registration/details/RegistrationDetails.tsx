@@ -17,14 +17,14 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 
-const BigValueContainer = styled.div`
+export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)}px;
   border-color: #b1b1b5;
   border-left-width: 1px;
   border-left-style: solid;
   display: flex;
 `;
-const BigValue = styled.div`
+export const BigValue = styled.div`
   font-family: ${({ theme }: { theme: MiśTheme }) =>
     theme.hctTypography.fontFamily};
   color: #253b46;

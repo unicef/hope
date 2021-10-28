@@ -7,6 +7,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
@@ -84,6 +85,11 @@ export const AddIndividualDataChangeField = ({
         required: field.required,
       };
       break;
+    case 'IMAGE':
+      fieldProps = {
+        component: FormikFileField,
+      };
+      break;
     default:
       fieldProps = {};
   }
@@ -136,13 +142,17 @@ export const AddIndividualDataChange = ({
         </Grid>
 
         {coreFields.map((item) => (
-          <AddIndividualDataChangeField field={item} />
+          <AddIndividualDataChangeField key={item.name} field={item} />
         ))}
         <Grid item xs={12}>
           {t('Flex Fields')}
         </Grid>
         {flexFields.map((item) => (
-          <AddIndividualDataChangeField field={item} flexField />
+          <AddIndividualDataChangeField
+            key={item.name}
+            field={item}
+            flexField
+          />
         ))}
       </Grid>
       <Grid container spacing={3}>

@@ -49,7 +49,7 @@ export function UsersListTableRow({
             <StatusBox status={user.status} statusToColor={userStatusToColor} />
           </StatusContainer>
         </TableCell>
-        <TableCell align='left'>{user.partner.name}</TableCell>
+        <TableCell align='left'>{user.partner?.name || '-'}</TableCell>
         <TableCell align='left'>{user.email}</TableCell>
         <TableCell align='left'>
           <UniversalMoment>{user.lastLogin}</UniversalMoment>

@@ -18,7 +18,7 @@ module.exports.AzureAdSingleSignOn = async function AzureAdSingleSignOn(
 ) {
   validateOptions(options);
 
-  const browser = await puppeteer.launch({ headless: !!options.headless });
+  const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   await page.goto(options.loginUrl);
 

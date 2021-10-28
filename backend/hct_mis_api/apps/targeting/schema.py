@@ -30,6 +30,7 @@ from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_and_get_object,
     decode_id_string,
+    map_unicef_ids_to_households_unicef_ids,
 )
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
@@ -272,11 +273,15 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
     rules = graphene.List(TargetingCriteriaRuleObjectType)
 
 
-def targeting_criteria_object_type_to_query(targeting_criteria_object_type, program: Union[str, Program]):
+def targeting_criteria_object_type_to_query(
+    targeting_criteria_object_type, program: Union[str, Program], excluded_ids=""
+):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     if not isinstance(program, Program):
         program = decode_and_get_object(program, Program, True)
-    targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin([])
+    targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin(
+        [], excluded_household_ids=map_unicef_ids_to_households_unicef_ids(excluded_ids)
+    )
     for rule in targeting_criteria_object_type.get("rules", []):
         targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingMixin(
             filters=[], individuals_filters_blocks=[]
@@ -314,6 +319,7 @@ class Query(graphene.ObjectType):
         HouseholdNode,
         targeting_criteria=TargetingCriteriaObjectType(required=True),
         program=graphene.Argument(graphene.ID, required=True),
+        excluded_ids=graphene.Argument(graphene.String, required=True),
         filterset_class=HouseholdFilter,
         permission_classes=(
             hopePermissionClass(Permissions.TARGETING_UPDATE),
@@ -331,6 +337,7 @@ class Query(graphene.ObjectType):
         HouseholdNode,
         target_population=graphene.Argument(graphene.ID, required=True),
         targeting_criteria=TargetingCriteriaObjectType(),
+        excluded_ids=graphene.Argument(graphene.String, required=True),
         filterset_class=HouseholdFilter,
         permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_DETAILS),),
     )
@@ -405,7 +412,7 @@ class Query(graphene.ObjectType):
             .all()
         )
 
-    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, **kwargs):
+    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
         return prefetch_selections(
-            Household.objects.filter(targeting_criteria_object_type_to_query(targeting_criteria, program))
+            Household.objects.filter(targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids))
         ).distinct()

@@ -5,19 +5,20 @@ import io
 import logging
 from itertools import chain
 
-import openpyxl
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import Sum, Count, F, Q
+from django.db.models import Count, F, Q, Sum
 from django.template.loader import render_to_string
 from django.urls import reverse
+
+import openpyxl
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
@@ -298,21 +299,21 @@ class GenerateDashboardReportContentHelpers:
                 received=Count(
                     path_to_payment_record_verifications,
                     filter=format_status_filter(PaymentVerification.STATUS_RECEIVED),
-                    distinct=True
+                    distinct=True,
                 )
             )
             .annotate(
                 not_received=Count(
                     path_to_payment_record_verifications,
                     filter=format_status_filter(PaymentVerification.STATUS_NOT_RECEIVED),
-                    distinct=True
+                    distinct=True,
                 )
             )
             .annotate(
                 received_with_issues=Count(
                     path_to_payment_record_verifications,
                     filter=format_status_filter(PaymentVerification.STATUS_RECEIVED_WITH_ISSUES),
-                    distinct=True
+                    distinct=True,
                 )
             )
             .annotate(
