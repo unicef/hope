@@ -107,7 +107,7 @@ class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Areas"
-        unique_together = ("area_type", "name")
+        unique_together = ("name", "p_code")
 
     def __str__(self):
         return self.name
