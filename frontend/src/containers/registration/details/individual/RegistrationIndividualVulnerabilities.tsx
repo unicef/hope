@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
-import { PhotoPreview } from '../../../../components/PhotoPreview';
 import { useArrayToDict } from '../../../../hooks/useArrayToDict';
 import {
   ImportedIndividualDetailedFragment,
   useAllIndividualsFlexFieldsAttributesQuery,
 } from '../../../../__generated__/graphql';
+import { ImportedIndividualFlexFieldPhotoModal } from './ImportedIndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -23,10 +23,6 @@ const Overview = styled(Paper)`
 const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
-const Image = styled.img`
-  max-width: 150px;
 `;
 
 interface RegistrationIndividualVulnerabilitiesProps {
@@ -65,9 +61,9 @@ export function RegistrationIndividualVulnerabilities({
 
       if (type === 'IMAGE') {
         children = (
-          <PhotoPreview src={value}>
-            <Image src={value} />
-          </PhotoPreview>
+          <ImportedIndividualFlexFieldPhotoModal
+            field={flexAttributesDict[key]}
+          />
         );
       } else if (type === 'SELECT_MANY' || type === 'SELECT_ONE') {
         newValue = getLabelOrDash(choices, value);

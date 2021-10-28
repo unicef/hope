@@ -41,10 +41,6 @@ const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
 `;
 
-const Image = styled.img`
-  max-width: 150px;
-`;
-
 export interface EditIndividualDataChangeField {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   name: string;
