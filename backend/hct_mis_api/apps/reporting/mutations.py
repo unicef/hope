@@ -1,16 +1,20 @@
-import graphene
 from django.shortcuts import get_object_or_404
 
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+import graphene
+
+from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
-
-from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
-from hct_mis_api.apps.reporting.celery_tasks import report_export_task, dashboard_report_export_task
-from hct_mis_api.apps.reporting.schema import ReportNode
-from hct_mis_api.apps.reporting.models import Report, DashboardReport
-from hct_mis_api.apps.reporting.validators import ReportValidator
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.reporting.celery_tasks import (
+    dashboard_report_export_task,
+    report_export_task,
+)
+from hct_mis_api.apps.reporting.models import DashboardReport, Report
+from hct_mis_api.apps.reporting.schema import ReportNode
+from hct_mis_api.apps.reporting.validators import ReportValidator
 
 
 class CreateReportInput(graphene.InputObjectType):
@@ -108,6 +112,8 @@ class CreateDashboardReport(PermissionMutation):
         if admin_area_id and business_area.slug != "global":
             admin_area = get_object_or_404(AdminArea, id=decode_id_string(admin_area_id))
             report_vars["admin_area"] = admin_area
+            admin_area_new = get_object_or_404(Area, original_id=decode_id_string(admin_area_id))
+            report_vars["admin_area_new"] = admin_area_new
 
         report = DashboardReport.objects.create(**report_vars)
 

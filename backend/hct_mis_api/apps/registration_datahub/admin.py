@@ -1,12 +1,16 @@
+import re
+
 from django.contrib import admin
+from django.contrib.admin import FieldListFilter, SimpleListFilter
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin
+from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
+from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, TextFieldFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.registration_datahub.models import (
@@ -20,6 +24,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
@@ -29,7 +34,6 @@ class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixi
     list_filter = (
         "created_at",
         "import_done",
-        ("registration_data_import", AutoCompleteFilter),
         TextFieldFilter.factory("business_area_slug__istartswith"),
     )
     advanced_filter_fields = (
@@ -78,6 +82,71 @@ class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixi
 #                  "proximity_to_score": 5.0}],
 #                  "possible_duplicates": []}
 
+number = r"(\d+(\.(\d+)))*"
+rexx = [
+    re.compile(rf"^(>=|<=|>|<|=)?([-+]?{number})$"),
+    re.compile(rf"{number}"),
+    # re.compile(r'(\d+)'),
+    # re.compile(r'^(<>)?([-+]?[0-9]+)$')
+]
+
+rex = re.compile(r"^(?P<op>>=|<=|>|<|=)?(?P<value>\d+(\.\d+)?)")
+
+
+def math_to_django(clause):
+    mapping = {
+        ">=": "gte",
+        "<=": "lte",
+        ">": "gt",
+        "<": "lt",
+        "=": "exact",
+        "<>": "not",
+    }
+    # for rex in rexx:
+    if match := rex.match(clause):
+        groups = match.groupdict()
+        op = groups.get("op", "=")
+        value = groups.get("value", 0)
+        return mapping[op or "="], value
+    return None, None
+
+
+class ScoreFilter(FieldListFilter):
+    template = "adminfilters/text.html"
+    title = "score"
+    parameter_name = "score"
+
+    def __init__(self, field, request, params, model, model_admin, field_path):
+        super().__init__(field, request, params, model, model_admin, field_path)
+        self.original_title = self.title
+
+    def expected_parameters(self):
+        return [self.parameter_name]
+
+    def value(self):
+        return self.used_parameters.get(self.parameter_name, "")
+
+    def queryset(self, request, queryset):
+        op, value = math_to_django(self.value())
+        if value:
+            self.title = f"{self.original_title} {op} {value}"
+            queryset = queryset.filter(**{f"{self.field_path}__score__max__{op}": float(value)})
+        return queryset
+
+    def choices(self, changelist):
+        yield {
+            "selected": False,
+            "query_string": changelist.get_query_string(
+                {},
+                [
+                    self.parameter_name,
+                ],
+            ),
+            "lookup_kwarg": self.parameter_name,
+            "display": "All",
+            "value": self.value(),
+        }
+
 
 @admin.register(ImportedIndividual)
 class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
@@ -87,8 +156,12 @@ class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         "full_name",
         "sex",
         "dedupe_status",
+        "score",
+        "batch_score",
     )
     list_filter = (
+        ("deduplication_batch_results", ScoreFilter),
+        ("deduplication_golden_record_results", ScoreFilter),
         TextFieldFilter.factory("registration_data_import__name__istartswith"),
         TextFieldFilter.factory("individual_id__istartswith"),
         "deduplication_batch_status",
@@ -96,6 +169,19 @@ class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("household", "registration_data_import")
+    actions = ["enrich_deduplication"]
+
+    def score(self, obj):
+        try:
+            return obj.deduplication_golden_record_results["score"]["max"]
+        except KeyError:
+            return ""
+
+    def batch_score(self, obj):
+        try:
+            return obj.deduplication_batch_results["score"]["max"]
+        except KeyError:
+            return ""
 
     def dedupe_status(self, obj):
         lbl = f"{obj.deduplication_batch_status}/{obj.deduplication_golden_record_status}"
@@ -107,6 +193,16 @@ class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         else:
             ret = lbl
         return mark_safe(ret)
+
+    def enrich_deduplication(self, request, queryset):
+        for record in queryset.exclude(deduplication_batch_results__has_key="score"):
+            post_process_dedupe_results(record)
+
+    @button()
+    def post_process_dedupe_results(self, request, pk):
+        record = self.get_queryset(request).get(id=pk)
+        post_process_dedupe_results(record)
+        record.save()
 
     @button()
     def duplicates(self, request, pk):

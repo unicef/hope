@@ -22,7 +22,7 @@ const importXlsDocument = (type) => {
 };
 
 When('the User navigates to Django Administration page', () => {
-  cy.visit('/api/admin');
+  cy.visit('/api/unicorn');
 });
 
 Then('the Site Administration page is shown', () => {
@@ -36,7 +36,7 @@ Then('the Site Administration page is shown', () => {
 });
 
 When('the User navigates to Flexible Attributes import section', () => {
-  cy.visit('/api/admin/core/flexibleattribute/import-xls/');
+  cy.visit('/api/unicorn/core/flexibleattribute/import-xls/');
 });
 
 And('the User imports a valid XLS file with flexible attributes', () => {

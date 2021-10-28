@@ -1,18 +1,23 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import FlagIcon from '@material-ui/icons/Flag';
 import { Tooltip } from '@material-ui/core';
-import WarningIcon from '@material-ui/icons/Warning';
-import { MiśTheme } from '../theme';
+import styled from 'styled-components';
 
-const useStyles = makeStyles((theme: MiśTheme) => ({
-  warning: { color: theme.hctPalette.red },
-}));
-
-export const FlagTooltip = ({ message = '' }): React.ReactElement => {
-  const classes = useStyles();
+const StyledFlag = styled(FlagIcon)`
+  color: ${({ theme, confirmed }) =>
+    confirmed ? 'deeppink' : theme.hctPalette.oragne};
+`;
+interface FlagTooltipProps {
+  confirmed?: boolean;
+  message?: string;
+}
+export const FlagTooltip = ({
+  confirmed,
+  message = '',
+}: FlagTooltipProps): React.ReactElement => {
   return (
     <Tooltip title={message}>
-      <WarningIcon className={classes.warning} />
+      <StyledFlag confirmed={confirmed} />
     </Tooltip>
   );
 };

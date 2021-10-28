@@ -75,7 +75,7 @@ def load_admin_area(country_id: int, geom, page_size, max_records, notify_to=Non
     
     Created: {results['created']}
     Updated: {results['updated']}
-    Errors: {results['errors'].length}
+    Errors: {len(results['errors'])}
     
     
     """,

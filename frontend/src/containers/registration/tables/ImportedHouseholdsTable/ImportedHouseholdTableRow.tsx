@@ -1,13 +1,14 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
-import { decodeIdString } from '../../../../utils/utils';
-import { FlagTooltip } from '../../../../components/FlagTooltip';
-import { UniversalMoment } from '../../../../components/UniversalMoment';
-import { AnonTableCell } from '../../../../components/table/AnonTableCell';
+import { useTranslation } from 'react-i18next';
 import { BlackLink } from '../../../../components/BlackLink';
+import { WarningTooltip } from '../../../../components/WarningTooltip';
+import { AnonTableCell } from '../../../../components/table/AnonTableCell';
+import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { decodeIdString } from '../../../../utils/utils';
+import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
 
 interface PaymentRecordTableRowProps {
   household: ImportedHouseholdMinimalFragment;
@@ -17,6 +18,7 @@ export function ImportedHouseholdTableRow({
   household,
 }: PaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
+  const { t } = useTranslation();
   const householdPath = `/${businessArea}/registration-data-import/household/${household.id}`;
   const handleClick = (): void => {
     const win = window.open(householdPath, '_blank');
@@ -33,7 +35,7 @@ export function ImportedHouseholdTableRow({
     >
       <TableCell align='left'>
         {household.hasDuplicates && (
-          <FlagTooltip message='Possible duplicates' />
+          <WarningTooltip confirmed message={t('Houesehold has Duplicates')} />
         )}
       </TableCell>
       <TableCell align='left'>

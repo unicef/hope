@@ -1,11 +1,9 @@
-import React from 'react';
 import { Typography } from '@material-ui/core';
-import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
-import { Flag } from './Flag';
-import { FlagTooltip } from './FlagTooltip';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
@@ -60,9 +58,6 @@ interface Props {
   breadCrumbs?: BreadCrumbsItem[];
   tabs?: React.ReactElement;
   hasInputComponent?: boolean;
-  withTriangle?: boolean;
-  possibleMatch?: boolean;
-  confirmedMatch?: boolean;
 }
 
 export function PageHeader({
@@ -71,9 +66,6 @@ export function PageHeader({
   breadCrumbs = null,
   tabs = null,
   hasInputComponent,
-  possibleMatch = false,
-  withTriangle = false,
-  confirmedMatch = false,
 }: Props): React.ReactElement {
   const history = useHistory();
   return (
@@ -93,12 +85,7 @@ export function PageHeader({
             ) : (
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
-                <Typography variant='h5'>
-                  {title} {withTriangle && <FlagTooltip />}{' '}
-                  {(possibleMatch || confirmedMatch) && (
-                    <Flag confirmed={confirmedMatch} />
-                  )}
-                </Typography>
+                <Typography variant='h5'>{title}</Typography>
               </>
             )}
           </div>

@@ -5,6 +5,7 @@ from collections import defaultdict, namedtuple
 from functools import cached_property
 from urllib.parse import unquote
 
+from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
@@ -14,19 +15,22 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.forms import UserCreationForm, UsernameField
+from django.contrib.auth.models import Group
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import router, transaction
 from django.db.models import Q
 from django.db.transaction import atomic
-from django.forms import ModelChoiceField, MultipleChoiceField
+from django.forms import EmailField, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
@@ -36,9 +40,11 @@ from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import AllValuesComboFilter, RelatedFieldComboFilter
 from constance import config
+from hijack.contrib.admin import HijackUserAdminMixin
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 from smart_admin.decorators import smart_register
+from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm, KoboLoginForm
@@ -305,7 +311,7 @@ class BusinessAreaFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value():
-            return queryset.filter(user_roles__business_area=self.value())
+            return queryset.filter(user_roles__business_area=self.value()).distinct()
         return queryset
 
 
@@ -315,9 +321,23 @@ class PartnerAdmin(ExtraUrlMixin, admin.ModelAdmin):
     search_fields = ("name",)
 
 
+class HopeUserCreationForm(UserCreationForm):
+    class Meta:
+        model = User
+        # fields = ("username", "email")
+        fields = ()
+        field_classes = {"username": UsernameField, "email": EmailField}
+
+
 @admin.register(account_models.User)
-class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
+class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
+    add_form = HopeUserCreationForm
+    add_form_template = "admin/auth/user/add_form.html"
+    readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
+
+    change_form_template = None
+    hijack_success_url = f"/api/{settings.ADMIN_PANEL_URL}/"
     list_filter = (
         ("partner", AutoCompleteFilter),
         BusinessAreaFilter,
@@ -336,9 +356,7 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         "is_superuser",
         "kobo_user",
     )
-    readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
     fieldsets = (
-        # (None, {"fields": ("username", "password")}),
         (
             _("Personal info"),
             {
@@ -392,24 +410,23 @@ class UserAdmin(ExtraUrlMixin, AdminActionPermMixin, BaseUserAdmin):
         JSONField: {"widget": JSONEditor},
     }
 
+    @property
+    def media(self):
+        return super().media + forms.Media(js=["hijack/hijack.js"])
+
     def get_fields(self, request, obj=None):
-        return ["last_name", "first_name", "email", "partner", "job_title"]
+        return [
+            "last_name",
+            "first_name",
+            "email",
+            "partner",
+            "job_title",
+        ]
 
     def get_fieldsets(self, request, obj=None):
         if request.user.is_superuser:
             return super().get_fieldsets(request, obj)
         return [(None, {"fields": self.get_fields(request, obj)})]
-
-    @button()
-    def linked_objects(self, request, pk):
-        ignored = config.IGNORED_USER_LINKED_OBJECTS.split(",")
-        context = self.get_common_context(request, pk, title="Inspect")
-        reverse = []
-        for f in self.model._meta.get_fields():
-            if f.auto_created and not f.concrete and not f.name in ignored:
-                reverse.append(f)
-        context["reverse"] = reverse
-        return TemplateResponse(request, "admin/account/user/inspect.html", context)
 
     def kobo_user(self, obj):
         return obj.custom_fields.get("kobo_username")
@@ -921,7 +938,8 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 class UserRoleAdmin(HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
-    raw_id_fields = ("user", "business_area")
+    autocomplete_fields = ("role",)
+    raw_id_fields = ("user", "business_area", "role")
     search_fields = ("user__username__istartswith",)
     list_filter = (
         ("business_area", AutoCompleteFilter),
@@ -955,12 +973,6 @@ class IncompatibleRoleFilter(SimpleListFilter):
 class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)
-
-
-from django.contrib.admin import site
-from django.contrib.auth.models import Group
-
-from smart_admin.smart_auth.admin import GroupAdmin
 
 
 @smart_register(Group)

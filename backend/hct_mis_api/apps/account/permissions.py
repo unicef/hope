@@ -31,6 +31,7 @@ class Permissions(Enum):
     RDI_IMPORT_DATA = auto()
     RDI_RERUN_DEDUPE = auto()
     RDI_MERGE_IMPORT = auto()
+    RDI_REFUSE_IMPORT = auto()
 
     # Population
     POPULATION_VIEW_HOUSEHOLDS_LIST = auto()
