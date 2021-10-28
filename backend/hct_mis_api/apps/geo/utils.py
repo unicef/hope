@@ -46,11 +46,11 @@ def initialise_areas():
         try:
             area_type = AreaType.objects.get(original_id=old_area.admin_area_level.id)
             Area.objects.update_or_create(
+                p_code=old_area.p_code,
                 name=old_area.title,
-                area_type=area_type,
                 defaults={
                     "original_id": old_area.id,
-                    "p_code": old_area.p_code,
+                    "area_type": area_type,
                     "parent": Area.objects.filter(p_code=old_area.parent.p_code).first(),
                 },
             )
@@ -99,3 +99,82 @@ def initialise_countries():
         logger.exception(e)
         results["errors"].append(e)
     return results
+
+
+def copy_admin_area_data():
+    areas = {}
+    from django.db import models
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
+    from hct_mis_api.apps.household.models import Household
+    from hct_mis_api.apps.program.models import Program
+    from hct_mis_api.apps.reporting.models import DashboardReport
+    from hct_mis_api.apps.reporting.models import Report
+
+    models_to_update = (
+        GrievanceTicket,
+        Household,
+        Program,
+        DashboardReport,
+        Report,
+    )
+    for Model in models_to_update:
+        try:
+            for field in Model._meta.get_fields():
+                if type(field) == models.ForeignKey:
+                    opts = field.related_model._meta
+                    if opts.app_label == "geo" and opts.model_name == "area":
+                        old_field_name = field.name[:-4]
+                        geo_name = field.name
+                        records = Model.objects.all()
+                        for record in records:
+                            source = getattr(record, old_field_name)
+                            if source:
+                                p_code = source.p_code
+                                if p_code not in areas.keys():
+                                    areas[p_code] = Area.objects.get(p_code=p_code)
+                                setattr(record, geo_name, areas[p_code])
+                        Model.objects.bulk_update(records, [geo_name])
+        except Exception as e:
+            raise
+
+
+def copy_country_data():
+    from django.db import models
+    from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
+    from hct_mis_api.apps.sanction_list.models import SanctionListIndividualDocument
+    from hct_mis_api.apps.sanction_list.models import SanctionListIndividualNationalities
+    from hct_mis_api.apps.sanction_list.models import SanctionListIndividualCountries
+    from hct_mis_api.apps.household.models import Agency
+    from hct_mis_api.apps.household.models import DocumentType
+    from hct_mis_api.apps.household.models import Household
+    from hct_mis_api.apps.core.models import CountryCodeMap
+
+    models_to_update = (
+        CountryCodeMap,
+        Household,
+        DocumentType,
+        Agency,
+        SanctionListIndividualCountries,
+        SanctionListIndividualNationalities,
+        SanctionListIndividualDocument,
+        SanctionListIndividual,
+    )
+    countries = {}
+    for Model in models_to_update:
+        try:
+            for field in Model._meta.get_fields():
+                if type(field) == models.ForeignKey:
+                    opts = field.related_model._meta
+                    if opts.app_label == "geo" and opts.model_name == "country":
+                        old_field_name = field.name[:-4]
+                        geo_name = field.name
+                        records = Model.objects.all()
+                        for record in records:
+                            source = getattr(record, old_field_name).code
+                            if source:
+                                if source not in countries:
+                                    countries[source] = Country.objects.get(iso_code2=source)
+                                setattr(record, geo_name, countries[source])
+                        Model.objects.bulk_update(records, [geo_name])
+        except Exception as e:
+            raise
