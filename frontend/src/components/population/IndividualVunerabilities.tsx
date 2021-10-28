@@ -25,10 +25,6 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-const Image = styled.img`
-  max-width: 150px;
-`;
-
 interface IndividualVulnerabilitesProps {
   individual: IndividualNode;
 }

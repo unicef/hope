@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useIndividualFlexFieldsQuery } from '../../__generated__/graphql';
+import { useHouseholdFlexFieldsQuery } from '../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -32,11 +32,9 @@ export const StyledLink = styled(Link)`
   color: #000;
 `;
 
-export const IndividualFlexFieldPhotoModal = ({
-  field,
-}): React.ReactElement => {
+export const HouseholdFlexFieldPhotoModal = ({ field }): React.ReactElement => {
   const { id } = useParams();
-  const { data } = useIndividualFlexFieldsQuery({
+  const { data } = useHouseholdFlexFieldsQuery({
     variables: { id },
     fetchPolicy: 'network-only',
   });
@@ -46,8 +44,9 @@ export const IndividualFlexFieldPhotoModal = ({
     return null;
   }
 
-  const { flexFields } = data.individual;
+  const { flexFields } = data.household;
   const picUrl = flexFields[field.name];
+
   return (
     <>
       <MiniImage alt='photo' src={picUrl} onClick={() => setDialogOpen(true)} />
