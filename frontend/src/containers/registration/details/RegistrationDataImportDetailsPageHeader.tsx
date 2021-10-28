@@ -77,7 +77,7 @@ export function RegistrationDataImportDetailsPageHeader({
     case RegistrationDataImportStatus.Merged:
       buttons = (
         <div>
-          {canRerunDedupe && (
+          (
             <MergeButtonContainer>
               <Button
                 variant='contained'
@@ -88,7 +88,7 @@ export function RegistrationDataImportDetailsPageHeader({
                 {t('View Tickets')}
               </Button>
             </MergeButtonContainer>
-          )}
+          )
         </div>
       );
       break;
