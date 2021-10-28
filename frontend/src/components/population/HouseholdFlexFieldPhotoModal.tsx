@@ -47,7 +47,7 @@ export const HouseholdFlexFieldPhotoModal = ({ field }): React.ReactElement => {
   const { flexFields } = data.household;
   const picUrl = flexFields[field.name];
 
-  return (
+  return picUrl ? (
     <>
       <MiniImage alt='photo' src={picUrl} onClick={() => setDialogOpen(true)} />
       <Dialog
@@ -70,5 +70,7 @@ export const HouseholdFlexFieldPhotoModal = ({ field }): React.ReactElement => {
         </DialogFooter>
       </Dialog>
     </>
+  ) : (
+    <>-</>
   );
 };

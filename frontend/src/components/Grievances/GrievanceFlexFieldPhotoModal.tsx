@@ -65,7 +65,6 @@ export const GrievanceFlexFieldPhotoModal = ({
   const picUrl: string = isCurrent
     ? flexFields[field.name]?.previous_value
     : flexFields[field.name]?.value;
-
   return picUrl ? (
     <>
       <MiniImage alt='photo' src={picUrl} onClick={() => setDialogOpen(true)} />

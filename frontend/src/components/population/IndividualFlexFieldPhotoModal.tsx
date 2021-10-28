@@ -48,7 +48,8 @@ export const IndividualFlexFieldPhotoModal = ({
 
   const { flexFields } = data.individual;
   const picUrl = flexFields[field.name];
-  return (
+
+  return picUrl ? (
     <>
       <MiniImage alt='photo' src={picUrl} onClick={() => setDialogOpen(true)} />
       <Dialog
@@ -71,5 +72,7 @@ export const IndividualFlexFieldPhotoModal = ({
         </DialogFooter>
       </Dialog>
     </>
+  ) : (
+    <>-</>
   );
 };
