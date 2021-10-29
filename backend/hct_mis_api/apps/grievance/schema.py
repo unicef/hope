@@ -460,7 +460,10 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
             for name, value in flex_fields.items():
                 if value and name in images_flex_fields_names:
                     try:
-                        flex_fields[name] = default_storage.url(value)
+                        if value:
+                            flex_fields[name] = default_storage.url(value)
+                        else:
+                            flex_fields[name] = ""
                     except Exception:
                         pass
             individual_data["flex_fields"] = flex_fields
