@@ -73,6 +73,8 @@ export const IndividualFlexFieldPhotoModal = ({
       </Dialog>
     </>
   ) : (
-    <>-</>
+    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+      -
+    </Box>
   );
 };
