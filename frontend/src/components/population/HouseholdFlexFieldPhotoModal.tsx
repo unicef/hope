@@ -71,6 +71,8 @@ export const HouseholdFlexFieldPhotoModal = ({ field }): React.ReactElement => {
       </Dialog>
     </>
   ) : (
-    <>-</>
+    <Box display='flex' alignItems='center'>
+      -
+    </Box>
   );
 };

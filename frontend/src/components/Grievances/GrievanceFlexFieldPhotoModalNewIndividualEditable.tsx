@@ -7,14 +7,14 @@ import {
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import {
   AllAddIndividualFieldsQuery,
-  useGrievanceTicketFlexFieldsQuery,
+  useIndividualFlexFieldsQuery,
 } from '../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
@@ -43,25 +43,22 @@ export const StyledLink = styled(Link)`
   color: #000;
 `;
 
-export interface GrievanceFlexFieldPhotoModalEditableProps {
+export interface GrievanceFlexFieldPhotoModalNewIndividualEditableProps {
   flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
-  isCurrent?: boolean;
-  isIndividual?: boolean;
+  individualId: string;
   field;
   form;
 }
 
-export const GrievanceFlexFieldPhotoModalEditable = ({
-  isCurrent,
-  isIndividual,
+export const GrievanceFlexFieldPhotoModalNewIndividualEditable = ({
+  flexField,
+  individualId,
   field,
   form,
-  flexField,
-}: GrievanceFlexFieldPhotoModalEditableProps): React.ReactElement => {
+}: GrievanceFlexFieldPhotoModalNewIndividualEditableProps): React.ReactElement => {
   const [isEdited, setEdit] = useState(false);
-  const { id } = useParams();
-  const { data } = useGrievanceTicketFlexFieldsQuery({
-    variables: { id },
+  const { data } = useIndividualFlexFieldsQuery({
+    variables: { id: individualId },
     fetchPolicy: 'network-only',
   });
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -69,15 +66,9 @@ export const GrievanceFlexFieldPhotoModalEditable = ({
     return null;
   }
 
-  const flexFields = isIndividual
-    ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-        ?.flex_fields
-    : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-        ?.flex_fields;
+  const { flexFields } = data.individual;
 
-  const picUrl: string = isCurrent
-    ? flexFields[flexField.name]?.previous_value
-    : flexFields[flexField.name]?.value;
+  const picUrl: string = flexFields[flexField.name];
 
   return (
     <Box style={{ height: '100%' }} display='flex' alignItems='center'>
