@@ -95,16 +95,15 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
                 />
               )}
             </Box>
-            <Box mr={2}>
-              {individual.photo ? (
-                <IndividualPhotoModal
-                  individual={individual as IndividualNode}
-                />
-              ) : null}
-            </Box>
           </>
         }
-      />
+      >
+        <Box mr={2}>
+          {individual.photo ? (
+            <IndividualPhotoModal individual={individual as IndividualNode} />
+          ) : null}
+        </Box>
+      </PageHeader>
 
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />
