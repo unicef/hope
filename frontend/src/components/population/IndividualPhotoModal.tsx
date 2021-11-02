@@ -1,29 +1,17 @@
 import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import {
   IndividualNode,
   useIndividualPhotosLazyQuery,
 } from '../../__generated__/graphql';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const StyledImage = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-`;
+import {
+  DialogFooter,
+  DialogTitleWrapper,
+  StyledImage,
+} from './IndividualFlexFieldPhotoModal';
 
 interface IndividualPhotoModalProps {
   individual: IndividualNode;

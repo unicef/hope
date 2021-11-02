@@ -6,26 +6,33 @@ import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useIndividualFlexFieldsQuery } from '../../__generated__/graphql';
 
-const DialogTitleWrapper = styled.div`
+export const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-const DialogFooter = styled.div`
+export const DialogFooter = styled.div`
   padding: 12px 16px;
   margin: 0;
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
 `;
 
-const StyledImage = styled.img`
-  max-width: 100%;
-  max-height: 100%;
+export const StyledImage = styled.div`
+  width: 500px;
+  height: 500px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url(${({ src }) => src});
+  background-size: 100%;
 `;
-
-const MiniImage = styled.img`
+export const MiniImage = styled.img`
   height: 45px;
   width: 45px;
   cursor: pointer;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url(${({ src }) => src});
+  background-size: 100%;
 `;
 
 export const StyledLink = styled(Link)`
