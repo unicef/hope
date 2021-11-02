@@ -258,7 +258,7 @@ export function EditGrievancePage(): React.ReactElement {
                 <Box mr={3}>
                   <Button
                     component={Link}
-                    to={`/${businessArea}/grievance-and-feedback`}
+                    to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}
                   >
                     {t('Cancel')}
                   </Button>
