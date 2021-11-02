@@ -76,20 +76,16 @@ export function RegistrationDataImportDetailsPageHeader({
       break;
     case RegistrationDataImportStatus.Merged:
       buttons = (
-        <div>
-          (
-            <MergeButtonContainer>
-              <Button
-                variant='contained'
-                color='primary'
-                component={Link}
-                to={`/${businessArea}/grievance-and-feedback/rdi/${registration.id}`}
-              >
-                {t('View Tickets')}
-              </Button>
-            </MergeButtonContainer>
-          )
-        </div>
+        <MergeButtonContainer>
+          <Button
+            variant='contained'
+            color='primary'
+            component={Link}
+            to={`/${businessArea}/grievance-and-feedback/rdi/${registration.id}`}
+          >
+            {t('View Tickets')}
+          </Button>
+        </MergeButtonContainer>
       );
       break;
   }
