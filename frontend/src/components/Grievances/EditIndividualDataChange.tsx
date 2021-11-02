@@ -47,12 +47,10 @@ const AddIcon = styled(AddCircleOutline)`
 export interface EditIndividualDataChangeField {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   name: string;
-  values?;
 }
 export const EditIndividualDataChangeField = ({
   name,
   field,
-  values,
 }: EditIndividualDataChangeField): React.ReactElement => {
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
@@ -120,7 +118,6 @@ export const EditIndividualDataChangeField = ({
           : GrievanceFlexFieldPhotoModalEditable,
         flexField: field,
         isIndividual: true,
-        individualId: values?.selectedIndividual?.id || null,
       };
       break;
     default:
@@ -266,7 +263,6 @@ export const EditIndividualDataChangeFieldRow = ({
         <EditIndividualDataChangeField
           name={`individualDataUpdateFields[${index}].fieldValue`}
           field={field}
-          values={values}
         />
       ) : (
         <Grid item xs={4} />
