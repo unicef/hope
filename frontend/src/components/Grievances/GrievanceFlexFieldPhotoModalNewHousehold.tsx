@@ -1,20 +1,12 @@
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-} from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
+import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import {
-  AllAddIndividualFieldsQuery,
-  useIndividualFlexFieldsQuery,
+  AllEditHouseholdFieldsQuery,
+  useHouseholdFlexFieldsQuery,
 } from '../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
@@ -43,22 +35,17 @@ export const StyledLink = styled(Link)`
   color: #000;
 `;
 
-export interface GrievanceFlexFieldPhotoModalNewIndividualEditableProps {
-  flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
-  individualId: string;
-  field;
-  form;
+export interface GrievanceFlexFieldPhotoModalNewHouseholdProps {
+  flexField: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
+  householdId: string;
 }
 
-export const GrievanceFlexFieldPhotoModalNewIndividualEditable = ({
+export const GrievanceFlexFieldPhotoModalNewHousehold = ({
   flexField,
-  individualId,
-  field,
-  form,
-}: GrievanceFlexFieldPhotoModalNewIndividualEditableProps): React.ReactElement => {
-  const [isEdited, setEdit] = useState(false);
-  const { data } = useIndividualFlexFieldsQuery({
-    variables: { id: individualId },
+  householdId,
+}: GrievanceFlexFieldPhotoModalNewHouseholdProps): React.ReactElement => {
+  const { data } = useHouseholdFlexFieldsQuery({
+    variables: { id: householdId },
     fetchPolicy: 'network-only',
   });
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -66,28 +53,19 @@ export const GrievanceFlexFieldPhotoModalNewIndividualEditable = ({
     return null;
   }
 
-  const { flexFields } = data.individual;
+  const { flexFields } = data.household;
 
   const picUrl: string = flexFields[flexField.name];
 
   return (
     <Box style={{ height: '100%' }} display='flex' alignItems='center'>
-      {isEdited || !picUrl ? (
-        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
-          <FormikFileField field={field} form={form} />
-        </Box>
-      ) : (
+      {picUrl ? (
         <>
-          <Box display='flex' alignItems='center'>
-            <MiniImage
-              alt='photo'
-              src={picUrl}
-              onClick={() => setDialogOpen(true)}
-            />
-            <IconButton onClick={() => setEdit(true)}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
+          <MiniImage
+            alt='photo'
+            src={picUrl}
+            onClick={() => setDialogOpen(true)}
+          />
           <Dialog
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
@@ -108,6 +86,10 @@ export const GrievanceFlexFieldPhotoModalNewIndividualEditable = ({
             </DialogFooter>
           </Dialog>
         </>
+      ) : (
+        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+          -
+        </Box>
       )}
     </Box>
   );
