@@ -5,6 +5,7 @@ import { Field, FieldArray, useField } from 'formik';
 import camelCase from 'lodash/camelCase';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
@@ -20,10 +21,12 @@ import {
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
-import { PhotoPreview } from '../PhotoPreview';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import { GrievanceFlexFieldPhotoModal } from './GrievanceFlexFieldPhotoModal';
+import { GrievanceFlexFieldPhotoModalEditable } from './GrievanceFlexFieldPhotoModalEditable';
+import { GrievanceFlexFieldPhotoModalNewIndividual } from './GrievanceFlexFieldPhotoModalNewIndividual';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 
@@ -41,10 +44,6 @@ const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
 `;
 
-const Image = styled.img`
-  max-width: 150px;
-`;
-
 export interface EditIndividualDataChangeField {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   name: string;
@@ -53,6 +52,9 @@ export const EditIndividualDataChangeField = ({
   name,
   field,
 }: EditIndividualDataChangeField): React.ReactElement => {
+  const location = useLocation();
+  const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
+
   let fieldProps;
   switch (field.type) {
     case 'DECIMAL':
@@ -111,7 +113,11 @@ export const EditIndividualDataChangeField = ({
       break;
     case 'IMAGE':
       fieldProps = {
-        component: FormikFileField,
+        component: isNewTicket
+          ? FormikFileField
+          : GrievanceFlexFieldPhotoModalEditable,
+        flexField: field,
+        isIndividual: true,
       };
       break;
     default:
@@ -135,12 +141,17 @@ export const EditIndividualDataChangeField = ({
 export interface CurrentValueProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   value;
+  values;
 }
 
 export function CurrentValue({
   field,
   value,
+  values,
 }: CurrentValueProps): React.ReactElement {
+  const location = useLocation();
+  const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
+
   const { t } = useTranslation();
   let displayValue = value;
   switch (field?.type) {
@@ -166,11 +177,16 @@ export function CurrentValue({
       displayValue = value === null ? '-' : value ? t('Yes') : t('No');
       break;
     case 'IMAGE':
-      return (
+      return isNewTicket ? (
         <Grid item xs={3}>
-          <PhotoPreview src={value}>
-            <Image src={value} />
-          </PhotoPreview>
+          <GrievanceFlexFieldPhotoModalNewIndividual
+            flexField={field}
+            individualId={values?.selectedIndividual?.id || null}
+          />
+        </Grid>
+      ) : (
+        <Grid item xs={3}>
+          <GrievanceFlexFieldPhotoModal isCurrent isIndividual field={field} />
         </Grid>
       );
     default:
@@ -190,6 +206,7 @@ export interface EditIndividualDataChangeFieldRowProps {
   index: number;
   notAvailableFields: string[];
   onDelete: () => {};
+  values;
 }
 export const EditIndividualDataChangeFieldRow = ({
   fields,
@@ -198,6 +215,7 @@ export const EditIndividualDataChangeFieldRow = ({
   itemValue,
   notAvailableFields,
   onDelete,
+  values,
 }: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
   // eslint-disable-next-line
@@ -239,6 +257,7 @@ export const EditIndividualDataChangeFieldRow = ({
             ? individual[camelCase(itemValue.fieldName)]
             : individual.flexFields[itemValue.fieldName]
         }
+        values={values}
       />
       {itemValue.fieldName ? (
         <EditIndividualDataChangeField
@@ -260,6 +279,8 @@ export const EditIndividualDataChangeFieldRow = ({
 export interface EditIndividualDataChangeProps {
   values;
   setFieldValue;
+  form;
+  field;
 }
 
 export const EditIndividualDataChange = ({
@@ -334,6 +355,7 @@ export const EditIndividualDataChange = ({
                       fields={data.allAddIndividualsFieldsAttributes}
                       notAvailableFields={notAvailableItems}
                       onDelete={() => arrayHelpers.remove(index)}
+                      values={values}
                     />
                   ),
                 )}
