@@ -1,4 +1,5 @@
 import { Button, Grid, IconButton, Typography } from '@material-ui/core';
+import { useLocation } from 'react-router-dom';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, FieldArray, useField } from 'formik';
@@ -21,7 +22,8 @@ import {
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
-import { GrievanceFlexFieldPhotoModal } from './GrievanceFlexFieldPhotoModal';
+import { GrievanceFlexFieldPhotoModalEditable } from './GrievanceFlexFieldPhotoModalEditable';
+import { GrievanceFlexFieldPhotoModalNewHousehold } from './GrievanceFlexFieldPhotoModalNewHousehold';
 
 const Title = styled.div`
   width: 100%;
@@ -39,6 +41,9 @@ export const EditHouseholdDataChangeField = ({
   name,
   field,
 }: EditHouseholdDataChangeField): React.ReactElement => {
+  const location = useLocation();
+  const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
+
   let fieldProps;
   switch (field.type) {
     case 'DECIMAL':
@@ -90,7 +95,11 @@ export const EditHouseholdDataChangeField = ({
       break;
     case 'IMAGE':
       fieldProps = {
-        component: FormikFileField,
+        component: isNewTicket
+          ? FormikFileField
+          : GrievanceFlexFieldPhotoModalEditable,
+        flexField: field,
+        isIndividual: false,
       };
       break;
     default:
@@ -115,11 +124,13 @@ export const EditHouseholdDataChangeField = ({
 export interface CurrentValueProps {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   value;
+  values;
 }
 
 export function CurrentValue({
   field,
   value,
+  values,
 }: CurrentValueProps): React.ReactElement {
   const { t } = useTranslation();
   let displayValue;
@@ -151,7 +162,10 @@ export function CurrentValue({
       case 'IMAGE':
         return (
           <Grid item xs={3}>
-            <GrievanceFlexFieldPhotoModal isCurrent field={field} />
+            <GrievanceFlexFieldPhotoModalNewHousehold
+              flexField={field}
+              householdId={values?.selectedHousehold?.id || null}
+            />
           </Grid>
         );
       default:
@@ -172,6 +186,7 @@ export interface EditHouseholdDataChangeFieldRowProps {
   index: number;
   notAvailableFields: string[];
   onDelete: () => {};
+  values;
 }
 export const EditHouseholdDataChangeFieldRow = ({
   fields,
@@ -180,6 +195,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   itemValue,
   notAvailableFields,
   onDelete,
+  values,
 }: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const { t } = useTranslation();
   const field = fields.find((item) => item.name === itemValue.fieldName);
@@ -221,6 +237,7 @@ export const EditHouseholdDataChangeFieldRow = ({
         value={
           !field?.isFlexField ? household[name] : household.flexFields[name]
         }
+        values={values}
       />
       {itemValue.fieldName ? (
         <EditHouseholdDataChangeField
@@ -303,6 +320,7 @@ export const EditHouseholdDataChange = ({
                   fields={householdFieldsData.allEditHouseholdFieldsAttributes}
                   notAvailableFields={notAvailableItems}
                   onDelete={() => arrayHelpers.remove(index)}
+                  values={values}
                 />
               ))}
               <Grid item xs={4}>
