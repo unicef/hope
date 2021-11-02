@@ -18,8 +18,7 @@ import {
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
-import { PhotoPreview } from '../PhotoPreview';
-import { NewValue } from './RequestedHouseholdDataChangeTable';
+import { GrievanceFlexFieldPhotoModal } from './GrievanceFlexFieldPhotoModal';
 
 const Title = styled.div`
   padding-top: ${({ theme }) => theme.spacing(4)}px;
@@ -31,10 +30,6 @@ const Capitalize = styled.span`
 `;
 const GreenIcon = styled.div`
   color: #28cb15;
-`;
-
-const Image = styled.img`
-  max-width: 150px;
 `;
 export interface CurrentValueProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -70,9 +65,7 @@ export function CurrentValue({
       break;
     case 'IMAGE':
       displayValue = (
-        <PhotoPreview src={value}>
-          <Image src={value} />
-        </PhotoPreview>
+        <GrievanceFlexFieldPhotoModal field={field} isCurrent isIndividual />
       );
       break;
     default:
@@ -80,6 +73,45 @@ export function CurrentValue({
   }
   return <>{displayValue || '-'}</>;
 }
+
+export function NewValue({
+  field,
+  value,
+}: CurrentValueProps): React.ReactElement {
+  let displayValue;
+  switch (field?.type) {
+    case 'SELECT_ONE':
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
+      break;
+    case 'SELECT_MANY':
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
+      if (value instanceof Array) {
+        displayValue = value
+          .map(
+            (choice) =>
+              field.choices.find((item) => item.value === choice)?.labelEn ||
+              '-',
+          )
+          .join(', ');
+      }
+      break;
+    case 'BOOL':
+      /* eslint-disable-next-line no-nested-ternary */
+      displayValue = value === null ? '-' : value ? 'Yes' : 'No';
+      break;
+    case 'IMAGE':
+      displayValue = (
+        <GrievanceFlexFieldPhotoModal field={field} isIndividual />
+      );
+      break;
+    default:
+      displayValue = value;
+  }
+  return <>{displayValue || '-'}</>;
+}
+
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   setFieldValue;
