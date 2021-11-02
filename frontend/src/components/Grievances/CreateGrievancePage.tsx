@@ -182,24 +182,25 @@ export function CreateGrievancePage(): React.ReactElement {
 
   const hasCategorySelected = (values): boolean => {
     return !!values.category;
-  }
+  };
 
   const hasHouseholdSelected = (values): boolean => {
-    return !!(values.selectedHousehold?.id);
-  }
+    return !!values.selectedHousehold?.id;
+  };
 
   const hasIndividualSelected = (values): boolean => {
-    return !!(values.selectedIndividual?.id);
-  }
+    return !!values.selectedIndividual?.id;
+  };
 
   const renderAlreadyExistsBox = (values): ReactElement => {
-    if (hasCategorySelected(values) && (hasHouseholdSelected(values) || hasIndividualSelected(values))) {
-      return (
-        <TicketsAlreadyExist values={values} />
-      );
+    if (
+      hasCategorySelected(values) &&
+      (hasHouseholdSelected(values) || hasIndividualSelected(values))
+    ) {
+      return <TicketsAlreadyExist values={values} />;
     }
     return null;
-  }
+  };
 
   return (
     <Formik
@@ -389,9 +390,7 @@ export function CreateGrievancePage(): React.ReactElement {
                 </NewTicket>
               </Grid>
               <Grid item xs={4}>
-                <NewTicket>
-                  {renderAlreadyExistsBox(values)}
-                </NewTicket>
+                <NewTicket>{renderAlreadyExistsBox(values)}</NewTicket>
                 <NewTicket>
                   {values.category && values.selectedHousehold?.id ? (
                     <OtherRelatedTicketsCreate values={values} />
