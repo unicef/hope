@@ -4,15 +4,22 @@ from adminfilters.filters import ChoicesFieldComboFilter, RelatedFieldComboFilte
 
 from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
+    SanctionListIndividualDateOfBirth,
     SanctionListIndividualDocument,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+
+
+class SanctionListIndividualDateOfBirthAdmin(admin.StackedInline):
+    model = SanctionListIndividualDateOfBirth
+    extra = 0
 
 
 @admin.register(SanctionListIndividual)
 class SanctionListIndividualAdmin(HOPEModelAdminBase):
     list_display = ("full_name", "listed_on", "un_list_type", "reference_number")
     search_fields = ("full_name",)
+    inlines = (SanctionListIndividualDateOfBirthAdmin,)
 
 
 @admin.register(SanctionListIndividualDocument)
