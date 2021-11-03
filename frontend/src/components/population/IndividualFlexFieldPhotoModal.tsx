@@ -17,22 +17,21 @@ export const DialogFooter = styled.div`
   text-align: right;
 `;
 
-export const StyledImage = styled.div`
-  width: 500px;
-  height: 500px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-image: url(${({ src }) => src});
-  background-size: 100%;
+export const StyledImage = styled.img`
+  width: 100%;
+  height: 100%;
+  max-width: 700px;
+  max-height: 700px;
+  pointer-events: none;
 `;
-export const MiniImage = styled.img`
+export const MiniImage = styled.div`
   height: 45px;
   width: 45px;
   cursor: pointer;
   background-position: center;
   background-repeat: no-repeat;
   background-image: url(${({ src }) => src});
-  background-size: 100%;
+  background-size: cover;
 `;
 
 export const StyledLink = styled(Link)`
