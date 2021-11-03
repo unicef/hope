@@ -49,7 +49,7 @@ export function TicketsAlreadyExist({ values }): React.ReactElement {
       <ContentLink
         href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
       >
-        {decodeIdString(edge.node.id)}
+        {edge.node.unicefId}
       </ContentLink>
     </Box>
   ));
