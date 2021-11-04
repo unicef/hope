@@ -108,7 +108,10 @@ class GrievanceTicketFilter(FilterSet):
     admin = ModelMultipleChoiceFilter(
         field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
     )
-    cash_plan_payment_verification = CharFilter(field_name='payment_verification_ticket_details',lookup_expr='payment_verifications__cash_plan_payment_verification')
+    cash_plan_payment_verification = CharFilter(
+        field_name="payment_verification_ticket_details",
+        lookup_expr="payment_verifications__cash_plan_payment_verification",
+    )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
 
@@ -244,20 +247,12 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
     def prepare_ticket_filters(self, lookup, obj):
         types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
-        ticket_types = types_and_lookups.keys()
 
         q_obj = Q()
-        for ticket_type in ticket_types:
-            has_lookup = lookup in types_and_lookups[ticket_type]
-            real_lookup = lookup
-            if not has_lookup:
-                for lookup_obj in types_and_lookups[ticket_type]:
-                    if isinstance(lookup_obj, dict):
-                        real_lookup = lookup_obj.get(lookup)
-                        break
-            if has_lookup:
+        for ticket_type, lookup_objs in types_and_lookups.items():
+            real_lookup = lookup_objs.get(lookup)
+            if real_lookup:
                 q_obj |= Q(**{f"{ticket_type}__{real_lookup}": obj})
-
         return q_obj
 
     def filter_queryset(self, queryset):
@@ -290,13 +285,13 @@ class ExistingGrievanceTicketFilter(FilterSet):
             q_obj = Q()
             for payment_record in payment_record_objects:
                 q_obj |= self.prepare_ticket_filters("payment_record", payment_record)
-            return queryset.filter(q_obj)
-        elif household_object:
+            queryset = queryset.filter(q_obj)
+        if household_object:
             q_obj = self.prepare_ticket_filters("household", household_object)
-            return queryset.filter(q_obj)
-        elif individual_object:
+            queryset = queryset.filter(q_obj)
+        if individual_object:
             q_obj = self.prepare_ticket_filters("individual", individual_object)
-            return queryset.filter(q_obj)
+            queryset = queryset.filter(q_obj)
 
         return queryset
 
@@ -431,10 +426,17 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
             for name, value in flex_fields.items():
-                if name in images_flex_fields_names:
+                if value and name in images_flex_fields_names:
                     try:
-                        flex_fields[name]["previous_value"] = default_storage.url(value.get("previous_value"))
-                        flex_fields[name]["value"] = default_storage.url(value.get("value"))
+                        previous_value = value.get("previous_value", "")
+                        if previous_value:
+                            previous_value = default_storage.url(previous_value)
+                        flex_fields[name]["previous_value"] = previous_value
+
+                        current_value = value.get("value", "")
+                        if current_value:
+                            current_value = default_storage.url(current_value)
+                        flex_fields[name]["value"] = current_value
                     except Exception:
                         pass
             individual_data["flex_fields"] = flex_fields

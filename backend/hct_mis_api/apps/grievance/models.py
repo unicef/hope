@@ -172,33 +172,41 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     )
 
     SEARCH_TICKET_TYPES_LOOKUPS = {
-        "complaint_ticket_details": (
-            "individual",
-            "household",
-            "payment_record",
-        ),
-        "sensitive_ticket_details": (
-            "individual",
-            "household",
-            "payment_record",
-        ),
-        "positive_feedback_ticket_details": (
-            "individual",
-            "household",
-        ),
-        "negative_feedback_ticket_details": (
-            "individual",
-            "household",
-        ),
-        "referral_ticket_details": (
-            "individual",
-            "household",
-        ),
-        "individual_data_update_ticket_details": ("individual", {"household": "individual__household"}),
-        "add_individual_ticket_details": ("household",),
-        "household_data_update_ticket_details": ("household",),
-        "system_flagging_ticket_details": ("golden_records_individual",),
-        "needs_adjudication_ticket_details": ("golden_records_individual",),
+        "complaint_ticket_details": {
+            "individual": "individual",
+            "household": "household",
+            "payment_record": "payment_record",
+        },
+        "sensitive_ticket_details": {
+            "individual": "individual",
+            "household": "household",
+            "payment_record": "payment_record",
+        },
+        "positive_feedback_ticket_details": {
+            "individual": "individual",
+            "household": "household",
+        },
+        "negative_feedback_ticket_details": {
+            "individual": "individual",
+            "household": "household",
+        },
+        "referral_ticket_details": {
+            "individual": "individual",
+            "household": "household",
+        },
+        "individual_data_update_ticket_details": {"individual": "individual", "household": "individual__household"},
+        "add_individual_ticket_details": {
+            "household": "household",
+        },
+        "household_data_update_ticket_details": {
+            "household": "household",
+        },
+        "system_flagging_ticket_details": {
+            "golden_records_individual": "golden_records_individual",
+        },
+        "needs_adjudication_ticket_details": {
+            "golden_records_individual": "golden_records_individual",
+        },
     }
     FIELD_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": (
