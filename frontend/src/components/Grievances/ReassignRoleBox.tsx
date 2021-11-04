@@ -122,7 +122,7 @@ export const ReassignRoleBox = ({
           <ReassignRoleUnique
             individualRole={{ role: el.role, id: el.id }}
             ticket={ticket}
-            household={household}
+            household={el.household}
             individual={uniqueIndividual}
           />
         ) : null}

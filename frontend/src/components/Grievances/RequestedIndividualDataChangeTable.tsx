@@ -18,6 +18,7 @@ import {
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
+import { PhotoPreview } from '../PhotoPreview';
 import { NewValue } from './RequestedHouseholdDataChangeTable';
 
 const Title = styled.div`
@@ -30,6 +31,10 @@ const Capitalize = styled.span`
 `;
 const GreenIcon = styled.div`
   color: #28cb15;
+`;
+
+const Image = styled.img`
+  max-width: 150px;
 `;
 export interface CurrentValueProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -62,6 +67,13 @@ export function CurrentValue({
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
       displayValue = value === null ? '-' : value ? 'Yes' : 'No';
+      break;
+    case 'IMAGE':
+      displayValue = (
+        <PhotoPreview src={value}>
+          <Image src={value} />
+        </PhotoPreview>
+      );
       break;
     default:
       displayValue = value;

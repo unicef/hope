@@ -11,6 +11,7 @@ import {
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
+import { PhotoPreview } from '../PhotoPreview';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -60,7 +61,9 @@ export function HouseholdVulnerabilities({
             key={key}
             label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
           >
-            <Image src={value} />
+            <PhotoPreview src={value}>
+              <Image src={value} />
+            </PhotoPreview>
           </LabelizedField>
         );
       }
