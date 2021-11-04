@@ -43438,10 +43438,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 18 -< 59',
+                'labelEn': 'Females Age 18 - 59',
                 'labels': [
                     {
-                        'label': 'Females Age 18 -< 59',
+                        'label': 'Females Age 18 - 59',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43540,10 +43540,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 18 -< 59',
+                'labelEn': 'Males Age 18 - 59',
                 'labels': [
                     {
-                        'label': 'Males Age 18 -< 59',
+                        'label': 'Males Age 18 - 59',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43625,10 +43625,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Females Age 18 -< 59 with disability',
+                'labelEn': 'Females Age 18 - 59 with disability',
                 'labels': [
                     {
-                        'label': 'Females Age 18 -< 59 with disability',
+                        'label': 'Females Age 18 - 59 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -43710,10 +43710,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Males Age 18 -< 59 with disability',
+                'labelEn': 'Males Age 18 - 59 with disability',
                 'labels': [
                     {
-                        'label': 'Males Age 18 -< 59 with disability',
+                        'label': 'Males Age 18 - 59 with disability',
                         'language': 'English(EN)'
                     }
                 ],
