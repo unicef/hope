@@ -62,7 +62,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
             )}
             canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
           />
-          {(status === 'APPROVED' || status === 'FINALIZED') && (
+          {(status === 'LOCKED' || status === 'FINALIZED') && (
             <TargetPopulationDetails targetPopulation={targetPopulation} />
           )}
           <TargetPopulationCore

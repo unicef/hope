@@ -7132,7 +7132,7 @@
             "deprecationReason": null
           },
           {
-            "name": "approvedTargetPopulations",
+            "name": "lockedTargetPopulations",
             "description": null,
             "args": [
               {
@@ -19256,7 +19256,7 @@
             "deprecationReason": null
           },
           {
-            "name": "approvedAt",
+            "name": "changeDate",
             "description": null,
             "args": [],
             "type": {
@@ -19268,7 +19268,7 @@
             "deprecationReason": null
           },
           {
-            "name": "approvedBy",
+            "name": "changedBy",
             "description": null,
             "args": [],
             "type": {
@@ -19777,7 +19777,7 @@
             "deprecationReason": null
           },
           {
-            "name": "APPROVED",
+            "name": "LOCKED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
