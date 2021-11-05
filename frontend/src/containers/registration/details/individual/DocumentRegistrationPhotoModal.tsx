@@ -1,8 +1,8 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogContent } from '@material-ui/core';
 import React, { useState } from 'react';
+import { PhotoModalHeader } from '../../../../components/PhotoModal/PhotoModalHeader';
 import {
   DialogFooter,
-  DialogTitleWrapper,
   StyledImage,
   StyledLink,
 } from '../../../../components/population/IndividualFlexFieldPhotoModal';
@@ -24,6 +24,7 @@ export const DocumentRegistrationPhotoModal = ({
   documentNumber,
   documentId,
 }: DocumentRegistrationPhotoModalProps): React.ReactElement => {
+  const [turnAngle, setTurnAngle] = useState(90);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [getPhotos, { data }] = useImportedIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
@@ -48,14 +49,18 @@ export const DocumentRegistrationPhotoModal = ({
         onClose={() => setDialogOpen(false)}
         aria-labelledby='form-dialog-title'
       >
-        <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            Document&apos;s Photo
-          </DialogTitle>
-        </DialogTitleWrapper>
+        <PhotoModalHeader
+          turnAngle={turnAngle}
+          setTurnAngle={setTurnAngle}
+          title="Document's Photo"
+        />
         <DialogContent>
           <Box p={3}>
-            <StyledImage alt='document' src={documentWithPhoto?.node?.photo} />
+            <StyledImage
+              id='modalImg'
+              alt='document'
+              src={documentWithPhoto?.node?.photo}
+            />
           </Box>
         </DialogContent>
         <DialogFooter>

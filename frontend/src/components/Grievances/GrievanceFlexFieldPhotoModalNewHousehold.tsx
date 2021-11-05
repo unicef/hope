@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogContent } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
@@ -6,9 +6,9 @@ import {
   AllEditHouseholdFieldsQuery,
   useHouseholdFlexFieldsQuery,
 } from '../../__generated__/graphql';
+import { PhotoModalHeader } from '../PhotoModal/PhotoModalHeader';
 import {
   DialogFooter,
-  DialogTitleWrapper,
   MiniImage,
   StyledImage,
 } from '../population/IndividualFlexFieldPhotoModal';
@@ -22,6 +22,7 @@ export const GrievanceFlexFieldPhotoModalNewHousehold = ({
   flexField,
   householdId,
 }: GrievanceFlexFieldPhotoModalNewHouseholdProps): React.ReactElement => {
+  const [turnAngle, setTurnAngle] = useState(90);
   const { data } = useHouseholdFlexFieldsQuery({
     variables: { id: householdId },
     fetchPolicy: 'network-only',
@@ -49,12 +50,13 @@ export const GrievanceFlexFieldPhotoModalNewHousehold = ({
             onClose={() => setDialogOpen(false)}
             aria-labelledby='form-dialog-title'
           >
-            <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>Photo</DialogTitle>
-            </DialogTitleWrapper>
+            <PhotoModalHeader
+              turnAngle={turnAngle}
+              setTurnAngle={setTurnAngle}
+            />
             <DialogContent>
               <Box p={3}>
-                <StyledImage alt='photo' src={picUrl} />
+                <StyledImage id='modalImg' alt='photo' src={picUrl} />
               </Box>
             </DialogContent>
             <DialogFooter>

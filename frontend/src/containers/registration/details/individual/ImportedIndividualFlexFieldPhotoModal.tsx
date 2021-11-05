@@ -1,9 +1,9 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogContent } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { PhotoModalHeader } from '../../../../components/PhotoModal/PhotoModalHeader';
 import {
   DialogFooter,
-  DialogTitleWrapper,
   MiniImage,
   StyledImage,
 } from '../../../../components/population/IndividualFlexFieldPhotoModal';
@@ -15,6 +15,7 @@ export const ImportedIndividualFlexFieldPhotoModal = ({
   field,
 }): React.ReactElement => {
   const { id } = useParams();
+  const [turnAngle, setTurnAngle] = useState(90);
   const { data } = useImportedIndividualFlexFieldsQuery({
     variables: { id },
     fetchPolicy: 'network-only',
@@ -36,12 +37,10 @@ export const ImportedIndividualFlexFieldPhotoModal = ({
         onClose={() => setDialogOpen(false)}
         aria-labelledby='form-dialog-title'
       >
-        <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>Photo</DialogTitle>
-        </DialogTitleWrapper>
+        <PhotoModalHeader turnAngle={turnAngle} setTurnAngle={setTurnAngle} />
         <DialogContent>
           <Box p={3}>
-            <StyledImage alt='photo' src={picUrl} />
+            <StyledImage id='modalImg' alt='photo' src={picUrl} />
           </Box>
         </DialogContent>
         <DialogFooter>

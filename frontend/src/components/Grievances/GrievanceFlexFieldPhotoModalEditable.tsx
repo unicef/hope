@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-} from '@material-ui/core';
+import { Box, Button, DialogContent, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -15,9 +9,9 @@ import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
 } from '../../__generated__/graphql';
+import { PhotoModalHeader } from '../PhotoModal/PhotoModalHeader';
 import {
   DialogFooter,
-  DialogTitleWrapper,
   MiniImage,
   StyledImage,
 } from '../population/IndividualFlexFieldPhotoModal';
@@ -38,6 +32,7 @@ export const GrievanceFlexFieldPhotoModalEditable = ({
   flexField,
 }: GrievanceFlexFieldPhotoModalEditableProps): React.ReactElement => {
   const [isEdited, setEdit] = useState(false);
+  const [turnAngle, setTurnAngle] = useState(90);
   const { id } = useParams();
   const { data } = useGrievanceTicketFlexFieldsQuery({
     variables: { id },
@@ -81,12 +76,14 @@ export const GrievanceFlexFieldPhotoModalEditable = ({
             onClose={() => setDialogOpen(false)}
             aria-labelledby='form-dialog-title'
           >
-            <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>Photo</DialogTitle>
-            </DialogTitleWrapper>
+            <PhotoModalHeader
+              turnAngle={turnAngle}
+              setTurnAngle={setTurnAngle}
+            />
+
             <DialogContent>
               <Box p={3}>
-                <StyledImage alt='photo' src={picUrl} />
+                <StyledImage id='modalImg' alt='photo' src={picUrl} />
               </Box>
             </DialogContent>
             <DialogFooter>
