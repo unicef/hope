@@ -1,6 +1,7 @@
 import logging
 import random
 import string
+import urllib.parse
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -357,6 +358,11 @@ def save_images(flex_fields, associated_with):
             logger.error(f"{name} is not a correct `flex field")
             raise ValueError(f"{name} is not a correct `flex field")
 
-        if flex_field["type"] == TYPE_IMAGE and isinstance(value, InMemoryUploadedFile):
-            file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
-            flex_fields[name] = default_storage.save(f"{file_name}-{timezone.now()}.jpg", value)
+        if flex_field["type"] == TYPE_IMAGE:
+            if isinstance(value, InMemoryUploadedFile):
+                file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
+                flex_fields[name] = default_storage.save(f"{file_name}-{timezone.now()}.jpg", value)
+            elif isinstance(value, str):
+                file_name = value.replace(default_storage.base_url, "")
+                unquoted_value = urllib.parse.unquote(file_name)
+                flex_fields[name] = unquoted_value
