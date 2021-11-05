@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogContent } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '../../containers/dialogs/Dialog';
@@ -7,11 +7,8 @@ import {
   ImportedIndividualNode,
   useImportedIndividualPhotosLazyQuery,
 } from '../../__generated__/graphql';
-import {
-  DialogFooter,
-  DialogTitleWrapper,
-  StyledImage,
-} from './IndividualFlexFieldPhotoModal';
+import { PhotoModalHeader } from '../PhotoModal/PhotoModalHeader';
+import { DialogFooter, StyledImage } from './IndividualFlexFieldPhotoModal';
 
 interface ImportedIndividualPhotoModalProps {
   individual: ImportedIndividualNode;
@@ -21,6 +18,7 @@ export const ImportedIndividualPhotoModal = ({
   individual,
 }: ImportedIndividualPhotoModalProps): React.ReactElement => {
   const { t } = useTranslation();
+  const [turnAngle, setTurnAngle] = useState(90);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [getPhotos, { data }] = useImportedIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
@@ -44,14 +42,11 @@ export const ImportedIndividualPhotoModal = ({
         onClose={() => setDialogOpen(false)}
         aria-labelledby='form-dialog-title'
       >
-        <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            {t('Individual')}&apos;s {t('Photo')}
-          </DialogTitle>
-        </DialogTitleWrapper>
+        <PhotoModalHeader turnAngle={turnAngle} setTurnAngle={setTurnAngle} />
         <DialogContent>
           <Box p={3}>
             <StyledImage
+              id='modalImg'
               alt={t('Individual')}
               src={data?.importedIndividual?.photo}
             />
