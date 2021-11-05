@@ -1,16 +1,15 @@
 from django.core.management import call_command
 
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household
 
 
 class TestTargetPopulationQuery(APITestCase):
@@ -101,7 +100,7 @@ class TestTargetPopulationQuery(APITestCase):
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
-            status=TargetPopulation.STATUS_APPROVED,
+            status=TargetPopulation.STATUS_LOCKED,
         )
         tp.save()
         tp.households.add(self.household_size_2)
@@ -118,7 +117,7 @@ class TestTargetPopulationQuery(APITestCase):
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
-            status=TargetPopulation.STATUS_APPROVED,
+            status=TargetPopulation.STATUS_LOCKED,
             candidate_list_targeting_criteria=targeting_criteria,
         )
         tp.save()

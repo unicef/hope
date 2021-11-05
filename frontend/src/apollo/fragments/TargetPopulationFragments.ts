@@ -38,7 +38,7 @@ export const targetPopulationDetailed = gql`
     }
     vulnerabilityScoreMin
     vulnerabilityScoreMax
-    approvedAt
+    changeDate
     finalizedAt
     finalizedBy {
       id

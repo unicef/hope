@@ -24,7 +24,7 @@ export function TargetingHouseholds({
         />
       );
       break;
-    case 'APPROVED':
+    case 'LOCKED':
       table = (
         <ApprovedTargetPopulationTable
           id={id}

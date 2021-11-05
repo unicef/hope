@@ -1,8 +1,10 @@
 from django.core.management import call_command
 from django.test import TestCase
 
+from parameterized import parameterized
+
 import hct_mis_api.apps.mis_datahub.models as dh_models
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
@@ -10,11 +12,11 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
 )
 from hct_mis_api.apps.household.models import (
-    ROLE_PRIMARY,
     ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Agency,
     Document,
     DocumentType,
-    Agency,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
@@ -22,7 +24,6 @@ from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahu
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from parameterized import parameterized
 
 
 class TestSendTpToDatahub(TestCase):
@@ -43,8 +44,8 @@ class TestSendTpToDatahub(TestCase):
             "ca_id": None,
             "ca_hash_id": None,
             "created_by": None,
-            "approved_at": None,
-            "approved_by": None,
+            "change_date": None,
+            "changed_by": None,
             "finalized_at": None,
             "finalized_by": None,
             "candidate_list_total_households": None,
@@ -293,7 +294,7 @@ class TestSendTpToDatahub(TestCase):
             ("custom_code", "AU", "AUL"),
         ]
     )
-    def test_send_household_country(self,_, iso_code2, expected_ca_code):
+    def test_send_household_country(self, _, iso_code2, expected_ca_code):
         (household, individuals) = create_household(household_args={"size": 1})
         household.country = iso_code2
         household.save()
