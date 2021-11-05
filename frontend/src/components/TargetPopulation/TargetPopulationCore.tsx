@@ -69,8 +69,8 @@ export function TargetPopulationCore({
       ) : null}
       <Results
         resultsData={targetPopulation.candidateStats}
-        totalNumOfHouseholds={targetPopulation.candidateStats.allHouseholds}
-        totalNumOfIndividuals={targetPopulation.candidateStats.allIndividuals}
+        totalNumOfHouseholds={targetPopulation.candidateListTotalHouseholds}
+        totalNumOfIndividuals={targetPopulation.candidateListTotalIndividuals}
       />
 
       {candidateListRules.length ? (

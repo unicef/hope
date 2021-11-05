@@ -98,7 +98,7 @@ export function TargetPopulationFilters({
             >
               <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
               <MenuItem value='DRAFT'>{TARGETING_STATES.DRAFT}</MenuItem>
-              <MenuItem value='APPROVED'>{TARGETING_STATES.APPROVED}</MenuItem>
+              <MenuItem value='LOCKED'>{TARGETING_STATES.LOCKED}</MenuItem>
               <MenuItem value='FINALIZED'>
                 {TARGETING_STATES.FINALIZED}
               </MenuItem>
