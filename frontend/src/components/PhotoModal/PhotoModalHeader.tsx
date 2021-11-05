@@ -10,11 +10,11 @@ export const DialogTitleWrapper = styled.div`
 export const PhotoModalHeader = ({
   turnAngle,
   setTurnAngle,
-  title = 'Photo',
+  title,
 }: {
   turnAngle: number;
   setTurnAngle: React.Dispatch<React.SetStateAction<number>>;
-  title?: string;
+  title: string;
 }): React.ReactElement => {
   return (
     <DialogTitleWrapper>
