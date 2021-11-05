@@ -1,14 +1,11 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogContent } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useIndividualFlexFieldsQuery } from '../../__generated__/graphql';
-
-export const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
+import { PhotoModalHeader } from '../PhotoModal/PhotoModalHeader';
 
 export const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -23,6 +20,7 @@ export const StyledImage = styled.img`
   max-width: 700px;
   max-height: 700px;
   pointer-events: none;
+  transition: 0.4s ease-in-out;
 `;
 export const MiniImage = styled.div`
   height: 45px;
@@ -42,6 +40,7 @@ export const IndividualFlexFieldPhotoModal = ({
   field,
 }): React.ReactElement => {
   const { id } = useParams();
+  const [turnAngle, setTurnAngle] = useState(90);
   const { data } = useIndividualFlexFieldsQuery({
     variables: { id },
     fetchPolicy: 'network-only',
@@ -63,12 +62,10 @@ export const IndividualFlexFieldPhotoModal = ({
         onClose={() => setDialogOpen(false)}
         aria-labelledby='form-dialog-title'
       >
-        <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>Photo</DialogTitle>
-        </DialogTitleWrapper>
+        <PhotoModalHeader turnAngle={turnAngle} setTurnAngle={setTurnAngle} />
         <DialogContent>
           <Box p={3}>
-            <StyledImage alt='photo' src={picUrl} />
+            <StyledImage id='modalImg' alt='photo' src={picUrl} />
           </Box>
         </DialogContent>
         <DialogFooter>
