@@ -1,4 +1,5 @@
 import { Button, Grid, IconButton, Typography } from '@material-ui/core';
+import { useLocation } from 'react-router-dom';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, FieldArray, useField } from 'formik';
@@ -8,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
@@ -20,6 +22,8 @@ import {
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import { GrievanceFlexFieldPhotoModalEditable } from './GrievanceFlexFieldPhotoModalEditable';
+import { GrievanceFlexFieldPhotoModalNewHousehold } from './GrievanceFlexFieldPhotoModalNewHousehold';
 
 const Title = styled.div`
   width: 100%;
@@ -37,6 +41,9 @@ export const EditHouseholdDataChangeField = ({
   name,
   field,
 }: EditHouseholdDataChangeField): React.ReactElement => {
+  const location = useLocation();
+  const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
+
   let fieldProps;
   switch (field.type) {
     case 'DECIMAL':
@@ -80,11 +87,19 @@ export const EditHouseholdDataChangeField = ({
         decoratorEnd: <CalendarTodayRoundedIcon color='disabled' />,
       };
       break;
-
     case 'BOOL':
       fieldProps = {
         component: FormikBoolFieldGrievances,
         required: field.required,
+      };
+      break;
+    case 'IMAGE':
+      fieldProps = {
+        component: isNewTicket
+          ? FormikFileField
+          : GrievanceFlexFieldPhotoModalEditable,
+        flexField: field,
+        isIndividual: false,
       };
       break;
     default:
@@ -109,11 +124,13 @@ export const EditHouseholdDataChangeField = ({
 export interface CurrentValueProps {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   value;
+  values;
 }
 
 export function CurrentValue({
   field,
   value,
+  values,
 }: CurrentValueProps): React.ReactElement {
   const { t } = useTranslation();
   let displayValue;
@@ -142,6 +159,15 @@ export function CurrentValue({
         /* eslint-disable-next-line no-nested-ternary */
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
         break;
+      case 'IMAGE':
+        return (
+          <Grid item xs={3}>
+            <GrievanceFlexFieldPhotoModalNewHousehold
+              flexField={field}
+              householdId={values?.selectedHousehold?.id || null}
+            />
+          </Grid>
+        );
       default:
         displayValue = value;
     }
@@ -160,6 +186,7 @@ export interface EditHouseholdDataChangeFieldRowProps {
   index: number;
   notAvailableFields: string[];
   onDelete: () => {};
+  values;
 }
 export const EditHouseholdDataChangeFieldRow = ({
   fields,
@@ -168,6 +195,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   itemValue,
   notAvailableFields,
   onDelete,
+  values,
 }: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const { t } = useTranslation();
   const field = fields.find((item) => item.name === itemValue.fieldName);
@@ -209,6 +237,7 @@ export const EditHouseholdDataChangeFieldRow = ({
         value={
           !field?.isFlexField ? household[name] : household.flexFields[name]
         }
+        values={values}
       />
       {itemValue.fieldName ? (
         <EditHouseholdDataChangeField
@@ -291,6 +320,7 @@ export const EditHouseholdDataChange = ({
                   fields={householdFieldsData.allEditHouseholdFieldsAttributes}
                   notAvailableFields={notAvailableItems}
                   onDelete={() => arrayHelpers.remove(index)}
+                  values={values}
                 />
               ))}
               <Grid item xs={4}>
