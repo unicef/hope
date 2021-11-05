@@ -30,6 +30,9 @@ def create_diff(old_object, new_object, mapping):
         if isinstance(old_value, decimal.Decimal):
             old_value = old_value.normalize()
 
+        if isinstance(new_value, decimal.Decimal):
+            new_value = new_value.normalize()
+
         if str(old_value) == str(new_value):
             continue
         change = {"from": None, "to": None}
