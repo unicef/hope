@@ -1,26 +1,12 @@
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-} from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
+import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
 } from '../../__generated__/graphql';
-import {
-  DialogFooter,
-  DialogTitleWrapper,
-  MiniImage,
-  StyledImage,
-} from '../population/IndividualFlexFieldPhotoModal';
+import { PhotoModal } from '../PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalEditableProps {
   flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -43,7 +29,7 @@ export const GrievanceFlexFieldPhotoModalEditable = ({
     variables: { id },
     fetchPolicy: 'network-only',
   });
-  const [dialogOpen, setDialogOpen] = useState(false);
+
   if (!data) {
     return null;
   }
@@ -65,37 +51,11 @@ export const GrievanceFlexFieldPhotoModalEditable = ({
           <FormikFileField field={field} form={form} />
         </Box>
       ) : (
-        <>
-          <Box display='flex' alignItems='center'>
-            <MiniImage
-              alt='photo'
-              src={picUrl}
-              onClick={() => setDialogOpen(true)}
-            />
-            <IconButton onClick={() => setEdit(true)}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Dialog
-            open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
-            aria-labelledby='form-dialog-title'
-          >
-            <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>Photo</DialogTitle>
-            </DialogTitleWrapper>
-            <DialogContent>
-              <Box p={3}>
-                <StyledImage alt='photo' src={picUrl} />
-              </Box>
-            </DialogContent>
-            <DialogFooter>
-              <DialogActions>
-                <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
-              </DialogActions>
-            </DialogFooter>
-          </Dialog>
-        </>
+        <PhotoModal
+          src={picUrl}
+          variant='pictureClose'
+          closeHandler={() => setEdit(true)}
+        />
       )}
     </Box>
   );
