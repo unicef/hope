@@ -196,7 +196,8 @@ export function EditGrievancePage(): React.ReactElement {
       'individualDataUpdateFields',
       'individualDataUpdateFieldsDocuments',
       'individualDataUpdateFieldsIdentities',
-      'individualDataUpdateFieldsEditedDocuments',
+      'individualDataUpdateDocumentsToEdit',
+      'individualDataUpdateIdentitiesToEdit',
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (

@@ -13,6 +13,7 @@ export interface DocumentFieldProps {
   onDelete: () => {};
   countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
   documentTypeChoices: AllAddIndividualFieldsQuery['documentTypeChoices'];
+  isEdited?: boolean;
 }
 
 export function DocumentField({
@@ -21,21 +22,11 @@ export function DocumentField({
   onDelete,
   countryChoices,
   documentTypeChoices,
+  isEdited,
 }: DocumentFieldProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <>
-      <Grid item xs={4}>
-        <Field
-          name={`${baseName}[${index}].country`}
-          fullWidth
-          variant='outlined'
-          label={t('Country')}
-          component={FormikSelectField}
-          choices={countryChoices}
-          required
-        />
-      </Grid>
       <Grid item xs={4}>
         <Field
           name={`${baseName}[${index}].type`}
@@ -44,6 +35,17 @@ export function DocumentField({
           label={t('Type')}
           component={FormikSelectField}
           choices={documentTypeChoices}
+          required
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <Field
+          name={`${baseName}[${index}].country`}
+          fullWidth
+          variant='outlined'
+          label={t('Country')}
+          component={FormikSelectField}
+          choices={countryChoices}
           required
         />
       </Grid>
@@ -57,11 +59,13 @@ export function DocumentField({
           required
         />
       </Grid>
-      <Grid item xs={1}>
-        <IconButton onClick={onDelete}>
-          <Delete />
-        </IconButton>
-      </Grid>
+      {!isEdited ? (
+        <Grid item xs={1}>
+          <IconButton onClick={onDelete}>
+            <Delete />
+          </IconButton>
+        </Grid>
+      ) : null}
     </>
   );
 }
