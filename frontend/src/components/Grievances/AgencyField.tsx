@@ -13,6 +13,7 @@ export interface AgencyFieldProps {
   onDelete: () => {};
   countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
   identityTypeChoices: AllAddIndividualFieldsQuery['identityTypeChoices'];
+  isEdited?: boolean;
 }
 
 export function AgencyField({
@@ -21,6 +22,7 @@ export function AgencyField({
   onDelete,
   countryChoices,
   identityTypeChoices,
+  isEdited,
 }: AgencyFieldProps): React.ReactElement {
   const { t } = useTranslation();
   return (
@@ -57,11 +59,13 @@ export function AgencyField({
           required
         />
       </Grid>
-      <Grid item xs={1}>
-        <IconButton onClick={onDelete}>
-          <Delete />
-        </IconButton>
-      </Grid>
+      {!isEdited ? (
+        <Grid item xs={1}>
+          <IconButton onClick={onDelete}>
+            <Delete />
+          </IconButton>
+        </Grid>
+      ) : null}
     </>
   );
 }

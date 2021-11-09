@@ -23,13 +23,14 @@ export function ExistingDocumentFieldArray({
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name='individualDataUpdateFieldsEditedDocuments'
+        name='individualDataUpdateDocumentsToEdit'
         render={(arrayHelpers) => {
           return (
             <>
               {individual?.documents?.edges?.map((item, index) => {
                 return (
                   <EditDocumentRow
+                    key={item.node.id}
                     setFieldValue={setFieldValue}
                     values={values}
                     document={item}
