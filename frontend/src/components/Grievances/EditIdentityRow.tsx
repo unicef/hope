@@ -10,65 +10,56 @@ import {
   AllIndividualsQuery,
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
-import { DocumentField } from './DocumentField';
+import { AgencyField } from './AgencyField';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
 `;
 
-export interface EditDocumentRowProps {
+export interface EditIdentityRowProps {
   setFieldValue;
   values;
-  document: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['documents']['edges'][number];
+  identity: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['identities'][number];
   arrayHelpers;
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
   index;
 }
 
-export function EditDocumentRow({
+export function EditIdentityRow({
   setFieldValue,
   values,
-  document,
+  identity,
   arrayHelpers,
   addIndividualFieldsData,
   index,
-}: EditDocumentRowProps): React.ReactElement {
+}: EditIdentityRowProps): React.ReactElement {
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
-  const documentsToRemove = values?.individualDataUpdateDocumentsToRemove || [];
-  const removed = documentsToRemove.includes(document.node.id);
-
+  const identitiesToRemove =
+    values?.individualDataUpdateIdentitiesToRemove || [];
+  const removed = identitiesToRemove.includes(identity.id);
   return isEdited ? (
     <Box display='flex' alignItems='center'>
-      <DocumentField
+      <AgencyField
         index={index}
-        key={`${index}-${document.node.type.country}-${document.node.type.label}`}
+        key={`${index}-${identity?.number}-${identity?.agency}`}
         onDelete={() => arrayHelpers.remove(index)}
         countryChoices={addIndividualFieldsData.countriesChoices}
-        documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
-        baseName='individualDataUpdateDocumentsToEdit'
+        identityTypeChoices={addIndividualFieldsData.identityTypeChoices}
+        baseName='individualDataUpdateIdentitiesToEdit'
         isEdited={isEdited}
       />
-      <IconButton
-        onClick={() => {
-          arrayHelpers.push({
-            country: document.node.type.country,
-            type: document.node.type,
-            number: document.node.documentNumber,
-          });
-          setEdit(false);
-        }}
-      >
+      <IconButton onClick={() => setEdit(false)}>
         <Close />
       </IconButton>
     </Box>
   ) : (
-    <React.Fragment key={document.node.id}>
+    <React.Fragment key={identity.id}>
       <Grid item xs={4}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
-            label={t('ID TYPE1')}
-            value={document.node.type.label}
+            label={t('ID AGENCY1')}
+            value={identity.agency.label}
           />
         </DisabledDiv>
       </Grid>
@@ -76,16 +67,13 @@ export function EditDocumentRow({
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Country')}
-            value={document.node.type.country}
+            value={identity.agency.country}
           />
         </DisabledDiv>
       </Grid>
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField
-            label={t('ID Number')}
-            value={document.node.documentNumber}
-          />
+          <LabelizedField label={t('ID Number')} value={identity.number} />
         </DisabledDiv>
       </Grid>
       <Grid item xs={1}>
@@ -94,8 +82,8 @@ export function EditDocumentRow({
             <IconButton
               onClick={() => {
                 setFieldValue(
-                  `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
-                  document.node.id,
+                  `individualDataUpdateIdentitiesToRemove[${identitiesToRemove.length}]`,
+                  identity.id,
                 );
               }}
             >
@@ -104,9 +92,9 @@ export function EditDocumentRow({
             <IconButton
               onClick={() => {
                 arrayHelpers.push({
-                  country: document.node.type.country,
-                  type: document.node.type,
-                  number: document.node.documentNumber,
+                  country: identity.agency.country,
+                  agency: identity.agency.label,
+                  number: identity.number,
                 });
                 setEdit(true);
               }}
