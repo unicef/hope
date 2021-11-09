@@ -39,7 +39,7 @@ export function EditDocumentRow({
   const removed = documentsToRemove.includes(document.node.id);
 
   return isEdited ? (
-    <Box display='flex' alignItems='center'>
+    <>
       <DocumentField
         index={index}
         key={`${index}-${document.node.type.country}-${document.node.type.label}`}
@@ -49,19 +49,21 @@ export function EditDocumentRow({
         baseName='individualDataUpdateDocumentsToEdit'
         isEdited={isEdited}
       />
-      <IconButton
-        onClick={() => {
-          arrayHelpers.push({
-            country: document.node.type.country,
-            type: document.node.type,
-            number: document.node.documentNumber,
-          });
-          setEdit(false);
-        }}
-      >
-        <Close />
-      </IconButton>
-    </Box>
+      <Box display='flex' alignItems='center'>
+        <IconButton
+          onClick={() => {
+            arrayHelpers.push({
+              country: document.node.type.country,
+              type: document.node.type,
+              number: document.node.documentNumber,
+            });
+            setEdit(false);
+          }}
+        >
+          <Close />
+        </IconButton>
+      </Box>
+    </>
   ) : (
     <React.Fragment key={document.node.id}>
       <Grid item xs={4}>
@@ -104,8 +106,9 @@ export function EditDocumentRow({
             <IconButton
               onClick={() => {
                 arrayHelpers.push({
-                  country: document.node.type.country,
-                  type: document.node.type,
+                  id: document.node.id,
+                  country: document.node.type.countryIso3,
+                  type: document.node.type.type,
                   number: document.node.documentNumber,
                 });
                 setEdit(true);
