@@ -243,6 +243,7 @@ export type AgencyNode = {
   label: Scalars['String'],
   country?: Maybe<Scalars['String']>,
   individualIdentities: Array<IndividualIdentityNode>,
+  countryIso3?: Maybe<Scalars['String']>,
 };
 
 export enum AgencyType {
@@ -921,6 +922,7 @@ export type DocumentTypeNode = {
   label: Scalars['String'],
   type: DocumentTypeType,
   documents: DocumentNodeConnection,
+  countryIso3?: Maybe<Scalars['String']>,
 };
 
 
@@ -5685,7 +5687,7 @@ export type IndividualMinimalFragment = (
         & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'country' | 'label'>
+          & Pick<DocumentTypeNode, 'country' | 'label' | 'type' | 'countryIso3'>
         ) }
       )> }
     )>> }
@@ -5694,7 +5696,7 @@ export type IndividualMinimalFragment = (
     & Pick<IndividualIdentityNode, 'id' | 'number'>
     & { agency: (
       { __typename?: 'AgencyNode' }
-      & Pick<AgencyNode, 'country' | 'label'>
+      & Pick<AgencyNode, 'country' | 'label' | 'countryIso3'>
     ) }
   )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
@@ -8854,6 +8856,8 @@ export const IndividualMinimalFragmentDoc = gql`
         type {
           country
           label
+          type
+          countryIso3
         }
       }
     }
@@ -8863,6 +8867,7 @@ export const IndividualMinimalFragmentDoc = gql`
     agency {
       country
       label
+      countryIso3
     }
     number
   }
@@ -17654,6 +17659,7 @@ export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversP
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individualIdentities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
+  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
@@ -18002,6 +18008,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
+  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {

@@ -29,6 +29,8 @@ export const individualMinimal = gql`
           type {
             country
             label
+            type
+            countryIso3
           }
         }
       }
@@ -38,6 +40,7 @@ export const individualMinimal = gql`
       agency {
         country
         label
+        countryIso3
       }
       number
     }
