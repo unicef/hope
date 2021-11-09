@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     CORE_FIELDS_ATTRIBUTES,
+    HOUSEHOLD_EDIT_ONLY_FIELDS,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
     TYPE_IMAGE,
 )
@@ -695,6 +696,7 @@ class Query(graphene.ObjectType):
             "country",
             "size",
             "address",
+            "admin_area_title",
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
             "female_age_group_12_17_count",
@@ -734,7 +736,7 @@ class Query(graphene.ObjectType):
         # yield from FlexibleAttribute.objects.order_by("name").all()
         yield from [
             x
-            for x in CORE_FIELDS_ATTRIBUTES
+            for x in HOUSEHOLD_EDIT_ONLY_FIELDS + CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _HOUSEHOLD and x.get("name") in ACCEPTABLE_FIELDS
         ]
         yield from FlexibleAttribute.objects.filter(
