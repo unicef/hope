@@ -10,8 +10,9 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
 from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task,
 )
@@ -48,6 +49,7 @@ from hct_mis_api.apps.utils.schema import Arg
 
 
 class HouseholdUpdateDataObjectType(graphene.InputObjectType):
+    admin_area_title = graphene.String()
     status = graphene.String()
     consent = graphene.Boolean()
     consent_sharing = graphene.List(graphene.String)
@@ -667,6 +669,8 @@ def close_update_household_grievance_ticket(grievance_ticket, info):
     household = ticket_details.household
     household_data = ticket_details.household_data
     country_origin = household_data.get("country_origin", {})
+    country = household_data.get("country", {})
+    admin_area_title = household_data.pop("admin_area_title", {})
     flex_fields_with_additional_data = household_data.pop("flex_fields", {})
     flex_fields = {
         field: data.get("value")
@@ -675,9 +679,17 @@ def close_update_household_grievance_ticket(grievance_ticket, info):
     }
     if country_origin.get("value") is not None:
         household_data["country_origin"]["value"] = Country(country_origin.get("value"))
-    country = household_data.get("country", {})
+
     if country.get("value") is not None:
         household_data["country"]["value"] = Country(country.get("value"))
+
+    if admin_area_title.get("value") is not None:
+        household_data["admin_area"] = admin_area_title.copy()
+        household_data["admin_area_new"] = admin_area_title.copy()
+
+        household_data["admin_area"]["value"] = AdminArea.objects.filter(p_code=admin_area_title.get("value")).first()
+        household_data["admin_area_new"]["value"] = Area.objects.filter(p_code=admin_area_title.get("value")).first()
+
     only_approved_data = {
         field: value_and_approve_status.get("value")
         for field, value_and_approve_status in household_data.items()

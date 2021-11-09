@@ -1201,6 +1201,7 @@ export type HouseholdNode = Node & {
   individuals: IndividualNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
   selections: Array<HouseholdSelection>,
+  adminAreaTitle?: Maybe<Scalars['String']>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   totalCashReceivedUsd?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
@@ -5586,7 +5587,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'adminAreaTitle' | 'address'>
   & { admin1: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
@@ -8795,6 +8796,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   unhcrId
   geopoint
   village
+  adminAreaTitle
   admin1 {
     id
     title
@@ -18189,6 +18191,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
