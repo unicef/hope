@@ -39,7 +39,7 @@ export function EditIdentityRow({
     values?.individualDataUpdateIdentitiesToRemove || [];
   const removed = identitiesToRemove.includes(identity.id);
   return isEdited ? (
-    <Box display='flex' alignItems='center'>
+    <>
       <AgencyField
         index={index}
         key={`${index}-${identity?.number}-${identity?.agency}`}
@@ -49,10 +49,12 @@ export function EditIdentityRow({
         baseName='individualDataUpdateIdentitiesToEdit'
         isEdited={isEdited}
       />
-      <IconButton onClick={() => setEdit(false)}>
-        <Close />
-      </IconButton>
-    </Box>
+      <Box display='flex' alignItems='center'>
+        <IconButton onClick={() => setEdit(false)}>
+          <Close />
+        </IconButton>
+      </Box>
+    </>
   ) : (
     <React.Fragment key={identity.id}>
       <Grid item xs={4}>
@@ -92,7 +94,7 @@ export function EditIdentityRow({
             <IconButton
               onClick={() => {
                 arrayHelpers.push({
-                  country: identity.agency.country,
+                  country: identity.agency.countryIso3,
                   agency: identity.agency.label,
                   number: identity.number,
                 });

@@ -248,9 +248,13 @@ class IndividualFilter(FilterSet):
 
 class DocumentTypeNode(DjangoObjectType):
     country = graphene.String(description="Country name")
+    country_iso3 = graphene.String(description="Country ISO3")
 
     def resolve_country(parent, info):
         return parent.country.name
+
+    def resolve_country_iso3(parent, info):
+        return parent.country.alpha3
 
     class Meta:
         model = DocumentType
@@ -258,9 +262,13 @@ class DocumentTypeNode(DjangoObjectType):
 
 class AgencyNode(DjangoObjectType):
     country = graphene.String(description="Country name")
+    country_iso3 = graphene.String(description="Country ISO3")
 
     def resolve_country(parent, info):
         return parent.country.name
+
+    def resolve_country_iso3(parent, info):
+        return parent.country.alpha3
 
     class Meta:
         model = Agency
