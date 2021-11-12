@@ -1,6 +1,5 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
-import Close from '@material-ui/icons/Close';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +9,7 @@ import {
   AllIndividualsQuery,
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
+import { PhotoModal } from '../PhotoModal/PhotoModal';
 import { DocumentField } from './DocumentField';
 
 const DisabledDiv = styled.div`
@@ -48,25 +48,34 @@ export function EditDocumentRow({
         documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
         baseName='individualDataUpdateDocumentsToEdit'
         isEdited={isEdited}
+        photoSrc={document.node.photo}
+        setFieldValue={setFieldValue}
       />
-      <Box display='flex' alignItems='center'>
-        <IconButton
+      <Box
+        style={{ width: '100%' }}
+        display='flex'
+        alignItems='center'
+        justifyContent='flex-end'
+      >
+        <Button
           onClick={() => {
-            arrayHelpers.push({
-              country: document.node.type.country,
-              type: document.node.type,
+            arrayHelpers.remove({
+              id: document.node.id,
+              country: document.node.type.countryIso3,
+              type: document.node.type.type,
               number: document.node.documentNumber,
+              photo: document.node.photo,
             });
             setEdit(false);
           }}
         >
-          <Close />
-        </IconButton>
+          {t('CANCEL')}
+        </Button>
       </Box>
     </>
   ) : (
     <React.Fragment key={document.node.id}>
-      <Grid item xs={4}>
+      <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID TYPE1')}
@@ -74,7 +83,7 @@ export function EditDocumentRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={4}>
+      <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Country')}
@@ -90,9 +99,26 @@ export function EditDocumentRow({
           />
         </DisabledDiv>
       </Grid>
+      <Grid item xs={2}>
+        <PhotoModal src={document.node.photo} />
+      </Grid>
       <Grid item xs={1}>
         {!removed ? (
           <Box display='flex' align-items='center'>
+            <IconButton
+              onClick={() => {
+                arrayHelpers.push({
+                  id: document.node.id,
+                  country: document.node.type.countryIso3,
+                  type: document.node.type.type,
+                  number: document.node.documentNumber,
+                  photo: document.node.photo,
+                });
+                setEdit(true);
+              }}
+            >
+              <Edit />
+            </IconButton>
             <IconButton
               onClick={() => {
                 setFieldValue(
@@ -102,19 +128,6 @@ export function EditDocumentRow({
               }}
             >
               <Delete />
-            </IconButton>
-            <IconButton
-              onClick={() => {
-                arrayHelpers.push({
-                  id: document.node.id,
-                  country: document.node.type.countryIso3,
-                  type: document.node.type.type,
-                  number: document.node.documentNumber,
-                });
-                setEdit(true);
-              }}
-            >
-              <Edit />
             </IconButton>
           </Box>
         ) : (

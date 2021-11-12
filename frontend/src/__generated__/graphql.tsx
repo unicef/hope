@@ -5684,7 +5684,7 @@ export type IndividualMinimalFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
           & Pick<DocumentTypeNode, 'country' | 'label' | 'type' | 'countryIso3'>
@@ -7916,7 +7916,7 @@ export type IndividualPhotosQuery = (
         { __typename?: 'DocumentNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'DocumentNode' }
-          & Pick<DocumentNode, 'id' | 'photo'>
+          & Pick<DocumentNode, 'id' | 'documentNumber' | 'photo'>
         )> }
       )>> }
     ) }
@@ -8853,6 +8853,7 @@ export const IndividualMinimalFragmentDoc = gql`
         id
         country
         documentNumber
+        photo
         type {
           country
           label
@@ -14645,6 +14646,7 @@ export const IndividualPhotosDocument = gql`
       edges {
         node {
           id
+          documentNumber
           photo
         }
       }
