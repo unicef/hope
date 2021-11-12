@@ -1,11 +1,13 @@
 import { Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import { Field } from 'formik';
+import { basename } from 'path';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
+import { GrievanceDocumentPhotoModalEditable } from './GrievanceDocumentPhotoModalEditable';
 
 export interface DocumentFieldProps {
   index: number;
@@ -14,6 +16,8 @@ export interface DocumentFieldProps {
   countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
   documentTypeChoices: AllAddIndividualFieldsQuery['documentTypeChoices'];
   isEdited?: boolean;
+  setFieldValue?;
+  photoSrc?: string;
 }
 
 export function DocumentField({
@@ -23,11 +27,13 @@ export function DocumentField({
   countryChoices,
   documentTypeChoices,
   isEdited,
+  setFieldValue,
+  photoSrc,
 }: DocumentFieldProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <>
-      <Grid item xs={4}>
+      <Grid item xs={3}>
         <Field
           name={`${baseName}[${index}].type`}
           fullWidth
@@ -38,7 +44,7 @@ export function DocumentField({
           required
         />
       </Grid>
-      <Grid item xs={4}>
+      <Grid item xs={2}>
         <Field
           name={`${baseName}[${index}].country`}
           fullWidth
@@ -57,6 +63,13 @@ export function DocumentField({
           label={t('Document Number')}
           component={FormikTextField}
           required
+        />
+      </Grid>
+      <Grid item xs={3}>
+        <GrievanceDocumentPhotoModalEditable
+          photoSrc={photoSrc}
+          setFieldValue={setFieldValue}
+          fieldName={`${baseName}[${index}].photo`}
         />
       </Grid>
       {!isEdited ? (
