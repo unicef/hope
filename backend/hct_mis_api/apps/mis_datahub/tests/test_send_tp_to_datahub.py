@@ -23,6 +23,11 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+    TargetPopulationFactory,
+)
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
@@ -302,3 +307,51 @@ class TestSendTpToDatahub(TestCase):
         dh_session = dh_models.Session()
         (dh_household, *_) = task.send_household(household, self.program_individual_data_needed_true, dh_session, [])
         self.assertEqual(dh_household.country, expected_ca_code)
+
+    def test_trim_targeting_criteria(self):
+        business_area = BusinessArea.objects.first()
+
+        program = ProgramFactory(
+            individual_data_needed=True,
+            business_area=business_area,
+        )
+
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory.create_batch(150, targeting_criteria=targeting_criteria)
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_FINALIZED,
+            candidate_list_targeting_criteria=targeting_criteria,
+        )
+
+        task = SendTPToDatahubTask()
+        task.send_tp(target_population)
+
+        dh_target_population = dh_models.TargetPopulation.objects.filter(mis_id=target_population.id).first()
+
+        self.assertEqual(len(dh_target_population.targeting_criteria), 390)
+        self.assertTrue("..." in dh_target_population.targeting_criteria)
+
+    def test_should_not_trim_targeting_criteria(self):
+        business_area = BusinessArea.objects.first()
+
+        program = ProgramFactory(
+            individual_data_needed=True,
+            business_area=business_area,
+        )
+
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory.create_batch(50, targeting_criteria=targeting_criteria)
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_FINALIZED,
+            candidate_list_targeting_criteria=targeting_criteria,
+        )
+
+        task = SendTPToDatahubTask()
+        task.send_tp(target_population)
+
+        dh_target_population = dh_models.TargetPopulation.objects.filter(mis_id=target_population.id).first()
+
+        self.assertEqual(len(dh_target_population.targeting_criteria), 194)
+        self.assertFalse("..." in dh_target_population.targeting_criteria)
