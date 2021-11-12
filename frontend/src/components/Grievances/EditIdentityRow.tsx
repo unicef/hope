@@ -50,7 +50,16 @@ export function EditIdentityRow({
         isEdited={isEdited}
       />
       <Box display='flex' alignItems='center'>
-        <IconButton onClick={() => setEdit(false)}>
+        <IconButton
+          onClick={() => {
+            arrayHelpers.remove({
+              country: identity.agency.countryIso3,
+              agency: identity.agency.label,
+              number: identity.number,
+            });
+            setEdit(false);
+          }}
+        >
           <Close />
         </IconButton>
       </Box>

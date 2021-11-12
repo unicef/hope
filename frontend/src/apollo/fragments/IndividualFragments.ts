@@ -26,6 +26,7 @@ export const individualMinimal = gql`
           id
           country
           documentNumber
+          photo
           type {
             country
             label
