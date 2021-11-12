@@ -1,7 +1,6 @@
 import { Grid, IconButton } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import { Field } from 'formik';
-import { basename } from 'path';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
