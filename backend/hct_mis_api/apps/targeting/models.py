@@ -108,7 +108,11 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "vulnerability_score_max",
             "exclusion_reason",
             "excluded_ids"
-        ]
+        ],
+        {
+        "vulnerability_score_min": "score_min",
+        "vulnerability_score_max": "score_max",
+        }
     )
 
     STATUS_DRAFT = "DRAFT"
