@@ -61,6 +61,7 @@ export const ReassignRoleUnique = ({
           });
           showMessage('Role Reassigned');
         } catch (e) {
+          console.error(e)
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
       }}
