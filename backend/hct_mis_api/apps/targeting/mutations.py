@@ -497,8 +497,8 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
                 target_population.allowed_steficon_rule is not None
                 and steficon_rule_id != target_population.allowed_steficon_rule.id
             ):
-                logger.error("You can't change steficon rule for this Target Population")
-                raise GraphQLError("You can't change steficon rule for this Target Population")
+                logger.error("Another formula was applied to a previous target population for this programme. You can only apply the same formula")
+                raise GraphQLError("Another formula was applied to a previous target population for this programme. You can only apply the same formula")
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             if not steficon_rule.enabled or steficon_rule.deprecated:
                 logger.error("This steficon rule is not enabled or is deprecated.")
