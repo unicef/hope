@@ -7641,6 +7641,10 @@ export type GrievanceTicketQuery = (
           & { node: Maybe<(
             { __typename?: 'PaymentVerificationNode' }
             & Pick<PaymentVerificationNode, 'id'>
+            & { paymentRecord: (
+              { __typename?: 'PaymentRecordNode' }
+              & Pick<PaymentRecordNode, 'id' | 'caId'>
+            ) }
           )> }
         )>> }
       ) }
@@ -13953,6 +13957,10 @@ export const GrievanceTicketDocument = gql`
         edges {
           node {
             id
+            paymentRecord {
+              id
+              caId
+            }
           }
         }
       }
