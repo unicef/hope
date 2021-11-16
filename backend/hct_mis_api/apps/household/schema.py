@@ -1,3 +1,5 @@
+import re
+
 from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Coalesce, Lower
 
@@ -144,7 +146,10 @@ class HouseholdFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
-        values = value.split(" ")
+        if re.match(r"([\"\']).+\1", value):
+            values = [value.replace('"', "").strip()]
+        else:
+            values = value.split(" ")
         q_obj = Q()
         for value in values:
             inner_query = Q()
@@ -216,7 +221,10 @@ class IndividualFilter(FilterSet):
         return qs.filter(q_obj)
 
     def search_filter(self, qs, name, value):
-        values = value.split(" ")
+        if re.match(r"([\"\']).+\1", value):
+            values = [value.replace('"', "").strip()]
+        else:
+            values = value.split(" ")
         q_obj = Q()
         for value in values:
             inner_query = Q()
