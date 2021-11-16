@@ -353,6 +353,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER),
     )
 
+    admin_area_title = graphene.String(description="Admin area title")
     total_cash_received = graphene.Decimal()
     total_cash_received_usd = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
@@ -368,6 +369,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin2 = graphene.Field(AdminAreaNode)
     status = graphene.String()
     programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+
+    def resolve_admin_area_title(parent, info):
+        return parent.admin_area.title
 
     def resolve_programs_with_delivered_quantity(parent, info):
         return parent.programs_with_delivered_quantity

@@ -252,6 +252,17 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
             for admin_area in queryset
         ]
 
+    @classmethod
+    def get_admin_areas(cls, business_area=None):
+        queryset = cls.objects.filter(level__gt=0)
+        if business_area is not None:
+            queryset.filter(admin_area_level__business_area=business_area)
+        queryset = queryset.order_by("title")
+        return [
+            {"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code}
+            for admin_area in queryset
+        ]
+
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     ASSOCIATED_WITH_HOUSEHOLD = 0
