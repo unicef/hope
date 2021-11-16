@@ -243,6 +243,7 @@ export type AgencyNode = {
   label: Scalars['String'],
   country?: Maybe<Scalars['String']>,
   individualIdentities: Array<IndividualIdentityNode>,
+  countryIso3?: Maybe<Scalars['String']>,
 };
 
 export enum AgencyType {
@@ -921,6 +922,7 @@ export type DocumentTypeNode = {
   label: Scalars['String'],
   type: DocumentTypeType,
   documents: DocumentNodeConnection,
+  countryIso3?: Maybe<Scalars['String']>,
 };
 
 
@@ -5682,10 +5684,10 @@ export type IndividualMinimalFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'country' | 'label'>
+          & Pick<DocumentTypeNode, 'country' | 'label' | 'type' | 'countryIso3'>
         ) }
       )> }
     )>> }
@@ -5694,7 +5696,7 @@ export type IndividualMinimalFragment = (
     & Pick<IndividualIdentityNode, 'id' | 'number'>
     & { agency: (
       { __typename?: 'AgencyNode' }
-      & Pick<AgencyNode, 'country' | 'label'>
+      & Pick<AgencyNode, 'country' | 'label' | 'countryIso3'>
     ) }
   )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
@@ -7918,7 +7920,7 @@ export type IndividualPhotosQuery = (
         { __typename?: 'DocumentNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'DocumentNode' }
-          & Pick<DocumentNode, 'id' | 'photo'>
+          & Pick<DocumentNode, 'id' | 'documentNumber' | 'photo'>
         )> }
       )>> }
     ) }
@@ -8855,9 +8857,12 @@ export const IndividualMinimalFragmentDoc = gql`
         id
         country
         documentNumber
+        photo
         type {
           country
           label
+          type
+          countryIso3
         }
       }
     }
@@ -8867,6 +8872,7 @@ export const IndividualMinimalFragmentDoc = gql`
     agency {
       country
       label
+      countryIso3
     }
     number
   }
@@ -14648,6 +14654,7 @@ export const IndividualPhotosDocument = gql`
       edges {
         node {
           id
+          documentNumber
           photo
         }
       }
@@ -17662,6 +17669,7 @@ export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversP
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individualIdentities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
+  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
@@ -18010,6 +18018,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
+  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {

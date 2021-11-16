@@ -123,6 +123,7 @@ type AgencyNode {
   label: String!
   country: String
   individualIdentities: [IndividualIdentityNode!]!
+  countryIso3: String
 }
 
 enum AgencyType {
@@ -602,6 +603,7 @@ type DocumentTypeNode {
   label: String!
   type: DocumentTypeType!
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+  countryIso3: String
 }
 
 enum DocumentTypeType {
