@@ -134,7 +134,7 @@ export function CurrentValue({
 }: CurrentValueProps): React.ReactElement {
   const { t } = useTranslation();
   let displayValue;
-  if (field?.name === 'country' || field?.name === 'country_origin') {
+  if (field?.name === 'country' || field?.name === 'country_origin' || field?.name === "admin_area_title") {
     displayValue = value || '-';
   } else {
     switch (field?.type) {
