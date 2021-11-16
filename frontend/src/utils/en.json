@@ -352,7 +352,7 @@
   "Add": "Add",
   "Filter": "Filter",
   "Add Filter": "Add Filter",
-  "Vulnerability score": "Vulnerability score",
+  "Score": "Score",
   "You need to select at least one targeting criteria": "You need to select at least one targeting criteria",
   "Unexpected problem while creating Target Population": "Unexpected problem while creating Target Population",
   "Target Population Updated": "Target Population Updated",
@@ -567,5 +567,6 @@
   "Exclusion Reason": "Exclusion Reason",
   "Household or Individual IDs to exclude": "Household or Individual IDs to exclude",
   "ID is not in the correct format": "ID is not in the correct format",
-  "Linked Households": "Linked Households"
+  "Linked Households": "Linked Households",
+  "Formula is executing, please wait until completed": "Formula is executing, please wait until completed"
 }

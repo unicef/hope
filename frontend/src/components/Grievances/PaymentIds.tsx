@@ -3,7 +3,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { decodeIdString } from '../../utils/utils';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../ContentLink';
 
@@ -31,7 +30,7 @@ export const PaymentIds = ({
         <ContentLink
           href={`/${businessArea}/verification-records/${verification.node.id}`}
         >
-          {decodeIdString(verification.node.id)}
+          {verification.node.paymentRecord.caId}
         </ContentLink>
       </Box>
     ),

@@ -1,4 +1,5 @@
 import { Box, Button, DialogContent, IconButton } from '@material-ui/core';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import CloseIcon from '@material-ui/icons/Close';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -125,7 +126,11 @@ export const PhotoModal = ({
         />
         <DialogContent>
           <Box p={3}>
-            <StyledImage id='modalImg' alt='photo' src={src} />
+            <TransformWrapper>
+              <TransformComponent>
+                <StyledImage id='modalImg' alt='photo' src={src} />
+              </TransformComponent>
+            </TransformWrapper>
           </Box>
         </DialogContent>
         <PhotoModalFooter
