@@ -1,6 +1,12 @@
 from django.core.management import call_command
+
 from parameterized import parameterized
 
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -8,12 +14,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
-
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.account.permissions import Permissions
 
 
 class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
@@ -89,7 +89,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
             name="target_population_size_1_approved",
             created_by=cls.user,
             candidate_list_targeting_criteria=targeting_criteria,
-            status="APPROVED",
+            status="LOCKED",
         )
         cls.target_population_size_1_approved.save()
         HouseholdSelection.objects.create(

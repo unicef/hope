@@ -28,12 +28,15 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     TARGETING_CORE_FIELDS,
-    TYPE_SELECT_MANY,
     TYPE_DECIMAL,
     TYPE_INTEGER,
+    TYPE_SELECT_MANY,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.utils import get_attr_value, map_unicef_ids_to_households_unicef_ids
+from hct_mis_api.apps.core.utils import (
+    get_attr_value,
+    map_unicef_ids_to_households_unicef_ids,
+)
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -70,7 +73,7 @@ class TargetPopulationManager(SoftDeletableManager):
             .get_queryset()
             .annotate(
                 number_of_households=Case(
-                    When(status=TargetPopulation.STATUS_APPROVED, then="candidate_list_total_households"),
+                    When(status=TargetPopulation.STATUS_LOCKED, then="candidate_list_total_households"),
                     When(status=TargetPopulation.STATUS_FINALIZED, then="final_list_total_households"),
                     default=Value(0),
                 )
@@ -90,8 +93,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "ca_id",
             "ca_hash_id",
             "created_by",
-            "approved_at",
-            "approved_by",
+            "change_date",
+            "changed_by",
             "finalized_at",
             "finalized_by",
             "status",
@@ -103,21 +106,27 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "program",
             "targeting_criteria_string",
             "sent_to_datahub",
-            "steficon_rule",
             "vulnerability_score_min",
             "vulnerability_score_max",
             "exclusion_reason",
-            "excluded_ids"
+            "excluded_ids",
         ],
         {
-        "vulnerability_score_min": "score_min",
-        "vulnerability_score_max": "score_max",
+            "steficon_rule": "additional_formula",
+            "steficon_applied_date": "additional_formula_applied_date",
+            "vulnerability_score_min": "score_min",
+            "vulnerability_score_max": "score_max",
         }
     )
 
     STATUS_DRAFT = "DRAFT"
-    STATUS_APPROVED = "APPROVED"
+    STATUS_LOCKED = "LOCKED"
     STATUS_FINALIZED = "FINALIZED"
+    STATUS_CHOICES = (
+        (STATUS_DRAFT, _("Open")),
+        (STATUS_LOCKED, _("Locked")),
+        (STATUS_FINALIZED, _("Sent")),
+    )
 
     objects = TargetPopulationManager()
 
@@ -141,11 +150,11 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         related_name="target_populations",
         null=True,
     )
-    approved_at = models.DateTimeField(null=True, blank=True)
-    approved_by = models.ForeignKey(
+    change_date = models.DateTimeField(null=True, blank=True)
+    changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        related_name="approved_target_populations",
+        related_name="locked_target_populations",
         null=True,
         blank=True,
     )
@@ -158,12 +167,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         blank=True,
     )
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
-    STATUS_CHOICES = (
-        (STATUS_DRAFT, _("Open")),
-        (STATUS_APPROVED, _("Closed")),
-        (STATUS_FINALIZED, _("Sent")),
-    )
-
     status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default=STATUS_DRAFT, db_index=True)
     households = models.ManyToManyField(
         "household.Household",
@@ -224,6 +227,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     steficon_rule = models.ForeignKey(
         "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
     )
+    steficon_applied_date = models.DateTimeField(blank=True, null=True)
     vulnerability_score_min = models.DecimalField(
         null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
     )
@@ -303,7 +307,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     def final_stats(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
             return None
-        elif self.status == TargetPopulation.STATUS_APPROVED:
+        elif self.status == TargetPopulation.STATUS_LOCKED:
             households_ids = (
                 self.vulnerability_score_filtered_households.filter(self.final_list_targeting_criteria.get_query())
                 .filter(business_area=self.business_area)
