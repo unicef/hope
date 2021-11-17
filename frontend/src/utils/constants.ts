@@ -1,7 +1,7 @@
 export const TARGETING_STATES = {
   NONE: 'None',
   DRAFT: 'Open',
-  APPROVED: 'Locked',
+  LOCKED: 'Locked',
   FINALIZED: 'Sent',
 };
 

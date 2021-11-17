@@ -1,7 +1,11 @@
 import logging
+
 from django.core.exceptions import ValidationError
 
-from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY, XLSX_ONLY_FIELDS
+from hct_mis_api.apps.core.core_fields_attributes import (
+    CORE_FIELDS_ATTRIBUTES_DICTIONARY,
+    XLSX_ONLY_FIELDS,
+)
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.core.validators import BaseValidator
@@ -31,7 +35,7 @@ class ApproveTargetPopulationValidator:
 class UnapproveTargetPopulationValidator:
     @staticmethod
     def validate(target_population):
-        if target_population.status != "APPROVED":
+        if target_population.status != "LOCKED":
             logger.error("Only Target Population with status APPROVED can be unapproved")
             raise ValidationError("Only Target Population with status APPROVED can be unapproved")
 
@@ -39,7 +43,7 @@ class UnapproveTargetPopulationValidator:
 class FinalizeTargetPopulationValidator:
     @staticmethod
     def validate(target_population):
-        if target_population.status != "APPROVED":
+        if target_population.status != "LOCKED":
             logger.error("Only Target Population with status APPROVED can be finalized")
             raise ValidationError("Only Target Population with status APPROVED can be finalized")
         if target_population.program.status != "ACTIVE":

@@ -399,10 +399,15 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
     def save(self, *args, **kwargs):
-        from hct_mis_api.apps.targeting.models import HouseholdSelection
+        from hct_mis_api.apps.targeting.models import (
+            HouseholdSelection,
+            TargetPopulation,
+        )
 
         if self.withdrawn:
-            HouseholdSelection.objects.filter(household=self, target_population__status="APPROVED").delete()
+            HouseholdSelection.objects.filter(
+                household=self, target_population__status=TargetPopulation.STATUS_LOCKED
+            ).delete()
         super().save(*args, **kwargs)
 
     @property

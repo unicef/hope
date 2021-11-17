@@ -69,7 +69,7 @@ export function EditTargetPopulation({
   });
   const isTitleEditable = (): boolean => {
     switch (targetPopulation.status) {
-      case 'APPROVED':
+      case 'LOCKED':
         return false;
       default:
         return true;
