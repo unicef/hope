@@ -15,6 +15,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import Case, Count, Q, Value, When
+from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
@@ -106,8 +107,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "program",
             "targeting_criteria_string",
             "sent_to_datahub",
-            "vulnerability_score_min",
-            "vulnerability_score_max",
+            "steficon_rule",
             "exclusion_reason",
             "excluded_ids",
         ],
@@ -301,7 +301,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def targeting_criteria_string(self):
-        return self.get_criteria_string()
+        return Truncator(self.get_criteria_string()).chars(390, "...")
 
     @property
     def final_stats(self):
