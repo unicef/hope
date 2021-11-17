@@ -116,7 +116,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "steficon_applied_date": "additional_formula_applied_date",
             "vulnerability_score_min": "score_min",
             "vulnerability_score_max": "score_max",
-        }
+        },
     )
 
     STATUS_DRAFT = "DRAFT"
@@ -421,7 +421,7 @@ class TargetingCriteriaQueryingMixin:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self):
-        return Q(withdrawn=False) & ~Q(unicef_id__in=self.excluded_household_ids)
+        return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.excluded_household_ids)
 
     def get_query(self):
         query = Q()
