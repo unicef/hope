@@ -37,7 +37,7 @@ export const ApprovedTargetPopulationTable = ({
         queriedObjectName='candidateHouseholdsListByTargetingCriteria'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <ProgrammeTableRow household={row} canViewDetails={canViewDetails} />
+          <ProgrammeTableRow key={row.id} household={row} canViewDetails={canViewDetails} />
         )}
       />
     </TableWrapper>
