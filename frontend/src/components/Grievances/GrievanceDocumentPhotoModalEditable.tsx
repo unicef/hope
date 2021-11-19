@@ -33,6 +33,7 @@ export const GrievanceDocumentPhotoModalEditable = ({
           src={picUrl}
           variant='pictureClose'
           closeHandler={() => setEdit(true)}
+          showRotate={false}
         />
       )}
     </Box>

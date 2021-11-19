@@ -11,17 +11,21 @@ export const PhotoModalHeader = ({
   turnAngle,
   setTurnAngle,
   title,
+  showRotate,
 }: {
   turnAngle: number;
   setTurnAngle: React.Dispatch<React.SetStateAction<number>>;
   title: string;
+  showRotate: boolean;
 }): React.ReactElement => {
   return (
     <DialogTitleWrapper>
       <DialogTitle id='scroll-dialog-title'>
         <Box display='flex' justifyContent='space-between' alignItems='center'>
           <span>{title}</span>
-          <RotateImg turnAngle={turnAngle} setTurnAngle={setTurnAngle} />
+          {showRotate ? (
+            <RotateImg turnAngle={turnAngle} setTurnAngle={setTurnAngle} />
+          ) : null}
         </Box>
       </DialogTitle>
     </DialogTitleWrapper>
