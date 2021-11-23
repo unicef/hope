@@ -1,3 +1,5 @@
+import decimal
+
 from hct_mis_api.apps.core.utils import nested_getattr
 
 
@@ -24,6 +26,13 @@ def create_diff(old_object, new_object, mapping):
             new_value = nested_getattr(new_object, field_name, None)
         if old_value is None and isinstance(new_value, str) and len(new_value) == 0:
             continue
+
+        if isinstance(old_value, decimal.Decimal):
+            old_value = old_value.normalize()
+
+        if isinstance(new_value, decimal.Decimal):
+            new_value = new_value.normalize()
+
         if str(old_value) == str(new_value):
             continue
         change = {"from": None, "to": None}
@@ -40,5 +49,3 @@ def copy_model_object(model_object):
     model_dict.update(model_object.__dict__)
     del model_dict["_state"]
     return model_object.__class__(**model_dict)
-
-

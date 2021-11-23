@@ -1,14 +1,14 @@
-from django.db.models import Sum, Count
-from django.db.models.signals import post_save, pre_save, m2m_changed
+from django.db.models import Count, Sum
+from django.db.models.signals import m2m_changed, post_save, pre_save
 from django.dispatch import receiver
 
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteriaRuleFilter,
-    TargetingCriteriaRule,
-    TargetPopulation,
     HouseholdSelection,
     TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetPopulation,
 )
 
 
@@ -34,7 +34,7 @@ def calculate_final_counts(target_population):
         target_population.final_list_total_households = None
         target_population.final_list_total_individuals = None
         return
-    elif target_population.status == TargetPopulation.STATUS_APPROVED:
+    elif target_population.status == TargetPopulation.STATUS_LOCKED:
         if target_population.final_list_targeting_criteria is None:
             households = target_population.vulnerability_score_filtered_households
         else:

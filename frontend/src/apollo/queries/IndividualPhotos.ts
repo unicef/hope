@@ -9,6 +9,7 @@ export const INDIVIDUAL_PHOTOS_QUERY = gql`
         edges {
           node {
             id
+            documentNumber
             photo
           }
         }

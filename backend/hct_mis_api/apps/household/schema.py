@@ -1,3 +1,5 @@
+import re
+
 from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Coalesce, Lower
 
@@ -144,7 +146,10 @@ class HouseholdFilter(FilterSet):
     )
 
     def search_filter(self, qs, name, value):
-        values = value.split(" ")
+        if re.match(r"([\"\']).+\1", value):
+            values = [value.replace('"', "").strip()]
+        else:
+            values = value.split(" ")
         q_obj = Q()
         for value in values:
             inner_query = Q()
@@ -216,7 +221,10 @@ class IndividualFilter(FilterSet):
         return qs.filter(q_obj)
 
     def search_filter(self, qs, name, value):
-        values = value.split(" ")
+        if re.match(r"([\"\']).+\1", value):
+            values = [value.replace('"', "").strip()]
+        else:
+            values = value.split(" ")
         q_obj = Q()
         for value in values:
             inner_query = Q()
@@ -248,9 +256,13 @@ class IndividualFilter(FilterSet):
 
 class DocumentTypeNode(DjangoObjectType):
     country = graphene.String(description="Country name")
+    country_iso3 = graphene.String(description="Country ISO3")
 
     def resolve_country(parent, info):
         return parent.country.name
+
+    def resolve_country_iso3(parent, info):
+        return parent.country.alpha3
 
     class Meta:
         model = DocumentType
@@ -258,9 +270,13 @@ class DocumentTypeNode(DjangoObjectType):
 
 class AgencyNode(DjangoObjectType):
     country = graphene.String(description="Country name")
+    country_iso3 = graphene.String(description="Country ISO3")
 
     def resolve_country(parent, info):
         return parent.country.name
+
+    def resolve_country_iso3(parent, info):
+        return parent.country.alpha3
 
     class Meta:
         model = Agency
@@ -345,6 +361,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER),
     )
 
+    admin_area_title = graphene.String(description="Admin area title")
     total_cash_received = graphene.Decimal()
     total_cash_received_usd = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
@@ -360,6 +377,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin2 = graphene.Field(AdminAreaNode)
     status = graphene.String()
     programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+
+    def resolve_admin_area_title(parent, info):
+        return parent.admin_area.title
 
     def resolve_programs_with_delivered_quantity(parent, info):
         return parent.programs_with_delivered_quantity

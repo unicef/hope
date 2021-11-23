@@ -11,7 +11,6 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -23,7 +22,8 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.geo.compat import GeoCountryField
+from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -399,10 +399,15 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
     def save(self, *args, **kwargs):
-        from hct_mis_api.apps.targeting.models import HouseholdSelection
+        from hct_mis_api.apps.targeting.models import (
+            HouseholdSelection,
+            TargetPopulation,
+        )
 
         if self.withdrawn:
-            HouseholdSelection.objects.filter(household=self, target_population__status="APPROVED").delete()
+            HouseholdSelection.objects.filter(
+                household=self, target_population__status=TargetPopulation.STATUS_LOCKED
+            ).delete()
         super().save(*args, **kwargs)
 
     @property
@@ -425,6 +430,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
+
+    @property
+    def admin_area_title(self):
+        return self.admin_area.title
 
     @property
     def admin1(self):

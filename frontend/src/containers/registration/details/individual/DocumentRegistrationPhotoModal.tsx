@@ -1,17 +1,9 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
-import React, { useState } from 'react';
-import {
-  DialogFooter,
-  DialogTitleWrapper,
-  StyledImage,
-  StyledLink,
-} from '../../../../components/population/IndividualFlexFieldPhotoModal';
+import React from 'react';
+import { PhotoModal } from '../../../../components/PhotoModal/PhotoModal';
 import {
   ImportedIndividualDetailedFragment,
-  useImportedIndividualPhotosLazyQuery,
+  useImportedIndividualPhotosQuery,
 } from '../../../../__generated__/graphql';
-import { Dialog } from '../../../dialogs/Dialog';
-import { DialogActions } from '../../../dialogs/DialogActions';
 
 interface DocumentRegistrationPhotoModalProps {
   individual: ImportedIndividualDetailedFragment;
@@ -24,8 +16,7 @@ export const DocumentRegistrationPhotoModal = ({
   documentNumber,
   documentId,
 }: DocumentRegistrationPhotoModalProps): React.ReactElement => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [getPhotos, { data }] = useImportedIndividualPhotosLazyQuery({
+  const { data } = useImportedIndividualPhotosQuery({
     variables: { id: individual?.id },
     fetchPolicy: 'network-only',
   });
@@ -34,36 +25,11 @@ export const DocumentRegistrationPhotoModal = ({
   );
 
   return (
-    <>
-      <StyledLink
-        onClick={() => {
-          setDialogOpen(true);
-          getPhotos();
-        }}
-      >
-        {documentNumber}
-      </StyledLink>
-      <Dialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        aria-labelledby='form-dialog-title'
-      >
-        <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>
-            Document&apos;s Photo
-          </DialogTitle>
-        </DialogTitleWrapper>
-        <DialogContent>
-          <Box p={3}>
-            <StyledImage alt='document' src={documentWithPhoto?.node?.photo} />
-          </Box>
-        </DialogContent>
-        <DialogFooter>
-          <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>CANCEL</Button>
-          </DialogActions>
-        </DialogFooter>
-      </Dialog>
-    </>
+    <PhotoModal
+      src={documentWithPhoto?.node?.photo}
+      linkText={documentNumber}
+      variant='link'
+      title="Document's Photo"
+    />
   );
 };

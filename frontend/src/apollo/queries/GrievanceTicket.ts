@@ -141,6 +141,10 @@ export const GrievanceTicket = gql`
           edges {
             node {
               id
+              paymentRecord {
+                id
+                caId
+              }
             }
           }
         }
