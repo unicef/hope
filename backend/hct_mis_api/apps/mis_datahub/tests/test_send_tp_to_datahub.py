@@ -1,8 +1,10 @@
 from django.core.management import call_command
 from django.test import TestCase
 
+from parameterized import parameterized
+
 import hct_mis_api.apps.mis_datahub.models as dh_models
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
@@ -10,19 +12,23 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
 )
 from hct_mis_api.apps.household.models import (
-    ROLE_PRIMARY,
     ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Agency,
     Document,
     DocumentType,
-    Agency,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+    TargetPopulationFactory,
+)
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from parameterized import parameterized
 
 
 class TestSendTpToDatahub(TestCase):
@@ -43,8 +49,8 @@ class TestSendTpToDatahub(TestCase):
             "ca_id": None,
             "ca_hash_id": None,
             "created_by": None,
-            "approved_at": None,
-            "approved_by": None,
+            "change_date": None,
+            "changed_by": None,
             "finalized_at": None,
             "finalized_by": None,
             "candidate_list_total_households": None,
@@ -293,7 +299,7 @@ class TestSendTpToDatahub(TestCase):
             ("custom_code", "AU", "AUL"),
         ]
     )
-    def test_send_household_country(self,_, iso_code2, expected_ca_code):
+    def test_send_household_country(self, _, iso_code2, expected_ca_code):
         (household, individuals) = create_household(household_args={"size": 1})
         household.country = iso_code2
         household.save()
@@ -301,3 +307,51 @@ class TestSendTpToDatahub(TestCase):
         dh_session = dh_models.Session()
         (dh_household, *_) = task.send_household(household, self.program_individual_data_needed_true, dh_session, [])
         self.assertEqual(dh_household.country, expected_ca_code)
+
+    def test_trim_targeting_criteria(self):
+        business_area = BusinessArea.objects.first()
+
+        program = ProgramFactory(
+            individual_data_needed=True,
+            business_area=business_area,
+        )
+
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory.create_batch(150, targeting_criteria=targeting_criteria)
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_FINALIZED,
+            candidate_list_targeting_criteria=targeting_criteria,
+        )
+
+        task = SendTPToDatahubTask()
+        task.send_tp(target_population)
+
+        dh_target_population = dh_models.TargetPopulation.objects.filter(mis_id=target_population.id).first()
+
+        self.assertEqual(len(dh_target_population.targeting_criteria), 390)
+        self.assertTrue("..." in dh_target_population.targeting_criteria)
+
+    def test_should_not_trim_targeting_criteria(self):
+        business_area = BusinessArea.objects.first()
+
+        program = ProgramFactory(
+            individual_data_needed=True,
+            business_area=business_area,
+        )
+
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory.create_batch(50, targeting_criteria=targeting_criteria)
+        target_population = TargetPopulationFactory(
+            program=program,
+            status=TargetPopulation.STATUS_FINALIZED,
+            candidate_list_targeting_criteria=targeting_criteria,
+        )
+
+        task = SendTPToDatahubTask()
+        task.send_tp(target_population)
+
+        dh_target_population = dh_models.TargetPopulation.objects.filter(mis_id=target_population.id).first()
+
+        self.assertEqual(len(dh_target_population.targeting_criteria), 194)
+        self.assertFalse("..." in dh_target_population.targeting_criteria)

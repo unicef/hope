@@ -273,7 +273,7 @@ export function CreateGrievancePage(): React.ReactElement {
               </Box>
             </PageHeader>
             <Grid container spacing={3}>
-              <Grid item xs={8}>
+              <Grid item xs={9}>
                 <NewTicket>
                   <ContainerColumnWithBorder>
                     <Grid container spacing={3}>
@@ -389,7 +389,7 @@ export function CreateGrievancePage(): React.ReactElement {
                   </ContainerColumnWithBorder>
                 </NewTicket>
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={3}>
                 <NewTicket>{renderAlreadyExistsBox(values)}</NewTicket>
                 <NewTicket>
                   {values.category && values.selectedHousehold?.id ? (

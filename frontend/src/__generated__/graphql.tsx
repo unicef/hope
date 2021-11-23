@@ -243,6 +243,7 @@ export type AgencyNode = {
   label: Scalars['String'],
   country?: Maybe<Scalars['String']>,
   individualIdentities: Array<IndividualIdentityNode>,
+  countryIso3?: Maybe<Scalars['String']>,
 };
 
 export enum AgencyType {
@@ -921,6 +922,7 @@ export type DocumentTypeNode = {
   label: Scalars['String'],
   type: DocumentTypeType,
   documents: DocumentNodeConnection,
+  countryIso3?: Maybe<Scalars['String']>,
 };
 
 
@@ -1201,6 +1203,7 @@ export type HouseholdNode = Node & {
   individuals: IndividualNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
   selections: Array<HouseholdSelection>,
+  adminAreaTitle?: Maybe<Scalars['String']>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   totalCashReceivedUsd?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
@@ -4688,8 +4691,8 @@ export type TargetPopulationNode = Node & {
   caId?: Maybe<Scalars['String']>,
   caHashId?: Maybe<Scalars['String']>,
   createdBy?: Maybe<UserNode>,
-  approvedAt?: Maybe<Scalars['DateTime']>,
-  approvedBy?: Maybe<UserNode>,
+  changeDate?: Maybe<Scalars['DateTime']>,
+  changedBy?: Maybe<UserNode>,
   finalizedAt?: Maybe<Scalars['DateTime']>,
   finalizedBy?: Maybe<UserNode>,
   businessArea?: Maybe<UserBusinessAreaNode>,
@@ -4758,7 +4761,7 @@ export type TargetPopulationNodeEdge = {
 
 export enum TargetPopulationStatus {
   Draft = 'DRAFT',
-  Approved = 'APPROVED',
+  Locked = 'LOCKED',
   Finalized = 'FINALIZED'
 }
 
@@ -5395,7 +5398,7 @@ export type UserNode = Node & {
   assignedTickets: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
-  approvedTargetPopulations: TargetPopulationNodeConnection,
+  lockedTargetPopulations: TargetPopulationNodeConnection,
   finalizedTargetPopulations: TargetPopulationNodeConnection,
   registrationDataImports: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
@@ -5455,7 +5458,7 @@ export type UserNodeTargetPopulationsArgs = {
 };
 
 
-export type UserNodeApprovedTargetPopulationsArgs = {
+export type UserNodeLockedTargetPopulationsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5586,7 +5589,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'adminAreaTitle' | 'address'>
   & { admin1: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
@@ -5682,10 +5685,10 @@ export type IndividualMinimalFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'country' | 'label'>
+          & Pick<DocumentTypeNode, 'country' | 'label' | 'type' | 'countryIso3'>
         ) }
       )> }
     )>> }
@@ -5694,7 +5697,7 @@ export type IndividualMinimalFragment = (
     & Pick<IndividualIdentityNode, 'id' | 'number'>
     & { agency: (
       { __typename?: 'AgencyNode' }
-      & Pick<AgencyNode, 'country' | 'label'>
+      & Pick<AgencyNode, 'country' | 'label' | 'countryIso3'>
     ) }
   )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
@@ -5780,7 +5783,7 @@ export type TargetPopulationMinimalFragment = (
 
 export type TargetPopulationDetailedFragment = (
   { __typename?: 'TargetPopulationNode' }
-  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'excludedIds' | 'exclusionReason' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'excludedIds' | 'exclusionReason' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'changeDate' | 'finalizedAt'>
   & { steficonRule: Maybe<(
     { __typename?: 'SteficonRuleNode' }
     & Pick<SteficonRuleNode, 'id' | 'name'>
@@ -7639,6 +7642,10 @@ export type GrievanceTicketQuery = (
           & { node: Maybe<(
             { __typename?: 'PaymentVerificationNode' }
             & Pick<PaymentVerificationNode, 'id'>
+            & { paymentRecord: (
+              { __typename?: 'PaymentRecordNode' }
+              & Pick<PaymentRecordNode, 'id' | 'caId'>
+            ) }
           )> }
         )>> }
       ) }
@@ -7914,7 +7921,7 @@ export type IndividualPhotosQuery = (
         { __typename?: 'DocumentNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'DocumentNode' }
-          & Pick<DocumentNode, 'id' | 'photo'>
+          & Pick<DocumentNode, 'id' | 'documentNumber' | 'photo'>
         )> }
       )>> }
     ) }
@@ -8795,6 +8802,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   unhcrId
   geopoint
   village
+  adminAreaTitle
   admin1 {
     id
     title
@@ -8851,9 +8859,12 @@ export const IndividualMinimalFragmentDoc = gql`
         id
         country
         documentNumber
+        photo
         type {
           country
           label
+          type
+          countryIso3
         }
       }
     }
@@ -8863,6 +8874,7 @@ export const IndividualMinimalFragmentDoc = gql`
     agency {
       country
       label
+      countryIso3
     }
     number
   }
@@ -9122,7 +9134,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   }
   vulnerabilityScoreMin
   vulnerabilityScoreMax
-  approvedAt
+  changeDate
   finalizedAt
   finalizedBy {
     id
@@ -13947,6 +13959,10 @@ export const GrievanceTicketDocument = gql`
         edges {
           node {
             id
+            paymentRecord {
+              id
+              caId
+            }
           }
         }
       }
@@ -14640,6 +14656,7 @@ export const IndividualPhotosDocument = gql`
       edges {
         node {
           id
+          documentNumber
           photo
         }
       }
@@ -17654,6 +17671,7 @@ export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversP
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individualIdentities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
+  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
@@ -18002,6 +18020,7 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
+  countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
@@ -18189,6 +18208,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
@@ -19344,8 +19364,8 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  approvedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  approvedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  changeDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  changedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   finalizedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   finalizedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
@@ -19765,7 +19785,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeAssignedTicketsArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, UserNodeTicketNotesArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeTargetPopulationsArgs>,
-  approvedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeApprovedTargetPopulationsArgs>,
+  lockedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeLockedTargetPopulationsArgs>,
   finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeFinalizedTargetPopulationsArgs>,
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserNodeReportsArgs>,

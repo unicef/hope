@@ -43,7 +43,7 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, LinkedObjectsMixin, ExtraUr
     )
     raw_id_fields = (
         "created_by",
-        "approved_by",
+        "changed_by",
         "finalized_by",
         "business_area",
         "program",

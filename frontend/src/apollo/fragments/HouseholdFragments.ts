@@ -20,6 +20,7 @@ export const householdMinimal = gql`
     unhcrId
     geopoint
     village
+    adminAreaTitle
     admin1 {
       id
       title

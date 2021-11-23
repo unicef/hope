@@ -169,7 +169,7 @@ export function targetPopulationStatusToColor(
   switch (status) {
     case 'DRAFT':
       return theme.hctPalette.gray;
-    case 'APPROVED':
+    case 'LOCKED':
       return theme.hctPalette.oragne;
     case 'FINALIZED':
       return theme.hctPalette.green;
