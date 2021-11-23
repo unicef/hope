@@ -67,8 +67,10 @@ function prepareInitialValueEditIndividual(
   };
   const documents = individualData?.documents;
   const documentsToRemove = individualData.documents_to_remove;
+  const documentsEdited = individualData?.documents_edited;
   const identities = individualData?.identities;
-  const identitiesToRemove = individualData.identities_to_remove;
+  const identitiesToRemove = individualData?.identities_to_remove;
+  const identitiesEdited = individualData?.identities_edited;
   const flexFields = individualData.flex_fields;
   delete individualData.documents;
   delete individualData.documents_to_remove;
@@ -104,6 +106,12 @@ function prepareInitialValueEditIndividual(
   );
   initialValues.individualDataUpdateIdentitiesToRemove = (
     identitiesToRemove || []
+  ).map((item) => item.value);
+  initialValues.individualDataUpdateDocumentsToEdit = (
+    documentsEdited || []
+  ).map((item) => item.value);
+  initialValues.individualDataUpdateIdentitiesToEdit = (
+    identitiesEdited || []
   ).map((item) => item.value);
   return initialValues;
 }
@@ -337,8 +345,10 @@ function prepareEditIndividualVariables(requiredVariables, values) {
               ...individualData,
               documents: values.individualDataUpdateFieldsDocuments,
               documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+              documentsToEdit: values.individualDataUpdateDocumentsToEdit,
               identities: values.individualDataUpdateFieldsIdentities,
               identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
+              identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
             },
           },
         },

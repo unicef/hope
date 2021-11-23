@@ -70,7 +70,7 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case 'APPROVED':
+    case 'LOCKED':
       buttons = (
         <ApprovedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}

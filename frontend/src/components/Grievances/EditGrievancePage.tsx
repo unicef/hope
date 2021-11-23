@@ -196,6 +196,8 @@ export function EditGrievancePage(): React.ReactElement {
       'individualDataUpdateFields',
       'individualDataUpdateFieldsDocuments',
       'individualDataUpdateFieldsIdentities',
+      'individualDataUpdateDocumentsToEdit',
+      'individualDataUpdateIdentitiesToEdit',
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (
@@ -273,7 +275,7 @@ export function EditGrievancePage(): React.ReactElement {
               </Box>
             </PageHeader>
             <Grid container spacing={3}>
-              <Grid item xs={8}>
+              <Grid item xs={9}>
                 <NewTicket>
                   <ContainerColumnWithBorder>
                     <Grid container spacing={3}>
@@ -410,7 +412,7 @@ export function EditGrievancePage(): React.ReactElement {
                   </ContainerColumnWithBorder>
                 </NewTicket>
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={3}>
                 <NewTicket>
                   {values.category && values.selectedHousehold?.id ? (
                     <OtherRelatedTicketsCreate values={values} />

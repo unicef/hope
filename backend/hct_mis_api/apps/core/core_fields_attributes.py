@@ -1452,6 +1452,23 @@ XLSX_ONLY_FIELDS = [
     },
 ]
 
+HOUSEHOLD_EDIT_ONLY_FIELDS = [
+    LazyEvalMethodsDict(
+        {
+            "id": "e48a4e26-6552-4e15-855f-9ea4d5268c84",
+            "type": TYPE_SELECT_ONE,
+            "name": "admin_area_title",
+            "lookup": "admin_area__p_code",
+            "required": False,
+            "label": {"English(EN)": "Household resides in which admin area?"},
+            "hint": "",
+            "choices": lambda: AdminArea.get_admin_areas(),
+            "associated_with": _HOUSEHOLD,
+            "xlsx_field": "admin_area_h_c",
+        },
+    ),
+]
+
 
 def _reduce_core_field_attr(old, new):
     old[new.get("name")] = new
