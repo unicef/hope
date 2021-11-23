@@ -660,8 +660,6 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
         (STATUS_INVALID, _("Invalid")),
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    objects = models.Manager()
-    existing_objects = SoftDeletableManager()
 
     def clean(self):
         from django.core.exceptions import ValidationError

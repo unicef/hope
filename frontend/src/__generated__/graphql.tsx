@@ -952,6 +952,18 @@ export type EditCashPlanPaymentVerificationInput = {
   rapidProArguments?: Maybe<RapidProArguments>,
 };
 
+export type EditIndividualDocumentObjectType = {
+  country: Scalars['String'],
+  type: Scalars['String'],
+  number: Scalars['String'],
+  photo?: Maybe<Scalars['Arg']>,
+  id: Scalars['ID'],
+};
+
+export type EditIndividualIdentityObjectType = {
+  id: Scalars['ID'],
+};
+
 export type EditPaymentVerificationMutation = {
    __typename?: 'EditPaymentVerificationMutation',
   cashPlan?: Maybe<CashPlanNode>,
@@ -1380,6 +1392,7 @@ export type HouseholdSelection = {
 };
 
 export type HouseholdUpdateDataObjectType = {
+  adminAreaTitle?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
   consent?: Maybe<Scalars['Boolean']>,
   consentSharing?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -2188,6 +2201,7 @@ export type IndividualDocumentObjectType = {
   country: Scalars['String'],
   type: Scalars['String'],
   number: Scalars['String'],
+  photo?: Maybe<Scalars['Arg']>,
 };
 
 export type IndividualIdentityNode = {
@@ -2464,8 +2478,10 @@ export type IndividualUpdateDataObjectType = {
   role?: Maybe<Scalars['String']>,
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
   documentsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  documentsToEdit?: Maybe<Array<Maybe<EditIndividualDocumentObjectType>>>,
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
   identitiesToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  identitiesToEdit?: Maybe<Array<Maybe<EditIndividualIdentityObjectType>>>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
@@ -4708,6 +4724,7 @@ export type TargetPopulationNode = Node & {
   finalListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
   sentToDatahub: Scalars['Boolean'],
   steficonRule?: Maybe<SteficonRuleNode>,
+  steficonAppliedDate?: Maybe<Scalars['DateTime']>,
   vulnerabilityScoreMin?: Maybe<Scalars['Float']>,
   vulnerabilityScoreMax?: Maybe<Scalars['Float']>,
   excludedIds: Scalars['String'],
@@ -17172,7 +17189,9 @@ export type ResolversTypes = {
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
   IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
   IndividualDocumentObjectType: IndividualDocumentObjectType,
+  EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
   IndividualIdentityObjectType: IndividualIdentityObjectType,
+  EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
@@ -17512,7 +17531,9 @@ export type ResolversParentTypes = {
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
   IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
   IndividualDocumentObjectType: IndividualDocumentObjectType,
+  EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
   IndividualIdentityObjectType: IndividualIdentityObjectType,
+  EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
@@ -19381,6 +19402,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   finalListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
   sentToDatahub?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   steficonRule?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
+  steficonAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   vulnerabilityScoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
