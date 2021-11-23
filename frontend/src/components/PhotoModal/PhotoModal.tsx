@@ -38,12 +38,14 @@ export const PhotoModal = ({
   variant = 'picture',
   title = 'Photo',
   closeHandler,
+  showRotate = true,
 }: {
   src: string;
   linkText?: string;
   variant?: 'picture' | 'button' | 'link' | 'pictureClose';
   title?: string;
   closeHandler?;
+  showRotate?: boolean;
 }): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [turnAngle, setTurnAngle] = useState(90);
@@ -123,6 +125,7 @@ export const PhotoModal = ({
           title={title}
           turnAngle={turnAngle}
           setTurnAngle={setTurnAngle}
+          showRotate={showRotate}
         />
         <DialogContent>
           <Box p={3}>

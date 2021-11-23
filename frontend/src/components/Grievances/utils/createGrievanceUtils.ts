@@ -189,9 +189,11 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 ...individualData,
                 documents: values.individualDataUpdateFieldsDocuments,
                 documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+                documentsToEdit: values.individualDataUpdateDocumentsToEdit,
                 identities: values.individualDataUpdateFieldsIdentities,
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
+                identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
               },
             },
           },

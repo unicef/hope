@@ -100,7 +100,7 @@ export function EditDocumentRow({
         </DisabledDiv>
       </Grid>
       <Grid item xs={2}>
-        <PhotoModal src={document.node.photo} />
+        <PhotoModal showRotate={false} src={document.node.photo} />
       </Grid>
       <Grid item xs={1}>
         {!removed ? (
