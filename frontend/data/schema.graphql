@@ -625,6 +625,18 @@ input EditCashPlanPaymentVerificationInput {
   rapidProArguments: RapidProArguments
 }
 
+input EditIndividualDocumentObjectType {
+  country: String!
+  type: String!
+  number: String!
+  photo: Arg
+  id: ID!
+}
+
+input EditIndividualIdentityObjectType {
+  id: ID!
+}
+
 type EditPaymentVerificationMutation {
   cashPlan: CashPlanNode
 }
@@ -895,6 +907,7 @@ type HouseholdSelection {
 }
 
 input HouseholdUpdateDataObjectType {
+  adminAreaTitle: String
   status: String
   consent: Boolean
   consentSharing: [String]
@@ -1665,6 +1678,7 @@ input IndividualDocumentObjectType {
   country: String!
   type: String!
   number: String!
+  photo: Arg
 }
 
 type IndividualIdentityNode {
@@ -1848,8 +1862,10 @@ input IndividualUpdateDataObjectType {
   role: String
   documents: [IndividualDocumentObjectType]
   documentsToRemove: [ID]
+  documentsToEdit: [EditIndividualDocumentObjectType]
   identities: [IndividualIdentityObjectType]
   identitiesToRemove: [ID]
+  identitiesToEdit: [EditIndividualIdentityObjectType]
   flexFields: Arg
 }
 
@@ -2807,6 +2823,7 @@ type TargetPopulationNode implements Node {
   finalListTargetingCriteria: TargetingCriteriaNode
   sentToDatahub: Boolean!
   steficonRule: SteficonRuleNode
+  steficonAppliedDate: DateTime
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
   excludedIds: String!
