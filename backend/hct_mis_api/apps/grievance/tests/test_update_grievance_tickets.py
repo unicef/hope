@@ -397,6 +397,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
                 "flex_fields": {},
                 "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
+                "documents_to_edit": [],
+                "identities_to_edit": [],
                 "previous_documents": {},
                 "documents_to_remove": [],
                 "previous_identities": {},

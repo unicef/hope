@@ -146,6 +146,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             },
                             'documents': [
                             ],
+                            'documents_to_edit': [
+                            ],
                             'documents_to_remove': [
                             ],
                             'flex_fields': {
@@ -161,6 +163,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'value': 'Test'
                             },
                             'identities': [
+                            ],
+                            'identities_to_edit': [
                             ],
                             'identities_to_remove': [
                             ],
@@ -219,6 +223,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                         },
                         'individualData': {
                             'birth_date': '1980-02-01',
+                            'documents': [
+                            ],
                             'estimated_birth_date': False,
                             'family_name': 'Romaniak',
                             'flex_fields': {
