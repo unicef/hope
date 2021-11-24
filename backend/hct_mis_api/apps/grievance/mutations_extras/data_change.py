@@ -681,9 +681,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         if is_approved(document_data)
     ]
     documents_to_update = [
-        handle_edit_document(document_id, document_data)
-        for document_id, document_data in documents_to_edit.items()
-        if is_approved(document_data)
+        handle_edit_document(document_data) for document_data in documents_to_edit if is_approved(document_data)
     ]
 
     identities_to_create = [
@@ -692,9 +690,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         if is_approved(identity_data)
     ]
     identities_to_update = [
-        handle_edit_identity(identity_id, identity_data)
-        for identity_id, identity_data in identities_to_edit.items()
-        if is_approved(identity_data)
+        handle_edit_identity(identity_data) for identity_data in identities_to_edit if is_approved(identity_data)
     ]
 
     Document.objects.bulk_create(documents_to_create)
