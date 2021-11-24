@@ -52,7 +52,7 @@ def handle_add_document(document, individual):
     return Document(document_number=number, individual=individual, type=document_type, photo=photo)
 
 
-def handle_edit_document(document_id: str, document_data: dict):
+def handle_edit_document(document_data: dict):
     from django.shortcuts import get_object_or_404
 
     from django_countries.fields import Country
@@ -60,9 +60,6 @@ def handle_edit_document(document_id: str, document_data: dict):
 
     from hct_mis_api.apps.core.utils import decode_id_string
     from hct_mis_api.apps.household.models import Document, DocumentType
-
-    document_id = decode_id_string(document_id)
-    document = get_object_or_404(Document, id=document_id)
 
     updated_document = {**document_data.get("previous_value", {}), **document_data.get("value", {})}
 
@@ -72,6 +69,10 @@ def handle_edit_document(document_id: str, document_data: dict):
     number = updated_document.get("number")
     photo = updated_document.get("photo", "")
     photo = photo.replace(default_storage.base_url, "")
+    document_id = updated_document.get("id")
+
+    document_id = decode_id_string(document_id)
+    document = get_object_or_404(Document, id=document_id)
 
     document_type = DocumentType.objects.get(country=country, type=type_name)
 
@@ -110,7 +111,7 @@ def handle_add_identity(identity, individual):
     return IndividualIdentity(number=number, individual=individual, agency=agency_type)
 
 
-def handle_edit_identity(identity_id: str, identity_data: dict):
+def handle_edit_identity(identity_data: dict):
     from django.shortcuts import get_object_or_404
 
     from django_countries.fields import Country
@@ -119,14 +120,16 @@ def handle_edit_identity(identity_id: str, identity_data: dict):
     from hct_mis_api.apps.core.utils import decode_id_string
     from hct_mis_api.apps.household.models import Agency, IndividualIdentity
 
-    identity_id = decode_id_string(identity_id)
-    identity = get_object_or_404(IndividualIdentity, id=identity_id)
-
     updated_identity = {**identity_data.get("previous_value", {}), **identity_data.get("value", {})}
     agency_name = updated_identity.get("agency")
     country_code = updated_identity.get("country")
     country = Country(country_code)
     number = updated_identity.get("number")
+    identity_id = updated_identity.get("id")
+
+    identity_id = decode_id_string(identity_id)
+    identity = get_object_or_404(IndividualIdentity, id=identity_id)
+
     agency_type, _ = Agency.objects.get_or_create(
         country=country,
         type=agency_name,
@@ -170,7 +173,7 @@ def prepare_edit_documents(documents_to_edit):
     from hct_mis_api.apps.core.utils import decode_id_string
     from hct_mis_api.apps.household.models import Document
 
-    edited_documents = {}
+    edited_documents = []
 
     def return_if_not_equal(field1, field2):
         if field1 != field2:
@@ -190,23 +193,25 @@ def prepare_edit_documents(documents_to_edit):
         document_id = decode_id_string(encoded_id)
         document = get_object_or_404(Document, id=document_id)
 
-        edited_documents[encoded_id] = {
-            "approve_status": False,
-            "value": {
-                "id": encoded_id,
-                "country": return_if_not_equal(country, document.type.country.alpha3),
-                "type": return_if_not_equal(document_type, document.type.type),
-                "number": return_if_not_equal(document_number, document.document_number),
-                "photo": return_if_not_equal(document_photo, document.photo.name),
-            },
-            "previous_value": {
-                "id": encoded_id,
-                "country": document.type.country.alpha3,
-                "type": document.type.type,
-                "number": document.document_number,
-                "photo": document.photo.name,
-            },
-        }
+        edited_documents.append(
+            {
+                "approve_status": False,
+                "value": {
+                    "id": encoded_id,
+                    "country": return_if_not_equal(country, document.type.country.alpha3),
+                    "type": return_if_not_equal(document_type, document.type.type),
+                    "number": return_if_not_equal(document_number, document.document_number),
+                    "photo": return_if_not_equal(document_photo, document.photo.name),
+                },
+                "previous_value": {
+                    "id": encoded_id,
+                    "country": document.type.country.alpha3,
+                    "type": document.type.type,
+                    "number": document.document_number,
+                    "photo": document.photo.name,
+                },
+            }
+        )
 
     return edited_documents
 
@@ -243,7 +248,7 @@ def prepare_edit_identities(identities):
             return field1
         return None
 
-    edited_identities = {}
+    edited_identities = []
     for identity_data in identities:
         encoded_id = identity_data.get("id")
         number = identity_data.get("number")
@@ -254,23 +259,27 @@ def prepare_edit_identities(identities):
         identity_id = decode_id_string(encoded_id)
         identity = get_object_or_404(IndividualIdentity, id=identity_id)
 
-        edited_identities[encoded_id] = {
-            "approve_status": False,
-            "value": {
-                "id": encoded_id,
-                "country": return_if_not_equal(country, identity.agency.country.alpha3),
-                "label": return_if_not_equal(label, identity.agency.label),
-                "individual": return_if_not_equal(individual, encode_id_base64(identity.individual.id, "Individual")),
-                "number": return_if_not_equal(number, identity.number),
-            },
-            "previous_value": {
-                "id": encoded_id,
-                "country": identity.agency.country.alpha3,
-                "label": identity.agency.label,
-                "individual": encode_id_base64(identity.individual.id, "Individual"),
-                "number": identity.number,
-            },
-        }
+        edited_identities.append(
+            {
+                "approve_status": False,
+                "value": {
+                    "id": encoded_id,
+                    "country": return_if_not_equal(country, identity.agency.country.alpha3),
+                    "label": return_if_not_equal(label, identity.agency.label),
+                    "individual": return_if_not_equal(
+                        individual, encode_id_base64(identity.individual.id, "Individual")
+                    ),
+                    "number": return_if_not_equal(number, identity.number),
+                },
+                "previous_value": {
+                    "id": encoded_id,
+                    "country": identity.agency.country.alpha3,
+                    "label": identity.agency.label,
+                    "individual": encode_id_base64(identity.individual.id, "Individual"),
+                    "number": identity.number,
+                },
+            }
+        )
     return edited_identities
 
 
