@@ -1,5 +1,7 @@
 from datetime import date
+from unittest import mock
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 from django_countries.fields import Country
@@ -250,6 +252,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
+    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_update_add_individual(self, name, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.add_individual_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
@@ -275,7 +278,12 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "maritalStatus": SINGLE,
                             "role": ROLE_PRIMARY,
                             "documents": [
-                                {"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "USA", "number": "321-321-UX-321"}
+                                {
+                                    "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                    "country": "USA",
+                                    "number": "321-321-UX-321",
+                                    "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                }
                             ],
                         }
                     }
@@ -294,7 +302,9 @@ class TestUpdateGrievanceTickets(APITestCase):
             expected_result = {
                 "sex": "MALE",
                 "role": "PRIMARY",
-                "documents": [{"type": "NATIONAL_ID", "number": "321-321-UX-321", "country": "USA"}],
+                "documents": [
+                    {"type": "NATIONAL_ID", "number": "321-321-UX-321", "country": "USA", "photo": "test_file_name.jpg"}
+                ],
                 "full_name": "John Example",
                 "birth_date": "1981-02-02",
                 "given_name": "John",
@@ -340,6 +350,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
+    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_update_change_individual(self, name, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.individual_data_change_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
@@ -365,7 +376,12 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "maritalStatus": SINGLE,
                             "role": ROLE_PRIMARY,
                             "documents": [
-                                {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "111-222-777"},
+                                {
+                                    "country": "POL",
+                                    "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                    "number": "111-222-777",
+                                    "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                },
                             ],
                             "documentsToRemove": [],
                         }
@@ -386,7 +402,12 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": {"value": "PRIMARY", "approve_status": False, "previous_value": "NO_ROLE"},
                 "documents": [
                     {
-                        "value": {"type": "NATIONAL_ID", "number": "111-222-777", "country": "POL"},
+                        "value": {
+                            "type": "NATIONAL_ID",
+                            "number": "111-222-777",
+                            "country": "POL",
+                            "photo": "test_file_name.jpg",
+                        },
                         "approve_status": False,
                     }
                 ],

@@ -1,33 +1,38 @@
 from datetime import date
-from parameterized import parameterized
 
 from django.core.management import call_command
+
 from django_countries.fields import Country
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-    TicketHouseholdDataUpdateDetailsFactory,
     TicketDeleteIndividualDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, DocumentFactory
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
-    SINGLE,
-    Individual,
-    ROLE_PRIMARY,
+    HEAD,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
+    ROLE_PRIMARY,
+    SINGLE,
     Document,
     DocumentType,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    Individual,
     IndividualRoleInHousehold,
-    HEAD,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -57,8 +62,8 @@ class TestCloseDataChangeTickets(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type,p_code="sfds323")
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type,p_code="sfds3dgg23")
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sfds323")
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sfds3dgg23")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -161,7 +166,14 @@ class TestCloseDataChangeTickets(APITestCase):
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "role": ROLE_PRIMARY,
-                "documents": [{"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "POL", "number": "123-123-UX-321"}],
+                "documents": [
+                    {
+                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                        "country": "POL",
+                        "number": "123-123-UX-321",
+                        "photo": "test_file_name.jpg",
+                    }
+                ],
             },
             approve_status=True,
         )
@@ -187,7 +199,12 @@ class TestCloseDataChangeTickets(APITestCase):
                 "role": {"value": ROLE_PRIMARY, "approve_status": True},
                 "documents": [
                     {
-                        "value": {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "999-888-777"},
+                        "value": {
+                            "country": "POL",
+                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "number": "999-888-777",
+                            "photo": "test_file_name.jpg",
+                        },
                         "approve_status": True,
                     },
                 ],
@@ -269,6 +286,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
             document = Document.objects.get(document_number="123-123-UX-321")
             self.assertEqual(document.type.country, Country("POL"))
+            self.assertEqual(document.photo, "test_file_name.jpg")
 
             role = created_individual.households_and_roles.get(
                 role=ROLE_PRIMARY, household=self.household_one, individual=created_individual
@@ -312,6 +330,7 @@ class TestCloseDataChangeTickets(APITestCase):
             document = Document.objects.get(document_number="999-888-777")
             self.assertEqual(document.type.country, Country("POL"))
             self.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
+            self.assertEqual(document.photo, "test_file_name.jpg")
 
             self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
             self.assertTrue(Document.objects.filter(id=self.birth_certificate.id).exists())
@@ -362,7 +381,7 @@ class TestCloseDataChangeTickets(APITestCase):
             },
         )
         if should_close:
-            ind =Individual.objects.filter(id=self.individuals_household_two[0].id).first()
+            ind = Individual.objects.filter(id=self.individuals_household_two[0].id).first()
             ind.refresh_from_db()
             self.assertTrue(ind.withdrawn)
             changed_role_exists = IndividualRoleInHousehold.objects.filter(
