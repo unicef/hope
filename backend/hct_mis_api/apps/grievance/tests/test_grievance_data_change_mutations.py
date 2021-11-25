@@ -1,7 +1,10 @@
 from datetime import date
+from unittest import mock
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
+from django_countries.fields import Country
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -10,13 +13,20 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
     FEMALE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     RELATIONSHIP_UNKNOWN,
     ROLE_NO_ROLE,
     SINGLE,
     WIDOWED,
+    DocumentType,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -58,6 +68,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     def setUp(self):
         super().setUp()
         call_command("loadbusinessareas")
+        call_command("loadcountries")
+        self.generate_document_types_for_all_countries()
+
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
@@ -153,6 +166,11 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.save()
         self.household_one = household_one
 
+        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        self.national_id = DocumentFactory.create(
+            type=national_id_type, document_number="789-789-645", individual=self.individuals[0]
+        )
+
     @parameterized.expand(
         [
             (
@@ -162,6 +180,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
+    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_grievance_create_individual_data_change(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -188,6 +207,14 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "estimatedBirthDate": False,
                                 "relationship": RELATIONSHIP_UNKNOWN,
                                 "role": ROLE_NO_ROLE,
+                                "documents": [
+                                    {
+                                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                        "country": "POL",
+                                        "number": "123-123-UX-321",
+                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    }
+                                ],
                             },
                         }
                     }
@@ -209,6 +236,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
+    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_grievance_update_individual_data_change(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -231,6 +259,23 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "sex": "MALE",
                                 "birthDate": date(year=1980, month=2, day=1).isoformat(),
                                 "maritalStatus": SINGLE,
+                                "documents": [
+                                    {
+                                        "type": IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+                                        "country": "POL",
+                                        "number": "321-321-XU-987",
+                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    }
+                                ],
+                                "documentsToEdit": [
+                                    {
+                                        "id": self.id_to_base64(self.national_id.id, "DocumentNode"),
+                                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                        "country": "POL",
+                                        "number": "321-321-XU-123",
+                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    }
+                                ],
                             },
                         }
                     }
