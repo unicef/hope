@@ -108,8 +108,12 @@ class IndividualDocumentObjectType(graphene.InputObjectType):
     photo = Arg()
 
 
-class EditIndividualDocumentObjectType(IndividualDocumentObjectType):
+class EditIndividualDocumentObjectType(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
+    country = graphene.String(required=True)
+    type = graphene.String(required=True)
+    number = graphene.String(required=True)
+    photo = Arg()
 
 
 class IndividualIdentityObjectType(graphene.InputObjectType):
@@ -120,6 +124,9 @@ class IndividualIdentityObjectType(graphene.InputObjectType):
 
 class EditIndividualIdentityObjectType(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
+    country = graphene.String(required=True)
+    agency = graphene.String(required=True)
+    number = graphene.String(required=True)
 
 
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
@@ -364,7 +371,9 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
             current_value = individual.role
         individual_data_with_approve_status[field]["previous_value"] = current_value
 
-    documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
+    documents_with_approve_status = [
+        {"value": handle_document(document), "approve_status": False} for document in documents
+    ]
     documents_to_remove_with_approve_status = [
         {"value": document_id, "approve_status": False} for document_id in documents_to_remove
     ]

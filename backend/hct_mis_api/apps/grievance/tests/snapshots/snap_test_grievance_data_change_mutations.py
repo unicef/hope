@@ -6,26 +6,6 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_1_without_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'createGrievanceTicket'
-            ]
-        }
-    ]
-}
-
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_individual_data_change_0_with_permission 1'] = {
     'data': {
         'createGrievanceTicket': {
@@ -125,6 +105,69 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
     ]
 }
 
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_0_with_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'addIndividualTicketDetails': {
+                        'household': {
+                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
+                        },
+                        'individualData': {
+                            'birth_date': '1980-02-01',
+                            'documents': [
+                                {
+                                    'country': 'POL',
+                                    'number': '123-123-UX-321',
+                                    'photo': '/api/uploads/test_file_name.jpg',
+                                    'type': 'NATIONAL_ID'
+                                }
+                            ],
+                            'estimated_birth_date': False,
+                            'family_name': 'Romaniak',
+                            'flex_fields': {
+                            },
+                            'full_name': 'Test Test',
+                            'given_name': 'Test',
+                            'marital_status': 'SINGLE',
+                            'relationship': 'UNKNOWN',
+                            'role': 'NO_ROLE',
+                            'sex': 'MALE'
+                        }
+                    },
+                    'category': 2,
+                    'description': 'Test',
+                    'householdDataUpdateTicketDetails': None,
+                    'individualDataUpdateTicketDetails': None,
+                    'issueType': 16,
+                    'sensitiveTicketDetails': None
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_1_without_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'createGrievanceTicket'
+            ]
+        }
+    ]
+}
+
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individual_data_change_0_with_permission 1'] = {
     'data': {
         'createGrievanceTicket': {
@@ -145,8 +188,34 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'value': '1980-02-01'
                             },
                             'documents': [
+                                {
+                                    'approve_status': False,
+                                    'value': {
+                                        'country': 'POL',
+                                        'number': '321-321-XU-987',
+                                        'photo': '/api/uploads/test_file_name.jpg',
+                                        'type': 'NATIONAL_PASSPORT'
+                                    }
+                                }
                             ],
                             'documents_to_edit': [
+                                {
+                                    'approve_status': False,
+                                    'previous_value': {
+                                        'country': 'POL',
+                                        'id': 'RG9jdW1lbnROb2RlOmZmNTAyZDBmLTkxYzctNGJkYS1hNWFjLTg3MWI3OTBlNGYxMg==',
+                                        'number': '789-789-645',
+                                        'photo': '',
+                                        'type': 'NATIONAL_ID'
+                                    },
+                                    'value': {
+                                        'country': None,
+                                        'id': 'RG9jdW1lbnROb2RlOmZmNTAyZDBmLTkxYzctNGJkYS1hNWFjLTg3MWI3OTBlNGYxMg==',
+                                        'number': '321-321-XU-123',
+                                        'photo': '/api/uploads/test_file_name.jpg',
+                                        'type': None
+                                    }
+                                }
                             ],
                             'documents_to_remove': [
                             ],
@@ -210,41 +279,4 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
             ]
         }
     ]
-}
-
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_0_with_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'addIndividualTicketDetails': {
-                        'household': {
-                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
-                        },
-                        'individualData': {
-                            'birth_date': '1980-02-01',
-                            'documents': [
-                            ],
-                            'estimated_birth_date': False,
-                            'family_name': 'Romaniak',
-                            'flex_fields': {
-                            },
-                            'full_name': 'Test Test',
-                            'given_name': 'Test',
-                            'marital_status': 'SINGLE',
-                            'relationship': 'UNKNOWN',
-                            'role': 'NO_ROLE',
-                            'sex': 'MALE'
-                        }
-                    },
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': None,
-                    'individualDataUpdateTicketDetails': None,
-                    'issueType': 16,
-                    'sensitiveTicketDetails': None
-                }
-            ]
-        }
-    }
 }
