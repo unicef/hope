@@ -536,10 +536,14 @@ def save_images(flex_fields, associated_with):
                 flex_fields[name] = unquoted_value
 
 
+def generate_filename() -> str:
+    file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
+    return f"{file_name}-{timezone.now()}"
+
+
 def handle_photo(photo) -> str:
     if isinstance(photo, InMemoryUploadedFile):
-        file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
-        return default_storage.save(f"{file_name}-{timezone.now()}.jpg", photo)
+        return default_storage.save(f"{generate_filename()}.jpg", photo)
     elif isinstance(photo, str):
         file_name = photo.replace(default_storage.base_url, "")
         return urllib.parse.unquote(file_name)
