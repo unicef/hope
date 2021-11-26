@@ -168,7 +168,10 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
 
         national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
         self.national_id = DocumentFactory.create(
-            type=national_id_type, document_number="789-789-645", individual=self.individuals[0]
+            id="d367e431-b807-4c1f-a811-ef2e0d217cc4",
+            type=national_id_type,
+            document_number="789-789-645",
+            individual=self.individuals[0],
         )
 
     @parameterized.expand(
