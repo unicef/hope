@@ -203,14 +203,14 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                     'approve_status': False,
                                     'previous_value': {
                                         'country': 'POL',
-                                        'id': 'RG9jdW1lbnROb2RlOmZmNTAyZDBmLTkxYzctNGJkYS1hNWFjLTg3MWI3OTBlNGYxMg==',
+                                        'id': 'RG9jdW1lbnROb2RlOmQzNjdlNDMxLWI4MDctNGMxZi1hODExLWVmMmUwZDIxN2NjNA==',
                                         'number': '789-789-645',
                                         'photo': '',
                                         'type': 'NATIONAL_ID'
                                     },
                                     'value': {
                                         'country': None,
-                                        'id': 'RG9jdW1lbnROb2RlOmZmNTAyZDBmLTkxYzctNGJkYS1hNWFjLTg3MWI3OTBlNGYxMg==',
+                                        'id': 'RG9jdW1lbnROb2RlOmQzNjdlNDMxLWI4MDctNGMxZi1hODExLWVmMmUwZDIxN2NjNA==',
                                         'number': '321-321-XU-123',
                                         'photo': '/api/uploads/test_file_name.jpg',
                                         'type': None
