@@ -750,11 +750,11 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
 
         documents_mapping = {
             "documents": approved_documents_to_create,
-            "documents_to_remove": approved_documents_to_edit,
-            "documents_to_edit": approved_documents_to_remove,
+            "documents_to_remove": approved_documents_to_remove,
+            "documents_to_edit": approved_documents_to_edit,
             "identities": approved_identities_to_create,
-            "identities_to_remove": approved_identities_to_edit,
-            "identities_to_edit": approved_identities_to_remove,
+            "identities_to_remove": approved_identities_to_remove,
+            "identities_to_edit": approved_identities_to_edit,
         }
 
         for field_name, item in individual_data.items():
