@@ -953,15 +953,18 @@ export type EditCashPlanPaymentVerificationInput = {
 };
 
 export type EditIndividualDocumentObjectType = {
+  id: Scalars['ID'],
   country: Scalars['String'],
   type: Scalars['String'],
   number: Scalars['String'],
   photo?: Maybe<Scalars['Arg']>,
-  id: Scalars['ID'],
 };
 
 export type EditIndividualIdentityObjectType = {
   id: Scalars['ID'],
+  country: Scalars['String'],
+  agency: Scalars['String'],
+  number: Scalars['String'],
 };
 
 export type EditPaymentVerificationMutation = {
@@ -2659,8 +2662,10 @@ export type MutationsCreateTicketNoteArgs = {
 
 export type MutationsApproveIndividualDataChangeArgs = {
   approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedDocumentsToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
   flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   grievanceTicketId: Scalars['ID'],
@@ -5977,7 +5982,9 @@ export type ApproveIndividualDataChangeMutationVariables = {
   flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedDocumentsToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
 };
 
@@ -9681,8 +9688,8 @@ export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof use
 export type ApproveHouseholdDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export const ApproveIndividualDataChangeDocument = gql`
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToRemove: [Int]) {
-  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove, approvedIdentitiesToCreate: $approvedIdentitiesToCreate, approvedIdentitiesToRemove: $approvedIdentitiesToRemove) {
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int]) {
+  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove, approvedDocumentsToEdit: $approvedDocumentsToEdit, approvedIdentitiesToCreate: $approvedIdentitiesToCreate, approvedIdentitiesToEdit: $approvedIdentitiesToEdit, approvedIdentitiesToRemove: $approvedIdentitiesToRemove) {
     grievanceTicket {
       id
       status
@@ -9734,7 +9741,9 @@ export function withApproveIndividualDataChange<TProps, TChildProps = {}>(operat
  *      flexFieldsApproveData: // value for 'flexFieldsApproveData'
  *      approvedDocumentsToCreate: // value for 'approvedDocumentsToCreate'
  *      approvedDocumentsToRemove: // value for 'approvedDocumentsToRemove'
+ *      approvedDocumentsToEdit: // value for 'approvedDocumentsToEdit'
  *      approvedIdentitiesToCreate: // value for 'approvedIdentitiesToCreate'
+ *      approvedIdentitiesToEdit: // value for 'approvedIdentitiesToEdit'
  *      approvedIdentitiesToRemove: // value for 'approvedIdentitiesToRemove'
  *   },
  * });
