@@ -39,7 +39,10 @@ from hct_mis_api.apps.household.models import (
     RELATIONSHIP_UNKNOWN,
     ROLE_PRIMARY,
     SINGLE,
+    UNHCR,
+    Agency,
     DocumentType,
+    IndividualIdentity,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -239,6 +242,19 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         PositiveFeedbackTicketWithoutExtrasFactory(ticket=self.positive_feedback_grievance_ticket)
 
+        unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR", country="POL")
+        self.identity_to_update = IndividualIdentity.objects.create(
+            agency=unhcr_agency,
+            individual=self.individuals[0],
+            number="1111",
+        )
+
+        self.identity_to_remove = IndividualIdentity.objects.create(
+            agency=unhcr_agency,
+            individual=self.individuals[0],
+            number="3456",
+        )
+
     @parameterized.expand(
         [
             (
@@ -285,6 +301,13 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
                                 }
                             ],
+                            "identities": [
+                                {
+                                    "agency": UNHCR,
+                                    "country": "POL",
+                                    "number": "2222",
+                                }
+                            ],
                         }
                     }
                 },
@@ -305,6 +328,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "documents": [
                     {"type": "NATIONAL_ID", "number": "321-321-UX-321", "country": "USA", "photo": "test_file_name.jpg"}
                 ],
+                "identities": [{"agency": "UNHCR", "country": "POL", "number": "2222"}],
                 "full_name": "John Example",
                 "birth_date": "1981-02-02",
                 "given_name": "John",
@@ -384,6 +408,21 @@ class TestUpdateGrievanceTickets(APITestCase):
                                 },
                             ],
                             "documentsToRemove": [],
+                            "identities": [
+                                {
+                                    "agency": UNHCR,
+                                    "country": "POL",
+                                    "number": "2222",
+                                }
+                            ],
+                            "identitiesToEdit": [
+                                {
+                                    "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
+                                    "agency": UNHCR,
+                                    "country": "POL",
+                                    "number": "3333",
+                                }
+                            ],
                         }
                     }
                 },
@@ -409,17 +448,40 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "photo": "test_file_name.jpg",
                         },
                         "approve_status": False,
-                    }
+                    },
+                ],
+                "identities": [
+                    {
+                        "value": {"agency": "UNHCR", "number": "2222", "country": "POL"},
+                        "approve_status": False,
+                    },
+                ],
+                "identities_to_edit": [
+                    {
+                        "value": {
+                            "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
+                            "label": None,
+                            "number": "3333",
+                            "country": None,
+                            "individual": None,
+                        },
+                        "previous_value": {
+                            "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
+                            "label": "UNHCR",
+                            "number": "1111",
+                            "country": "POL",
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                        },
+                        "approve_status": False,
+                    },
                 ],
                 "full_name": {"value": "John Example", "approve_status": False, "previous_value": "Benjamin Butler"},
                 "birth_date": {"value": "1962-12-21", "approve_status": False, "previous_value": "1943-07-30"},
                 "given_name": {"value": "John", "approve_status": False, "previous_value": "Benjamin"},
-                "identities": [],
                 "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
                 "flex_fields": {},
                 "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
                 "documents_to_edit": [],
-                "identities_to_edit": [],
                 "previous_documents": {},
                 "documents_to_remove": [],
                 "previous_identities": {},
