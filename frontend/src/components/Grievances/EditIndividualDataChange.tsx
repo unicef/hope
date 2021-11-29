@@ -388,6 +388,7 @@ export const EditIndividualDataChange = ({
         <NewDocumentFieldArray
           values={values}
           addIndividualFieldsData={addIndividualFieldsData}
+          setFieldValue={setFieldValue}
         />
       </Box>
       <Box mt={3}>
