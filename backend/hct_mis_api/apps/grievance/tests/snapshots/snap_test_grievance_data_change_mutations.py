@@ -130,6 +130,13 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                             },
                             'full_name': 'Test Test',
                             'given_name': 'Test',
+                            'identities': [
+                                {
+                                    'agency': 'UNHCR',
+                                    'country': 'POL',
+                                    'number': '2222'
+                                }
+                            ],
                             'marital_status': 'SINGLE',
                             'relationship': 'UNKNOWN',
                             'role': 'NO_ROLE',
@@ -232,8 +239,33 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'value': 'Test'
                             },
                             'identities': [
+                                {
+                                    'approve_status': False,
+                                    'value': {
+                                        'agency': 'UNHCR',
+                                        'country': 'POL',
+                                        'number': '2222'
+                                    }
+                                }
                             ],
                             'identities_to_edit': [
+                                {
+                                    'approve_status': False,
+                                    'previous_value': {
+                                        'country': 'POL',
+                                        'id': 'SW5kaXZpZHVhbElkZW50aXR5Tm9kZTox',
+                                        'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',
+                                        'label': 'UNHCR',
+                                        'number': '1111'
+                                    },
+                                    'value': {
+                                        'country': None,
+                                        'id': 'SW5kaXZpZHVhbElkZW50aXR5Tm9kZTox',
+                                        'individual': None,
+                                        'label': None,
+                                        'number': '3333'
+                                    }
+                                }
                             ],
                             'identities_to_remove': [
                             ],

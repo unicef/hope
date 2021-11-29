@@ -2,7 +2,7 @@ import logging
 import random
 import string
 import urllib.parse
-from typing import List
+from typing import List, Optional
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -40,8 +40,9 @@ def handle_add_document(document, individual):
     country_code = document.get("country")
     country = Country(country_code)
     number = document.get("number")
-    photo = document.get("photo", "")
-    photo = photo.replace(default_storage.base_url, "")
+    photo = document.get("photo")
+    if photo:
+        photo = photo.replace(default_storage.base_url, "")
     document_type = DocumentType.objects.get(country=country, type=type_name)
 
     document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
@@ -67,8 +68,9 @@ def handle_edit_document(document_data: dict):
     country_code = updated_document.get("country")
     country = Country(country_code)
     number = updated_document.get("number")
-    photo = updated_document.get("photo", "")
-    photo = photo.replace(default_storage.base_url, "")
+    photo = updated_document.get("photo")
+    if photo:
+        photo = photo.replace(default_storage.base_url, "")
     document_id = updated_document.get("id")
 
     document_id = decode_id_string(document_id)
@@ -187,8 +189,7 @@ def prepare_edit_documents(documents_to_edit):
         document_number = document_to_edit.get("number")
         document_photo = document_to_edit.get("photo")
 
-        if document_photo:
-            document_photo = handle_photo(document_photo)
+        document_photo = handle_photo(document_photo)
 
         document_id = decode_id_string(encoded_id)
         document = get_object_or_404(Document, id=document_id)
@@ -541,19 +542,18 @@ def generate_filename() -> str:
     return f"{file_name}-{timezone.now()}"
 
 
-def handle_photo(photo) -> str:
+def handle_photo(photo) -> Optional[str]:
     if isinstance(photo, InMemoryUploadedFile):
         return default_storage.save(f"{generate_filename()}.jpg", photo)
     elif isinstance(photo, str):
         file_name = photo.replace(default_storage.base_url, "")
         return urllib.parse.unquote(file_name)
-    return ""
+    return None
 
 
 def handle_document(document) -> dict:
     photo = document.get("photo")
-    if photo is not None:
-        document["photo"] = handle_photo(photo)
+    document["photo"] = handle_photo(photo)
     return document
 
 

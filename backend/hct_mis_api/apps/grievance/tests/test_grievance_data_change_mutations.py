@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
+    IndividualIdentityFactory,
 )
 from hct_mis_api.apps.household.models import (
     FEMALE,
@@ -25,8 +26,11 @@ from hct_mis_api.apps.household.models import (
     RELATIONSHIP_UNKNOWN,
     ROLE_NO_ROLE,
     SINGLE,
+    UNHCR,
     WIDOWED,
+    Agency,
     DocumentType,
+    IndividualIdentity,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -100,6 +104,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
 
         self.individuals_to_create = [
             {
+                "id": "b6ffb227-a2dd-4103-be46-0c9ebe9f001a",
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
                 "family_name": "Butler",
@@ -111,6 +116,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
+                "id": "e6b0acc8-f4db-4d70-8f50-c2080b3ba9ec",
                 "full_name": "Robin Ford",
                 "given_name": "Robin",
                 "family_name": "Ford",
@@ -122,6 +128,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
+                "id": "667be49c-6620-4381-a69a-211ba9f7d8c8",
                 "full_name": "Timothy Perry",
                 "given_name": "Timothy",
                 "family_name": "Perry",
@@ -133,6 +140,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
+                "id": "ef52d4d7-3142-4d51-a31b-2ad231120c58",
                 "full_name": "Eric Torres",
                 "given_name": "Eric",
                 "family_name": "Torres",
@@ -144,6 +152,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
+                "id": "cb2e2e3a-d9c4-40ce-8777-707ca18d7fc8",
                 "full_name": "Jenna Franklin",
                 "given_name": "Jenna",
                 "family_name": "Franklin",
@@ -172,6 +181,14 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             type=national_id_type,
             document_number="789-789-645",
             individual=self.individuals[0],
+        )
+
+        unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR", country="POL")
+        self.identity = IndividualIdentityFactory.create(
+            id=1,
+            agency=unhcr_agency,
+            individual=self.individuals[0],
+            number="1111",
         )
 
     @parameterized.expand(
@@ -216,6 +233,13 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "country": "POL",
                                         "number": "123-123-UX-321",
                                         "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    }
+                                ],
+                                "identities": [
+                                    {
+                                        "agency": UNHCR,
+                                        "country": "POL",
+                                        "number": "2222",
                                     }
                                 ],
                             },
@@ -277,6 +301,21 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "country": "POL",
                                         "number": "321-321-XU-123",
                                         "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    }
+                                ],
+                                "identities": [
+                                    {
+                                        "agency": UNHCR,
+                                        "country": "POL",
+                                        "number": "2222",
+                                    }
+                                ],
+                                "identitiesToEdit": [
+                                    {
+                                        "id": self.id_to_base64(self.identity.id, "IndividualIdentityNode"),
+                                        "agency": UNHCR,
+                                        "country": "POL",
+                                        "number": "3333",
                                     }
                                 ],
                             },
