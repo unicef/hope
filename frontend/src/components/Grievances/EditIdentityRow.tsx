@@ -103,6 +103,7 @@ export function EditIdentityRow({
             <IconButton
               onClick={() => {
                 arrayHelpers.push({
+                  id: identity.id,
                   country: identity.agency.countryIso3,
                   agency: identity.agency.label,
                   number: identity.number,
