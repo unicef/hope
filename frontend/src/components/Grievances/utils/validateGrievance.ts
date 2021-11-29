@@ -79,12 +79,17 @@ export function validate(
       if (values.individualDataUpdateFields?.length) {
         values.individualDataUpdateFields.forEach((el) => {
           if (el?.fieldName) {
-            const { required } = individualFieldsDict[el.fieldName];
-            if (el.fieldValue === 0) {
-              delete errors.individualDataUpdateFields;
-            } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
-              errors.individualDataUpdateFields =
-                'Field and field value are required';
+            if (individualFieldsDict[el.fieldName]) {
+              const { required } = individualFieldsDict[el.fieldName];
+              if (el.fieldValue === 0) {
+                delete errors.individualDataUpdateFields;
+              } else if (
+                !el.fieldName ||
+                (isEmpty(el.fieldValue) && required)
+              ) {
+                errors.individualDataUpdateFields =
+                  'Field and field value are required';
+              }
             }
           }
         });
