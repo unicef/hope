@@ -371,6 +371,16 @@ export function RequestedIndividualDataChangeTable({
     </TableHead>
   );
 
+  const renderCurrentPhoto = (document): React.ReactElement => {
+    if (document.value?.photo === document.previous_value?.photo) {
+      return <GreyText>{t('Not updated')}</GreyText>;
+    }
+    if (!document.value?.photo) {
+      return <span>-</span>;
+    }
+    return <PhotoModal src={document.value.photo} />;
+  };
+
   return (
     <div>
       {entries?.length ? (
@@ -552,11 +562,7 @@ export function RequestedIndividualDataChangeTable({
                       )}
                     </TableCell>
                     <TableCell align='left'>
-                      {document.value?.photo ? (
-                        <PhotoModal src={document.value.photo} />
-                      ) : (
-                        '-'
-                      )}
+                      {renderCurrentPhoto(document)}
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -691,25 +697,6 @@ export function RequestedIndividualDataChangeTable({
                         {identity.value?.number ?? (
                           <GreyText>{t('Not updated')}</GreyText>
                         )}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell />
-                      <TableCell align='left'>{t('Photo')}</TableCell>
-                      <TableCell align='left'>
-                        {identity.previous_value?.photo ? (
-                          <PhotoModal src={identity.previous_value.photo} />
-                        ) : (
-                          '-'
-                        )}
-                      </TableCell>
-                      <TableCell align='left'>
-                        {identity.value?.photo ? (
-                          <PhotoModal src={identity.value.photo} />
-                        ) : (
-                          '-'
-                        )}
-                        <Missing />
                       </TableCell>
                     </TableRow>
                   </TableBody>
