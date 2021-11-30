@@ -1,0 +1,12 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% block extrahead %}
+
+{% endblock %}
+{% block content %}
+  <form action="." method="post">
+    {% csrf_token %}
+    <input name="stage" type="hidden" value="2">
+    {{ form.as_p }}
+    <div><input type="submit" value="Next"></div>
+  </form>
+{% endblock %}
