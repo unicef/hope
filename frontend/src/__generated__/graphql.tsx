@@ -242,8 +242,16 @@ export type AgencyNode = {
   type: AgencyType,
   label: Scalars['String'],
   country?: Maybe<Scalars['String']>,
-  individualIdentities: Array<IndividualIdentityNode>,
+  individualIdentities: IndividualIdentityNodeConnection,
   countryIso3?: Maybe<Scalars['String']>,
+};
+
+
+export type AgencyNodeIndividualIdentitiesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 export enum AgencyType {
@@ -2070,13 +2078,27 @@ export enum ImportedIndividualDisability {
   NotDisabled = 'NOT_DISABLED'
 }
 
-export type ImportedIndividualIdentityNode = {
+export type ImportedIndividualIdentityNode = Node & {
    __typename?: 'ImportedIndividualIdentityNode',
   id: Scalars['ID'],
   individual: ImportedIndividualNode,
   documentNumber: Scalars['String'],
   type?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
+};
+
+export type ImportedIndividualIdentityNodeConnection = {
+   __typename?: 'ImportedIndividualIdentityNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<ImportedIndividualIdentityNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type ImportedIndividualIdentityNodeEdge = {
+   __typename?: 'ImportedIndividualIdentityNodeEdge',
+  node?: Maybe<ImportedIndividualIdentityNode>,
+  cursor: Scalars['String'],
 };
 
 export enum ImportedIndividualMaritalStatus {
@@ -2129,13 +2151,21 @@ export type ImportedIndividualNode = Node & {
   whoAnswersAltPhone: Scalars['String'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
-  identities: Array<ImportedIndividualIdentityNode>,
+  identities: ImportedIndividualIdentityNodeConnection,
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
 };
 
 
 export type ImportedIndividualNodeDocumentsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ImportedIndividualNodeIdentitiesArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2207,7 +2237,7 @@ export type IndividualDocumentObjectType = {
   photo?: Maybe<Scalars['Arg']>,
 };
 
-export type IndividualIdentityNode = {
+export type IndividualIdentityNode = Node & {
    __typename?: 'IndividualIdentityNode',
   id: Scalars['ID'],
   agency: AgencyNode,
@@ -2215,6 +2245,20 @@ export type IndividualIdentityNode = {
   number: Scalars['String'],
   type?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
+};
+
+export type IndividualIdentityNodeConnection = {
+   __typename?: 'IndividualIdentityNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<IndividualIdentityNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type IndividualIdentityNodeEdge = {
+   __typename?: 'IndividualIdentityNodeEdge',
+  node?: Maybe<IndividualIdentityNode>,
+  cursor: Scalars['String'],
 };
 
 export type IndividualIdentityObjectType = {
@@ -2302,7 +2346,7 @@ export type IndividualNode = Node & {
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
-  identities: Array<IndividualIdentityNode>,
+  identities: IndividualIdentityNodeConnection,
   householdsAndRoles: Array<IndividualRoleInHouseholdNode>,
   status?: Maybe<Scalars['String']>,
   role?: Maybe<Scalars['String']>,
@@ -2391,6 +2435,14 @@ export type IndividualNodeRepresentedHouseholdsArgs = {
 
 
 export type IndividualNodeDocumentsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeIdentitiesArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5647,10 +5699,16 @@ export type HouseholdDetailedFragment = (
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'birthDate' | 'relationship'>
-        & { identities: Array<(
-          { __typename?: 'IndividualIdentityNode' }
-          & Pick<IndividualIdentityNode, 'id' | 'number' | 'type'>
-        )> }
+        & { identities: (
+          { __typename?: 'IndividualIdentityNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'IndividualIdentityNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'IndividualIdentityNode' }
+              & Pick<IndividualIdentityNode, 'id' | 'number' | 'type'>
+            )> }
+          )>> }
+        ) }
         & IndividualMinimalFragment
       )> }
     )>> }
@@ -5714,14 +5772,20 @@ export type IndividualMinimalFragment = (
         ) }
       )> }
     )>> }
-  ), identities: Array<(
-    { __typename?: 'IndividualIdentityNode' }
-    & Pick<IndividualIdentityNode, 'id' | 'number'>
-    & { agency: (
-      { __typename?: 'AgencyNode' }
-      & Pick<AgencyNode, 'country' | 'label' | 'countryIso3'>
-    ) }
-  )>, household: Maybe<(
+  ), identities: (
+    { __typename?: 'IndividualIdentityNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'IndividualIdentityNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'IndividualIdentityNode' }
+        & Pick<IndividualIdentityNode, 'id' | 'number'>
+        & { agency: (
+          { __typename?: 'AgencyNode' }
+          & Pick<AgencyNode, 'country' | 'label' | 'countryIso3'>
+        ) }
+      )> }
+    )>> }
+  ), household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id' | 'unicefId' | 'status'>
     & { admin1: Maybe<(
@@ -5759,14 +5823,20 @@ export type IndividualDetailedFragment = (
         ) }
       )> }
     )>> }
-  ), identities: Array<(
-    { __typename?: 'IndividualIdentityNode' }
-    & Pick<IndividualIdentityNode, 'id' | 'number' | 'type' | 'country'>
-    & { agency: (
-      { __typename?: 'AgencyNode' }
-      & Pick<AgencyNode, 'country' | 'label'>
-    ) }
-  )>, household: Maybe<(
+  ), identities: (
+    { __typename?: 'IndividualIdentityNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'IndividualIdentityNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'IndividualIdentityNode' }
+        & Pick<IndividualIdentityNode, 'id' | 'number' | 'type' | 'country'>
+        & { agency: (
+          { __typename?: 'AgencyNode' }
+          & Pick<AgencyNode, 'country' | 'label'>
+        ) }
+      )> }
+    )>> }
+  ), household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
     & { adminArea: Maybe<(
@@ -8588,10 +8658,16 @@ export type ImportedIndividualDetailedFragment = (
         ) }
       )> }
     )>> }
-  ), identities: Array<(
-    { __typename?: 'ImportedIndividualIdentityNode' }
-    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type' | 'country'>
-  )>, household: Maybe<(
+  ), identities: (
+    { __typename?: 'ImportedIndividualIdentityNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'ImportedIndividualIdentityNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'ImportedIndividualIdentityNode' }
+        & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type' | 'country'>
+      )> }
+    )>> }
+  ), household: Maybe<(
     { __typename?: 'ImportedHouseholdNode' }
     & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
   )>, registrationDataImport: (
@@ -8894,13 +8970,17 @@ export const IndividualMinimalFragmentDoc = gql`
     }
   }
   identities {
-    id
-    agency {
-      country
-      label
-      countryIso3
+    edges {
+      node {
+        id
+        agency {
+          country
+          label
+          countryIso3
+        }
+        number
+      }
     }
-    number
   }
   household {
     id
@@ -8976,9 +9056,13 @@ export const HouseholdDetailedFragmentDoc = gql`
         birthDate
         relationship
         identities {
-          id
-          number
-          type
+          edges {
+            node {
+              id
+              number
+              type
+            }
+          }
         }
       }
     }
@@ -9074,21 +9158,30 @@ export const IndividualDetailedFragmentDoc = gql`
     }
   }
   identities {
-    id
-    agency {
-      country
-      label
+    edges {
+      node {
+        id
+        agency {
+          country
+          label
+        }
+        number
+        type
+        country
+      }
     }
-    number
-    type
-    country
   }
   enrolledInNutritionProgramme
   administrationOfRutf
   identities {
-    number
-    type
-    country
+    edges {
+      node {
+        id
+        number
+        type
+        country
+      }
+    }
   }
   household {
     status
@@ -9434,10 +9527,14 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
     }
   }
   identities {
-    id
-    documentNumber
-    type
-    country
+    edges {
+      node {
+        id
+        documentNumber
+        type
+        country
+      }
+    }
   }
   role
   relationship
@@ -17081,6 +17178,8 @@ export type ResolversTypes = {
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
   DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
+  IndividualIdentityNodeConnection: ResolverTypeWrapper<IndividualIdentityNodeConnection>,
+  IndividualIdentityNodeEdge: ResolverTypeWrapper<IndividualIdentityNodeEdge>,
   IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
   AgencyNode: ResolverTypeWrapper<AgencyNode>,
   AgencyType: AgencyType,
@@ -17170,6 +17269,8 @@ export type ResolversTypes = {
   ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>,
   ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
   ImportedDocumentTypeType: ImportedDocumentTypeType,
+  ImportedIndividualIdentityNodeConnection: ResolverTypeWrapper<ImportedIndividualIdentityNodeConnection>,
+  ImportedIndividualIdentityNodeEdge: ResolverTypeWrapper<ImportedIndividualIdentityNodeEdge>,
   ImportedIndividualIdentityNode: ResolverTypeWrapper<ImportedIndividualIdentityNode>,
   ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator,
   ImportedHouseholdRegistrationMethod: ImportedHouseholdRegistrationMethod,
@@ -17423,6 +17524,8 @@ export type ResolversParentTypes = {
   DocumentTypeNode: DocumentTypeNode,
   DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
+  IndividualIdentityNodeConnection: IndividualIdentityNodeConnection,
+  IndividualIdentityNodeEdge: IndividualIdentityNodeEdge,
   IndividualIdentityNode: IndividualIdentityNode,
   AgencyNode: AgencyNode,
   AgencyType: AgencyType,
@@ -17512,6 +17615,8 @@ export type ResolversParentTypes = {
   ImportedDocumentTypeNode: ImportedDocumentTypeNode,
   ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
   ImportedDocumentTypeType: ImportedDocumentTypeType,
+  ImportedIndividualIdentityNodeConnection: ImportedIndividualIdentityNodeConnection,
+  ImportedIndividualIdentityNodeEdge: ImportedIndividualIdentityNodeEdge,
   ImportedIndividualIdentityNode: ImportedIndividualIdentityNode,
   ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator,
   ImportedHouseholdRegistrationMethod: ImportedHouseholdRegistrationMethod,
@@ -17700,7 +17805,7 @@ export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversP
   type?: Resolver<ResolversTypes['AgencyType'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  individualIdentities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
+  individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, AgencyNodeIndividualIdentitiesArgs>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -18401,6 +18506,18 @@ export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentTyp
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type ImportedIndividualIdentityNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualIdentityNodeConnection'] = ResolversParentTypes['ImportedIndividualIdentityNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['ImportedIndividualIdentityNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ImportedIndividualIdentityNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualIdentityNodeEdge'] = ResolversParentTypes['ImportedIndividualIdentityNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['ImportedIndividualIdentityNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNode'] = ResolversParentTypes['ImportedIndividualNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -18441,7 +18558,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
-  identities?: Resolver<Array<ResolversTypes['ImportedIndividualIdentityNode']>, ParentType, ContextType>,
+  identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
@@ -18474,6 +18591,18 @@ export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extend
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type IndividualIdentityNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNodeConnection'] = ResolversParentTypes['IndividualIdentityNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['IndividualIdentityNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type IndividualIdentityNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNodeEdge'] = ResolversParentTypes['IndividualIdentityNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export type IndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']> = {
@@ -18545,7 +18674,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
-  identities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
+  identities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, IndividualNodeIdentitiesArgs>,
   householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -18694,7 +18823,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -19942,12 +20071,16 @@ export type Resolvers<ContextType = any> = {
   ImportedHouseholdNodeConnection?: ImportedHouseholdNodeConnectionResolvers<ContextType>,
   ImportedHouseholdNodeEdge?: ImportedHouseholdNodeEdgeResolvers<ContextType>,
   ImportedIndividualIdentityNode?: ImportedIndividualIdentityNodeResolvers<ContextType>,
+  ImportedIndividualIdentityNodeConnection?: ImportedIndividualIdentityNodeConnectionResolvers<ContextType>,
+  ImportedIndividualIdentityNodeEdge?: ImportedIndividualIdentityNodeEdgeResolvers<ContextType>,
   ImportedIndividualNode?: ImportedIndividualNodeResolvers<ContextType>,
   ImportedIndividualNodeConnection?: ImportedIndividualNodeConnectionResolvers<ContextType>,
   ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>,
   ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<ContextType>,
   IndividualDataChangeApproveMutation?: IndividualDataChangeApproveMutationResolvers<ContextType>,
   IndividualIdentityNode?: IndividualIdentityNodeResolvers<ContextType>,
+  IndividualIdentityNodeConnection?: IndividualIdentityNodeConnectionResolvers<ContextType>,
+  IndividualIdentityNodeEdge?: IndividualIdentityNodeEdgeResolvers<ContextType>,
   IndividualNode?: IndividualNodeResolvers<ContextType>,
   IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,

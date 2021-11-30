@@ -165,10 +165,14 @@ export const importedIndividualDetailed = gql`
       }
     }
     identities {
-      id
-      documentNumber
-      type
-      country
+      edges {
+        node {
+          id
+          documentNumber
+          type
+          country
+        }
+      }
     }
     role
     relationship

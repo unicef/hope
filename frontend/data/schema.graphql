@@ -122,7 +122,7 @@ type AgencyNode {
   type: AgencyType!
   label: String!
   country: String
-  individualIdentities: [IndividualIdentityNode!]!
+  individualIdentities(before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   countryIso3: String
 }
 
@@ -1566,12 +1566,24 @@ enum ImportedIndividualDisability {
   NOT_DISABLED
 }
 
-type ImportedIndividualIdentityNode {
+type ImportedIndividualIdentityNode implements Node {
   id: ID!
   individual: ImportedIndividualNode!
   documentNumber: String!
   type: String
   country: String
+}
+
+type ImportedIndividualIdentityNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ImportedIndividualIdentityNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ImportedIndividualIdentityNodeEdge {
+  node: ImportedIndividualIdentityNode
+  cursor: String!
 }
 
 enum ImportedIndividualMaritalStatus {
@@ -1623,7 +1635,7 @@ type ImportedIndividualNode implements Node {
   whoAnswersAltPhone: String!
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
-  identities: [ImportedIndividualIdentityNode!]!
+  identities(before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
   role: String
   age: Int
 }
@@ -1684,13 +1696,25 @@ input IndividualDocumentObjectType {
   photo: Arg
 }
 
-type IndividualIdentityNode {
+type IndividualIdentityNode implements Node {
   id: ID!
   agency: AgencyNode!
   individual: IndividualNode!
   number: String!
   type: String
   country: String
+}
+
+type IndividualIdentityNodeConnection {
+  pageInfo: PageInfo!
+  edges: [IndividualIdentityNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type IndividualIdentityNodeEdge {
+  node: IndividualIdentityNode
+  cursor: String!
 }
 
 input IndividualIdentityObjectType {
@@ -1777,7 +1801,7 @@ type IndividualNode implements Node {
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
-  identities: [IndividualIdentityNode!]!
+  identities(before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   status: String
   role: String

@@ -321,7 +321,7 @@ export function RequestedIndividualDataChangeTable({
     } else {
       newSelected.push(documentIndex);
     }
-    setFieldValue('selecteIdentitiesToEdit', newSelected);
+    setFieldValue('selectedIdentitiesToEdit', newSelected);
   };
 
   const handleSelectDocumentToRemove = (documentIndex): void => {
@@ -645,11 +645,11 @@ export function RequestedIndividualDataChangeTable({
                               ticket.status !==
                               GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                             }
-                            checked={selectedIdentities.includes(index)}
+                            checked={selectedIdentitiesToEdit.includes(index)}
                             inputProps={{ 'aria-labelledby': 'selected' }}
                           />
                         ) : (
-                          selectedIdentities.includes(index) && (
+                          selectedIdentitiesToEdit.includes(index) && (
                             <GreenIcon>
                               <CheckCircleIcon />
                             </GreenIcon>
@@ -666,10 +666,10 @@ export function RequestedIndividualDataChangeTable({
                       <TableCell />
                       <TableCell align='left'>{t('Agency')}</TableCell>
                       <TableCell align='left'>
-                        {identity.previous_value.label}
+                        {identity.previous_value.agency}
                       </TableCell>
                       <TableCell align='left'>
-                        {identity.value?.label ?? (
+                        {identity.value?.agency ?? (
                           <GreyText>{t('Not updated')}</GreyText>
                         )}
                       </TableCell>
