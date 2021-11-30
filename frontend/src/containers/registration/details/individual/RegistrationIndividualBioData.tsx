@@ -87,15 +87,15 @@ export function RegistrationIndividualsBioData({
     </Grid>
   ));
 
-  const mappedIdentities = individual.identities?.map((item) => (
+  const mappedIdentities = individual.identities?.edges?.map((item) => (
     <Grid item xs={3}>
       <Box flexDirection='column'>
         <Box mb={1}>
-          <LabelizedField label={`${item.type} ID`}>
-            {item.documentNumber}
+          <LabelizedField label={`${item.node.type} ID`}>
+            {item.node.documentNumber}
           </LabelizedField>
         </Box>
-        <LabelizedField label={t('issued')}>{item.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{item.node.country}</LabelizedField>
       </Box>
     </Grid>
   ));
