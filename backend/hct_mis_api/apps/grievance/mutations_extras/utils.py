@@ -62,7 +62,7 @@ def handle_edit_document(document_data: dict):
     from hct_mis_api.apps.core.utils import decode_id_string
     from hct_mis_api.apps.household.models import Document, DocumentType
 
-    updated_document = {**document_data.get("previous_value", {}), **document_data.get("value", {})}
+    updated_document = document_data.get("value", {})
 
     type_name = updated_document.get("type")
     country_code = updated_document.get("country")
@@ -122,7 +122,7 @@ def handle_edit_identity(identity_data: dict):
     from hct_mis_api.apps.core.utils import decode_id_string
     from hct_mis_api.apps.household.models import Agency, IndividualIdentity
 
-    updated_identity = {**identity_data.get("previous_value", {}), **identity_data.get("value", {})}
+    updated_identity = identity_data.get("value", {})
     agency_name = updated_identity.get("agency")
     country_code = updated_identity.get("country")
     country = Country(country_code)
@@ -162,7 +162,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
             "id": encode_id_base64(document.id, "Document"),
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
-            "label": document.type.label,
+            "type": document.type.type,
             "country": document.type.country.alpha3,
         }
 
@@ -176,11 +176,6 @@ def prepare_edit_documents(documents_to_edit):
     from hct_mis_api.apps.household.models import Document
 
     edited_documents = []
-
-    def return_if_not_equal(field1, field2):
-        if field1 != field2:
-            return field1
-        return None
 
     for document_to_edit in documents_to_edit:
         encoded_id = document_to_edit.get("id")
@@ -199,10 +194,10 @@ def prepare_edit_documents(documents_to_edit):
                 "approve_status": False,
                 "value": {
                     "id": encoded_id,
-                    "country": return_if_not_equal(country, document.type.country.alpha3),
-                    "type": return_if_not_equal(document_type, document.type.type),
-                    "number": return_if_not_equal(document_number, document.document_number),
-                    "photo": return_if_not_equal(document_photo, document.photo.name),
+                    "country": country,
+                    "type": document_type,
+                    "number": document_number,
+                    "photo": document_photo,
                 },
                 "previous_value": {
                     "id": encoded_id,
@@ -231,7 +226,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status):
             "id": identity.id,
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
-            "label": identity.agency.label,
+            "agency": identity.agency.type,
             "country": identity.agency.country.alpha3,
         }
 
@@ -244,17 +239,11 @@ def prepare_edit_identities(identities):
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
     from hct_mis_api.apps.household.models import IndividualIdentity
 
-    def return_if_not_equal(field1, field2):
-        if field1 != field2:
-            return field1
-        return None
-
     edited_identities = []
     for identity_data in identities:
         encoded_id = identity_data.get("id")
         number = identity_data.get("number")
-        individual = identity_data.get("individual")
-        label = identity_data.get("label")
+        agency = identity_data.get("agency")
         country = identity_data.get("country")
 
         identity_id = decode_id_string(encoded_id)
@@ -265,17 +254,15 @@ def prepare_edit_identities(identities):
                 "approve_status": False,
                 "value": {
                     "id": encoded_id,
-                    "country": return_if_not_equal(country, identity.agency.country.alpha3),
-                    "label": return_if_not_equal(label, identity.agency.label),
-                    "individual": return_if_not_equal(
-                        individual, encode_id_base64(identity.individual.id, "Individual")
-                    ),
-                    "number": return_if_not_equal(number, identity.number),
+                    "country": country,
+                    "agency": agency,
+                    "individual": encode_id_base64(identity.individual.id, "Individual"),
+                    "number": number,
                 },
                 "previous_value": {
                     "id": encoded_id,
                     "country": identity.agency.country.alpha3,
-                    "label": identity.agency.label,
+                    "agency": identity.agency.type,
                     "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": identity.number,
                 },
