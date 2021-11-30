@@ -19,7 +19,7 @@ const DisabledDiv = styled.div`
 export interface EditIdentityRowProps {
   setFieldValue;
   values;
-  identity: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['identities'][number];
+  identity: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['identities']['edges'][number];
   arrayHelpers;
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
   index;
@@ -37,12 +37,12 @@ export function EditIdentityRow({
   const [isEdited, setEdit] = useState(false);
   const identitiesToRemove =
     values?.individualDataUpdateIdentitiesToRemove || [];
-  const removed = identitiesToRemove.includes(identity.id);
+  const removed = identitiesToRemove.includes(identity.node.id);
   return isEdited ? (
     <>
       <AgencyField
         index={index}
-        key={`${index}-${identity?.number}-${identity?.agency}`}
+        key={`${index}-${identity?.node?.number}-${identity?.node?.agency}`}
         onDelete={() => arrayHelpers.remove(index)}
         countryChoices={addIndividualFieldsData.countriesChoices}
         identityTypeChoices={addIndividualFieldsData.identityTypeChoices}
@@ -53,9 +53,9 @@ export function EditIdentityRow({
         <IconButton
           onClick={() => {
             arrayHelpers.remove({
-              country: identity.agency.countryIso3,
-              agency: identity.agency.label,
-              number: identity.number,
+              country: identity.node.agency.countryIso3,
+              agency: identity.node.agency.label,
+              number: identity.node.number,
             });
             setEdit(false);
           }}
@@ -65,12 +65,12 @@ export function EditIdentityRow({
       </Box>
     </>
   ) : (
-    <React.Fragment key={identity.id}>
+    <React.Fragment key={identity.node.id}>
       <Grid item xs={4}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID AGENCY1')}
-            value={identity.agency.label}
+            value={identity.node.agency.label}
           />
         </DisabledDiv>
       </Grid>
@@ -78,13 +78,13 @@ export function EditIdentityRow({
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Country')}
-            value={identity.agency.country}
+            value={identity.node.agency.country}
           />
         </DisabledDiv>
       </Grid>
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField label={t('ID Number')} value={identity.number} />
+          <LabelizedField label={t('ID Number')} value={identity.node.number} />
         </DisabledDiv>
       </Grid>
       <Grid item xs={1}>
@@ -94,7 +94,7 @@ export function EditIdentityRow({
               onClick={() => {
                 setFieldValue(
                   `individualDataUpdateIdentitiesToRemove[${identitiesToRemove.length}]`,
-                  identity.id,
+                  identity.node.id,
                 );
               }}
             >
@@ -103,10 +103,10 @@ export function EditIdentityRow({
             <IconButton
               onClick={() => {
                 arrayHelpers.push({
-                  id: identity.id,
-                  country: identity.agency.countryIso3,
-                  agency: identity.agency.label,
-                  number: identity.number,
+                  id: identity.node.id,
+                  country: identity.node.agency.countryIso3,
+                  agency: identity.node.agency.label,
+                  number: identity.node.number,
                 });
                 setEdit(true);
               }}
