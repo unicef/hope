@@ -183,7 +183,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             individual=self.individuals[0],
         )
 
-        unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR", country="POL")
+        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
         self.identity = IndividualIdentityFactory.create(
             id=1,
             agency=unhcr_agency,
