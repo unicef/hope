@@ -36,6 +36,8 @@ from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketSystemFlaggingDetails,
 )
+from hct_mis_api.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form
+from hct_mis_api.apps.household.individual_xlsx_update import IndividualXlsxUpdate
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -48,6 +50,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    XlsxUpdateFile,
 )
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
@@ -397,6 +400,27 @@ class IndividualAdmin(
         context["duplicates"] = Individual.objects.filter(unicef_id=obj.unicef_id)
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
+
+    def xlsx_update_stage2(self, request):
+        form = UpdateByXlsxStage1Form(request.POST, request.FILES)
+
+        xlsx_update_file = XlsxUpdateFile(file=request.FILES["file"])
+        xlsx_update_file.save()
+        updater = IndividualXlsxUpdate(xlsx_update_file)
+        context = self.get_common_context(
+            request,
+            title="Update Individual by xlsx",
+            form=UpdateByXlsxStage2Form(xlsx_columns=updater.columns_names),
+        )
+        return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
+
+    @button()
+    def xlsx_update(self, request):
+        if request.method == "GET":
+            context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
+        if request.POST.get("stage") == "2":
+            return self.xlsx_update_stage2(request)
+        return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
 
 
 @admin.register(IndividualRoleInHousehold)
