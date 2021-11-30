@@ -242,7 +242,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         PositiveFeedbackTicketWithoutExtrasFactory(ticket=self.positive_feedback_grievance_ticket)
 
-        unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR", country="POL")
+        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
         self.identity_to_update = IndividualIdentity.objects.create(
             agency=unhcr_agency,
             individual=self.individuals[0],
@@ -460,14 +460,14 @@ class TestUpdateGrievanceTickets(APITestCase):
                     {
                         "value": {
                             "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
-                            "label": None,
+                            "agency": "UNHCR",
                             "number": "3333",
-                            "country": None,
-                            "individual": None,
+                            "country": "POL",
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                         },
                         "previous_value": {
                             "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
-                            "label": "UNHCR",
+                            "agency": "UNHCR",
                             "number": "1111",
                             "country": "POL",
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),

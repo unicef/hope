@@ -216,11 +216,11 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                         'type': 'NATIONAL_ID'
                                     },
                                     'value': {
-                                        'country': None,
+                                        'country': 'POL',
                                         'id': 'RG9jdW1lbnROb2RlOmQzNjdlNDMxLWI4MDctNGMxZi1hODExLWVmMmUwZDIxN2NjNA==',
                                         'number': '321-321-XU-123',
                                         'photo': '/api/uploads/test_file_name.jpg',
-                                        'type': None
+                                        'type': 'NATIONAL_ID'
                                     }
                                 }
                             ],
@@ -259,7 +259,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                         'number': '1111'
                                     },
                                     'value': {
-                                        'country': None,
+                                        'country': 'POL',
                                         'id': 'SW5kaXZpZHVhbElkZW50aXR5Tm9kZTox',
                                         'individual': None,
                                         'label': None,
