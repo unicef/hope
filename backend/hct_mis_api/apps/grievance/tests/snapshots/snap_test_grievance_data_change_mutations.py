@@ -252,17 +252,17 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 {
                                     'approve_status': False,
                                     'previous_value': {
+                                        'agency': 'UNHCR',
                                         'country': 'POL',
                                         'id': 'SW5kaXZpZHVhbElkZW50aXR5Tm9kZTox',
                                         'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',
-                                        'label': 'UNHCR',
                                         'number': '1111'
                                     },
                                     'value': {
+                                        'agency': 'UNHCR',
                                         'country': 'POL',
                                         'id': 'SW5kaXZpZHVhbElkZW50aXR5Tm9kZTox',
-                                        'individual': None,
-                                        'label': None,
+                                        'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',
                                         'number': '3333'
                                     }
                                 }
