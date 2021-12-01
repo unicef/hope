@@ -339,6 +339,69 @@ class TestCloseDataChangeTickets(APITestCase):
             self.assertEqual(individual.full_name, "Benjamin Butler")
             self.assertEqual(individual.family_name, "Butler")
 
+    def test_close_update_individual_document_photo(self):
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+        )
+
+        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        national_id = DocumentFactory(
+            type=national_id_type,
+            document_number="999-888-777",
+            individual=self.individuals[0],
+            photo="test_file_name.jpg",
+        )
+
+        grievance_ticket = GrievanceTicketFactory(
+            id="32c3ae7d-fb39-4d69-8559-9d0fa4284790",
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+            admin2=self.admin_area_1,
+            business_area=self.business_area,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=grievance_ticket,
+            individual=self.individuals[0],
+            individual_data={
+                "documents_to_edit": [
+                    {
+                        "value": {
+                            "id": self.id_to_base64(national_id.id, "DocumentNode"),
+                            "country": "POL",
+                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "number": "999-888-777",
+                            "photo": "new_test_file_name.jpg",
+                        },
+                        "previous_value": {
+                            "id": self.id_to_base64(national_id.id, "DocumentNode"),
+                            "country": "POL",
+                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "number": "999-888-777",
+                            "photo": "test_file_name.jpg",
+                        },
+                        "approve_status": True,
+                    },
+                ],
+            },
+        )
+
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(grievance_ticket.id, "GrievanceTicketNode"),
+                "status": GrievanceTicket.STATUS_CLOSED,
+            },
+        )
+        individual = self.individuals[0]
+        individual.refresh_from_db()
+
+        document = Document.objects.get(document_number="999-888-777")
+        self.assertEqual(document.type.country, Country("POL"))
+        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
+        self.assertEqual(document.photo.name, "new_test_file_name.jpg")
+
     @parameterized.expand(
         [
             ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),

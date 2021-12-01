@@ -78,7 +78,9 @@ def handle_edit_document(document_data: dict):
 
     document_type = DocumentType.objects.get(country=country, type=type_name)
 
-    document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
+    document_already_exists = (
+        Document.objects.exclude(pk=document_id).filter(document_number=number, type=document_type).exists()
+    )
     if document_already_exists:
         logger.error(f"Document with number {number} of type {type_name} for country {country} already exist")
         raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
