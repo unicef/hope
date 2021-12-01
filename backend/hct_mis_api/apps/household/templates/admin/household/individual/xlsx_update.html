@@ -3,7 +3,7 @@
 
 {% endblock %}
 {% block content %}
-  <form action="." method="post">
+  <form action="." method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <input name="stage" type="hidden" value="2">
     {{ form.as_p }}

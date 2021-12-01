@@ -401,17 +401,31 @@ class IndividualAdmin(
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
-    def xlsx_update_stage2(self, request):
-        form = UpdateByXlsxStage1Form(request.POST, request.FILES)
-
-        xlsx_update_file = XlsxUpdateFile(file=request.FILES["file"])
+    def xlsx_update_stage2(self, request, old_form):
+        xlsx_update_file = XlsxUpdateFile(
+            file=old_form.cleaned_data["file"],
+            business_area=old_form.cleaned_data["business_area"],
+            rdi=old_form.cleaned_data["registration_data_import"],
+        )
         xlsx_update_file.save()
         updater = IndividualXlsxUpdate(xlsx_update_file)
         context = self.get_common_context(
             request,
             title="Update Individual by xlsx",
-            form=UpdateByXlsxStage2Form(xlsx_columns=updater.columns_names),
+            form=UpdateByXlsxStage2Form(
+                xlsx_columns=updater.columns_names, initial={"xlsx_update_file": xlsx_update_file}
+            ),
         )
+        return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
+
+    def xlsx_update_stage3(self, request, old_form):
+        xlsx_update_file = old_form.cleaned_data["xlsx_update_file"]
+        xlsx_update_file.xlsx_match_columns = old_form.cleaned_data["xlsx_match_columns"]
+        xlsx_update_file.save()
+        context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
+        updater = IndividualXlsxUpdate(xlsx_update_file)
+        report = updater.get_matching_report()
+        import ipdb;ipdb.set_trace()
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
 
     @button()
@@ -419,7 +433,19 @@ class IndividualAdmin(
         if request.method == "GET":
             context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
         if request.POST.get("stage") == "2":
-            return self.xlsx_update_stage2(request)
+            form = UpdateByXlsxStage1Form(request.POST, request.FILES)
+            context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
+            if not form.is_valid():
+                return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
+            return self.xlsx_update_stage2(request, form)
+        if request.POST.get("stage") == "3":
+            xlsx_update_file = XlsxUpdateFile.objects.get(pk=request.POST["xlsx_update_file"])
+            updater = IndividualXlsxUpdate(xlsx_update_file)
+            form = UpdateByXlsxStage2Form(request.POST, request.FILES, xlsx_columns=updater.columns_names)
+            context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
+            if not form.is_valid():
+                return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
+            return self.xlsx_update_stage3(request, form)
         return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
 
 
