@@ -1,0 +1,50 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% block extrahead %}
+
+{% endblock %}
+{% block content %}
+    <h3>Unique</h3>
+    <table width="100%">
+        <thead>
+            <th>Xlsx Row number</th>
+            <th>Individual unicef id</th>
+        </thead>
+
+        {% for report_row in unique_report_rows %}
+        <tr>
+            <td>{{ report_row.0 }}</td>
+            <td><a href="{% url "admin:household_individual_change" object_id=report_row.1.id %}">{{ report_row.1.unicef_id }}</a></td>
+        </tr>
+
+    {% endfor %}</table>
+    <h3>Not Found</h3>
+    <table width="100%">
+        <thead>
+            <th>Xlsx Row number</th>
+        </thead>
+
+        {% for report_row in no_match_report_rows %}
+        <tr>
+            <td>{{ report_row }}</td>
+        </tr>
+
+    {% endfor %}</table>
+    <h3>Mutliple Match</h3>
+    <table width="100%">
+        <thead>
+            <th>Xlsx Row number</th>
+            <th>Individual unicef id</th>
+        </thead>
+
+        {% for report_row in multiple_match_report_rows %}
+        <tr>
+            <td>{{ report_row.0 }}</td>
+            <td>
+                {% for individual in report_row.1 %}
+                    <a href="{% url "admin:household_individual_change" object_id=individual %}">{{ individual.unicef_id }}</a>{% if not forloop.last %},&nbsp;{% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+
+    {% endfor %}</table>
+{% endblock %}
