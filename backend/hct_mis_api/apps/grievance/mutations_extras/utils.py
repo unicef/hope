@@ -140,7 +140,9 @@ def handle_edit_identity(identity_data: dict):
         defaults={"country": country, "type": agency_name, "label": f"{country.name} - {agency_name}"},
     )
 
-    identity_already_exists = IndividualIdentity.objects.filter(number=number, agency=agency_type).exists()
+    identity_already_exists = (
+        IndividualIdentity.objects.exclude(pk=identity_id).filter(number=number, agency=agency_type).exists()
+    )
     if identity_already_exists:
         logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
         raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
