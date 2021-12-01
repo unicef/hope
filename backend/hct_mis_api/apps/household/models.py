@@ -1015,4 +1015,5 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
     xlsx_match_columns = ArrayField(
         models.CharField(max_length=32),
+        null=True
     )
