@@ -53,9 +53,6 @@ class IndividualXlsxUpdate:
             value = row[self.columns_names_index_dict[match_col] - 1].value
             q_object &= Q(**{attr.get("lookup"): value})
 
-        import ipdb
-
-        ipdb.set_trace()
         individuals = list(self.get_queryset().filter(q_object))
         if not individuals:
             return IndividualXlsxUpdate.STATUS_NO_MATCH, self._row_report_data(row)
