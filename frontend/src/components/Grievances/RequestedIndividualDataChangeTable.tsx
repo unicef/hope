@@ -380,6 +380,13 @@ export function RequestedIndividualDataChangeTable({
     return <PhotoModal src={document.value.photo} />;
   };
 
+  const renderNewOrNotUpdated = (prev, curr): React.ReactElement => {
+    if (prev === curr) {
+      return <GreyText>{t('Not updated')}</GreyText>;
+    }
+    return <span>{curr}</span>;
+  };
+
   return (
     <div>
       {entries?.length ? (
@@ -520,8 +527,9 @@ export function RequestedIndividualDataChangeTable({
                       {countriesDict[document.previous_value.country]}
                     </TableCell>
                     <TableCell align='left'>
-                      {countriesDict[document.value?.country] ?? (
-                        <GreyText>{t('Not updated')}</GreyText>
+                      {renderNewOrNotUpdated(
+                        countriesDict[document.previous_value.country],
+                        countriesDict[document.value?.country],
                       )}
                     </TableCell>
                   </TableRow>
@@ -532,8 +540,9 @@ export function RequestedIndividualDataChangeTable({
                       {documentTypeDict[document.previous_value.type]}
                     </TableCell>
                     <TableCell align='left'>
-                      {documentTypeDict[document.value.type] ?? (
-                        <GreyText>{t('Not updated')}</GreyText>
+                      {renderNewOrNotUpdated(
+                        documentTypeDict[document.previous_value.type],
+                        documentTypeDict[document.value.type],
                       )}
                     </TableCell>
                   </TableRow>
@@ -545,8 +554,9 @@ export function RequestedIndividualDataChangeTable({
                       {document.previous_value.number}
                     </TableCell>
                     <TableCell align='left'>
-                      {document.value?.number ?? (
-                        <GreyText>{t('Not updated')}</GreyText>
+                      {renderNewOrNotUpdated(
+                        documentTypeDict[document.previous_value.number],
+                        documentTypeDict[document.value.number],
                       )}
                     </TableCell>
                   </TableRow>
@@ -681,8 +691,9 @@ export function RequestedIndividualDataChangeTable({
                         {countriesDict[identity.previous_value.country]}
                       </TableCell>
                       <TableCell align='left'>
-                        {countriesDict[identity.value?.country] ?? (
-                          <GreyText>{t('Not updated')}</GreyText>
+                        {renderNewOrNotUpdated(
+                          countriesDict[identity.previous_value.country],
+                          countriesDict[identity.value?.country],
                         )}
                       </TableCell>
                     </TableRow>
@@ -693,8 +704,9 @@ export function RequestedIndividualDataChangeTable({
                         {identity.previous_value.number}
                       </TableCell>
                       <TableCell align='left'>
-                        {identity.value?.number ?? (
-                          <GreyText>{t('Not updated')}</GreyText>
+                        {renderNewOrNotUpdated(
+                          identity.previous_value.number,
+                          identity.value?.number,
                         )}
                       </TableCell>
                     </TableRow>
