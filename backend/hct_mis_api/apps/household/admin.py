@@ -422,11 +422,16 @@ class IndividualAdmin(
         xlsx_update_file = old_form.cleaned_data["xlsx_update_file"]
         xlsx_update_file.xlsx_match_columns = old_form.cleaned_data["xlsx_match_columns"]
         xlsx_update_file.save()
-        context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
         updater = IndividualXlsxUpdate(xlsx_update_file)
         report = updater.get_matching_report()
-        import ipdb;ipdb.set_trace()
-        return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
+        context = self.get_common_context(
+            request,
+            title="Update Individual by xlsx Report",
+            unique_report_rows=report[IndividualXlsxUpdate.STATUS_UNIQUE],
+            multiple_match_report_rows=report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH],
+            no_match_report_rows=report[IndividualXlsxUpdate.STATUS_NO_MATCH],
+        )
+        return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
     @button()
     def xlsx_update(self, request):
