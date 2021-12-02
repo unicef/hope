@@ -225,7 +225,6 @@ export const EditIndividualDataChangeFieldRow = ({
     helpers.setValue(field?.isFlexField);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
-  if (!field) return null;
   return (
     <>
       <Grid item xs={4}>
@@ -332,6 +331,7 @@ export const EditIndividualDataChange = ({
   const notAvailableItems = (values.individualDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
+
   return (
     <>
       <BoxWithBorders>
