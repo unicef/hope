@@ -4,12 +4,18 @@ from django.db.models import Q
 
 import openpyxl
 
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     CORE_FIELDS_ATTRIBUTES,
 )
 from hct_mis_api.apps.household.models import Individual
+
+
+class InvalidColumnsError(Exception):
+    pass
 
 
 class IndividualXlsxUpdate:
@@ -28,6 +34,7 @@ class IndividualXlsxUpdate:
         self.wb = openpyxl.load_workbook(xlsx_update_file.file, data_only=True)
         self.individuals_ws = self.wb["Individuals"]
         self.report_dict = None
+        self._validate_columns_names()
         self._build_helpers()
 
     @staticmethod
@@ -36,6 +43,14 @@ class IndividualXlsxUpdate:
             return f"individual__{attr.get('name')}"
         if attr.get("associated_with") == _HOUSEHOLD:
             return f"household__{attr.get('name')}"
+
+    def _validate_columns_names(self):
+        first_row = self.individuals_ws[1]
+
+        invalid_columns = [cell.value for cell in first_row if cell.value not in self.core_attr_by_names]
+
+        if invalid_columns:
+            raise InvalidColumnsError(f"Invalid columns: {invalid_columns}")
 
     def _build_helpers(self):
         first_row = self.individuals_ws[1]
@@ -47,8 +62,10 @@ class IndividualXlsxUpdate:
 
     def get_queryset(self):
         queryset = Individual.objects.filter(business_area=self.xlsx_update_file.business_area)
+
         if self.xlsx_update_file.rdi:
-            queryset.filter(registration_data_import=self.xlsx_update_file.rdi)
+            queryset = queryset.filter(registration_data_import=self.xlsx_update_file.rdi)
+
         return queryset
 
     def _row_report_data(self, row):
@@ -94,9 +111,14 @@ class IndividualXlsxUpdate:
         Individual.objects.bulk_update(individuals, columns)
 
     def _update_single_individual(self, row, individual):
+        old_individual = copy_model_object(individual)
+
         for cell in row:
             if cell.col_idx in self.columns_match_indexes:
                 continue
             attr = self.attr_by_column_index[cell.col_idx]
             setattr(individual, attr["name"], cell.value)
+
+        log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", None, old_individual, individual)
+
         return individual
