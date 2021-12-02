@@ -1,7 +1,14 @@
-import openpyxl
+from typing import List
+
 from django.db.models import Q
 
-from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD
+import openpyxl
+
+from hct_mis_api.apps.core.core_fields_attributes import (
+    _HOUSEHOLD,
+    _INDIVIDUAL,
+    CORE_FIELDS_ATTRIBUTES,
+)
 from hct_mis_api.apps.household.models import Individual
 
 
@@ -13,8 +20,7 @@ class IndividualXlsxUpdate:
 
     def __init__(self, xlsx_update_file):
         self.xlsx_update_file = xlsx_update_file
-        self.core_columns_names = [self._column_name_by_attr(attr) for attr in CORE_FIELDS_ATTRIBUTES]
-        self.core_attr_by_xlsx_names = {self._column_name_by_attr(attr): attr for attr in CORE_FIELDS_ATTRIBUTES}
+        self.core_attr_by_names = {self._column_name_by_attr(attr): attr for attr in CORE_FIELDS_ATTRIBUTES}
         self.updatable_core_columns_names = [
             self._column_name_by_attr(attr) for attr in CORE_FIELDS_ATTRIBUTES if attr["associated_with"] == _INDIVIDUAL
         ]
@@ -22,19 +28,21 @@ class IndividualXlsxUpdate:
         self.wb = openpyxl.load_workbook(xlsx_update_file.file, data_only=True)
         self.individuals_ws = self.wb["Individuals"]
         self.report_dict = None
-        self._get_xlsx_column_names()
+        self._build_helpers()
 
     @staticmethod
     def _column_name_by_attr(attr):
         if attr.get("associated_with") == _INDIVIDUAL:
-            return f"individual__{attr.get('xlsx_field')}"
+            return f"individual__{attr.get('name')}"
         if attr.get("associated_with") == _HOUSEHOLD:
-            return f"household__{attr.get('xlsx_field')}"
+            return f"household__{attr.get('name')}"
 
-    def _get_xlsx_column_names(self):
+    def _build_helpers(self):
         first_row = self.individuals_ws[1]
         self.columns_names = [cell.value for cell in first_row]
         self.columns_names_index_dict = {cell.value: cell.col_idx for cell in first_row}
+        self.attr_by_column_index = {cell.col_idx: self.core_attr_by_names[cell.value] for cell in first_row}
+        self.columns_match_indexes = [self.columns_names_index_dict[col] for col in self.xlsx_match_columns]
         return self.columns_names
 
     def get_queryset(self):
@@ -49,7 +57,7 @@ class IndividualXlsxUpdate:
     def _get_matching_report_for_single_row(self, row):
         q_object = Q()
         for match_col in self.xlsx_match_columns:
-            attr = self.core_attr_by_xlsx_names[match_col]
+            attr = self.core_attr_by_names[match_col]
             value = row[self.columns_names_index_dict[match_col] - 1].value
             q_object &= Q(**{attr.get("lookup"): value})
 
@@ -71,3 +79,24 @@ class IndividualXlsxUpdate:
             report_dict[status].append(data)
         self.report_dict = report_dict
         return report_dict
+
+    def update_individuals(self):
+        self.get_matching_report()
+
+        individuals = []
+
+        for individuals_unique_report in self.report_dict[IndividualXlsxUpdate.STATUS_UNIQUE]:
+            row_num, individual = individuals_unique_report
+            row = self.individuals_ws[row_num]
+            individuals.append(self._update_single_individual(row, individual))
+
+        columns = [column.replace("individual__", "") for column in self.columns_names]
+        Individual.objects.bulk_update(individuals, columns)
+
+    def _update_single_individual(self, row, individual):
+        for cell in row:
+            if cell.col_idx in self.columns_match_indexes:
+                continue
+            attr = self.attr_by_column_index[cell.col_idx]
+            setattr(individual, attr["name"], cell.value)
+        return individual
