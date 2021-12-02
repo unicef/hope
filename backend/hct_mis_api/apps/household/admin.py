@@ -8,6 +8,7 @@ from django.contrib.admin import TabularInline
 from django.contrib.admin.models import LogEntry
 from django.contrib.messages import DEFAULT_TAGS
 from django.contrib.postgres.fields import JSONField
+from django.db import transaction
 from django.db.models import Count, Q
 from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
@@ -40,7 +41,10 @@ from hct_mis_api.apps.household.forms import (
     UpdateByXlsxStage1Form,
     UpdateByXlsxStage2Form,
 )
-from hct_mis_api.apps.household.individual_xlsx_update import IndividualXlsxUpdate
+from hct_mis_api.apps.household.individual_xlsx_update import (
+    IndividualXlsxUpdate,
+    InvalidColumnsError,
+)
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -411,7 +415,13 @@ class IndividualAdmin(
             rdi=old_form.cleaned_data["registration_data_import"],
         )
         xlsx_update_file.save()
-        updater = IndividualXlsxUpdate(xlsx_update_file)
+        try:
+            updater = IndividualXlsxUpdate(xlsx_update_file)
+        except InvalidColumnsError as e:
+            self.message_user(request, str(e), messages.ERROR)
+            context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
+            return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
+
         context = self.get_common_context(
             request,
             title="Update Individual by xlsx",
@@ -460,7 +470,8 @@ class IndividualAdmin(
             xlsx_update_file = XlsxUpdateFile.objects.get(pk=xlsx_update_file_id)
             updater = IndividualXlsxUpdate(xlsx_update_file)
             try:
-                updater.update_individuals()
+                with transaction.atomic():
+                    updater.update_individuals()
                 self.message_user(request, "Done", messages.SUCCESS)
                 return HttpResponseRedirect(reverse("admin:household_individual_changelist"))
             except Exception as e:
@@ -505,3 +516,8 @@ class EntitlementCardAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         TextFieldFilter.factory("card_type"),
         TextFieldFilter.factory("service_provider"),
     )
+
+
+@admin.register(XlsxUpdateFile)
+class XlsxUpdateFileAdmin(HOPEModelAdminBase):
+    pass
