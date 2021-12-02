@@ -36,7 +36,10 @@ from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.household.forms import UpdateByXlsxStage1Form, UpdateByXlsxStage2Form
+from hct_mis_api.apps.household.forms import (
+    UpdateByXlsxStage1Form,
+    UpdateByXlsxStage2Form,
+)
 from hct_mis_api.apps.household.individual_xlsx_update import IndividualXlsxUpdate
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -430,6 +433,7 @@ class IndividualAdmin(
             unique_report_rows=report[IndividualXlsxUpdate.STATUS_UNIQUE],
             multiple_match_report_rows=report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH],
             no_match_report_rows=report[IndividualXlsxUpdate.STATUS_NO_MATCH],
+            xlsx_update_file=xlsx_update_file.id,
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
@@ -451,6 +455,27 @@ class IndividualAdmin(
             if not form.is_valid():
                 return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
             return self.xlsx_update_stage3(request, form)
+        if request.POST.get("stage") == "4":
+            xlsx_update_file_id = request.POST.get("xlsx_update_file")
+            xlsx_update_file = XlsxUpdateFile.objects.get(pk=xlsx_update_file_id)
+            updater = IndividualXlsxUpdate(xlsx_update_file)
+            try:
+                updater.update_individuals()
+                self.message_user(request, "Done", messages.SUCCESS)
+                return HttpResponseRedirect(reverse("admin:household_individual_changelist"))
+            except Exception as e:
+                self.message_user(request, str(e), messages.ERROR)
+                report = updater.report_dict
+                context = self.get_common_context(
+                    request,
+                    title="Update Individual by xlsx Report",
+                    unique_report_rows=report[IndividualXlsxUpdate.STATUS_UNIQUE],
+                    multiple_match_report_rows=report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH],
+                    no_match_report_rows=report[IndividualXlsxUpdate.STATUS_NO_MATCH],
+                    xlsx_update_file=xlsx_update_file.id,
+                )
+                return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
+
         return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
 
 
