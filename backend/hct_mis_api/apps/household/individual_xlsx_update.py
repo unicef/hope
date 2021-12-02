@@ -1,5 +1,3 @@
-from typing import List
-
 from django.db.models import Q
 
 import openpyxl
@@ -37,54 +35,6 @@ class IndividualXlsxUpdate:
         self._validate_columns_names()
         self._build_helpers()
 
-    @staticmethod
-    def _column_name_by_attr(attr):
-        if attr.get("associated_with") == _INDIVIDUAL:
-            return f"individual__{attr.get('name')}"
-        if attr.get("associated_with") == _HOUSEHOLD:
-            return f"household__{attr.get('name')}"
-
-    def _validate_columns_names(self):
-        first_row = self.individuals_ws[1]
-
-        invalid_columns = [cell.value for cell in first_row if cell.value not in self.core_attr_by_names]
-
-        if invalid_columns:
-            raise InvalidColumnsError(f"Invalid columns: {invalid_columns}")
-
-    def _build_helpers(self):
-        first_row = self.individuals_ws[1]
-        self.columns_names = [cell.value for cell in first_row]
-        self.columns_names_index_dict = {cell.value: cell.col_idx for cell in first_row}
-        self.attr_by_column_index = {cell.col_idx: self.core_attr_by_names[cell.value] for cell in first_row}
-        self.columns_match_indexes = [self.columns_names_index_dict[col] for col in self.xlsx_match_columns]
-        return self.columns_names
-
-    def get_queryset(self):
-        queryset = Individual.objects.filter(business_area=self.xlsx_update_file.business_area)
-
-        if self.xlsx_update_file.rdi:
-            queryset = queryset.filter(registration_data_import=self.xlsx_update_file.rdi)
-
-        return queryset
-
-    def _row_report_data(self, row):
-        return row[0].row
-
-    def _get_matching_report_for_single_row(self, row):
-        q_object = Q()
-        for match_col in self.xlsx_match_columns:
-            attr = self.core_attr_by_names[match_col]
-            value = row[self.columns_names_index_dict[match_col] - 1].value
-            q_object &= Q(**{attr.get("lookup"): value})
-
-        individuals = list(self.get_queryset().filter(q_object))
-        if not individuals:
-            return IndividualXlsxUpdate.STATUS_NO_MATCH, self._row_report_data(row)
-        if len(individuals) > 1:
-            return IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH, (self._row_report_data(row), individuals)
-        return IndividualXlsxUpdate.STATUS_UNIQUE, (self._row_report_data(row), individuals[0])
-
     def get_matching_report(self):
         report_dict = {
             IndividualXlsxUpdate.STATUS_UNIQUE: [],
@@ -109,6 +59,54 @@ class IndividualXlsxUpdate:
 
         columns = [column.replace("individual__", "") for column in self.columns_names]
         Individual.objects.bulk_update(individuals, columns)
+
+    @staticmethod
+    def _column_name_by_attr(attr):
+        if attr.get("associated_with") == _INDIVIDUAL:
+            return f"individual__{attr.get('name')}"
+        if attr.get("associated_with") == _HOUSEHOLD:
+            return f"household__{attr.get('name')}"
+
+    def _validate_columns_names(self):
+        first_row = self.individuals_ws[1]
+
+        invalid_columns = [cell.value for cell in first_row if cell.value not in self.core_attr_by_names]
+
+        if invalid_columns:
+            raise InvalidColumnsError(f"Invalid columns: {invalid_columns}")
+
+    def _build_helpers(self):
+        first_row = self.individuals_ws[1]
+        self.columns_names = [cell.value for cell in first_row]
+        self.columns_names_index_dict = {cell.value: cell.col_idx for cell in first_row}
+        self.attr_by_column_index = {cell.col_idx: self.core_attr_by_names[cell.value] for cell in first_row}
+        self.columns_match_indexes = [self.columns_names_index_dict[col] for col in self.xlsx_match_columns]
+        return self.columns_names
+
+    def _get_queryset(self):
+        queryset = Individual.objects.filter(business_area=self.xlsx_update_file.business_area)
+
+        if self.xlsx_update_file.rdi:
+            queryset = queryset.filter(registration_data_import=self.xlsx_update_file.rdi)
+
+        return queryset
+
+    def _row_report_data(self, row):
+        return row[0].row
+
+    def _get_matching_report_for_single_row(self, row):
+        q_object = Q()
+        for match_col in self.xlsx_match_columns:
+            attr = self.core_attr_by_names[match_col]
+            value = row[self.columns_names_index_dict[match_col] - 1].value
+            q_object &= Q(**{attr.get("lookup"): value})
+
+        individuals = list(self._get_queryset().filter(q_object))
+        if not individuals:
+            return IndividualXlsxUpdate.STATUS_NO_MATCH, self._row_report_data(row)
+        if len(individuals) > 1:
+            return IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH, (self._row_report_data(row), individuals)
+        return IndividualXlsxUpdate.STATUS_UNIQUE, (self._row_report_data(row), individuals[0])
 
     def _update_single_individual(self, row, individual):
         old_individual = copy_model_object(individual)
