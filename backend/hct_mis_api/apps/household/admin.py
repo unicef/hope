@@ -408,6 +408,37 @@ class IndividualAdmin(
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
+
+@admin.register(IndividualRoleInHousehold)
+class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
+    list_display = ("individual_id", "household_id", "role")
+    list_filter = ("role",)
+    raw_id_fields = (
+        "individual",
+        "household",
+    )
+
+
+@admin.register(IndividualIdentity)
+class IndividualIdentityAdmin(HOPEModelAdminBase):
+    pass
+
+
+@admin.register(EntitlementCard)
+class EntitlementCardAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+    list_display = ("id", "card_number", "status", "card_type", "service_provider")
+    search_fields = ("card_number",)
+    date_hierarchy = "created_at"
+    raw_id_fields = ("household",)
+    list_filter = (
+        "status",
+        TextFieldFilter.factory("card_type"),
+        TextFieldFilter.factory("service_provider"),
+    )
+
+
+@admin.register(XlsxUpdateFile)
+class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     def xlsx_update_stage2(self, request, old_form):
         xlsx_update_file = XlsxUpdateFile(
             file=old_form.cleaned_data["file"],
@@ -488,36 +519,3 @@ class IndividualAdmin(
                 return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
         return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
-
-
-@admin.register(IndividualRoleInHousehold)
-class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("individual_id", "household_id", "role")
-    list_filter = ("role",)
-    raw_id_fields = (
-        "individual",
-        "household",
-    )
-
-
-@admin.register(IndividualIdentity)
-class IndividualIdentityAdmin(HOPEModelAdminBase):
-    pass
-
-
-@admin.register(EntitlementCard)
-class EntitlementCardAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("id", "card_number", "status", "card_type", "service_provider")
-    search_fields = ("card_number",)
-    date_hierarchy = "created_at"
-    raw_id_fields = ("household",)
-    list_filter = (
-        "status",
-        TextFieldFilter.factory("card_type"),
-        TextFieldFilter.factory("service_provider"),
-    )
-
-
-@admin.register(XlsxUpdateFile)
-class XlsxUpdateFileAdmin(HOPEModelAdminBase):
-    pass
