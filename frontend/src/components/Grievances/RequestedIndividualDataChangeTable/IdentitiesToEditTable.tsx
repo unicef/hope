@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -49,7 +50,7 @@ export const IdentitiesToEditTable = ({
   countriesDict,
   index,
   identity,
-}: IdentitiesToEditTableProps) => {
+}: IdentitiesToEditTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const { selectedIdentitiesToEdit } = values;
   const renderNewOrNotUpdated = (prev, curr): React.ReactElement => {
@@ -58,15 +59,13 @@ export const IdentitiesToEditTable = ({
     }
     return <span>{curr}</span>;
   };
-  const handleSelectIdentityToEdit = (documentIndex): void => {
-    const newSelected = [...selectedIdentitiesToEdit];
-    const selectedIndex = newSelected.indexOf(documentIndex);
-    if (selectedIndex !== -1) {
-      newSelected.splice(selectedIndex, 1);
-    } else {
-      newSelected.push(documentIndex);
-    }
-    setFieldValue('selectedIdentitiesToEdit', newSelected);
+  const handleSelectIdentityToEdit = (identityIndex): void => {
+    handleSelected(
+      identityIndex,
+      'selectedIdentitiesToEdit',
+      selectedIdentitiesToEdit,
+      setFieldValue,
+    );
   };
 
   return (
