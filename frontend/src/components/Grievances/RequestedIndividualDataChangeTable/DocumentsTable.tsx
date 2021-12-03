@@ -1,20 +1,20 @@
 import {
   Box,
-  Typography,
+  Checkbox,
   Table,
   TableBody,
-  TableRow,
   TableCell,
-  Checkbox,
   TableHead,
+  TableRow,
+  Typography,
 } from '@material-ui/core';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { handleSelected } from '../utils/helpers';
 
 const Title = styled.div`
   padding-top: ${({ theme }) => theme.spacing(4)}px;
@@ -47,18 +47,16 @@ export const DocumentsTable = ({
   documents,
   documentTypeDict,
   countriesDict,
-}: DocumentsTableProps) => {
+}: DocumentsTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const { selectedDocuments } = values;
   const handleSelectDocument = (documentIndex): void => {
-    const newSelected = [...selectedDocuments];
-    const selectedIndex = newSelected.indexOf(documentIndex);
-    if (selectedIndex !== -1) {
-      newSelected.splice(selectedIndex, 1);
-    } else {
-      newSelected.push(documentIndex);
-    }
-    setFieldValue('selectedDocuments', newSelected);
+    handleSelected(
+      documentIndex,
+      'selectedDocuments',
+      selectedDocuments,
+      setFieldValue,
+    );
   };
   const documentsTableHead = (
     <TableHead>

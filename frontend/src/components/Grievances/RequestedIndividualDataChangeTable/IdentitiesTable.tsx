@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -48,19 +49,17 @@ export const IdentitiesTable = ({
   countriesDict,
   identityTypeDict,
   identities,
-}: IdentitiesTableProps) => {
+}: IdentitiesTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const { selectedIdentities } = values;
 
   const handleSelectIdentity = (identityIndex): void => {
-    const newSelected = [...selectedIdentities];
-    const selectedIndex = newSelected.indexOf(identityIndex);
-    if (selectedIndex !== -1) {
-      newSelected.splice(selectedIndex, 1);
-    } else {
-      newSelected.push(identityIndex);
-    }
-    setFieldValue('selectedIdentities', newSelected);
+    handleSelected(
+      identityIndex,
+      'selectedIdentities',
+      selectedIdentities,
+      setFieldValue,
+    );
   };
   const identitiesTableHead = (
     <TableHead>
