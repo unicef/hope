@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { handleSelected } from '../utils/helpers';
 import { individualDataRow } from './individualDataRow';
 
 const StyledTable = styled(Table)`
@@ -44,24 +45,15 @@ export const EntriesTable = ({
   const isSelectedFlexfields = (name: string): boolean =>
     selectedFlexFields.includes(name);
   const handleSelectBioData = (name): void => {
-    const newSelected = [...selectedBioData];
-    const selectedIndex = newSelected.indexOf(camelCase(name));
-    if (selectedIndex !== -1) {
-      newSelected.splice(selectedIndex, 1);
-    } else {
-      newSelected.push(camelCase(name));
-    }
-    setFieldValue('selected', newSelected);
+    handleSelected(camelCase(name), 'selected', selectedBioData, setFieldValue);
   };
   const handleFlexFields = (name): void => {
-    const newSelected = [...selectedFlexFields];
-    const selectedIndex = newSelected.indexOf(name);
-    if (selectedIndex !== -1) {
-      newSelected.splice(selectedIndex, 1);
-    } else {
-      newSelected.push(name);
-    }
-    setFieldValue('selectedFlexFields', newSelected);
+    handleSelected(
+      name,
+      'selectedFlexFields',
+      selectedFlexFields,
+      setFieldValue,
+    );
   };
 
   return (

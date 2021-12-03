@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { PhotoModal } from '../../PhotoModal/PhotoModal';
+import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -52,7 +53,7 @@ export const DocumentsToEditTable = ({
   countriesDict,
   index,
   document,
-}: DocumentsToEditTableProps) => {
+}: DocumentsToEditTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const renderNewOrNotUpdated = (prev, curr): React.ReactElement => {
     if (prev === curr) {
@@ -71,14 +72,12 @@ export const DocumentsToEditTable = ({
     return <PhotoModal src={document.value.photo} />;
   };
   const handleSelectDocumentToEdit = (documentIndex): void => {
-    const newSelected = [...selectedDocumentsToEdit];
-    const selectedIndex = newSelected.indexOf(documentIndex);
-    if (selectedIndex !== -1) {
-      newSelected.splice(selectedIndex, 1);
-    } else {
-      newSelected.push(documentIndex);
-    }
-    setFieldValue('selectedDocumentsToEdit', newSelected);
+    handleSelected(
+      documentIndex,
+      'selectedDocumentsToEdit',
+      selectedDocumentsToEdit,
+      setFieldValue,
+    );
   };
 
   return (

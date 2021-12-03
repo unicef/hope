@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -44,7 +45,7 @@ export const DocumentsToRemoveTable = ({
   countriesDict,
   documentsToRemove,
   previousDocuments,
-}: DocumentsToRemoveTableProps) => {
+}: DocumentsToRemoveTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const documentsTableHead = (
     <TableHead>
@@ -58,14 +59,12 @@ export const DocumentsToRemoveTable = ({
   );
   const { selectedDocumentsToRemove } = values;
   const handleSelectDocumentToRemove = (documentIndex): void => {
-    const newSelected = [...selectedDocumentsToRemove];
-    const selectedIndex = newSelected.indexOf(documentIndex);
-    if (selectedIndex !== -1) {
-      newSelected.splice(selectedIndex, 1);
-    } else {
-      newSelected.push(documentIndex);
-    }
-    setFieldValue('selectedDocumentsToRemove', newSelected);
+    handleSelected(
+      documentIndex,
+      'selectedDocumentsToRemove',
+      selectedDocumentsToRemove,
+      setFieldValue,
+    );
   };
 
   return (

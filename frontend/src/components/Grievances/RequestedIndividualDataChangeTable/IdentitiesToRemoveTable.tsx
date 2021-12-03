@@ -1,8 +1,3 @@
-import React from 'react';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
-import { useTranslation } from 'react-i18next';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import styled from 'styled-components';
 import {
   Box,
   Checkbox,
@@ -13,7 +8,13 @@ import {
   TableRow,
   Typography,
 } from '@material-ui/core';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -44,7 +45,7 @@ export const IdentitiesToRemoveTable = ({
   identitiesToRemove,
   previousIdentities,
   setFieldValue,
-}: IdentitiesToRemoveTableProps) => {
+}: IdentitiesToRemoveTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const { selectedIdentitiesToRemove } = values;
   const identitiesTableHead = (
@@ -58,14 +59,12 @@ export const IdentitiesToRemoveTable = ({
     </TableHead>
   );
   const handleSelectIdentityToRemove = (identityIndex): void => {
-    const newSelected = [...selectedIdentitiesToRemove];
-    const selectedIndex = newSelected.indexOf(identityIndex);
-    if (selectedIndex !== -1) {
-      newSelected.splice(selectedIndex, 1);
-    } else {
-      newSelected.push(identityIndex);
-    }
-    setFieldValue('selectedIdentitiesToRemove', newSelected);
+    handleSelected(
+      identityIndex,
+      'selectedIdentitiesToRemove',
+      selectedIdentitiesToRemove,
+      setFieldValue,
+    );
   };
 
   return (

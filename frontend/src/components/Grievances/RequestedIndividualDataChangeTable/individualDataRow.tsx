@@ -1,10 +1,10 @@
-import React from 'react';
+import { Checkbox, TableCell, TableRow } from '@material-ui/core';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
+import React from 'react';
 import styled from 'styled-components';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
-import { Checkbox, TableCell, TableRow } from '@material-ui/core';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
 
