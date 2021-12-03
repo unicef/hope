@@ -45,6 +45,8 @@ def invalid_file():
 
 
 class TestIndividualXlsxUpdate(APITestCase):
+    multi_db = True
+
     def setUp(self) -> None:
         call_command("loadbusinessareas")
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
