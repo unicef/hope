@@ -1,3 +1,4 @@
+import datetime
 from io import BytesIO
 from pathlib import Path
 
@@ -29,6 +30,13 @@ def valid_file():
     return File(BytesIO(content), name="valid_updated_test_file.xlsx")
 
 
+def valid_file_complex():
+    content = Path(
+        f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/valid_updated_test_file_complex.xlsx"
+    ).read_bytes()
+    return File(BytesIO(content), name="valid_updated_test_file_complex.xlsx")
+
+
 def invalid_file():
     content = Path(
         f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/invalid_updated_test_file.xlsx"
@@ -52,6 +60,12 @@ class TestIndividualXlsxUpdate(APITestCase):
             file=invalid_file(),
             business_area=self.business_area,
             xlsx_match_columns=["individual__given_name"],
+        )
+
+        self.xlsx_update_valid_file_complex = XlsxUpdateFile.objects.create(
+            file=valid_file_complex(),
+            business_area=self.business_area,
+            xlsx_match_columns=["individual__full_name"],
         )
 
         household_data = {
@@ -144,3 +158,38 @@ class TestIndividualXlsxUpdate(APITestCase):
             IndividualXlsxUpdate(self.xlsx_update_invalid_file)
 
         self.assertTrue("Invalid columns" in str(context.exception))
+
+    def test_complex_update_individual(self):
+        # Given
+        updater = IndividualXlsxUpdate(self.xlsx_update_valid_file_complex)
+
+        # When
+        updater.update_individuals()
+
+        # Then
+        [individual.refresh_from_db() for individual in self.individuals]
+
+        self.assertEqual(self.individuals[0].family_name, "Kowalski")
+        self.assertEqual(self.individuals[1].family_name, "Kowalska")
+        self.assertEqual(self.individuals[2].family_name, "Kowalska")
+        self.assertEqual(self.individuals[3].family_name, "Dąbrowska")
+
+        self.assertEqual(self.individuals[0].given_name, "Patryk")
+        self.assertEqual(self.individuals[1].given_name, "Karolina")
+        self.assertEqual(self.individuals[2].given_name, "Angela")
+        self.assertEqual(self.individuals[3].given_name, "Angela")
+
+        self.assertEqual(self.individuals[0].full_name, "Patryk Kowalski")
+        self.assertEqual(self.individuals[1].full_name, "Karolina Kowalska")
+        self.assertEqual(self.individuals[2].full_name, "Angela Kowalska")
+        self.assertEqual(self.individuals[3].full_name, "Angela Dąbrowska")
+
+        self.assertEqual(self.individuals[0].phone_no, "934-25-25-197")
+        self.assertEqual(self.individuals[1].phone_no, "934-25-25-198")
+        self.assertEqual(self.individuals[2].phone_no, "934-25-25-199")
+        self.assertEqual(self.individuals[3].phone_no, "934-25-25-121")
+
+        self.assertEqual(self.individuals[0].birth_date, datetime.date(1965, 8, 5))
+        self.assertEqual(self.individuals[1].birth_date, datetime.date(1965, 8, 6))
+        self.assertEqual(self.individuals[2].birth_date, datetime.date(1965, 8, 7))
+        self.assertEqual(self.individuals[3].birth_date, datetime.date(1985, 8, 12))
