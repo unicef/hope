@@ -5,7 +5,7 @@ import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
 } from '../../../__generated__/graphql';
-import { EditIdentityRow } from '../EditIdentityRow';
+import { EditIdentityRow } from './EditIdentityRow';
 
 export interface ExistingIdentityFieldArrayProps {
   setFieldValue;
