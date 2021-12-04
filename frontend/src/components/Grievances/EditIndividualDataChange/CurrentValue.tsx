@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 import { LabelizedField } from '../../LabelizedField';
-import { GrievanceFlexFieldPhotoModal } from '../GrievanceFlexFieldPhotoModal';
-import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievanceFlexFieldPhotoModalNewIndividual';
+import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
+import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
 
 export interface CurrentValueProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];

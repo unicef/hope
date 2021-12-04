@@ -1,16 +1,22 @@
+import { Grid } from '@material-ui/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AllEditHouseholdFieldsQuery } from '../../../__generated__/graphql';
-import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
+import { LabelizedField } from '../../LabelizedField';
+import { GrievanceFlexFieldPhotoModalNewHousehold } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewHousehold';
 
 export interface CurrentValueProps {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   value;
+  values;
 }
 
 export function CurrentValue({
   field,
   value,
+  values,
 }: CurrentValueProps): React.ReactElement {
+  const { t } = useTranslation();
   let displayValue;
   if (
     field?.name === 'country' ||
@@ -42,11 +48,21 @@ export function CurrentValue({
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
         break;
       case 'IMAGE':
-        displayValue = <GrievanceFlexFieldPhotoModal field={field} isCurrent />;
-        break;
+        return (
+          <Grid item xs={3}>
+            <GrievanceFlexFieldPhotoModalNewHousehold
+              flexField={field}
+              householdId={values?.selectedHousehold?.id || null}
+            />
+          </Grid>
+        );
       default:
         displayValue = value;
     }
   }
-  return <>{displayValue || '-'}</>;
+  return (
+    <Grid item xs={3}>
+      <LabelizedField label={t('Current Value')} value={displayValue} />
+    </Grid>
+  );
 }

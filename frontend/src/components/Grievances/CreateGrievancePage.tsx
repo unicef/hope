@@ -40,7 +40,7 @@ import { PageHeader } from '../PageHeader';
 import { PermissionDenied } from '../PermissionDenied';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { Consent } from './Consent';
-import { EditHouseholdDataChange } from './EditHouseholdDataChange';
+import { EditHouseholdDataChange } from './EditHouseholdDataChange/EditHouseholdDataChange';
 import { EditIndividualDataChange } from './EditIndividualDataChange/EditIndividualDataChange';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
