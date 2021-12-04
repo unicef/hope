@@ -41,7 +41,7 @@ import { PermissionDenied } from '../PermissionDenied';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { Consent } from './Consent';
 import { EditHouseholdDataChange } from './EditHouseholdDataChange';
-import { EditIndividualDataChange } from './EditIndividualDataChange';
+import { EditIndividualDataChange } from './EditIndividualDataChange/EditIndividualDataChange';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import { TicketsAlreadyExist } from './TicketsAlreadyExist';

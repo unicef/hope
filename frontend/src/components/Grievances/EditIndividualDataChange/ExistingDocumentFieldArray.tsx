@@ -4,36 +4,36 @@ import React from 'react';
 import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
-} from '../../__generated__/graphql';
-import { EditIdentityRow } from './EditIdentityRow';
+} from '../../../__generated__/graphql';
+import { EditDocumentRow } from '../EditDocumentRow';
 
-export interface ExistingIdentityFieldArrayProps {
+export interface ExistingDocumentFieldArrayProps {
   setFieldValue;
   values;
   individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
 }
 
-export function ExistingIdentityFieldArray({
+export function ExistingDocumentFieldArray({
   setFieldValue,
   values,
   individual,
   addIndividualFieldsData,
-}: ExistingIdentityFieldArrayProps): React.ReactElement {
+}: ExistingDocumentFieldArrayProps): React.ReactElement {
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name='individualDataUpdateIdentitiesToEdit'
+        name='individualDataUpdateDocumentsToEdit'
         render={(arrayHelpers) => {
           return (
             <>
-              {individual?.identities?.edges?.map((item, index) => {
+              {individual?.documents?.edges?.map((item, index) => {
                 return (
-                  <EditIdentityRow
+                  <EditDocumentRow
                     key={item.node.id}
                     setFieldValue={setFieldValue}
                     values={values}
-                    identity={item}
+                    document={item}
                     index={index}
                     arrayHelpers={arrayHelpers}
                     addIndividualFieldsData={addIndividualFieldsData}
