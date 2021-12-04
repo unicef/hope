@@ -1,6 +1,6 @@
 import React from 'react';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
-import { GrievanceFlexFieldPhotoModal } from '../GrievanceFlexFieldPhotoModal';
+import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 
 export interface CurrentValueProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];

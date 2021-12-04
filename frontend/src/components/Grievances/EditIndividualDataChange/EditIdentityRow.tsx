@@ -8,9 +8,9 @@ import styled from 'styled-components';
 import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
-} from '../../__generated__/graphql';
-import { LabelizedField } from '../LabelizedField';
-import { AgencyField } from './AgencyField';
+} from '../../../__generated__/graphql';
+import { LabelizedField } from '../../LabelizedField';
+import { AgencyField } from '../AgencyField';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});

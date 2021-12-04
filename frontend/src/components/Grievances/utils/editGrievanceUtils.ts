@@ -8,7 +8,7 @@ import { thingForSpecificGrievanceType } from '../../../utils/utils';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
-import { EditHouseholdDataChange } from '../EditHouseholdDataChange';
+import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
 
 interface EditValuesTypes {
   description?: string;

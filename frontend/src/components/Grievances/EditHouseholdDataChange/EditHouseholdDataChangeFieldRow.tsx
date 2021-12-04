@@ -1,39 +1,43 @@
 import { Grid, IconButton } from '@material-ui/core';
-import camelCase from 'lodash/camelCase';
 import { Delete } from '@material-ui/icons';
-import { useField, Field } from 'formik';
+import { Field, useField } from 'formik';
+import camelCase from 'lodash/camelCase';
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import {
-  AllAddIndividualFieldsQuery,
-  IndividualQuery,
+  AllEditHouseholdFieldsQuery,
+  HouseholdQuery,
 } from '../../../__generated__/graphql';
-import { EditIndividualDataChangeField } from './EditIndividualDataChangeField';
 import { CurrentValue } from './CurrentValue';
+import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
 
-export interface EditIndividualDataChangeFieldRowProps {
-  fields: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'];
-  individual: IndividualQuery['individual'];
+export interface EditHouseholdDataChangeFieldRowProps {
+  fields: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'];
+  household: HouseholdQuery['household'];
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
   onDelete: () => {};
   values;
 }
-export const EditIndividualDataChangeFieldRow = ({
+export const EditHouseholdDataChangeFieldRow = ({
   fields,
-  individual,
+  household,
   index,
   itemValue,
   notAvailableFields,
   onDelete,
   values,
-}: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
+}: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
+  const { t } = useTranslation();
   const field = fields.find((item) => item.name === itemValue.fieldName);
-  // eslint-disable-next-line
-  const [fieldNotUsed, metaNotUsed, helpers] = useField(
-    `individualDataUpdateFields[${index}].isFlexField`,
+  const [, , helpers] = useField(
+    `householdDataUpdateFields[${index}].isFlexField`,
   );
+  const name = !field?.isFlexField
+    ? camelCase(itemValue.fieldName)
+    : itemValue.fieldName;
   useEffect(() => {
     helpers.setValue(field?.isFlexField);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -42,10 +46,10 @@ export const EditIndividualDataChangeFieldRow = ({
     <>
       <Grid item xs={4}>
         <Field
-          name={`individualDataUpdateFields[${index}].fieldName`}
+          name={`householdDataUpdateFields[${index}].fieldName`}
           fullWidth
           variant='outlined'
-          label='Field'
+          label={t('Field')}
           required
           component={FormikSelectField}
           choices={fields
@@ -64,15 +68,13 @@ export const EditIndividualDataChangeFieldRow = ({
       <CurrentValue
         field={field}
         value={
-          !field?.isFlexField
-            ? individual[camelCase(itemValue.fieldName)]
-            : individual.flexFields[itemValue.fieldName]
+          !field?.isFlexField ? household[name] : household.flexFields[name]
         }
         values={values}
       />
       {itemValue.fieldName ? (
-        <EditIndividualDataChangeField
-          name={`individualDataUpdateFields[${index}].fieldValue`}
+        <EditHouseholdDataChangeField
+          name={`householdDataUpdateFields[${index}].fieldValue`}
           field={field}
         />
       ) : (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AllEditHouseholdFieldsQuery } from '../../../__generated__/graphql';
-import { GrievanceFlexFieldPhotoModal } from '../GrievanceFlexFieldPhotoModal';
+import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 
 export interface NewValueProps {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];

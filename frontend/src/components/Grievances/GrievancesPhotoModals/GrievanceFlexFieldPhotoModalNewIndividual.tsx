@@ -3,8 +3,8 @@ import React from 'react';
 import {
   AllAddIndividualFieldsQuery,
   useIndividualFlexFieldsQuery,
-} from '../../__generated__/graphql';
-import { PhotoModal } from '../PhotoModal/PhotoModal';
+} from '../../../__generated__/graphql';
+import { PhotoModal } from '../../PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalNewIndividualProps {
   flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
