@@ -70,7 +70,7 @@ export const EditIndividualDataChangeFieldRow = ({
         }
         values={values}
       />
-      {itemValue.fieldName ? (
+      {itemValue.fieldName && itemValue.fieldValue ? (
         <EditIndividualDataChangeField
           name={`individualDataUpdateFields[${index}].fieldValue`}
           field={field}
