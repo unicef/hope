@@ -150,8 +150,8 @@ export const DocumentsToEditTable = ({
             <TableCell align='left'>{document.previous_value.number}</TableCell>
             <TableCell align='left'>
               {renderNewOrNotUpdated(
-                documentTypeDict[document.previous_value.number],
-                documentTypeDict[document.value.number],
+                document.previous_value.number,
+                document.value.number,
               )}
             </TableCell>
           </TableRow>
