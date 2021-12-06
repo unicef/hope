@@ -526,3 +526,10 @@ export const formatAge = (age): string | number => {
   }
   return '<1';
 };
+
+export const renderIndividualName = (individual): string => {
+  if (individual?.givenName && individual?.familyName) {
+    return `${individual.givenName} ${individual.familyName}`;
+  }
+  return individual?.fullName;
+};

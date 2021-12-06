@@ -3,6 +3,7 @@ import TableCell from '@material-ui/core/TableCell';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { renderIndividualName } from '../../../../utils/utils';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
@@ -28,7 +29,9 @@ export function TargetPopulationHouseholdTableRow({
       key={household.id}
     >
       <TableCell align='left'>{household.unicefId}</TableCell>
-      <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</TableCell>
+      <TableCell align='left'>
+        {renderIndividualName(household.headOfHousehold)}
+      </TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>
