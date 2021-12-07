@@ -105,7 +105,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             name="target_population_size_1_finalized",
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_PROCESSING,
             program=program,
         )
         cls.target_population_size_1_finalized.save()

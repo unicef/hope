@@ -214,10 +214,10 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if vulnerability_score_max is not None:
             target_population.vulnerability_score_max = vulnerability_score_max
 
-        if target_population.status == TargetPopulation.STATUS_LOCKED and name:
+        if target_population.is_locked() and name:
             logger.error("Name can't be changed when Target Population is in APPROVED status")
             raise ValidationError("Name can't be changed when Target Population is in APPROVED status")
-        if target_population.status == TargetPopulation.STATUS_FINALIZED:
+        if target_population.is_finalized():
             logger.error("Finalized Target Population can't be changed")
             raise ValidationError("Finalized Target Population can't be changed")
         if name:
@@ -337,7 +337,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
             user = info.context.user
             target_population: TargetPopulation = kwargs.get("model_object")
             old_target_population = kwargs.get("old_model_object")
-            target_population.status = TargetPopulation.STATUS_FINALIZED
+            target_population.status = TargetPopulation.STATUS_PROCESSING
             target_population.finalized_by = user
             target_population.finalized_at = timezone.now()
             if target_population.final_list_targeting_criteria:
@@ -498,8 +498,12 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
                 target_population.allowed_steficon_rule is not None
                 and steficon_rule_id != target_population.allowed_steficon_rule.id
             ):
-                logger.error("Another formula was applied to a previous target population for this programme. You can only apply the same formula")
-                raise GraphQLError("Another formula was applied to a previous target population for this programme. You can only apply the same formula")
+                logger.error(
+                    "Another formula was applied to a previous target population for this programme. You can only apply the same formula"
+                )
+                raise GraphQLError(
+                    "Another formula was applied to a previous target population for this programme. You can only apply the same formula"
+                )
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             if not steficon_rule.enabled or steficon_rule.deprecated:
                 logger.error("This steficon rule is not enabled or is deprecated.")
