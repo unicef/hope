@@ -1,30 +1,36 @@
+import os
 import uuid
 from datetime import timedelta
 from unittest import mock
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-import os
-
-import requests_mock
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
+import requests_mock
 from parameterized import parameterized
 
+from hct_mis_api.apps.cash_assist_datahub.models import CashPlan as DHCashPlan
+from hct_mis_api.apps.cash_assist_datahub.models import PaymentRecord as DHPaymentRecord
+from hct_mis_api.apps.cash_assist_datahub.models import Programme as DHProgram
 from hct_mis_api.apps.cash_assist_datahub.models import (
-    CashPlan as DHCashPlan,
-    PaymentRecord as DHPaymentRecord,
-    TargetPopulation as DHTargetPopulation,
     ServiceProvider as DHServiceProvider,
-    Programme as DHProgram,
 )
 from hct_mis_api.apps.cash_assist_datahub.models import Session
-from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import PullFromDatahubTask
+from hct_mis_api.apps.cash_assist_datahub.models import (
+    TargetPopulation as DHTargetPopulation,
+)
+from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
+    PullFromDatahubTask,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.tests.test_exchange_rates import EXCHANGE_RATES_WITH_HISTORICAL_DATA
+from hct_mis_api.apps.core.tests.test_exchange_rates import (
+    EXCHANGE_RATES_WITH_HISTORICAL_DATA,
+)
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
-from hct_mis_api.apps.program.models import Program, CashPlan
+from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
@@ -51,7 +57,7 @@ class TestPullDataFromDatahub(TestCase):
     def _setup_in_app_data(cls):
         target_population = TargetPopulation()
         target_population.name = "Test TP"
-        target_population.status = TargetPopulation.STATUS_FINALIZED
+        target_population.status = TargetPopulation.STATUS_PROCESSING
         target_population.save()
 
         program = Program()
