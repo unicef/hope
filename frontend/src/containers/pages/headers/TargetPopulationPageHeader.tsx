@@ -81,7 +81,7 @@ export function TargetPopulationPageHeader({
       );
       break;
     default:
-      //FINALIZED
+      //Ready for Cash Assist, Processing
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
