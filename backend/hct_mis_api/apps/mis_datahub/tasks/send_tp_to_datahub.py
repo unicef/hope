@@ -12,10 +12,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.mis_datahub import models as dh_mis_models
-from hct_mis_api.apps.targeting.models import (
-    HouseholdSelection,
-    TargetPopulation,
-)
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +75,7 @@ class SendTPToDatahubTask:
 
     def execute(self):
         target_populations = TargetPopulation.objects.filter(
-            status=TargetPopulation.STATUS_FINALIZED, sent_to_datahub=False
+            status=TargetPopulation.STATUS_PROCESSING, sent_to_datahub=False
         )
         for target_population in target_populations:
             self.send_tp(target_population)
@@ -165,7 +162,7 @@ class SendTPToDatahubTask:
                     dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
                     dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)
                     dh_mis_models.TargetPopulationEntry.objects.bulk_create(tp_entries_to_bulk_create)
-                    target_population.sent_to_datahub = True
+                    target_population.set_to_ready_for_cash_assist()
                     target_population.save()
                     households.update(last_sync_at=timezone.now())
                     return {
