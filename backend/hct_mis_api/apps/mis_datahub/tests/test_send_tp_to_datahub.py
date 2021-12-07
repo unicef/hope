@@ -184,7 +184,7 @@ class TestSendTpToDatahub(TestCase):
             name="Test TP",
             program=cls.program_individual_data_needed_true,
             business_area=business_area_with_data_sharing,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_first.households.set([cls.household])
 
@@ -193,7 +193,7 @@ class TestSendTpToDatahub(TestCase):
             name="Test TP 2",
             program=cls.program_individual_data_needed_false,
             business_area=business_area_with_data_sharing,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_second.households.set([cls.household])
 
@@ -202,7 +202,7 @@ class TestSendTpToDatahub(TestCase):
             name="Test TP 3",
             program=cls.program_third,
             business_area=business_area_with_data_sharing,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_PROCESSING,
         )
         cls.target_population_third.households.set([cls.household_second])
 
@@ -268,7 +268,7 @@ class TestSendTpToDatahub(TestCase):
             name="Test TP xD",
             program=program_individual_data_needed_false,
             business_area=business_area_with_data_sharing,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_first.households.set([household])
 
@@ -277,7 +277,7 @@ class TestSendTpToDatahub(TestCase):
             name="Test TP xD 2",
             program=program_individual_data_needed_true,
             business_area=business_area_with_data_sharing,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_PROCESSING,
         )
         target_population_second.households.set([household])
 
@@ -320,7 +320,7 @@ class TestSendTpToDatahub(TestCase):
         TargetingCriteriaRuleFactory.create_batch(150, targeting_criteria=targeting_criteria)
         target_population = TargetPopulationFactory(
             program=program,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_PROCESSING,
             candidate_list_targeting_criteria=targeting_criteria,
         )
 
@@ -344,7 +344,7 @@ class TestSendTpToDatahub(TestCase):
         TargetingCriteriaRuleFactory.create_batch(50, targeting_criteria=targeting_criteria)
         target_population = TargetPopulationFactory(
             program=program,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_PROCESSING,
             candidate_list_targeting_criteria=targeting_criteria,
         )
 
