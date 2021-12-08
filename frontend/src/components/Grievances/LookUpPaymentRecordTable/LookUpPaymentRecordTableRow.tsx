@@ -8,7 +8,7 @@ import {
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
-import { ClickableTableRow } from '../../table/ClickableTableRow';
+import { ClickableTableRow } from '../../Table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import { BlackLink } from '../../BlackLink';
 

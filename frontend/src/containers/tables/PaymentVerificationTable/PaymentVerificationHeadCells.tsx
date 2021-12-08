@@ -1,4 +1,4 @@
-import { HeadCell } from '../../../components/table/EnhancedTableHead';
+import { HeadCell } from '../../../components/Table/EnhancedTableHead';
 import { AllCashPlansQuery } from '../../../__generated__/graphql';
 
 export const headCells: HeadCell<

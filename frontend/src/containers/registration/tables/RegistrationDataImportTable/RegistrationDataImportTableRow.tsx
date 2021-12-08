@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import React from 'react';
 import { RegistrationDataImportNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { ClickableTableRow } from '../../../../components/Table/ClickableTableRow';
 import { StatusBox } from '../../../../components/StatusBox';
 import { registrationDataImportStatusToColor } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/UniversalMoment';

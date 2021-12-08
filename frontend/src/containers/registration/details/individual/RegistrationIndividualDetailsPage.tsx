@@ -6,7 +6,7 @@ import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { PageHeader } from '../../../../components/PageHeader';
 import { PermissionDenied } from '../../../../components/PermissionDenied';
-import { ImportedIndividualPhotoModal } from '../../../../components/population/ImportedIndividualPhotoModal';
+import { ImportedIndividualPhotoModal } from '../../../../components/Population/ImportedIndividualPhotoModal';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
