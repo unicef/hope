@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
 import { PermissionDenied } from '../../components/PermissionDenied';
-import { IndividualsFilter } from '../../components/population/IndividualsFilter';
+import { IndividualsFilter } from '../../components/Population/IndividualsFilter';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
