@@ -90,6 +90,7 @@ class RdiMergeTask:
         "returnee",
         "fchild_hoh",
         "child_hoh",
+        "kobo_asset_id",
     )
 
     INDIVIDUAL_FIELDS = (
