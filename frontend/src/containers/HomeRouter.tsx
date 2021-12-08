@@ -8,7 +8,7 @@ import { MiśTheme } from '../theme';
 import { Drawer } from '../components/Drawer/Drawer';
 import { AppBar } from '../components/AppBar';
 import { useSnackbar } from '../hooks/useSnackBar';
-import { GrievanceDetailsPage } from '../components/Grievances/GrievanceDetailsPage';
+import { GrievanceDetailsPage } from '../components/Grievances/GrievancesDetailsPage/GrievanceDetailsPage';
 import { GrievancesTablePage } from '../components/Grievances/GrievancesTablePage';
 import { CreateGrievancePage } from '../components/Grievances/CreateGrievancePage';
 import { EditGrievancePage } from '../components/Grievances/EditGrievancePage';
