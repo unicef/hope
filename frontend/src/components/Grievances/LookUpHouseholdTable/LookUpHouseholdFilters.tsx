@@ -23,7 +23,7 @@ import {
 } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
 import { FieldLabel } from '../../FieldLabel';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../../Population/AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -186,7 +186,7 @@ export function LookUpHouseholdFilters({
           </StyledFormControl>
         </Grid>
         <Grid item>
-          <AdminAreasAutocomplete
+          <AdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}

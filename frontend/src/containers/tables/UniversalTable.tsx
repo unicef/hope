@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { LoadingComponent } from '../../components/LoadingComponent';
-import { HeadCell } from '../../components/table/EnhancedTableHead';
-import { Order, TableComponent } from '../../components/table/TableComponent';
+import { HeadCell } from '../../components/Table/EnhancedTableHead';
+import { Order, TableComponent } from '../../components/Table/TableComponent';
 import { columnToOrderBy } from '../../utils/utils';
 
 interface UniversalTableProps<T, K> {
