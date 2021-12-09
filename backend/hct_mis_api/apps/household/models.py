@@ -314,6 +314,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             "collect_individual_data",
             "currency",
             "unhcr_id",
+            "kobo_asset_id",
         ]
     )
     withdrawn = models.BooleanField(default=False, db_index=True)
@@ -393,6 +394,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
 
     class Meta:
         verbose_name = "Household"
