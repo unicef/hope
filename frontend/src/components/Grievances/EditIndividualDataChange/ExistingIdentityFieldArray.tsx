@@ -4,7 +4,7 @@ import React from 'react';
 import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
-} from '../../__generated__/graphql';
+} from '../../../__generated__/graphql';
 import { EditIdentityRow } from './EditIdentityRow';
 
 export interface ExistingIdentityFieldArrayProps {

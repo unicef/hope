@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
-import { GrievanceDocumentPhotoModalEditable } from './GrievanceDocumentPhotoModalEditable';
+import { GrievanceDocumentPhotoModalEditable } from './GrievancesPhotoModals/GrievanceDocumentPhotoModalEditable';
 
 export interface DocumentFieldProps {
   index: number;

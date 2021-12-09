@@ -10,7 +10,7 @@ import {
   useApproveHouseholdDataChangeMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../ConfirmationDialog';
-import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable';
+import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 
 const StyledBox = styled(Paper)`
   display: flex;

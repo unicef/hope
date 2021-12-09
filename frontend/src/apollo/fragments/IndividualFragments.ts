@@ -160,6 +160,9 @@ export const individualDetailed = gql`
       id
       headOfHousehold {
         id
+        givenName
+        familyName
+        fullName
       }
     }
     flexFields

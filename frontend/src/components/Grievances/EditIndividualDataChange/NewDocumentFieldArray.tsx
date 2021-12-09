@@ -4,41 +4,44 @@ import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
-import { AgencyField } from './AgencyField';
+import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import { DocumentField } from '../DocumentField';
 
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
 `;
 
-export interface NewIdentityFieldArrayProps {
+export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
   values;
+  setFieldValue;
 }
 
-export function NewIdentityFieldArray({
+export function NewDocumentFieldArray({
   addIndividualFieldsData,
   values,
-}: NewIdentityFieldArrayProps): React.ReactElement {
+  setFieldValue,
+}: NewDocumentFieldArrayProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name='individualDataUpdateFieldsIdentities'
+        name='individualDataUpdateFieldsDocuments'
         render={(arrayHelpers) => {
           return (
             <>
-              {values.individualDataUpdateFieldsIdentities?.map(
+              {values.individualDataUpdateFieldsDocuments?.map(
                 (item, index) => (
-                  <AgencyField
+                  <DocumentField
                     index={index}
-                    key={`${index}-${item?.country}-${item?.agency}`}
+                    key={`${index}-${item?.country}-${item?.type}`}
                     onDelete={() => arrayHelpers.remove(index)}
                     countryChoices={addIndividualFieldsData.countriesChoices}
-                    identityTypeChoices={
-                      addIndividualFieldsData.identityTypeChoices
+                    documentTypeChoices={
+                      addIndividualFieldsData.documentTypeChoices
                     }
-                    baseName='individualDataUpdateFieldsIdentities'
+                    baseName='individualDataUpdateFieldsDocuments'
+                    setFieldValue={setFieldValue}
                   />
                 ),
               )}
@@ -50,13 +53,13 @@ export function NewIdentityFieldArray({
                   onClick={() => {
                     arrayHelpers.push({
                       country: null,
-                      agency: null,
+                      type: null,
                       number: '',
                     });
                   }}
                 >
                   <AddIcon />
-                  {t('Add Identity')}
+                  {t('Add Document')}
                 </Button>
               </Grid>
             </>
