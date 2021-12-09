@@ -12,7 +12,7 @@ import {
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../ConfirmationDialog';
-import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
+import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
 
 const StyledBox = styled(Paper)`
   display: flex;

@@ -1,12 +1,12 @@
 import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FormikFileField } from '../../shared/Formik/FormikFileField';
+import { FormikFileField } from '../../../shared/Formik/FormikFileField';
 import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
-} from '../../__generated__/graphql';
-import { PhotoModal } from '../PhotoModal/PhotoModal';
+} from '../../../__generated__/graphql';
+import { PhotoModal } from '../../PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalEditableProps {
   flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];

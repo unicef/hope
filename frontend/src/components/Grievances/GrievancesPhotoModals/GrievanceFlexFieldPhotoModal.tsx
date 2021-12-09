@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom';
 import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
-} from '../../__generated__/graphql';
-import { PhotoModal } from '../PhotoModal/PhotoModal';
+} from '../../../__generated__/graphql';
+import { PhotoModal } from '../../PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
