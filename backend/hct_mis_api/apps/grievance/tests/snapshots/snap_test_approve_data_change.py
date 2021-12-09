@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestGrievanceApproveDataChangeMutation::test_approve_add_individual_0_with_permission 1'] = {
@@ -105,6 +104,25 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individua
                                 }
                             }
                         ],
+                        'documents_to_edit': [
+                            {
+                                'approve_status': True,
+                                'previous_value': {
+                                    'country': 'POL',
+                                    'id': 'RG9jdW1lbnROb2RlOmRmMWNlNmU4LTI4NjQtNGMzZi04MDNkLTE5ZWM2ZjRjNDdmMw==',
+                                    'number': '789-789-645',
+                                    'photo': '',
+                                    'type': 'NATIONAL_ID'
+                                },
+                                'value': {
+                                    'country': None,
+                                    'id': 'RG9jdW1lbnROb2RlOmRmMWNlNmU4LTI4NjQtNGMzZi04MDNkLTE5ZWM2ZjRjNDdmMw==',
+                                    'number': '999-888-666',
+                                    'photo': '',
+                                    'type': None
+                                }
+                            }
+                        ],
                         'documents_to_remove': [
                             {
                                 'approve_status': True,
@@ -153,7 +171,7 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individua
             'locations': [
                 {
                     'column': 7,
-                    'line': 11
+                    'line': 13
                 }
             ],
             'message': 'Permission Denied: User does not have correct permission.',

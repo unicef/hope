@@ -30,6 +30,7 @@ export function DocumentField({
   photoSrc,
 }: DocumentFieldProps): React.ReactElement {
   const { t } = useTranslation();
+
   return (
     <>
       <Grid item xs={3}>
