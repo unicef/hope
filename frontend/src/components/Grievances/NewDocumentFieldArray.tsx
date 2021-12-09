@@ -14,11 +14,13 @@ const AddIcon = styled(AddCircleOutline)`
 export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
   values;
+  setFieldValue;
 }
 
 export function NewDocumentFieldArray({
   addIndividualFieldsData,
   values,
+  setFieldValue,
 }: NewDocumentFieldArrayProps): React.ReactElement {
   const { t } = useTranslation();
   return (
@@ -39,6 +41,7 @@ export function NewDocumentFieldArray({
                       addIndividualFieldsData.documentTypeChoices
                     }
                     baseName='individualDataUpdateFieldsDocuments'
+                    setFieldValue={setFieldValue}
                   />
                 ),
               )}

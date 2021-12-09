@@ -1,5 +1,7 @@
 from datetime import date
+from unittest import mock
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 from django_countries.fields import Country
@@ -37,7 +39,10 @@ from hct_mis_api.apps.household.models import (
     RELATIONSHIP_UNKNOWN,
     ROLE_PRIMARY,
     SINGLE,
+    UNHCR,
+    Agency,
     DocumentType,
+    IndividualIdentity,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -237,6 +242,19 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         PositiveFeedbackTicketWithoutExtrasFactory(ticket=self.positive_feedback_grievance_ticket)
 
+        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
+        self.identity_to_update = IndividualIdentity.objects.create(
+            agency=unhcr_agency,
+            individual=self.individuals[0],
+            number="1111",
+        )
+
+        self.identity_to_remove = IndividualIdentity.objects.create(
+            agency=unhcr_agency,
+            individual=self.individuals[0],
+            number="3456",
+        )
+
     @parameterized.expand(
         [
             (
@@ -250,6 +268,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
+    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_update_add_individual(self, name, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.add_individual_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
@@ -275,7 +294,19 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "maritalStatus": SINGLE,
                             "role": ROLE_PRIMARY,
                             "documents": [
-                                {"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "USA", "number": "321-321-UX-321"}
+                                {
+                                    "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                    "country": "USA",
+                                    "number": "321-321-UX-321",
+                                    "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                }
+                            ],
+                            "identities": [
+                                {
+                                    "agency": UNHCR,
+                                    "country": "POL",
+                                    "number": "2222",
+                                }
                             ],
                         }
                     }
@@ -294,7 +325,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             expected_result = {
                 "sex": "MALE",
                 "role": "PRIMARY",
-                "documents": [{"type": "NATIONAL_ID", "number": "321-321-UX-321", "country": "USA"}],
+                "documents": [
+                    {"type": "NATIONAL_ID", "number": "321-321-UX-321", "country": "USA", "photo": "test_file_name.jpg"}
+                ],
+                "identities": [{"agency": "UNHCR", "country": "POL", "number": "2222"}],
                 "full_name": "John Example",
                 "birth_date": "1981-02-02",
                 "given_name": "John",
@@ -340,6 +374,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             ("without_permission", []),
         ]
     )
+    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_update_change_individual(self, name, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.individual_data_change_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
@@ -365,9 +400,29 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "maritalStatus": SINGLE,
                             "role": ROLE_PRIMARY,
                             "documents": [
-                                {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "111-222-777"},
+                                {
+                                    "country": "POL",
+                                    "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                    "number": "111-222-777",
+                                    "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                },
                             ],
                             "documentsToRemove": [],
+                            "identities": [
+                                {
+                                    "agency": UNHCR,
+                                    "country": "POL",
+                                    "number": "2222",
+                                }
+                            ],
+                            "identitiesToEdit": [
+                                {
+                                    "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
+                                    "agency": UNHCR,
+                                    "country": "POL",
+                                    "number": "3333",
+                                }
+                            ],
                         }
                     }
                 },
@@ -386,17 +441,47 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "role": {"value": "PRIMARY", "approve_status": False, "previous_value": "NO_ROLE"},
                 "documents": [
                     {
-                        "value": {"type": "NATIONAL_ID", "number": "111-222-777", "country": "POL"},
+                        "value": {
+                            "type": "NATIONAL_ID",
+                            "number": "111-222-777",
+                            "country": "POL",
+                            "photo": "test_file_name.jpg",
+                        },
                         "approve_status": False,
-                    }
+                    },
+                ],
+                "identities": [
+                    {
+                        "value": {"agency": "UNHCR", "number": "2222", "country": "POL"},
+                        "approve_status": False,
+                    },
+                ],
+                "identities_to_edit": [
+                    {
+                        "value": {
+                            "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
+                            "agency": "UNHCR",
+                            "number": "3333",
+                            "country": "POL",
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                        },
+                        "previous_value": {
+                            "id": self.id_to_base64(self.identity_to_update.id, "IndividualIdentityNode"),
+                            "agency": "UNHCR",
+                            "number": "1111",
+                            "country": "POL",
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                        },
+                        "approve_status": False,
+                    },
                 ],
                 "full_name": {"value": "John Example", "approve_status": False, "previous_value": "Benjamin Butler"},
                 "birth_date": {"value": "1962-12-21", "approve_status": False, "previous_value": "1943-07-30"},
                 "given_name": {"value": "John", "approve_status": False, "previous_value": "Benjamin"},
-                "identities": [],
                 "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
                 "flex_fields": {},
                 "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
+                "documents_to_edit": [],
                 "previous_documents": {},
                 "documents_to_remove": [],
                 "previous_identities": {},
