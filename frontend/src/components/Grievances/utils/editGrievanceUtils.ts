@@ -7,8 +7,8 @@ import {
 import { thingForSpecificGrievanceType } from '../../../utils/utils';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
-import { EditIndividualDataChange } from '../EditIndividualDataChange';
-import { EditHouseholdDataChange } from '../EditHouseholdDataChange';
+import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
+import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
 
 interface EditValuesTypes {
   description?: string;
@@ -67,15 +67,17 @@ function prepareInitialValueEditIndividual(
   };
   const documents = individualData?.documents;
   const documentsToRemove = individualData.documents_to_remove;
-  const documentsEdited = individualData?.documents_edited;
+  const documentsEdited = individualData?.documents_to_edit;
   const identities = individualData?.identities;
   const identitiesToRemove = individualData?.identities_to_remove;
-  const identitiesEdited = individualData?.identities_edited;
+  const identitiesEdited = individualData?.identities_to_edit;
   const flexFields = individualData.flex_fields;
   delete individualData.documents;
   delete individualData.documents_to_remove;
+  delete individualData.documents_to_edit;
   delete individualData.identities;
   delete individualData.identities_to_remove;
+  delete individualData.identities_to_edit;
   delete individualData.previous_documents;
   delete individualData.previous_identities;
   delete individualData.flex_fields;
