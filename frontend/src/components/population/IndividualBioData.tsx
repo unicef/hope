@@ -86,15 +86,15 @@ export function IndividualsBioData({
     </Grid>
   ));
 
-  const mappedIdentities = individual.identities?.map((item) => (
-    <Grid item xs={3} key={item.id}>
+  const mappedIdentities = individual.identities?.edges?.map((item) => (
+    <Grid item xs={3} key={item.node.id}>
       <Box flexDirection='column'>
         <Box mb={1}>
-          <LabelizedField label={`${item.type} ID`}>
-            {item.number}
+          <LabelizedField label={`${item.node.type} ID`}>
+            {item.node.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label='issued'>{item.country}</LabelizedField>
+        <LabelizedField label='issued'>{item.node.country}</LabelizedField>
       </Box>
     </Grid>
   ));
