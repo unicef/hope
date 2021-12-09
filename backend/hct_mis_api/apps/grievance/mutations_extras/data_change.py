@@ -26,7 +26,13 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     handle_add_document,
     handle_add_identity,
+    handle_document,
+    handle_documents,
+    handle_edit_document,
+    handle_edit_identity,
     handle_role,
+    prepare_edit_documents,
+    prepare_edit_identities,
     prepare_previous_documents,
     prepare_previous_identities,
     reassign_roles_on_update,
@@ -99,9 +105,25 @@ class IndividualDocumentObjectType(graphene.InputObjectType):
     country = graphene.String(required=True)
     type = graphene.String(required=True)
     number = graphene.String(required=True)
+    photo = Arg()
+
+
+class EditIndividualDocumentObjectType(graphene.InputObjectType):
+    id = graphene.Field(graphene.ID, required=True)
+    country = graphene.String(required=True)
+    type = graphene.String(required=True)
+    number = graphene.String(required=True)
+    photo = Arg()
 
 
 class IndividualIdentityObjectType(graphene.InputObjectType):
+    country = graphene.String(required=True)
+    agency = graphene.String(required=True)
+    number = graphene.String(required=True)
+
+
+class EditIndividualIdentityObjectType(graphene.InputObjectType):
+    id = graphene.Field(graphene.ID, required=True)
     country = graphene.String(required=True)
     agency = graphene.String(required=True)
     number = graphene.String(required=True)
@@ -137,8 +159,10 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     role = graphene.String()
     documents = graphene.List(IndividualDocumentObjectType)
     documents_to_remove = graphene.List(graphene.ID)
+    documents_to_edit = graphene.List(EditIndividualDocumentObjectType)
     identities = graphene.List(IndividualIdentityObjectType)
     identities_to_remove = graphene.List(graphene.ID)
+    identities_to_edit = graphene.List(EditIndividualIdentityObjectType)
     flex_fields = Arg()
 
 
@@ -318,10 +342,15 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     individual_data = individual_data_update_issue_type_extras.get("individual_data", {})
+
     documents = individual_data.pop("documents", [])
     documents_to_remove = individual_data.pop("documents_to_remove", [])
+    documents_to_edit = individual_data.pop("documents_to_edit", [])
+
     identities = individual_data.pop("identities", [])
     identities_to_remove = individual_data.pop("identities_to_remove", [])
+    identities_to_edit = individual_data.pop("identities_to_edit", [])
+
     to_phone_number_str(individual_data, "phone_no")
     to_phone_number_str(individual_data, "phone_no_alternative")
     to_date_string(individual_data, "birth_date")
@@ -342,7 +371,9 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
             current_value = individual.role
         individual_data_with_approve_status[field]["previous_value"] = current_value
 
-    documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
+    documents_with_approve_status = [
+        {"value": handle_document(document), "approve_status": False} for document in documents
+    ]
     documents_to_remove_with_approve_status = [
         {"value": document_id, "approve_status": False} for document_id in documents_to_remove
     ]
@@ -354,10 +385,15 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
         field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
         for field, value in flex_fields.items()
     }
+
     individual_data_with_approve_status["documents"] = documents_with_approve_status
     individual_data_with_approve_status["documents_to_remove"] = documents_to_remove_with_approve_status
+    individual_data_with_approve_status["documents_to_edit"] = prepare_edit_documents(documents_to_edit)
+
     individual_data_with_approve_status["identities"] = identities_with_approve_status
     individual_data_with_approve_status["identities_to_remove"] = identities_to_remove_with_approve_status
+    individual_data_with_approve_status["identities_to_edit"] = prepare_edit_identities(identities_to_edit)
+
     individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
 
     individual_data_with_approve_status["previous_documents"] = prepare_previous_documents(
@@ -383,10 +419,15 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
 
     individual = ticket_details.individual
     new_individual_data = individual_data_update_extras.get("individual_data", {})
+
     documents = new_individual_data.pop("documents", [])
     documents_to_remove = new_individual_data.pop("documents_to_remove", [])
+    documents_to_edit = new_individual_data.pop("documents_to_edit", [])
+
     identities = new_individual_data.pop("identities", [])
     identities_to_remove = new_individual_data.pop("identities_to_remove", [])
+    identities_to_edit = new_individual_data.pop("identities_to_edit", [])
+
     flex_fields = {to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()}
 
     to_phone_number_str(new_individual_data, "phone_no")
@@ -409,7 +450,9 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
             current_value = individual.role
         individual_data_with_approve_status[field]["previous_value"] = current_value
 
-    documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
+    documents_with_approve_status = [
+        {"value": handle_document(document), "approve_status": False} for document in documents
+    ]
     documents_to_remove_with_approve_status = [
         {"value": document_id, "approve_status": False} for document_id in documents_to_remove
     ]
@@ -421,18 +464,22 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
         field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
         for field, value in flex_fields.items()
     }
+
     individual_data_with_approve_status["documents"] = documents_with_approve_status
     individual_data_with_approve_status["documents_to_remove"] = documents_to_remove_with_approve_status
-    individual_data_with_approve_status["identities"] = identities_with_approve_status
-    individual_data_with_approve_status["identities_to_remove"] = identities_to_remove_with_approve_status
-    individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
-
+    individual_data_with_approve_status["documents_to_edit"] = prepare_edit_documents(documents_to_edit)
     individual_data_with_approve_status["previous_documents"] = prepare_previous_documents(
         documents_to_remove_with_approve_status
     )
+
+    individual_data_with_approve_status["identities"] = identities_with_approve_status
+    individual_data_with_approve_status["identities_to_remove"] = identities_to_remove_with_approve_status
+    individual_data_with_approve_status["identities_to_edit"] = prepare_edit_identities(identities_to_edit)
     individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
         identities_to_remove_with_approve_status
     )
+
+    individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
 
     ticket_details.individual_data = individual_data_with_approve_status
     ticket_details.save()
@@ -464,6 +511,9 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
     individual_data = add_individual_issue_type_extras.get("individual_data", {})
+
+    documents = individual_data.pop("documents", [])
+
     to_phone_number_str(individual_data, "phone_no")
     to_phone_number_str(individual_data, "phone_no_alternative")
     to_date_string(individual_data, "birth_date")
@@ -472,6 +522,9 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     verify_flex_fields(flex_fields, "individuals")
     save_images(flex_fields, "individuals")
     individual_data["flex_fields"] = flex_fields
+
+    individual_data["documents"] = handle_documents(documents)
+
     ticket_add_individual_details = TicketAddIndividualDetails(
         individual_data=individual_data,
         household=household,
@@ -487,6 +540,9 @@ def update_add_individual_extras(root, info, input, grievance_ticket, extras, **
     new_add_individual_extras = extras.get("add_individual_issue_type_extras")
 
     new_individual_data = new_add_individual_extras.get("individual_data", {})
+
+    documents = new_individual_data.pop("documents", [])
+
     to_phone_number_str(new_individual_data, "phone_no")
     to_phone_number_str(new_individual_data, "phone_no_alternative")
     to_date_string(new_individual_data, "birth_date")
@@ -495,6 +551,8 @@ def update_add_individual_extras(root, info, input, grievance_ticket, extras, **
     verify_flex_fields(flex_fields, "individuals")
     save_images(flex_fields, "individuals")
     new_individual_data["flex_fields"] = flex_fields
+
+    new_individual_data["documents"] = handle_documents(documents)
 
     ticket_details.individual_data = new_individual_data
     ticket_details.approve_status = False
@@ -579,6 +637,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     flex_fields = {
         field: data.get("value") for field, data in flex_fields_with_additional_data.items() if is_approved(data)
     }
+
     documents = individual_data.pop("documents", [])
     documents_to_remove_encoded = individual_data.pop("documents_to_remove", [])
     documents_to_remove = [
@@ -586,11 +645,14 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         for document_data in documents_to_remove_encoded
         if is_approved(document_data)
     ]
+    documents_to_edit = individual_data.pop("documents_to_edit", [])
+
     identities = individual_data.pop("identities", [])
     identities_to_remove_encoded = individual_data.pop("identities_to_remove", [])
     identities_to_remove = [
         identity_data["value"] for identity_data in identities_to_remove_encoded if is_approved(identity_data)
     ]
+    identities_to_edit = individual_data.pop("identities_to_edit", [])
 
     only_approved_data = {
         field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
@@ -627,16 +689,29 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         for document_data in documents
         if is_approved(document_data)
     ]
+    documents_to_update = [
+        handle_edit_document(document_data) for document_data in documents_to_edit if is_approved(document_data)
+    ]
+
     identities_to_create = [
         handle_add_identity(identity_data["value"], individual)
         for identity_data in identities
         if is_approved(identity_data)
     ]
+    identities_to_update = [
+        handle_edit_identity(identity_data) for identity_data in identities_to_edit if is_approved(identity_data)
+    ]
+
     Document.objects.bulk_create(documents_to_create)
+    Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo"])
     Document.objects.filter(id__in=documents_to_remove).delete()
+
     IndividualIdentity.objects.bulk_create(identities_to_create)
+    IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "agency"])
     IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
+
     new_individual.refresh_from_db()
+
     if new_individual.household:
         new_individual.household.recalculate_data()
     else:

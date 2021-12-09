@@ -32,7 +32,10 @@ export const GrievanceDocumentPhotoModalEditable = ({
         <PhotoModal
           src={picUrl}
           variant='pictureClose'
-          closeHandler={() => setEdit(true)}
+          closeHandler={() => {
+            setEdit(true);
+            setFieldValue(fieldName, null);
+          }}
           showRotate={false}
         />
       )}
