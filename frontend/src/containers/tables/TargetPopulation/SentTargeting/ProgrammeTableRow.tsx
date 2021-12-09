@@ -6,6 +6,7 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/Table/ClickableTableRow';
 import { AnonTableCell } from '../../../../components/Table/AnonTableCell';
 import { BlackLink } from '../../../../components/BlackLink';
+import { renderIndividualName } from '../../../../utils/utils';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
@@ -36,7 +37,9 @@ export function ProgrammeTableRow({
           household.unicefId
         )}
       </TableCell>
-      <AnonTableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</AnonTableCell>
+      <AnonTableCell align='left'>
+        {renderIndividualName(household.headOfHousehold)}
+      </AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>

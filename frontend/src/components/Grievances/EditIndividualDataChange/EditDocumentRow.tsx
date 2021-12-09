@@ -7,10 +7,10 @@ import styled from 'styled-components';
 import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
-} from '../../__generated__/graphql';
-import { LabelizedField } from '../LabelizedField';
-import { PhotoModal } from '../PhotoModal/PhotoModal';
-import { DocumentField } from './DocumentField';
+} from '../../../__generated__/graphql';
+import { LabelizedField } from '../../LabelizedField';
+import { PhotoModal } from '../../PhotoModal/PhotoModal';
+import { DocumentField } from '../DocumentField';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
