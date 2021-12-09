@@ -27,10 +27,9 @@ from django.forms import EmailField, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
@@ -38,18 +37,19 @@ import requests
 from admin_extra_urls.api import ExtraUrlMixin, button
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import AllValuesComboFilter, RelatedFieldComboFilter
+from adminfilters.filters import AllValuesComboFilter
 from constance import config
-from hijack.contrib.admin import HijackUserAdminMixin
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 from smart_admin.decorators import smart_register
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm, KoboLoginForm
+from hct_mis_api.apps.account.forms import AddRoleForm, ImportCSVForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, User, UserRole
+from hct_mis_api.apps.account.models import IncompatibleRoles, Partner, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
@@ -872,12 +872,19 @@ class PermissionFilter(SimpleListFilter):
         return queryset.filter(permissions__contains=[self.value()])
 
 
+class RoleResource(resources.ModelResource):
+    class Meta:
+        model = account_models.Role
+
+
 @admin.register(account_models.Role)
-class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class RoleAdmin(ImportExportModelAdmin, ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
     list_filter = (PermissionFilter, "subsystem")
+    resource_class = RoleResource
+    change_list_template = "admin/account/role/change_list.html"
 
     @button()
     def members(self, request, pk):
