@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     EntitlementCard,
     Household,
     Individual,
+    IndividualIdentity,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -123,6 +124,13 @@ class DocumentFactory(factory.DjangoModelFactory):
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
     type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by("?").first())
+
+
+class IndividualIdentityFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = IndividualIdentity
+
+    number = factory.Faker("pystr", min_chars=None, max_chars=20)
 
 
 class IndividualFactory(factory.DjangoModelFactory):

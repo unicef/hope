@@ -294,6 +294,9 @@ class IndividualIdentityNode(DjangoObjectType):
 
     class Meta:
         model = IndividualIdentity
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class DocumentNode(DjangoObjectType):
