@@ -1,6 +1,6 @@
 import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
-import { PhotoModal } from '../PhotoModal/PhotoModal';
+import { PhotoModal } from '../../PhotoModal/PhotoModal';
 
 interface GrievanceDocumentPhotoModalProps {
   photoSrc: string;

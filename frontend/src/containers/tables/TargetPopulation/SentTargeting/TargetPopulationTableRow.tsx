@@ -3,8 +3,8 @@ import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/Table/ClickableTableRow';
-import { decodeIdString } from '../../../../utils/utils';
+import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { decodeIdString, renderIndividualName } from '../../../../utils/utils';
 import { BlackLink } from '../../../../components/BlackLink';
 
 interface TargetPopulationHouseholdTableRowProps {
@@ -35,7 +35,9 @@ export function TargetPopulationHouseholdTableRow({
           decodeIdString(household.id)
         )}
       </TableCell>
-      <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</TableCell>
+      <TableCell align='left'>
+        {renderIndividualName(household.headOfHousehold)}
+      </TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>-</TableCell>
       <TableCell align='left'>{household.address}</TableCell>
