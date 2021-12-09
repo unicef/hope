@@ -3,7 +3,7 @@ import re
 from datetime import date, datetime
 
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
-from django.contrib.postgres.fields import CICharField, JSONField
+from django.contrib.postgres.fields import CICharField, JSONField, ArrayField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.db.models import F, Sum
@@ -1006,4 +1006,14 @@ class EntitlementCard(TimeStampedUUIDModel):
         related_name="entitlement_cards",
         on_delete=models.SET_NULL,
         null=True,
+    )
+
+
+class XlsxUpdateFile(TimeStampedUUIDModel):
+    file = models.FileField()
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
+    xlsx_match_columns = ArrayField(
+        models.CharField(max_length=32),
+        null=True
     )
