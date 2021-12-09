@@ -99,8 +99,11 @@ export function TargetPopulationFilters({
               <MenuItem value=''>{TARGETING_STATES.NONE}</MenuItem>
               <MenuItem value='DRAFT'>{TARGETING_STATES.DRAFT}</MenuItem>
               <MenuItem value='LOCKED'>{TARGETING_STATES.LOCKED}</MenuItem>
-              <MenuItem value='FINALIZED'>
-                {TARGETING_STATES.FINALIZED}
+              <MenuItem value='PROCESSING'>
+                {TARGETING_STATES.PROCESSING}
+              </MenuItem>
+              <MenuItem value='READY_FOR_CASH_ASSIST'>
+                {TARGETING_STATES.READY_FOR_CASH_ASSIST}
               </MenuItem>
             </Select>
           </StyledFormControl>
