@@ -11,9 +11,9 @@ variables:
   # ========================================================================
   Docker.backend.filePath: "**/backend/Dockerfile"
   Docker.frontend.filePath: "**/frontend/Dockerfile"
-  Docker.backend.repository: "hope-backend"
-  Docker.frontend.repository: "hope-frontend"
-  Docker.registry: "ICTD-HOPE-DEV-ACR"
+  Docker.registry: "ICTD-HOPE-PRD-ACR"
+  Docker.repository: "uniappsakshope"
+  Docker.url: "uniappsakshope.azurecr.io"
   Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
   Kubernetes.namespace: "ictd-hope-dev"
 
@@ -31,7 +31,7 @@ stages:
             inputs:
               command: buildAndPush
               dockerfile: $(Docker.backend.filePath)
-              repository: $(Docker.backend.repository)
+              repository: $(Docker.repository)
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
@@ -45,7 +45,7 @@ stages:
           vmImage: ubuntu-latest
         displayName: "[DJANGO TEST]"
         variables:
-          backend_image: ICTD-HOPE-DEV-ACR.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
+          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
@@ -71,7 +71,7 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
               dockerComposeFileArgs: |
-               backend_image=ICTD-HOPE-DEV-ACR.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
+               backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.BuildId)
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
