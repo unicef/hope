@@ -1,33 +1,38 @@
 from datetime import date
-from parameterized import parameterized
 
 from django.core.management import call_command
+
 from django_countries.fields import Country
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-    TicketHouseholdDataUpdateDetailsFactory,
     TicketDeleteIndividualDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, DocumentFactory
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
-    SINGLE,
-    Individual,
-    ROLE_PRIMARY,
+    HEAD,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
+    ROLE_PRIMARY,
+    SINGLE,
     Document,
     DocumentType,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    Individual,
     IndividualRoleInHousehold,
-    HEAD,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -57,8 +62,8 @@ class TestCloseDataChangeTickets(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type,p_code="sfds323")
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type,p_code="sfds3dgg23")
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sfds323")
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sfds3dgg23")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -161,7 +166,14 @@ class TestCloseDataChangeTickets(APITestCase):
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "role": ROLE_PRIMARY,
-                "documents": [{"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "POL", "number": "123-123-UX-321"}],
+                "documents": [
+                    {
+                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                        "country": "POL",
+                        "number": "123-123-UX-321",
+                        "photo": "test_file_name.jpg",
+                    }
+                ],
             },
             approve_status=True,
         )
@@ -187,7 +199,12 @@ class TestCloseDataChangeTickets(APITestCase):
                 "role": {"value": ROLE_PRIMARY, "approve_status": True},
                 "documents": [
                     {
-                        "value": {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "999-888-777"},
+                        "value": {
+                            "country": "POL",
+                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "number": "999-888-777",
+                            "photo": "test_file_name.jpg",
+                        },
                         "approve_status": True,
                     },
                 ],
@@ -269,6 +286,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
             document = Document.objects.get(document_number="123-123-UX-321")
             self.assertEqual(document.type.country, Country("POL"))
+            self.assertEqual(document.photo, "test_file_name.jpg")
 
             role = created_individual.households_and_roles.get(
                 role=ROLE_PRIMARY, household=self.household_one, individual=created_individual
@@ -312,6 +330,7 @@ class TestCloseDataChangeTickets(APITestCase):
             document = Document.objects.get(document_number="999-888-777")
             self.assertEqual(document.type.country, Country("POL"))
             self.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
+            self.assertEqual(document.photo, "test_file_name.jpg")
 
             self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
             self.assertTrue(Document.objects.filter(id=self.birth_certificate.id).exists())
@@ -319,6 +338,69 @@ class TestCloseDataChangeTickets(APITestCase):
             self.assertEqual(individual.given_name, "Benjamin")
             self.assertEqual(individual.full_name, "Benjamin Butler")
             self.assertEqual(individual.family_name, "Butler")
+
+    def test_close_update_individual_document_photo(self):
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+        )
+
+        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        national_id = DocumentFactory(
+            type=national_id_type,
+            document_number="999-888-777",
+            individual=self.individuals[0],
+            photo="test_file_name.jpg",
+        )
+
+        grievance_ticket = GrievanceTicketFactory(
+            id="32c3ae7d-fb39-4d69-8559-9d0fa4284790",
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+            admin2=self.admin_area_1,
+            business_area=self.business_area,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=grievance_ticket,
+            individual=self.individuals[0],
+            individual_data={
+                "documents_to_edit": [
+                    {
+                        "value": {
+                            "id": self.id_to_base64(national_id.id, "DocumentNode"),
+                            "country": "POL",
+                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "number": "999-888-777",
+                            "photo": "new_test_file_name.jpg",
+                        },
+                        "previous_value": {
+                            "id": self.id_to_base64(national_id.id, "DocumentNode"),
+                            "country": "POL",
+                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "number": "999-888-777",
+                            "photo": "test_file_name.jpg",
+                        },
+                        "approve_status": True,
+                    },
+                ],
+            },
+        )
+
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(grievance_ticket.id, "GrievanceTicketNode"),
+                "status": GrievanceTicket.STATUS_CLOSED,
+            },
+        )
+        individual = self.individuals[0]
+        individual.refresh_from_db()
+
+        document = Document.objects.get(document_number="999-888-777")
+        self.assertEqual(document.type.country, Country("POL"))
+        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
+        self.assertEqual(document.photo.name, "new_test_file_name.jpg")
 
     @parameterized.expand(
         [
@@ -362,7 +444,7 @@ class TestCloseDataChangeTickets(APITestCase):
             },
         )
         if should_close:
-            ind =Individual.objects.filter(id=self.individuals_household_two[0].id).first()
+            ind = Individual.objects.filter(id=self.individuals_household_two[0].id).first()
             ind.refresh_from_db()
             self.assertTrue(ind.withdrawn)
             changed_role_exists = IndividualRoleInHousehold.objects.filter(
