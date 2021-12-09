@@ -90,9 +90,10 @@ export function EditTargetPopulation({
     name: Yup.string()
       .min(2, 'Too short')
       .max(255, 'Too long'),
-    excludedIds: Yup.string()
-      .max(500, t('Too long'))
-      .test('testName', 'ID is not in the correct format', (ids) => {
+    excludedIds: Yup.string().test(
+      'testName',
+      'ID is not in the correct format',
+      (ids) => {
         if (!ids?.length) {
           return true;
         }
@@ -100,7 +101,8 @@ export function EditTargetPopulation({
         return idsArr.every((el) =>
           /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
         );
-      }),
+      },
+    ),
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 
