@@ -36,6 +36,8 @@ export const householdMinimal = gql`
     headOfHousehold {
       id
       fullName
+      givenName
+      familyName
     }
     address
     individuals {
