@@ -27,10 +27,10 @@ export function ExistingIdentityFieldArray({
         render={(arrayHelpers) => {
           return (
             <>
-              {individual?.identities?.map((item, index) => {
+              {individual?.identities?.edges?.map((item, index) => {
                 return (
                   <EditIdentityRow
-                    key={item.id}
+                    key={item.node.id}
                     setFieldValue={setFieldValue}
                     values={values}
                     identity={item}
