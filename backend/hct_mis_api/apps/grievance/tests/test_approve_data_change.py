@@ -1,27 +1,32 @@
 import json
 from datetime import date
-from parameterized import parameterized
 
 from django.core.management import call_command
+
 from django_countries.fields import Country
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
-    TicketIndividualDataUpdateDetailsFactory,
     TicketHouseholdDataUpdateDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, DocumentFactory
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
-    SINGLE,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    SINGLE,
     DocumentType,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -46,9 +51,11 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
       $grievanceTicketId: ID!, 
       $individualApproveData: JSONString,
       $flexFieldsApproveData: JSONString, 
-      $approvedDocumentsToCreate: [Int], 
+      $approvedDocumentsToCreate: [Int],
+      $approvedDocumentsToEdit: [Int],
       $approvedDocumentsToRemove: [Int],
       $approvedIdentitiesToCreate: [Int], 
+      $approvedIdentitiesToEdit: [Int], 
       $approvedIdentitiesToRemove: [Int]
     ) {
       approveIndividualDataChange(
@@ -56,8 +63,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         individualApproveData: $individualApproveData,
         flexFieldsApproveData: $flexFieldsApproveData,
         approvedDocumentsToCreate: $approvedDocumentsToCreate, 
+        approvedDocumentsToEdit: $approvedDocumentsToEdit, 
         approvedDocumentsToRemove: $approvedDocumentsToRemove,
         approvedIdentitiesToCreate: $approvedIdentitiesToCreate, 
+        approvedIdentitiesToEdit: $approvedIdentitiesToEdit, 
         approvedIdentitiesToRemove: $approvedIdentitiesToRemove
       ) {
         grievanceTicket {
@@ -212,6 +221,25 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                         "approve_status": False,
                     },
                 ],
+                "documents_to_edit": [
+                    {
+                        "value": {
+                            "id": self.id_to_base64(self.national_id.id, "DocumentNode"),
+                            "country": None,
+                            "type": None,
+                            "number": "999-888-666",
+                            "photo": "",
+                        },
+                        "previous_value": {
+                            "id": self.id_to_base64(self.national_id.id, "DocumentNode"),
+                            "country": "POL",
+                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "number": "789-789-645",
+                            "photo": "",
+                        },
+                        "approve_status": False,
+                    }
+                ],
                 "documents_to_remove": [
                     {"value": self.id_to_base64(self.national_id.id, "DocumentNode"), "approve_status": False},
                     {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
@@ -279,8 +307,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 ),
                 "individualApproveData": json.dumps({"givenName": True, "fullName": True, "familyName": True}),
                 "approvedDocumentsToCreate": [0],
+                "approvedDocumentsToEdit": [0],
                 "approvedDocumentsToRemove": [0],
                 "approvedIdentitiesToCreate": [],
+                "approvedIdentitiesToEdit": [],
                 "approvedIdentitiesToRemove": [],
                 "flexFieldsApproveData": json.dumps({}),
             },

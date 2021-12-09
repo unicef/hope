@@ -54,7 +54,6 @@ export const EditIndividualDataChangeField = ({
 }: EditIndividualDataChangeField): React.ReactElement => {
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
-
   let fieldProps;
   switch (field.type) {
     case 'DECIMAL':
@@ -226,7 +225,7 @@ export const EditIndividualDataChangeFieldRow = ({
     helpers.setValue(field?.isFlexField);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
-
+  if (!field) return null;
   return (
     <>
       <Grid item xs={4}>
@@ -388,6 +387,7 @@ export const EditIndividualDataChange = ({
         <NewDocumentFieldArray
           values={values}
           addIndividualFieldsData={addIndividualFieldsData}
+          setFieldValue={setFieldValue}
         />
       </Box>
       <Box mt={3}>
