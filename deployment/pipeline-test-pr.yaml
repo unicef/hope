@@ -13,6 +13,8 @@ variables:
   Docker.frontend.filePath: "**/frontend/Dockerfile"
   Docker.registry: "ICTD-HOPE-PRD-ACR"
   Docker.repository: "uniappsakshope"
+  Docker.backend.repository: "hope-backend"
+  Docker.frontend.repository: "hope-frontend"
   Docker.url: "uniappsakshope.azurecr.io"
   Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
   Kubernetes.namespace: "ictd-hope-dev"
@@ -31,7 +33,7 @@ stages:
             inputs:
               command: buildAndPush
               dockerfile: $(Docker.backend.filePath)
-              repository: $(Docker.repository)
+              repository: $(Docker.backend.repository)
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
