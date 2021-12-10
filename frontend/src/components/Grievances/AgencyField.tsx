@@ -29,23 +29,23 @@ export function AgencyField({
     <>
       <Grid item xs={4}>
         <Field
-          name={`${baseName}[${index}].country`}
-          fullWidth
-          variant='outlined'
-          label={t('Country')}
-          component={FormikSelectField}
-          choices={countryChoices}
-          required
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <Field
           name={`${baseName}[${index}].agency`}
           fullWidth
           variant='outlined'
           label={t('Agency')}
           component={FormikSelectField}
           choices={identityTypeChoices}
+          required
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <Field
+          name={`${baseName}[${index}].country`}
+          fullWidth
+          variant='outlined'
+          label={t('Country')}
+          component={FormikSelectField}
+          choices={countryChoices}
           required
         />
       </Grid>

@@ -1,55 +1,51 @@
 from datetime import date
 
+from django.db.models import Prefetch, Q
+from django.db.models.functions import Lower
+
 import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from django.db.models import Q, Prefetch
-from django.db.models.functions import Lower
-from django_filters import (
-    FilterSet,
-    OrderingFilter,
-    CharFilter,
-    BooleanFilter,
-)
+from django_filters import BooleanFilter, CharFilter, FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
+    BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
-    BaseNodePermissionMixin,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    decode_id_string,
-    to_choice_object,
-    encode_ids,
     CustomOrderingFilter,
-    resolve_flex_fields_choices_to_string,
+    decode_id_string,
+    encode_ids,
     get_model_choices_fields,
+    resolve_flex_fields_choices_to_string,
+    to_choice_object,
 )
 from hct_mis_api.apps.household.models import (
-    ROLE_NO_ROLE,
+    DEDUPLICATION_BATCH_STATUS_CHOICE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DUPLICATE,
-    NEEDS_ADJUDICATION,
     DUPLICATE_IN_BATCH,
-    DEDUPLICATION_BATCH_STATUS_CHOICE,
-    ROLE_PRIMARY,
+    NEEDS_ADJUDICATION,
     ROLE_ALTERNATE,
+    ROLE_NO_ROLE,
+    ROLE_PRIMARY,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportData,
+    ImportedDocument,
+    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
-    RegistrationDataImportDatahub,
-    ImportData,
-    ImportedDocumentType,
-    ImportedDocument,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
@@ -286,6 +282,9 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
 
     class Meta:
         model = ImportedIndividualIdentity
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class XlsxRowErrorNode(graphene.ObjectType):

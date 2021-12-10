@@ -265,6 +265,7 @@ OTHER_APPS = [
     "django_celery_results",
     "django_celery_beat",
     "explorer",
+    "import_export",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS

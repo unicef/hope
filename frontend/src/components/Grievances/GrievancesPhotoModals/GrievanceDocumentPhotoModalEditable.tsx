@@ -1,6 +1,6 @@
 import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
-import { PhotoModal } from '../PhotoModal/PhotoModal';
+import { PhotoModal } from '../../PhotoModal/PhotoModal';
 
 interface GrievanceDocumentPhotoModalProps {
   photoSrc: string;
@@ -32,7 +32,10 @@ export const GrievanceDocumentPhotoModalEditable = ({
         <PhotoModal
           src={picUrl}
           variant='pictureClose'
-          closeHandler={() => setEdit(true)}
+          closeHandler={() => {
+            setEdit(true);
+            setFieldValue(fieldName, null);
+          }}
           showRotate={false}
         />
       )}

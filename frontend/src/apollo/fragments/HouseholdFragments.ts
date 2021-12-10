@@ -36,6 +36,8 @@ export const householdMinimal = gql`
     headOfHousehold {
       id
       fullName
+      givenName
+      familyName
     }
     address
     individuals {
@@ -100,9 +102,13 @@ export const householdDetailed = gql`
           birthDate
           relationship
           identities {
-            id
-            number
-            type
+            edges {
+              node {
+                id
+                number
+                type
+              }
+            }
           }
         }
       }
