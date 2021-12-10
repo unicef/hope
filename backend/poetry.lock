@@ -320,7 +320,7 @@ python-versions = ">=2.7"
 
 [[package]]
 name = "django"
-version = "2.2.16"
+version = "2.2.25"
 description = "A high-level Python Web framework that encourages rapid development and clean, pragmatic design."
 category = "main"
 optional = false
@@ -1892,7 +1892,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "d5e7521e05ab0875b77bc4ceb6abf99994b3b31ef7a88d420ac397bfe6fdc2b5"
+content-hash = "b296c34b115942df15b8099632b6c9a951ce6dce9496a6ac651e3ece5a51921e"
 
 [metadata.files]
 amqp = [
@@ -2065,8 +2065,8 @@ diff-match-patch = [
     {file = "diff_match_patch-20200713-py3-none-any.whl", hash = "sha256:8bf9d9c4e059d917b5c6312bac0c137971a32815ddbda9c682b949f2986b4d34"},
 ]
 django = [
-    {file = "Django-2.2.16-py3-none-any.whl", hash = "sha256:83ced795a0f239f41d8ecabf51cc5fad4b97462a6008dc12e5af3cb9288724ec"},
-    {file = "Django-2.2.16.tar.gz", hash = "sha256:62cf45e5ee425c52e411c0742e641a6588b7e8af0d2c274a27940931b2786594"},
+    {file = "Django-2.2.25-py3-none-any.whl", hash = "sha256:08bad7ef7e90286b438dbe1412c3e633fbc7b96db04735f0c7baadeed52f3fad"},
+    {file = "Django-2.2.25.tar.gz", hash = "sha256:b1e65eaf371347d4b13eb7e061b09786c973061de95390c327c85c1e2aa2349c"},
 ]
 django-admin-extra-urls = [
     {file = "django-admin-extra-urls-3.5.1.tar.gz", hash = "sha256:fc68efd40569f2301cb329a0c445dd3517b0aa9c03c1ab7d9fc8a006d22de9b8"},

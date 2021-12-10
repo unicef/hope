@@ -52,7 +52,7 @@ authors = ["Tivix"]
 
 [tool.poetry.dependencies]
 python = "3.9.1"
-Django = "2.2.16"
+Django = "2.2.25"
 Jinja2 = "2.11.2"
 PyJWT = "1.7.1"
 PyYAML = "^5.4.1"
