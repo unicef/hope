@@ -37,13 +37,17 @@ export const individualMinimal = gql`
       }
     }
     identities {
-      id
-      agency {
-        country
-        label
-        countryIso3
+      edges {
+        node {
+          id
+          agency {
+            country
+            label
+            countryIso3
+          }
+          number
+        }
       }
-      number
     }
 
     household {
@@ -116,19 +120,28 @@ export const individualDetailed = gql`
       }
     }
     identities {
-      id
-      agency {
-        country
-        label
+      edges {
+        node {
+          id
+          agency {
+            country
+            label
+          }
+          number
+        }
       }
-      number
     }
     enrolledInNutritionProgramme
     administrationOfRutf
     identities {
-      number
-      type
-      country
+      edges {
+        node {
+          id
+          number
+          type
+          country
+        }
+      }
     }
     household {
       status
@@ -147,6 +160,9 @@ export const individualDetailed = gql`
       id
       headOfHousehold {
         id
+        givenName
+        familyName
+        fullName
       }
     }
     flexFields

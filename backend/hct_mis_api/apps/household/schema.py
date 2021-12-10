@@ -294,6 +294,9 @@ class IndividualIdentityNode(DjangoObjectType):
 
     class Meta:
         model = IndividualIdentity
+        filter_fields = []
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class DocumentNode(DjangoObjectType):
@@ -379,7 +382,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
 
     def resolve_admin_area_title(parent, info):
-        return parent.admin_area.title
+        if parent.admin_area:
+            return parent.admin_area.title
+        return ""
 
     def resolve_programs_with_delivered_quantity(parent, info):
         return parent.programs_with_delivered_quantity

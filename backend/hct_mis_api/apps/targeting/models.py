@@ -75,7 +75,7 @@ class TargetPopulationManager(SoftDeletableManager):
             .annotate(
                 number_of_households=Case(
                     When(status=TargetPopulation.STATUS_LOCKED, then="candidate_list_total_households"),
-                    When(status=TargetPopulation.STATUS_FINALIZED, then="final_list_total_households"),
+                    When(status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST, then="final_list_total_households"),
                     default=Value(0),
                 )
             )
@@ -121,11 +121,14 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     STATUS_DRAFT = "DRAFT"
     STATUS_LOCKED = "LOCKED"
-    STATUS_FINALIZED = "FINALIZED"
+    STATUS_PROCESSING = "PROCESSING"
+    STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
+
     STATUS_CHOICES = (
         (STATUS_DRAFT, _("Open")),
         (STATUS_LOCKED, _("Locked")),
-        (STATUS_FINALIZED, _("Sent")),
+        (STATUS_PROCESSING, _("Processing")),
+        (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
     )
 
     objects = TargetPopulationManager()
@@ -339,7 +342,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return None
         tp = (
             TargetPopulation.objects.filter(
-                program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_FINALIZED
+                program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_PROCESSING
             )
             .order_by("-created_at")
             .first()
@@ -347,6 +350,16 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         if tp is None:
             return None
         return tp.steficon_rule
+
+    def set_to_ready_for_cash_assist(self):
+        self.status = self.STATUS_READY_FOR_CASH_ASSIST
+        self.sent_to_datahub = True
+
+    def is_finalized(self):
+        return self.status in [self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST]
+
+    def is_locked(self):
+        return self.status == self.STATUS_LOCKED
 
     def __str__(self):
         return self.name

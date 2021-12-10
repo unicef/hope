@@ -3,7 +3,7 @@ import re
 from datetime import date, datetime
 
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
-from django.contrib.postgres.fields import CICharField, JSONField
+from django.contrib.postgres.fields import CICharField, JSONField, ArrayField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.db.models import F, Sum
@@ -314,6 +314,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             "collect_individual_data",
             "currency",
             "unhcr_id",
+            "kobo_asset_id",
         ]
     )
     withdrawn = models.BooleanField(default=False, db_index=True)
@@ -393,6 +394,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
 
     class Meta:
         verbose_name = "Household"
@@ -660,8 +662,6 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
         (STATUS_INVALID, _("Invalid")),
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    objects = models.Manager()
-    existing_objects = SoftDeletableManager()
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -1008,4 +1008,14 @@ class EntitlementCard(TimeStampedUUIDModel):
         related_name="entitlement_cards",
         on_delete=models.SET_NULL,
         null=True,
+    )
+
+
+class XlsxUpdateFile(TimeStampedUUIDModel):
+    file = models.FileField()
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
+    xlsx_match_columns = ArrayField(
+        models.CharField(max_length=32),
+        null=True
     )

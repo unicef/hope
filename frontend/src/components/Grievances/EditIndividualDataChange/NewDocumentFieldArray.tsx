@@ -4,8 +4,8 @@ import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
-import { DocumentField } from './DocumentField';
+import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import { DocumentField } from '../DocumentField';
 
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
@@ -14,11 +14,13 @@ const AddIcon = styled(AddCircleOutline)`
 export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
   values;
+  setFieldValue;
 }
 
 export function NewDocumentFieldArray({
   addIndividualFieldsData,
   values,
+  setFieldValue,
 }: NewDocumentFieldArrayProps): React.ReactElement {
   const { t } = useTranslation();
   return (
@@ -39,6 +41,7 @@ export function NewDocumentFieldArray({
                       addIndividualFieldsData.documentTypeChoices
                     }
                     baseName='individualDataUpdateFieldsDocuments'
+                    setFieldValue={setFieldValue}
                   />
                 ),
               )}
