@@ -1,7 +1,10 @@
 from datetime import date
+from unittest import mock
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
+from django_countries.fields import Country
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -10,13 +13,24 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualIdentityFactory,
+)
 from hct_mis_api.apps.household.models import (
     FEMALE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     RELATIONSHIP_UNKNOWN,
     ROLE_NO_ROLE,
     SINGLE,
+    UNHCR,
     WIDOWED,
+    Agency,
+    DocumentType,
+    IndividualIdentity,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -58,6 +72,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     def setUp(self):
         super().setUp()
         call_command("loadbusinessareas")
+        call_command("loadcountries")
+        self.generate_document_types_for_all_countries()
+
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
@@ -87,6 +104,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
 
         self.individuals_to_create = [
             {
+                "id": "b6ffb227-a2dd-4103-be46-0c9ebe9f001a",
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
                 "family_name": "Butler",
@@ -98,6 +116,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
+                "id": "e6b0acc8-f4db-4d70-8f50-c2080b3ba9ec",
                 "full_name": "Robin Ford",
                 "given_name": "Robin",
                 "family_name": "Ford",
@@ -109,6 +128,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
+                "id": "667be49c-6620-4381-a69a-211ba9f7d8c8",
                 "full_name": "Timothy Perry",
                 "given_name": "Timothy",
                 "family_name": "Perry",
@@ -120,6 +140,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
+                "id": "ef52d4d7-3142-4d51-a31b-2ad231120c58",
                 "full_name": "Eric Torres",
                 "given_name": "Eric",
                 "family_name": "Torres",
@@ -131,6 +152,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
+                "id": "cb2e2e3a-d9c4-40ce-8777-707ca18d7fc8",
                 "full_name": "Jenna Franklin",
                 "given_name": "Jenna",
                 "family_name": "Franklin",
@@ -153,6 +175,22 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.save()
         self.household_one = household_one
 
+        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        self.national_id = DocumentFactory.create(
+            id="d367e431-b807-4c1f-a811-ef2e0d217cc4",
+            type=national_id_type,
+            document_number="789-789-645",
+            individual=self.individuals[0],
+        )
+
+        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
+        self.identity = IndividualIdentityFactory.create(
+            id=1,
+            agency=unhcr_agency,
+            individual=self.individuals[0],
+            number="1111",
+        )
+
     @parameterized.expand(
         [
             (
@@ -162,6 +200,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
+    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_grievance_create_individual_data_change(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -188,6 +227,21 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "estimatedBirthDate": False,
                                 "relationship": RELATIONSHIP_UNKNOWN,
                                 "role": ROLE_NO_ROLE,
+                                "documents": [
+                                    {
+                                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                        "country": "POL",
+                                        "number": "123-123-UX-321",
+                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    }
+                                ],
+                                "identities": [
+                                    {
+                                        "agency": UNHCR,
+                                        "country": "POL",
+                                        "number": "2222",
+                                    }
+                                ],
                             },
                         }
                     }
@@ -209,6 +263,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
+    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
     def test_grievance_update_individual_data_change(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -231,6 +286,38 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "sex": "MALE",
                                 "birthDate": date(year=1980, month=2, day=1).isoformat(),
                                 "maritalStatus": SINGLE,
+                                "documents": [
+                                    {
+                                        "type": IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+                                        "country": "POL",
+                                        "number": "321-321-XU-987",
+                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    }
+                                ],
+                                "documentsToEdit": [
+                                    {
+                                        "id": self.id_to_base64(self.national_id.id, "DocumentNode"),
+                                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                                        "country": "POL",
+                                        "number": "321-321-XU-123",
+                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    }
+                                ],
+                                "identities": [
+                                    {
+                                        "agency": UNHCR,
+                                        "country": "POL",
+                                        "number": "2222",
+                                    }
+                                ],
+                                "identitiesToEdit": [
+                                    {
+                                        "id": self.id_to_base64(self.identity.id, "IndividualIdentityNode"),
+                                        "agency": UNHCR,
+                                        "country": "POL",
+                                        "number": "3333",
+                                    }
+                                ],
                             },
                         }
                     }

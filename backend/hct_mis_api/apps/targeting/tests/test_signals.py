@@ -158,7 +158,7 @@ class TestTargetPopulationQuery(APITestCase):
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
         )
         tp.save()
         tp.households.add(self.household_size_2)

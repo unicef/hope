@@ -1,0 +1,85 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% block extrahead %}
+
+{% endblock %}
+{% block content %}
+    {% if no_match_report_rows or multiple_match_report_rows %}
+        <section>
+            <h2>Not allowed to update</h2>
+            {% if no_match_report_rows %}
+                <h3>Not Found</h3>
+                <table width="100%">
+                    <thead>
+                    <tr>
+                        <th>Xlsx Row number</th>
+                    </tr>
+                    </thead>
+
+                    {% for report_row in no_match_report_rows %}
+                        <tr>
+                            <td>{{ report_row }}</td>
+                        </tr>
+
+                    {% endfor %}
+                </table>
+            {% endif %}
+
+            {% if multiple_match_report_rows %}
+                <h3>Mutliple Match</h3>
+                <table width="100%">
+                    <thead>
+                    <tr>
+                        <th>Xlsx Row number</th>
+                        <th>Individual unicef id</th>
+                    </tr>
+                    </thead>
+
+                    {% for report_row in multiple_match_report_rows %}
+                        <tr>
+                            <td>{{ report_row.0 }}</td>
+                            <td>
+                                {% for individual in report_row.1 %}
+                                    <a href="{% url "admin:household_individual_change" object_id=individual.id %}">{{ individual.unicef_id }}</a>
+                                    {% if not forloop.last %},&nbsp;{% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    {% if unique_report_rows %}
+        <section>
+            <h2>Allowed to update</h2>
+            <h3>Matched individuals</h3>
+            <table width="100%">
+                <thead>
+                <tr>
+                    <th>Xlsx Row number</th>
+                    <th>Individual unicef id</th>
+                </tr>
+                </thead>
+
+                {% for report_row in unique_report_rows %}
+                    <tr>
+                        <td>{{ report_row.0 }}</td>
+                        <td>
+                            <a href="{% url "admin:household_individual_change" object_id=report_row.1.id %}">{{ report_row.1.unicef_id }}</a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </table>
+        </section>
+    {% endif %}
+
+    <form action="." method="post">
+        {% csrf_token %}
+        <input name="stage" type="hidden" value="4">
+        <input name="xlsx_update_file" type="hidden" value="{{ xlsx_update_file }}">
+        <a href="{% url "admin:household_individual_changelist" %}">Cancel</a>
+        <input type="submit" value="Approve" {% if not unique_report_rows %} disabled {% endif %} >
+    </form>
+{% endblock %}

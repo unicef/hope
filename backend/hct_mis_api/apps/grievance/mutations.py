@@ -702,8 +702,10 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         """
         individual_approve_data = graphene.JSONString()
         approved_documents_to_create = graphene.List(graphene.Int)
+        approved_documents_to_edit = graphene.List(graphene.Int)
         approved_documents_to_remove = graphene.List(graphene.Int)
         approved_identities_to_create = graphene.List(graphene.Int)
+        approved_identities_to_edit = graphene.List(graphene.Int)
         approved_identities_to_remove = graphene.List(graphene.Int)
         flex_fields_approve_data = graphene.JSONString()
         version = BigInt(required=False)
@@ -718,8 +720,10 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         grievance_ticket_id,
         individual_approve_data,
         approved_documents_to_create,
+        approved_documents_to_edit,
         approved_documents_to_remove,
         approved_identities_to_create,
+        approved_identities_to_edit,
         approved_identities_to_remove,
         flex_fields_approve_data,
         **kwargs,
@@ -743,26 +747,22 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         individual_data = individual_data_details.individual_data
         cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
         cls.verify_approve_data_against_object_data(individual_data.get("flex_fields"), flex_fields_approve_data)
+
+        documents_mapping = {
+            "documents": approved_documents_to_create,
+            "documents_to_remove": approved_documents_to_remove,
+            "documents_to_edit": approved_documents_to_edit,
+            "identities": approved_identities_to_create,
+            "identities_to_remove": approved_identities_to_remove,
+            "identities_to_edit": approved_identities_to_edit,
+        }
+
         for field_name, item in individual_data.items():
             field_to_approve = individual_approve_data.get(field_name)
-            if field_name in ("documents", "documents_to_remove"):
+            if field_name in documents_mapping:
                 for index, document_data in enumerate(individual_data[field_name]):
-                    approved_documents_indexes = (
-                        approved_documents_to_create if field_name == "documents" else approved_documents_to_remove
-                    )
-                    if index in approved_documents_indexes:
-                        document_data["approve_status"] = True
-                    else:
-                        document_data["approve_status"] = False
-            elif field_name in ("identities", "identities_to_remove"):
-                for index, identity_data in enumerate(individual_data[field_name]):
-                    approved_identities_indexes = (
-                        approved_identities_to_create if field_name == "identities" else approved_identities_to_remove
-                    )
-                    if index in approved_identities_indexes:
-                        identity_data["approve_status"] = True
-                    else:
-                        identity_data["approve_status"] = False
+                    approved_documents_indexes = documents_mapping.get(field_name, [])
+                    document_data["approve_status"] = index in approved_documents_indexes
             elif field_name == "flex_fields":
                 for flex_field_name in item.keys():
                     individual_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(

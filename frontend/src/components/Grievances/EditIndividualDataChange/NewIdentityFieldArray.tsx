@@ -4,8 +4,8 @@ import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
-import { AgencyField } from './AgencyField';
+import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import { AgencyField } from '../AgencyField';
 
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;

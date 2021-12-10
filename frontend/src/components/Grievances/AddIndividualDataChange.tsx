@@ -119,6 +119,7 @@ export interface AddIndividualDataChangeProps {
 
 export const AddIndividualDataChange = ({
   values,
+  setFieldValue,
 }: AddIndividualDataChangeProps): React.ReactElement => {
   const { t } = useTranslation();
   const { data, loading } = useAllAddIndividualFieldsQuery();
@@ -168,6 +169,7 @@ export const AddIndividualDataChange = ({
                     countryChoices={data.countriesChoices}
                     documentTypeChoices={data.documentTypeChoices}
                     baseName='individualData.documents'
+                    setFieldValue={setFieldValue}
                   />
                 ))}
 
