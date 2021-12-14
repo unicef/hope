@@ -171,7 +171,9 @@ export function targetPopulationStatusToColor(
       return theme.hctPalette.gray;
     case 'LOCKED':
       return theme.hctPalette.oragne;
-    case 'FINALIZED':
+    case 'PROCESSING':
+      return theme.hctPalette.green;
+    case 'READY_FOR_CASH_ASSIST':
       return theme.hctPalette.green;
     default:
       return theme.palette.error.main;
