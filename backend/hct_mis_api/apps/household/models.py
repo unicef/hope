@@ -3,7 +3,7 @@ import re
 from datetime import date, datetime
 
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
-from django.contrib.postgres.fields import CICharField, JSONField, ArrayField
+from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.db.models import F, Sum
@@ -965,6 +965,9 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def count_all_roles(self):
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
 
+    def count_primary_roles(self):
+        return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
+
     @cached_property
     def parents(self):
         if self.household:
@@ -982,6 +985,11 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def active_record(self):
         if self.duplicate:
             return Individual.objects.filter(unicef_id=self.unicef_id, duplicate=False, is_removed=False).first()
+
+    def is_head(self):
+        if not self.household:
+            return False
+        return self.household.head_of_household.id == self.id
 
 
 class EntitlementCard(TimeStampedUUIDModel):
@@ -1015,7 +1023,4 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     file = models.FileField()
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
-    xlsx_match_columns = ArrayField(
-        models.CharField(max_length=32),
-        null=True
-    )
+    xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)
