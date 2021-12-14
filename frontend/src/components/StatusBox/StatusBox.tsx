@@ -36,7 +36,7 @@ export function StatusBox({
       data-cy='status-container'
     >
       {statusNameMapping
-        ? statusNameMapping(status.replace(underscoreRemoveRegex, ' '))
+        ? statusNameMapping(status)
         : status.replace(underscoreRemoveRegex, ' ')}
     </StatusBoxContainer>
   );
