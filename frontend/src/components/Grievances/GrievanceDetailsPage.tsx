@@ -362,11 +362,8 @@ export function GrievanceDetailsPage(): React.ReactElement {
       household =
         ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
     }
-
-    const householdsAndRoles = individual?.householdsAndRoles;
-    const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
-    const hasRolesToReassign =
-      householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
+    const isMoreThanOneIndividual = household?.individuals?.totalCount !== 1;
+    if (!isMoreThanOneIndividual) return false;
 
     const isRightCategory =
       (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
@@ -379,10 +376,17 @@ export function GrievanceDetailsPage(): React.ReactElement {
         ticket?.systemFlaggingTicketDetails?.approveStatus) ||
       (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
         ticket?.needsAdjudicationTicketDetails?.selectedIndividual);
+
+    if (!isRightCategory) return false;
+
     const isRightStatus =
       ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+    if (!isRightStatus) return false;
 
-    const isMoreThanOneIndividual = household?.individuals?.totalCount !== 1;
+    const householdsAndRoles = individual?.householdsAndRoles;
+    const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
+    const hasRolesToReassign =
+      householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
 
     let isProperDataChange = true;
     if (
@@ -399,8 +403,6 @@ export function GrievanceDetailsPage(): React.ReactElement {
       }
     }
     return (
-      isMoreThanOneIndividual &&
-      isRightCategory &&
       isRightStatus &&
       (isHeadOfHousehold || hasRolesToReassign) &&
       isProperDataChange
