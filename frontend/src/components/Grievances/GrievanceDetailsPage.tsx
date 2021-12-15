@@ -402,11 +402,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
         isProperDataChange = false;
       }
     }
-    return (
-      isRightStatus &&
-      (isHeadOfHousehold || hasRolesToReassign) &&
-      isProperDataChange
-    );
+    return (isHeadOfHousehold || hasRolesToReassign) && isProperDataChange;
   };
 
   // const shouldShowReassignBoxFlag = (): boolean => {
