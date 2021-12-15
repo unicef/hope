@@ -8,6 +8,9 @@ import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
+  HouseholdNode,
+  IndividualNode,
+  IndividualRoleInHouseholdRole,
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
@@ -27,6 +30,12 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
+export type RoleReassignData = {
+  role: IndividualRoleInHouseholdRole | string;
+  individual: IndividualNode;
+  household: HouseholdNode;
+};
+
 export function DeleteIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
@@ -40,16 +49,30 @@ export function DeleteIndividualGrievanceDetails({
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const isHeadOfHousehold =
     ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
-  const rolesCount =
-    ticket.individual?.householdsAndRoles.length + (isHeadOfHousehold ? 1 : 0);
-  const rolesReassignedCount = Object.keys(
-    JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
-  ).length;
   const isOneIndividual = ticket?.household?.individuals?.totalCount === 1;
+  const primaryCollectorRolesCount =
+    ticket?.individual?.householdsAndRoles.filter(
+      (el) => el.role === IndividualRoleInHouseholdRole.Primary,
+    ).length + (isHeadOfHousehold ? 1 : 0);
+  const primaryColletorRolesReassignedCount = Object.values(
+    JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
+  )?.filter(
+    (el: RoleReassignData) =>
+      el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+  ).length;
 
-  const approveEnabled =
-    (isOneIndividual && isForApproval) ||
-    (isForApproval && rolesCount === rolesReassignedCount);
+  const approveEnabled = () => {
+    if (isOneIndividual && isForApproval) {
+      return true;
+    }
+    if (
+      isForApproval &&
+      primaryCollectorRolesCount === primaryColletorRolesReassignedCount
+    ) {
+      return true;
+    }
+    return false;
+  };
 
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveDeleteIndividualDataChangeMutation();
