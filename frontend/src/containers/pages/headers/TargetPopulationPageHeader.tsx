@@ -70,7 +70,7 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case 'APPROVED':
+    case 'LOCKED':
       buttons = (
         <ApprovedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
@@ -81,7 +81,7 @@ export function TargetPopulationPageHeader({
       );
       break;
     default:
-      //FINALIZED
+      //Ready for Cash Assist, Processing
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}

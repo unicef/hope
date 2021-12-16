@@ -169,9 +169,11 @@ export function targetPopulationStatusToColor(
   switch (status) {
     case 'DRAFT':
       return theme.hctPalette.gray;
-    case 'APPROVED':
+    case 'LOCKED':
       return theme.hctPalette.oragne;
-    case 'FINALIZED':
+    case 'PROCESSING':
+      return theme.hctPalette.green;
+    case 'READY_FOR_CASH_ASSIST':
       return theme.hctPalette.green;
     default:
       return theme.palette.error.main;
@@ -525,4 +527,11 @@ export const formatAge = (age): string | number => {
     return age;
   }
   return '<1';
+};
+
+export const renderIndividualName = (individual): string => {
+  if (individual?.givenName && individual?.familyName) {
+    return `${individual.givenName} ${individual.familyName}`;
+  }
+  return individual?.fullName;
 };

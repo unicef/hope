@@ -3,7 +3,7 @@ import re
 from datetime import date, datetime
 
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
-from django.contrib.postgres.fields import CICharField, JSONField
+from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.db.models import F, Sum
@@ -11,7 +11,6 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -23,7 +22,8 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.geo.compat import GeoCountryField
+from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -314,6 +314,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             "collect_individual_data",
             "currency",
             "unhcr_id",
+            "kobo_asset_id",
+            "row_id",
         ]
     )
     withdrawn = models.BooleanField(default=False, db_index=True)
@@ -393,16 +395,23 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
+    row_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
     def save(self, *args, **kwargs):
-        from hct_mis_api.apps.targeting.models import HouseholdSelection
+        from hct_mis_api.apps.targeting.models import (
+            HouseholdSelection,
+            TargetPopulation,
+        )
 
         if self.withdrawn:
-            HouseholdSelection.objects.filter(household=self, target_population__status="APPROVED").delete()
+            HouseholdSelection.objects.filter(
+                household=self, target_population__status=TargetPopulation.STATUS_LOCKED
+            ).delete()
         super().save(*args, **kwargs)
 
     @property
@@ -425,6 +434,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
+
+    @property
+    def admin_area_title(self):
+        return self.admin_area.title
 
     @property
     def admin1(self):
@@ -651,8 +664,6 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
         (STATUS_INVALID, _("Invalid")),
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    objects = models.Manager()
-    existing_objects = SoftDeletableManager()
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -775,6 +786,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             "comms_disability",
             "who_answers_phone",
             "who_answers_alt_phone",
+            "kobo_asset_id",
+            "row_id",
         ]
     )
     duplicate = models.BooleanField(default=False, db_index=True)
@@ -860,6 +873,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     fchild_hoh = models.BooleanField(default=False)
     child_hoh = models.BooleanField(default=False)
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
+    row_id = models.PositiveIntegerField(blank=True, null=True)
 
     @property
     def age(self):
@@ -1000,3 +1015,10 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
+
+
+class XlsxUpdateFile(TimeStampedUUIDModel):
+    file = models.FileField()
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
+    xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)

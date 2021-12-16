@@ -91,9 +91,10 @@ export function CreateTargetPopulation(): React.ReactElement {
     name: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
-    excludedIds: Yup.string()
-      .max(500, t('Too long'))
-      .test('testName', 'ID is not in the correct format', (ids) => {
+    excludedIds: Yup.string().test(
+      'testName',
+      'ID is not in the correct format',
+      (ids) => {
         if (!ids?.length) {
           return true;
         }
@@ -101,7 +102,8 @@ export function CreateTargetPopulation(): React.ReactElement {
         return idsArr.every((el) =>
           /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
         );
-      }),
+      },
+    ),
     exclusionReason: Yup.string().max(500, t('Too long')),
   });
 

@@ -29,7 +29,7 @@ spec:
         {{- toYaml .Values.celery.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}-celery-worker
-          command: ["celery", "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info"]
+          command: ["celery", "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info", "--max-tasks-per-child=4"]
           securityContext:
             {{- toYaml .Values.celery.securityContext | nindent 12 }}
           image: "{{ .Values.celery.image }}"

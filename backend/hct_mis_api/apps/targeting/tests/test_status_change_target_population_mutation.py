@@ -1,7 +1,8 @@
 import unittest
-from parameterized import parameterized
 
 from django.core.management import call_command
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -68,7 +69,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
 
         tp = TargetPopulation(
             name="Approved Target Population with final filters",
-            status=TargetPopulation.STATUS_APPROVED,
+            status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
         )
 
@@ -83,7 +84,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         cls.target_population_approved_with_final_rule = tp
 
         tp = TargetPopulation(
-            name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED, business_area=cls.business_area
+            name="Approved Target Population", status=TargetPopulation.STATUS_LOCKED, business_area=cls.business_area
         )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -186,7 +187,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
 
         tp = TargetPopulation(
             name="Approved Target Population with final filters",
-            status=TargetPopulation.STATUS_APPROVED,
+            status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
         )
 
@@ -201,7 +202,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.target_population_approved_with_final_rule = tp
 
         tp = TargetPopulation(
-            name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED, business_area=cls.business_area
+            name="Approved Target Population", status=TargetPopulation.STATUS_LOCKED, business_area=cls.business_area
         )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -309,7 +310,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
 
         tp = TargetPopulation(
             name="Approved Target Population with final filters",
-            status=TargetPopulation.STATUS_APPROVED,
+            status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
         )
 
@@ -326,7 +327,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         cls.target_population_approved_with_final_rule = tp
 
         tp = TargetPopulation(
-            name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED, business_area=cls.business_area
+            name="Approved Target Population", status=TargetPopulation.STATUS_LOCKED, business_area=cls.business_area
         )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
