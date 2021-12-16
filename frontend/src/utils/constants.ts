@@ -1,8 +1,9 @@
 export const TARGETING_STATES = {
   NONE: 'None',
   DRAFT: 'Open',
-  APPROVED: 'Locked',
-  FINALIZED: 'Sent',
+  LOCKED: 'Locked',
+  READY_FOR_CASH_ASSIST: 'Ready For Cash Assist',
+  PROCESSING: 'Processing',
 };
 
 export const GRIEVANCE_TICKET_STATES = {

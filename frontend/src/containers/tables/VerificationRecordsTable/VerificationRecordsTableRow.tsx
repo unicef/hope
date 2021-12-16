@@ -1,23 +1,20 @@
-import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import { TableRow } from '@material-ui/core';
-import { PaymentVerificationNode } from '../../../__generated__/graphql';
+import TableCell from '@material-ui/core/TableCell';
+import React from 'react';
+import styled from 'styled-components';
+import { BlackLink } from '../../../components/BlackLink';
+import { StatusBox } from '../../../components/StatusBox';
+import { AnonTableCell } from '../../../components/table/AnonTableCell';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
-import { StatusBox } from '../../../components/StatusBox';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { PaymentVerificationNode } from '../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
-`;
-const Pointer = styled.span`
-  cursor: pointer;
 `;
 interface VerificationRecordsTableRowProps {
   record: PaymentVerificationNode;
@@ -30,20 +27,18 @@ export function VerificationRecordsTableRow({
   record,
   canViewRecordDetails,
 }: VerificationRecordsTableRowProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
-  const handleClick = (): void => {
-    const path = `/${businessArea}/verification-records/${record.id}`;
-    history.push(path);
-  };
 
   return (
     <TableRow hover role='checkbox' key={record.id}>
-      <TableCell
-        onClick={canViewRecordDetails ? handleClick : undefined}
-        align='left'
-      >
-        <Pointer>{record.paymentRecord?.caId}</Pointer>
+      <TableCell align='left'>
+        {canViewRecordDetails ? (
+          <BlackLink to={`/${businessArea}/verification-records/${record.id}`}>
+            {record.paymentRecord?.caId}
+          </BlackLink>
+        ) : (
+          <span>{record.paymentRecord?.caId}</span>
+        )}
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>

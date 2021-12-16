@@ -12,7 +12,7 @@ import {
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../ConfirmationDialog';
-import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
+import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -41,8 +41,10 @@ export function RequestedIndividualDataChange({
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const documents = individualData?.documents || [];
   const documentsToRemove = individualData.documents_to_remove || [];
+  const documentsToEdit = individualData.documents_to_edit || [];
   const identities = individualData?.identities || [];
   const identitiesToRemove = individualData.identities_to_remove || [];
+  const identitiesToEdit = individualData.identities_to_edit || [];
   const flexFields = individualData.flex_fields || {};
   const role = individualData.role || {};
   const relationship = individualData.relationship || {};
@@ -59,9 +61,11 @@ export function RequestedIndividualDataChange({
   allApprovedCount += documents.filter((el) => el.approve_status).length;
   allApprovedCount += documentsToRemove.filter((el) => el.approve_status)
     .length;
+  allApprovedCount += documentsToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += identities.filter((el) => el.approve_status).length;
   allApprovedCount += identitiesToRemove.filter((el) => el.approve_status)
     .length;
+  allApprovedCount += identitiesToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += entries.filter(
     ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
@@ -78,6 +82,7 @@ export function RequestedIndividualDataChange({
   const [mutate] = useApproveIndividualDataChangeMutation();
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
+  const selectedDocumentsToEdit = [];
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < documents?.length; i++) {
     if (documents[i]?.approve_status) {
@@ -90,8 +95,15 @@ export function RequestedIndividualDataChange({
       selectedDocumentsToRemove.push(i);
     }
   }
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < documentsToEdit?.length; i++) {
+    if (documentsToEdit[i]?.approve_status) {
+      selectedDocumentsToEdit.push(i);
+    }
+  }
   const selectedIdentities = [];
   const selectedIdentitiesToRemove = [];
+  const selectedIdentitiesToEdit = [];
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < identities?.length; i++) {
     if (identities[i]?.approve_status) {
@@ -102,6 +114,12 @@ export function RequestedIndividualDataChange({
   for (let i = 0; i < identitiesToRemove?.length; i++) {
     if (identitiesToRemove[i]?.approve_status) {
       selectedIdentitiesToRemove.push(i);
+    }
+  }
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < identitiesToEdit?.length; i++) {
+    if (identitiesToEdit[i]?.approve_status) {
+      selectedIdentitiesToEdit.push(i);
     }
   }
 
@@ -131,8 +149,10 @@ export function RequestedIndividualDataChange({
       entriesFlexFields.length +
       documents.length +
       documentsToRemove.length +
+      documentsToEdit.length +
       identities.length +
-      identitiesToRemove.length;
+      identitiesToRemove.length +
+      identitiesToEdit.length;
     return allSelected === countAll;
   };
 
@@ -191,7 +211,9 @@ export function RequestedIndividualDataChange({
           .map((row) => row[0]),
         selectedDocuments,
         selectedDocumentsToRemove,
+        selectedDocumentsToEdit,
         selectedIdentities,
+        selectedIdentitiesToEdit,
         selectedIdentitiesToRemove,
       }}
       onSubmit={async (values) => {
@@ -202,8 +224,10 @@ export function RequestedIndividualDataChange({
         }, {});
         const approvedDocumentsToCreate = values.selectedDocuments;
         const approvedDocumentsToRemove = values.selectedDocumentsToRemove;
+        const approvedDocumentsToEdit = values.selectedDocumentsToEdit;
         const approvedIdentitiesToCreate = values.selectedIdentities;
         const approvedIdentitiesToRemove = values.selectedIdentitiesToRemove;
+        const approvedIdentitiesToEdit = values.selectedIdentitiesToEdit;
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
@@ -219,8 +243,10 @@ export function RequestedIndividualDataChange({
               individualApproveData: JSON.stringify(individualApproveData),
               approvedDocumentsToCreate,
               approvedDocumentsToRemove,
+              approvedDocumentsToEdit,
               approvedIdentitiesToCreate,
               approvedIdentitiesToRemove,
+              approvedIdentitiesToEdit,
               flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },
           });

@@ -22,13 +22,13 @@ export function TargetPopulationDetails({
   const {
     createdBy,
     finalizedBy,
-    approvedAt,
+    changeDate,
     finalizedAt,
     program,
   } = targetPopulation;
   const { t } = useTranslation();
-  const closeDate = approvedAt ? (
-    <UniversalMoment>{approvedAt}</UniversalMoment>
+  const closeDate = changeDate ? (
+    <UniversalMoment>{changeDate}</UniversalMoment>
   ) : (
     '-'
   );

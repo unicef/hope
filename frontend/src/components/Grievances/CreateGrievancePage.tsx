@@ -40,8 +40,8 @@ import { PageHeader } from '../PageHeader';
 import { PermissionDenied } from '../PermissionDenied';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { Consent } from './Consent';
-import { EditHouseholdDataChange } from './EditHouseholdDataChange';
-import { EditIndividualDataChange } from './EditIndividualDataChange';
+import { EditHouseholdDataChange } from './EditHouseholdDataChange/EditHouseholdDataChange';
+import { EditIndividualDataChange } from './EditIndividualDataChange/EditIndividualDataChange';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import { TicketsAlreadyExist } from './TicketsAlreadyExist';
@@ -182,24 +182,25 @@ export function CreateGrievancePage(): React.ReactElement {
 
   const hasCategorySelected = (values): boolean => {
     return !!values.category;
-  }
+  };
 
   const hasHouseholdSelected = (values): boolean => {
-    return !!(values.selectedHousehold?.id);
-  }
+    return !!values.selectedHousehold?.id;
+  };
 
   const hasIndividualSelected = (values): boolean => {
-    return !!(values.selectedIndividual?.id);
-  }
+    return !!values.selectedIndividual?.id;
+  };
 
   const renderAlreadyExistsBox = (values): ReactElement => {
-    if (hasCategorySelected(values) && (hasHouseholdSelected(values) || hasIndividualSelected(values))) {
-      return (
-        <TicketsAlreadyExist values={values} />
-      );
+    if (
+      hasCategorySelected(values) &&
+      (hasHouseholdSelected(values) || hasIndividualSelected(values))
+    ) {
+      return <TicketsAlreadyExist values={values} />;
     }
     return null;
-  }
+  };
 
   return (
     <Formik
@@ -272,7 +273,7 @@ export function CreateGrievancePage(): React.ReactElement {
               </Box>
             </PageHeader>
             <Grid container spacing={3}>
-              <Grid item xs={8}>
+              <Grid item xs={9}>
                 <NewTicket>
                   <ContainerColumnWithBorder>
                     <Grid container spacing={3}>
@@ -388,10 +389,8 @@ export function CreateGrievancePage(): React.ReactElement {
                   </ContainerColumnWithBorder>
                 </NewTicket>
               </Grid>
-              <Grid item xs={4}>
-                <NewTicket>
-                  {renderAlreadyExistsBox(values)}
-                </NewTicket>
+              <Grid item xs={3}>
+                <NewTicket>{renderAlreadyExistsBox(values)}</NewTicket>
                 <NewTicket>
                   {values.category && values.selectedHousehold?.id ? (
                     <OtherRelatedTicketsCreate values={values} />

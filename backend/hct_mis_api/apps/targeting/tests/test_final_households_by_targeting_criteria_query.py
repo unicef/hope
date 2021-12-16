@@ -1,6 +1,13 @@
 from django.core.management import call_command
+
 from parameterized import parameterized
 
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
@@ -8,13 +15,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
-
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class FinalListTargetingCriteriaQueryTestCase(APITestCase):
@@ -81,7 +81,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             name="target_population_size_2",
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
-            status=TargetPopulation.STATUS_APPROVED,
+            status=TargetPopulation.STATUS_LOCKED,
             program=program,
         )
         cls.target_population_size_2.households.set(cls.households)
@@ -93,7 +93,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             name="target_population_residence_status",
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
-            status=TargetPopulation.STATUS_APPROVED,
+            status=TargetPopulation.STATUS_LOCKED,
             program=program,
         )
         cls.target_population_residence_status.households.set(cls.households)
@@ -105,7 +105,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             name="target_population_size_1_finalized",
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
-            status=TargetPopulation.STATUS_FINALIZED,
+            status=TargetPopulation.STATUS_PROCESSING,
             program=program,
         )
         cls.target_population_size_1_finalized.save()

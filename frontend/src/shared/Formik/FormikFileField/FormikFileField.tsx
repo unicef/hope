@@ -1,17 +1,9 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
-import InputLabel from '../../InputLabel';
 
-export const FormikFileField = ({
-  field,
-  form,
-  ...otherProps
-}): React.ReactElement => {
+export const FormikFileField = ({ field, form }): React.ReactElement => {
   return (
-    <>
-      <Box mb={1}>
-        <InputLabel>{otherProps.label}</InputLabel>
-      </Box>
+    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
       <input
         type='file'
         accept='image/*'
@@ -19,6 +11,6 @@ export const FormikFileField = ({
           form.setFieldValue(field.name, event.currentTarget.files[0]);
         }}
       />
-    </>
+    </Box>
   );
 };

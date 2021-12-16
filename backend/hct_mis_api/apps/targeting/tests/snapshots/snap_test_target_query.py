@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_0_with_permission 1'] = {
@@ -18,7 +17,7 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_0_with_permi
                         'finalListTotalHouseholds': 1,
                         'finalListTotalIndividuals': 1,
                         'name': 'target_population_size_1_approved',
-                        'status': 'APPROVED'
+                        'status': 'LOCKED'
                     }
                 },
                 {
@@ -77,7 +76,7 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_2_with_permi
                         'finalListTotalHouseholds': 1,
                         'finalListTotalIndividuals': 1,
                         'name': 'target_population_size_1_approved',
-                        'status': 'APPROVED'
+                        'status': 'LOCKED'
                     }
                 }
             ]
@@ -114,7 +113,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_0_with_permission
             'finalListTotalHouseholds': 1,
             'finalListTotalIndividuals': 1,
             'name': 'target_population_size_1_approved',
-            'status': 'APPROVED'
+            'status': 'LOCKED'
         }
     }
 }

@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     CORE_FIELDS_ATTRIBUTES,
+    HOUSEHOLD_EDIT_ONLY_FIELDS,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
     TYPE_IMAGE,
 )
@@ -440,6 +441,30 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
                     except Exception:
                         pass
             individual_data["flex_fields"] = flex_fields
+
+        documents_to_edit = individual_data.get("documents_to_edit")
+        if documents_to_edit:
+            for index, document in enumerate(documents_to_edit):
+                previous_value = document.get("previous_value", {})
+                if previous_value and previous_value.get("photo"):
+                    previous_value["photo"] = default_storage.url(previous_value.get("photo"))
+                    documents_to_edit[index]["previous_value"] = previous_value
+
+                current_value = document.get("value", {})
+                if current_value and current_value.get("photo"):
+                    current_value["photo"] = default_storage.url(current_value.get("photo"))
+                    documents_to_edit[index]["value"] = current_value
+            individual_data["documents_to_edit"] = documents_to_edit
+
+        documents = individual_data.get("documents")
+        if documents:
+            for index, document in enumerate(documents):
+                current_value = document.get("value", {})
+                if current_value and current_value.get("photo"):
+                    current_value["photo"] = default_storage.url(current_value.get("photo"))
+                    documents[index]["value"] = current_value
+            individual_data["documents"] = documents
+
         return individual_data
 
 
@@ -460,10 +485,21 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
             for name, value in flex_fields.items():
                 if value and name in images_flex_fields_names:
                     try:
-                        flex_fields[name] = default_storage.url(value)
+                        if value:
+                            flex_fields[name] = default_storage.url(value)
+                        else:
+                            flex_fields[name] = ""
                     except Exception:
                         pass
             individual_data["flex_fields"] = flex_fields
+
+        documents = individual_data.get("documents")
+        if documents:
+            for index, document in enumerate(documents):
+                if document and document["photo"]:
+                    document["photo"] = default_storage.url(document["photo"])
+                    documents[index] = document
+            individual_data["documents"] = documents
         return individual_data
 
 
@@ -692,6 +728,7 @@ class Query(graphene.ObjectType):
             "country",
             "size",
             "address",
+            "admin_area_title",
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
             "female_age_group_12_17_count",
@@ -731,7 +768,7 @@ class Query(graphene.ObjectType):
         # yield from FlexibleAttribute.objects.order_by("name").all()
         yield from [
             x
-            for x in CORE_FIELDS_ATTRIBUTES
+            for x in HOUSEHOLD_EDIT_ONLY_FIELDS + CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _HOUSEHOLD and x.get("name") in ACCEPTABLE_FIELDS
         ]
         yield from FlexibleAttribute.objects.filter(
