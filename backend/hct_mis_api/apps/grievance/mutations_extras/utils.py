@@ -1,6 +1,8 @@
 import logging
 import random
 import string
+import urllib.parse
+from typing import List, Optional
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -38,6 +40,9 @@ def handle_add_document(document, individual):
     country_code = document.get("country")
     country = Country(country_code)
     number = document.get("number")
+    photo = document.get("photo")
+    if photo:
+        photo = photo.replace(default_storage.base_url, "")
     document_type = DocumentType.objects.get(country=country, type=type_name)
 
     document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
@@ -45,7 +50,45 @@ def handle_add_document(document, individual):
         logger.error(f"Document with number {number} of type {type_name} for country {country} already exist")
         raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
 
-    return Document(document_number=number, individual=individual, type=document_type)
+    return Document(document_number=number, individual=individual, type=document_type, photo=photo)
+
+
+def handle_edit_document(document_data: dict):
+    from django.shortcuts import get_object_or_404
+
+    from django_countries.fields import Country
+    from graphql import GraphQLError
+
+    from hct_mis_api.apps.core.utils import decode_id_string
+    from hct_mis_api.apps.household.models import Document, DocumentType
+
+    updated_document = document_data.get("value", {})
+
+    type_name = updated_document.get("type")
+    country_code = updated_document.get("country")
+    country = Country(country_code)
+    number = updated_document.get("number")
+    photo = updated_document.get("photo")
+    if photo:
+        photo = photo.replace(default_storage.base_url, "")
+    document_id = updated_document.get("id")
+
+    document_id = decode_id_string(document_id)
+    document = get_object_or_404(Document, id=document_id)
+
+    document_type = DocumentType.objects.get(country=country, type=type_name)
+
+    document_already_exists = (
+        Document.objects.exclude(pk=document_id).filter(document_number=number, type=document_type).exists()
+    )
+    if document_already_exists:
+        logger.error(f"Document with number {number} of type {type_name} for country {country} already exist")
+        raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
+
+    document.document_number = number
+    document.type = document_type
+    document.photo = photo
+    return document
 
 
 def handle_add_identity(identity, individual):
@@ -72,6 +115,43 @@ def handle_add_identity(identity, individual):
     return IndividualIdentity(number=number, individual=individual, agency=agency_type)
 
 
+def handle_edit_identity(identity_data: dict):
+    from django.shortcuts import get_object_or_404
+
+    from django_countries.fields import Country
+    from graphql import GraphQLError
+
+    from hct_mis_api.apps.core.utils import decode_id_string
+    from hct_mis_api.apps.household.models import Agency, IndividualIdentity
+
+    updated_identity = identity_data.get("value", {})
+    agency_name = updated_identity.get("agency")
+    country_code = updated_identity.get("country")
+    country = Country(country_code)
+    number = updated_identity.get("number")
+    identity_id = updated_identity.get("id")
+
+    identity_id = decode_id_string(identity_id)
+    identity = get_object_or_404(IndividualIdentity, id=identity_id)
+
+    agency_type, _ = Agency.objects.get_or_create(
+        country=country,
+        type=agency_name,
+        defaults={"country": country, "type": agency_name, "label": f"{country.name} - {agency_name}"},
+    )
+
+    identity_already_exists = (
+        IndividualIdentity.objects.exclude(pk=identity_id).filter(number=number, agency=agency_type).exists()
+    )
+    if identity_already_exists:
+        logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
+        raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
+
+    identity.number = number
+    identity.agency = agency_type
+    return identity
+
+
 def prepare_previous_documents(documents_to_remove_with_approve_status):
     from django.shortcuts import get_object_or_404
 
@@ -86,11 +166,54 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
             "id": encode_id_base64(document.id, "Document"),
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
-            "label": document.type.label,
+            "type": document.type.type,
             "country": document.type.country.alpha3,
         }
 
     return previous_documents
+
+
+def prepare_edit_documents(documents_to_edit):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.core.utils import decode_id_string
+    from hct_mis_api.apps.household.models import Document
+
+    edited_documents = []
+
+    for document_to_edit in documents_to_edit:
+        encoded_id = document_to_edit.get("id")
+        country = document_to_edit.get("country")
+        document_type = document_to_edit.get("type")
+        document_number = document_to_edit.get("number")
+        document_photo = document_to_edit.get("photo")
+
+        document_photo = handle_photo(document_photo)
+
+        document_id = decode_id_string(encoded_id)
+        document = get_object_or_404(Document, id=document_id)
+
+        edited_documents.append(
+            {
+                "approve_status": False,
+                "value": {
+                    "id": encoded_id,
+                    "country": country,
+                    "type": document_type,
+                    "number": document_number,
+                    "photo": document_photo,
+                },
+                "previous_value": {
+                    "id": encoded_id,
+                    "country": document.type.country.alpha3,
+                    "type": document.type.type,
+                    "number": document.document_number,
+                    "photo": document.photo.name,
+                },
+            }
+        )
+
+    return edited_documents
 
 
 def prepare_previous_identities(identities_to_remove_with_approve_status):
@@ -107,11 +230,49 @@ def prepare_previous_identities(identities_to_remove_with_approve_status):
             "id": identity.id,
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
-            "label": identity.agency.label,
+            "agency": identity.agency.type,
             "country": identity.agency.country.alpha3,
         }
 
     return previous_identities
+
+
+def prepare_edit_identities(identities):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+    from hct_mis_api.apps.household.models import IndividualIdentity
+
+    edited_identities = []
+    for identity_data in identities:
+        encoded_id = identity_data.get("id")
+        number = identity_data.get("number")
+        agency = identity_data.get("agency")
+        country = identity_data.get("country")
+
+        identity_id = decode_id_string(encoded_id)
+        identity = get_object_or_404(IndividualIdentity, id=identity_id)
+
+        edited_identities.append(
+            {
+                "approve_status": False,
+                "value": {
+                    "id": encoded_id,
+                    "country": country,
+                    "agency": agency,
+                    "individual": encode_id_base64(identity.individual.id, "Individual"),
+                    "number": number,
+                },
+                "previous_value": {
+                    "id": encoded_id,
+                    "country": identity.agency.country.alpha3,
+                    "agency": identity.agency.type,
+                    "individual": encode_id_base64(identity.individual.id, "Individual"),
+                    "number": identity.number,
+                },
+            }
+        )
+    return edited_identities
 
 
 def verify_required_arguments(input_data, field_name, options):
@@ -357,6 +518,35 @@ def save_images(flex_fields, associated_with):
             logger.error(f"{name} is not a correct `flex field")
             raise ValueError(f"{name} is not a correct `flex field")
 
-        if flex_field["type"] == TYPE_IMAGE and isinstance(value, InMemoryUploadedFile):
-            file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
-            flex_fields[name] = default_storage.save(f"{file_name}-{timezone.now()}.jpg", value)
+        if flex_field["type"] == TYPE_IMAGE:
+            if isinstance(value, InMemoryUploadedFile):
+                file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
+                flex_fields[name] = default_storage.save(f"{file_name}-{timezone.now()}.jpg", value)
+            elif isinstance(value, str):
+                file_name = value.replace(default_storage.base_url, "")
+                unquoted_value = urllib.parse.unquote(file_name)
+                flex_fields[name] = unquoted_value
+
+
+def generate_filename() -> str:
+    file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
+    return f"{file_name}-{timezone.now()}"
+
+
+def handle_photo(photo) -> Optional[str]:
+    if isinstance(photo, InMemoryUploadedFile):
+        return default_storage.save(f"{generate_filename()}.jpg", photo)
+    elif isinstance(photo, str):
+        file_name = photo.replace(default_storage.base_url, "")
+        return urllib.parse.unquote(file_name)
+    return None
+
+
+def handle_document(document) -> dict:
+    photo = document.get("photo")
+    document["photo"] = handle_photo(photo)
+    return document
+
+
+def handle_documents(documents) -> List[dict]:
+    return [handle_document(document) for document in documents]

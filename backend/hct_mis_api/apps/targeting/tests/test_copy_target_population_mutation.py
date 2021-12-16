@@ -1,12 +1,6 @@
 from django.core.management import call_command
-from parameterized import parameterized
 
-from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetPopulation,
-)
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -14,6 +8,12 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.targeting.models import (
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetPopulation,
+)
 
 
 class TestCopyTargetPopulationMutation(APITestCase):
@@ -70,7 +70,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household = household
-        tp = TargetPopulation(name="Original Target Population", status="APPROVED", business_area=cls.business_area)
+        tp = TargetPopulation(name="Original Target Population", status="LOCKED", business_area=cls.business_area)
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS"}
@@ -82,7 +82,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         tp.households.add(cls.household)
         cls.target_population = tp
         cls.empty_target_population_1 = TargetPopulation(
-            name="emptyTargetPopulation1", status="APPROVED", business_area=cls.business_area
+            name="emptyTargetPopulation1", status="LOCKED", business_area=cls.business_area
         )
         cls.empty_target_population_1.save()
 

@@ -200,7 +200,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         vulnerability_score_max = input.get("vulnerability_score_max")
         excluded_ids = input.get("excluded_ids")
         exclusion_reason = input.get("exclusion_reason")
-        if target_population.status != TargetPopulation.STATUS_APPROVED and (
+        if target_population.status != TargetPopulation.STATUS_LOCKED and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
             logger.error(
@@ -214,10 +214,10 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if vulnerability_score_max is not None:
             target_population.vulnerability_score_max = vulnerability_score_max
 
-        if target_population.status == TargetPopulation.STATUS_APPROVED and name:
+        if target_population.is_locked() and name:
             logger.error("Name can't be changed when Target Population is in APPROVED status")
             raise ValidationError("Name can't be changed when Target Population is in APPROVED status")
-        if target_population.status == TargetPopulation.STATUS_FINALIZED:
+        if target_population.is_finalized():
             logger.error("Finalized Target Population can't be changed")
             raise ValidationError("Finalized Target Population can't be changed")
         if name:
@@ -234,7 +234,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
                 if target_population.candidate_list_targeting_criteria:
                     target_population.candidate_list_targeting_criteria.delete()
                 target_population.candidate_list_targeting_criteria = targeting_criteria
-            elif target_population.status == TargetPopulation.STATUS_APPROVED:
+            elif target_population.status == TargetPopulation.STATUS_LOCKED:
                 if target_population.final_list_targeting_criteria:
                     target_population.final_list_targeting_criteria.delete()
                 target_population.final_list_targeting_criteria = targeting_criteria
@@ -277,9 +277,9 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
         user = info.context.user
         target_population = kwargs.get("model_object")
         old_target_population = kwargs.get("old_model_object")
-        target_population.status = TargetPopulation.STATUS_APPROVED
-        target_population.approved_by = user
-        target_population.approved_at = timezone.now()
+        target_population.status = TargetPopulation.STATUS_LOCKED
+        target_population.changed_by = user
+        target_population.change_date = timezone.now()
         households = Household.objects.filter(business_area=target_population.business_area).filter(
             target_population.candidate_list_targeting_criteria.get_query()
         )
@@ -337,7 +337,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
             user = info.context.user
             target_population: TargetPopulation = kwargs.get("model_object")
             old_target_population = kwargs.get("old_model_object")
-            target_population.status = TargetPopulation.STATUS_FINALIZED
+            target_population.status = TargetPopulation.STATUS_PROCESSING
             target_population.finalized_by = user
             target_population.finalized_at = timezone.now()
             if target_population.final_list_targeting_criteria:
@@ -397,6 +397,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
                 candidate_list_total_households=target_population.candidate_list_total_households,
                 candidate_list_total_individuals=target_population.candidate_list_total_individuals,
                 steficon_rule=target_population.steficon_rule,
+                steficon_applied_date=target_population.steficon_applied_date,
                 program=target_population.program,
             )
             target_population_copy.full_clean()
@@ -497,13 +498,18 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
                 target_population.allowed_steficon_rule is not None
                 and steficon_rule_id != target_population.allowed_steficon_rule.id
             ):
-                logger.error("You can't change steficon rule for this Target Population")
-                raise GraphQLError("You can't change steficon rule for this Target Population")
+                logger.error(
+                    "Another formula was applied to a previous target population for this programme. You can only apply the same formula"
+                )
+                raise GraphQLError(
+                    "Another formula was applied to a previous target population for this programme. You can only apply the same formula"
+                )
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             if not steficon_rule.enabled or steficon_rule.deprecated:
                 logger.error("This steficon rule is not enabled or is deprecated.")
                 raise GraphQLError("This steficon rule is not enabled or is deprecated.")
             target_population.steficon_rule = steficon_rule
+            target_population.steficon_applied_date = timezone.now()
             target_population.save()
             interpreter = mapping[steficon_rule.language](steficon_rule.definition)
             for selection in HouseholdSelection.objects.filter(target_population=target_population):

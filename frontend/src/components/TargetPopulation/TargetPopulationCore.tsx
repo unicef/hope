@@ -2,6 +2,7 @@ import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
@@ -13,6 +14,14 @@ const PaperContainer = styled(Paper)`
   margin: ${({ theme }) => theme.spacing(5)}px;
   flex-direction: column;
   border-bottom: 1px solid rgba(224, 224, 224, 1);
+`;
+
+const TableWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 20px;
+  padding-bottom: 0;
 `;
 
 const Label = styled.p`
@@ -60,8 +69,8 @@ export function TargetPopulationCore({
       ) : null}
       <Results
         resultsData={targetPopulation.candidateStats}
-        totalNumOfHouseholds={targetPopulation.candidateStats.allHouseholds}
-        totalNumOfIndividuals={targetPopulation.candidateStats.allIndividuals}
+        totalNumOfHouseholds={targetPopulation.candidateListTotalHouseholds}
+        totalNumOfIndividuals={targetPopulation.candidateListTotalIndividuals}
       />
 
       {candidateListRules.length ? (
@@ -78,6 +87,9 @@ export function TargetPopulationCore({
           <Label>{t('Add targeting criteria to see results.')}</Label>
         </PaperContainer>
       )}
+      <TableWrapper>
+        <UniversalActivityLogTable objectId={targetPopulation.id} />
+      </TableWrapper>
     </>
   );
 }

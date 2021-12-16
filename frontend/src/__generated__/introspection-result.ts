@@ -120,6 +120,9 @@
             "name": "DocumentNode"
           },
           {
+            "name": "IndividualIdentityNode"
+          },
+          {
             "name": "TicketHouseholdDataUpdateDetailsNode"
           },
           {
@@ -148,6 +151,9 @@
           },
           {
             "name": "ImportedDocumentNode"
+          },
+          {
+            "name": "ImportedIndividualIdentityNode"
           }
         ]
       }

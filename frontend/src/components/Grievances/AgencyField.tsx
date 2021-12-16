@@ -13,6 +13,7 @@ export interface AgencyFieldProps {
   onDelete: () => {};
   countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
   identityTypeChoices: AllAddIndividualFieldsQuery['identityTypeChoices'];
+  isEdited?: boolean;
 }
 
 export function AgencyField({
@@ -21,21 +22,11 @@ export function AgencyField({
   onDelete,
   countryChoices,
   identityTypeChoices,
+  isEdited,
 }: AgencyFieldProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <>
-      <Grid item xs={4}>
-        <Field
-          name={`${baseName}[${index}].country`}
-          fullWidth
-          variant='outlined'
-          label={t('Country')}
-          component={FormikSelectField}
-          choices={countryChoices}
-          required
-        />
-      </Grid>
       <Grid item xs={4}>
         <Field
           name={`${baseName}[${index}].agency`}
@@ -44,6 +35,17 @@ export function AgencyField({
           label={t('Agency')}
           component={FormikSelectField}
           choices={identityTypeChoices}
+          required
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <Field
+          name={`${baseName}[${index}].country`}
+          fullWidth
+          variant='outlined'
+          label={t('Country')}
+          component={FormikSelectField}
+          choices={countryChoices}
           required
         />
       </Grid>
@@ -57,11 +59,13 @@ export function AgencyField({
           required
         />
       </Grid>
-      <Grid item xs={1}>
-        <IconButton onClick={onDelete}>
-          <Delete />
-        </IconButton>
-      </Grid>
+      {!isEdited ? (
+        <Grid item xs={1}>
+          <IconButton onClick={onDelete}>
+            <Delete />
+          </IconButton>
+        </Grid>
+      ) : null}
     </>
   );
 }
