@@ -55,9 +55,11 @@ class IndividualXlsxUpdate:
         for individuals_unique_report in self.report_dict[IndividualXlsxUpdate.STATUS_UNIQUE]:
             row_num, individual = individuals_unique_report
             row = self.individuals_ws[row_num]
+            individual.row_id = row_num
             individuals.append(self._update_single_individual(row, individual))
 
         columns = [column.replace("individual__", "") for column in self.columns_names]
+        columns.append("row_id")
         Individual.objects.bulk_update(individuals, columns)
 
     @staticmethod
