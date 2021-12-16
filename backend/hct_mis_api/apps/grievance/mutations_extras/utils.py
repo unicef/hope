@@ -417,19 +417,16 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
     primary_roles_count = Counter([role.get("role") for role in role_reassign_data.values()])[ROLE_PRIMARY]
 
     household = individual_to_remove.household
-    can_be_closed_because_of_empty_household = household.individuals.count() == 1 if household else False
+    is_one_individual = household.individuals.count() == 1 if household else False
 
-    if (
-        primary_roles_count != individual_to_remove.count_primary_roles()
-        and not can_be_closed_because_of_empty_household
-    ):
+    if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
         logger.error("Ticket cannot be closed, not all roles have been reassigned")
         raise GraphQLError("Ticket cannot be closed, not all roles have been reassigned")
 
     if (
         all(HEAD not in key for key in role_reassign_data.keys())
         and individual_to_remove.is_head()
-        and not can_be_closed_because_of_empty_household
+        and not is_one_individual
     ):
         logger.error("Ticket cannot be closed head of household has not been reassigned")
         raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
