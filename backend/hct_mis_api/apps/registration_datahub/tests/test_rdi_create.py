@@ -332,6 +332,28 @@ class TestRdiCreateTask(TestCase):
         result = task._cast_value("MALE", "gender_i_c")
         self.assertEqual(result, "MALE")
 
+    def test_store_row_id(self):
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+
+        households = ImportedHousehold.objects.all()
+        individuals = ImportedIndividual.objects.all()
+
+        self.assertEqual(households[0].row_id, 3)
+        self.assertEqual(households[1].row_id, 4)
+        self.assertEqual(households[2].row_id, 5)
+
+        self.assertEqual(individuals[0].row_id, 8)
+        self.assertEqual(individuals[1].row_id, 7)
+        self.assertEqual(individuals[2].row_id, 6)
+        self.assertEqual(individuals[3].row_id, 5)
+        self.assertEqual(individuals[4].row_id, 4)
+        self.assertEqual(individuals[5].row_id, 3)
+
 
 class TestRdiKoboCreateTask(TestCase):
     multi_db = True
