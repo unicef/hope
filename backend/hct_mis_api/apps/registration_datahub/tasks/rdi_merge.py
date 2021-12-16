@@ -91,6 +91,7 @@ class RdiMergeTask:
         "fchild_hoh",
         "child_hoh",
         "kobo_asset_id",
+        "row_id",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -124,6 +125,8 @@ class RdiMergeTask:
         "who_answers_alt_phone",
         "pregnant",
         "work_status",
+        "kobo_asset_id",
+        "row_id",
     )
 
     def merge_admin_area(
