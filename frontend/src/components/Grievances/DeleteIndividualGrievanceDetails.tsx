@@ -212,7 +212,7 @@ export function DeleteIndividualGrievanceDetails({
                       : 'contained'
                   }
                   color='primary'
-                  disabled={!approveEnabled}
+                  disabled={!approveEnabled()}
                 >
                   {ticket.deleteIndividualTicketDetails?.approveStatus
                     ? t('Disapprove')
