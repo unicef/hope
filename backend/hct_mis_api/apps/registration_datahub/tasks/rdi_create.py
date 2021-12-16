@@ -583,6 +583,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         ) from e
 
                 obj_to_create.last_registration_date = obj_to_create.first_registration_date
+                obj_to_create.row_id = row[0].row
 
                 if sheet_title == "households":
                     obj_to_create = self._assign_admin_areas_titles(obj_to_create)
@@ -829,7 +830,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         documents_and_identities_to_create = []
         collectors_to_create = defaultdict(list)
         individuals_to_create_list = []
-        external_collectors = []
         for household in self.reduced_submissions:
             submission_meta_data = get_submission_metadata(household)
             if self.business_area.get_sys_option("ignore_amended_kobo_submissions"):
@@ -927,6 +927,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             for ind in current_individuals:
                 ind.first_registration_date = registration_date
                 ind.last_registration_date = registration_date
+                ind.kobo_asset_id = household_obj.kobo_asset_id
 
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create_list)
