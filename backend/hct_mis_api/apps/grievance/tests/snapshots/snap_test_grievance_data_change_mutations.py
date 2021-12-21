@@ -121,6 +121,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                                     'country': 'POL',
                                     'number': '123-123-UX-321',
                                     'photo': '/api/uploads/test_file_name.jpg',
+                                    'photoraw': 'test_file_name.jpg',
                                     'type': 'NATIONAL_ID'
                                 }
                             ],
@@ -201,6 +202,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                         'country': 'POL',
                                         'number': '321-321-XU-987',
                                         'photo': '/api/uploads/test_file_name.jpg',
+                                        'photoraw': 'test_file_name.jpg',
                                         'type': 'NATIONAL_PASSPORT'
                                     }
                                 }
@@ -213,6 +215,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                         'id': 'RG9jdW1lbnROb2RlOmQzNjdlNDMxLWI4MDctNGMxZi1hODExLWVmMmUwZDIxN2NjNA==',
                                         'number': '789-789-645',
                                         'photo': '',
+                                        'photoraw': '',
                                         'type': 'NATIONAL_ID'
                                     },
                                     'value': {
@@ -220,6 +223,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                         'id': 'RG9jdW1lbnROb2RlOmQzNjdlNDMxLWI4MDctNGMxZi1hODExLWVmMmUwZDIxN2NjNA==',
                                         'number': '321-321-XU-123',
                                         'photo': '/api/uploads/test_file_name.jpg',
+                                        'photoraw': 'test_file_name.jpg',
                                         'type': 'NATIONAL_ID'
                                     }
                                 }
