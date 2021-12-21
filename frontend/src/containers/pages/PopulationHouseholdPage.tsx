@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
 import { PermissionDenied } from '../../components/PermissionDenied';
-import { HouseholdFilters } from '../../components/population/HouseholdFilter';
+import { HouseholdFilters } from '../../components/Population/HouseholdFilter';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';

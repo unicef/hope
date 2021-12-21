@@ -7,7 +7,7 @@ import {
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
+import { ClickableTableRow } from '../../../components/Table/ClickableTableRow';
 import {
   choicesToDict,
   formatCurrencyWithSymbol,
