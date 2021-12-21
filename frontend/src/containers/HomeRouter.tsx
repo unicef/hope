@@ -35,7 +35,7 @@ import { UsersList } from './pages/UsersList';
 import { ReportingPage } from './pages/ReportingPage';
 import { ReportingDetailsPage } from './pages/ReportingDetailsPage';
 import { ActivityLogPage } from './pages/MainActivityLogPage';
-import { CashPlanVerificationRedirectPage } from './pages/CashPlanVerificationRedirectPage';
+import { CashPlanVerificationRedirectPage } from './pages/CashplanVerificationRedirectPage';
 
 const Root = styled.div`
   display: flex;
