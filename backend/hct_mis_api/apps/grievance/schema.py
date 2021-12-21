@@ -447,11 +447,13 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
             for index, document in enumerate(documents_to_edit):
                 previous_value = document.get("previous_value", {})
                 if previous_value and previous_value.get("photo"):
+                    previous_value["photoraw"] = previous_value["photo"]
                     previous_value["photo"] = default_storage.url(previous_value.get("photo"))
                     documents_to_edit[index]["previous_value"] = previous_value
 
                 current_value = document.get("value", {})
                 if current_value and current_value.get("photo"):
+                    current_value["photoraw"] = current_value["photo"]
                     current_value["photo"] = default_storage.url(current_value.get("photo"))
                     documents_to_edit[index]["value"] = current_value
             individual_data["documents_to_edit"] = documents_to_edit
@@ -461,6 +463,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
             for index, document in enumerate(documents):
                 current_value = document.get("value", {})
                 if current_value and current_value.get("photo"):
+                    current_value["photoraw"] = current_value["photo"]
                     current_value["photo"] = default_storage.url(current_value.get("photo"))
                     documents[index]["value"] = current_value
             individual_data["documents"] = documents
@@ -497,6 +500,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         if documents:
             for index, document in enumerate(documents):
                 if document and document["photo"]:
+                    document["photoraw"] = document["photo"]
                     document["photo"] = default_storage.url(document["photo"])
                     documents[index] = document
             individual_data["documents"] = documents
