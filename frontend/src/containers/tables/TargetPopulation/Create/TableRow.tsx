@@ -1,6 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { ClickableTableRow } from '../../../../components/Table/ClickableTableRow';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { renderIndividualName } from '../../../../utils/utils';
 import { HouseholdNode } from '../../../../__generated__/graphql';
