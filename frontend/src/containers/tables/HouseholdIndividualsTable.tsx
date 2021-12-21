@@ -7,9 +7,9 @@ import {
   HouseholdNode,
   IndividualNode,
 } from '../../__generated__/graphql';
-import { Order, TableComponent } from '../../components/table/TableComponent';
-import { HeadCell } from '../../components/table/EnhancedTableHead';
-import { ClickableTableRow } from '../../components/table/ClickableTableRow';
+import { Order, TableComponent } from '../../components/Table/TableComponent';
+import { HeadCell } from '../../components/Table/EnhancedTableHead';
+import { ClickableTableRow } from '../../components/Table/ClickableTableRow';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { StatusBox } from '../../components/StatusBox';
 import {

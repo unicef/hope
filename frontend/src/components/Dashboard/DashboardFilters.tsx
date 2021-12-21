@@ -14,7 +14,7 @@ import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import { useAllProgramsQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
-import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../Population/AdminAreaAutocomplete';
 
 const Container = styled(Paper)`
   display: flex;
@@ -87,7 +87,7 @@ export const DashboardFilters = ({
           </StyledFormControl>
         </Grid>
         <Grid item xs={3}>
-          <AdminAreasAutocomplete
+          <AdminAreaAutocomplete
             fullWidth
             onFilterChange={onFilterChange}
             name='administrativeArea'

@@ -12,7 +12,7 @@ import TextField from '../../shared/TextField';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { FieldLabel } from '../FieldLabel';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
-import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -75,7 +75,7 @@ export function IndividualsFilter({
           />
         </Grid>
         <Grid item>
-          <AdminAreasAutocomplete
+          <AdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='adminArea'
           />
