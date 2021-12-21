@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
-import { PaymentRecordDetails } from '../../components/payments/PaymentRecordDetails';
+import { PaymentRecordDetails } from '../../components/Payments/PaymentRecordDetails';
 import { PermissionDenied } from '../../components/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';

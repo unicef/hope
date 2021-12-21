@@ -19,7 +19,7 @@ import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
 import { FieldLabel } from '../../FieldLabel';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../../Population/AdminAreaAutocomplete';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;
@@ -175,7 +175,7 @@ export function LookUpIndividualFilters({
           </StyledFormControl>
         </Grid>
         <Grid item>
-          <AdminAreasAutocomplete
+          <AdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}

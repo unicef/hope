@@ -4,11 +4,11 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/LoadingComponent';
-import { HeadCell } from '../../../components/table/EnhancedTableHead';
+import { HeadCell } from '../../../components/Table/EnhancedTableHead';
 import {
   Order,
   TableComponent,
-} from '../../../components/table/TableComponent';
+} from '../../../components/Table/TableComponent';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTable/ImportedIndividualsTableRow';
 
 const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [

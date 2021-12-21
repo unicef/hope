@@ -4,7 +4,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { CashPlanNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
+import { ClickableTableRow } from '../../../components/Table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
 import {
   cashPlanStatusToColor,
