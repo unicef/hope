@@ -106,6 +106,7 @@ class IndividualDocumentObjectType(graphene.InputObjectType):
     type = graphene.String(required=True)
     number = graphene.String(required=True)
     photo = Arg()
+    photoraw = Arg()
 
 
 class EditIndividualDocumentObjectType(graphene.InputObjectType):
@@ -114,6 +115,7 @@ class EditIndividualDocumentObjectType(graphene.InputObjectType):
     type = graphene.String(required=True)
     number = graphene.String(required=True)
     photo = Arg()
+    photoraw = Arg()
 
 
 class IndividualIdentityObjectType(graphene.InputObjectType):

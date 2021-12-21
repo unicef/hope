@@ -326,7 +326,13 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "sex": "MALE",
                 "role": "PRIMARY",
                 "documents": [
-                    {"type": "NATIONAL_ID", "number": "321-321-UX-321", "country": "USA", "photo": "test_file_name.jpg"}
+                    {
+                        "type": "NATIONAL_ID",
+                        "number": "321-321-UX-321",
+                        "country": "USA",
+                        "photo": "test_file_name.jpg",
+                        "photoraw": "test_file_name.jpg",
+                    }
                 ],
                 "identities": [{"agency": "UNHCR", "country": "POL", "number": "2222"}],
                 "full_name": "John Example",
@@ -446,6 +452,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "number": "111-222-777",
                             "country": "POL",
                             "photo": "test_file_name.jpg",
+                            "photoraw": "test_file_name.jpg",
                         },
                         "approve_status": False,
                     },
