@@ -25,6 +25,7 @@ interface LookUpIndividualTableProps {
   setSelectedHousehold;
   ticket?;
   excludedId?;
+  withdrawn?: boolean;
 }
 
 export const LookUpIndividualTable = ({
@@ -37,6 +38,7 @@ export const LookUpIndividualTable = ({
   setSelectedHousehold,
   ticket,
   excludedId,
+  withdrawn,
 }: LookUpIndividualTableProps): React.ReactElement => {
   const handleRadioChange = (individual): void => {
     if (individual.household?.id) {
@@ -48,7 +50,7 @@ export const LookUpIndividualTable = ({
     setFieldValue('identityVerified', false);
   };
 
-  const initialVariables = {
+  const initialVariables : AllIndividualsQueryVariables = {
     businessArea,
     search: filter.search,
     programs: [decodeIdString(filter.programs)],
@@ -61,6 +63,9 @@ export const LookUpIndividualTable = ({
       : null,
     excludedId: excludedId || ticket?.individual?.id || null,
   };
+  if(withdrawn!==null &&withdrawn!==undefined){
+    initialVariables.withdrawn = withdrawn
+  }
 
   return (
     <TableWrapper>
