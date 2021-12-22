@@ -667,7 +667,9 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     if individual.flex_fields is not None:
         merged_flex_fields.update(individual.flex_fields)
     merged_flex_fields.update(flex_fields)
-    Individual.objects.filter(id=individual.id).update(flex_fields=merged_flex_fields, **only_approved_data)
+    Individual.objects.filter(id=individual.id).update(
+        flex_fields=merged_flex_fields, **only_approved_data, updated_at=datetime.now()
+    )
     new_individual = Individual.objects.get(id=individual.id)
     relationship_to_head_of_household = individual_data.get("relationship")
     if (
