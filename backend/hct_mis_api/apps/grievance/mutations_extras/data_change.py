@@ -264,6 +264,7 @@ def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwa
         return update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
         return update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
+    return grievance_ticket
 
 
 def save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
