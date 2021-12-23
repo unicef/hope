@@ -1,4 +1,4 @@
-import { HeadCell } from '../table/EnhancedTableHead';
+import { HeadCell } from '../Table/EnhancedTableHead';
 import { LogEntryNode } from '../../__generated__/graphql';
 
 export const headCells: HeadCell<LogEntryNode>[] = [
