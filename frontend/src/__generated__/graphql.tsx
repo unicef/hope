@@ -966,6 +966,7 @@ export type EditIndividualDocumentObjectType = {
   type: Scalars['String'],
   number: Scalars['String'],
   photo?: Maybe<Scalars['Arg']>,
+  photoraw?: Maybe<Scalars['Arg']>,
 };
 
 export type EditIndividualIdentityObjectType = {
@@ -1214,6 +1215,8 @@ export type HouseholdNode = Node & {
   currency?: Maybe<Scalars['String']>,
   unhcrId: Scalars['String'],
   userFields: Scalars['JSONString'],
+  koboAssetId: Scalars['String'],
+  rowId?: Maybe<Scalars['Int']>,
   paymentRecords: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
@@ -2012,6 +2015,7 @@ export type ImportedHouseholdNode = Node & {
   koboSubmissionUuid?: Maybe<Scalars['UUID']>,
   koboAssetId: Scalars['String'],
   koboSubmissionTime?: Maybe<Scalars['DateTime']>,
+  rowId?: Maybe<Scalars['Int']>,
   individuals: ImportedIndividualNodeConnection,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
 };
@@ -2149,6 +2153,8 @@ export type ImportedIndividualNode = Node & {
   commsDisability: Scalars['String'],
   whoAnswersPhone: Scalars['String'],
   whoAnswersAltPhone: Scalars['String'],
+  koboAssetId: Scalars['String'],
+  rowId?: Maybe<Scalars['Int']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
@@ -2235,6 +2241,7 @@ export type IndividualDocumentObjectType = {
   type: Scalars['String'],
   number: Scalars['String'],
   photo?: Maybe<Scalars['Arg']>,
+  photoraw?: Maybe<Scalars['Arg']>,
 };
 
 export type IndividualIdentityNode = Node & {
@@ -2334,6 +2341,8 @@ export type IndividualNode = Node & {
   businessArea: UserBusinessAreaNode,
   fchildHoh: Scalars['Boolean'],
   childHoh: Scalars['Boolean'],
+  koboAssetId: Scalars['String'],
+  rowId?: Maybe<Scalars['Int']>,
   paymentRecords: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
@@ -4836,7 +4845,8 @@ export type TargetPopulationNodeEdge = {
 export enum TargetPopulationStatus {
   Draft = 'DRAFT',
   Locked = 'LOCKED',
-  Finalized = 'FINALIZED'
+  Processing = 'PROCESSING',
+  ReadyForCashAssist = 'READY_FOR_CASH_ASSIST'
 }
 
 export type TicketAddIndividualDetailsNode = Node & {
@@ -5672,7 +5682,7 @@ export type HouseholdMinimalFragment = (
     & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
   )>, headOfHousehold: (
     { __typename?: 'IndividualNode' }
-    & Pick<IndividualNode, 'id' | 'fullName'>
+    & Pick<IndividualNode, 'id' | 'fullName' | 'givenName' | 'familyName'>
   ), individuals: (
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -5848,7 +5858,7 @@ export type IndividualDetailedFragment = (
     & Pick<HouseholdNode, 'id'>
     & { headOfHousehold: (
       { __typename?: 'IndividualNode' }
-      & Pick<IndividualNode, 'id'>
+      & Pick<IndividualNode, 'id' | 'givenName' | 'familyName' | 'fullName'>
     ) }
   )>, householdsAndRoles: Array<(
     { __typename?: 'IndividualRoleInHouseholdNode' }
@@ -8918,6 +8928,8 @@ export const HouseholdMinimalFragmentDoc = gql`
   headOfHousehold {
     id
     fullName
+    givenName
+    familyName
   }
   address
   individuals {
@@ -9200,6 +9212,9 @@ export const IndividualDetailedFragmentDoc = gql`
     id
     headOfHousehold {
       id
+      givenName
+      familyName
+      fullName
     }
   }
   flexFields
@@ -18331,6 +18346,8 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeSensitiveTicketDetailsArgs>,
@@ -18482,6 +18499,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   koboSubmissionUuid?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
@@ -18556,6 +18574,8 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
@@ -18662,6 +18682,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   fchildHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentRecordsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, IndividualNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, IndividualNodeSensitiveTicketDetailsArgs>,

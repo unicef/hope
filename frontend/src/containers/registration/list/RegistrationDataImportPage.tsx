@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../../components/PageHeader';
 import { RegistrationDataImport } from '../import/RegistrationDataImport';
-import { RegistrationDataImportTable } from '../tables/RegistrationdDataImportTable';
+import { RegistrationDataImportTable } from '../tables/RegistrationDataImportTable';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';

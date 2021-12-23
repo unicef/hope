@@ -131,6 +131,7 @@ export const LookUpReassignRoleModal = ({
               setSelectedIndividual={setSelectedIndividual}
               ticket={ticket}
               excludedId={excludedIndividual.id}
+              withdrawn={false}
             />
           </DialogContent>
           <DialogFooter>
