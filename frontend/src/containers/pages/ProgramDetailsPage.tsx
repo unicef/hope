@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { PermissionDenied } from '../../components/PermissionDenied';
-import { ProgramDetails } from '../../components/programs/ProgramDetails';
+import { ProgramDetails } from '../../components/Programs/ProgramDetails';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { usePermissions } from '../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../utils/utils';

@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { PhotoModal } from '../../PhotoModal/PhotoModal';
 import { handleSelected } from '../utils/helpers';
 
 const Title = styled.div`
@@ -65,6 +66,7 @@ export const DocumentsTable = ({
         <TableCell align='left'>{t('ID Type')}</TableCell>
         <TableCell align='left'>{t('Country')}</TableCell>
         <TableCell align='left'>{t('Number')}</TableCell>
+        <TableCell align='left'>{t('Photo')}</TableCell>
       </TableRow>
     </TableHead>
   );
@@ -109,6 +111,9 @@ export const DocumentsTable = ({
                   {countriesDict[row.value.country]}
                 </TableCell>
                 <TableCell align='left'>{row.value.number}</TableCell>
+                <TableCell align='left'>
+                  {row.value.photo ? <PhotoModal src={row.value.photo} /> : '-'}
+                </TableCell>
               </TableRow>
             );
           })}

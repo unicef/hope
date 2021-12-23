@@ -315,6 +315,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             "currency",
             "unhcr_id",
             "kobo_asset_id",
+            "row_id",
         ]
     )
     withdrawn = models.BooleanField(default=False, db_index=True)
@@ -395,6 +396,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
+    row_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Household"
@@ -784,6 +786,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             "comms_disability",
             "who_answers_phone",
             "who_answers_alt_phone",
+            "kobo_asset_id",
+            "row_id",
         ]
     )
     duplicate = models.BooleanField(default=False, db_index=True)
@@ -869,6 +873,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     fchild_hoh = models.BooleanField(default=False)
     child_hoh = models.BooleanField(default=False)
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
+    row_id = models.PositiveIntegerField(blank=True, null=True)
 
     @property
     def age(self):
