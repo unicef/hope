@@ -4,7 +4,9 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.mutations_extras.utils import reassign_roles_on_update
+from hct_mis_api.apps.grievance.mutations_extras.utils import (
+    reassign_roles_on_disable_individual,
+)
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -15,7 +17,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
-class TestReassignRolesOnUpdate(APITestCase):
+class TestReassignRolesOnDisableIndividual(APITestCase):
     def setUp(self) -> None:
         super().setUp()
         call_command("loadbusinessareas")
@@ -65,14 +67,14 @@ class TestReassignRolesOnUpdate(APITestCase):
                 "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                 "individual": self.id_to_base64(individual.id, "IndividualNode"),
             },
-            self.primary_role.id: {
+            str(self.primary_role.id): {
                 "role": "PRIMARY",
                 "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                 "individual": self.id_to_base64(individual.id, "IndividualNode"),
             },
         }
 
-        reassign_roles_on_update(self.primary_collector_individual, role_reassign_data)
+        reassign_roles_on_disable_individual(self.primary_collector_individual, role_reassign_data)
 
         individual.refresh_from_db()
         self.household.refresh_from_db()
@@ -84,7 +86,7 @@ class TestReassignRolesOnUpdate(APITestCase):
 
     def test_reassign_alternate_role_to_primary_collector(self):
         role_reassign_data = {
-            self.alternate_role.id: {
+            str(self.alternate_role.id): {
                 "role": "ALTERNATE",
                 "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                 "individual": self.id_to_base64(self.primary_collector_individual.id, "IndividualNode"),
@@ -92,7 +94,7 @@ class TestReassignRolesOnUpdate(APITestCase):
         }
 
         with self.assertRaises(GraphQLError) as context:
-            reassign_roles_on_update(self.alternate_collector_individual, role_reassign_data)
+            reassign_roles_on_disable_individual(self.alternate_collector_individual, role_reassign_data)
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
 
@@ -102,14 +104,14 @@ class TestReassignRolesOnUpdate(APITestCase):
         individual.save()
 
         role_reassign_data = {
-            self.alternate_role.id: {
+            str(self.alternate_role.id): {
                 "role": "ALTERNATE",
                 "household": self.id_to_base64(self.household.id, "HouseholdNode"),
                 "individual": self.id_to_base64(individual.id, "IndividualNode"),
             },
         }
 
-        reassign_roles_on_update(self.alternate_collector_individual, role_reassign_data)
+        reassign_roles_on_disable_individual(self.alternate_collector_individual, role_reassign_data)
 
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
         self.assertEqual(role, ROLE_ALTERNATE)
