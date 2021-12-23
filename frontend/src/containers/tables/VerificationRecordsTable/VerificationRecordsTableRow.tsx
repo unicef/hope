@@ -4,7 +4,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { BlackLink } from '../../../components/BlackLink';
 import { StatusBox } from '../../../components/StatusBox';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { AnonTableCell } from '../../../components/Table/AnonTableCell';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,

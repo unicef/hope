@@ -4,49 +4,45 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  hasCreatorOrOwnerPermissions,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { usePermissions } from '../../hooks/usePermissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../hooks/usePermissions';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
+} from '../../../utils/constants';
 import {
   decodeIdString,
   grievanceTicketStatusToColor,
   isPermissionDeniedError,
   reduceChoices,
   renderUserName,
-} from '../../utils/utils';
+} from '../../../utils/utils';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
   useMeQuery,
-} from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { ContentLink } from '../ContentLink';
-import { LabelizedField } from '../LabelizedField';
-import { LoadingComponent } from '../LoadingComponent';
-import { OverviewContainer } from '../OverviewContainer';
-import { PermissionDenied } from '../PermissionDenied';
-import { StatusBox } from '../StatusBox';
-import { UniversalMoment } from '../UniversalMoment';
-import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
-import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
-import { FlagDetails } from './FlagDetails';
-import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
-import { NeedsAdjudicationDetails } from './NeedsAdjudicationDetails';
-import { Notes } from './Notes';
-import { OtherRelatedTickets } from './OtherRelatedTickets';
-import { PaymentIds } from './PaymentIds';
-import { ReassignRoleBox } from './ReassignRoleBox';
-import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
-import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
+} from '../../../__generated__/graphql';
+import { ContainerColumnWithBorder } from '../../ContainerColumnWithBorder';
+import { ContentLink } from '../../ContentLink';
+import { LabelizedField } from '../../LabelizedField';
+import { LoadingComponent } from '../../LoadingComponent';
+import { OverviewContainer } from '../../OverviewContainer';
+import { PermissionDenied } from '../../PermissionDenied';
+import { StatusBox } from '../../StatusBox';
+import { UniversalMoment } from '../../UniversalMoment';
+import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails';
+import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
+import { FlagDetails } from '../FlagDetails';
+import { GrievanceDetailsToolbar } from '../GrievanceDetailsToolbar';
+import { NeedsAdjudicationDetails } from '../NeedsAdjudicationDetails';
+import { Notes } from '../Notes';
+import { OtherRelatedTickets } from '../OtherRelatedTickets';
+import { PaymentIds } from '../PaymentIds';
+import { ReassignRoleBox } from '../ReassignRoleBox';
+import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
+import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
+import { grievancePermissions } from './grievancePermissions';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -73,6 +69,11 @@ export function GrievanceDetailsPage(): React.ReactElement {
     variables: { id },
     fetchPolicy: 'network-only',
   });
+  const ticket = data?.grievanceTicket;
+  const currentUserId = currentUserData?.me?.id;
+  const isCreator = currentUserId === ticket?.createdBy?.id;
+  const isOwner = currentUserId === ticket?.assignedTo?.id;
+
   const businessArea = useBusinessArea();
   const {
     data: choicesData,
@@ -94,126 +95,6 @@ export function GrievanceDetailsPage(): React.ReactElement {
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
-  const ticket = data.grievanceTicket;
-  const currentUserId = currentUserData.me.id;
-  const isCreator = currentUserId === ticket.createdBy?.id;
-  const isOwner = currentUserId === ticket.assignedTo?.id;
-
-  const canViewHouseholdDetails = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER,
-    permissions,
-  );
-
-  const canViewIndividualDetails = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER,
-    permissions,
-  );
-
-  const canEdit = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_UPDATE,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_UPDATE_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
-    permissions,
-  );
-
-  const canAddNote = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_ADD_NOTE,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_ADD_NOTE_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_ADD_NOTE_AS_OWNER,
-    permissions,
-  );
-
-  const canSetInProgress = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS_AS_OWNER,
-    permissions,
-  );
-
-  const canSetOnHold = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_SET_ON_HOLD,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_SET_ON_HOLD_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_SET_ON_HOLD_AS_OWNER,
-    permissions,
-  );
-
-  const canSendForApproval = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER,
-    permissions,
-  );
-  const canSendBack = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_SEND_BACK,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_SEND_BACK_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_SEND_BACK_AS_OWNER,
-    permissions,
-  );
-  const isFeedbackType = [
-    GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK,
-    GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK,
-    GRIEVANCE_CATEGORIES.REFERRAL,
-  ].includes(ticket.category.toString());
-  const canClose =
-    (isFeedbackType &&
-      hasCreatorOrOwnerPermissions(
-        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
-        isCreator,
-        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
-        isOwner,
-        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
-        permissions,
-      )) ||
-    (!isFeedbackType &&
-      hasCreatorOrOwnerPermissions(
-        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
-        isCreator,
-        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
-        isOwner,
-        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
-        permissions,
-      ));
-
-  const canApproveDataChange = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
-    permissions,
-  );
-
-  const canApproveFlagAndAdjudication = hasCreatorOrOwnerPermissions(
-    PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
-    isCreator,
-    PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
-    isOwner,
-    PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
-    permissions,
-  );
-
-  const canAssign = hasPermissions(PERMISSIONS.GRIEVANCES_ASSIGN, permissions);
-
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -221,6 +102,21 @@ export function GrievanceDetailsPage(): React.ReactElement {
           (el) => el.value === ticket.issueType.toString(),
         )[0].name
     : '-';
+
+  const {
+    canViewHouseholdDetails,
+    canViewIndividualDetails,
+    canEdit,
+    canAddNote,
+    canSetInProgress,
+    canSetOnHold,
+    canSendForApproval,
+    canSendBack,
+    canClose,
+    canApproveDataChange,
+    canApproveFlagAndAdjudication,
+    canAssign,
+  } = grievancePermissions(isCreator, isOwner, ticket, permissions);
 
   const FieldsArray: {
     label: string;

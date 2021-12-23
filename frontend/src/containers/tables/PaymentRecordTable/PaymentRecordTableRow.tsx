@@ -4,14 +4,14 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
+import { ClickableTableRow } from '../../../components/Table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
 import {
   formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { AnonTableCell } from '../../../components/Table/AnonTableCell';
 import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`

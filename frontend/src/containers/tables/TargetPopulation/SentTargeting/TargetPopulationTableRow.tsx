@@ -3,7 +3,7 @@ import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { ClickableTableRow } from '../../../../components/Table/ClickableTableRow';
 import { decodeIdString, renderIndividualName } from '../../../../utils/utils';
 import { BlackLink } from '../../../../components/BlackLink';
 

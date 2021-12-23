@@ -91,6 +91,7 @@ class RdiMergeTask:
         "fchild_hoh",
         "child_hoh",
         "kobo_asset_id",
+        "row_id",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -124,6 +125,8 @@ class RdiMergeTask:
         "who_answers_alt_phone",
         "pregnant",
         "work_status",
+        "kobo_asset_id",
+        "row_id",
     )
 
     def merge_admin_area(
@@ -134,13 +137,13 @@ class RdiMergeTask:
         admin1 = imported_household.admin1
         admin2 = imported_household.admin2
         try:
-            if admin2 is not None:
+            if admin2:
                 admin_area = AdminArea.objects.filter(p_code=admin2).first()
                 admin_area_new = Area.objects.filter(p_code=admin2).first()
                 household.admin_area = admin_area
                 household.admin_area_new = admin_area_new
                 return
-            if admin1 is not None:
+            if admin1:
                 admin_area = AdminArea.objects.filter(p_code=admin1).first()
                 admin_area_new = Area.objects.filter(p_code=admin1).first()
                 household.admin_area = admin_area
