@@ -343,16 +343,8 @@ class TestRdiCreateTask(TestCase):
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
 
-        self.assertEqual(households[0].row_id, 3)
-        self.assertEqual(households[1].row_id, 4)
-        self.assertEqual(households[2].row_id, 5)
-
-        self.assertEqual(individuals[0].row_id, 8)
-        self.assertEqual(individuals[1].row_id, 7)
-        self.assertEqual(individuals[2].row_id, 6)
-        self.assertEqual(individuals[3].row_id, 5)
-        self.assertEqual(individuals[4].row_id, 4)
-        self.assertEqual(individuals[5].row_id, 3)
+        [self.assertTrue(household.row_id in [3, 4, 5]) for household in households]
+        [self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8]) for individual in individuals]
 
 
 class TestRdiKoboCreateTask(TestCase):

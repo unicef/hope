@@ -172,6 +172,7 @@ class TestCloseDataChangeTickets(APITestCase):
                         "country": "POL",
                         "number": "123-123-UX-321",
                         "photo": "test_file_name.jpg",
+                        "photoraw": "test_file_name.jpg",
                     }
                 ],
             },
@@ -204,6 +205,7 @@ class TestCloseDataChangeTickets(APITestCase):
                             "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                             "number": "999-888-777",
                             "photo": "test_file_name.jpg",
+                            "photoraw": "test_file_name.jpg",
                         },
                         "approve_status": True,
                     },
@@ -372,6 +374,7 @@ class TestCloseDataChangeTickets(APITestCase):
                             "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                             "number": "999-888-777",
                             "photo": "new_test_file_name.jpg",
+                            "photoraw": "new_test_file_name.jpg",
                         },
                         "previous_value": {
                             "id": self.id_to_base64(national_id.id, "DocumentNode"),
@@ -379,6 +382,7 @@ class TestCloseDataChangeTickets(APITestCase):
                             "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                             "number": "999-888-777",
                             "photo": "test_file_name.jpg",
+                            "photoraw": "test_file_name.jpg",
                         },
                         "approve_status": True,
                     },
