@@ -50,14 +50,20 @@ export const LookUpReassignRoleModal = ({
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
-  const [filterIndividual, setFilterIndividual] = useState({
+  const individualFilterInitial = {
     search: '',
-    program: '',
+    programs: '',
     lastRegistrationDate: { min: undefined, max: undefined },
-    residenceStatus: '',
-    admin2: '',
+    status: '',
+    admin2: null,
     sex: '',
-  });
+  };
+  const [filterIndividualApplied, setFilterIndividualApplied] = useState(
+    individualFilterInitial,
+  );
+  const [filterIndividual, setFilterIndividual] = useState(
+    individualFilterInitial,
+  );
   const debouncedFilterIndividual = useDebounce(filterIndividual, 500);
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
@@ -117,11 +123,13 @@ export const LookUpReassignRoleModal = ({
           <DialogContent>
             <LookUpIndividualFilters
               programs={programs as ProgramNode[]}
-              filter={debouncedFilterIndividual}
+              filter={filterIndividual}
               onFilterChange={setFilterIndividual}
+              setFilterIndividualApplied={setFilterIndividualApplied}
+              individualFilterInitial={individualFilterInitial}
             />
             <LookUpIndividualTable
-              filter={debouncedFilterIndividual}
+              filter={filterIndividualApplied}
               businessArea={businessArea}
               setFieldValue={setFieldValue}
               valuesInner={values}
