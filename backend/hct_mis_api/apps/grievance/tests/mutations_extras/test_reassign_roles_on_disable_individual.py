@@ -1,9 +1,9 @@
 from django.core.management import call_command
-
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.fixtures import TicketDeleteIndividualDetailsFactory
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     reassign_roles_on_disable_individual,
 )
@@ -21,7 +21,6 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
     def setUp(self) -> None:
         super().setUp()
         call_command("loadbusinessareas")
-
         business_area = BusinessArea.objects.get(slug="afghanistan")
         program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
 
@@ -30,6 +29,10 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         self.household.registration_data_import.save()
         self.household.programs.add(program_one)
 
+        ticket_details = TicketDeleteIndividualDetailsFactory()
+        ticket_details.household = self.household
+        ticket_details.save()
+        self.ticket = ticket_details.ticket
         self.primary_collector_individual = IndividualFactory(household=None)
         self.household.head_of_household = self.primary_collector_individual
         self.household.save()
@@ -73,8 +76,9 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
                 "individual": self.id_to_base64(individual.id, "IndividualNode"),
             },
         }
+        ticket = T
 
-        reassign_roles_on_disable_individual(self.primary_collector_individual, role_reassign_data)
+        reassign_roles_on_disable_individual(self.ticket, self.primary_collector_individual, role_reassign_data)
 
         individual.refresh_from_db()
         self.household.refresh_from_db()
@@ -94,7 +98,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         }
 
         with self.assertRaises(GraphQLError) as context:
-            reassign_roles_on_disable_individual(self.alternate_collector_individual, role_reassign_data)
+            reassign_roles_on_disable_individual(self.ticket, self.alternate_collector_individual, role_reassign_data)
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
 
@@ -111,7 +115,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
             },
         }
 
-        reassign_roles_on_disable_individual(self.alternate_collector_individual, role_reassign_data)
+        reassign_roles_on_disable_individual(self.ticket, self.alternate_collector_individual, role_reassign_data)
 
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
         self.assertEqual(role, ROLE_ALTERNATE)
