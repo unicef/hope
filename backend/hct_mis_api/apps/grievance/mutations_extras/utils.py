@@ -346,7 +346,7 @@ def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove,
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
+    household = reassign_roles_on_disable_individual(ticket_details.ticket, individual_to_remove, ticket_details.role_reassign_data, info)
     withdraw_individual(individual_to_remove, info, old_individual, household)
 
 
@@ -354,7 +354,7 @@ def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_t
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
+    household = reassign_roles_on_disable_individual(ticket_details.ticket, individual_to_remove, ticket_details.role_reassign_data, info)
     mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
 
 
@@ -376,7 +376,7 @@ def get_data_from_role_data(role_data):
     return role_name, old_individual, new_individual, household
 
 
-def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_data, info=None):
+def reassign_roles_on_disable_individual(ticket, individual_to_remove, role_reassign_data, info=None):
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -388,6 +388,8 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
         Individual,
         IndividualRoleInHousehold,
     )
+
+    ticket_household = ticket.ticket_details.household
 
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
@@ -414,7 +416,7 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
 
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
-                IndividualRoleInHousehold, role=role_name, household=household, individual=individual_to_remove
+                IndividualRoleInHousehold, role=role_name, household=ticket_household, individual=individual_to_remove
             )
             role.individual = new_individual
             roles_to_bulk_update.append(role)
