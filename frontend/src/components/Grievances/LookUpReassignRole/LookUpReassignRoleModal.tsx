@@ -45,12 +45,33 @@ export const LookUpReassignRoleModal = ({
   setSelectedIndividual,
   setSelectedHousehold,
   excludedIndividual,
+  household,
+}: {
+  onValueChange;
+  initialValues;
+  lookUpDialogOpen;
+  setLookUpDialogOpen;
+  ticket;
+  selectedIndividual;
+  selectedHousehold;
+  setSelectedIndividual;
+  setSelectedHousehold;
+  excludedIndividual;
+  household?;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
-  const individualFilterInitial = {
+  const individualFilterInitial: {
+    search;
+    programs;
+    lastRegistrationDate;
+    status;
+    admin2;
+    sex;
+    household?;
+  } = {
     search: '',
     programs: '',
     lastRegistrationDate: { min: undefined, max: undefined },
@@ -58,6 +79,9 @@ export const LookUpReassignRoleModal = ({
     admin2: null,
     sex: '',
   };
+  if (household) {
+    individualFilterInitial.household = household?.id;
+  }
   const [filterIndividualApplied, setFilterIndividualApplied] = useState(
     individualFilterInitial,
   );
@@ -127,6 +151,7 @@ export const LookUpReassignRoleModal = ({
               onFilterChange={setFilterIndividual}
               setFilterIndividualApplied={setFilterIndividualApplied}
               individualFilterInitial={individualFilterInitial}
+              household={household}
             />
             <LookUpIndividualTable
               filter={filterIndividualApplied}

@@ -49,8 +49,15 @@ export const LookUpIndividualTable = ({
     setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
   };
-
-  const initialVariables : AllIndividualsQueryVariables = {
+  let householdId;
+  if ('household' in filter) {
+    householdId = decodeIdString(filter.household);
+  } else {
+    householdId = valuesInner.selectedHousehold
+      ? decodeIdString(valuesInner.selectedHousehold.id)
+      : null;
+  }
+  const initialVariables: AllIndividualsQueryVariables = {
     businessArea,
     search: filter.search,
     programs: [decodeIdString(filter.programs)],
@@ -58,13 +65,11 @@ export const LookUpIndividualTable = ({
     status: filter.status,
     admin2: [decodeIdString(filter?.admin2?.node?.id)],
     sex: [filter.sex],
-    householdId: valuesInner.selectedHousehold
-      ? decodeIdString(valuesInner.selectedHousehold.id)
-      : null,
+    householdId,
     excludedId: excludedId || ticket?.individual?.id || null,
   };
-  if(withdrawn!==null &&withdrawn!==undefined){
-    initialVariables.withdrawn = withdrawn
+  if (withdrawn !== null && withdrawn !== undefined) {
+    initialVariables.withdrawn = withdrawn;
   }
 
   return (
