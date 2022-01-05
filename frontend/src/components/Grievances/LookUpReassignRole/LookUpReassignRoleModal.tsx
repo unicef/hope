@@ -113,7 +113,7 @@ export const LookUpReassignRoleModal = ({
           await mutate({
             variables: {
               grievanceTicketId: id,
-              householdId: values.selectedHousehold.id,
+              householdId: household.id,
               individualId: values.selectedIndividual.id,
               role: values.role,
             },
