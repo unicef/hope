@@ -941,14 +941,13 @@ class ReassignRoleMutation(graphene.Mutation):
             ticket_individual = ticket_details.golden_records_individual
         else:
             ticket_individual = ticket_details.individual
-        ticket_household = ticket_details.household
-        cls.verify_if_role_exists(ticket_household, ticket_individual, role)
+        cls.verify_if_role_exists(household, ticket_individual, role)
 
         if role == HEAD:
             role_data_key = role
         else:
             role_object = get_object_or_404(
-                IndividualRoleInHousehold, individual=ticket_individual, household=ticket_household, role=role
+                IndividualRoleInHousehold, individual=ticket_individual, household=household, role=role
             )
             role_data_key = str(role_object.id)
 

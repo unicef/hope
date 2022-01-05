@@ -389,7 +389,6 @@ def reassign_roles_on_disable_individual(ticket, individual_to_remove, role_reas
         IndividualRoleInHousehold,
     )
 
-    ticket_household = ticket.ticket_details.household
 
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
@@ -416,15 +415,15 @@ def reassign_roles_on_disable_individual(ticket, individual_to_remove, role_reas
 
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
-                IndividualRoleInHousehold, role=role_name, household=ticket_household, individual=individual_to_remove
+                IndividualRoleInHousehold, role=role_name, household=household, individual=individual_to_remove
             )
             role.individual = new_individual
             roles_to_bulk_update.append(role)
 
     primary_roles_count = Counter([role.get("role") for role in role_reassign_data.values()])[ROLE_PRIMARY]
 
-    household = individual_to_remove.household
-    is_one_individual = household.individuals.count() == 1 if household else False
+    household_to_remove = individual_to_remove.household
+    is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False
 
     if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
         logger.error("Ticket cannot be closed, not all roles have been reassigned")
