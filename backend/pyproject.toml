@@ -57,7 +57,7 @@ Jinja2 = "2.11.2"
 PyJWT = "1.7.1"
 PyYAML = "^5.4.1"
 black = "^20.8b1"
-celery = {extras = ["redis"], version = "^5.0.5"}
+celery = {extras = ["redis"], version = "^5.2.2"}
 defusedxml= "0.7.0rc1"
 django-advanced-filters = "*"
 django-admin-extra-urls = "^3.5.1"
