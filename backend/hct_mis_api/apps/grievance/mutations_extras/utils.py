@@ -346,7 +346,9 @@ def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove,
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(ticket_details.ticket, individual_to_remove, ticket_details.role_reassign_data, info)
+    household = reassign_roles_on_disable_individual(
+        ticket_details.ticket, individual_to_remove, ticket_details.role_reassign_data, info
+    )
     withdraw_individual(individual_to_remove, info, old_individual, household)
 
 
@@ -354,7 +356,9 @@ def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_t
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(ticket_details.ticket, individual_to_remove, ticket_details.role_reassign_data, info)
+    household = reassign_roles_on_disable_individual(
+        ticket_details.ticket, individual_to_remove, ticket_details.role_reassign_data, info
+    )
     mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
 
 
@@ -388,7 +392,6 @@ def reassign_roles_on_disable_individual(ticket, individual_to_remove, role_reas
         Individual,
         IndividualRoleInHousehold,
     )
-
 
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
@@ -440,7 +443,7 @@ def reassign_roles_on_disable_individual(ticket, individual_to_remove, role_reas
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
-    return household
+    return household_to_remove
 
 
 def reassign_roles_on_update(individual, role_reassign_data, info=None):
@@ -515,7 +518,7 @@ def log_and_withdraw_household_if_needed(
         individual_to_remove,
     )
     removed_individual_household.refresh_from_db()
-    if removed_individual_household and removed_individual_household.individuals.count() == 0:
+    if removed_individual_household and removed_individual_household.active_individuals.count() == 0:
         removed_individual_household.withdraw()
 
 
