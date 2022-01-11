@@ -619,8 +619,7 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request):
         from django.contrib.admin.helpers import AdminForm
-
-        context = self.get_common_context(request)
+        context = self.get_common_context(request, processed=False)
         if request.method == "GET":
             form = ImportCSVForm(initial={"partner": Partner.objects.first()})
             context["form"] = form
@@ -628,6 +627,7 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
             form = ImportCSVForm(data=request.POST, files=request.FILES)
             if form.is_valid():
                 try:
+                    context["processed"] = True
                     csv_file = form.cleaned_data["file"]
                     enable_kobo = form.cleaned_data["enable_kobo"]
                     partner = form.cleaned_data["partner"]
@@ -687,6 +687,7 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                     context["errors"] = [str(e)]
                     self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
             else:
+                self.message_user(request, "Please correct errors below", messages.ERROR)
                 context["form"] = form
         fs = form._fieldsets or [(None, {"fields": form.base_fields})]
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})
