@@ -971,6 +971,9 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def count_all_roles(self):
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
 
+    def count_primary_roles(self):
+        return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
+
     @cached_property
     def parents(self):
         if self.household:
@@ -988,6 +991,11 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def active_record(self):
         if self.duplicate:
             return Individual.objects.filter(unicef_id=self.unicef_id, duplicate=False, is_removed=False).first()
+
+    def is_head(self):
+        if not self.household:
+            return False
+        return self.household.head_of_household.id == self.id
 
 
 class EntitlementCard(TimeStampedUUIDModel):

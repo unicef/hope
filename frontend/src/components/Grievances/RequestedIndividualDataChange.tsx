@@ -9,6 +9,9 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketQuery,
+  HouseholdNode,
+  IndividualNode,
+  IndividualRoleInHouseholdRole,
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../ConfirmationDialog';
@@ -24,6 +27,12 @@ const StyledBox = styled(Paper)`
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
+
+export type RoleReassignData = {
+  role: IndividualRoleInHouseholdRole | string;
+  individual: IndividualNode;
+  household: HouseholdNode;
+};
 
 export function RequestedIndividualDataChange({
   ticket,
@@ -125,20 +134,21 @@ export function RequestedIndividualDataChange({
 
   const isHeadOfHousehold =
     ticket.individual?.id === ticket.household?.headOfHousehold?.id;
-  const rolesToReassign = ticket.individual?.householdsAndRoles?.filter(
-    (el) => el.role !== 'NO_ROLE',
-  ).length;
 
-  const rolesCount =
-    (role.value ? rolesToReassign : 0) +
-    (isHeadOfHousehold && relationship.value && relationship.value !== 'HEAD'
-      ? 1
-      : 0);
-
-  const rolesReassignedCount = Object.keys(
+  const primaryCollectorRolesCount =
+    ticket?.individual?.householdsAndRoles.filter(
+      (el) => el.role === IndividualRoleInHouseholdRole.Primary,
+    ).length + (isHeadOfHousehold ? 1 : 0);
+  const primaryColletorRolesReassignedCount = Object.values(
     JSON.parse(ticket.individualDataUpdateTicketDetails.roleReassignData),
+  )?.filter(
+    (el: RoleReassignData) =>
+      el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
   ).length;
-  const approveEnabled = isForApproval && rolesCount === rolesReassignedCount;
+
+  const approveEnabled =
+    isForApproval &&
+    primaryCollectorRolesCount === primaryColletorRolesReassignedCount;
 
   const shouldShowEditButton = (allChangesLength): boolean =>
     allChangesLength && !isEdit && isForApproval;

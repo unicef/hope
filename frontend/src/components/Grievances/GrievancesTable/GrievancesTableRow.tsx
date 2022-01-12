@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../table/ClickableTableRow';
+import { ClickableTableRow } from '../../Table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import {
   grievanceTicketStatusToColor,
