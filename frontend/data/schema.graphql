@@ -631,6 +631,7 @@ input EditIndividualDocumentObjectType {
   type: String!
   number: String!
   photo: Arg
+  photoraw: Arg
 }
 
 input EditIndividualIdentityObjectType {
@@ -840,6 +841,8 @@ type HouseholdNode implements Node {
   currency: String
   unhcrId: String!
   userFields: JSONString!
+  koboAssetId: String!
+  rowId: Int
   paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -1510,6 +1513,7 @@ type ImportedHouseholdNode implements Node {
   koboSubmissionUuid: UUID
   koboAssetId: String!
   koboSubmissionTime: DateTime
+  rowId: Int
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
 }
@@ -1633,6 +1637,8 @@ type ImportedIndividualNode implements Node {
   commsDisability: String!
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
+  koboAssetId: String!
+  rowId: Int
   importedhousehold: ImportedHouseholdNode
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
@@ -1694,6 +1700,7 @@ input IndividualDocumentObjectType {
   type: String!
   number: String!
   photo: Arg
+  photoraw: Arg
 }
 
 type IndividualIdentityNode implements Node {
@@ -1789,6 +1796,8 @@ type IndividualNode implements Node {
   businessArea: UserBusinessAreaNode!
   fchildHoh: Boolean!
   childHoh: Boolean!
+  koboAssetId: String!
+  rowId: Int
   paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -2879,7 +2888,8 @@ type TargetPopulationNodeEdge {
 enum TargetPopulationStatus {
   DRAFT
   LOCKED
-  FINALIZED
+  PROCESSING
+  READY_FOR_CASH_ASSIST
 }
 
 type TargetingCriteriaNode {

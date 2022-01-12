@@ -13,8 +13,8 @@ import {
 } from '../../../../utils/utils';
 import { DedupeResults } from '../../details/DedupeResults';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
-import { AnonTableCell } from '../../../../components/table/AnonTableCell';
-import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { AnonTableCell } from '../../../../components/Table/AnonTableCell';
+import { ClickableTableRow } from '../../../../components/Table/ClickableTableRow';
 import { BlackLink } from '../../../../components/BlackLink';
 
 interface ImportedIndividualsTableRowProps {

@@ -6,7 +6,7 @@ import { ActivityLogPageFilters } from '../../components/ActivityLogPageFilters'
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { PageHeader } from '../../components/PageHeader';
 import { PermissionDenied } from '../../components/PermissionDenied';
-import { EmptyTable } from '../../components/table/EmptyTable';
+import { EmptyTable } from '../../components/Table/EmptyTable';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';

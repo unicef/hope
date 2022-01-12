@@ -7,8 +7,8 @@ import { BlackLink } from '../../../components/BlackLink';
 import { FlagTooltip } from '../../../components/FlagTooltip';
 import { WarningTooltip } from '../../../components/WarningTooltip';
 import { LoadingComponent } from '../../../components/LoadingComponent';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
+import { AnonTableCell } from '../../../components/Table/AnonTableCell';
+import { ClickableTableRow } from '../../../components/Table/ClickableTableRow';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { choicesToDict, sexToCapitalize } from '../../../utils/utils';
 import {

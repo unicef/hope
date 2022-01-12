@@ -1,22 +1,18 @@
 import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
-import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
-import GroupIcon from '@material-ui/icons/Group';
+import CakeIcon from '@material-ui/icons/Cake';
 import SearchIcon from '@material-ui/icons/Search';
+import WcIcon from '@material-ui/icons/Wc';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
-import {
-  HouseholdChoiceDataQuery,
-  ProgramNode,
-} from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { FieldLabel } from '../FieldLabel';
-import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
+import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
+import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -27,6 +23,7 @@ const TextContainer = styled(TextField)`
     -moz-appearance: textfield;
   }
 `;
+
 const StyledFormControl = styled(FormControl)`
   width: 232px;
   color: #5f6368;
@@ -39,23 +36,21 @@ const SearchTextField = styled(TextField)`
     min-width: 150px;
   }
 `;
-
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
 `;
 
-interface HouseholdFiltersProps {
+interface IndividualsFilterProps {
   onFilterChange;
   filter;
-  programs: ProgramNode[];
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: IndividualChoiceDataQuery;
 }
-export function HouseholdFilters({
+
+export function IndividualsFilter({
   onFilterChange,
   filter,
-  programs,
   choicesData,
-}: HouseholdFiltersProps): React.ReactElement {
+}: IndividualsFilterProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -66,8 +61,8 @@ export function HouseholdFilters({
           <SearchTextField
             label={t('Search')}
             variant='outlined'
-            value={filter.text || ''}
             margin='dense'
+            value={filter.text}
             onChange={(e) => handleFilterChange(e, 'text')}
             InputProps={{
               startAdornment: (
@@ -80,95 +75,62 @@ export function HouseholdFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Programme')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'program')}
-              variant='outlined'
-              label={t('Programme')}
-              value={filter.program || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <FlashOnIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
-        </Grid>
-        <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Residence Status')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'residenceStatus')}
-              variant='outlined'
-              label='Residence Status'
-              value={filter.residenceStatus || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <AssignmentIndRoundedIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-              SelectDisplayProps={{
-                'data-cy': 'filters-residence-status',
-              }}
-              MenuProps={{
-                'data-cy': 'filters-residence-status-options',
-              }}
-            >
-              {choicesData.residenceStatusChoices.map((program) => (
-                <MenuItem key={program.value} value={program.value}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
-        </Grid>
-        <Grid item>
-          <AdminAreasAutocomplete
+          <AdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='adminArea'
           />
         </Grid>
         <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>{t('Gender')}</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'sex')}
+              variant='outlined'
+              value={filter.sex || ''}
+              label={t('Gender')}
+              InputProps={{
+                startAdornment: (
+                  <StartInputAdornment position='start'>
+                    <WcIcon />
+                  </StartInputAdornment>
+                ),
+              }}
+              SelectDisplayProps={{
+                'data-cy': 'filters-sex',
+              }}
+              MenuProps={{
+                'data-cy': 'filters-sex-options',
+              }}
+            >
+              <MenuItem value=''>
+                <em>{t('None')}</em>
+              </MenuItem>
+              <MenuItem value='MALE'>{t('Male')}</MenuItem>
+              <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
           <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Household size')}</FieldLabel>
+            <FieldLabel>Age</FieldLabel>
             <TextContainer
-              id='minFilter'
-              value={filter.householdSize.min}
               variant='outlined'
               margin='dense'
               placeholder={t('From')}
+              value={filter.age.min}
               onChange={(e) =>
                 onFilterChange({
                   ...filter,
-                  householdSize: {
-                    ...filter.householdSize,
-                    min: e.target.value || undefined,
-                  },
+                  age: { ...filter.age, min: e.target.value || undefined },
                 })
               }
               type='number'
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
-                    <GroupIcon />
+                    <CakeIcon />
                   </InputAdornment>
                 ),
               }}
@@ -177,29 +139,53 @@ export function HouseholdFilters({
         </Grid>
         <Grid item>
           <TextContainer
-            id='maxFilter'
-            value={filter.householdSize.max}
             variant='outlined'
             margin='dense'
             placeholder={t('To')}
+            value={filter.age.max}
             onChange={(e) =>
               onFilterChange({
                 ...filter,
-                householdSize: {
-                  ...filter.householdSize,
-                  max: e.target.value || undefined,
-                },
+                age: { ...filter.age, max: e.target.value || undefined },
               })
             }
             type='number'
             InputProps={{
               startAdornment: (
                 <InputAdornment position='start'>
-                  <GroupIcon />
+                  <CakeIcon />
                 </InputAdornment>
               ),
             }}
           />
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>{t('Flags')}</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'flags')}
+              variant='outlined'
+              label={t('Flags')}
+              multiple
+              value={filter.flags}
+              SelectDisplayProps={{ 'data-cy': 'filters-flags' }}
+              MenuProps={{
+                'data-cy': 'filters-flags-options',
+              }}
+            >
+              {choicesData?.flagChoices.map((each, index) => (
+                <MenuItem
+                  key={each.value}
+                  value={each.value}
+                  data-cy={`select-option-${index}`}
+                >
+                  {each.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </StyledFormControl>
         </Grid>
       </Grid>
     </ContainerWithBorder>

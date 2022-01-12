@@ -18,7 +18,7 @@ import TextField from '../../../shared/TextField';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
 import { FieldLabel } from '../../FieldLabel';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../../Population/AdminAreaAutocomplete';
 
 const SearchTextField = styled(TextField)`
   flex: 1;
@@ -156,10 +156,7 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
-          <AdminAreasAutocomplete
-            onFilterChange={onFilterChange}
-            name='admin'
-          />
+          <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
