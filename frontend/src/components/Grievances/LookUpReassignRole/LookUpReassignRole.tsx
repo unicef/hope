@@ -21,7 +21,7 @@ export const LookUpReassignRole = ({
   shouldDisableButton,
   individual,
 }: {
-  household:
+  household?:
     | GrievanceTicketQuery['grievanceTicket']['household']
     | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
   individual: GrievanceTicketQuery['grievanceTicket']['individual'];
@@ -72,7 +72,7 @@ export const LookUpReassignRole = ({
     <Formik
       initialValues={{
         selectedIndividual: individualData?.individual || null,
-        selectedHousehold: household || null,
+        selectedHousehold: individualData?.individual?.household||null,
         role: individualRole.role,
       }}
       onSubmit={null}
@@ -102,6 +102,7 @@ export const LookUpReassignRole = ({
             selectedHousehold={selectedHousehold}
             setSelectedHousehold={setSelectedHousehold}
             setSelectedIndividual={setSelectedIndividual}
+            household={household}
           />
         </>
       )}

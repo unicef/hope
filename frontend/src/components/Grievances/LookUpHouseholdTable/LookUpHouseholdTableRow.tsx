@@ -7,7 +7,7 @@ import {
   HouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { BlackLink } from '../../BlackLink';
-import { ClickableTableRow } from '../../table/ClickableTableRow';
+import { ClickableTableRow } from '../../Table/ClickableTableRow';
 import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpHouseholdTableRowProps {

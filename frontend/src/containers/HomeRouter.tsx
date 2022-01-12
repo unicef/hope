@@ -8,7 +8,7 @@ import { MiśTheme } from '../theme';
 import { Drawer } from '../components/Drawer/Drawer';
 import { AppBar } from '../components/AppBar';
 import { useSnackbar } from '../hooks/useSnackBar';
-import { GrievanceDetailsPage } from '../components/Grievances/GrievanceDetailsPage';
+import { GrievanceDetailsPage } from '../components/Grievances/GrievancesDetailsPage/GrievanceDetailsPage';
 import { GrievancesTablePage } from '../components/Grievances/GrievancesTablePage';
 import { CreateGrievancePage } from '../components/Grievances/CreateGrievancePage';
 import { EditGrievancePage } from '../components/Grievances/EditGrievancePage';
@@ -35,7 +35,7 @@ import { UsersList } from './pages/UsersList';
 import { ReportingPage } from './pages/ReportingPage';
 import { ReportingDetailsPage } from './pages/ReportingDetailsPage';
 import { ActivityLogPage } from './pages/MainActivityLogPage';
-import { CashplanVerificationRedirectPage } from './pages/CashplanVerificationRedirectPage';
+import { CashPlanVerificationRedirectPage } from './pages/CashplanVerificationRedirectPage';
 
 const Root = styled.div`
   display: flex;
@@ -162,7 +162,7 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/csh-payment-verification/:id');
               }}
             >
-              <CashplanVerificationRedirectPage />
+              <CashPlanVerificationRedirectPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/grievance-and-feedback/new-ticket'>

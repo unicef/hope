@@ -1,6 +1,8 @@
 import {
   Box,
   Button,
+  Checkbox,
+  FormControlLabel,
   Grid,
   InputAdornment,
   MenuItem,
@@ -19,7 +21,7 @@ import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import { ContainerWithBorder } from '../../ContainerWithBorder';
 import { FieldLabel } from '../../FieldLabel';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
+import { AdminAreaAutocomplete } from '../../Population/AdminAreaAutocomplete';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;
@@ -43,6 +45,7 @@ interface LookUpIndividualFiltersProps {
   programs;
   setFilterIndividualApplied?;
   individualFilterInitial?;
+  household?;
 }
 export function LookUpIndividualFilters({
   onFilterChange,
@@ -50,6 +53,7 @@ export function LookUpIndividualFilters({
   programs,
   setFilterIndividualApplied,
   individualFilterInitial,
+  household,
 }: LookUpIndividualFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
@@ -175,7 +179,7 @@ export function LookUpIndividualFilters({
           </StyledFormControl>
         </Grid>
         <Grid item>
-          <AdminAreasAutocomplete
+          <AdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
             value={filter.admin2}
@@ -213,6 +217,27 @@ export function LookUpIndividualFilters({
             </Select>
           </StyledFormControl>
         </Grid>
+        {household && (
+          <Grid item>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={filter.household}
+                  color='primary'
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      onFilterChange({ ...filter, household: household.id });
+                    } else {
+                      onFilterChange({ ...filter, household: null });
+                    }
+                  }}
+                />
+              }
+              label={t('Show only Individuals from this household')}
+            />
+          </Grid>
+        )}
+
         <Grid container justify='flex-end'>
           <Button
             color='primary'
