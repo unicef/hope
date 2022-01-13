@@ -148,8 +148,14 @@ if "DATABASE_URL_HUB_REGISTRATION" not in os.environ:
         f'{os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB")}'
     )
 
+RO_CONN = dict(**env.db('DATABASE_URL')).copy()
+RO_CONN['OPTIONS'] = {
+    'options': '-c default_transaction_read_only=on'
+}
+
 DATABASES = {
     "default": env.db(),
+    "ro": RO_CONN,
     "cash_assist_datahub_mis": env.db("DATABASE_URL_HUB_MIS"),
     "cash_assist_datahub_ca": env.db("DATABASE_URL_HUB_CA"),
     "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
@@ -212,6 +218,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.intervention",
     "hct_mis_api.apps.payment",
     "hct_mis_api.apps.program",
+    "hct_mis_api.apps.power_query.apps.Config",
     # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
     "hct_mis_api.apps.utils",

@@ -1,0 +1,10 @@
+{% extends "admin_extra_urls/action_page.html" %}
+{% block action-content %}
+    {{ original.query.name }}
+    <table>
+        <tr>{% for fname in dataset.headers %}<th>{{ fname }}</th>{% endfor %}</tr>
+        {% for row in dataset %}<tr>
+        {% for col in row %}<td>{{ col }}</td>{% endfor %}
+        </tr>{% endfor %}
+    </table>
+{% endblock action-content %}

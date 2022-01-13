@@ -29,6 +29,8 @@ from adminfilters.filters import (
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from jsoneditor.forms import JSONEditor
+
+from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
@@ -91,6 +93,7 @@ class HouseholdAdmin(
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
     LinkedObjectsMixin,
+    PowerQueryMixin,
     AdminAdvancedFiltersMixin,
     SmartFieldsetMixin,
     HOPEModelAdminBase,
