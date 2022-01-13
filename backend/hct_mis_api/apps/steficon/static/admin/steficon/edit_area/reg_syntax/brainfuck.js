@@ -42,4 +42,3 @@ editAreaLoader.load_syntax["brainfuck"] = {
 		}
 	}
 };
-

@@ -15,14 +15,8 @@ from adminfilters.filters import (
 )
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
-
-
-class RuleTestForm(forms.Form):
-    rule = forms.ModelChoiceField(queryset=Rule.objects.all())
-    number_of_records = forms.IntegerField(validators=[MinValueValidator(1)])
 
 
 @admin.register(TargetPopulation)
@@ -69,32 +63,32 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, LinkedObjectsMixin, ExtraUr
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
-    @button()
-    def test_steficon(self, request, pk):
-        context = self.get_common_context(request, pk)
-        if request.method == "GET":
-            context["title"] = f"Test Steficon rule"
-            context["form"] = RuleTestForm(initial={"number_of_records": 100, "rule": self.object.steficon_rule})
-        else:
-            form = RuleTestForm(request.POST)
-            if form.is_valid():
-                rule = form.cleaned_data["rule"]
-                records = form.cleaned_data["number_of_records"]
-                context["title"] = f"Test results of `{rule.name}` against `{self.object}`"
-                context["target_population"] = self.object
-                context["rule"] = rule
-                elements = []
-                context["elements"] = elements
-                entries = self.object.selections.all()[:records]
-                if entries:
-                    for tp in entries:
-                        value = context["rule"].execute(hh=tp.household)
-                        tp.vulnerability_score = value
-                        elements.append(tp)
-                    self.message_user(request, "%s scores calculated" % len(elements))
-                else:
-                    self.message_user(request, "No records found", messages.WARNING)
-        return TemplateResponse(request, "admin/targeting/steficon.html", context)
+    # @button()
+    # def test_steficon(self, request, pk):
+    #     context = self.get_common_context(request, pk)
+    #     if request.method == "GET":
+    #         context["title"] = f"Test Steficon rule"
+    #         context["form"] = RuleTestForm(initial={"number_of_records": 100, "rule": self.object.steficon_rule})
+    #     else:
+    #         form = RuleTestForm(request.POST)
+    #         if form.is_valid():
+    #             rule = form.cleaned_data["rule"]
+    #             records = form.cleaned_data["number_of_records"]
+    #             context["title"] = f"Test results of `{rule.name}` against `{self.object}`"
+    #             context["target_population"] = self.object
+    #             context["rule"] = rule
+    #             elements = []
+    #             context["elements"] = elements
+    #             entries = self.object.selections.all()[:records]
+    #             if entries:
+    #                 for tp in entries:
+    #                     value = context["rule"].execute(hh=tp.household)
+    #                     tp.vulnerability_score = value
+    #                     elements.append(tp)
+    #                 self.message_user(request, "%s scores calculated" % len(elements))
+    #             else:
+    #                 self.message_user(request, "No records found", messages.WARNING)
+    #     return TemplateResponse(request, "admin/targeting/steficon.html", context)
 
 
 @admin.register(HouseholdSelection)

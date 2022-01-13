@@ -1078,4 +1078,3 @@ EditAreaLoader.prototype ={
 	
 	var editAreaLoader= new EditAreaLoader();
 	var editAreas= {};
-

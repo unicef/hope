@@ -122,11 +122,19 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_DRAFT = "DRAFT"
     STATUS_LOCKED = "LOCKED"
     STATUS_PROCESSING = "PROCESSING"
+    STATUS_STEFICON_WAIT = "STEFICON_WAIT"
+    STATUS_STEFICON_RUN = "STEFICON_RUN"
+    STATUS_STEFICON_COMPLETED = "STEFICON_COMPLETED"
+    STATUS_STEFICON_ERROR = "STEFICON_ERROR"
     STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
 
     STATUS_CHOICES = (
         (STATUS_DRAFT, _("Open")),
         (STATUS_LOCKED, _("Locked")),
+        (STATUS_STEFICON_WAIT, _("Waiting for Rule Engine")),
+        (STATUS_STEFICON_RUN, _("Rule Engine Running")),
+        (STATUS_STEFICON_COMPLETED, _("Rule Engine Completed")),
+        (STATUS_STEFICON_ERROR, _("Rule Engine Errored")),
         (STATUS_PROCESSING, _("Processing")),
         (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
     )
