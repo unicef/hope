@@ -1,0 +1,11 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load admin_urls %}
+{% block action-content %}
+    <table>
+    {% for entry in entries %}
+        <tr><td>{{ entry.name }}</td><td>{{ entry.description }}</td></tr>
+    {% endfor %}
+    </table>
+    {% if perms.power_query.add_query %}
+        <a href="{% url "admin:power_query_query_add" %}?ct={{ ct.pk }}">Add New</a>
+    {% endif %}
+{% endblock %}
