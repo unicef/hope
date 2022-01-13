@@ -1,15 +1,12 @@
-from difflib import _mdiff
-
 import difflib
 import json
+from difflib import _mdiff
 
 from django import template
 from django.utils.safestring import mark_safe
+
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
-
-# from pygments.lexers.python import PythonLexer
-# from pygments.lexers.data import JsonLexer
 
 register = template.Library()
 
@@ -56,7 +53,13 @@ class HtmlDiff(difflib.HtmlDiff):
             context_lines = numlines
         else:
             context_lines = None
-        diffs = _mdiff(fromlines, tolines, context_lines, linejunk=self._linejunk, charjunk=self._charjunk)
+        diffs = _mdiff(
+            fromlines,
+            tolines,
+            context_lines,
+            linejunk=self._linejunk,
+            charjunk=self._charjunk,
+        )
 
         # set up iterator to wrap lines that exceed desired width
         if self._wrapcolumn:
@@ -71,7 +74,7 @@ class HtmlDiff(difflib.HtmlDiff):
         )
 
         s = []
-        fmt = '            <tr><td class="diff_next"%s>%s</td>%s' + '<td class="diff_next">%s</td>%s</tr>\n'
+        fmt = '<tr><td class="diff_next"%s>%s</td>%s<td class="diff_next">%s</td>%s</tr>\n'
         for i in range(len(flaglist)):
             if flaglist[i] is None:
                 # mdiff yields None on separator lines skip the bogus ones
