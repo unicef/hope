@@ -1,80 +1,56 @@
+import csv
+import json
 import logging
+from io import StringIO
 
-from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
-from django.contrib.admin.widgets import AutocompleteMixin
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import QuerySet
 from django.db.transaction import atomic
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
 from admin_extra_urls.api import ExtraUrlMixin, button
-from adminfilters.filters import TextFieldFilter
-from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
+from admin_extra_urls.utils import labelize
+from adminfilters.autocomplete import AutoCompleteFilter
+from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.steficon.forms import RuleForm
-from hct_mis_api.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from .forms import (
+    RuleDownloadCSVFileProcessForm,
+    RuleFileProcessForm,
+    RuleForm,
+    RuleTestForm,
+)
+from .models import MONITORED_FIELDS, Rule, RuleCommit
+from .security import clean_context
 
 logger = logging.getLogger(__name__)
 
 
-class GenericAutocompleteMixin(AutocompleteMixin):
-    url_name = "%s:%s_%s_autocomplete"
-
-    def __init__(self, form_field, admin_site, attrs=None, choices=(), using=None):
-        self.form_field = form_field
-        self.empty_values = [""]
-        super().__init__(None, admin_site, attrs, choices, using)
-
-    def get_url(self):
-        model = self.form_field.queryset.model
-        return reverse(self.url_name % (self.admin_site.name, model._meta.app_label, model._meta.model_name))
-
-    def optgroups(self, name, value, attr=None):
-        """Return selected options based on the ModelChoiceIterator."""
-        default = (None, [], 0)
-        groups = [default]
-        has_selected = False
-        selected_choices = {str(v) for v in value if str(v) not in self.empty_values}
-        if not self.is_required and not self.allow_multiple_selected:
-            default[1].append(self.create_option(name, "", "", False, 0))
-        choices = (
-            (obj.pk, self.choices.field.label_from_instance(obj))
-            for obj in self.form_field.queryset.using(self.db).filter(pk__in=selected_choices)
-        )
-        for option_value, option_label in choices:
-            selected = str(option_value) in value and (has_selected is False or self.allow_multiple_selected)
-            has_selected |= selected
-            index = len(default[1])
-            subgroup = default[1]
-            subgroup.append(self.create_option(name, option_value, option_label, selected_choices, index))
-        return groups
-
-
-class GenericAutocompleteSelect(GenericAutocompleteMixin, forms.Select):
-    pass
-
-
-class RuleTestForm(forms.Form):
-    target_population = forms.ModelChoiceField(queryset=TargetPopulation.objects.all().order_by("name"))
-
-    def __init__(self, *args, **kwargs):
-        admin_site = kwargs.pop("admin_site")
-        super().__init__(*args, **kwargs)
-        tp = self.fields["target_population"]
-        tp.widget = GenericAutocompleteSelect(tp, admin_site)
-
-
 @register(Rule)
-class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
-    list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by")
+class RuleAdmin(ExtraUrlMixin, LinkedObjectsMixin, ModelAdmin):
+    list_display = (
+        "name",
+        "version",
+        "language",
+        "enabled",
+        "deprecated",
+        "created_by",
+        "updated_by",
+    )
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
     form = RuleForm
+    readonly_fields = (
+        "created_by",
+        "created_at",
+        "updated_by",
+        "updated_at",
+        "version",
+    )
 
-    readonly_fields = ("updated_by", "created_by", "version")
     change_form_template = None
     fieldsets = [
         (
@@ -83,6 +59,7 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
                 "fields": (
                     ("name", "version"),
                     ("enabled", "deprecated"),
+                    ("description",),
                 )
             },
         ),
@@ -96,16 +73,148 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
                 ),
             },
         ),
-        ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
+        (
+            "Data",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    ("created_by", "created_at"),
+                    ("updated_by", "updated_at"),
+                ),
+            },
+        ),
     ]
 
-    @button()
-    def used_by(self, request, pk):
-        context = self.get_common_context(request, pk, title="Used By")
-        if request.method == "GET":
-            return TemplateResponse(request, "admin/steficon/rule/used_by.html", context)
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        return super().get_form(request, obj, change, **kwargs)
 
-    @button()
+    @button(visible=lambda o, r: "/test/" not in r.path)
+    def test(self, request, pk):
+        context = self.get_common_context(
+            request,
+            pk,
+            title="Test",
+            state_opts=RuleCommit._meta,
+        )
+        if request.method == "POST":
+            rule: Rule = self.get_object(request, pk)
+            form = RuleTestForm(request.POST, request.FILES)
+            if form.is_valid():
+                selection = form.cleaned_data["opt"]
+                if selection == "optFile":
+                    data = form.cleaned_data.get("file")
+                elif selection == "optData":
+                    data = form.cleaned_data.get("raw_data")
+                elif selection == "optContentType":
+                    ct: ContentType = form.cleaned_data["content_type"]
+                    filters = json.loads(form.cleaned_data.get("content_type_filters") or "{}")
+                    qs = ct.model_class().objects.filter(**filters)
+                    data = qs.all()
+                else:
+                    raise Exception("Invalid option")
+                if not isinstance(data, (list, tuple, QuerySet)):
+                    data = [data]
+                results = []
+                for values in data:
+                    row = [values, None, True]
+                    try:
+                        entry = clean_context(values)
+                        row[1] = rule.execute(entry, only_enabled=False, only_release=False)
+                    except Exception as e:
+                        row[1] = "%s: %s" % (e.__class__.__name__, str(e))
+                        row[2] = False
+                    results.append(row)
+                context["results"] = results
+            else:
+                context["form"] = form
+        else:
+            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
+
+        return TemplateResponse(request, "admin/steficon/rule/test.html", context)
+
+    def _get_csv_config(self, form):
+        return dict(
+            quoting=int(form.cleaned_data["quoting"]),
+            delimiter=form.cleaned_data["delimiter"],
+            quotechar=form.cleaned_data["quotechar"],
+            escapechar=form.cleaned_data["escapechar"],
+        )
+
+    @button(visible=lambda o, r: "/process_file/" not in r.path)
+    def process_file(self, request, pk):
+        context = self.get_common_context(
+            request,
+            pk,
+            step=1,
+            title="Process CSV file",
+            state_opts=RuleCommit._meta,
+        )
+        if request.method == "POST":
+            rule: Rule = self.get_object(request, pk)
+            if request.POST["step"] == "1":
+                form = RuleFileProcessForm(request.POST, request.FILES)
+                if form.is_valid():
+                    csv_config = self._get_csv_config(form)
+                    f = request.FILES["file"]
+                    input = f.read().decode("utf-8")
+                    data = csv.DictReader(StringIO(input), fieldnames=None, **csv_config)
+                    context["fields"] = data.fieldnames
+                    for attr in form.cleaned_data["results"]:
+                        context["fields"].append(labelize(attr))
+                    info_col = labelize(form.cleaned_data["results"][0])
+                    results = []
+                    for entry in data:
+                        try:
+                            result = rule.execute(entry, only_enabled=False, only_release=False)
+                            for attr in form.cleaned_data["results"]:
+                                entry[labelize(attr)] = getattr(result, attr, "<ATTR NOT FOUND>")
+                        except Exception as e:
+                            entry[info_col] = str(e)
+                        results.append(entry)
+                    context["results"] = results
+                    context["step"] = 2
+                    context["form"] = RuleDownloadCSVFileProcessForm(
+                        initial={
+                            "quoting": csv_config["quoting"],
+                            "delimiter": csv_config["delimiter"],
+                            "quotechar": csv_config["quotechar"],
+                            "escapechar": csv_config["escapechar"],
+                            "data": json.dumps(results),
+                            "fields": ",".join(context["fields"]),
+                            "filename": f.name,
+                        }
+                    )
+                else:
+                    context["form"] = form
+
+            elif request.POST["step"] == "2":
+                form = RuleDownloadCSVFileProcessForm(request.POST)
+                if form.is_valid():
+                    try:
+                        csv_config = self._get_csv_config(form)
+                        data = form.cleaned_data["data"]
+                        fields = form.cleaned_data["fields"]
+                        response = HttpResponse(
+                            content_type="text/csv",
+                            headers={
+                                "Content-Disposition": 'attachment; filename="%s"' % form.cleaned_data["filename"]
+                            },
+                        )
+
+                        writer = csv.DictWriter(response, fieldnames=fields, **csv_config)
+                        writer.writeheader()
+                        writer.writerows(data)
+                        return response
+                    except Exception:
+                        raise
+                else:
+                    context["form"] = form
+        else:
+            context["form"] = RuleFileProcessForm(initial={"results": "value"})
+
+        return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
+
+    @button(visible=lambda o, r: "/changelog/" not in r.path)
     def changelog(self, request, pk):
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
@@ -136,7 +245,7 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
             self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    @button()
+    @button(visible=lambda o, r: "/diff/" not in r.path)
     def diff(self, request, pk):
         try:
             context = self.get_common_context(request, pk, action="Code history")
@@ -145,14 +254,15 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
                 state = self.object.history.get(pk=state_pk)
             else:
                 state = self.object.history.first()
+
             try:
                 context["prev"] = state.get_previous_by_timestamp()
-            except RuleCommit.DoesNotExist:
+            except (RuleCommit.DoesNotExist, AttributeError):
                 context["prev"] = None
 
             try:
                 context["next"] = state.get_next_by_timestamp()
-            except RuleCommit.DoesNotExist:
+            except (RuleCommit.DoesNotExist, AttributeError):
                 context["next"] = None
 
             context["state"] = state
@@ -162,39 +272,7 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
             return TemplateResponse(request, "admin/steficon/rule/diff.html", context)
         except Exception as e:
             logger.exception(e)
-            self.message_user(request, str(e), messages.ERROR)
-            return HttpResponseRedirect(reverse("admin:index"))
-
-    @button(label="Test")
-    def preview(self, request, pk):
-        try:
-            context = self.get_common_context(request, pk, title="Test")
-            context["media"] = self.media
-            if request.method == "GET":
-                context["title"] = f"Test `{self.object.name}` against target population"
-                context["form"] = RuleTestForm(admin_site=self.admin_site)
-                return TemplateResponse(request, "admin/steficon/rule/preview_rule.html", context)
-            else:
-                form = RuleTestForm(request.POST, admin_site=self.admin_site)
-                if form.is_valid():
-                    target_population = form.cleaned_data["target_population"]
-                    context["title"] = f"Test results of `{self.object.name}` against `{target_population}`"
-                    context["target_population"] = target_population
-                    elements = []
-                    context["elements"] = elements
-                    entries = context["target_population"].selections.all()[:100]
-                    if entries:
-                        for tp in entries:
-                            value = context["original"].execute(hh=tp.household)
-                            tp.vulnerability_score = value
-                            elements.append(tp)
-                        self.message_user(request, "%s scores calculated" % len(elements))
-                    else:
-                        self.message_user(request, "No records found", messages.WARNING)
-                return TemplateResponse(request, "admin/steficon/rule/preview_rule.html", context)
-        except Exception as e:
-            logger.exception(e)
-            self.message_user(request, str(e), messages.ERROR)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
     @atomic()
@@ -207,8 +285,18 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
 
 @register(RuleCommit)
 class RuleCommitAdmin(ExtraUrlMixin, ModelAdmin):
-    list_display = ("timestamp", "rule", "version", "updated_by", "affected_fields")
-    list_filter = (TextFieldFilter.factory("rule__id__iexact", "Rule"),)
+    list_display = (
+        "timestamp",
+        "rule",
+        "version",
+        "updated_by",
+        "affected_fields",
+        "is_release",
+    )
+    list_filter = (
+        ("rule", AutoCompleteFilter),
+        "is_release",
+    )
     search_fields = ("name",)
     readonly_fields = ("updated_by", "rule", "affected_fields", "version")
     change_form_template = None
