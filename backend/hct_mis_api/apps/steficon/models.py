@@ -122,6 +122,13 @@ class Rule(TimeStampedUUIDModel):
             raise ValueError("Cannot release disabled/deprecated rules")
         self.commit(is_release=True)
 
+    @property
+    def latest(self):
+        try:
+            return self.history.filter(is_release=True).latest()
+        except RuleCommit.DoesNotExist:
+            pass
+
     @cached_property
     def interpreter(self):
         return mapping[self.language](self.definition)
