@@ -118,7 +118,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "vulnerability_score_max": "score_max",
         },
     )
-
     STATUS_DRAFT = "DRAFT"
     STATUS_LOCKED = "LOCKED"
     STATUS_PROCESSING = "PROCESSING"
@@ -236,7 +235,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         db_index=True,
     )
     steficon_rule = models.ForeignKey(
-        "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
+        "steficon.RuleCommit", null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
     vulnerability_score_min = models.DecimalField(

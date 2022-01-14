@@ -27,7 +27,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.interpreters import mapping
-from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
@@ -51,6 +51,8 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
+
+from .tasks import target_population_apply_steficon
 
 logger = logging.getLogger(__name__)
 
@@ -505,17 +507,14 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
                     "Another formula was applied to a previous target population for this programme. You can only apply the same formula"
                 )
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
+            steficon_rule_commit = steficon_rule.latest
             if not steficon_rule.enabled or steficon_rule.deprecated:
                 logger.error("This steficon rule is not enabled or is deprecated.")
                 raise GraphQLError("This steficon rule is not enabled or is deprecated.")
-            target_population.steficon_rule = steficon_rule
-            target_population.steficon_applied_date = timezone.now()
+            target_population.steficon_rule = steficon_rule_commit
+            target_population.status = TargetPopulation.STATUS_STEFICON_WAIT
             target_population.save()
-            interpreter = mapping[steficon_rule.language](steficon_rule.definition)
-            for selection in HouseholdSelection.objects.filter(target_population=target_population):
-                value = interpreter.execute(hh=selection.household)
-                selection.vulnerability_score = value
-                selection.save(update_fields=["vulnerability_score"])
+            target_population_apply_steficon.delay(target_population.pk)
         else:
             target_population.steficon_rule = None
             target_population.vulnerability_score_min = None

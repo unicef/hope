@@ -11,6 +11,7 @@ from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from admin_extra_urls.api import ExtraUrlMixin, button
 from admin_extra_urls.utils import labelize
@@ -31,15 +32,7 @@ logger = logging.getLogger(__name__)
 
 @register(Rule)
 class RuleAdmin(ExtraUrlMixin, LinkedObjectsMixin, ModelAdmin):
-    list_display = (
-        "name",
-        "version",
-        "language",
-        "enabled",
-        "deprecated",
-        "created_by",
-        "updated_by",
-    )
+    list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
     form = RuleForm
@@ -87,6 +80,13 @@ class RuleAdmin(ExtraUrlMixin, LinkedObjectsMixin, ModelAdmin):
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         return super().get_form(request, obj, change, **kwargs)
+
+    def stable(self, obj):
+        try:
+            url = reverse("admin:steficon_rulecommit_change", args=[obj.latest.pk])
+            return mark_safe(f'<a href="{url}">{obj.latest.version}</a>')
+        except (RuleCommit.DoesNotExist, AttributeError):
+            pass
 
     @button(visible=lambda o, r: "/test/" not in r.path)
     def test(self, request, pk):
