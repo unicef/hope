@@ -79,7 +79,7 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
 @register(Dataset)
 class DatasetAdmin(ExtraUrlMixin, ModelAdmin):
     search_fields = ("query__name",)
-    list_display = ("query",)
+    list_display = ("query", "dataset_type", "target_type")
     list_filter = (("query__target", AutoCompleteFilter),)
     change_form_template = None
     readonly_fields = ("last_run", "query", "info")
@@ -87,6 +87,12 @@ class DatasetAdmin(ExtraUrlMixin, ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def dataset_type(self, obj):
+        return obj.info.get("type")
+
+    def target_type(self, obj):
+        return obj.query.target
 
     @button(visible=lambda o, r: "change" in r.path)
     def export(self, request, pk):
