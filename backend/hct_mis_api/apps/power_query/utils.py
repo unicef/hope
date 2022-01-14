@@ -1,5 +1,8 @@
-import tablib
+from django.conf import settings
 from django.db.models import QuerySet
+from django.utils.safestring import mark_safe
+
+import tablib
 
 
 def to_dataset(result):
@@ -17,3 +20,9 @@ def to_dataset(result):
         raise ValueError(result)
     return data
 
+
+def get_sentry_url(event_id, html=False):
+    url = f"{settings.SENTRY_URL}?query={event_id}"
+    if html:
+        return mark_safe('<a href="{url}" target="_sentry" >View on Sentry<a/>')
+    return url

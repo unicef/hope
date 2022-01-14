@@ -1,22 +1,21 @@
-import pickle
-
 import json
-import tablib
-
-from builtins import __build_class__
-
 import logging
-from concurrency.utils import fqn
+import pickle
+from builtins import __build_class__
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.core import serializers
 from django.db import models
 from django.db.models import QuerySet
-from django.template import Template, Context
+from django.template import Context, Template
 from django.utils import timezone
 from django.utils.functional import cached_property
+
+import tablib
+from concurrency.utils import fqn
 from django_celery_beat.models import CrontabSchedule
+from sentry_sdk import capture_exception
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.power_query.utils import to_dataset
@@ -24,86 +23,70 @@ from hct_mis_api.apps.power_query.utils import to_dataset
 logger = logging.getLogger(__name__)
 
 mimetype_map = {
-    'xls': 'application/vnd.ms-excel',
-    'txt': 'text/plain',
-    'csv': 'text/csv',
-    'html': 'text/html',
-    'yaml': 'text/yaml',
-    'json': 'application/json',
+    "xls": "application/vnd.ms-excel",
+    "txt": "text/plain",
+    "csv": "text/csv",
+    "html": "text/html",
+    "yaml": "text/yaml",
+    "json": "application/json",
 }
 
 
 class Query(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, unique=True)
     description = models.TextField(blank=True, null=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='power_queries')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="power_queries")
     target = models.ForeignKey(ContentType, on_delete=models.CASCADE, default="")
     code = models.TextField(default="qs=conn.all()", blank=True)
     info = JSONField(default=dict, blank=True)
+    query_args = JSONField(default=dict, blank=True)
+
+    error = models.CharField(max_length=400, blank=True, null=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'Power Queries'
-        ordering = ('name',)
+        verbose_name_plural = "Power Queries"
+        ordering = ("name",)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if not self.code:
             self.code = "qs=conn.all().order_by('id')"
+        self.error = None
         try:
             self.dataset.delete()
         except Dataset.DoesNotExist:
             pass
         super().save(force_insert, force_update, using, update_fields)
 
-    def execute(self, persist=False):
+    def execute(self, persist=False, query_args=None):
         model = self.target.model_class()
-        # gl = {
-        #     "__builtins__": {
-        #         "__build_class__": __build_class__,
-        #         "__name__": __name__,
-        #         "__import__": __import__,
-        #         "bytearray": bytearray,
-        #         "power_"
-        #         "bytes": bytes,
-        #         "tablib": tablib,
-        #         "complex": complex,
-        #         "dict": dict,
-        #         "float": float,
-        #         "frozenset": frozenset,
-        #         "int": int,
-        #         "list": list,
-        #         "print": print,
-        #         "memoryview": memoryview,
-        #         "range": range,
-        #         "set": set,
-        #         "str": str,
-        #         "tuple": tuple,
-        #     }
-        # }
+        filters = query_args or {}
         try:
+            self.error = None
             locals_ = dict()
-            locals_["conn"] = model._default_manager.using('ro')
+            locals_["conn"] = model._default_manager.using("ro")
             locals_["query"] = self
+            locals_["query_filters"] = filters
             exec(self.code, globals(), locals_)
-            result = locals_.get('result', None)
+            result = locals_.get("result", None)
 
             if persist:
-                info = {'type': type(result).__name__,
-                        'fqn': fqn(result),
-                        }
-                r, __ = Dataset.objects.update_or_create(query=self,
-                                                         defaults={
-                                                             'last_run': timezone.now(),
-                                                             'result': pickle.dumps(result),
-                                                             'info': info
-                                                         })
+                info = {
+                    "type": type(result).__name__,
+                    "fqn": fqn(result),
+                }
+                r, __ = Dataset.objects.update_or_create(
+                    query=self, defaults={"last_run": timezone.now(), "result": pickle.dumps(result), "info": info}
+                )
 
             return result
         except Exception as e:
-            logger.exception(e)
-            raise
+            id = capture_exception(e)
+            self.error = id
+        finally:
+            self.save()
 
 
 class Dataset(models.Model):
@@ -113,7 +96,7 @@ class Dataset(models.Model):
     info = JSONField(default=dict, blank=True)
 
     def __str__(self):
-        return f'Result of {self.query.name}'
+        return f"Result of {self.query.name}"
 
     @property
     def data(self):
@@ -129,9 +112,9 @@ class Formatter(models.Model):
         return self.name
 
     def render(self, context):
-        if self.content_type == 'xls':
-            dt = to_dataset(context['dataset'])
-            return dt.export('xls')
+        if self.content_type == "xls":
+            dt = to_dataset(context["dataset"])
+            return dt.export("xls")
         tpl = Template(self.code)
         return tpl.render(Context(context))
 
@@ -143,14 +126,18 @@ class Report(models.Model):
     refresh = models.BooleanField(default=False)
     notify_to = models.ManyToManyField(User, blank=True)
 
+    query_args = JSONField(default=dict, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)
     result = models.BinaryField(null=True, blank=True)
 
     def execute(self):
         self.query.execute(True)
-        output = self.formatter.render({'dataset': self.query.dataset,
-                                        'report': 'self',
-                                        })
+        output = self.formatter.render(
+            {
+                "dataset": self.query.dataset,
+                "report": "self",
+            }
+        )
         self.last_run = timezone.now()
         self.result = pickle.dumps(output)
         self.save()
