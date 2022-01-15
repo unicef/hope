@@ -30,8 +30,65 @@ from .security import clean_context
 logger = logging.getLogger(__name__)
 
 
+class TestRuleMixin:
+    @button(visible=lambda o, r: "/test/" not in r.path)
+    def test(self, request, pk):
+        rule: Rule = self.get_object(request, pk)
+        context = self.get_common_context(
+            request,
+            pk,
+            title=f"{rule}",
+            state_opts=RuleCommit._meta,
+        )
+        if request.method == "POST":
+            form = RuleTestForm(request.POST, request.FILES)
+            if form.is_valid():
+                selection = form.cleaned_data["opt"]
+                if selection == "optFile":
+                    data = form.cleaned_data.get("file")
+                elif selection == "optData":
+                    data = form.cleaned_data.get("raw_data")
+                elif selection == "optTargetPopulation":
+                    tp = form.cleaned_data.get("target_population")
+                    data = [e.household for e in tp.selections.all()]
+                elif selection == "optContentType":
+                    ct: ContentType = form.cleaned_data["content_type"]
+                    filters = json.loads(form.cleaned_data.get("content_type_filters") or "{}")
+                    qs = ct.model_class().objects.filter(**filters)
+                    data = qs.all()
+                else:
+                    raise Exception(f"Invalid option '{selection}'")
+                if not isinstance(data, (list, tuple, QuerySet)):
+                    data = [data]
+                results = []
+                for values in data:
+                    row = {
+                        "input": values,
+                        "input_type": values.__class__.__name__,
+                        "data": "",
+                        "error": None,
+                        "success": True,
+                    }
+                    try:
+                        if isinstance(rule, Rule):
+                            row["result"] = rule.execute(values, only_enabled=False, only_release=False)
+                        else:
+                            row["result"] = rule.execute(values)
+                    except Exception as e:
+                        row["error"] = "%s: %s" % (e.__class__.__name__, str(e))
+                        row["success"] = False
+                    results.append(row)
+                context["results"] = results
+            else:
+                context["form"] = form
+        else:
+            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
+
+        return TemplateResponse(request, "admin/steficon/rule/test.html", context)
+
+
 @register(Rule)
-class RuleAdmin(ExtraUrlMixin, LinkedObjectsMixin, ModelAdmin):
+class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
@@ -88,49 +145,53 @@ class RuleAdmin(ExtraUrlMixin, LinkedObjectsMixin, ModelAdmin):
         except (RuleCommit.DoesNotExist, AttributeError):
             pass
 
-    @button(visible=lambda o, r: "/test/" not in r.path)
-    def test(self, request, pk):
-        context = self.get_common_context(
-            request,
-            pk,
-            title="Test",
-            state_opts=RuleCommit._meta,
-        )
-        if request.method == "POST":
-            rule: Rule = self.get_object(request, pk)
-            form = RuleTestForm(request.POST, request.FILES)
-            if form.is_valid():
-                selection = form.cleaned_data["opt"]
-                if selection == "optFile":
-                    data = form.cleaned_data.get("file")
-                elif selection == "optData":
-                    data = form.cleaned_data.get("raw_data")
-                elif selection == "optContentType":
-                    ct: ContentType = form.cleaned_data["content_type"]
-                    filters = json.loads(form.cleaned_data.get("content_type_filters") or "{}")
-                    qs = ct.model_class().objects.filter(**filters)
-                    data = qs.all()
-                else:
-                    raise Exception("Invalid option")
-                if not isinstance(data, (list, tuple, QuerySet)):
-                    data = [data]
-                results = []
-                for values in data:
-                    row = [values, None, True]
-                    try:
-                        entry = clean_context(values)
-                        row[1] = rule.execute(entry, only_enabled=False, only_release=False)
-                    except Exception as e:
-                        row[1] = "%s: %s" % (e.__class__.__name__, str(e))
-                        row[2] = False
-                    results.append(row)
-                context["results"] = results
-            else:
-                context["form"] = form
-        else:
-            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
-
-        return TemplateResponse(request, "admin/steficon/rule/test.html", context)
+    # @button(visible=lambda o, r: "/test/" not in r.path)
+    # def test(self, request, pk):
+    #     context = self.get_common_context(
+    #         request,
+    #         pk,
+    #         title="Test",
+    #         state_opts=RuleCommit._meta,
+    #     )
+    #     if request.method == "POST":
+    #         rule: Rule = self.get_object(request, pk)
+    #         form = RuleTestForm(request.POST, request.FILES)
+    #         if form.is_valid():
+    #             selection = form.cleaned_data["opt"]
+    #             if selection == "optFile":
+    #                 data = form.cleaned_data.get("file")
+    #             elif selection == "optData":
+    #                 data = form.cleaned_data.get("raw_data")
+    #             elif selection == "optTargetPopulation":
+    #                 tp = form.cleaned_data.get("target_population")
+    #                 data = [e.household for e in tp.selections.all()]
+    #             elif selection == "optContentType":
+    #                 ct: ContentType = form.cleaned_data["content_type"]
+    #                 filters = json.loads(form.cleaned_data.get("content_type_filters") or "{}")
+    #                 qs = ct.model_class().objects.filter(**filters)
+    #                 data = qs.all()
+    #             else:
+    #                 raise Exception(f"Invalid option '{selection}'")
+    #             if not isinstance(data, (list, tuple, QuerySet)):
+    #                 data = [data]
+    #             results = []
+    #             for values in data:
+    #                 row = {'input': values, 'input_type': values.__class__.__name__,
+    #                        'data': '', 'error': None, 'success': True}
+    #                 try:
+    #                     # entry = clean_context(values)
+    #                     row['result'] = rule.execute(values, only_enabled=False, only_release=False)
+    #                 except Exception as e:
+    #                     row['error'] = "%s: %s" % (e.__class__.__name__, str(e))
+    #                     row['success'] = False
+    #                 results.append(row)
+    #             context["results"] = results
+    #         else:
+    #             context["form"] = form
+    #     else:
+    #         context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
+    #
+    #     return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 
     def _get_csv_config(self, form):
         return dict(
@@ -242,7 +303,7 @@ class RuleAdmin(ExtraUrlMixin, LinkedObjectsMixin, ModelAdmin):
                 return HttpResponseRedirect(url)
         except Exception as e:
             logger.exception(e)
-            self.message_user(request, str(e), messages.ERROR)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
     @button(visible=lambda o, r: "/diff/" not in r.path)
@@ -284,7 +345,7 @@ class RuleAdmin(ExtraUrlMixin, LinkedObjectsMixin, ModelAdmin):
 
 
 @register(RuleCommit)
-class RuleCommitAdmin(ExtraUrlMixin, ModelAdmin):
+class RuleCommitAdmin(ExtraUrlMixin, TestRuleMixin, ModelAdmin):
     list_display = (
         "timestamp",
         "rule",

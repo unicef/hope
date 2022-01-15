@@ -427,6 +427,7 @@
         <label><input type="radio" name="opt" class="optFile" checked value="optFile"> File </label>
         <label><input type="radio" name="opt" class="optData" value="optData"> Data </label>
         <label><input type="radio" name="opt" class="optContentType" value="optContentType"> ContentType </label>
+        <label><input type="radio" name="opt" class="optTargetPopulation" value="optTargetPopulation"> TargetPopulation </label>
         <div style="margin: 10px">
           <div id="optFile" style="display: block" class="options">
             {{ form.file }}
@@ -440,6 +441,11 @@
               <tr><th>Filters</th><td>{{ form.content_type_filters }}</td> </tr>
             </table>
           </div>
+            <div id="optTargetPopulation" style="display: none" class="options">
+                <table>
+                    <tr><th>Target</th><td>{{ form.target_population }}</td> </tr>
+                </table>
+            </div>
         </div>
 {#      </table>#}
       <input type="submit" value="Test">
@@ -447,14 +453,15 @@
   {% endif %}
   {% if results %}
     <table style="font-size: 20px;width: 100%">
-      {% for data, result, success in results %}
-        <tr style="background-color: {% if success %}darkseagreen{% else %}#e1adad{% endif %}">
+      {% for row in results %}
+        <tr class="toggler" data-bind="#data{{ forloop.counter }}" style="background-color: {% if row.success %}darkseagreen{% else %}#e1adad{% endif %}">
           <td>{{ forloop.counter }}</td>
-          <td>{{ result }}
+          <td>{{ row.input|truncatechars:100 }}</td>
+          <td>{{ row.result|default_if_none:"" }} {{ row.error|default_if_none:"" }}
             <div id="data{{ forloop.counter }}" style="display: none">
               <pre style="background-color: white;padding: 5px;">
-                {{ data|repr }}
-                {{ data|smart_json }}
+<h1>{{ row.input }}({{ row.input_type }})</h1>
+{{ row.input|smart_json }}
               </pre>
             </div>
           </td>
@@ -477,12 +484,12 @@
       });
       $(".toggler").on("click", function (e) {
         var $x = $($(this).data("bind"));
-        if ($(this).html() === "+") {
-          $x.show();
-          $(this).html("-");
-        } else {
-          $x.hide();
-          $(this).html("+");
+        if ($(this).hasClass('opened')){
+            $(this).removeClass('opened')
+            $x.hide();
+        }else{
+            $(this).addClass('opened');
+            $x.show();
         }
       });
       {% if form.opt.value  %}
