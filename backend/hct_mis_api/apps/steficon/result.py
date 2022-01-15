@@ -10,4 +10,12 @@ class Result:
 
 
 class Score(Result):
-    pass
+    def __init__(self):
+        super(Score, self).__init__()
+        self.extra = {}
+
+    def __repr__(self):
+        return "<steficon.result.Score object at %s>" % id(self)
+
+    def __str__(self):
+        return "Score: %s" % self.value

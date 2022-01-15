@@ -1,13 +1,17 @@
 import logging
+import sys
+import traceback
 from builtins import __build_class__
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
+from django.utils.safestring import mark_safe
 
 from jinja2 import Environment
 
 from .config import config
+from .exception import RuleError
 from .templatetags import engine
 
 logger = logging.getLogger(__name__)
@@ -73,8 +77,34 @@ class PythonExec(Interpreter):
         locals_ = dict()
         locals_["context"] = context
         locals_["result"] = pts
-        exec(self.code, gl, locals_)
-        return pts
+        try:
+            exec(self.init_string, gl, locals_)
+            # exec(self.code, gl, locals_)
+        except SyntaxError as err:
+            error_class = err.__class__.__name__
+            detail = err.args[0]
+            line_number = err.lineno
+            raise RuleError(
+                rule=self,
+                error_class=error_class,
+                detail=detail,
+                line_number=line_number,
+                traceback=None,
+            )
+        except Exception as err:
+            error_class = err.__class__.__name__
+            detail = err.args[0]
+            cl, exc, tb = sys.exc_info()
+            line_number = traceback.extract_tb(tb)[-1][1]
+            raise RuleError(
+                rule=self,
+                error_class=error_class,
+                detail=detail,
+                line_number=line_number,
+                traceback=traceback,
+            )
+        else:
+            return pts
 
     def validate(self):
         errors = []
@@ -92,13 +122,13 @@ class PythonExec(Interpreter):
                 errors.append("Code contains an invalid statement '%s'" % forbidden)
         if errors:
             raise ValidationError(errors)
-        # try:
-        #     self.execute(**MagicMock())
-        # except Exception as e:
-        #     logger.exception(e)
-        #     tb = traceback.format_exc(limit=-1)
-        #     msg = tb.split('<code>", ')[-1]
-        #     raise ValidationError(mark_safe(msg))
+        try:
+            compile(self.init_string, "<code>", mode="exec")
+        except Exception as e:
+            logger.exception(e)
+            tb = traceback.format_exc(limit=-1)
+            msg = tb.split('<code>", ')[-1]
+            raise ValidationError(mark_safe(msg))
 
 
 # from jinja2 import environment

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
 from django.core.validators import ProhibitNullCharactersValidator
 from django.db import models
 from django.db.models import QuerySet
@@ -11,6 +11,7 @@ from concurrency.fields import AutoIncVersionField
 
 from ..utils.models import TimeStampedUUIDModel
 from .config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
+from .exception import RuleError
 from .interpreters import interpreters, mapping
 from .result import Result
 from .validators import DoubleSpaceValidator, StartEndSpaceValidator
@@ -18,34 +19,18 @@ from .validators import DoubleSpaceValidator, StartEndSpaceValidator
 MONITORED_FIELDS = ("name", "enabled", "deprecated", "language", "definition")
 
 
-class CaseInsensitiveQuerySet(QuerySet):
-    def get(self, *args, **kwargs):
-        return super().get(*args, **kwargs)
-
-    def _filter_or_exclude(self, mapper, *args, **kwargs):
-        if args and "name" in args[1]:
-            args[1]["name__iexact"] = args[1]["name"]
-            del args[1]["name"]
-        return super(CaseInsensitiveQuerySet, self)._filter_or_exclude(mapper, *args, **kwargs)
-
-
-# custom manager that overrides the initial query set
 class RuleManager(models.Manager):
-    def get_queryset(self):
-        return CaseInsensitiveQuerySet(self.model)
+    pass
 
 
-class Rule(TimeStampedUUIDModel):
+class Rule(models.Model):
     LANGUAGES = [[a.label.lower(), a.label] for a in interpreters]
+    # code = models.AutoField(primary_key=True, editable=False)
     version = AutoIncVersionField()
-    name = models.CharField(
+    name = CICharField(
         max_length=100,
         unique=True,
-        validators=[
-            ProhibitNullCharactersValidator(),
-            StartEndSpaceValidator,
-            DoubleSpaceValidator,
-        ],
+        validators=[ProhibitNullCharactersValidator(), StartEndSpaceValidator, DoubleSpaceValidator],
     )
     definition = models.TextField(blank=True, default="result.value=0")
     description = models.TextField(blank=True, null=True)
@@ -88,9 +73,13 @@ class Rule(TimeStampedUUIDModel):
         if self.pk:
             self.security = self.__original_security
 
+    def clean_definition(self):
+        self.interpreter.validate()
+
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         with atomic():
-            self.commit()
+            if self.pk:
+                self.commit()
             super().save(force_insert, force_update, using, update_fields)
 
     def delete(self, using=None, keep_parents=False):
@@ -174,7 +163,10 @@ class RuleCommit(models.Model):
         get_latest_by = "-timestamp"
 
     def __str__(self):
-        return f"Commit #{self.id} of {self.rule}"
+        value = f"{self.rule} #{self.id}"
+        if not self.is_release:
+            return f"{value} (Draft)"
+        return value
 
     @atomic
     def revert(self, fields=MONITORED_FIELDS):

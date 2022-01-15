@@ -96,12 +96,49 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
             raise ValidationError(e)
 
 
+class ContentTypeChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.name.title()} ({obj.app_label})"
+
+
+class TPModelChoiceField(forms.ModelChoiceField):
+    def __init__(
+        self,
+        *,
+        empty_label="---------",
+        required=True,
+        widget=None,
+        label=None,
+        initial=None,
+        help_text="",
+        to_field_name=None,
+        limit_choices_to=None,
+        **kwargs,
+    ):
+        from hct_mis_api.apps.targeting.models import TargetPopulation
+
+        queryset = TargetPopulation.objects.all()
+        super().__init__(
+            queryset,
+            empty_label=empty_label,
+            required=required,
+            widget=widget,
+            label=label,
+            initial=initial,
+            help_text=help_text,
+            to_field_name=to_field_name,
+            limit_choices_to=limit_choices_to,
+            **kwargs,
+        )
+
+
 class RuleTestForm(forms.Form):
     opt = forms.CharField(required=True, widget=HiddenInput)
     file = forms.FileField(label="", required=False)
     raw_data = forms.CharField(label="", widget=Textarea, required=False)
-    content_type = forms.ModelChoiceField(queryset=ContentType.objects.all(), required=False)
+    content_type = ContentTypeChoiceField(queryset=ContentType.objects.order_by("model", "app_label"), required=False)
     content_type_filters = forms.CharField(label="", widget=Textarea, required=False)
+    target_population = TPModelChoiceField()
 
     @property
     def media(self):
@@ -131,6 +168,9 @@ class RuleTestForm(forms.Form):
                 raise ValidationError({"file": "Please select a file to upload"})
         elif selection == "optData" and not self.cleaned_data.get("raw_data"):
             raise ValidationError({"raw_data": "Please provide sample data"})
+        elif selection == "optTargetPopulation":
+            if not self.cleaned_data.get("target_population"):
+                raise ValidationError({"content_type": "Please select a TargetPopulation"})
         elif selection == "optContentType":
             if not self.cleaned_data.get("content_type"):
                 raise ValidationError({"content_type": "Please select a Content Type"})
@@ -155,7 +195,10 @@ class RuleForm(forms.ModelForm):
         code = self.cleaned_data.get("definition", "")
         language = self.cleaned_data["language"]
         i = mapping[language](code)
-        i.validate()
+        try:
+            i.validate()
+        except Exception as e:
+            raise ValidationError({"definition": str(e.message)})
         if config.USE_BLACK:
             try:
                 self.cleaned_data["definition"] = format_code(code)

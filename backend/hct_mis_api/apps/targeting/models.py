@@ -39,6 +39,7 @@ from hct_mis_api.apps.core.utils import (
     map_unicef_ids_to_households_unicef_ids,
 )
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
+from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -234,8 +235,11 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             """,
         db_index=True,
     )
+    # steficon_rule = models.ForeignKey(
+    #     "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
+    # )
     steficon_rule = models.ForeignKey(
-        "steficon.RuleCommit", null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
+        RuleCommit, null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
     vulnerability_score_min = models.DecimalField(

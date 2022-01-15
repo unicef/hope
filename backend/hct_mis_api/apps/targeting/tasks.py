@@ -6,7 +6,6 @@ from django.utils import timezone
 from hct_mis_api.apps.core.celery import app
 
 from ..targeting.models import HouseholdSelection, TargetPopulation
-from .models import RuleCommit
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +13,10 @@ logger = logging.getLogger(__name__)
 @app.task()
 def target_population_apply_steficon(target_population_id):
     try:
+        from steficon.models import RuleCommit
+
         target_population = TargetPopulation.objects.get(pk=target_population_id)
-        rule = target_population.steficon_rule
+        rule: RuleCommit = target_population.steficon_rule
         try:
             target_population.status = TargetPopulation.STATUS_STEFICON_RUN
             target_population.steficon_applied_date = timezone.now()
@@ -23,7 +24,7 @@ def target_population_apply_steficon(target_population_id):
             with atomic():
                 entry: HouseholdSelection
                 for entry in target_population.selections.all():
-                    result = rule.execute({"context": entry})
+                    result = rule.execute({"household": entry.household})
                     entry.vulnerability_score = result.value
                     entry.save()
             target_population.status = TargetPopulation.STATUS_STEFICON_COMPLETED
