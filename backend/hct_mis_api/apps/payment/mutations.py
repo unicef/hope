@@ -1,15 +1,15 @@
 import json
 import logging
-from decimal import Decimal
-
-import graphene
 import math
+from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
@@ -19,19 +19,35 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
-from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+)
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketPaymentVerificationDetails,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
 )
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    PaymentRecord,
+    PaymentVerification,
+)
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode
-from hct_mis_api.apps.payment.utils import get_number_of_samples, from_received_to_status, calculate_counts
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
+from hct_mis_api.apps.payment.utils import (
+    calculate_counts,
+    from_received_to_status,
+    get_number_of_samples,
+)
+from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
+    XlsxVerificationImportService,
+)
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
@@ -465,7 +481,8 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
         )
 
         GrievanceNotification.send_all_notifications(
-            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket))
+            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+        )
         details = TicketPaymentVerificationDetails(
             ticket=grievance_ticket,
             payment_verification_status=status,
