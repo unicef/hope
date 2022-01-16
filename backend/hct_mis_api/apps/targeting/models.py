@@ -38,7 +38,13 @@ from hct_mis_api.apps.core.utils import (
     get_attr_value,
     map_unicef_ids_to_households_unicef_ids,
 )
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    MALE,
+    Document,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -119,6 +125,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "vulnerability_score_max": "score_max",
         },
     )
+
     STATUS_DRAFT = "DRAFT"
     STATUS_LOCKED = "LOCKED"
     STATUS_PROCESSING = "PROCESSING"
@@ -235,9 +242,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             """,
         db_index=True,
     )
-    # steficon_rule = models.ForeignKey(
-    #     "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
-    # )
     steficon_rule = models.ForeignKey(
         RuleCommit, null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
     )
@@ -445,7 +449,12 @@ class TargetingCriteriaQueryingMixin:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self):
-        return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.excluded_household_ids)
+        return (
+            Q(size__gt=0)
+            & Q(withdrawn=False)
+            & ~Q(unicef_id__in=self.excluded_household_ids)
+            & ~Q(individuals__documents__status=Document.STATUS_INVALID)
+        )
 
     def get_query(self):
         query = Q()
