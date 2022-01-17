@@ -147,7 +147,6 @@ if "DATABASE_URL_HUB_REGISTRATION" not in os.environ:
         f'@{os.getenv("POSTGRES_REGISTRATION_DATAHUB_HOST")}:5432/'
         f'{os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB")}'
     )
-TEST_RUNNER = "hct_mis_api.runner.ReadOnlyDatabaseRunner"
 RO_CONN = dict(**env.db("DATABASE_URL")).copy()
 RO_CONN.update(
     {
@@ -159,7 +158,7 @@ RO_CONN.update(
 )
 DATABASES = {
     "default": env.db(),
-    "ro": RO_CONN,
+    "read_only": RO_CONN,
     "cash_assist_datahub_mis": env.db("DATABASE_URL_HUB_MIS"),
     "cash_assist_datahub_ca": env.db("DATABASE_URL_HUB_CA"),
     "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
