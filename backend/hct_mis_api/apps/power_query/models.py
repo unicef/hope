@@ -54,11 +54,20 @@ class Query(models.Model):
         if not self.code:
             self.code = "qs=conn.all().order_by('id')"
         self.error = None
+        if not update_fields:
+            try:
+                self.dataset.delete()
+            except Dataset.DoesNotExist:
+                pass
+        super().save(force_insert, force_update, using, update_fields)
+
+    @property
+    def ready(self):
         try:
-            self.dataset.delete()
+            return self.dataset is not None
         except Dataset.DoesNotExist:
             pass
-        super().save(force_insert, force_update, using, update_fields)
+        return False
 
     def execute(self, persist=False, query_args=None):
         model = self.target.model_class()
@@ -86,7 +95,7 @@ class Query(models.Model):
             id = capture_exception(e)
             self.error = id
         finally:
-            self.save()
+            self.save(update_fields=["error"])
 
 
 class Dataset(models.Model):
