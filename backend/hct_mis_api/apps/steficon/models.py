@@ -94,17 +94,18 @@ class Rule(models.Model):
             stored, changes = self.get_changes()
         else:
             stored, changes = {}, []
-        return RuleCommit.objects.create(
-            rule=self,
-            enabled=self.enabled,
-            definition=self.definition,
-            version=self.version,
-            is_release=is_release,
-            updated_by=self.updated_by,
-            before=stored,
-            after=self.as_dict(),
-            affected_fields=changes,
-        )
+        if changes or not self.pk:
+            return RuleCommit.objects.create(
+                rule=self,
+                enabled=self.enabled,
+                definition=self.definition,
+                version=self.version,
+                is_release=is_release,
+                updated_by=self.updated_by,
+                before=stored,
+                after=self.as_dict(),
+                affected_fields=changes,
+            )
 
     def release(self):
         if self.deprecated or not self.enabled:

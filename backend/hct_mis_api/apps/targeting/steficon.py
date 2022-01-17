@@ -4,8 +4,7 @@ from django.template.response import TemplateResponse
 
 from admin_extra_urls.decorators import button
 
-from hct_mis_api.apps.steficon.debug import get_error_info, render_exception
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.steficon.debug import get_error_info
 
 try:
     from hct_mis_api.apps.steficon.models import RuleCommit
@@ -37,8 +36,8 @@ try:
                         entries = self.object.selections.all()[:records]
                         if entries:
                             for tp in entries:
-                                value = rule.execute({"household": tp.household})
-                                tp.vulnerability_score = value
+                                result = rule.execute({"household": tp.household})
+                                tp.vulnerability_score = result.value
                                 elements.append(tp)
                             self.message_user(request, "%s scores calculated" % len(elements))
                         else:
