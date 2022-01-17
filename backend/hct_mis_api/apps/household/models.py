@@ -546,6 +546,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
                 )
         return programs_dict.values()
 
+    @property
+    def active_individuals(self):
+        return self.individuals.filter(withdrawn=False, duplicate=False)
+
     def __str__(self):
         return f"{self.unicef_id}"
 

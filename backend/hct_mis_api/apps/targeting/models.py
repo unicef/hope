@@ -38,7 +38,13 @@ from hct_mis_api.apps.core.utils import (
     get_attr_value,
     map_unicef_ids_to_households_unicef_ids,
 )
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    MALE,
+    Document,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -434,7 +440,12 @@ class TargetingCriteriaQueryingMixin:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self):
-        return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.excluded_household_ids)
+        return (
+            Q(size__gt=0)
+            & Q(withdrawn=False)
+            & ~Q(unicef_id__in=self.excluded_household_ids)
+            & ~Q(individuals__documents__status=Document.STATUS_INVALID)
+        )
 
     def get_query(self):
         query = Q()
