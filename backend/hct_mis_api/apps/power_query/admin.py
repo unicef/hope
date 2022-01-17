@@ -13,7 +13,9 @@ import tablib
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.autocomplete import AutoCompleteFilter
+from import_export import fields, resources
 from import_export.admin import ImportExportMixin
+from import_export.widgets import ForeignKeyWidget
 from tablib import Dataset
 
 from .forms import ExportForm, QueryForm
@@ -24,9 +26,28 @@ from .utils import to_dataset
 logger = logging.getLogger(__name__)
 
 
+class QueryResource(resources.ModelResource):
+    class Meta:
+        model = Query
+        fields = ("name", "description", "target", "code", "info")
+        import_id_fields = ("name",)
+
+    def dehydrate_target(self, obj):
+        return f"{obj.target.app_label}.{obj.target.model}"
+
+    def before_import_row(self, row, row_number=None, **kwargs):
+        ct = row.get("target")
+        app_label, model_name = ct.split(".")
+        try:
+            row["target"] = ContentType.objects.get(app_label=app_label, model=model_name).pk
+        except ContentType.DoesNotExist:
+            pass
+        return row
+
+
 @register(Query)
 class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
-    list_display = ("name", "target", "description", "owner")
+    list_display = ("name", "target", "description", "owner", "status", "is_ready")
     search_fields = ("name",)
     list_filter = (
         ("target", AutoCompleteFilter),
@@ -35,8 +56,25 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
     autocomplete_fields = ("target", "owner")
     form = QueryForm
     change_form_template = None
+    resource_class = QueryResource
 
-    @button()
+    def status(self, obj):
+        return obj.ready and not obj.error
+
+    status.boolean = True
+
+    def is_ready(self, obj):
+        return obj.ready
+
+    is_ready.boolean = True
+
+    @button(visible=lambda o, r: "/change" in r.path)
+    def create_report(self, request, pk):
+        obj = self.get_object(request, pk)
+        url = reverse("admin:power_query_report_add")
+        return HttpResponseRedirect(f"{url}?q={obj.pk}")
+
+    @button(visible=lambda o, r: o.ready and "/change" in r.path)
     def result(self, request, pk):
         obj = self.get_object(request, pk)
         try:
@@ -45,7 +83,7 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button()
+    @button(visible=lambda o, r: "/change" in r.path)
     def queue(self, request, pk):
         try:
             queue.delay(pk)
@@ -53,13 +91,15 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button()
+    @button(visible=lambda o, r: o.ready and "/change" in r.path)
     def preview(self, request, pk):
         obj: Query = self.get_object(request, pk)
         try:
             context = self.get_common_context(request, pk, title="Results")
             ret = obj.execute(persist=False)
             context["type"] = type(ret).__name__
+            context["raw"] = ret
+            context["title"] = f"Result of {obj.name} ({type(ret).__name__})"
             if isinstance(ret, QuerySet):
                 ret = ret[:100]
                 context["queryset"] = ret
@@ -67,6 +107,8 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
                 context["dataset"] = ret
             elif isinstance(ret, dict):
                 context["result"] = ret
+            else:
+                self.message_user(f"Query does not returns a valid result. It returned {type(ret)}")
             return render(request, "power_query/preview.html", context)
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
@@ -129,18 +171,52 @@ class DatasetAdmin(ExtraUrlMixin, ModelAdmin):
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
 
+class FormatterResource(resources.ModelResource):
+    class Meta:
+        model = Report
+        fields = ("name", "content_type", "code")
+        import_id_fields = ("name",)
+
+
 @register(Formatter)
 class FormatterAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
     list_display = ("name", "content_type")
     search_fields = ("name",)
     list_filter = ("content_type",)
+    resource_class = FormatterResource
+
+
+class ReportResource(resources.ModelResource):
+    query = fields.Field(widget=ForeignKeyWidget(Query, "name"))
+    formatter = fields.Field(widget=ForeignKeyWidget(Formatter, "name"))
+
+    class Meta:
+        model = Report
+        fields = ("name", "query", "formatter")
+        import_id_fields = ("name",)
 
 
 @register(Report)
 class ReportAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
-    list_display = ("name", "query", "formatter")
+    list_display = ("name", "query", "formatter", "is_ready")
     autocomplete_fields = ("query", "formatter")
     filter_horizontal = ("notify_to",)
+    list_filter = (("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
+    resource_class = ReportResource
+
+    def get_changeform_initial_data(self, request):
+        kwargs = {}
+        if "q" in request.GET:
+            q = Query.objects.get(pk=request.GET["q"])
+            kwargs["query"] = q
+            kwargs["name"] = f"Report for {q.name}"
+            kwargs["notify_to"] = [request.user]
+        return kwargs
+
+    def is_ready(self, obj):
+        return obj.result is not None
+
+    is_ready.boolean = True
 
     @button(visible=lambda o, r: "change" in r.path)
     def execute(self, request, pk):
@@ -150,11 +226,12 @@ class ReportAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda o, r: "change" in r.path)
+    @button(visible=lambda o, r: o.result and "/change" in r.path)
     def view(self, request, pk):
         try:
             obj = self.get_object(request, pk)
             data = pickle.loads(obj.result)
             return HttpResponse(data)
         except Exception as e:
+            logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
