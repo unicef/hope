@@ -12,5 +12,8 @@ class TestBasicRule(TestCase):
         self.user = UserFactory()
 
     def test_execution(self):
-        r = Query(name="All HH", owner=self.user, target=ContentType.objects.get_for_model(User), code="qs=conn.all()")
+        r = Query.objects.update_or_create(
+            name="All HH",
+            defaults={"owner": self.user, "target": ContentType.objects.get_for_model(User), "code": "qs=conn.all()"},
+        )
         r.execute()

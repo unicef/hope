@@ -188,8 +188,12 @@ class PostgresTestRunner(TestRunner):
 
     def teardown_databases(self, old_config, **kwargs):
         connections["cash_assist_datahub_ca"].close()
-        connections["cash_assist_datahub_erp"].close()
-        return super().teardown_databases(old_config, **kwargs)
+        connections["cash_assist_datahub_ca"].close()
+        config = []
+        for connection, old_name, destroy in old_config:
+            read_only = connection.settings_dict.get("TEST", {}).get("READ_ONLY", False)
+            config.append([connection, old_name, destroy and not read_only])
+        return super().teardown_databases(config, **kwargs)
 
     def setup_databases(self, **kwargs):
         old_names = []
