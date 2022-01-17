@@ -115,16 +115,25 @@ class Dataset(models.Model):
 class Formatter(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, unique=True)
     content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))
-    code = models.TextField()
+    code = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
 
     def render(self, context):
         if self.content_type == "xls":
-            dt = to_dataset(context["dataset"])
+            dt = to_dataset(context["dataset"].data)
             return dt.export("xls")
-        tpl = Template(self.code)
+        if self.code:
+            tpl = Template(self.code)
+        elif self.content_type == "json":
+            dt = to_dataset(context["dataset"].data)
+            return dt.export("json")
+        elif self.content_type == "yaml":
+            dt = to_dataset(context["dataset"].data)
+            return dt.export("yaml")
+        else:
+            raise ValueError("Unable to render")
         return tpl.render(Context(context))
 
 
@@ -133,7 +142,8 @@ class Report(models.Model):
     query = models.ForeignKey(Query, on_delete=models.CASCADE)
     formatter = models.ForeignKey(Formatter, on_delete=models.CASCADE)
     refresh = models.BooleanField(default=False)
-    notify_to = models.ManyToManyField(User, blank=True)
+    owner = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name="+")
+    available_to = models.ManyToManyField(User, blank=True, related_name="+")
 
     query_args = JSONField(default=dict, blank=True)
     last_run = models.DateTimeField(null=True, blank=True)

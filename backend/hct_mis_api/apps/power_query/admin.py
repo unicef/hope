@@ -4,6 +4,7 @@ import pickle
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -18,7 +19,7 @@ from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
 from tablib import Dataset
 
-from .forms import ExportForm, QueryForm
+from .forms import ExportForm, FormatterTestForm, QueryForm
 from .models import Dataset, Formatter, Query, Report
 from .tasks import queue
 from .utils import to_dataset
@@ -57,6 +58,9 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
     form = QueryForm
     change_form_template = None
     resource_class = QueryResource
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser or obj.owner == request.user
 
     def status(self, obj):
         return obj.ready and not obj.error
@@ -185,6 +189,28 @@ class FormatterAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
     list_filter = ("content_type",)
     resource_class = FormatterResource
 
+    @button(visible=lambda o, r: "change" in r.path)
+    def test(self, request, pk):
+        context = self.get_common_context(request, pk)
+        # obj = self.get_object(request, pk)
+        form = FormatterTestForm()
+        try:
+            if request.method == "POST":
+                form = FormatterTestForm(request.POST)
+                if form.is_valid():
+                    obj: Formatter = context["original"]
+                    ctx = {
+                        "dataset": form.cleaned_data["query"].dataset,
+                        "report": "None",
+                    }
+                    context["results"] = str(obj.render(ctx))
+                else:
+                    form = FormatterTestForm()
+        except Exception as e:
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+        context["form"] = form
+        return render(request, "admin/power_query/formatter/test.html", context)
+
 
 class ReportResource(resources.ModelResource):
     query = fields.Field(widget=ForeignKeyWidget(Query, "name"))
@@ -198,14 +224,18 @@ class ReportResource(resources.ModelResource):
 
 @register(Report)
 class ReportAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
-    list_display = ("name", "query", "formatter", "is_ready")
+    list_display = ("name", "query", "formatter", "is_ready", "last_run")
     autocomplete_fields = ("query", "formatter")
-    filter_horizontal = ("notify_to",)
+    filter_horizontal = ("available_to",)
+    readonly_fields = ("last_run",)
     list_filter = (("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
     resource_class = ReportResource
 
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser or obj.owner == request.user
+
     def get_changeform_initial_data(self, request):
-        kwargs = {}
+        kwargs = {"owner": request.user}
         if "q" in request.GET:
             q = Query.objects.get(pk=request.GET["q"])
             kwargs["query"] = q
@@ -224,14 +254,18 @@ class ReportAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
         try:
             obj.execute()
         except Exception as e:
+            logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     @button(visible=lambda o, r: o.result and "/change" in r.path)
     def view(self, request, pk):
         try:
             obj = self.get_object(request, pk)
-            data = pickle.loads(obj.result)
-            return HttpResponse(data)
+            if request.user.is_superuser or Report.objects.filter(pk=obj.pk, available_to=request.user).exists():
+                data = pickle.loads(obj.result)
+                return HttpResponse(data)
+            else:
+                raise PermissionDenied()
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)

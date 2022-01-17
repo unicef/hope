@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
 from ..account.models import User
-from .models import Formatter, Query
+from .models import Formatter, Query, Report
 from .widget import CodeWidget
 
 
@@ -41,6 +41,10 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
         return f"{obj.name.title()} ({obj.app_label})"
+
+
+class FormatterTestForm(forms.Form):
+    query = forms.ModelChoiceField(Query.objects)
 
 
 class QueryForm(forms.ModelForm):

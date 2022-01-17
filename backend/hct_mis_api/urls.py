@@ -32,6 +32,7 @@ urlpatterns = [
     path(f"api/{settings.ADMIN_PANEL_URL}/hijack/", include("hijack.urls")),
     path(f"api/{settings.ADMIN_PANEL_URL}/adminactions/", include("adminactions.urls")),
     path(f"api/{settings.ADMIN_PANEL_URL}/advanced_filters/", include("advanced_filters.urls")),
+    path(f"api/{settings.ADMIN_PANEL_URL}/reports/", include("hct_mis_api.apps.power_query.urls")),
     path("", homepage),
     path("_health", homepage),
     path("api/_health", homepage),
