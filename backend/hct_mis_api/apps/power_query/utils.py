@@ -17,7 +17,7 @@ def to_dataset(result):
     elif isinstance(result, dict):
         data = result
     else:
-        raise ValueError(result)
+        raise ValueError(f"{result} ({type(result)}")
     return data
 
 
