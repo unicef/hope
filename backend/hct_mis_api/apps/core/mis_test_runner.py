@@ -80,7 +80,6 @@ def create_fake_test_db(creation, verbosity=1, autoclobber=False, serialize=True
     from django.core.management import call_command
 
     test_database_name = creation._get_test_db_name()
-
     if verbosity >= 1:
         action = "Creating"
         if keepdb:
@@ -204,6 +203,7 @@ class PostgresTestRunner(TestRunner):
             if read_only:
                 if self.verbosity >= 1:
                     connection.creation.log("Skipping ReadOnly test database for alias '%s'..." % alias)
+                old_names.extend([alias])
                 continue
             if alias in (
                 "cash_assist_datahub_mis",
