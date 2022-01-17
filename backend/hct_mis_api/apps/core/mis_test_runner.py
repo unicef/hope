@@ -196,9 +196,11 @@ class PostgresTestRunner(TestRunner):
         created = False
         for alias in connections:
             connection = connections[alias]
-            if connection.settings_dict.get("TEST", {}).get("READ_ONLY", False):
+            read_only = connection.settings_dict.get("TEST", {}).get("READ_ONLY", False)
+            if read_only:
+                if self.verbosity >= 1:
+                    connection.creation.log("Skipping ReadOnly test database for alias '%s'..." % alias)
                 continue
-
             if alias in (
                 "cash_assist_datahub_mis",
                 "cash_assist_datahub_ca",
