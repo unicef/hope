@@ -2,9 +2,10 @@ from __future__ import absolute_import
 
 import os
 
-import xmlrunner
 from django.conf import settings
 from django.db import connections
+
+import xmlrunner
 from snapshottest.django import TestRunner
 
 
@@ -194,6 +195,10 @@ class PostgresTestRunner(TestRunner):
         old_names = []
         created = False
         for alias in connections:
+            connection = connections[alias]
+            if connection.settings_dict.get("TEST", {}).get("READ_ONLY", False):
+                continue
+
             if alias in (
                 "cash_assist_datahub_mis",
                 "cash_assist_datahub_ca",
@@ -210,7 +215,6 @@ class PostgresTestRunner(TestRunner):
                     )
                     created = True
                 else:
-                    connection = connections[alias]
                     create_fake_test_db(
                         connection.creation,
                         verbosity=self.verbosity,
