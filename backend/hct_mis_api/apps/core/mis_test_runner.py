@@ -203,8 +203,10 @@ class PostgresTestRunner(TestRunner):
             if read_only:
                 if self.verbosity >= 1:
                     connection.creation.log("Skipping ReadOnly test database for alias '%s'..." % alias)
-                old_names.extend([alias])
+                aliases = kwargs.get("aliases")
+                aliases.discard(alias)
                 continue
+
             if alias in (
                 "cash_assist_datahub_mis",
                 "cash_assist_datahub_ca",
