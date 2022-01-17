@@ -589,7 +589,6 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             return cls(grievance_ticket)
 
         if cls.MOVE_TO_STATUS_PERMISSION_MAPPING.get(status):
-            permissions_to_use = None
             if cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("feedback"):
                 if grievance_ticket.is_feedback:
                     permissions_to_use = cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("feedback")

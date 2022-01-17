@@ -67,7 +67,7 @@ class XlsxVerificationExportService:
             str(payment_record_verification.payment_record_id),
             str(payment_record_verification.payment_record.ca_id),
             self._to_received_column(payment_record_verification),
-            str(payment_record_verification.payment_record.household.head_of_household.full_name),
+            str(payment_record_verification.payment_record.head_of_household.full_name),
             str(payment_record_verification.payment_record.household_id),
             str(payment_record_verification.payment_record.household.unicef_id),
             payment_record_verification.payment_record.delivered_quantity,

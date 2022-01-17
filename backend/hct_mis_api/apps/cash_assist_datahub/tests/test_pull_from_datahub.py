@@ -251,9 +251,7 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.ca_id, self.dh_payment_record.ca_id)
         self.assertEqual(str(payment_record.ca_hash_id), str(self.dh_payment_record.ca_hash_id))
         self.assertEqual(str(payment_record.household_id), str(self.dh_payment_record.household_mis_id))
-        self.assertEqual(
-            str(payment_record.household.head_of_household_id), str(self.dh_payment_record.head_of_household_mis_id)
-        )
+        self.assertEqual(str(payment_record.head_of_household_id), str(self.dh_payment_record.head_of_household_mis_id))
         self.assertEqual(payment_record.full_name, self.dh_payment_record.full_name)
         self.assertEqual(payment_record.total_persons_covered, self.dh_payment_record.total_persons_covered)
         self.assertEqual(payment_record.distribution_modality, self.dh_payment_record.distribution_modality)
