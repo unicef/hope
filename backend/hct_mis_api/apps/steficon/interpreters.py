@@ -79,7 +79,6 @@ class PythonExec(Interpreter):
         locals_["result"] = pts
         try:
             exec(self.init_string, gl, locals_)
-            # exec(self.code, gl, locals_)
         except SyntaxError as err:
             error_class = err.__class__.__name__
             detail = err.args[0]
@@ -129,9 +128,6 @@ class PythonExec(Interpreter):
             tb = traceback.format_exc(limit=-1)
             msg = tb.split('<code>", ')[-1]
             raise ValidationError(mark_safe(msg))
-
-
-# from jinja2 import environment
 
 
 def get_env(**options) -> Environment:
