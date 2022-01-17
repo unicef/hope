@@ -3,7 +3,7 @@ from django.test.runner import DiscoverRunner
 from django.test.utils import get_unique_databases_and_mirrors
 
 
-class LegacyDatabaseRunner(DiscoverRunner):
+class ReadOnlyDatabaseRunner(DiscoverRunner):
     """
     Test runner that will skip attempting to create any database with LEGACY=True
     in its TEST configuration dictionary
