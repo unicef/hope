@@ -66,7 +66,7 @@ class Query(models.Model):
         try:
             self.error = None
             locals_ = dict()
-            locals_["conn"] = model._default_manager.using("ro")
+            locals_["conn"] = model._default_manager.using("read_only")
             locals_["query"] = self
             locals_["query_filters"] = filters
             exec(self.code, globals(), locals_)
