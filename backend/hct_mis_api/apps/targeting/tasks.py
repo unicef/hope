@@ -17,6 +17,8 @@ def target_population_apply_steficon(target_population_id):
     try:
         target_population = TargetPopulation.objects.get(pk=target_population_id)
         rule: RuleCommit = target_population.steficon_rule
+        if not rule:
+            raise Exception("TargetPopulation does not have a Steficon rule")
     except Exception as e:
         logger.exception(e)
         raise
