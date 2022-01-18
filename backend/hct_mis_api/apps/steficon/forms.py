@@ -7,12 +7,13 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.forms import HiddenInput, Textarea
+from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
 
 from .config import config
 from .interpreters import mapping
 from .models import Rule
-from .widget import CodeWidget
+from .widget import PythonEditor
 
 logger = logging.getLogger(__name__)
 try:
@@ -184,7 +185,7 @@ class RuleTestForm(forms.Form):
 
 
 class RuleForm(forms.ModelForm):
-    definition = forms.CharField(widget=CodeWidget)
+    definition = forms.CharField(widget=PythonEditor)
 
     class Meta:
         model = Rule
