@@ -21,8 +21,12 @@ class TestTargetingSteficon(TestCase):
     def test_queue(self):
         assert self.target_population.selections.count() == 1
         assert self.target_population.households.count() == 1
+
         target_population_apply_steficon(self.target_population.pk)
+
         entry = self.target_population.selections.first()
         self.target_population.refresh_from_db()
-        assert self.target_population.status == TargetPopulation.STATUS_STEFICON_COMPLETED
+        assert (
+            self.target_population.status == TargetPopulation.STATUS_STEFICON_COMPLETED
+        ), self.target_population.status
         assert entry.vulnerability_score == 999, entry.vulnerability_score
