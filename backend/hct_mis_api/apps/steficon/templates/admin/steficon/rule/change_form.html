@@ -18,6 +18,16 @@
         a.btn-action.disabled {
             background-color: lightgray;
         }
+        .CodeMirror {
+        {#    font-family: Arial, monospace;#}
+            font-size: 16px;
+         }
+        .CodeMirror-fullscreen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            height: auto;
+            z-index: 9;
+        }
     </style>
     <script>
         window.addEventListener('load', function () {
@@ -29,5 +39,31 @@
                 link.textContent = gettext('Hide');
             }
         });
+        (function(){
+            var $ = django.jQuery;
+            $(document).ready(function(){
+                $('textarea.python-editor').each(function(idx, el){
+                    var editor = CodeMirror.fromTextArea(el, {
+                        lineNumbers: true,
+                        lineWrapping: true,
+                        indentUnit: 4,
+                        mode: 'python',
+                        styleActiveLine: true,
+                        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+                        foldGutter: true,
+                        extraKeys: {
+                            "F3": function(cm){ cm.foldCode(cm.getCursor()); },
+                            "F11": function(cm) {
+                                cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                            },
+                            "Esc": function(cm) {
+                                if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                            }
+                        }
+                    })
+                    editor.execCommand('foldAll')
+                });
+            });
+        })();
     </script>
 {% endblock %}
