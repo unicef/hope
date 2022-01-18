@@ -89,12 +89,12 @@ class Rule(models.Model):
     def used_by(self):
         raise NotImplementedError
 
-    def commit(self, is_release=False):
+    def commit(self, is_release=False, force=False):
         if self.pk:
             stored, changes = self.get_changes()
         else:
             stored, changes = {}, []
-        if changes or not self.pk:
+        if force or changes or not self.pk:
             return RuleCommit.objects.create(
                 rule=self,
                 enabled=self.enabled,
