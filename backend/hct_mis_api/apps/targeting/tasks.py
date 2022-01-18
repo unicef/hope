@@ -34,9 +34,10 @@ def target_population_apply_steficon(target_population_id):
             HouseholdSelection.objects.bulk_update(updates, ["vulnerability_score"])
         target_population.status = TargetPopulation.STATUS_STEFICON_COMPLETED
         target_population.steficon_applied_date = timezone.now()
+        target_population.save()
     except Exception as e:
         logger.exception(e)
         target_population.steficon_applied_date = timezone.now()
         target_population.status = TargetPopulation.STATUS_STEFICON_ERROR
-    finally:
         target_population.save()
+        raise
