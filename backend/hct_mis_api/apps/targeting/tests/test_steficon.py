@@ -4,6 +4,7 @@ from uuid import uuid4
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.targeting.tasks import target_population_apply_steficon
 
 
@@ -22,4 +23,6 @@ class TestTargetingSteficon(TestCase):
         assert self.target_population.households.count() == 1
         target_population_apply_steficon(self.target_population.pk)
         entry = self.target_population.selections.first()
+        self.target_population.refresh_from_db()
+        assert self.target_population.status == TargetPopulation.STATUS_STEFICON_COMPLETED
         assert entry.vulnerability_score == 999, entry.vulnerability_score
