@@ -18,10 +18,18 @@ back to the defaults.
 """
 from django.conf import settings
 from django.core.signals import setting_changed
+from django.utils.module_loading import import_string
+
+SAFETY_NONE = 0  # accept any value
+SAFETY_STANDARD = 2  # only accept promitives
+SAFETY_HIGH = 4  # only accept json values
 
 DEFAULTS = {
     "USE_BLACK": False,
     "BUILTIN_MODULES": ["random", "datetime", "dateutil"],
+    "RESULT": "hct_mis_api.apps.steficon.result.Score",
+    "USED_BY": None,
+    "SAFETY_LEVEL": SAFETY_HIGH,
 }
 
 
@@ -48,6 +56,11 @@ class Config:
         except KeyError:
             # Fall back to defaults
             val = self.defaults[attr]
+
+        if attr in "RESULT":
+            val = import_string(val)
+        elif attr in "USED_BY" and val:
+            val = import_string(val)
 
         # Cache the result
         self._cached_attrs.add(attr)
