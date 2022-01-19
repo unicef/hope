@@ -5,6 +5,7 @@
         font-variant: none;
     }
 </style>
+<div id="{{ widget.attrs.id }}_container">
 <div style="margin:10px;">
     <a id="undo" class="button toolbutton" href="javascript:false"> undo </a>
     <a id="redo" class="button toolbutton" href="javascript:false"> redo </a>
@@ -12,6 +13,7 @@
 </div>
 <textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
 {% if widget.value %}{{ widget.value }}{% endif %}</textarea>
+</div>
 <script>
     (function ($) {
         var editor;
@@ -37,14 +39,14 @@
             eval(expression);
         });
 
-        $(document).ready(function () {
+         $(document).ready(function () {
             editor = CodeMirror.fromTextArea(document.getElementById('{{widget.attrs.id}}'), {
                 mode: "python",
                 lineNumbers: true,
                 lineWrapping: true,
                 indentUnit: 4,
                 styleActiveLine: true,
-                theme: "midnight",
+                theme: "{{ widget.attrs.theme }}",
                 foldGutter: true,
                 gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
                 extraKeys: {
@@ -65,7 +67,8 @@
             });
             editor.execCommand("unfoldAll");
             editor.foldCode(CodeMirror.Pos(0, 0));
-        });
+            $('#{{widget.attrs.id}}').data('CodeMirror', editor);
+         });
     })(django.jQuery);
 
 </script>

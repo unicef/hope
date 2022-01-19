@@ -11,4 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for db in settings.DATABASES:
             self.stdout.write(self.style.WARNING(f"Migrating {db} database"))
-            call_command("migrate", database=db)
+            if db == "ro":
+                self.stdout.write(self.style.WARNING(f"Migrating {db} database"))
+            else:
+                call_command("migrate", database=db)
