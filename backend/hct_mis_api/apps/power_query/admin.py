@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
+from django.db import models
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -23,6 +24,7 @@ from .forms import ExportForm, FormatterTestForm, QueryForm
 from .models import Dataset, Formatter, Query, Report
 from .tasks import queue
 from .utils import to_dataset
+from .widget import FormatterEditor
 
 logger = logging.getLogger(__name__)
 
@@ -188,6 +190,11 @@ class FormatterAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
     search_fields = ("name",)
     list_filter = ("content_type",)
     resource_class = FormatterResource
+    change_form_template = None
+
+    formfield_overrides = {
+        models.TextField: {"widget": FormatterEditor(theme="abcdef")},
+    }
 
     @button(visible=lambda o, r: "change" in r.path)
     def test(self, request, pk):
