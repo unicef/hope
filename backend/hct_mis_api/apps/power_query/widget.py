@@ -3,13 +3,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.templatetags.static import static
 
 
-class PythonEditor(forms.Textarea):
+class FormatterEditor(forms.Textarea):
     template_name = "steficon/widgets/codewidget.html"
 
     def __init__(self, *args, **kwargs):
         theme = kwargs.pop("theme", "midnight")
         super().__init__(*args, **kwargs)
-        self.attrs["class"] = "python-editor"
+        self.attrs["class"] = "formatter-editor"
         self.attrs["theme"] = theme
 
     class Media:
@@ -17,18 +17,20 @@ class PythonEditor(forms.Textarea):
             "all": (
                 static("admin/steficon/codemirror/codemirror.css"),
                 static("admin/steficon/codemirror/fullscreen.css"),
-                static("admin/steficon/codemirror/midnight.css"),
                 static("admin/steficon/codemirror/foldgutter.css"),
+                static("admin/steficon/codemirror/midnight.css"),
+                static("admin/power_query/codemirror/abcdef.css"),
             )
         }
         js = (
             static("admin/steficon/codemirror/codemirror.js"),
-            static("admin/steficon/codemirror/python.js"),
             static("admin/steficon/codemirror/fullscreen.js"),
             static("admin/steficon/codemirror/active-line.js"),
             static("admin/steficon/codemirror/foldcode.js"),
             static("admin/steficon/codemirror/foldgutter.js"),
             static("admin/steficon/codemirror/indent-fold.js"),
+            static("admin/power_query/codemirror/overlay.js"),
+            static("admin/power_query/codemirror/django.js"),
         )
 
 
