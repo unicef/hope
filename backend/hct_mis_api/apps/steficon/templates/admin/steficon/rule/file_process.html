@@ -1,0 +1,43 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify jsonfy %}
+{% block extrastyle %}{{ block.super }}
+  {#  {{ form.media }}#}
+  <script src="/static/admin/js/vendor/jquery/jquery.js"></script>
+  <script src="/static/admin/js/jquery.init.js"></script>
+
+{% endblock %}
+{% block action-content %}
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table>
+      {{ form }}
+    </table>
+    {% if results %}
+      {{ writer }}
+      <table style="font-size: 20px;width: 100%">
+        <tr>
+          <td>#</td>
+          {% for fname in fields %}
+            <td>{{ fname }}</td>
+          {% endfor %}
+        </tr>
+        {% for entry in results %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            {% for col, value in entry.items %}
+              <td>{{ value }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </table>
+        <input type="hidden" name="step" value='2'>
+        <input type="submit" value="Download">
+    {% else %}
+      <input type="hidden" name="step" value='1'>
+      <input type="submit" value="Start">
+    {% endif %}
+  </form>
+
+{% endblock %}
+{% block document_ready %}{{ block.super }}
+
+{% endblock %}

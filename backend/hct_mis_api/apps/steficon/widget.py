@@ -1,29 +1,62 @@
-from django.forms import Textarea
+from django import forms
+from django.contrib.contenttypes.models import ContentType
+from django.templatetags.static import static
 
 
-class CodeWidget(Textarea):
+class PythonEditor(forms.Textarea):
     template_name = "steficon/widgets/codewidget.html"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attrs["class"] = "python-editor"
 
     class Media:
         css = {
             "all": (
-                # 'admin/steficon/editor/edit_area.css',
+                static("admin/steficon/codemirror/codemirror.css"),
+                static("admin/steficon/codemirror/fullscreen.css"),
+                static("admin/steficon/codemirror/midnight.css"),
+                static("admin/steficon/codemirror/foldgutter.css"),
             )
         }
         js = (
-            # 'admin/steficon/editor/edit_area_full.js',
-            "admin/steficon/edit_area/edit_area_loader.js",
-            # 'admin/steficon/editor/edit_area.js',
-            # 'admin/steficon/editor/regexp.js',
-            # 'admin/steficon/editor/autocompletion.js',
-            # 'admin/steficon/codepress/engines/gecko.js',
-            # 'admin/steficon/codepress/codepress.js',
-            # 'admin/steficon/codepress/languages/generic.js',
+            static("admin/steficon/codemirror/codemirror.js"),
+            static("admin/steficon/codemirror/python.js"),
+            static("admin/steficon/codemirror/fullscreen.js"),
+            static("admin/steficon/codemirror/active-line.js"),
+            static("admin/steficon/codemirror/foldcode.js"),
+            static("admin/steficon/codemirror/foldgutter.js"),
+            static("admin/steficon/codemirror/indent-fold.js"),
         )
 
-    def __init__(self, attrs=None):
-        super().__init__(attrs={"class": "vLargeTextField", **(attrs or {})})
 
-    def build_attrs(self, base_attrs, extra_attrs=None):
-        base_attrs["class"] = "vLargeTextField codepress generic linenumbers-on"
-        return super().build_attrs(base_attrs, extra_attrs)
+class ContentTypeChoiceField(forms.ModelChoiceField):
+    def __init__(
+        self,
+        *,
+        empty_label="---------",
+        required=True,
+        widget=None,
+        label=None,
+        initial=None,
+        help_text="",
+        to_field_name=None,
+        limit_choices_to=None,
+        **kwargs,
+    ):
+        queryset = ContentType.objects.order_by("model", "app_label")
+        super().__init__(
+            queryset,
+            empty_label=empty_label,
+            required=required,
+            widget=widget,
+            label=label,
+            initial=initial,
+            help_text=help_text,
+            to_field_name=to_field_name,
+            limit_choices_to=limit_choices_to,
+            **kwargs,
+        )
+
+    def label_from_instance(self, obj):
+        return f"{obj.name.title()} ({obj.app_label})"

@@ -1,21 +1,18 @@
-import datetime
-import random
+import logging
+import sys
 import traceback
 from builtins import __build_class__
-from decimal import Decimal
 
-import dateutil
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.safestring import mark_safe
+
 from jinja2 import Environment
 
-from hct_mis_api.apps.household.models import Household
 from .config import config
-from .score import Score
+from .exception import RuleError
 from .templatetags import engine
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +23,12 @@ class Interpreter:
 
     def validate(self):
         try:
-            self.execute(hh=Household.objects.first())
+            self.execute()
         except Exception as e:
-            logger.exception(e)
             raise ValidationError(e)
+
+    def get_result(self):
+        return config.RESULT()
 
 
 class PythonFunction(Interpreter):
@@ -50,7 +49,7 @@ class PythonExec(Interpreter):
     def code(self):
         return compile(self.init_string, "<code>", mode="exec")
 
-    def execute(self, **context):
+    def execute(self, context):
         gl = {
             "__builtins__": {
                 "__build_class__": __build_class__,
@@ -74,31 +73,61 @@ class PythonExec(Interpreter):
             mod = __import__(module_name)
             gl["__builtins__"][module_name] = mod
 
-        pts = Score()
-        locals_ = dict(context)
-        locals_["score"] = pts
-        exec(self.code, gl, locals_)
-        return pts.value
+        pts = self.get_result()
+        locals_ = dict()
+        locals_["context"] = context
+        locals_["result"] = pts
+        try:
+            exec(self.init_string, gl, locals_)
+        except SyntaxError as err:
+            error_class = err.__class__.__name__
+            detail = err.args[0]
+            line_number = err.lineno
+            raise RuleError(
+                rule=self,
+                error_class=error_class,
+                detail=detail,
+                line_number=line_number,
+                traceback=None,
+            )
+        except Exception as err:
+            error_class = err.__class__.__name__
+            detail = err.args[0]
+            cl, exc, tb = sys.exc_info()
+            line_number = traceback.extract_tb(tb)[-1][1]
+            raise RuleError(
+                rule=self,
+                error_class=error_class,
+                detail=detail,
+                line_number=line_number,
+                traceback=traceback,
+            )
+        else:
+            return pts
 
     def validate(self):
         errors = []
-        for forbidden in ["__import__", "raw", "connection", "import", "delete", "save", "eval", "exec"]:
+        for forbidden in [
+            "__import__",
+            "raw",
+            "connection",
+            "import",
+            "delete",
+            "save",
+            "eval",
+            "exec",
+        ]:
             if forbidden in self.init_string:
                 errors.append("Code contains an invalid statement '%s'" % forbidden)
         if errors:
-            logger.error(errors)
             raise ValidationError(errors)
         try:
-            self.execute(hh=Household.objects.first())
+            compile(self.init_string, "<code>", mode="exec")
         except Exception as e:
             logger.exception(e)
             tb = traceback.format_exc(limit=-1)
             msg = tb.split('<code>", ')[-1]
-            logger.error(mark_safe(msg))
             raise ValidationError(mark_safe(msg))
-
-
-# from jinja2 import environment
 
 
 def get_env(**options) -> Environment:
@@ -110,26 +139,6 @@ def get_env(**options) -> Environment:
         }
     )
     return env
-
-
-# environment.DEFAULT_FILTERS['md5'] = lambda s: md5(s.encode('utf-8'))
-# environment.DEFAULT_FILTERS['hexdigest'] = lambda s: s.hexdigest()
-# environment.DEFAULT_FILTERS['urlencode'] = urlencode
-# environment.DEFAULT_FILTERS['slugify'] = slugify
-
-
-class Jinja(Interpreter):
-    label = "Jinja2"
-
-    @cached_property
-    def code(self):
-        return get_env().from_string(self.init_string)
-
-    def execute(self, **context):
-        pts = Score()
-        context["score"] = pts
-        output = self.code.render(**context)
-        return Decimal(output.strip())
 
 
 interpreters = [
