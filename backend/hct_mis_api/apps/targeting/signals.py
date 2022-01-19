@@ -1,4 +1,4 @@
-from django.db.models import Count, Sum, Q
+from django.db.models import Count, Q, Sum
 from django.db.models.signals import m2m_changed, post_save, pre_save
 from django.dispatch import receiver
 
@@ -16,8 +16,10 @@ def calculate_candidate_counts(target_population):
     if target_population.status == TargetPopulation.STATUS_DRAFT:
         if target_population.candidate_list_targeting_criteria is None:
             return
-        households = Household.objects.filter(target_population.candidate_list_targeting_criteria.get_query(),
-                                              business_area=target_population.business_area).distinct()
+        households = Household.objects.filter(
+            target_population.candidate_list_targeting_criteria.get_query(),
+            business_area=target_population.business_area,
+        ).distinct()
     else:
         households = target_population.vulnerability_score_filtered_households
     households_count = households.count()
