@@ -14,9 +14,15 @@
             Load csv file.
             Allowed formats are:
         <ul>
-            <li>area_name(char), area_code(char), area_level(int),</li>
-            <li>area_name(char), area_code(char), area_level(int), level_name(char)</li>
+            <li>area_name(char); area_code(char); parent_area_code(char); area_level(int),</li>
+            <li>area_name(char); area_code(char); arent_area_code(char);  area_level(int); level_name(char)</li>
         </ul>
+        <table>
+            <tr><td>area_name;area_code;parent_area_code;area_level</td></tr>
+            <tr><td>Bangladesh;BD;;0</td></tr>
+            <tr><td>Barisal;BD10;BD;1</td></tr>
+            <tr><td>Barguna;BD1004;BD10;2</td></tr>
+        </table>
         </div>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
