@@ -18,6 +18,9 @@
         a.btn-action.disabled {
             background-color: lightgray;
         }
+        .CodeMirror {
+            font-size: 16px;
+         }
     </style>
     <script>
         window.addEventListener('load', function () {
@@ -28,7 +31,5 @@
                 var link = elem.querySelector('h2>a');
                 link.textContent = gettext('Hide');
             }
-        });
-    </script>
+        });</script>
 {% endblock %}
-

@@ -6,11 +6,13 @@
         &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
         &rsaquo; <a href="{% url opts|admin_urlname:'change' original.pk %}">{{ original }}</a>
         &rsaquo; <a href="{% url opts|admin_urlname:'test_steficon' original.pk %}">Test</a>
-
     </div>
 {% endblock %}
 
 {% block content %}
+    {% if rule_error %}
+        {% include "steficon/debug.html" with exception_value=rule_error.exception_value exception_type=rule_error.exception_type %}
+    {% endif %}
     {% if original.selections.count == 0 %}
         <b>{{ original }}</b> does not contains records
     {% elif form %}
