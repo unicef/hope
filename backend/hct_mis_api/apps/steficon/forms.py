@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from .config import config
 from .interpreters import mapping
 from .models import Rule
-from .widget import PythonEditor
+from .widget import ContentTypeChoiceField, PythonEditor
 
 logger = logging.getLogger(__name__)
 try:
@@ -97,11 +97,6 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
             raise ValidationError(e)
 
 
-class ContentTypeChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return f"{obj.name.title()} ({obj.app_label})"
-
-
 class TPModelChoiceField(forms.ModelChoiceField):
     def __init__(
         self,
@@ -137,7 +132,7 @@ class RuleTestForm(forms.Form):
     opt = forms.CharField(required=True, widget=HiddenInput)
     file = forms.FileField(label="", required=False)
     raw_data = forms.CharField(label="", widget=Textarea, required=False)
-    content_type = ContentTypeChoiceField(queryset=ContentType.objects.order_by("model", "app_label"), required=False)
+    content_type = ContentTypeChoiceField(required=False)
     content_type_filters = forms.CharField(label="", widget=Textarea, required=False)
     target_population = TPModelChoiceField()
 
