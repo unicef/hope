@@ -2,9 +2,10 @@ from __future__ import absolute_import
 
 import os
 
-import xmlrunner
 from django.conf import settings
 from django.db import connections
+
+import xmlrunner
 from snapshottest.django import TestRunner
 
 
@@ -79,7 +80,6 @@ def create_fake_test_db(creation, verbosity=1, autoclobber=False, serialize=True
     from django.core.management import call_command
 
     test_database_name = creation._get_test_db_name()
-
     if verbosity >= 1:
         action = "Creating"
         if keepdb:
@@ -188,12 +188,25 @@ class PostgresTestRunner(TestRunner):
     def teardown_databases(self, old_config, **kwargs):
         connections["cash_assist_datahub_ca"].close()
         connections["cash_assist_datahub_erp"].close()
-        return super().teardown_databases(old_config, **kwargs)
+        config = []
+        for connection, old_name, destroy in old_config:
+            read_only = connection.settings_dict.get("TEST", {}).get("READ_ONLY", False)
+            config.append([connection, old_name, destroy and not read_only])
+        return super().teardown_databases(config, **kwargs)
 
     def setup_databases(self, **kwargs):
         old_names = []
         created = False
         for alias in connections:
+            connection = connections[alias]
+            read_only = connection.settings_dict.get("TEST", {}).get("READ_ONLY", False)
+            if read_only:
+                if self.verbosity >= 1:
+                    connection.creation.log("Skipping ReadOnly test database for alias '%s'..." % alias)
+                aliases = kwargs.get("aliases")
+                aliases.discard(alias)
+                continue
+
             if alias in (
                 "cash_assist_datahub_mis",
                 "cash_assist_datahub_ca",
@@ -210,7 +223,6 @@ class PostgresTestRunner(TestRunner):
                     )
                     created = True
                 else:
-                    connection = connections[alias]
                     create_fake_test_db(
                         connection.creation,
                         verbosity=self.verbosity,

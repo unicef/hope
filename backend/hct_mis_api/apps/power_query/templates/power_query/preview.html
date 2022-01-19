@@ -1,0 +1,31 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load power_query %}
+{% block action-content %}
+    <h2>Dataset is: {{ type }}</h2>
+    {% if result %}
+        <table>
+            <tr>{% for field in result.fields %}
+                <th>{{ field }}</th>{% endfor %}</tr>
+            {% for obj in result.data %}
+                <tr>
+                    {% for field in result.fields %}
+                        <td>{{ obj|field:field }}</td>{% endfor %}
+                </tr>{% endfor %}
+        </table>
+    {% elif queryset %}
+        <table>
+            <tr><th>id</th><th>record</th></tr>
+            {% for row in queryset %}
+                <tr><td>{{ row.pk }}</td><td>{{ row }}</td></tr>{% endfor %}
+        </table>
+    {% elif dataset %}
+        <table>
+            <tr>{% for fname in dataset.headers %}
+                <th>{{ fname }}</th>{% endfor %}</tr>
+            {% for row in dataset %}
+                <tr>
+                    {% for col in row %}
+                        <td>{{ col }}</td>{% endfor %}
+                </tr>{% endfor %}
+        </table>
+    {% endif %}
+{% endblock action-content %}
