@@ -1,0 +1,13 @@
+{% extends "admin_extra_urls/action_page.html" %}
+{% block action-content %}
+    <div style="padding: 10px;">
+        <form method="post">
+            {% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+            <input type="submit">
+        </form>
+    </div>
+    {{ results }}
+{% endblock %}
