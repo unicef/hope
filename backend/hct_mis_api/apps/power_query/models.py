@@ -23,12 +23,13 @@ from hct_mis_api.apps.power_query.utils import to_dataset
 logger = logging.getLogger(__name__)
 
 mimetype_map = {
-    "xls": "application/vnd.ms-excel",
-    "txt": "text/plain",
     "csv": "text/csv",
     "html": "text/html",
-    "yaml": "text/yaml",
     "json": "application/json",
+    "txt": "text/plain",
+    "xls": "application/vnd.ms-excel",
+    "xml": "application/xml",
+    "yaml": "text/yaml",
 }
 
 
