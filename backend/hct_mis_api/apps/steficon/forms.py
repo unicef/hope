@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.admin.widgets import AutocompleteSelect
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.forms import HiddenInput, Textarea
+from django.forms import HiddenInput, Media, Textarea
 from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
 
@@ -146,8 +146,10 @@ class RuleTestForm(forms.Form):
 
     @property
     def media(self):
-        extra = "" if settings.DEBUG else ".min"
-        return forms.Media(js=("admin/js/vendor/jquery/jquery%s.js" % extra, "admin/js/jquery.init.js"))
+        media = Media()
+        for field in self.fields.values():
+            media = media + field.widget.media
+        return media
 
     def clean_raw_data(self):
         original = self.cleaned_data["raw_data"]
