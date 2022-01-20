@@ -272,6 +272,14 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return queryset.distinct()
 
     @property
+    def candidate_list(self):
+        if self.status != TargetPopulation.STATUS_DRAFT:
+            return []
+        return Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).filter(
+            business_area=self.business_area
+        )
+
+    @property
     def final_list(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
             return []
@@ -284,11 +292,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     @property
     def candidate_stats(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
-            households_ids = (
-                Household.objects.filter(self.candidate_list_targeting_criteria.get_query())
-                .filter(business_area=self.business_area)
-                .values_list("id")
-            )
+            households_ids = self.candidate_list.values_list("id")
         else:
             households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
