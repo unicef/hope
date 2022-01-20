@@ -145,54 +145,6 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
         except (RuleCommit.DoesNotExist, AttributeError):
             pass
 
-    # @button(visible=lambda o, r: "/test/" not in r.path)
-    # def test(self, request, pk):
-    #     context = self.get_common_context(
-    #         request,
-    #         pk,
-    #         title="Test",
-    #         state_opts=RuleCommit._meta,
-    #     )
-    #     if request.method == "POST":
-    #         rule: Rule = self.get_object(request, pk)
-    #         form = RuleTestForm(request.POST, request.FILES)
-    #         if form.is_valid():
-    #             selection = form.cleaned_data["opt"]
-    #             if selection == "optFile":
-    #                 data = form.cleaned_data.get("file")
-    #             elif selection == "optData":
-    #                 data = form.cleaned_data.get("raw_data")
-    #             elif selection == "optTargetPopulation":
-    #                 tp = form.cleaned_data.get("target_population")
-    #                 data = [e.household for e in tp.selections.all()]
-    #             elif selection == "optContentType":
-    #                 ct: ContentType = form.cleaned_data["content_type"]
-    #                 filters = json.loads(form.cleaned_data.get("content_type_filters") or "{}")
-    #                 qs = ct.model_class().objects.filter(**filters)
-    #                 data = qs.all()
-    #             else:
-    #                 raise Exception(f"Invalid option '{selection}'")
-    #             if not isinstance(data, (list, tuple, QuerySet)):
-    #                 data = [data]
-    #             results = []
-    #             for values in data:
-    #                 row = {'input': values, 'input_type': values.__class__.__name__,
-    #                        'data': '', 'error': None, 'success': True}
-    #                 try:
-    #                     # entry = clean_context(values)
-    #                     row['result'] = rule.execute(values, only_enabled=False, only_release=False)
-    #                 except Exception as e:
-    #                     row['error'] = "%s: %s" % (e.__class__.__name__, str(e))
-    #                     row['success'] = False
-    #                 results.append(row)
-    #             context["results"] = results
-    #         else:
-    #             context["form"] = form
-    #     else:
-    #         context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
-    #
-    #     return TemplateResponse(request, "admin/steficon/rule/test.html", context)
-
     def _get_csv_config(self, form):
         return dict(
             quoting=int(form.cleaned_data["quoting"]),
@@ -336,12 +288,24 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def _changeform_view(self, request, object_id, form_url, extra_context):
+        if request.method == "POST" and "_release" in request.POST:
+            object_id = None
+        return super()._changeform_view(request, object_id, form_url, extra_context)
+
     @atomic()
     def save_model(self, request, obj, form, change):
         if not obj.pk:
             obj.created_by = request.user
         obj.updated_by = request.user
-        return super().save_model(request, obj, form, change)
+        obj.save()
+        if "_save" in request.POST:
+            obj.commit(is_release=True, force=True)
+        if not obj.latest:
+            obj.commit(force=True)
 
 
 @register(RuleCommit)
