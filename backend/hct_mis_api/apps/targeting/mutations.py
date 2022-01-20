@@ -52,7 +52,7 @@ from hct_mis_api.apps.targeting.validators import (
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
 
-from .tasks import target_population_apply_steficon
+from .celery_tasks import target_population_apply_steficon
 
 logger = logging.getLogger(__name__)
 
