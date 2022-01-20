@@ -10,7 +10,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 class UpdateByXlsxStage1Form(forms.Form):
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
-    registration_data_import = forms.CharField(required=False)
+    registration_data_import = forms.ModelChoiceField(queryset=RegistrationDataImport.objects.all())
     file = forms.FileField()
 
     def clean_registration_data_import(self) -> Optional[RegistrationDataImport]:
