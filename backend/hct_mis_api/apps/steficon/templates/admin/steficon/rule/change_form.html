@@ -1,4 +1,4 @@
-{% extends "admin_extra_urls/change_form.html" %}{% load engine static %}
+{% extends "admin_extra_urls/change_form.html" %}{% load i18n admin_urls engine static %}
 {% block extrastyle %}
     {{ block.super }}
     <style>
@@ -12,7 +12,13 @@
 {% block object-tools-items %}
     {# removes standard django buttons   #}
     {% include "admin_extra_urls/includes/change_form_buttons.html" %}
+    <li>{{ original.latest.version|default_if_none:"No release" }}</li>
 {% endblock %}
+{% block submit_buttons_bottom %}
+    <input type="submit" value="{% trans 'Save and continue editing' %}" name="_continue">
+    <input type="submit" value="{% trans 'Release' %}" name="_save">
+{% endblock %}
+
 {% block admin_change_form_document_ready %}{{ block.super }}
     <style>
         a.btn-action.disabled {
