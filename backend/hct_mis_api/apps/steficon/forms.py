@@ -4,6 +4,7 @@ import logging
 
 from django import forms
 from django.conf import settings
+from django.contrib.admin.widgets import AutocompleteSelect
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.forms import HiddenInput, Textarea
@@ -127,6 +128,13 @@ class TPModelChoiceField(forms.ModelChoiceField):
             **kwargs,
         )
 
+    def label_from_instance(self, obj):
+        if obj and obj.business_area:
+            return f"{obj.name} ({obj.business_area.name})"
+        elif obj.name:
+            return f"{obj.name}"
+        return str(obj)
+
 
 class RuleTestForm(forms.Form):
     opt = forms.CharField(required=True, widget=HiddenInput)
@@ -134,7 +142,7 @@ class RuleTestForm(forms.Form):
     raw_data = forms.CharField(label="", widget=Textarea, required=False)
     content_type = ContentTypeChoiceField(required=False)
     content_type_filters = forms.CharField(label="", widget=Textarea, required=False)
-    target_population = TPModelChoiceField()
+    target_population = TPModelChoiceField(required=False)
 
     @property
     def media(self):
@@ -194,7 +202,7 @@ class RuleForm(forms.ModelForm):
         try:
             i.validate()
         except Exception as e:
-            raise ValidationError({"definition": str(e.message)})
+            raise ValidationError({"definition": str(e)})
         if config.USE_BLACK:
             try:
                 self.cleaned_data["definition"] = format_code(code)
