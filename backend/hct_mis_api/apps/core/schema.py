@@ -152,6 +152,15 @@ def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
     return resolver(attname, default_value, root, info, **args)
 
 
+def sort_by_attr(options, attrs: str) -> list:
+    def key_extractor(el):
+        for attr in attrs.split("."):
+            el = _custom_dict_or_attr_resolver(attr, None, el, None)
+        return el
+
+    return list(sorted(options, key=key_extractor))
+
+
 class FieldAttributeNode(graphene.ObjectType):
     class Meta:
         default_resolver = _custom_dict_or_attr_resolver
@@ -312,10 +321,10 @@ class Query(graphene.ObjectType):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(parent, info, flex_field=None):
-        return get_fields_attr_generators(flex_field)
+        return sort_by_attr(get_fields_attr_generators(flex_field), "label.English(EN)")
 
     def resolve_all_individual_fields_attributes(parent, info, flex_field=None):
-        return get_fields_attr_generators(flex_field)
+        return sort_by_attr(get_fields_attr_generators(flex_field), "label.English(EN)")
 
     def resolve_kobo_project(self, info, uid, business_area_slug, **kwargs):
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
