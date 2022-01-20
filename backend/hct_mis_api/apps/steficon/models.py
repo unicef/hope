@@ -115,7 +115,7 @@ class Rule(models.Model):
     @property
     def latest(self):
         try:
-            return self.history.filter(is_release=True).latest()
+            return self.history.filter(is_release=True).order_by("-version").first()
         except RuleCommit.DoesNotExist:
             pass
 

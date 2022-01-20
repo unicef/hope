@@ -2,6 +2,7 @@ import logging
 import sys
 import traceback
 from builtins import __build_class__
+from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
@@ -56,6 +57,7 @@ class PythonExec(Interpreter):
                 "__name__": __name__,
                 "bytearray": bytearray,
                 "bytes": bytes,
+                "Decimal": Decimal,
                 "complex": complex,
                 "dict": dict,
                 "float": float,
