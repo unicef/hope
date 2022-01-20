@@ -39,7 +39,12 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
+from hct_mis_api.apps.core.schema import (
+    ChoiceObject,
+    FieldAttributeNode,
+    _custom_dict_or_attr_resolver,
+    sort_by_attr,
+)
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
@@ -712,15 +717,17 @@ class Query(graphene.ObjectType):
             "who_answers_alt_phone",
         ]
 
-        yield from [
-            x
-            for x in CORE_FIELDS_ATTRIBUTES
-            if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
-        ]
-        yield from KOBO_ONLY_INDIVIDUAL_FIELDS.values()
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-        ).order_by("created_at")
+        all_options = (
+            [
+                x
+                for x in CORE_FIELDS_ATTRIBUTES
+                if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
+            ]
+            + list(KOBO_ONLY_INDIVIDUAL_FIELDS.values())
+            + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL))
+        )
+
+        return sort_by_attr(all_options, "label.English(EN)")
 
     def resolve_all_edit_household_fields_attributes(self, info, **kwargs):
         ACCEPTABLE_FIELDS = [
@@ -770,14 +777,13 @@ class Query(graphene.ObjectType):
         ]
 
         # yield from FlexibleAttribute.objects.order_by("name").all()
-        yield from [
+        all_options = [
             x
             for x in HOUSEHOLD_EDIT_ONLY_FIELDS + CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _HOUSEHOLD and x.get("name") in ACCEPTABLE_FIELDS
-        ]
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-        ).order_by("created_at")
+        ] + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD))
+
+        return sort_by_attr(all_options, "label.English(EN)")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
