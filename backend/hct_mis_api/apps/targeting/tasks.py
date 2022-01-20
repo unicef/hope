@@ -3,6 +3,8 @@ import logging
 from django.db.transaction import atomic
 from django.utils import timezone
 
+from concurrency.api import disable_concurrency
+
 from hct_mis_api.apps.core.celery import app
 
 from ..targeting.models import HouseholdSelection, TargetPopulation
@@ -29,14 +31,15 @@ def target_population_apply_steficon(target_population_id):
         updates = []
         with atomic():
             entry: HouseholdSelection
-            for entry in target_population.selections.all():
+            for entry in target_population.selections.using("read_only").all():
                 result = rule.execute({"household": entry.household, "target_population": target_population})
                 entry.vulnerability_score = result.value
                 updates.append(entry)
             HouseholdSelection.objects.bulk_update(updates, ["vulnerability_score"])
         target_population.status = TargetPopulation.STATUS_STEFICON_COMPLETED
         target_population.steficon_applied_date = timezone.now()
-        target_population.save()
+        with disable_concurrency(target_population):
+            target_population.save()
     except Exception as e:
         logger.exception(e)
         target_population.steficon_applied_date = timezone.now()
