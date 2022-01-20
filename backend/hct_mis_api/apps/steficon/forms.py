@@ -4,9 +4,10 @@ import logging
 
 from django import forms
 from django.conf import settings
+from django.contrib.admin.widgets import AutocompleteSelect
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.forms import HiddenInput, Textarea
+from django.forms import HiddenInput, Media, Textarea
 from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
 
@@ -127,6 +128,13 @@ class TPModelChoiceField(forms.ModelChoiceField):
             **kwargs,
         )
 
+    def label_from_instance(self, obj):
+        if obj and obj.business_area:
+            return f"{obj.name} ({obj.business_area.name})"
+        elif obj.name:
+            return f"{obj.name}"
+        return str(obj)
+
 
 class RuleTestForm(forms.Form):
     opt = forms.CharField(required=True, widget=HiddenInput)
@@ -138,8 +146,10 @@ class RuleTestForm(forms.Form):
 
     @property
     def media(self):
-        extra = "" if settings.DEBUG else ".min"
-        return forms.Media(js=("admin/js/vendor/jquery/jquery%s.js" % extra, "admin/js/jquery.init.js"))
+        media = Media()
+        for field in self.fields.values():
+            media = media + field.widget.media
+        return media
 
     def clean_raw_data(self):
         original = self.cleaned_data["raw_data"]
@@ -194,7 +204,7 @@ class RuleForm(forms.ModelForm):
         try:
             i.validate()
         except Exception as e:
-            raise ValidationError({"definition": str(e.message)})
+            raise ValidationError({"definition": str(e)})
         if config.USE_BLACK:
             try:
                 self.cleaned_data["definition"] = format_code(code)
