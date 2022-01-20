@@ -37,5 +37,29 @@
                 var link = elem.querySelector('h2>a');
                 link.textContent = gettext('Hide');
             }
-        });</script>
+        });
+    </script>
+    <script type="text/javascript">
+        if ('undefined' !== typeof(django)) {
+            // supplement focus prototype for Django's old jQuery
+            django.jQuery.expr[':'].focus = function( elem ) {
+                return elem === document.activeElement && ( elem.type || elem.href );
+            };
+            django.jQuery(document).keydown(function(e) {
+                // only do J/K nav on result lists and when the search field isn't focused
+                var do_jk_nav = django.jQuery('#result_list').length && django.jQuery('input:focus').length == 0;
+                console.log(11111, 'ctrlKey:', e.ctrlKey, 'metaKey:', e.metaKey, 'which:', e.which);
+                if ((e.ctrlKey || e.metaKey) && (e.which === 83 || e.which === 115)) { // s or S
+                    e.preventDefault();
+                    django.jQuery("input[name='_continue']").click();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.which === 80)) { // s or S
+                    django.jQuery("#btn-preview").click();
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+    </script>
 {% endblock %}

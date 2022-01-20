@@ -2,6 +2,7 @@ import logging
 import re
 from datetime import date, datetime
 
+from django.conf import settings
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
@@ -1035,3 +1036,4 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
     xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.PROTECT)
