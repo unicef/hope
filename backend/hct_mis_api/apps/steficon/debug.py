@@ -5,6 +5,16 @@ from django.template.response import TemplateResponse
 from django.views.debug import ExceptionReporter
 
 
+def process_exception(exception, request=None):
+    if not exception:
+        exc_type, exception, traceback = sys.exc_info()
+
+    reporter = ExceptionReporter(request, *sys.exc_info())
+
+    tb_text = reporter.get_traceback_html()
+    return tb_text
+
+
 def render_exception(request, exception, extra_context):
     exc_type, exception, traceback = sys.exc_info()
     reporter = ExceptionReporter(request, exc_type, exception, traceback)

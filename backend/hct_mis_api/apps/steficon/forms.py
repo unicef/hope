@@ -134,7 +134,7 @@ class RuleTestForm(forms.Form):
     raw_data = forms.CharField(label="", widget=Textarea, required=False)
     content_type = ContentTypeChoiceField(required=False)
     content_type_filters = forms.CharField(label="", widget=Textarea, required=False)
-    target_population = TPModelChoiceField()
+    target_population = TPModelChoiceField(required=False)
 
     @property
     def media(self):
