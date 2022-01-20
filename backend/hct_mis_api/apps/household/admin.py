@@ -33,6 +33,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketSystemFlaggingDetails,
@@ -60,6 +61,8 @@ from hct_mis_api.apps.household.models import (
     XlsxUpdateFile,
 )
 from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.steficon.admin import AutocompleteWidget
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -494,7 +497,10 @@ class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
     def xlsx_update(self, request):
         if request.method == "GET":
-            context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
+            form = UpdateByXlsxStage1Form()
+            form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
+            form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
+            context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
         elif request.POST.get("stage") == "2":
             form = UpdateByXlsxStage1Form(request.POST, request.FILES)
             context = self.get_common_context(request, title="Update Individual by xlsx", form=form)

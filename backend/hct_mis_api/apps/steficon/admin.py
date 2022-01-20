@@ -104,9 +104,6 @@ class TestRuleMixin:
             title=f"{rule}",
             state_opts=RuleCommit._meta,
         )
-        from hct_mis_api.apps.targeting.models import TargetPopulation
-
-        widget = AutocompleteWidget(TargetPopulation, self.admin_site)
 
         if request.method == "POST":
             form = RuleTestForm(request.POST, request.FILES)
@@ -127,7 +124,7 @@ class TestRuleMixin:
                     filters = json.loads(form.cleaned_data.get("content_type_filters") or "{}")
                     qs = ct.model_class().objects.filter(**filters)
                     data = qs.all()
-                    title = f"Test result for '{rule}' using TargetPopulation '{tp}'"
+                    title = f"Test result for '{rule}' using ContentType '{ct}'"
                 else:
                     raise Exception(f"Invalid option '{selection}'")
                 if not isinstance(data, (list, tuple, QuerySet)):
@@ -155,9 +152,11 @@ class TestRuleMixin:
             else:
                 context["form"] = form
         else:
+            from hct_mis_api.apps.targeting.models import TargetPopulation
 
             context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
-            context["form"].fields["target_population"].widget = widget
+            context["form"].fields["target_population"].widget = AutocompleteWidget(TargetPopulation, self.admin_site)
+            context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 
 
