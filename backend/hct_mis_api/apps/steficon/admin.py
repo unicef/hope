@@ -141,7 +141,7 @@ class TestRuleMixin:
                     }
                     try:
                         if isinstance(rule, Rule):
-                            row["result"] = rule.execute(values, only_enabled=False, only_release=False)
+                            row["result"] = rule.interpreter.execute(values)
                         else:
                             row["result"] = rule.execute(values)
                     except Exception as e:
@@ -366,12 +366,24 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def _changeform_view(self, request, object_id, form_url, extra_context):
+        if request.method == "POST" and "_release" in request.POST:
+            object_id = None
+        return super()._changeform_view(request, object_id, form_url, extra_context)
+
     @atomic()
     def save_model(self, request, obj, form, change):
         if not obj.pk:
             obj.created_by = request.user
         obj.updated_by = request.user
-        return super().save_model(request, obj, form, change)
+        obj.save()
+        if "_save" in request.POST:
+            obj.commit(is_release=True, force=True)
+        if not obj.latest:
+            obj.commit(force=True)
 
 
 @register(RuleCommit)
