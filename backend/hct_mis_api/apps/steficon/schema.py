@@ -5,7 +5,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
 
 class SteficonRuleFilter(FilterSet):
@@ -17,6 +17,14 @@ class SteficonRuleFilter(FilterSet):
 class SteficonRuleNode(DjangoObjectType):
     class Meta:
         model = Rule
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+        exclude = ("version",)
+
+
+class RuleCommitNode(DjangoObjectType):
+    class Meta:
+        model = RuleCommit
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
         exclude = ("version",)
