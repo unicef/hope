@@ -57,6 +57,7 @@ urlpatterns = [
     path(
         "api/unicorn/download-target-population-xlsx/<uuid:target_population_id>/",
         hct_mis_api.apps.targeting.views.download_xlsx_households,
+        name="admin-download-target-population",
     ),
     path(
         "api/dashboard-report/<uuid:report_id>",
