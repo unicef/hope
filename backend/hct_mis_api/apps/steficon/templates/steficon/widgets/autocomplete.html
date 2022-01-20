@@ -4,28 +4,12 @@
         data-ajax--cache="false"
         data-ajax--delay="250"
         data-ajax--type="GET"
-{#        data-ajax--qs="id"#}
-{#        data-ajax--qs="{{ widget.query_string }}"#}
         data-ajax--param="{{ widget.lookup_kwarg }}"
         data-ajax--url="{{ widget.url }}"
         data-theme="filter-autocomplete"
-{#        data-app-label="targeting"#}
-{#        data-model-name="targetpopulation"#}
-{#        data-field-name="id"#}
-{#        data-app-label="{{ widget.target_opts.app_label }}"#}
-{#        data-model-name="{{ widget.target_opts.model_name }}"#}
-{#        data-field-name="{{ widget.target_field.name }}"#}
         data-allow-clear="true"
         data-placeholder=""
         class="admin-autocomplete">
     {% for c in choices %}
         <option selected="selected">{{ c }}</option>{% endfor %}
 </select>
-{{ widget.media }}
-<script>
-    window.addEventListener("load", function () {
-        ;(function ($) {
-            $("#{{widget.attrs.id}}").djangoAdminSelect2();
-        })(django.jQuery);
-     });
-</script>
