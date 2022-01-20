@@ -31,7 +31,7 @@ def target_population_apply_steficon(target_population_id):
         updates = []
         with atomic():
             entry: HouseholdSelection
-            for entry in target_population.selections.using("read_only").all():
+            for entry in target_population.selections.all():
                 result = rule.execute({"household": entry.household, "target_population": target_population})
                 entry.vulnerability_score = result.value
                 updates.append(entry)
