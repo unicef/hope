@@ -2589,9 +2589,48 @@ enum RoleSubsystem {
   CA
 }
 
+enum RuleCommitLanguage {
+  PYTHON
+  INTERNAL
+}
+
+type RuleCommitNode implements Node {
+  id: ID!
+  timestamp: DateTime!
+  rule: SteficonRuleNode
+  updatedBy: UserNode
+  definition: String!
+  isRelease: Boolean!
+  enabled: Boolean!
+  deprecated: Boolean!
+  language: RuleCommitLanguage!
+  affectedFields: [String]!
+  before: JSONString!
+  after: JSONString!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+}
+
+type RuleCommitNodeConnection {
+  pageInfo: PageInfo!
+  edges: [RuleCommitNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type RuleCommitNodeEdge {
+  node: RuleCommitNode
+  cursor: String!
+}
+
 enum RuleLanguage {
   PYTHON
   INTERNAL
+}
+
+enum RuleSecurity {
+  A_0
+  A_2
+  A_4
 }
 
 type SanctionListIndividualAliasNameNode implements Node {
@@ -2757,10 +2796,10 @@ type ServiceProviderNode implements Node {
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
   caId: String!
-  fullName: String!
-  shortName: String!
+  fullName: String
+  shortName: String
   country: String!
-  visionId: String!
+  visionId: String
   paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
 }
@@ -2804,16 +2843,18 @@ type StatsObjectType {
 
 type SteficonRuleNode implements Node {
   id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
   name: String!
   definition: String!
+  description: String
   enabled: Boolean!
   deprecated: Boolean!
   language: RuleLanguage!
+  security: RuleSecurity!
   createdBy: UserNode
   updatedBy: UserNode
-  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  history(before: String, after: String, first: Int, last: Int): RuleCommitNodeConnection!
 }
 
 type SteficonRuleNodeConnection {
@@ -2858,7 +2899,7 @@ type TargetPopulationNode implements Node {
   candidateListTargetingCriteria: TargetingCriteriaNode
   finalListTargetingCriteria: TargetingCriteriaNode
   sentToDatahub: Boolean!
-  steficonRule: SteficonRuleNode
+  steficonRule: RuleCommitNode
   steficonAppliedDate: DateTime
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
@@ -2888,6 +2929,10 @@ type TargetPopulationNodeEdge {
 enum TargetPopulationStatus {
   DRAFT
   LOCKED
+  STEFICON_WAIT
+  STEFICON_RUN
+  STEFICON_COMPLETED
+  STEFICON_ERROR
   PROCESSING
   READY_FOR_CASH_ASSIST
 }
