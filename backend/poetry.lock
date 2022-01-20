@@ -552,14 +552,14 @@ six = ">=1.2"
 
 [[package]]
 name = "django-filter"
-version = "2.2.0"
+version = "2.4.0"
 description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
 category = "main"
 optional = false
-python-versions = ">=3.4"
+python-versions = ">=3.5"
 
 [package.dependencies]
-Django = ">=1.11"
+Django = ">=2.2"
 
 [[package]]
 name = "django-hijack"
@@ -1892,7 +1892,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "d5e7521e05ab0875b77bc4ceb6abf99994b3b31ef7a88d420ac397bfe6fdc2b5"
+content-hash = "c746c995f95456afa7b6971fe6ba57fa4668f86ab7ff5991dc05ff37bcfee7e7"
 
 [metadata.files]
 amqp = [
@@ -2130,8 +2130,8 @@ django-extensions = [
     {file = "django_extensions-2.2.6-py2.py3-none-any.whl", hash = "sha256:4524eca892d23fa6e93b0620901983b287ff5dc806f1b978d6a98541f06b9471"},
 ]
 django-filter = [
-    {file = "django-filter-2.2.0.tar.gz", hash = "sha256:c3deb57f0dd7ff94d7dce52a047516822013e2b441bed472b722a317658cfd14"},
-    {file = "django_filter-2.2.0-py3-none-any.whl", hash = "sha256:558c727bce3ffa89c4a7a0b13bc8976745d63e5fd576b3a9a851650ef11c401b"},
+    {file = "django-filter-2.4.0.tar.gz", hash = "sha256:84e9d5bb93f237e451db814ed422a3a625751cbc9968b484ecc74964a8696b06"},
+    {file = "django_filter-2.4.0-py3-none-any.whl", hash = "sha256:e00d32cebdb3d54273c48f4f878f898dced8d5dfaad009438fe61ebdf535ace1"},
 ]
 django-hijack = [
     {file = "django-hijack-3.0.4.tar.gz", hash = "sha256:ef391c5b497b00ce2e054063240c941e6763af5b730a90462b3fd082fb25927d"},
