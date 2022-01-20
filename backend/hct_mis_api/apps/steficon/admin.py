@@ -71,7 +71,7 @@ class TestRuleMixin:
                     }
                     try:
                         if isinstance(rule, Rule):
-                            row["result"] = rule.execute(values, only_enabled=False, only_release=False)
+                            row["result"] = rule.interpreter.execute(values)
                         else:
                             row["result"] = rule.execute(values)
                     except Exception as e:
