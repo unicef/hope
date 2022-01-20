@@ -5,7 +5,7 @@ from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFact
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.targeting.tasks import target_population_apply_steficon
+from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 
 
 class TestTargetingSteficon(TestCase):
