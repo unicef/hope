@@ -2,19 +2,42 @@ from collections import OrderedDict
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
+
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
+
+User = get_user_model()
+
+
+class GenericField:
+    def __init__(self, name: str, column_name: str):
+        self.name = name
+        self.column_name = column_name
+
+    def value(self, user: User, business_area: str) -> str:
+        return getattr(user, self.name)
+
+
+class PartnerField(GenericField):
+    def value(self, user: User, business_area: str) -> str:
+        return user.partner.name
+
+
+class UserRoleField(GenericField):
+    def value(self, user: User, business_area: str) -> str:
+        all_roles = user.user_roles.filter(business_area__slug=business_area)
+        return ", ".join([f"{role.business_area.name}-{role.role.name}" for role in all_roles])
 
 
 class ExportUsersXlsx:
     FIELDS_TO_COLUMNS_MAPPING = OrderedDict(
         {
-            "first_name": "FIRST NAME",
-            "last_name": "LAST NAME",
-            "email": "E-MAIL",
-            "status": "ACCOUNT STATUS",
-            "partner": "PARTNER",
-            "user_roles": "USER ROLES",
+            "first_name": GenericField("first_name", "FIRST NAME"),
+            "last_name": GenericField("last_name", "LAST NAME"),
+            "email": GenericField("email", "E-MAIL"),
+            "status": GenericField("status", "ACCOUNT STATUS"),
+            "partner": PartnerField("partner", "PARTNER"),
+            "user_roles": UserRoleField("user_roles", "USER ROLES"),
         }
     )
 
@@ -26,28 +49,21 @@ class ExportUsersXlsx:
         self._add_headers()
 
     def _add_headers(self):
-        self.ws.append(list(self.FIELDS_TO_COLUMNS_MAPPING.values()))
+        self.ws.append([field.column_name for field in self.FIELDS_TO_COLUMNS_MAPPING.values()])
         for i in range(1, len(self.FIELDS_TO_COLUMNS_MAPPING) + 1):
             self.ws.column_dimensions[get_column_letter(i)].width = 20
 
     @transaction.atomic(using="default")
     def get_exported_users_file(self):
-        user_fields = self.FIELDS_TO_COLUMNS_MAPPING.keys()
-        users = (
-            get_user_model()
-            .objects.prefetch_related("user_roles")
-            .filter(
-                available_for_export=True, is_superuser=False, user_roles__business_area__slug=self.business_area_slug
-            )
+        fields = self.FIELDS_TO_COLUMNS_MAPPING.values()
+        users = User.objects.prefetch_related("user_roles").filter(
+            available_for_export=True, is_superuser=False, user_roles__business_area__slug=self.business_area_slug
         )
         if users.exists() is False:
             return
 
         for user in users:
-            row = [getattr(user, field) for field in user_fields if field != "user_roles"]
-            all_roles = user.user_roles.filter(business_area__slug=self.business_area_slug)
-            row.append(", ".join([f"{role.business_area.name}-{role.role.name}" for role in all_roles]))
-            self.ws.append(row)
+            self.ws.append([field.value(user, self.business_area_slug) for field in fields])
 
         users.update(available_for_export=False)
 
