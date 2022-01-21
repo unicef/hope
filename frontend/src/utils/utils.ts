@@ -171,15 +171,15 @@ export function targetPopulationStatusToColor(
     case [TargetPopulationStatus.Draft]:
       return theme.hctPalette.gray;
     case [TargetPopulationStatus.Locked]:
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.red;
     case [TargetPopulationStatus.Processing]:
-      return theme.hctPalette.green;
+      return theme.hctPalette.blue;
     case [TargetPopulationStatus.ReadyForCashAssist]:
       return theme.hctPalette.green;
     case [TargetPopulationStatus.SteficonWait]:
       return theme.hctPalette.oragne;
     case [TargetPopulationStatus.SteficonRun]:
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.blue;
     case [TargetPopulationStatus.SteficonCompleted]:
       return theme.hctPalette.green;
     case [TargetPopulationStatus.SteficonError]:
