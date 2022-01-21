@@ -1,14 +1,17 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
+import {
+  TargetPopulationNode,
+  TargetPopulationStatus,
+} from '../../../__generated__/graphql';
 import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/StatusBox';
 import {
-  targetPopulationStatusToColor,
   targetPopulationStatusMapping,
+  targetPopulationStatusToColor,
 } from '../../../utils/utils';
 import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
@@ -58,7 +61,7 @@ export function TargetPopulationPageHeader({
   //TODO: Use statuses from node - not in backend yet
   let buttons;
   switch (targetPopulation.status) {
-    case 'DRAFT':
+    case TargetPopulationStatus.Draft:
       buttons = (
         <InProgressTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
@@ -70,7 +73,8 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case 'LOCKED':
+    case TargetPopulationStatus.Locked:
+    case TargetPopulationStatus.SteficonCompleted:
       buttons = (
         <ApprovedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
