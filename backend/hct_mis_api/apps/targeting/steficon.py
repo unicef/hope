@@ -5,9 +5,18 @@ from django.template.response import TemplateResponse
 from admin_extra_urls.decorators import button
 
 from hct_mis_api.apps.steficon.debug import get_error_info
+from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 try:
     from hct_mis_api.apps.steficon.models import RuleCommit
+
+    class RuleReRunForm(forms.Form):
+        rule = forms.ModelChoiceField(
+            queryset=RuleCommit.objects.filter(enabled=True, deprecated=False, is_release=True)
+        )
+        background = forms.BooleanField(required=False)
+        number_of_records = forms.IntegerField(required=False)
 
     class RuleTestForm(forms.Form):
         rule = forms.ModelChoiceField(
@@ -16,6 +25,23 @@ try:
         number_of_records = forms.IntegerField()
 
     class SteficonExecutorMixin:
+        @button(visible=lambda o, r: o.status == TargetPopulation.STATUS_STEFICON_ERROR)
+        def re_run_steficon(self, request, pk):
+            context = self.get_common_context(request, pk)
+            tp = context["original"]
+            if request.method == "POST":
+                form = RuleReRunForm(request.POST)
+                if form.is_valid():
+                    tp.steficon_rule = form.cleaned_data["rule"]
+                    tp.save()
+                    if form.cleaned_data["background"]:
+                        target_population_apply_steficon.delay(pk)
+                    else:
+                        target_population_apply_steficon(pk)
+            else:
+                context["form"] = RuleReRunForm()
+            return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_rerun.html", context)
+
         @button()
         def test_steficon(self, request, pk):
             context = self.get_common_context(request, pk)
@@ -48,7 +74,7 @@ try:
                         context["exception"] = e
                         context["rule_error"] = get_error_info(e)
                         context["form"] = form
-            return TemplateResponse(request, "admin/targeting/steficon.html", context)
+            return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_test.html", context)
 
 
 except ImportError:

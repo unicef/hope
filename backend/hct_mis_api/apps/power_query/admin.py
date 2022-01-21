@@ -3,10 +3,12 @@ import pickle
 
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
+from django.contrib.admin.widgets import AutocompleteSelect
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.db.models import QuerySet
+from django.forms.widgets import Input
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -24,7 +26,7 @@ from .forms import ExportForm, FormatterTestForm, QueryForm
 from .models import Dataset, Formatter, Query, Report
 from .tasks import queue
 from .utils import to_dataset
-from .widget import FormatterEditor
+from .widget import ContentTypeChoiceField, FormatterEditor
 
 logger = logging.getLogger(__name__)
 
