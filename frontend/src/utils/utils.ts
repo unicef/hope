@@ -4,6 +4,7 @@ import {
   AllProgramsQuery,
   ChoiceObject,
   ProgramStatus,
+  TargetPopulationStatus,
 } from '../__generated__/graphql';
 import { ValidationGraphQLError } from '../apollo/client';
 import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
@@ -164,17 +165,25 @@ export function registrationDataImportStatusToColor(
 
 export function targetPopulationStatusToColor(
   theme: typeof themeObj,
-  status: string,
+  status: string | TargetPopulationStatus[],
 ): string {
   switch (status) {
-    case 'DRAFT':
+    case [TargetPopulationStatus.Draft]:
       return theme.hctPalette.gray;
-    case 'LOCKED':
+    case [TargetPopulationStatus.Locked]:
       return theme.hctPalette.oragne;
-    case 'PROCESSING':
+    case [TargetPopulationStatus.Processing]:
       return theme.hctPalette.green;
-    case 'READY_FOR_CASH_ASSIST':
+    case [TargetPopulationStatus.ReadyForCashAssist]:
       return theme.hctPalette.green;
+    case [TargetPopulationStatus.SteficonWait]:
+      return theme.hctPalette.oragne;
+    case [TargetPopulationStatus.SteficonRun]:
+      return theme.hctPalette.oragne;
+    case [TargetPopulationStatus.SteficonCompleted]:
+      return theme.hctPalette.green;
+    case [TargetPopulationStatus.SteficonError]:
+      return theme.palette.error.main;
     default:
       return theme.palette.error.main;
   }
