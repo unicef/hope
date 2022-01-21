@@ -28,15 +28,20 @@ class TargetPopulationAdmin(
     list_display = (
         "name",
         "status",
-        "candidate_list_total_households",
-        "candidate_list_total_individuals",
+        "sent_to_datahub",
+        "business_area",
+        "program",
+        # "candidate_list_total_households",
+        # "candidate_list_total_individuals",
         "final_list_total_households",
-        "final_list_total_individuals",
+        # "final_list_total_individuals",
     )
     search_fields = ("name",)
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
+        ("steficon_rule__rule", AutoCompleteFilter),
+        ("program", AutoCompleteFilter),
         "sent_to_datahub",
     )
     raw_id_fields = (
@@ -82,6 +87,7 @@ class HouseholdSelectionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     )
     list_filter = (
         TextFieldFilter.factory("household__unicef_id", "Household ID"),
+        ("target_population", AutoCompleteFilter),
         TextFieldFilter.factory("target_population__id", "Target Population ID"),
         "final",
         ("vulnerability_score", MaxMinFilter),
