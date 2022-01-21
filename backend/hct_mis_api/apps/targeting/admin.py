@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.core.validators import MinValueValidator
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
@@ -66,6 +67,10 @@ class TargetPopulationAdmin(
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
+
+    @button()
+    def download_xlsx(self, request, pk):
+        return redirect("admin-download-target-population", target_population_id=pk)
 
 
 @admin.register(HouseholdSelection)
