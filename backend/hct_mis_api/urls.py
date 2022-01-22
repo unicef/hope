@@ -13,6 +13,7 @@ from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
 import hct_mis_api.apps.payment.views
+import hct_mis_api.apps.targeting.views
 import hct_mis_api.apps.registration_datahub.views
 import hct_mis_api.apps.sanction_list.views
 from hct_mis_api.apps.core.views import (
@@ -52,6 +53,11 @@ urlpatterns = [
     path(
         "api/download-sanction-template",
         hct_mis_api.apps.sanction_list.views.download_sanction_template,
+    ),
+    path(
+        "api/unicorn/download-target-population-xlsx/<uuid:target_population_id>/",
+        hct_mis_api.apps.targeting.views.download_xlsx_households,
+        name="admin-download-target-population",
     ),
     path(
         "api/dashboard-report/<uuid:report_id>",
