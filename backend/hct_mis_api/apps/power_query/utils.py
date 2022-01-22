@@ -1,8 +1,31 @@
+import inspect
+
 from django.conf import settings
 from django.db.models import QuerySet
 from django.utils.safestring import mark_safe
 
 import tablib
+from concurrency.utils import get_classname
+
+
+def fqn(o):
+
+    parts = []
+
+    if inspect.isclass(o):
+        cls = o
+    else:
+        cls = type(o)
+    if hasattr(o, "__module__"):
+        parts.append(o.__module__)
+        parts.append(get_classname(o))
+    elif inspect.ismodule(o):
+        return o.__name__
+    else:
+        parts.append(cls.__name__)
+    if not parts:
+        raise ValueError("Invalid argument `%s`" % o)
+    return ".".join(parts)
 
 
 def to_dataset(result):
