@@ -1,3 +1,5 @@
+import json
+
 from django import template
 
 from adminactions.utils import get_attr
@@ -15,3 +17,13 @@ def field(obj, field_name):
 @register.filter()
 def link_to_sentry(event_id, href=False):
     return get_sentry_url(event_id, href)
+
+
+@register.filter(name="classname")
+def get_class(value):
+    return value.__class__.__name__
+
+
+@register.filter()
+def dataset_to_json(value):
+    return json.dump(value)

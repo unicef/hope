@@ -1,24 +1,19 @@
-import json
 import logging
 import pickle
-from builtins import __build_class__
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
-from django.core import serializers
 from django.db import models
-from django.db.models import QuerySet
 from django.template import Context, Template
 from django.utils import timezone
-from django.utils.functional import cached_property
 
-import tablib
-from concurrency.utils import fqn
 from django_celery_beat.models import CrontabSchedule
 from sentry_sdk import capture_exception
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.power_query.utils import to_dataset
+
+from .utils import fqn
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +69,7 @@ class Query(models.Model):
         model = self.target.model_class()
         filters = query_args or {}
         try:
-            self.error = None
+            _error = None
             locals_ = dict()
             locals_["conn"] = model._default_manager.using("read_only")
             locals_["query"] = self
@@ -85,7 +80,7 @@ class Query(models.Model):
             if persist:
                 info = {
                     "type": type(result).__name__,
-                    "fqn": fqn(result),
+                    # "fqn": fqn(result),
                 }
                 r, __ = Dataset.objects.update_or_create(
                     query=self, defaults={"last_run": timezone.now(), "result": pickle.dumps(result), "info": info}
@@ -93,10 +88,10 @@ class Query(models.Model):
 
             return result
         except Exception as e:
-            id = capture_exception(e)
-            self.error = id
+            _error = capture_exception(e)
+            logger.exception(e)
         finally:
-            self.save(update_fields=["error"])
+            Query.objects.filter(pk=self.pk).update(error=_error)
 
 
 class Dataset(models.Model):
