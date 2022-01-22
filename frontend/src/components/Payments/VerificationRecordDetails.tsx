@@ -13,6 +13,8 @@ import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
+import { useBusinessArea } from "../../hooks/useBusinessArea";
+import { BlackLink } from "../BlackLink";
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -45,6 +47,7 @@ export function VerificationRecordDetails({
   canViewActivityLog,
 }: VerificationRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
+  const businessArea = useBusinessArea();
   return (
     <>
       <ContainerColumnWithBorder>
@@ -63,10 +66,13 @@ export function VerificationRecordDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField
-              label={t('REGISTRATION GROUP')}
-              value={paymentVerification.paymentRecord.registrationCaId}
-            />
+            <LabelizedField label={t('REGISTRATION GROUP')}>
+              <BlackLink
+                to={`/${businessArea}/population/household/${paymentVerification.paymentRecord.household.id}`}
+              >
+                {paymentVerification.paymentRecord.household.unicefId}
+              </BlackLink>
+            </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
