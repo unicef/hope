@@ -94,8 +94,9 @@ class Rule(models.Model):
             stored, changes = self.get_changes()
         else:
             stored, changes = {}, []
+        release = None
         if force or changes:
-            return RuleCommit.objects.create(
+            release = RuleCommit.objects.create(
                 rule=self,
                 enabled=self.enabled,
                 definition=self.definition,
@@ -106,6 +107,9 @@ class Rule(models.Model):
                 after=self.as_dict(),
                 affected_fields=changes,
             )
+            if is_release:
+                self.history.exclude(pk=release.pk).update(deprecated=True)
+        return release
 
     def release(self):
         if self.deprecated or not self.enabled:
@@ -114,6 +118,7 @@ class Rule(models.Model):
         if commit and not commit.is_release:
             commit.is_release = True
             commit.save()
+            self.history.exclude(pk=commit.pk).update(deprecated=True)
         else:
             commit = self.commit(is_release=True, force=True)
         return commit
