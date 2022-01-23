@@ -90,4 +90,4 @@ class TestBasicRule(TestCase):
         release1.refresh_from_db()
         self.assertEqual(release2.version, 2)
         self.assertNotEquals(release1, release2)
-        self.assertFalse(release1, release2)
+        self.assertNotEquals(release1, release2)
