@@ -77,3 +77,17 @@ class TestBasicRule(TestCase):
         self.assertEqual(state.version, original_version)
         self.assertEqual(rule.definition, "result.value=1")
         self.assertGreater(rule.version, original_version)
+
+    def test_release(self):
+        rule = Rule(definition="result.value=1", enabled=True)
+        rule.save()
+        release1 = rule.release()
+        self.assertEqual(release1.version, 1)
+        self.assertEqual(rule.history.count(), 1)
+        self.assertEqual(rule.latest, rule.history.latest())
+        rule.save()
+        release2 = rule.release()
+        release1.refresh_from_db()
+        self.assertEqual(release2.version, 2)
+        self.assertNotEquals(release1, release2)
+        self.assertFalse(release1, release2)
