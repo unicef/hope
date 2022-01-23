@@ -94,7 +94,7 @@ class Rule(models.Model):
             stored, changes = self.get_changes()
         else:
             stored, changes = {}, []
-        if force or changes or not self.pk:
+        if force or changes:
             return RuleCommit.objects.create(
                 rule=self,
                 enabled=self.enabled,
@@ -110,7 +110,13 @@ class Rule(models.Model):
     def release(self):
         if self.deprecated or not self.enabled:
             raise ValueError("Cannot release disabled/deprecated rules")
-        self.commit(is_release=True)
+        commit = self.history.filter(version=self.version).first()
+        if commit and not commit.is_release:
+            commit.is_release = True
+            commit.save()
+        else:
+            commit = self.commit(is_release=True, force=True)
+        return commit
 
     @property
     def latest(self):
@@ -160,6 +166,10 @@ class RuleCommit(models.Model):
     class Meta:
         verbose_name = "Rule (History)"
         verbose_name_plural = "Rules (History)"
+        unique_together = (
+            "rule",
+            "version",
+        )
         ordering = ("-timestamp",)
         get_latest_by = "-timestamp"
 
@@ -171,8 +181,10 @@ class RuleCommit(models.Model):
 
     @atomic
     def revert(self, fields=MONITORED_FIELDS):
+        current = self.rule.version
         for field in fields:
             setattr(self.rule, field, self.before[field])
+        # self.rule.version = current
         self.rule.save()
 
     @cached_property
