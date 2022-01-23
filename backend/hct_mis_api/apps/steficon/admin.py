@@ -157,9 +157,10 @@ class TestRuleMixin:
             else:
                 context["form"] = form
         else:
+            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
+        if "form" in context:
             from hct_mis_api.apps.targeting.models import TargetPopulation
 
-            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
             context["form"].fields["target_population"].widget = AutocompleteWidget(TargetPopulation, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
@@ -432,18 +433,8 @@ class RuleCommitResource(ModelResource):
 
 @register(RuleCommit)
 class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, ModelAdmin):
-    list_display = (
-        "timestamp",
-        "rule",
-        "version",
-        "updated_by",
-        "affected_fields",
-        "is_release",
-    )
-    list_filter = (
-        ("rule", AutoCompleteFilter),
-        "is_release",
-    )
+    list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
+    list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
     readonly_fields = ("updated_by", "rule", "affected_fields", "version")
     change_form_template = None

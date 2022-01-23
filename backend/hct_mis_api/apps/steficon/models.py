@@ -180,8 +180,12 @@ class RuleCommit(models.Model):
 
     def __str__(self):
         value = f"{self.rule} #{self.id}"
-        if not self.is_release:
-            return f"{value} (Draft)"
+        if not self.enabled:
+            value = f"{value} (Disabled)"
+        elif self.deprecated:
+            value = f"{value} (Deprecated)"
+        elif not self.is_release:
+            value = f"{value} (Draft)"
         return value
 
     @atomic
