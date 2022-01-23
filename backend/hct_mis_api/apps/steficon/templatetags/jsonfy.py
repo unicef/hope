@@ -20,8 +20,17 @@ json_value_escapes = {
 
 
 @register.filter
-def pretty_json(value):
-    response = json.dumps(value, sort_keys=True, indent=2)
+def pretty_json(context: dict):
+    data = {}
+    for key, value in context.items():
+        try:
+            if isinstance(value, Model):
+                data[key] = json.loads(serializers.serialize("json", [value]))
+            else:
+                data[key] = value
+        except TypeError:
+            data[key] = {"obj": str(value), "type": type(value).__name__}
+    response = json.dumps(data, sort_keys=True, indent=2)
     formatter = HtmlFormatter(style="colorful")
     response = highlight(response, JsonLexer(), formatter)
     return mark_safe(response)
