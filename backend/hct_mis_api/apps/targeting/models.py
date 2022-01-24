@@ -380,6 +380,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     def is_locked(self):
         return self.status == self.STATUS_LOCKED
 
+    def is_approved(self):
+        return self.status in [self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED]
+
     def __str__(self):
         return self.name
 
