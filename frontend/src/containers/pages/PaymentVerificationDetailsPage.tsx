@@ -8,11 +8,11 @@ import { BlackLink } from '../../components/BlackLink';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { LabelizedField } from '../../components/LabelizedField';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { Missing } from '../../components/Missing';
 import { PageHeader } from '../../components/PageHeader';
 import { ActivateVerificationPlan } from '../../components/Payments/ActivateVerificationPlan';
 import { CreateVerificationPlan } from '../../components/Payments/CreateVerificationPlan';
 import { DiscardVerificationPlan } from '../../components/Payments/DiscardVerificationPlan';
-import { EditVerificationPlan } from '../../components/Payments/EditVerificationPlan';
 import { FinishVerificationPlan } from '../../components/Payments/FinishVerificationPlan';
 import { VerificationPlanDetails } from '../../components/Payments/VerificationPlanDetails';
 import { PermissionDenied } from '../../components/PermissionDenied';
@@ -131,9 +131,6 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     cashPlan.verifications &&
     cashPlan.verifications.edges.length !== 0;
 
-  const canEdit =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_UPDATE, permissions) &&
-    canEditAndActivate;
   const canActivate =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_ACTIVATE, permissions) &&
     canEditAndActivate;
@@ -169,14 +166,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         {canCreate && (
           <CreateVerificationPlan disabled={false} cashPlanId={cashPlan.id} />
         )}
-        {(canEdit || canActivate) && (
+        {canActivate && (
           <Box alignItems='center' display='flex'>
-            {canEdit && (
-              <EditVerificationPlan
-                cashPlanId={cashPlan.id}
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            )}
             {canActivate && (
               <ActivateVerificationPlan
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
@@ -308,11 +299,53 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Grid>
       </Container>
+      <Container>
+        <Grid container>
+          <Grid item xs={9}>
+            <Title>
+              <Typography variant='h6'>
+                {t('Verification Plans Summary')}
+              </Typography>
+            </Title>
+            <Grid container>
+              <Grid item xs={3}>
+                <Box pt={2} pb={2}>
+                  <LabelizedField label={t('Status')}>
+                    <Missing />
+                  </LabelizedField>
+                </Box>
+              </Grid>
+              <Grid item xs={3}>
+                <Box pt={2} pb={2}>
+                  <LabelizedField label={t('Activation Date')}>
+                    <Missing />
+                  </LabelizedField>
+                </Box>
+              </Grid>
+              <Grid item xs={3}>
+                <Box pt={2} pb={2}>
+                  <LabelizedField label={t('Completion Date')}>
+                    <Missing />
+                  </LabelizedField>
+                </Box>
+              </Grid>
+              <Grid item xs={3}>
+                <Box pt={2} pb={2}>
+                  <LabelizedField label={t('Number of Verification Plans')}>
+                    <Missing />
+                  </LabelizedField>
+                </Box>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Container>
       {cashPlan.verifications?.edges?.length
         ? cashPlan.verifications.edges.map((edge) => (
             <VerificationPlanDetails
               samplingChoicesData={choicesData}
               verificationPlan={edge.node}
+              cashPlan={cashPlan}
             />
           ))
         : null}
