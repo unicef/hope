@@ -122,9 +122,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
 
   const canCreate =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_CREATE, permissions) &&
-    cashPlan.verificationStatus === 'PENDING' &&
-    cashPlan.verifications &&
-    cashPlan.verifications.edges.length === 0;
+    cashPlan.verificationStatus === 'PENDING';
 
   const canEditAndActivate =
     cashPlan.verificationStatus === 'PENDING' &&
