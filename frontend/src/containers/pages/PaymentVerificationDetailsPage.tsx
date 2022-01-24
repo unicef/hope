@@ -14,19 +14,17 @@ import { CreateVerificationPlan } from '../../components/Payments/CreateVerifica
 import { DiscardVerificationPlan } from '../../components/Payments/DiscardVerificationPlan';
 import { EditVerificationPlan } from '../../components/Payments/EditVerificationPlan';
 import { FinishVerificationPlan } from '../../components/Payments/FinishVerificationPlan';
+import { VerificationPlanDetails } from '../../components/Payments/VerificationPlanDetails';
 import { PermissionDenied } from '../../components/PermissionDenied';
-import { StatusBox } from '../../components/StatusBox';
 import { UniversalMoment } from '../../components/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import { usePermissions } from '../../hooks/usePermissions';
 import {
-  choicesToDict,
   countPercentage,
   decodeIdString,
   isPermissionDeniedError,
-  paymentVerificationStatusToColor,
 } from '../../utils/utils';
 import {
   useCashPlanQuery,
@@ -79,10 +77,6 @@ const TableWrapper = styled.div`
   padding: 20px;
   padding-bottom: 0;
 `;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -106,9 +100,6 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || !choicesData || permissions === null) return null;
 
-  const samplingChoicesDict = choicesToDict(
-    choicesData.cashPlanVerificationSamplingChoices,
-  );
   const { cashPlan } = data;
   const verificationPlan = cashPlan?.verifications?.edges?.length
     ? cashPlan.verifications.edges[0].node
@@ -317,129 +308,14 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Grid>
         </Grid>
       </Container>
-      {cashPlan.verifications && cashPlan.verifications.edges.length ? (
-        <Container>
-          <Title>
-            <Typography variant='h6'>
-              {t('Verification Plan Details')}
-            </Typography>
-          </Title>
-          <Grid container>
-            <Grid item xs={11}>
-              <Grid container>
-                <Grid item xs={3}>
-                  <LabelizedField label={t('STATUS')}>
-                    <StatusContainer>
-                      <StatusBox
-                        status={verificationPlan.status}
-                        statusToColor={paymentVerificationStatusToColor}
-                      />
-                    </StatusContainer>
-                  </LabelizedField>
-                </Grid>
-                {[
-                  {
-                    label: t('SAMPLING'),
-                    value: samplingChoicesDict[verificationPlan.sampling],
-                  },
-                  {
-                    label: t('RESPONDED'),
-                    value: verificationPlan.respondedCount,
-                  },
-                  {
-                    label: t('RECEIVED WITH ISSUES'),
-                    value: verificationPlan.receivedWithProblemsCount,
-                  },
-                  {
-                    label: t('VERIFICATION METHOD'),
-                    value: verificationPlan.verificationMethod,
-                  },
-                  {
-                    label: t('SAMPLE SIZE'),
-                    value: verificationPlan.sampleSize,
-                  },
-                  {
-                    label: t('RECEIVED'),
-                    value: verificationPlan.receivedCount,
-                  },
-                  {
-                    label: t('NOT RECEIVED'),
-                    value: verificationPlan.notReceivedCount,
-                  },
-                  {
-                    label: t('ACTIVATION DATE'),
-                    value: (
-                      <UniversalMoment>
-                        {verificationPlan.activationDate}
-                      </UniversalMoment>
-                    ),
-                  },
-                  {
-                    label: t('COMPLETION DATE'),
-                    value: (
-                      <UniversalMoment>
-                        {verificationPlan.completionDate}
-                      </UniversalMoment>
-                    ),
-                  },
-                ].map((el) => (
-                  <Grid item xs={3} key={el.label}>
-                    <Box pt={2} pb={2}>
-                      <LabelizedField label={el.label} value={el.value} />
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Grid>
-            <Grid item xs={1}>
-              <ChartContainer>
-                <Doughnut
-                  width={200}
-                  height={200}
-                  options={{
-                    maintainAspectRatio: false,
-                    cutoutPercentage: 80,
-                    legend: {
-                      display: false,
-                    },
-                  }}
-                  data={{
-                    labels: [
-                      t('RECEIVED'),
-                      t('RECEIVED WITH ISSUES'),
-                      t('NOT RECEIVED'),
-                      t('PENDING'),
-                    ],
-                    datasets: [
-                      {
-                        data: [
-                          verificationPlan.receivedCount,
-                          verificationPlan.receivedWithProblemsCount,
-                          verificationPlan.notReceivedCount,
-                          verificationPlan.sampleSize -
-                            verificationPlan.respondedCount,
-                        ],
-                        backgroundColor: [
-                          '#31D237',
-                          '#F57F1A',
-                          '#FF0100',
-                          '#DCDCDC',
-                        ],
-                        hoverBackgroundColor: [
-                          '#31D237',
-                          '#F57F1A',
-                          '#FF0100',
-                          '#DCDCDC',
-                        ],
-                      },
-                    ],
-                  }}
-                />
-              </ChartContainer>
-            </Grid>
-          </Grid>
-        </Container>
-      ) : null}
+      {cashPlan.verifications?.edges?.length
+        ? cashPlan.verifications.edges.map((edge) => (
+            <VerificationPlanDetails
+              samplingChoicesData={choicesData}
+              verificationPlan={edge.node}
+            />
+          ))
+        : null}
       {cashPlan.verifications &&
       cashPlan.verifications.edges.length &&
       cashPlan.verificationStatus !== 'PENDING' ? (
