@@ -745,7 +745,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                 all_fields = list(fields.values()) + list(self.flex_fields[name].values())
 
-                required_fields = set(field["xlsx_field"] for field in all_fields if field["required"])
+                required_fields = {field["xlsx_field"] for field in all_fields if field["required"]}
 
                 column_names = {cell.value for cell in first_row}
 

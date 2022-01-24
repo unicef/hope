@@ -151,7 +151,7 @@ def get_valid_kobo_username(user: User):
 
 
 class DjAdminManager:
-    regex = re.compile('class="errorlist"><li>(.*)(?=<\/li>)')
+    regex = re.compile(r'class="errorlist"><li>(.*)(?=<\/li>)')
 
     class ResponseException(Exception):
         pass
@@ -896,7 +896,7 @@ class RoleAdmin(ImportExportModelAdmin, ExtraUrlMixin, HOPEModelAdminBase):
         ctx = self.get_common_context(request, action="Matrix")
         matrix1 = {}
         matrix2 = {}
-        perms = sorted([str(x.value) for x in Permissions])
+        perms = sorted(str(x.value) for x in Permissions)
         roles = account_models.Role.objects.order_by("name").filter(subsystem="HOPE")
         for perm in perms:
             granted_to_roles = []

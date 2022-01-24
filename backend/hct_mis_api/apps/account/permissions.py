@@ -235,7 +235,7 @@ class BaseNodePermissionMixin:
     @classmethod
     def check_node_permission(cls, info, object_instance):
         business_area = object_instance.business_area
-        if not any((perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)):
+        if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
             logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
 
@@ -318,7 +318,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
     @classmethod
     def resolve_queryset(cls, connection, iterable, info, args, filtering_args, filterset_class, permission_classes):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
-        if not any((perm.has_permission(info, **filter_kwargs) for perm in permission_classes)):
+        if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
             logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
         if "permissions" in filtering_args:

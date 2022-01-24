@@ -60,7 +60,7 @@ class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):
 
                 conn = connections[self.model.objects.db]
                 cursor = conn.cursor()
-                cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY CASCADE '.format(self.model._meta.db_table))
+                cursor.execute('TRUNCATE TABLE "{}" RESTART IDENTITY CASCADE '.format(self.model._meta.db_table))
         else:
             return _confirm_action(
                 self,
