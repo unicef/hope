@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import {
@@ -88,7 +87,6 @@ export const LookUpReassignRoleModal = ({
   const [filterIndividual, setFilterIndividual] = useState(
     individualFilterInitial,
   );
-  const debouncedFilterIndividual = useDebounce(filterIndividual, 500);
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },

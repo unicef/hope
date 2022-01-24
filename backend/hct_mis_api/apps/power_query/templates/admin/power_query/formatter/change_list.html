@@ -1,0 +1,14 @@
+{% extends "admin/import_export/change_list.html" %}
+{% load extra_urls %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    {% include "admin_extra_urls/includes/styles.html" %}
+{% endblock %}
+
+{% block object-tools-items %}
+    {% include "admin_extra_urls/includes/change_list_buttons.html" %}
+    {% include "admin/import_export/change_list_import_item.html" %}
+    {% include "admin/import_export/change_list_export_item.html" %}
+    {{ block.super }}
+{% endblock %}

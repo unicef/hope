@@ -45,6 +45,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -128,11 +129,19 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_DRAFT = "DRAFT"
     STATUS_LOCKED = "LOCKED"
     STATUS_PROCESSING = "PROCESSING"
+    STATUS_STEFICON_WAIT = "STEFICON_WAIT"
+    STATUS_STEFICON_RUN = "STEFICON_RUN"
+    STATUS_STEFICON_COMPLETED = "STEFICON_COMPLETED"
+    STATUS_STEFICON_ERROR = "STEFICON_ERROR"
     STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
 
     STATUS_CHOICES = (
         (STATUS_DRAFT, _("Open")),
         (STATUS_LOCKED, _("Locked")),
+        (STATUS_STEFICON_WAIT, _("Waiting for Rule Engine")),
+        (STATUS_STEFICON_RUN, _("Rule Engine Running")),
+        (STATUS_STEFICON_COMPLETED, _("Rule Engine Completed")),
+        (STATUS_STEFICON_ERROR, _("Rule Engine Errored")),
         (STATUS_PROCESSING, _("Processing")),
         (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
     )
@@ -234,7 +243,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         db_index=True,
     )
     steficon_rule = models.ForeignKey(
-        "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
+        RuleCommit, null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
     vulnerability_score_min = models.DecimalField(
@@ -263,6 +272,14 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return queryset.distinct()
 
     @property
+    def candidate_list(self):
+        if self.status != TargetPopulation.STATUS_DRAFT:
+            return []
+        return Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).filter(
+            business_area=self.business_area
+        )
+
+    @property
     def final_list(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
             return []
@@ -275,11 +292,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     @property
     def candidate_stats(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
-            households_ids = (
-                Household.objects.filter(self.candidate_list_targeting_criteria.get_query())
-                .filter(business_area=self.business_area)
-                .values_list("id")
-            )
+            households_ids = self.candidate_list.values_list("id")
         else:
             households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
@@ -366,6 +379,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     def is_locked(self):
         return self.status == self.STATUS_LOCKED
+
+    def is_approved(self):
+        return self.status in [self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED]
 
     def __str__(self):
         return self.name

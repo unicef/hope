@@ -57,6 +57,9 @@
             "name": "TargetPopulationNode"
           },
           {
+            "name": "RuleCommitNode"
+          },
+          {
             "name": "SteficonRuleNode"
           },
           {
