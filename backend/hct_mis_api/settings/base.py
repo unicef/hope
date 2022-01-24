@@ -608,6 +608,9 @@ SMART_ADMIN_SECTIONS = {
         "constance",
         "household.agency",
     ],
+    "Power Query & Reports": [
+        "power_query",
+    ],
     "Rule Engine": [
         "steficon",
     ],

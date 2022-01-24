@@ -80,9 +80,13 @@ class AgencyTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Document)
 class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
+    search_fields = ("document_number",)
     list_display = ("document_number", "type", "status", "individual")
     raw_id_fields = ("individual",)
-    list_filter = (("type", RelatedFieldComboFilter),)
+    list_filter = (
+        ("type", RelatedFieldComboFilter),
+        ("individual", AutoCompleteFilter),
+    )
 
 
 @admin.register(DocumentType)
@@ -128,6 +132,7 @@ class HouseholdAdmin(
         "org_enumerator",
         "last_registration_date",
     )
+    search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("representatives", "programs")
     raw_id_fields = ("registration_data_import", "admin_area", "head_of_household", "business_area")
@@ -333,7 +338,7 @@ class IndividualAdmin(
         ("business_area__name", "business area"),
     )
 
-    search_fields = ("family_name",)
+    search_fields = ("family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     exclude = ("created_at", "updated_at")
     inlines = [IndividualRoleInHouseholdInline]
