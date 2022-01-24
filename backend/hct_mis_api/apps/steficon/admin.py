@@ -20,8 +20,13 @@ from django.utils.translation import get_language
 from admin_extra_urls.api import ExtraUrlMixin, button
 from admin_extra_urls.utils import labelize
 from adminfilters.autocomplete import AutoCompleteFilter
+from import_export import fields
+from import_export.admin import ImportExportMixin
+from import_export.resources import ModelResource
+from import_export.widgets import ForeignKeyWidget
 from smart_admin.mixins import LinkedObjectsMixin
 
+from ..account.models import User
 from ..utils.security import is_root
 from .forms import (
     RuleDownloadCSVFileProcessForm,
@@ -117,7 +122,7 @@ class TestRuleMixin:
                     title = f"Test result for '{rule}' using sample data"
                 elif selection == "optTargetPopulation":
                     tp = form.cleaned_data.get("target_population")
-                    data = [e.household for e in tp.selections.all()]
+                    data = [{"household": e.household} for e in tp.selections.all()]
                     title = f"Test result for '{rule}' using TargetPopulation '{tp}'"
                 elif selection == "optContentType":
                     ct: ContentType = form.cleaned_data["content_type"]
@@ -152,16 +157,42 @@ class TestRuleMixin:
             else:
                 context["form"] = form
         else:
+            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
+        if "form" in context:
             from hct_mis_api.apps.targeting.models import TargetPopulation
 
-            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
             context["form"].fields["target_population"].widget = AutocompleteWidget(TargetPopulation, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 
 
+class RuleResource(ModelResource):
+    created_by = fields.Field(
+        column_name="created_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+    )
+
+    updated_by = fields.Field(
+        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+    )
+
+    class Meta:
+        model = Rule
+        fields = (
+            "name",
+            "version",
+            "definition",
+            "enabled",
+            "deprecated",
+            "language",
+            "security",
+            "created_by",
+            "updated_by",
+        )
+        import_id_fields = ("name",)
+
+
 @register(Rule)
-class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
+class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
@@ -174,6 +205,8 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
         "version",
     )
     change_form_template = None
+    change_list_template = None
+    resource_class = RuleResource
     fieldsets = [
         (
             None,
@@ -386,20 +419,24 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
             obj.commit(force=True)
 
 
+class RuleCommitResource(ModelResource):
+    rule = fields.Field(column_name="rule", attribute="rule", widget=ForeignKeyWidget(Rule, "name"))
+    updated_by = fields.Field(
+        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+    )
+
+    class Meta:
+        model = RuleCommit
+        fields = ("timestamp", "rule", "version", "updated_by", "affected_fields", "is_release")
+        import_id_fields = ("rule", "version")
+
+
 @register(RuleCommit)
-class RuleCommitAdmin(ExtraUrlMixin, TestRuleMixin, ModelAdmin):
-    list_display = (
-        "timestamp",
-        "rule",
-        "version",
-        "updated_by",
-        "affected_fields",
-        "is_release",
-    )
-    list_filter = (
-        ("rule", AutoCompleteFilter),
-        "is_release",
-    )
+class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, ModelAdmin):
+    list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
+    list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
     readonly_fields = ("updated_by", "rule", "affected_fields", "version")
     change_form_template = None
+    change_list_template = None
+    resource_class = RuleCommitResource

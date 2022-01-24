@@ -17,26 +17,27 @@ logger = logging.getLogger(__name__)
 @app.task()
 def queue(query_id):
     try:
-        with atomic():
-            query = Query.objects.get(pk=query_id)
-            result = query.execute(persist=True)
-            if result:
-                url = reverse("admin:power_query_dataset_export", args=[query.dataset.pk])
-                send_mail(
-                    "Power Query completed",
-                    f"""Power Query {query.name} completed.
+        query = Query.objects.get(pk=query_id)
+        result = query.execute(persist=True)
+        if result:
+            url = reverse("admin:power_query_dataset_export", args=[query.dataset.pk])
+            send_mail(
+                "Power Query completed",
+                f"""Power Query {query.name} completed.
 results available here: {url}.
-    
+
 """,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[query.owner.email],
-                )
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[query.owner.email],
+            )
     except Exception as e:
         logger.exception(e)
+        return False
+    return result
 
 
 @app.task()
-def reporting():
+def refresh_reports():
     try:
         for report in Report.objects.filter(refresh=True):
             with atomic():
