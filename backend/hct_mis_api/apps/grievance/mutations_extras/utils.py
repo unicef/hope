@@ -326,7 +326,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
             logger.error(f"{name} is not a correct `flex field")
             raise ValueError(f"{name} is not a correct `flex field")
         field_type = flex_field["type"]
-        field_choices = set(f.get("value") for f in flex_field["choices"])
+        field_choices = {f.get("value") for f in flex_field["choices"]}
         if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
             logger.error(f"invalid value type for a field {name}")
             raise ValueError(f"invalid value type for a field {name}")

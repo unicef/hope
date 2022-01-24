@@ -174,7 +174,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 preserved_filters = self.get_preserved_filters(request)
 
                 redirect_url = reverse(
-                    "admin:%s_%s_change" % (opts.app_label, opts.model_name),
+                    "admin:{}_{}_change".format(opts.app_label, opts.model_name),
                     args=(office.pk,),
                     current_app=self.admin_site.name,
                 )
