@@ -1,8 +1,11 @@
-import { Typography, Grid, Box } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { usePermissions } from '../../hooks/usePermissions';
 import {
   choicesToDict,
   paymentVerificationStatusToColor,
@@ -11,13 +14,16 @@ import {
   CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
 } from '../../__generated__/graphql';
+import { ErrorButton } from '../ErrorButton';
 import { LabelizedField } from '../LabelizedField';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
+import { EditVerificationPlan } from './EditVerificationPlan';
 
 interface VerificationPlanDetailsProps {
   verificationPlan: CashPlanQuery['cashPlan']['verifications']['edges'][number]['node'];
   samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
+  cashPlan: CashPlanQuery['cashPlan'];
 }
 
 const Container = styled.div`
@@ -50,17 +56,50 @@ const ChartContainer = styled.div`
 export const VerificationPlanDetails = ({
   verificationPlan,
   samplingChoicesData,
+  cashPlan,
 }: VerificationPlanDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
+  const permissions = usePermissions();
+  if (!verificationPlan || !samplingChoicesData || !permissions) return null;
+
+  const canEditAndActivate =
+    cashPlan.verificationStatus === 'PENDING' &&
+    cashPlan.verifications?.edges?.length !== 0;
+  const canEdit =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_UPDATE, permissions) &&
+    canEditAndActivate;
   const samplingChoicesDict = choicesToDict(
     samplingChoicesData.cashPlanVerificationSamplingChoices,
   );
 
+  const handleDelete = (): void => {
+    console.log('DELETE VERIFICATION PLAN');
+  };
+
   return (
     <Container>
-      <Title>
-        <Typography variant='h6'>{t('Verification Plan Details')}</Typography>
-      </Title>
+      <Box display='flex' justifyContent='space-between'>
+        <Title>
+          <Typography variant='h6'>{t('Verification Plan Details')}</Typography>
+        </Title>
+        <Box display='flex' alignItems='center'>
+          <Box mr={2}>
+            <ErrorButton
+              onClick={() => handleDelete()}
+              startIcon={<DeleteIcon />}
+            >
+              {t('Delete')}
+            </ErrorButton>
+          </Box>
+          {canEdit && (
+            <EditVerificationPlan
+              cashPlanId={cashPlan.id}
+              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+            />
+          )}
+        </Box>
+      </Box>
+
       <Grid container>
         <Grid item xs={11}>
           <Grid container>
