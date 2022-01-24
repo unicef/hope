@@ -7,4 +7,4 @@ class RuleError(Exception):
         self.traceback = traceback
 
     def __str__(self):
-        return f"{self.error_class}: {self.detail}"
+        return f"{self.error_class}: {self.detail} at {self.lineno}"

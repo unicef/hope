@@ -26,7 +26,14 @@ SAFETY_HIGH = 4  # only accept json values
 
 DEFAULTS = {
     "USE_BLACK": False,
-    "BUILTIN_MODULES": ["random", "datetime", "dateutil"],
+    "BUILTIN_MODULES": [
+        "random",
+        "datetime",
+        # "datetime.date",
+        # "datetime.datetime",
+        "dateutil",
+        "dateutil.relativedelta",
+    ],
     "RESULT": "hct_mis_api.apps.steficon.result.Score",
     "USED_BY": None,
     "SAFETY_LEVEL": SAFETY_HIGH,
