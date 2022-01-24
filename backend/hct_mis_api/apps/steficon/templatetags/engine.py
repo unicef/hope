@@ -1,10 +1,10 @@
-from difflib import _mdiff
-
 import difflib
 import json
+from difflib import _mdiff
 
 from django import template
 from django.utils.safestring import mark_safe
+
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
 
@@ -18,13 +18,15 @@ class HtmlDiff(difflib.HtmlDiff):
     def _format_line(self, side, flag, linenum, text):
         try:
             linenum = "%d" % linenum
-            id = ' id="%s%s"' % (self._prefix[side], linenum)
+            id = ' id="{}{}"'.format(self._prefix[side], linenum)
         except TypeError:
             id = ""
         text = text.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;")
         text = text.replace(" ", "&nbsp;").rstrip()
 
-        return '<td class="diff_header lineno"%s>%s</td><td class="code" nowrap="nowrap">%s</td>' % (id, linenum, text)
+        return '<td class="diff_header lineno"{}>{}</td><td class="code" nowrap="nowrap">{}</td>'.format(
+            id, linenum, text
+        )
 
     def make_table(self, fromlines, tolines, fromdesc="", todesc="", context=False, numlines=5):
         """Returns HTML table of side by side comparison with change highlights
@@ -81,7 +83,7 @@ class HtmlDiff(difflib.HtmlDiff):
             else:
                 s.append(fmt % (next_id[i], next_href[i], fromlist[i], next_href[i], tolist[i]))
         if fromdesc or todesc:
-            header_row = "<thead><tr>%s%s%s%s</tr></thead>" % (
+            header_row = "<thead><tr>{}{}{}{}</tr></thead>".format(
                 '<th class="diff_next"><br /></th>',
                 '<th colspan="2" class="diff_header">%s</th>' % fromdesc,
                 '<th class="diff_next"><br /></th>',
