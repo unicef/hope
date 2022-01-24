@@ -1,11 +1,8 @@
 {% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify jsonfy %}
 {% block extrastyle %}{{ block.super }}
-    {% if form %}
-        {{ form.media }}
-    {% else %}
-        <script src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
-        <script src="{% static "admin/js/jquery.init.js" %}"></script>
-    {% endif %}
+    <script src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+    <script src="{% static "admin/js/jquery.init.js" %}"></script>
+    {{ form.media }}
     <style>
         .toggler {
             cursor: pointer;
