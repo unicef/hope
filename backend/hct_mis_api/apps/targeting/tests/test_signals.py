@@ -64,7 +64,7 @@ class TestTargetPopulationQuery(APITestCase):
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_DRAFT,
-            business_area=BusinessArea.objects.first()
+            business_area=BusinessArea.objects.first(),
         )
         tp.save()
 
@@ -83,7 +83,7 @@ class TestTargetPopulationQuery(APITestCase):
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_DRAFT,
-            business_area=BusinessArea.objects.first()
+            business_area=BusinessArea.objects.first(),
         )
         tp.save()
 

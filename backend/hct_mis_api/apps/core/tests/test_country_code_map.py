@@ -1,5 +1,6 @@
 from django.core.management import call_command
 from django.test import TestCase
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.models import CountryCodeMap, CountryCodeMapManager
@@ -52,4 +53,3 @@ class TestCountryCodeMap(TestCase):
             self.assertEqual(CountryCodeMap.objects.get_iso3_code("afg"), "AFG")
             self.assertEqual(CountryCodeMap.objects.get_iso3_code("AUL"), "AUS")
             self.assertEqual(CountryCodeMap.objects.get_iso2_code("AFg"), "AF")
-

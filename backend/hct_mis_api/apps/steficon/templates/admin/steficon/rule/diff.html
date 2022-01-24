@@ -22,7 +22,7 @@
             </li>
             <li><a class="btn btn-success" href="{% if next %}?state_pk={{ next.id }}{% else %}#{% endif %}">next >></a>
             </li>
-            <li><a id="btn-{{ options.method }}" href="{% url "admin:steficon_rule_revert" original.pk state.pk %}"
+            <li><a id="btn-{{ options.method }}" href="{% url 'admin:steficon_rule_revert' original.pk state.pk %}"
                    class="btn extra-link">Revert</a>
             </li>
         </ul>

@@ -151,10 +151,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
 class ServiceProvider(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     ca_id = models.CharField(max_length=255, unique=True)
-    full_name = models.CharField(max_length=255)
-    short_name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=255, null=True)
+    short_name = models.CharField(max_length=100, null=True)
     country = models.CharField(max_length=3)
-    vision_id = models.CharField(max_length=255)
+    vision_id = models.CharField(max_length=255, null=True)
 
     def __str__(self):
         return self.full_name
