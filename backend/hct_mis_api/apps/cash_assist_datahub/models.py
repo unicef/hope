@@ -166,12 +166,12 @@ class PaymentRecord(SessionModel):
 class ServiceProvider(SessionModel):
     business_area = models.CharField(max_length=20)
     ca_id = models.CharField(max_length=255)
-    full_name = models.CharField(max_length=255)
-    short_name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=255, null=True)
+    short_name = models.CharField(max_length=100, null=True)
     country = models.CharField(
         max_length=3,
     )
-    vision_id = models.CharField(max_length=255)
+    vision_id = models.CharField(max_length=255, null=True)
 
     class Meta:
         unique_together = ("session", "ca_id")

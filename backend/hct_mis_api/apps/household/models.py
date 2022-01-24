@@ -2,6 +2,7 @@ import logging
 import re
 from datetime import date, datetime
 
+from django.conf import settings
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
@@ -621,8 +622,9 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             size=Count("id", distinct=True, filter=Q(is_beneficiary & active_beneficiary)),
             pregnant_count=Count("id", distinct=True, filter=Q(is_beneficiary & active_beneficiary & Q(pregnant=True))),
         )
-
+        updated_fields = ["child_hoh", "fchild_hoh"]
         for key, value in age_groups.items():
+            updated_fields.append(key)
             setattr(self, key, value)
 
         self.child_hoh = False
@@ -631,7 +633,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             if self.head_of_household.sex == FEMALE:
                 self.fchild_hoh = True
             self.child_hoh = True
-        self.save()
+        self.save(update_fields=updated_fields)
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -970,7 +972,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             value = getattr(self, field, None)
             should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
         self.disability = DISABLED if should_be_disabled else NOT_DISABLED
-        self.save()
+        self.save(update_fields=["disability"])
 
     def count_all_roles(self):
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
@@ -1034,3 +1036,4 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
     xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.PROTECT)

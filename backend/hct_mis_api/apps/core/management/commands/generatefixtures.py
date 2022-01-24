@@ -8,24 +8,26 @@ from django.db.models import Q
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import UserRole
-from hct_mis_api.apps.cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
-from hct_mis_api.apps.cash_assist_datahub.models import Session, Programme
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.cash_assist_datahub import (
+    fixtures as cash_assist_datahub_fixtures,
+)
+from hct_mis_api.apps.cash_assist_datahub.models import Programme, Session
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
-    GrievanceComplaintTicketWithoutExtrasFactory,
 )
 from hct_mis_api.apps.household.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.household.fixtures import (
-    EntitlementCardFactory,
     DocumentFactory,
+    EntitlementCardFactory,
     create_household_for_fixtures,
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
+    PaymentRecordFactory,
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
@@ -37,10 +39,10 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     create_imported_household,
 )
 from hct_mis_api.apps.targeting.fixtures import (
-    TargetPopulationFactory,
+    TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
-    TargetingCriteriaFactory,
+    TargetPopulationFactory,
 )
 
 
@@ -271,7 +273,7 @@ class Command(BaseCommand):
             programme = cash_assist_datahub_fixtures.ProgrammeFactory(session=session, mis_id=mis_id)
             programme.save()
 
-        if not options['noreindex']:
+        if not options["noreindex"]:
             rebuild_search_index()
 
         self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")
