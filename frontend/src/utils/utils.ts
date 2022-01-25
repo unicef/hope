@@ -168,21 +168,21 @@ export function targetPopulationStatusToColor(
   status: string | TargetPopulationStatus[],
 ): string {
   switch (status) {
-    case [TargetPopulationStatus.Draft]:
+    case TargetPopulationStatus.Draft:
       return theme.hctPalette.gray;
-    case [TargetPopulationStatus.Locked]:
+    case TargetPopulationStatus.Locked:
       return theme.hctPalette.red;
-    case [TargetPopulationStatus.Processing]:
+    case TargetPopulationStatus.Processing:
       return theme.hctPalette.blue;
-    case [TargetPopulationStatus.ReadyForCashAssist]:
+    case TargetPopulationStatus.ReadyForCashAssist:
       return theme.hctPalette.green;
-    case [TargetPopulationStatus.SteficonWait]:
+    case TargetPopulationStatus.SteficonWait:
       return theme.hctPalette.oragne;
-    case [TargetPopulationStatus.SteficonRun]:
+    case TargetPopulationStatus.SteficonRun:
       return theme.hctPalette.blue;
-    case [TargetPopulationStatus.SteficonCompleted]:
+    case TargetPopulationStatus.SteficonCompleted:
       return theme.hctPalette.green;
-    case [TargetPopulationStatus.SteficonError]:
+    case TargetPopulationStatus.SteficonError:
       return theme.palette.error.main;
     default:
       return theme.palette.error.main;
