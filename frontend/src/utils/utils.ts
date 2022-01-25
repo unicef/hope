@@ -165,28 +165,22 @@ export function registrationDataImportStatusToColor(
 
 export function targetPopulationStatusToColor(
   theme: typeof themeObj,
-  status: string | TargetPopulationStatus[],
+  status: string,
 ): string {
-  switch (status) {
-    case [TargetPopulationStatus.Draft]:
-      return theme.hctPalette.gray;
-    case [TargetPopulationStatus.Locked]:
-      return theme.hctPalette.red;
-    case [TargetPopulationStatus.Processing]:
-      return theme.hctPalette.blue;
-    case [TargetPopulationStatus.ReadyForCashAssist]:
-      return theme.hctPalette.green;
-    case [TargetPopulationStatus.SteficonWait]:
-      return theme.hctPalette.oragne;
-    case [TargetPopulationStatus.SteficonRun]:
-      return theme.hctPalette.blue;
-    case [TargetPopulationStatus.SteficonCompleted]:
-      return theme.hctPalette.green;
-    case [TargetPopulationStatus.SteficonError]:
-      return theme.palette.error.main;
-    default:
-      return theme.palette.error.main;
+  const colorsMap = {
+    [TargetPopulationStatus.Draft]: theme.hctPalette.gray,
+    [TargetPopulationStatus.Locked]: theme.hctPalette.red,
+    [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
+    [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
+    [TargetPopulationStatus.SteficonWait]: theme.hctPalette.oragne,
+    [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
+    [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
+    [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
   }
+  return theme.palette.error.main;
 }
 
 export function userStatusToColor(
