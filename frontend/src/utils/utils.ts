@@ -167,7 +167,7 @@ export function targetPopulationStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
-  const mapColors = {
+  const colorsMap = {
     [TargetPopulationStatus.Draft]: theme.hctPalette.gray,
     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
@@ -177,8 +177,8 @@ export function targetPopulationStatusToColor(
     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
   };
-  if (status in mapColors) {
-    return mapColors[status];
+  if (status in colorsMap) {
+    return colorsMap[status];
   }
   return theme.palette.error.main;
 }
