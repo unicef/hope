@@ -177,7 +177,10 @@ export function targetPopulationStatusToColor(
     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
     [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
   };
-  return mapColors[status] ? mapColors[status] : theme.palette.error.main;
+  if (status in mapColors) {
+    return mapColors[status];
+  }
+  return theme.palette.error.main;
 }
 
 export function userStatusToColor(
