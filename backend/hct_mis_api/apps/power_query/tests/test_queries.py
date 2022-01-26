@@ -1,19 +1,29 @@
-from django.contrib.contenttypes.models import ContentType
+from django.db.models import QuerySet
 from django.test import TestCase
 
-from ...account.fixtures import UserFactory
-from ...account.models import User
-from ..models import Query
+from ..apps import create_defaults
+from .fixtures import FormatterFactory, QueryFactory, ReportFactory
 
 
-class TestBasicRule(TestCase):
+class TestPowerQuery(TestCase):
+    databases = ["read_only", "default"]
+
     @classmethod
     def setUpTestData(self):
-        self.user = UserFactory()
+        create_defaults()
+        self.query1 = QueryFactory(code="result=conn.all()")
+        self.query2 = QueryFactory(code=f"result, __=invoke({self.query1.pk})")
+        self.formatter = FormatterFactory(name="Queryset To HTML")
+        self.report = ReportFactory(formatter=self.formatter, query=self.query1)
 
-    def test_execution(self):
-        r, __ = Query.objects.update_or_create(
-            name="All HH",
-            defaults={"owner": self.user, "target": ContentType.objects.get_for_model(User), "code": "qs=conn.all()"},
-        )
-        r.execute()
+    def test_query_execution(self):
+        result, debug_info = self.query1.execute()
+        self.assertIsInstance(result, QuerySet)
+
+    def test_report_execution(self):
+        result = self.report.execute(run_query=True)
+        self.assertIn("<h1>Query", result)
+
+    def test_nested_query(self):
+        result, debug_info = self.query2.execute()
+        self.assertIsInstance(result, QuerySet)
