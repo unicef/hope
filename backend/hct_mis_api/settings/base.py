@@ -736,3 +736,5 @@ IMPERSONATE = {
 #     'social_auth',
 #     'django_admin',
 # )
+
+POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
