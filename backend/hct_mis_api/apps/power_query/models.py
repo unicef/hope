@@ -1,6 +1,7 @@
 import logging
 import pickle
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ObjectDoesNotExist
@@ -77,7 +78,7 @@ class Query(models.Model):
         _error = None
         try:
             locals_ = dict()
-            locals_["conn"] = model._default_manager.using("read_only")
+            locals_["conn"] = model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
             locals_["query"] = self
             locals_["query_filters"] = filters
             locals_["invoke"] = self._invoke
