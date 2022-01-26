@@ -649,6 +649,7 @@ class DocumentType(TimeStampedUUIDModel):
 
     class Meta:
         unique_together = ("country", "type")
+        ordering = ["country", "label"]
 
     def __str__(self):
         return f"{self.label} in {self.country}"
@@ -707,7 +708,7 @@ class Agency(models.Model):
         ]
 
     def __str__(self):
-        return self.label
+        return f"{self.label} in {self.country}"
 
 
 class IndividualIdentity(models.Model):
@@ -716,6 +717,9 @@ class IndividualIdentity(models.Model):
     number = models.CharField(
         max_length=255,
     )
+
+    class Meta:
+        verbose_name_plural = "Individual Identities"
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.number}"
