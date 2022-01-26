@@ -86,7 +86,7 @@ class Query(models.Model):
             result = locals_.get("result", None)
             debug_info = locals_.get("debug_info", None)
 
-            if persist:
+            if persist and result:
                 info = {
                     "type": type(result).__name__,
                     "debug_info": debug_info,
