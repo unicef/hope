@@ -17,13 +17,16 @@ class TestPowerQuery(TestCase):
         self.report = ReportFactory(formatter=self.formatter, query=self.query1)
 
     def test_query_execution(self):
-        result, debug_info = self.query1.execute()
-        self.assertIsInstance(result, QuerySet)
+        with self.settings(POWER_QUERY_DB_ALIAS="default"):
+            result, debug_info = self.query1.execute()
+            self.assertIsInstance(result, QuerySet)
 
     def test_report_execution(self):
-        result = self.report.execute(run_query=True)
-        self.assertIn("<h1>Query", result)
+        with self.settings(POWER_QUERY_DB_ALIAS="default"):
+            result = self.report.execute(run_query=True)
+            self.assertIn("<h1>Query", result)
 
     def test_nested_query(self):
-        result, debug_info = self.query2.execute()
-        self.assertIsInstance(result, QuerySet)
+        with self.settings(POWER_QUERY_DB_ALIAS="default"):
+            result, debug_info = self.query2.execute()
+            self.assertIsInstance(result, QuerySet)
