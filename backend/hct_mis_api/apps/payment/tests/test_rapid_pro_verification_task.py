@@ -6,22 +6,27 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
-from hct_mis_api.apps.household.fixtures import (
-    create_household,
-    EntitlementCardFactory,
-)
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
+    PaymentRecordFactory,
     PaymentVerificationFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    PaymentVerification,
+)
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import CheckRapidProVerificationTask
-from hct_mis_api.apps.program.fixtures import ProgramFactory, CashPlanFactory
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+    CheckRapidProVerificationTask,
+)
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -113,6 +118,7 @@ class TestRapidProVerificationTask(TestCase):
             payment_record = PaymentRecordFactory(
                 cash_plan=cash_plan,
                 household=household,
+                head_of_household=household.head_of_household,
                 target_population=target_population,
                 delivered_quantity_usd=200,
             )
@@ -131,11 +137,11 @@ class TestRapidProVerificationTask(TestCase):
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
         payment_record_verification = payment_record_verification_obj.prefetch_related(
-            "payment_record__household__head_of_household"
+            "payment_record__head_of_household"
         ).first()
         TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"][
             "urn"
-        ] = f"tel:{payment_record_verification.payment_record.household.head_of_household.phone_no}"
+        ] = f"tel:{payment_record_verification.payment_record.head_of_household.phone_no}"
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
@@ -150,11 +156,11 @@ class TestRapidProVerificationTask(TestCase):
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
         payment_record_verification = payment_record_verification_obj.prefetch_related(
-            "payment_record__household__head_of_household"
+            "payment_record__head_of_household"
         ).first()
         TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"][
             "urn"
-        ] = f"tel:{payment_record_verification.payment_record.household.head_of_household.phone_no}"
+        ] = f"tel:{payment_record_verification.payment_record.head_of_household.phone_no}"
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
@@ -163,9 +169,7 @@ class TestRapidProVerificationTask(TestCase):
                 mapped_dict,
                 [
                     {
-                        "phone_number": str(
-                            payment_record_verification.payment_record.household.head_of_household.phone_no
-                        ),
+                        "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
                         "received": True,
                         "received_amount": Decimal("200"),
                     }
@@ -177,7 +181,7 @@ class TestRapidProVerificationTask(TestCase):
         mock_parent_init.return_value = None
         payment_record_verification = (
             TestRapidProVerificationTask.verification.payment_record_verifications.prefetch_related(
-                "payment_record__household__head_of_household"
+                "payment_record__head_of_household"
             )
             .order_by("?")
             .first()
@@ -188,7 +192,7 @@ class TestRapidProVerificationTask(TestCase):
         )
         fake_data_to_return_from_rapid_pro_api = [
             {
-                "phone_number": str(payment_record_verification.payment_record.household.head_of_household.phone_no),
+                "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
                 "received": False,
             }
         ]
@@ -208,7 +212,7 @@ class TestRapidProVerificationTask(TestCase):
         mock_parent_init.return_value = None
         payment_record_verification = (
             TestRapidProVerificationTask.verification.payment_record_verifications.prefetch_related(
-                "payment_record__household__head_of_household"
+                "payment_record__head_of_household"
             )
             .order_by("?")
             .first()
@@ -219,7 +223,7 @@ class TestRapidProVerificationTask(TestCase):
         )
         fake_data_to_return_from_rapid_pro_api = [
             {
-                "phone_number": str(payment_record_verification.payment_record.household.head_of_household.phone_no),
+                "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
                 "received": True,
                 "received_amount": payment_record_verification.payment_record.delivered_quantity - 1,
             }
@@ -244,7 +248,7 @@ class TestRapidProVerificationTask(TestCase):
         mock_parent_init.return_value = None
         payment_record_verification = (
             TestRapidProVerificationTask.verification.payment_record_verifications.prefetch_related(
-                "payment_record__household__head_of_household"
+                "payment_record__head_of_household"
             )
             .order_by("?")
             .first()
@@ -255,7 +259,7 @@ class TestRapidProVerificationTask(TestCase):
         )
         fake_data_to_return_from_rapid_pro_api = [
             {
-                "phone_number": str(payment_record_verification.payment_record.household.head_of_household.phone_no),
+                "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
                 "received": True,
                 "received_amount": payment_record_verification.payment_record.delivered_quantity,
             }

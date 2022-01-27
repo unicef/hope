@@ -1,0 +1,133 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify jsonfy %}
+{% block extrastyle %}{{ block.super }}
+    <script src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+    <script src="{% static "admin/js/jquery.init.js" %}"></script>
+    <script src="{% static "admin/js/collapse.js" %}"></script>
+
+    <link rel="stylesheet" href="{% static "admin/steficon/colorful.css" %}">
+
+    {{ form.media }}
+    <style>
+        .toggler {
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+{% block breadcrumbs-active %}&rsaquo;<a href="{% url opts|admin_urlname:'test' original.pk %}">Test</a>{% endblock %}
+
+{% block action-content %}
+    {% if form %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {#      <table>#}
+            {{ form.errors }}
+            {{ form.opt }}
+            <label><input type="radio" name="opt" class="optFile" checked value="optFile"> File </label>
+            <label><input type="radio" name="opt" class="optData" value="optData"> Data </label>
+            <label><input type="radio" name="opt" class="optContentType" value="optContentType"> ContentType </label>
+            <label><input type="radio" name="opt" class="optTargetPopulation" value="optTargetPopulation">
+                TargetPopulation </label>
+            <div style="margin: 10px">
+                <div id="optFile" style="display: block" class="options">
+                    {{ form.file }}
+                </div>
+                <div id="optData" style="display: none" class="options">
+                    {{ form.raw_data }}
+                </div>
+                <div id="optContentType" style="display: none" class="options">
+                    <table>
+                        <tr>
+                            <th>Target</th>
+                            <td>{{ form.content_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Filters</th>
+                            <td>{{ form.content_type_filters }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="optTargetPopulation" style="display: none" class="options">
+                    <table style="width: 50%">
+                        <tr>
+                            <th style="width: 5%">Target</th>
+                            <td style="width: 300px">{{ form.target_population }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            {#      </table>#}
+            <input type="submit" value="Test">
+        </form>
+    {% endif %}
+    {% if results %}
+        {% if target_population%}
+            <ul>
+            <li><b>Target Population</b>: {{ target_population }}</li>
+            <ul><li><b>Individual_data</b>: {{ target_population.program.individual_data_needed|default_if_none:"False" }}</li>
+            </ul>
+            <li><b>Business Area</b>: {{ target_population.business_area }}</li>
+            <li><b>Program</b>: {{ target_population.program }}</li>
+            </ul>
+        {% endif %}
+        <fieldset class="module aligned collapse">
+            <h2>Code</h2>
+            {{ original.definition|pretty_python }}
+        </fieldset>
+        <fieldset class="module aligned">
+        <h2>Results</h2>
+        <table style="font-size: 20px;width: 100%">
+            {% for row in results %}
+                <tr class="toggler" data-bind="#data{{ forloop.counter }}"
+                    style="background-color: {% if row.success %}darkseagreen{% else %}#e1adad{% endif %}">
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        {% if target_population %}
+                            <a target="_details" href="{% url "admin:household_household_change" row.input.household.pk %}">
+                                {{ row.input.household }}
+                            </a>
+                        {% else %}
+                            {{ row.input|truncatechars:100 }}</td>
+                        {% endif %}
+                    <td>{{ row.result|default_if_none:"N/A" }} {{ row.error|default_if_none:"" }}
+                        <div id="data{{ forloop.counter }}" style="display: none">
+              <pre style="background-color: white;padding: 5px;">
+<h3>Context:{{ row.input }}({{ row.input_type }})</h3>
+<h3>Debug:{{ row.result.debug_info|smart_json}}</h3>
+{{ row.input|smart_json }}
+              </pre>
+                        </div>
+                    </td>
+                    <td style="width: 3%">
+                        <div class="toggler" data-bind="#data{{ forloop.counter }}">+</div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        </fieldset>
+    {% endif %}
+{% endblock %}
+{% block document_ready %}{{ block.super }}
+    <script>
+        (function ($) {
+            $("input[type=radio]").on("click", function (e) {
+                $(".options").hide();
+                var $target = $("#" + $(this).val());
+                $("#id_opt").val($(this).val());
+                $target.show();
+            });
+            $(".toggler").on("click", function (e) {
+                var $x = $($(this).data("bind"));
+                if ($(this).hasClass("opened")) {
+                    $(this).removeClass("opened");
+                    $x.hide();
+                } else {
+                    $(this).addClass("opened");
+                    $x.show();
+                }
+            });
+            {% if form.opt.value  %}
+                $('input[type=radio].{{ form.opt.value }}').click();
+            {% endif %}
+        })(django.jQuery);
+    </script>
+{% endblock %}

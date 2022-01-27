@@ -6,7 +6,8 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
@@ -47,10 +48,14 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         ]
     }
 
+    def setUp(self):
+        super().setUp()
+        self.generate_document_types_for_all_countries()
+
     @classmethod
     def setUpTestData(cls):
-        cls.households = []
         call_command("loadbusinessareas")
+        cls.households = []
         cls.business_area = BusinessArea.objects.first()
         program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
         _ = create_household(
@@ -59,6 +64,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         (household, individuals) = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
+        cls.household_status_host = household
         cls.households.append(household)
         (household, individuals) = create_household(
             {"size": 1, "residence_status": "IDP", "business_area": cls.business_area},
@@ -241,6 +247,35 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
                     "TargetPopulationNode",
                 ),
                 "targetingCriteria": self.FAMILY_SIZE_2_TARGETING_CRITERIA,
+                **self.variables,
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_final_households_list_without_invalid_documents(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        household = self.household_status_host
+        individual = IndividualRoleInHousehold.objects.get(household=household, role=ROLE_PRIMARY).individual
+        individual.household = household
+        individual.save()
+        DocumentFactory.create(individual=individual, status="INVALID")
+
+        self.snapshot_graphql_request(
+            request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
+            context={"user": self.user},
+            variables={
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_residence_status.id, "TargetPopulationNode"
+                ),
                 **self.variables,
             },
         )
