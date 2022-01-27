@@ -682,7 +682,7 @@ class SheetImageLoader:
     def get(self, cell):
         """Retrieves image data from a cell"""
         if cell not in self._images:
-            raise ValueError("Cell {} doesn't contain an image".format(cell))
+            raise ValueError(f"Cell {cell} doesn't contain an image")
         else:
             image = io.BytesIO(self._images[cell]())
             return Image.open(image)
