@@ -1469,6 +1469,33 @@ HOUSEHOLD_EDIT_ONLY_FIELDS = [
     ),
 ]
 
+UNICEF_ID_FIELDS_ATTR = [
+    {
+        "id": "df2b2588-68af-4dea-89ab-c5a53a5764be",
+        "type": TYPE_STRING,
+        "name": "unicef_id",
+        "lookup": "unicef_id",
+        "required": False,
+        "label": {"English(EN)": "Household unicef id"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "unicef_id_h_c",
+    },
+    {
+        "id": "bb9bcb76-c9e4-4e83-8b9a-6c8bb35cb84c",
+        "type": TYPE_STRING,
+        "name": "unicef_id",
+        "lookup": "unicef_id",
+        "required": False,
+        "label": {"English(EN)": "Individual unicef id"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "unicef_id_i_c",
+    },
+]
+
 
 def _reduce_core_field_attr(old, new):
     old[new.get("name")] = new

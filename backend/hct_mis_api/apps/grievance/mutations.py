@@ -589,7 +589,6 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             return cls(grievance_ticket)
 
         if cls.MOVE_TO_STATUS_PERMISSION_MAPPING.get(status):
-            permissions_to_use = None
             if cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("feedback"):
                 if grievance_ticket.is_feedback:
                     permissions_to_use = cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("feedback")
@@ -619,6 +618,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if status == GrievanceTicket.STATUS_CLOSED:
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket, info)
+            grievance_ticket.refresh_from_db()
         if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
             cls.has_permission(info, Permissions.GRIEVANCE_ASSIGN, grievance_ticket.business_area)
             grievance_ticket.assigned_to = info.context.user

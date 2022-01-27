@@ -174,5 +174,3 @@ services:
         hard: -1
     volumes:
       - data_es_test:/usr/share/elasticsearch/data
-    ports:
-      - 9201:9200

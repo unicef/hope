@@ -3,12 +3,7 @@ from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 
 import graphene
-from django_filters import (
-    CharFilter,
-    FilterSet,
-    ModelChoiceFilter,
-    OrderingFilter,
-)
+from django_filters import CharFilter, FilterSet, ModelChoiceFilter, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -102,8 +97,8 @@ class PaymentVerificationFilter(FilterSet):
         fields=(
             "payment_record",
             "status",
-            "payment_record__household__head_of_household__full_name",
-            "payment_record__household__head_of_household__family_name",
+            "payment_record__head_of_household__full_name",
+            "payment_record__head_of_household__family_name",
             "payment_record__household",
             "payment_record__household__unicef_id",
             "payment_record__delivered_quantity",
@@ -118,10 +113,10 @@ class PaymentVerificationFilter(FilterSet):
             q_obj |= Q(id__startswith=value)
             q_obj |= Q(received_amount__startswith=value)
             q_obj |= Q(payment_record__id__startswith=value)
-            q_obj |= Q(payment_record__household__head_of_household__full_name__startswith=value)
-            q_obj |= Q(payment_record__household__head_of_household__given_name__startswith=value)
-            q_obj |= Q(payment_record__household__head_of_household__middle_name__startswith=value)
-            q_obj |= Q(payment_record__household__head_of_household__family_name__startswith=value)
+            q_obj |= Q(payment_record__head_of_household__full_name__startswith=value)
+            q_obj |= Q(payment_record__head_of_household__given_name__startswith=value)
+            q_obj |= Q(payment_record__head_of_household__middle_name__startswith=value)
+            q_obj |= Q(payment_record__head_of_household__family_name__startswith=value)
         return qs.filter(q_obj)
 
 

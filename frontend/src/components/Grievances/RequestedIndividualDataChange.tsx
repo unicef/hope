@@ -55,8 +55,6 @@ export function RequestedIndividualDataChange({
   const identitiesToRemove = individualData.identities_to_remove || [];
   const identitiesToEdit = individualData.identities_to_edit || [];
   const flexFields = individualData.flex_fields || {};
-  const role = individualData.role || {};
-  const relationship = individualData.relationship || {};
   delete individualData.flex_fields;
   delete individualData.documents;
   delete individualData.identities;
