@@ -42,26 +42,42 @@ class TestBasicRule(TestCase):
         self.assertEqual(result.value, 101)
 
     def test_history(self):
-        rule = Rule(definition="result.value=1", enabled=True)
+        rule = Rule(definition="result.value=1", enabled=True, name="Rule1")
         rule.save()
-        # no history on first save
-        self.assertFalse(rule.history.first())
+        # history on first save
+        # self.assertTrue(rule.history.first())
+        self.assertEqual(rule.history.count(), 1)
+        self.assertTrue(rule.latest_commit)
+        self.assertEqual(rule.latest_commit.before, {})
+        self.assertEqual(rule.latest_commit.after, rule.as_dict())
+        self.assertEqual(rule.version, rule.latest_commit.version)
 
         # no history if no changes
         rule.save()
-        self.assertFalse(rule.history.first())
+        self.assertEqual(rule.history.count(), 1, rule.last_changes)
+        self.assertTrue(rule.latest_commit.version, rule.version)
+        self.assertNotEqual(rule.version, rule.latest_commit.version)
 
         rule.definition = "result.value=2"
         rule.save()
-        history = rule.history.first()
-        self.assertTrue(history)
-        self.assertEqual(history.after, rule.as_dict())
-        self.assertEqual(history.before["definition"], "result.value=1")
-        self.assertEqual(history.affected_fields, ["definition"])
+        history = rule.history.all()
+        self.assertEqual(len(history), 2)
+        self.assertEqual(rule.version, rule.latest_commit.version)
+        self.assertEqual(history[0].version, 3)  # because version 2 did not produced changes
+        self.assertEqual(history[0].after, rule.as_dict())
+        self.assertEqual(history[0].before["definition"], "result.value=1")
+        self.assertEqual(history[0].affected_fields, ["definition"])
+        self.assertEqual(history[1].version, 1)
+        self.assertEqual(history[1].before, {})
+        self.assertEqual(history[1].after["definition"], "result.value=1")
+        self.assertListEqual(
+            sorted(history[1].affected_fields), ["definition", "deprecated", "enabled", "language", "name"]
+        )
 
     def test_revert(self):
         rule = Rule(definition="result.value=1", enabled=True)
         rule.save()
+        first_commit = rule.latest_commit
         original_version = rule.version
 
         rule.definition = "result.value=2"
@@ -70,13 +86,13 @@ class TestBasicRule(TestCase):
         rule.definition = "result.value=3"
         rule.save()
 
-        state = rule.history.latest()
-        state.revert()
+        first_commit.revert()
 
         rule.refresh_from_db()
-        self.assertEqual(state.version, original_version)
+        self.assertEqual(first_commit.version, original_version)
         self.assertEqual(rule.definition, "result.value=1")
         self.assertGreater(rule.version, original_version)
+        self.assertEqual(rule.version, rule.latest_commit.version)
 
     def test_release(self):
         rule = Rule(definition="result.value=1", enabled=True)
@@ -91,3 +107,25 @@ class TestBasicRule(TestCase):
         self.assertEqual(release2.version, 2)
         self.assertNotEquals(release1, release2)
         self.assertNotEquals(release1, release2)
+
+    def test_nested_rule(self):
+        rule1 = Rule.objects.create(name="Rule1", definition="result.value=101", enabled=True)
+        rule2 = Rule.objects.create(
+            name="Rule2", definition=f"result.value=invoke({rule1.pk}, context).value", enabled=True
+        )
+        release1 = rule1.release()
+        release2 = rule2.release()
+
+        result = rule2.execute({"hh": self.household})
+        self.assertEqual(result.value, 101)
+
+    def test_modules(self):
+        rule = Rule.objects.create(
+            name="Rule1", definition="age1=dateutil.relativedelta.relativedelta(years=17)", enabled=True
+        )
+        is_valid = rule.interpreter.validate()
+        self.assertTrue(is_valid)
+
+        rule = Rule.objects.create(name="Rule2", definition="age1=datetime.date.today()", enabled=True)
+        is_valid = rule.execute({}, only_release=False)
+        self.assertTrue(is_valid)
