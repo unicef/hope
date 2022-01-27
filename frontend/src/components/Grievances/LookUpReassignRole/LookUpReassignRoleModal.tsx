@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import {
@@ -45,20 +44,49 @@ export const LookUpReassignRoleModal = ({
   setSelectedIndividual,
   setSelectedHousehold,
   excludedIndividual,
+  household,
+}: {
+  onValueChange;
+  initialValues;
+  lookUpDialogOpen;
+  setLookUpDialogOpen;
+  ticket;
+  selectedIndividual;
+  selectedHousehold;
+  setSelectedIndividual;
+  setSelectedHousehold;
+  excludedIndividual;
+  household?;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
-  const [filterIndividual, setFilterIndividual] = useState({
+  const individualFilterInitial: {
+    search;
+    programs;
+    lastRegistrationDate;
+    status;
+    admin2;
+    sex;
+    household?;
+  } = {
     search: '',
-    program: '',
+    programs: '',
     lastRegistrationDate: { min: undefined, max: undefined },
-    residenceStatus: '',
-    admin2: '',
+    status: '',
+    admin2: null,
     sex: '',
-  });
-  const debouncedFilterIndividual = useDebounce(filterIndividual, 500);
+  };
+  if (household) {
+    individualFilterInitial.household = household?.id;
+  }
+  const [filterIndividualApplied, setFilterIndividualApplied] = useState(
+    individualFilterInitial,
+  );
+  const [filterIndividual, setFilterIndividual] = useState(
+    individualFilterInitial,
+  );
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
@@ -83,7 +111,7 @@ export const LookUpReassignRoleModal = ({
           await mutate({
             variables: {
               grievanceTicketId: id,
-              householdId: values.selectedHousehold.id,
+              householdId: household.id,
               individualId: values.selectedIndividual.id,
               role: values.role,
             },
@@ -117,11 +145,14 @@ export const LookUpReassignRoleModal = ({
           <DialogContent>
             <LookUpIndividualFilters
               programs={programs as ProgramNode[]}
-              filter={debouncedFilterIndividual}
+              filter={filterIndividual}
               onFilterChange={setFilterIndividual}
+              setFilterIndividualApplied={setFilterIndividualApplied}
+              individualFilterInitial={individualFilterInitial}
+              household={household}
             />
             <LookUpIndividualTable
-              filter={debouncedFilterIndividual}
+              filter={filterIndividualApplied}
               businessArea={businessArea}
               setFieldValue={setFieldValue}
               valuesInner={values}

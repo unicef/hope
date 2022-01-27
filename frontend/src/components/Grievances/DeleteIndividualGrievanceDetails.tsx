@@ -61,7 +61,7 @@ export function DeleteIndividualGrievanceDetails({
       el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
   ).length;
 
-  const approveEnabled = () => {
+  const approveEnabled = (): boolean => {
     if (isOneIndividual && isForApproval) {
       return true;
     }

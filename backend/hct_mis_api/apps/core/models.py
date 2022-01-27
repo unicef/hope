@@ -160,7 +160,7 @@ class AdminAreaLevel(TimeStampedUUIDModel):
     def __str__(self):
         if self.admin_level == 0:
             return self.country_name or ""
-        return "{} - {}".format(self.area_code, self.name)
+        return f"{self.area_code} - {self.name}"
 
 
 class AdminAreaManager(TreeManager):
@@ -219,12 +219,9 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     def __str__(self):
         level_name = self.admin_area_level.name if self.admin_area_level else ""
         if self.p_code:
-            return "{} ({} {})".format(
-                self.title,
-                level_name,
-                "{}: {}".format("CERD" if level_name == "School" else "PCode", self.p_code or ""),
-            )
-
+            code_type = "CERD" if level_name == "School" else "PCode"
+            pcode_string = f"{code_type}: {self.p_code or ''}"
+            return f"{self.title} ({level_name} {pcode_string})"
         return self.title
 
     def country(self):
@@ -239,7 +236,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
 
     @property
     def point_lat_long(self):
-        return "Lat: {}, Long: {}".format(self.point.y, self.point.x)
+        return f"Lat: {self.point.y}, Long: {self.point.x}"
 
     @classmethod
     def get_admin_areas_as_choices(cls, admin_level, business_area=None):

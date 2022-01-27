@@ -3,6 +3,7 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
+from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from urllib.parse import unquote
 
 from django import forms
@@ -16,7 +17,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserCreationForm, UsernameField
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
@@ -39,7 +40,7 @@ from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import AllValuesComboFilter
 from constance import config
-from import_export import resources
+from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
@@ -117,9 +118,9 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
                     if form_two.cleaned_data
-                    and not form_two.cleaned_data.get("DELETE")
-                    and form_two.cleaned_data["business_area"] == business_area
-                    and form_two.cleaned_data["role"].id in incompatible_roles
+                       and not form_two.cleaned_data.get("DELETE")
+                       and form_two.cleaned_data["business_area"] == business_area
+                       and form_two.cleaned_data["role"].id in incompatible_roles
                 ]
                 if error_forms:
                     if "role" not in form._errors:
@@ -619,8 +620,7 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request):
         from django.contrib.admin.helpers import AdminForm
-
-        context = self.get_common_context(request)
+        context = self.get_common_context(request, processed=False)
         if request.method == "GET":
             form = ImportCSVForm(initial={"partner": Partner.objects.first()})
             context["form"] = form
@@ -628,6 +628,7 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
             form = ImportCSVForm(data=request.POST, files=request.FILES)
             if form.is_valid():
                 try:
+                    context["processed"] = True
                     csv_file = form.cleaned_data["file"]
                     enable_kobo = form.cleaned_data["enable_kobo"]
                     partner = form.cleaned_data["partner"]
@@ -687,6 +688,7 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                     context["errors"] = [str(e)]
                     self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
             else:
+                self.message_user(request, "Please correct errors below", messages.ERROR)
                 context["form"] = form
         fs = form._fieldsets or [(None, {"fields": form.base_fields})]
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})
@@ -875,6 +877,8 @@ class PermissionFilter(SimpleListFilter):
 class RoleResource(resources.ModelResource):
     class Meta:
         model = account_models.Role
+        fields = ('name', 'subsystem', 'permissions')
+        import_id_fields = ("name", "subsystem")
 
 
 @admin.register(account_models.Role)
@@ -982,8 +986,22 @@ class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_filter = (IncompatibleRoleFilter,)
 
 
+class GroupResource(resources.ModelResource):
+    permissions = fields.Field(widget=ManyToManyWidget(Permission,
+                                                       field='codename'),
+                               attribute='permissions')
+
+    class Meta:
+        model = Group
+        fields = ('name', 'permissions')
+        import_id_fields = ("name", )
+
+
 @smart_register(Group)
-class GroupAdmin(ExtraUrlMixin, _GroupAdmin):
+class GroupAdmin(ImportExportModelAdmin, ExtraUrlMixin, _GroupAdmin):
+    resource_class = GroupResource
+    change_list_template = "admin/account/group/change_list.html"
+
     @button(permission=lambda request, group: request.user.is_superuser)
     def import_fixture(self, request):
         from adminactions.helpers import import_fixture as _import_fixture

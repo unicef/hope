@@ -23,7 +23,7 @@ def close_system_flagging_ticket(grievance_ticket, info, should_log=True):
     else:
         individual.sanction_list_confirmed_match = True
         individual.save()
-        reassign_roles_on_disable_individual(individual, ticket_details.role_reassign_data, info)
+        reassign_roles_on_disable_individual(grievance_ticket, individual, ticket_details.role_reassign_data, info)
 
     if should_log:
         log_create(

@@ -29,13 +29,13 @@ def _get_models(args):
                 if model._meta.app_label == arg:
                     models.append(model)
                     match_found = True
-                elif "{}.{}".format(model._meta.app_label.lower(), model._meta.model_name.lower()) == arg:
+                elif f"{model._meta.app_label.lower()}.{model._meta.model_name.lower()}" == arg:
                     models.append(model)
                     match_found = True
 
             if not match_found:
-                logger.error("No model or app named {}".format(arg))
-                raise CommandError("No model or app named {}".format(arg))
+                logger.error(f"No model or app named {arg}")
+                raise CommandError(f"No model or app named {arg}")
     else:
         models = registry.get_models()
 
@@ -83,6 +83,7 @@ def remove_document_by_matching_ids(id_list, document):
     search = Search(index="individuals")
     search.update_from_dict(query_dict)
     search.delete()
+
 
 def remove_elasticsearch_documents_by_matching_ids(id_list, document):
     query_dict = {"query": {"terms": {"id": id_list}}}

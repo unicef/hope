@@ -10,7 +10,9 @@ def send_target_population_task():
     logger.info("send_target_population_task start")
 
     try:
-        from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
+        from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import (
+            SendTPToDatahubTask,
+        )
 
         SendTPToDatahubTask().execute()
     except Exception as e:
@@ -18,4 +20,3 @@ def send_target_population_task():
         raise
 
     logger.info("send_target_population_task end")
-

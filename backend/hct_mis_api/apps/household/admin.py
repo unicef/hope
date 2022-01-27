@@ -24,6 +24,7 @@ from adminfilters.filters import (
     AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
+    MultiValueTextFieldFilter,
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
@@ -33,6 +34,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketSystemFlaggingDetails,
@@ -59,6 +61,9 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
     XlsxUpdateFile,
 )
+from hct_mis_api.apps.power_query.mixin import PowerQueryMixin
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.steficon.admin import AutocompleteWidget
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -76,9 +81,13 @@ class AgencyTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Document)
 class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
+    search_fields = ("document_number",)
     list_display = ("document_number", "type", "status", "individual")
     raw_id_fields = ("individual",)
-    list_filter = (("type", RelatedFieldComboFilter),)
+    list_filter = (
+        ("type", RelatedFieldComboFilter),
+        ("individual", AutoCompleteFilter),
+    )
 
 
 @admin.register(DocumentType)
@@ -91,6 +100,7 @@ class HouseholdAdmin(
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
     LinkedObjectsMixin,
+    PowerQueryMixin,
     AdminAdvancedFiltersMixin,
     SmartFieldsetMixin,
     HOPEModelAdminBase,
@@ -103,6 +113,8 @@ class HouseholdAdmin(
         "last_registration_date",
         "registration_data_import",
         ("business_area__name", "business area"),
+        ("head_of_household__unicef_id", "Head Of Household"),
+        ("admin_area", "Head Of Household"),
     )
 
     list_display = (
@@ -112,15 +124,16 @@ class HouseholdAdmin(
         "size",
     )
     list_filter = (
-        TextFieldFilter.factory("unicef_id", "UNICEF ID"),
-        TextFieldFilter.factory("unhcr_id", "UNHCR ID"),
-        TextFieldFilter.factory("id", "MIS ID"),
+        MultiValueTextFieldFilter.factory("unicef_id", "UNICEF ID"),
+        MultiValueTextFieldFilter.factory("unhcr_id", "UNHCR ID"),
+        MultiValueTextFieldFilter.factory("id", "MIS ID"),
         # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("size", MaxMinFilter),
         "org_enumerator",
         "last_registration_date",
     )
+    search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("representatives", "programs")
     raw_id_fields = ("registration_data_import", "admin_area", "head_of_household", "business_area")
@@ -326,7 +339,7 @@ class IndividualAdmin(
         ("business_area__name", "business area"),
     )
 
-    search_fields = ("family_name",)
+    search_fields = ("family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     exclude = ("created_at", "updated_at")
     inlines = [IndividualRoleInHouseholdInline]
@@ -439,11 +452,18 @@ class EntitlementCardAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 @admin.register(XlsxUpdateFile)
 class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+    readonly_fields = ("file", "business_area", "rdi", "xlsx_match_columns", "uploaded_by")
+    list_filter = (
+        ("business_area", AutoCompleteFilter),
+        ("uploaded_by", AutoCompleteFilter),
+    )
+
     def xlsx_update_stage2(self, request, old_form):
         xlsx_update_file = XlsxUpdateFile(
             file=old_form.cleaned_data["file"],
             business_area=old_form.cleaned_data["business_area"],
             rdi=old_form.cleaned_data["registration_data_import"],
+            uploaded_by=request.user,
         )
         xlsx_update_file.save()
         try:
@@ -478,25 +498,38 @@ class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
-    @button()
+    def add_view(self, request, form_url="", extra_context=None):
+        return self.xlsx_update(request)
+
     def xlsx_update(self, request):
         if request.method == "GET":
-            context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
-        if request.POST.get("stage") == "2":
+            form = UpdateByXlsxStage1Form()
+            form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
+            form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
+            context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
+        elif request.POST.get("stage") == "2":
             form = UpdateByXlsxStage1Form(request.POST, request.FILES)
             context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
-            if not form.is_valid():
-                return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
-            return self.xlsx_update_stage2(request, form)
-        if request.POST.get("stage") == "3":
+            if form.is_valid():
+                try:
+                    return self.xlsx_update_stage2(request, form)
+                except Exception as e:
+                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+            return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
+
+        elif request.POST.get("stage") == "3":
             xlsx_update_file = XlsxUpdateFile.objects.get(pk=request.POST["xlsx_update_file"])
             updater = IndividualXlsxUpdate(xlsx_update_file)
             form = UpdateByXlsxStage2Form(request.POST, request.FILES, xlsx_columns=updater.columns_names)
             context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
-            if not form.is_valid():
-                return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
-            return self.xlsx_update_stage3(request, form)
-        if request.POST.get("stage") == "4":
+            if form.is_valid():
+                try:
+                    return self.xlsx_update_stage3(request, form)
+                except Exception as e:
+                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+            return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
+
+        elif request.POST.get("stage") == "4":
             xlsx_update_file_id = request.POST.get("xlsx_update_file")
             xlsx_update_file = XlsxUpdateFile.objects.get(pk=xlsx_update_file_id)
             updater = IndividualXlsxUpdate(xlsx_update_file)
@@ -506,7 +539,7 @@ class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 self.message_user(request, "Done", messages.SUCCESS)
                 return HttpResponseRedirect(reverse("admin:household_individual_changelist"))
             except Exception as e:
-                self.message_user(request, str(e), messages.ERROR)
+                self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
                 report = updater.report_dict
                 context = self.get_common_context(
                     request,
