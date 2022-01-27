@@ -175,21 +175,6 @@ class Rule(models.Model):
             else:
                 raise ValueError("No Released Rules found")
 
-    # def get_usage(self):
-    #     for f in self._meta.get_fields():
-    #         if f.auto_created and not f.concrete and f.name not in ignored:
-    #             reverse.append(f)
-    #     # context["reverse"] = [get_related(user, f ) for f in reverse]
-    #     context["reverse"] = sorted([get_related(context['original'], f) for f in reverse],
-    #                                 key=lambda x: x['related_name'].lower())
-    #
-    #     return TemplateResponse(request, self.linked_objects_template or [
-    #         "admin/%s/%s/linked_objects.html" % (app_label, opts.model_name),
-    #         "admin/%s/linked_objects.html" % app_label,
-    #         "smart_admin/linked_objects.html"
-    #     ], context)
-    #
-
 
 class RuleCommit(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
