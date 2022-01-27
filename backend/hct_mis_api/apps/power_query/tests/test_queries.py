@@ -1,12 +1,13 @@
 from django.db.models import QuerySet
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from ..apps import create_defaults
 from .fixtures import FormatterFactory, QueryFactory, ReportFactory
 
 
+@override_settings(POWER_QUERY_DB_ALIAS="default")
 class TestPowerQuery(TestCase):
-    databases = ["read_only", "default"]
+    databases = ["default"]
 
     @classmethod
     def setUpTestData(self):
@@ -17,16 +18,13 @@ class TestPowerQuery(TestCase):
         self.report = ReportFactory(formatter=self.formatter, query=self.query1)
 
     def test_query_execution(self):
-        with self.settings(POWER_QUERY_DB_ALIAS="default"):
-            result, debug_info = self.query1.execute()
-            self.assertIsInstance(result, QuerySet)
+        result, debug_info = self.query1.execute()
+        self.assertIsInstance(result, QuerySet)
 
     def test_report_execution(self):
-        with self.settings(POWER_QUERY_DB_ALIAS="default"):
-            result = self.report.execute(run_query=True)
-            self.assertIn("<h1>Query", result)
+        result = self.report.execute(run_query=True)
+        self.assertIn("<h1>Query", result)
 
     def test_nested_query(self):
-        with self.settings(POWER_QUERY_DB_ALIAS="default"):
-            result, debug_info = self.query2.execute()
-            self.assertIsInstance(result, QuerySet)
+        result, debug_info = self.query2.execute()
+        self.assertIsInstance(result, QuerySet)

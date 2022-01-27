@@ -15,8 +15,6 @@ from sentry_sdk import capture_exception
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.power_query.utils import to_dataset
 
-from .utils import fqn
-
 logger = logging.getLogger(__name__)
 
 mimetype_map = {
