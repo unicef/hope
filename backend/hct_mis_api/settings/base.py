@@ -106,7 +106,7 @@ ENV = env("ENV")
 
 # prefix all non-production emails
 if ENV != "prod":
-    EMAIL_SUBJECT_PREFIX = "{}".format(ENV)
+    EMAIL_SUBJECT_PREFIX = f"{ENV}"
 
 # BACKWARD_COMPATIBILITY SNIPPET
 if "DATABASE_URL" not in os.environ:
