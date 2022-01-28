@@ -142,35 +142,24 @@ def pygmentize(code):
 
 
 @register.filter
-def diff(state, panels="before,after"):
-    abefore, aafter = panels.split(",")
-    if abefore == "current":
-        left = state.rule.definition.split("\n")
-        left_label = f"Current ({state.rule.version})"
-    else:
-        left = getattr(state, abefore)["definition"].split("\n")
-        left_label = (f"Version: {state.version} updated by {state.updated_by}",)
+def diff(commit, panels="before,after"):
+    left, right = panels.split(",")
+    rule = commit.rule
+    left_panel, right_panel = [], []
+    right_label = "No data"
+    if panels == "before,after":
+        left_label = f"No Data (First Commit"
+        if "definition" in commit.before:
+            left_label = f"Version before commit ({commit.prev.version})"
+            left_panel = commit.before["definition"].split("\n")
 
-    if aafter == "current":
-        right = state.rule.definition.split("\n")
-        right_label = f"Current ({state.rule.version})"
-    else:
-        right = getattr(state, aafter)["definition"].split("\n")
-        right_label = (f"Version: {state.version+1}",)
+        right_label = f"Version after commit ({commit.version})"
+        right_panel = commit.after["definition"].split("\n")
+    elif panels == "after,current":
+        left_label = f"Version  commit ({commit.version})"
+        left_panel = commit.after["definition"].split("\n")
 
-    return mark_safe(HtmlDiff(wrapcolumn=80).make_table(left, right, left_label, right_label))
+        right_label = f"Version current ({rule.version})"
+        right_panel = rule.definition.split("\n")
 
-
-#
-# @register.filter
-# def diff_to_current(state, headers=None):
-#     right = state.before["definition"].split("\n")
-#     left = state.rule.definition.split("\n")
-#     if not headers:
-#         headers = "Current code: Version {state.rule.version},Version: {state.version} code"
-#
-#     left_header, right_header = headers.split(",")
-#
-#     return mark_safe(
-#         difflib.HtmlDiff().make_table(left, right, left_header.format(state=state), right_header.format(state=state))
-#     )
+    return mark_safe(HtmlDiff(wrapcolumn=80).make_table(left_panel, right_panel, left_label, right_label))
