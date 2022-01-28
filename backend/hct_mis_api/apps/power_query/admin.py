@@ -73,7 +73,7 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
 
     is_ready.boolean = True
 
-    @button(visible=lambda o, r: "/change" in r.path)
+    @button(visible=lambda c: "/change" in c["request"].path)
     def create_report(self, request, pk):
         obj = self.get_object(request, pk)
         url = reverse("admin:power_query_report_add")
@@ -88,7 +88,7 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda o, r: "/change" in r.path)
+    @button(visible=lambda c: "/change" in c["request"].path)
     def queue(self, request, pk):
         try:
             queue.delay(pk)
@@ -101,7 +101,7 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
         obj: Query = self.get_object(request, pk)
         try:
             context = self.get_common_context(request, pk, title="Results")
-            ret = obj.execute(persist=False)
+            ret, debug_info = obj.execute(persist=False)
             context["type"] = type(ret).__name__
             context["raw"] = ret
             context["title"] = f"Result of {obj.name} ({type(ret).__name__})"
@@ -143,7 +143,7 @@ class DatasetAdmin(ExtraUrlMixin, ModelAdmin):
     def target_type(self, obj):
         return obj.query.target
 
-    @button(visible=lambda o, r: "change" in r.path)
+    @button(visible=lambda c: "change" in c["request"].path)
     def export(self, request, pk):
         obj = self.get_object(request, pk)
         try:
@@ -166,7 +166,7 @@ class DatasetAdmin(ExtraUrlMixin, ModelAdmin):
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda o, r: "change" in r.path)
+    @button(visible=lambda c: "change" in c["request"].path)
     def preview(self, request, pk):
         obj = self.get_object(request, pk)
         try:
@@ -197,7 +197,7 @@ class FormatterAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
         models.TextField: {"widget": FormatterEditor(theme="abcdef")},
     }
 
-    @button(visible=lambda o, r: "change" in r.path)
+    @button(visible=lambda c: "change" in c["request"].path)
     def test(self, request, pk):
         context = self.get_common_context(request, pk)
         # obj = self.get_object(request, pk)
@@ -257,7 +257,7 @@ class ReportAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
 
     is_ready.boolean = True
 
-    @button(visible=lambda o, r: "change" in r.path)
+    @button(visible=lambda c: "change" in c["request"].path)
     def execute(self, request, pk):
         obj: Report = self.get_object(request, pk)
         try:
@@ -266,7 +266,7 @@ class ReportAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda o, r: o.result and "/change" in r.path)
+    @button(visible=lambda c: "/change" in c["request"].path)
     def view(self, request, pk):
         url = reverse("power_query:report", args=[pk])
         return HttpResponseRedirect(url)

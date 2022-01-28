@@ -128,7 +128,9 @@ def pretty_json(json_object):
 
 @register.filter
 def get_item(dictionary, key):
-    return dictionary.get(key)
+    if isinstance(dictionary, dict):
+        return dictionary.get(key)
+    return ""
 
 
 @register.filter
@@ -145,6 +147,7 @@ def diff(commit, panels="before,after"):
     rule = commit.rule
     left_panel, right_panel = [], []
     right_label = "No data"
+    left_label = "No data"
     if panels == "before,after":
         left_label = f"No Data (First Commit"
         if "definition" in commit.before:

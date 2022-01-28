@@ -10,9 +10,8 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
+from admin_extra_urls.api import ExtraUrlMixin, confirm_action
 from admin_extra_urls.decorators import button, href
-from admin_extra_urls.extras import ExtraUrlMixin
-from admin_extra_urls.mixins import _confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
@@ -77,7 +76,7 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
     @button(
         label="Re-run RDI",
         permission=lambda r, o: r.user.is_superuser,
-        visible=lambda o, r: o.status == RegistrationDataImport.IMPORT_ERROR,
+        visible=lambda c: "original" in c and c["original"].status == RegistrationDataImport.IMPORT_ERROR,
     )
     def rerun_rdi(self, request, pk):
         obj = self.get_object(request, pk)
@@ -112,7 +111,7 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
     @button(
         label="Re-run Merging RDI",
         permission=lambda r, o: r.user.is_superuser,
-        visible=lambda o, r: o.status == RegistrationDataImport.MERGE_ERROR,
+        visible=lambda c: "original" in c and c["original"].status == RegistrationDataImport.MERGE_ERROR,
     )
     def rerun_merge_rdi(self, request, pk):
         try:
@@ -125,7 +124,9 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
 
     @button(
         permission=is_root,
-        visible=lambda o, r: o.status != RegistrationDataImport.MERGED and o.status != RegistrationDataImport.MERGING,
+        visible=lambda c: "original" in c
+        and c["original"].status != RegistrationDataImport.MERGED
+        and c["original"].status != RegistrationDataImport.MERGING,
     )
     def delete_rdi(self, request, pk):
         try:
@@ -248,7 +249,7 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
                             reverse("admin:registration_data_registrationdataimport_changelist")
                         )
             else:
-                return _confirm_action(
+                return confirm_action(
                     self,
                     request,
                     self.delete_rdi,

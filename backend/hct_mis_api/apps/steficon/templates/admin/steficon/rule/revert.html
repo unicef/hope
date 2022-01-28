@@ -10,10 +10,10 @@
     &rsaquo; Revert to {{ state.timestamp|date:"d, M Y H:i" }}
 {% endblock %}
 {% block content_title %}<h1>Warning!!</h1>
-<h2>You are reverting rule '{{ original }}' to commit #{{ state.version }} of {{ state.timestamp|date:"d, M Y H:i" }}.</h2>
+<h2>You are reverting rule '{{ original }}' to commit #{{ state.version }} on {{ state.timestamp|date:"d, M Y H:i" }}</h2>
 {% endblock %}
 {% block object-tools-items %}
-<li><form method="post">{% csrf_token %}
+<li><form method="post" action="{% url "admin:steficon_rule_do_revert" original.pk state.pk %}">{% csrf_token %}
     &nbsp;&nbsp;<input class="default" type="submit" name="_restore" value="Restore All Data">&nbsp;
     &nbsp;&nbsp;<input type="submit" name="_revert"  value="Revert Code Only">&nbsp;&nbsp;</form></li>
 {% endblock %}

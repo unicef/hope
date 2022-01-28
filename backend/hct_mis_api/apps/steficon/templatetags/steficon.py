@@ -24,9 +24,9 @@ def get_item(dictionary, key):
 
 
 @register.filter
-def pygmentize(code):
+def pygmentize(code, lexer="python"):
     formatter = HtmlFormatter(linenos=True)
-    lex = lexers.get_lexer_by_name("python")
+    lex = lexers.get_lexer_by_name(lexer)
     formatted_code = highlight(code, lex, formatter)
     return mark_safe(formatted_code)
 

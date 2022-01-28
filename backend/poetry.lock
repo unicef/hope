@@ -336,14 +336,14 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-admin-extra-urls"
-version = "3.5.1"
+version = "4.1.1"
 description = "Django mixin to easily add urls to any ModelAdmin"
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.extras]
-dev = ["autopep8", "check-manifest", "django", "flake8", "pep8", "readme", "sphinx", "wheel", "coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox (>=2.3)", "wheel"]
+dev = ["autopep8", "check-manifest", "django", "flake8", "pep8", "readme", "sphinx", "wheel", "isort"]
 test = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox (>=2.3)", "wheel"]
 
 [[package]]
@@ -1668,11 +1668,11 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "tablib"
-version = "3.1.0"
+version = "3.2.0"
 description = "Format agnostic tabular data library (XLS, JSON, YAML, CSV)"
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 markuppy = {version = "*", optional = true, markers = "extra == \"html\""}
@@ -1892,7 +1892,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "1d47822eca60f5f6142775df219ca56fd4b9d449c17a76a3c0d6b9576f9f6066"
+content-hash = "2bbd83aecad5a5612961e80ba106d63517930bfe6966d75fc124b6ebec7ddc71"
 
 [metadata.files]
 amqp = [
@@ -2069,7 +2069,7 @@ django = [
     {file = "Django-2.2.26.tar.gz", hash = "sha256:dfa537267d52c6243a62b32855a744ca83c37c70600aacffbfd98bc5d6d8518f"},
 ]
 django-admin-extra-urls = [
-    {file = "django-admin-extra-urls-3.5.1.tar.gz", hash = "sha256:fc68efd40569f2301cb329a0c445dd3517b0aa9c03c1ab7d9fc8a006d22de9b8"},
+    {file = "django-admin-extra-urls-4.1.1.tar.gz", hash = "sha256:b896eebc24779081f5bb5015c41fb12a741c61d520eec88688749e4991f7cbf5"},
 ]
 django-adminactions = [
     {file = "django-adminactions-1.13.1.tar.gz", hash = "sha256:264101a3b5118ec0edaf6be188cd869a011d4f719d85f5bd6dc206b891fe7aac"},
@@ -2737,8 +2737,8 @@ sqlparse = [
     {file = "sqlparse-0.4.2.tar.gz", hash = "sha256:0c00730c74263a94e5a9919ade150dfc3b19c574389985446148402998287dae"},
 ]
 tablib = [
-    {file = "tablib-3.1.0-py3-none-any.whl", hash = "sha256:26141c9cf2d5904a2228d3f5d45f8a46a3f3f2f0fbb4c33b4a1c1ddca9f31348"},
-    {file = "tablib-3.1.0.tar.gz", hash = "sha256:d64c9f6712918a3d90ec5d71b44b8bab1083e3609e4844ad2be80eb633e097ed"},
+    {file = "tablib-3.2.0-py3-none-any.whl", hash = "sha256:1ba12da7b0b17e33f5997fb1bc8ed560aae3535f5892ae5e5c01a056c47d4d78"},
+    {file = "tablib-3.2.0.tar.gz", hash = "sha256:12d8686454c721de88d8ca5adf07e1f419ef6dbcecedf65e8950d4a329daf3a0"},
 ]
 termcolor = [
     {file = "termcolor-1.1.0.tar.gz", hash = "sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b"},

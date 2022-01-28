@@ -8,6 +8,7 @@ from django.contrib.admin import TabularInline
 from django.contrib.admin.models import LogEntry
 from django.contrib.messages import DEFAULT_TAGS
 from django.contrib.postgres.fields import JSONField
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Count, Q
 from django.db.transaction import atomic
@@ -127,7 +128,6 @@ class HouseholdAdmin(
         MultiValueTextFieldFilter.factory("unicef_id", "UNICEF ID"),
         MultiValueTextFieldFilter.factory("unhcr_id", "UNHCR ID"),
         MultiValueTextFieldFilter.factory("id", "MIS ID"),
-        # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("size", MaxMinFilter),
         "org_enumerator",
@@ -172,7 +172,7 @@ class HouseholdAdmin(
     def get_ignored_linked_objects(self):
         return []
 
-    @button(permission="can_withdrawn")
+    @button(permission="can_withdrawn", visible=lambda c: "/withdrawn/" not in c["request"].path)
     def withdrawn(self, request, pk):
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -185,7 +185,11 @@ class HouseholdAdmin(
             tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
         else:
             tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
-
+        # individual.represented_households.exclude(id=individual.household.pk)
+        context["linked"] = IndividualRoleInHousehold.objects.exclude(household=obj).filter(
+            individual__in=obj.individuals.values_list("id", flat=True)
+        )
+        context["allowed"] = False
         context["tickets"] = tickets
         if request.method == "POST":
             try:
@@ -255,7 +259,7 @@ class HouseholdAdmin(
         alternate = IndividualRoleInHousehold.objects.filter(household=hh, role=ROLE_ALTERNATE).first()
         try:
             head = hh.individuals.get(relationship=HEAD)
-        except IndividualRoleInHousehold.DoesNotExist:
+        except ObjectDoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
         total_in_ranges = 0

@@ -1,16 +1,15 @@
 import re
 
 from django.contrib import admin
-from django.contrib.admin import FieldListFilter, SimpleListFilter
+from django.contrib.admin import FieldListFilter
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
+from admin_extra_urls.api import ExtraUrlMixin
 from admin_extra_urls.decorators import button, href
-from admin_extra_urls.mixins import ExtraUrlMixin
-from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, TextFieldFilter
+from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.registration_datahub.models import (

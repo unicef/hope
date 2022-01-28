@@ -14,6 +14,7 @@
     {% include "admin_extra_urls/includes/change_form_buttons.html" %}
     <li>{{ original.latest.version|default_if_none:"No release" }}</li>
 {% endblock %}
+
 {% block submit_buttons_bottom %}
     <div class="submit-row">
     <input type="submit" value="{% trans 'Save and continue editing' %}" name="_continue">

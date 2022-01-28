@@ -17,7 +17,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
-from admin_extra_urls.api import ExtraUrlMixin, button
+from admin_extra_urls.api import ExtraUrlMixin, button, url
 from admin_extra_urls.utils import labelize
 from adminfilters.autocomplete import AutoCompleteFilter
 from import_export import fields
@@ -292,7 +292,7 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
             escapechar=form.cleaned_data["escapechar"],
         )
 
-    @button(visible=lambda o, r: "/change/" in r.path)
+    @button(visible=lambda c: "/change/" in c["request"].path)
     def process_file(self, request, pk):
         context = self.get_common_context(
             request,
@@ -371,33 +371,24 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
 
-    @button(urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"], visible=lambda o, r: "/change/" in r.path)
-    def revert(self, request, pk, state=None):
+    @url(url="<int:pk>/revert/<int:state>/")
+    def do_revert(self, request, pk, state):
         try:
-            context = self.get_common_context(
-                request,
-                pk,
-                action="Revert",
-                MONITORED_FIELDS=MONITORED_FIELDS,
-            )
+            self.get_object(request, pk)
             state = self.object.history.get(pk=state)
-            if request.method == "GET":
-                context["state"] = state
-                return TemplateResponse(request, "admin/steficon/rule/revert.html", context)
-            else:
-                with atomic():
-                    if "_restore" in request.POST:
-                        state.revert()
-                    else:
-                        state.revert(["definition"])
-                url = reverse("admin:steficon_rule_change", args=[self.object.id])
-                return HttpResponseRedirect(url)
+            with atomic():
+                if "_restore" in request.POST:
+                    state.revert()
+                else:
+                    state.revert(["definition"])
+            url = reverse("admin:steficon_rule_change", args=[self.object.id])
+            return HttpResponseRedirect(url)
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    @button(visible=lambda o, r: "/change/" in r.path)
+    @button(visible=lambda c: "/change/" in c["request"].path)
     def diff(self, request, pk):
         try:
             context = self.get_common_context(request, pk, action="Code history")
@@ -406,16 +397,6 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
                 state = self.object.history.get(pk=state_pk)
             else:
                 state = self.object.history.first()
-
-            try:
-                context["prev"] = state.get_previous_by_timestamp()
-            except (RuleCommit.DoesNotExist, AttributeError):
-                context["prev"] = None
-
-            try:
-                context["next"] = state.get_next_by_timestamp()
-            except (RuleCommit.DoesNotExist, AttributeError):
-                context["next"] = None
 
             context["state"] = state
             context["title"] = (
@@ -460,7 +441,57 @@ class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, LinkedObjectsMixin, Test
     list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
-    readonly_fields = ("updated_by", "rule", "affected_fields", "version")
+    readonly_fields = ("updated_by", "rule", "affected_fields", "version", "definition")
     change_form_template = None
     change_list_template = None
     resource_class = RuleCommitResource
+    fieldsets = [
+        (
+            None,
+            {"fields": (("is_release", "enabled", "deprecated"),)},
+        ),
+        # (
+        #     "code",
+        #     {
+        #         "classes": ("collapse", "open"),
+        #         "fields": (
+        #             "language",
+        #             "definition",
+        #         ),
+        #     },
+        # ),
+        # (
+        #     "Info",
+        #     {
+        #         "classes": ["collapse"],
+        #         "fields": ("description", "flags"),
+        #     },
+        # ),
+        # (
+        #     "Data",
+        #     {
+        #         "classes": ("collapse",),
+        #         "fields": (
+        #             ("created_by", "created_at"),
+        #             ("updated_by", "updated_at"),
+        #         ),
+        #     },
+        # ),
+    ]
+
+    # def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+    #     self.request = request
+    #     return super().render_change_form(request, context, add, change, form_url, obj)
+    #
+    # @property
+    # def change_form_template(self):
+    #     return self.request
+
+    def has_change_permission(self, request, obj=None):
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request, obj=None):
+        return False

@@ -40,8 +40,8 @@
         </tr>
         <tr>
             <th>Head</th>
-            <td>{{ head.full_name }}</td>
-            <td>{{ head.unicef_id }}</td>
+            <td>{{ original.head_of_household.full_name }}</td>
+            <td>{{ original.head_of_household.unicef_id }}</td>
 {#            <td>{{ head.is_removed }}</td>#}
 {#            <td>{{ head.status }}</td>#}
         </tr>
@@ -54,13 +54,17 @@
             <th></th><th>Name</th><th>Unicef ID</th>
         <tr>
             <td>Primary</td>
+            {% if primary %}
             <td><a href="{% url "admin:household_individual_change"  primary.individual.pk %}">{{ primary.individual.full_name }}</a></td>
             <td>{{ primary.individual.unicef_id }}</td>
+            {% endif %}
         </tr>
         <tr>
             <td>Alternate</td>
+            {% if alternate %}
             <td><a href="{% url "admin:household_individual_change" alternate.individual.pk %}">{{ alternate.individual.full_name }}</a></td>
             <td>{{ alternate.individual.unicef_id }}</td>
+            {% endif %}
         </tr>
         {#    </table>#}
         {#    <h3>Members</h3>#}

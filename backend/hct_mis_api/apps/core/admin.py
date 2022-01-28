@@ -372,6 +372,23 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 "Successfully executed",
             )
 
+    def get_changeform_buttons(self, request, original):
+        valid = []
+        for btn in self.extra_buttons:
+            if btn.name not in ["export_doap", "send_doap", "force_sync_doap"]:
+                valid.append(btn)
+        return valid
+
+    def get_changelist_buttons(self, request):
+        return self.extra_buttons
+
+    def get_action_buttons(self, request):
+        valid = []
+        for btn in self.extra_buttons:
+            if "doap" in request.path and btn.name in ["export_doap", "force_sync_doap", "send_doap"]:
+                valid.append(btn)
+        return valid
+
 
 class CountryFilter(SimpleListFilter):
     template = "adminfilters/combobox.html"
