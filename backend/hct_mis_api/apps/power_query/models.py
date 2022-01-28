@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
+from django.db import models, transaction
 from django.template import Context, Template
 from django.utils import timezone
 
@@ -70,33 +70,45 @@ class Query(models.Model):
         result, debug_info = query.execute(persist=False)
         return result, debug_info
 
-    def execute(self, persist=False, query_args=None):
+    def execute(self, persist=False):
         model = self.target.model_class()
-        filters = query_args or {}
         _error = None
+        buffer = []
+
+        def local_print(*args):
+            buffer.append(" ".join([str(a) for a in args]))
+
         try:
+            gl = dict(globals())
             locals_ = dict()
             locals_["conn"] = model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
+            locals_["print"] = local_print
             locals_["query"] = self
-            locals_["query_filters"] = filters
             locals_["invoke"] = self._invoke
-            exec(self.code, globals(), locals_)
-            result = locals_.get("result", None)
-            debug_info = locals_.get("debug_info", None)
+            with transaction.atomic():
+                exec(self.code, gl, locals_)
+                result = locals_.get("result", None)
+                debug_info = locals_.get("debug", {})
+                if buffer:
+                    debug_info["stdout"] = buffer
+                transaction.set_rollback(True)
 
             if persist and result:
                 info = {
                     "type": type(result).__name__,
-                    "debug_info": debug_info,
+                    "debug": debug_info,
                 }
                 r, __ = Dataset.objects.update_or_create(
                     query=self, defaults={"last_run": timezone.now(), "result": pickle.dumps(result), "info": info}
                 )
 
             return result, debug_info
-        except Exception as e:
-            _error = capture_exception(e)
+        except SyntaxError as e:
             logger.exception(e)
+            _error = capture_exception(e)
+        except Exception as e:
+            logger.exception(e)
+            _error = capture_exception(e)
         finally:
             Query.objects.filter(pk=self.pk).update(error=_error)
         return None, None

@@ -7,6 +7,7 @@ from builtins import __build_class__
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.safestring import mark_safe
@@ -98,7 +99,10 @@ class PythonExec(Interpreter):
         locals_["context"] = context
         locals_["result"] = pts
         try:
-            exec(self.init_string, gl, locals_)
+            with transaction.atomic():
+                exec(self.init_string, gl, locals_)
+                transaction.set_rollback(True)
+
         except SyntaxError as err:
             error_class = err.__class__.__name__
             detail = err.args[0]

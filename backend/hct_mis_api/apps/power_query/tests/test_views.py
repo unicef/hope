@@ -27,24 +27,22 @@ class TestPowerQueryViews(TestCase):
         cls.report2.execute(run_query=True)
 
     def test_pending_report(self):
-        with self.settings(POWER_QUERY_DB_ALIAS="default"):
-            url = reverse("power_query:report", args=[self.report1.pk])
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 302)
-            self.client.force_login(self.report1.owner)
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 400)
+        url = reverse("power_query:report", args=[self.report1.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.client.force_login(self.report1.owner)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
 
     def test_pending_fetch(self):
-        with self.settings(POWER_QUERY_DB_ALIAS="default"):
-            url = reverse("power_query:data", args=[self.report1.pk])
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 401)
-            self.client.force_login(self.report1.owner)
+        url = reverse("power_query:data", args=[self.report1.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 401)
+        self.client.force_login(self.report1.owner)
 
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 400)
-            self.assertContains(response, b"This report is not currently available", status_code=400)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, b"This report is not currently available", status_code=400)
 
     def test_valid_report(self):
         url = reverse("power_query:report", args=[self.report2.pk])
@@ -54,12 +52,11 @@ class TestPowerQueryViews(TestCase):
         self.assertContains(response, b"<h1>Query")
 
     def test_valid_fetch(self):
-        with self.settings(POWER_QUERY_DB_ALIAS="default"):
-            url = reverse("power_query:data", args=[self.report2.pk])
-            self.client.force_login(self.report1.owner)
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 200)
-            self.assertContains(response, b"<h1>Query")
+        url = reverse("power_query:data", args=[self.report2.pk])
+        self.client.force_login(self.report1.owner)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, b"<h1>Query")
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")
