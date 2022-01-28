@@ -52,7 +52,7 @@ class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):
                     user_id=request.user.pk,
                     content_type_id=ContentType.objects.get_for_model(self.model).pk,
                     object_id=None,
-                    object_repr=f"truncate table {self.model._meta.verbose_name}",
+                    object_repr=f"TRUNCATE TABLE {self.model._meta.verbose_name}",
                     action_flag=DELETION,
                     change_message="truncate table",
                 )
@@ -60,7 +60,7 @@ class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):
 
                 conn = connections[self.model.objects.db]
                 cursor = conn.cursor()
-                cursor.execute('TRUNCATE TABLE "{}" RESTART IDENTITY CASCADE '.format(self.model._meta.db_table))
+                cursor.execute(f"TRUNCATE TABLE '{self.model._meta.db_table}' RESTART IDENTITY CASCADE")
         else:
             return _confirm_action(
                 self,

@@ -24,9 +24,11 @@ from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
 from import_export.widgets import ForeignKeyWidget
+from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
 from ..account.models import User
+from ..administration.widgets import JsonWidget
 from ..utils.security import is_root
 from .forms import (
     RuleDownloadCSVFileProcessForm,
@@ -122,6 +124,7 @@ class TestRuleMixin:
                     title = f"Test result for '{rule}' using sample data"
                 elif selection == "optTargetPopulation":
                     tp = form.cleaned_data.get("target_population")
+                    context["target_population"] = tp
                     data = [{"household": e.household} for e in tp.selections.all()]
                     title = f"Test result for '{rule}' using TargetPopulation '{tp}'"
                 elif selection == "optContentType":
@@ -135,6 +138,7 @@ class TestRuleMixin:
                 if not isinstance(data, (list, tuple, QuerySet)):
                     data = [data]
                 context["title"] = title
+                context["selection"] = selection
                 results = []
                 for values in data:
                     row = {
@@ -214,7 +218,6 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
                 "fields": (
                     ("name", "version"),
                     ("enabled", "deprecated"),
-                    ("description",),
                 )
             },
         ),
@@ -229,6 +232,13 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
             },
         ),
         (
+            "Info",
+            {
+                "classes": ["collapse"],
+                "fields": ("description", "flags"),
+            },
+        ),
+        (
             "Data",
             {
                 "classes": ("collapse",),
@@ -239,6 +249,18 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
             },
         ),
     ]
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "flags":
+            if is_root(request):
+                kwargs = {"widget": JSONEditor}
+            else:
+                kwargs = {"widget": JsonWidget}
+            return db_field.formfield(**kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def has_delete_permission(self, request, obj=None):
+        return is_root(request)
 
     def has_change_permission(self, request, obj=None):
         return is_root(request)
@@ -255,6 +277,12 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
             return mark_safe(f'<a href="{url}">{obj.latest.version}</a>')
         except (RuleCommit.DoesNotExist, AttributeError):
             pass
+
+    def delete_view(self, request, object_id, extra_context=None):
+        return super().delete_view(request, object_id, extra_context)
+
+    def render_delete_form(self, request, context):
+        return super().render_delete_form(request, context)
 
     def _get_csv_config(self, form):
         return dict(
@@ -413,10 +441,6 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
             obj.created_by = request.user
         obj.updated_by = request.user
         obj.save()
-        if "_save" in request.POST:
-            obj.commit(is_release=True, force=True)
-        if not obj.latest:
-            obj.commit(force=True)
 
 
 class RuleCommitResource(ModelResource):
@@ -432,7 +456,7 @@ class RuleCommitResource(ModelResource):
 
 
 @register(RuleCommit)
-class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, ModelAdmin):
+class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin):
     list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
