@@ -263,6 +263,7 @@ class RdiMergeTask:
 
     def execute(self, registration_data_import_id):
         individual_ids = []
+        kobo_submissions = []
         try:
             with transaction.atomic(using="default"):
                 with transaction.atomic(using="registration_datahub"):
@@ -298,7 +299,6 @@ class RdiMergeTask:
                     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
 
-                    kobo_submissions = []
                     for imported_household in imported_households:
                         kobo_submission_uuid = imported_household.kobo_submission_uuid
                         kobo_asset_id = imported_household.kobo_asset_id
@@ -333,7 +333,7 @@ class RdiMergeTask:
                         registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
                     )
 
-                    create_needs_adjudication_tickets(
+                    ticket_details_to_create = create_needs_adjudication_tickets(
                         needs_adjudication,
                         "possible_duplicates",
                         obj_hct.business_area,
@@ -348,6 +348,13 @@ class RdiMergeTask:
                     obj_hct.save()
                     DeduplicateTask.hard_deduplicate_documents(documents_to_create, registration_data_import=obj_hct)
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
+                    return {
+                        "name": obj_hct.name,
+                        "status": obj_hct.status,
+                        "kobo_submissions": len(kobo_submissions),
+                        "individuals": len(individual_ids),
+                        "ticket_details_to_create": len(ticket_details_to_create),
+                    }
         except:
             remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise

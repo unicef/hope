@@ -146,12 +146,10 @@ def registration_xlsx_import_hourly_task():
 
 @app.task
 def merge_registration_data_import_task(registration_data_import_id):
-    logger.info("merge_registration_data_import_task start")
-
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
-        RdiMergeTask().execute(registration_data_import_id)
+        return RdiMergeTask().execute(registration_data_import_id)
     except Exception as e:
         logger.exception(e)
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -160,8 +158,6 @@ def merge_registration_data_import_task(registration_data_import_id):
             id=registration_data_import_id,
         ).update(status=RegistrationDataImport.MERGE_ERROR)
         raise
-
-    logger.info("merge_registration_data_import_task end")
 
 
 @app.task
