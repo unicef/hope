@@ -12,10 +12,10 @@ def noop(apps, schema_editor):
 
 
 def remove_all_rules(apps, schema_editor):
-    # TargetPopulation = apps.get_model("targeting", "TargetPopulation")
+    TargetPopulation = apps.get_model("targeting", "TargetPopulation")
     Rule = apps.get_model("steficon", "Rule")
     RuleCommit = apps.get_model("steficon", "RuleCommit")
-    # TargetPopulation._default_manager.update(steficon_rule=None)
+    TargetPopulation._default_manager.update(steficon_rule=None)
     Rule.objects.all().delete()
     RuleCommit.objects.all().delete()
 
@@ -27,5 +27,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(remove_all_rules, noop),
-        migrations.DeleteModel(name='RuleCommit'),
     ]
