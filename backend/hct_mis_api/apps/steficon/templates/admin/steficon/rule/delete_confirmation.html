@@ -1,0 +1,9 @@
+{% extends "admin/delete_confirmation.html" %}
+{% block content %}
+    <h1>Warning, this Rule is used by the following Objects</h1>
+    <ul>{% for commit in rule.history %}
+        <li>{{ commit }}</li>
+        <ul></ul>
+    {% endfor %}</ul>
+    {{ block.super }}
+{% endblock content %}

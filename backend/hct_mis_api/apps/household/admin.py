@@ -24,6 +24,7 @@ from adminfilters.filters import (
     AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
+    MultiValueTextFieldFilter,
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
@@ -128,9 +129,9 @@ class HouseholdAdmin(
         "size",
     )
     list_filter = (
-        TextFieldFilter.factory("unicef_id", "UNICEF ID"),
-        TextFieldFilter.factory("unhcr_id", "UNHCR ID"),
-        TextFieldFilter.factory("id", "MIS ID"),
+        MultiValueTextFieldFilter.factory("unicef_id", "UNICEF ID"),
+        MultiValueTextFieldFilter.factory("unhcr_id", "UNHCR ID"),
+        MultiValueTextFieldFilter.factory("id", "MIS ID"),
         # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("size", MaxMinFilter),
