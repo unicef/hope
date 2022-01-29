@@ -1,0 +1,77 @@
+{% load i18n %}
+<h3>{% blocktrans with title as filter_title %} By {{ filter_title }} {% endblocktrans %}</h3>
+<ul>
+    <small>
+        <input type="checkbox" id="{{ spec.lookup_kwarg_negated }}"
+                   data-group="{{ spec.id }}"
+                   class="filter-flexfield negate {{ spec.id }}"
+                   {% if spec.lookup_negated_val == "true" %}checked="checked"{% endif %}>
+        {% trans "Exclude" %}
+        <select style="height: 20px;padding: 0"
+                class="filter-flexfield {{ spec.id }}"
+                id="{{ spec.lookup_kwarg_options }}">
+            <option value="e" {% if spec.lookup_options_val == "e" %}selected="selected"{% endif %}><small>remove missing</small></option>
+            <option value="i" {% if spec.lookup_options_val == "i" %}selected="selected"{% endif %}><small>add missing</small></option>
+        </select>
+    </small>
+    <li>
+        <input type="text" id="{{ spec.lookup_kwarg_key }}"
+               name="key"
+               data-group="{{ spec.id }}"
+               placeholder="field name"
+               class="filter-flexfield {{ spec.id }}"
+               value="{{ spec.lookup_key_val }}"
+               style="width: 90%">
+
+        <input type="text" id="{{ spec.lookup_kwarg_value }}"
+               name="value"
+               data-group="{{ spec.id }}"
+               placeholder="field value"
+               class="filter-flexfield {{ spec.id }}"
+               value="{{ spec.lookup_value_val }}"
+               style="width: 90%">
+    </li>
+    <small><a id="{{ spec.id }}_button"
+              data-group="{{ spec.id }}"
+              data-field="{{ spec.field_path }}"
+              data-qs="{{ spec.query_string }}"
+              data-key="#{{ spec.lookup_kwarg_key }}"
+              data-value="#{{ spec.lookup_kwarg_value }}"
+              data-negate="#{{ spec.lookup_kwarg_negated }}"
+              data-options="#{{ spec.lookup_kwarg_options }}"
+              data-action="{% if spec.value.0 %}clear{% else %}filter{% endif %}"
+              class="filter-flexfield {{ spec.id }}"
+              href="#">{% if spec.value.0 %}clear{% else %}filter{% endif %}</a></small>
+</ul>
+{{ spec.media }}
+<script type="text/javascript">
+    (function ($) {
+        var flexfieldFilter = function (e) {
+            var $button = $(e.target);
+            var action = $button.data("action");
+            var $key = $($button.data("key"));
+            var $value = $($button.data("value"));
+            var $negate = $($button.data("negate"));
+            var $options = $($button.data("options"));
+            var qs = $button.data("qs");
+            if (action==="clear"){
+                location.href = qs;
+            } else if ($key.val()) {
+                var url = qs;
+                url = url + "&" + $key.attr("id") + "=" + $key.val();
+                url = url + "&" + $value.attr("id") + "=" + $value.val();
+                url = url + "&" + $negate.attr("id") + "=" + $negate.is(":checked");
+                url = url + "&" + $options.attr("id") + "=" + $options.val();
+                location.href = url;
+            }
+        };
+        $(document).ready(function () {
+            $('.{{ spec.id }}').on("change", function () {
+                $('#{{ spec.id }}_button').html("filter");
+                $('#{{ spec.id }}_button').data("action", "filter");
+                $('#{{ spec.id }}_button').html("filter");
+            });
+            $('#{{ spec.id }}_button').click(flexfieldFilter);
+        });
+    })(django.jQuery);
+</script>

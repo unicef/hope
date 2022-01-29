@@ -4,8 +4,9 @@ from inspect import isclass
 from itertools import chain
 
 from django.contrib import admin, messages
-from django.contrib.admin import TabularInline
+from django.contrib.admin import FieldListFilter, SimpleListFilter, TabularInline
 from django.contrib.admin.models import LogEntry
+from django.contrib.admin.utils import prepare_lookup_value
 from django.contrib.messages import DEFAULT_TAGS
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ObjectDoesNotExist
@@ -35,7 +36,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
 from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketSystemFlaggingDetails,
@@ -96,6 +97,70 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
     list_display = ("label", "country", "type")
 
 
+class FlexFieldFilter(SimpleListFilter):
+    parameter_name = "ba"
+    title = "Flex Field"
+    template = "admin/flexfieldfilter.html"
+
+    def __init__(self, field, request, params, model, model_admin, field_path):
+        self.lookup_kwarg_key = "%s__key" % field_path
+        self.lookup_kwarg_value = "%s__value" % field_path
+        self.lookup_kwarg_negated = "%s__negated" % field_path
+        self.lookup_kwarg_options = "%s__options" % field_path
+        self.lookup_key_val = params.get(self.lookup_kwarg_key, "")
+        self.lookup_value_val = params.get(self.lookup_kwarg_value, "")
+        self.lookup_negated_val = params.get(self.lookup_kwarg_negated)
+        self.lookup_options_val = params.get(self.lookup_kwarg_options)
+        self.field = field
+        self.field_path = field_path
+        self.title = getattr(field, "verbose_name", field_path)
+        super().__init__(request, params, model, model_admin)
+        for p in self.expected_parameters():
+            if p in params:
+                value = params.pop(p)
+                self.used_parameters[p] = prepare_lookup_value(p, value)
+
+    def id(self):
+        return hash(f"{self.parameter_name}-{self.title}")
+
+    def expected_parameters(self):
+        return [self.lookup_kwarg_key, self.lookup_kwarg_value, self.lookup_kwarg_negated, self.lookup_kwarg_options]
+
+    def value(self):
+        return [
+            self.lookup_key_val,
+            self.lookup_value_val,
+            self.lookup_options_val,
+            self.lookup_negated_val == "true",
+        ]
+
+    def lookups(self, request, model_admin):
+        return ["", ""]
+
+    def choices(self, changelist):
+        self.query_string = changelist.get_query_string(remove=self.expected_parameters())
+        return []
+
+    def queryset(self, request, queryset):
+        key, value, options, negated = self.value()
+        if key:
+            # queryset  = queryset.exclude(data__key1__isnull=True).exclude(data__key1__exact='')
+            if negated:
+                filters = {f"{self.field_path}__{key}__not": str(value)}
+                if options == "i":
+                    queryset = queryset.filter(Q(**filters) | Q(**{f"{self.field_path}__{key}__isnull": True}))
+                else:
+                    queryset = queryset.exclude(**filters)
+            else:
+                filters = {f"{self.field_path}__{key}": str(value)}
+                if options == "i":
+                    queryset = queryset.filter(Q(**filters) | Q(**{f"{self.field_path}__{key}__isnull": True}))
+                else:
+                    queryset = queryset.filter(**filters)
+            self.debug = [filters, negated, options]
+        return queryset
+
+
 @admin.register(Household)
 class HouseholdAdmin(
     SoftDeletableAdminMixin,
@@ -125,13 +190,16 @@ class HouseholdAdmin(
         "size",
     )
     list_filter = (
+        ("business_area", AutoCompleteFilter),
         MultiValueTextFieldFilter.factory("unicef_id", "UNICEF ID"),
         MultiValueTextFieldFilter.factory("unhcr_id", "UNHCR ID"),
-        MultiValueTextFieldFilter.factory("id", "MIS ID"),
-        ("business_area", AutoCompleteFilter),
+        ("registration_data_import", AutoCompleteFilter),
+        ("flex_fields", FlexFieldFilter),
         ("size", MaxMinFilter),
+        ("admin_area", AutoCompleteFilter),
         "org_enumerator",
         "last_registration_date",
+        MultiValueTextFieldFilter.factory("id", "MIS ID"),
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
@@ -348,11 +416,14 @@ class IndividualAdmin(
     exclude = ("created_at", "updated_at")
     inlines = [IndividualRoleInHouseholdInline]
     list_filter = (
-        TextFieldFilter.factory("unicef_id__iexact", "UNICEF ID"),
-        TextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
+        ("business_area", AutoCompleteFilter),
+        MultiValueTextFieldFilter.factory("unicef_id", "UNICEF ID"),
+        MultiValueTextFieldFilter.factory("unhcr_id", "UNHCR ID"),
+        MultiValueTextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
+        ("registration_data_import", AutoCompleteFilter),
+        ("flex_fields", FlexFieldFilter),
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
-        ("business_area", AutoCompleteFilter),
         "updated_at",
         "last_sync_at",
     )

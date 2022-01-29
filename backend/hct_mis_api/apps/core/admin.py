@@ -431,7 +431,7 @@ class AdminLevelFilter(SimpleListFilter):
 
 @admin.register(AdminAreaLevel)
 class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
-    list_display = ("name", "country_name", "admin_level", "area_code")
+    list_display = ("name", "country_name", "country", "business_area", "admin_level", "area_code")
     list_filter = (
         ("admin_level", AllValuesComboFilter),
         ("country_name", AllValuesComboFilter),
