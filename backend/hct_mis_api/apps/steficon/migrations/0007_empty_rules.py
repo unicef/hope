@@ -23,6 +23,7 @@ def remove_all_rules(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ('steficon', '0006_migration'),
+        ('targeting', '0028_migration'),
     ]
 
     operations = [
