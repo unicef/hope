@@ -304,8 +304,8 @@ class TestSendTpToDatahub(TestCase):
         household.country = iso_code2
         household.save()
         task = SendTPToDatahubTask()
-        dh_session = dh_models.Session()
-        (dh_household, *_) = task.send_household(household, self.program_individual_data_needed_true, dh_session, [])
+        task.dh_session = dh_models.Session()
+        dh_household = task.send_household(household)
         self.assertEqual(dh_household.country, expected_ca_code)
 
     def test_trim_targeting_criteria(self):
