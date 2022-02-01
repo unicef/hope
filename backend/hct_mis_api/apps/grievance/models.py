@@ -121,54 +121,54 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL = 16
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
+            ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
             ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: _("Household Data Update"),
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: _("Individual Data Update"),
-            ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
-            ISSUE_TYPE_DATA_BREACH: _("Data breach"),
             ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),
+            ISSUE_TYPE_DATA_BREACH: _("Data breach"),
+            ISSUE_TYPE_CONFLICT_OF_INTEREST: _("Conflict of interest"),
             ISSUE_TYPE_FRAUD_FORGERY: _("Fraud and forgery"),
             ISSUE_TYPE_FRAUD_MISUSE: _("Fraud involving misuse of programme funds by third party"),
+            ISSUE_TYPE_GROSS_MISMANAGEMENT: _("Gross mismanagement"),
             ISSUE_TYPE_HARASSMENT: _("Harassment and abuse of authority"),
             ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: _("Inappropriate staff conduct"),
-            ISSUE_TYPE_UNAUTHORIZED_USE: _("Unauthorized use, misuse or waste of UNICEF property or funds"),
-            ISSUE_TYPE_CONFLICT_OF_INTEREST: _("Conflict of interest"),
-            ISSUE_TYPE_GROSS_MISMANAGEMENT: _("Gross mismanagement"),
+            ISSUE_TYPE_MISCELLANEOUS: _("Miscellaneous"),
             ISSUE_TYPE_PERSONAL_DISPUTES: _("Personal disputes"),
             ISSUE_TYPE_SEXUAL_HARASSMENT: _("Sexual harassment and sexual exploitation"),
-            ISSUE_TYPE_MISCELLANEOUS: _("Miscellaneous"),
+            ISSUE_TYPE_UNAUTHORIZED_USE: _("Unauthorized use, misuse or waste of UNICEF property or funds"),
         },
     }
     ALL_ISSUE_TYPES = [choice for choices_group in ISSUE_TYPES_CHOICES.values() for choice in choices_group.items()]
     STATUS_CHOICES = (
         (STATUS_NEW, _("New")),
         (STATUS_ASSIGNED, _("Assigned")),
+        (STATUS_CLOSED, _("Closed")),
+        (STATUS_FOR_APPROVAL, _("For Approval")),
         (STATUS_IN_PROGRESS, _("In Progress")),
         (STATUS_ON_HOLD, _("On Hold")),
-        (STATUS_FOR_APPROVAL, _("For Approval")),
-        (STATUS_CLOSED, _("Closed")),
     )
 
     CATEGORY_CHOICES = (
-        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_DATA_CHANGE, _("Data Change")),
-        (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
         (CATEGORY_GRIEVANCE_COMPLAINT, _("Grievance Complaint")),
-        (CATEGORY_NEGATIVE_FEEDBACK, _("Negative Feedback")),
-        (CATEGORY_REFERRAL, _("Referral")),
-        (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
         (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
+        (CATEGORY_NEGATIVE_FEEDBACK, _("Negative Feedback")),
+        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
+        (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
+        (CATEGORY_REFERRAL, _("Referral")),
+        (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
     MANUAL_CATEGORIES = (
         CATEGORY_DATA_CHANGE,
-        CATEGORY_SENSITIVE_GRIEVANCE,
         CATEGORY_GRIEVANCE_COMPLAINT,
         CATEGORY_NEGATIVE_FEEDBACK,
-        CATEGORY_REFERRAL,
         CATEGORY_POSITIVE_FEEDBACK,
+        CATEGORY_REFERRAL,
+        CATEGORY_SENSITIVE_GRIEVANCE,
     )
 
     SEARCH_TICKET_TYPES_LOOKUPS = {

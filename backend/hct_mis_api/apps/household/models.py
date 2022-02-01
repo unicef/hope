@@ -60,11 +60,11 @@ DIVORCED = "DIVORCED"
 SEPARATED = "SEPARATED"
 MARITAL_STATUS_CHOICE = (
     (BLANK, _("None")),
-    (SINGLE, _("Single")),
-    (MARRIED, _("Married")),
-    (WIDOWED, _("Widowed")),
     (DIVORCED, _("Divorced")),
+    (MARRIED, _("Married")),
     (SEPARATED, _("Separated")),
+    (SINGLE, _("Single")),
+    (WIDOWED, _("Widowed")),
 )
 
 NONE = "NONE"
@@ -103,23 +103,23 @@ COUSIN = "COUSIN"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_CHOICE = (
     (RELATIONSHIP_UNKNOWN, "Unknown"),
+    (AUNT_UNCLE, "Aunt / Uncle"),
+    (BROTHER_SISTER, "Brother / Sister"),
+    (COUSIN, "Cousin"),
+    (DAUGHTERINLAW_SONINLAW, "Daughter-in-law / Son-in-law"),
+    (GRANDDAUGHER_GRANDSON, "Granddaughter / Grandson"),
+    (GRANDMOTHER_GRANDFATHER, "Grandmother / Grandfather"),
+    (HEAD, "Head of household (self)"),
+    (MOTHER_FATHER, "Mother / Father"),
+    (MOTHERINLAW_FATHERINLAW, "Mother-in-law / Father-in-law"),
+    (NEPHEW_NIECE, "Nephew / Niece"),
     (
         NON_BENEFICIARY,
         "Not a Family Member. Can only act as a recipient.",
     ),
-    (HEAD, "Head of household (self)"),
+    (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
-    (BROTHER_SISTER, "Brother / Sister"),
-    (MOTHER_FATHER, "Mother / Father"),
-    (AUNT_UNCLE, "Aunt / Uncle"),
-    (GRANDMOTHER_GRANDFATHER, "Grandmother / Grandfather"),
-    (MOTHERINLAW_FATHERINLAW, "Mother-in-law / Father-in-law"),
-    (DAUGHTERINLAW_SONINLAW, "Daughter-in-law / Son-in-law"),
-    (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
-    (GRANDDAUGHER_GRANDSON, "Granddaughter / Grandson"),
-    (NEPHEW_NIECE, "Nephew / Niece"),
-    (COUSIN, "Cousin"),
 )
 YES = "1"
 NO = "0"
@@ -138,9 +138,9 @@ ROLE_PRIMARY = "PRIMARY"
 ROLE_ALTERNATE = "ALTERNATE"
 ROLE_NO_ROLE = "NO_ROLE"
 ROLE_CHOICE = (
-    (ROLE_PRIMARY, "Primary collector"),
-    (ROLE_ALTERNATE, "Alternate collector"),
     (ROLE_NO_ROLE, "None"),
+    (ROLE_ALTERNATE, "Alternate collector"),
+    (ROLE_PRIMARY, "Primary collector"),
 )
 IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
 IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
@@ -151,17 +151,17 @@ IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
     (IDENTIFICATION_TYPE_DRIVERS_LICENSE, _("Driver's License")),
+    (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
     (IDENTIFICATION_TYPE_NATIONAL_ID, _("National ID")),
     (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
-    (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: "Birth Certificate",
     IDENTIFICATION_TYPE_DRIVERS_LICENSE: "Driver's License",
+    IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_NATIONAL_ID: "National ID",
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "National Passport",
-    IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
 UNHCR = "UNHCR"
@@ -176,8 +176,8 @@ STATUS_WITHDRAWN = "WITHDRAWN"
 STATUS_DUPLICATE = "DUPLICATE"
 INDIVIDUAL_STATUS_CHOICES = (
     (STATUS_ACTIVE, "Active"),
-    (STATUS_WITHDRAWN, "Withdrawn"),
     (STATUS_DUPLICATE, "Duplicate"),
+    (STATUS_WITHDRAWN, "Withdrawn"),
 )
 INDIVIDUAL_HOUSEHOLD_STATUS = ((STATUS_ACTIVE, "Active"), (STATUS_INACTIVE, "Inactive"))
 UNIQUE = "UNIQUE"
@@ -185,53 +185,53 @@ DUPLICATE = "DUPLICATE"
 NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
 NOT_PROCESSED = "NOT_PROCESSED"
 DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE = (
-    (UNIQUE, "Unique"),
     (DUPLICATE, "Duplicate"),
     (NEEDS_ADJUDICATION, "Needs Adjudication"),
     (NOT_PROCESSED, "Not Processed"),
+    (UNIQUE, "Unique"),
 )
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
 UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
 NOT_PROCESSED = "NOT_PROCESSED"
 DEDUPLICATION_BATCH_STATUS_CHOICE = (
-    (SIMILAR_IN_BATCH, "Similar in batch"),
     (DUPLICATE_IN_BATCH, "Duplicate in batch"),
-    (UNIQUE_IN_BATCH, "Unique in batch"),
     (NOT_PROCESSED, "Not Processed"),
+    (SIMILAR_IN_BATCH, "Similar in batch"),
+    (UNIQUE_IN_BATCH, "Unique in batch"),
 )
 SOME_DIFFICULTY = "SOME_DIFFICULTY"
 LOT_DIFFICULTY = "LOT_DIFFICULTY"
 CANNOT_DO = "CANNOT_DO"
 SEVERITY_OF_DISABILITY_CHOICES = (
     (BLANK, _("None")),
-    (SOME_DIFFICULTY, "Some difficulty"),
     (LOT_DIFFICULTY, "A lot of difficulty"),
     (CANNOT_DO, "Cannot do at all"),
+    (SOME_DIFFICULTY, "Some difficulty"),
 )
 UNICEF = "UNICEF"
 PARTNER = "PARTNER"
 ORG_ENUMERATOR_CHOICES = (
     (BLANK, _("None")),
-    (UNICEF, "UNICEF"),
     (PARTNER, "Partner"),
+    (UNICEF, "UNICEF"),
 )
 HUMANITARIAN_PARTNER = "HUMANITARIAN_PARTNER"
 PRIVATE_PARTNER = "PRIVATE_PARTNER"
 GOVERNMENT_PARTNER = "GOVERNMENT_PARTNER"
 DATA_SHARING_CHOICES = (
     (BLANK, _("None")),
-    (UNICEF, "UNICEF"),
+    (GOVERNMENT_PARTNER, "Government partners"),
     (HUMANITARIAN_PARTNER, "Humanitarian partners"),
     (PRIVATE_PARTNER, "Private partners"),
-    (GOVERNMENT_PARTNER, "Government partners"),
+    (UNICEF, "UNICEF"),
 )
 HH_REGISTRATION = "HH_REGISTRATION"
 COMMUNITY = "COMMUNITY"
 REGISTRATION_METHOD_CHOICES = (
     (BLANK, _("None")),
-    (HH_REGISTRATION, "Household Registration"),
     (COMMUNITY, "Community-level Registration"),
+    (HH_REGISTRATION, "Household Registration"),
 )
 
 DISABLED = "disabled"
@@ -249,10 +249,10 @@ DISABILITY_CHOICES = (
 SANCTION_LIST_POSSIBLE_MATCH = "SANCTION_LIST_POSSIBLE_MATCH"
 SANCTION_LIST_CONFIRMED_MATCH = "SANCTION_LIST_CONFIRMED_MATCH"
 INDIVIDUAL_FLAGS_CHOICES = (
-    (NEEDS_ADJUDICATION, "Needs adjudication"),
     (DUPLICATE, "Duplicate"),
-    (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
+    (NEEDS_ADJUDICATION, "Needs adjudication"),
     (SANCTION_LIST_CONFIRMED_MATCH, "Sanction list match"),
+    (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
 )
 
 logger = logging.getLogger(__name__)
