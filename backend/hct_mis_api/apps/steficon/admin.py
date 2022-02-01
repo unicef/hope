@@ -154,7 +154,7 @@ class TestRuleMixin:
                         else:
                             row["result"] = rule.execute(values)
                     except Exception as e:
-                        row["error"] = "%s: %s" % (e.__class__.__name__, str(e))
+                        row["error"] = "{}: {}".format(e.__class__.__name__, str(e))
                         row["success"] = False
                     results.append(row)
                 context["results"] = results
