@@ -380,6 +380,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin2 = graphene.Field(AdminAreaNode)
     status = graphene.String()
     programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+    active_individuals_count = graphene.Int()
 
     def resolve_admin_area_title(parent, info):
         if parent.admin_area:
@@ -415,6 +416,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_flex_fields(parent, info):
         return resolve_flex_fields_choices_to_string(parent)
+
+    def resolve_active_individuals_count(parent, info):
+        return parent.active_beneficiary_individuals
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
