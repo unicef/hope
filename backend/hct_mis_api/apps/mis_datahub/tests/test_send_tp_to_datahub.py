@@ -1,6 +1,5 @@
 from django.core.management import call_command
 from django.test import TestCase
-
 from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
@@ -305,7 +304,7 @@ class TestSendTpToDatahub(TestCase):
         household.save()
         task = SendTPToDatahubTask()
         task.dh_session = dh_models.Session()
-        dh_household = task._send_household(household)
+        dh_household = task._prepare_datahub_object_household(household)
         self.assertEqual(dh_household.country, expected_ca_code)
 
     def test_trim_targeting_criteria(self):
