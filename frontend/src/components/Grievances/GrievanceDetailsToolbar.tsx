@@ -204,16 +204,21 @@ export const GrievanceDetailsToolbar = ({
     if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
       return getClosingConfirmationExtraText();
     }
+    let additionalContent = '';
     if (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
-      let additionalContent = '';
       if (!ticket.systemFlaggingTicketDetails.approveStatus) {
         additionalContent = t(
           ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found',
         );
       }
-      return `${closingConfirmationText}${additionalContent}`;
     }
-    return closingConfirmationText;
+
+    if (ticket.household?.activeIndividualsCount === 1) {
+      additionalContent = t(
+        ' When you close this ticket, the household that this Individual is a member of will be deactivated.',
+      );
+    }
+    return `${closingConfirmationText}${additionalContent}`;
   };
 
   let closeButton = (
@@ -253,6 +258,7 @@ export const GrievanceDetailsToolbar = ({
       />
     );
   }
+
   return (
     <PageHeader
       title={`Ticket ID: ${ticket.unicefId}`}

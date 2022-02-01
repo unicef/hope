@@ -14347,6 +14347,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "activeIndividualsCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -21577,6 +21589,22 @@
             "deprecationReason": null
           },
           {
+            "name": "flags",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONString",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "history",
             "description": null,
             "args": [
@@ -21655,12 +21683,6 @@
         "enumValues": [
           {
             "name": "PYTHON",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "INTERNAL",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -21817,12 +21839,6 @@
         "enumValues": [
           {
             "name": "PYTHON",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "INTERNAL",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
