@@ -43,15 +43,15 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     IMPORT_ERROR = "IMPORT_ERROR"
     MERGE_ERROR = "MERGE_ERROR"
     STATUS_CHOICE = (
+        (DEDUPLICATION, _("Deduplication")),
+        (DEDUPLICATION_FAILED, _("Deduplication Failed")),
+        (IMPORTING, _("Importing")),
+        (IMPORT_ERROR, _("Import Error")),
         (IN_REVIEW, _("In Review")),
         (MERGED, _("Merged")),
         (MERGING, _("Merging")),
-        (IMPORTING, _("Importing")),
-        (DEDUPLICATION_FAILED, _("Deduplication Failed")),
-        (DEDUPLICATION, _("Deduplication")),
-        (REFUSED_IMPORT, _("Refused import")),
-        (IMPORT_ERROR, _("Import Error")),
         (MERGE_ERROR, _("Merge Error")),
+        (REFUSED_IMPORT, _("Refused import")),
     )
     XLS = "XLS"
     KOBO = "KOBO"

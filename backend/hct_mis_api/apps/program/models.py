@@ -55,8 +55,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     ACTIVE = "ACTIVE"
     FINISHED = "FINISHED"
     STATUS_CHOICE = (
-        (DRAFT, _("Draft")),
         (ACTIVE, _("Active")),
+        (DRAFT, _("Draft")),
         (FINISHED, _("Finished")),
     )
 
@@ -64,8 +64,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     ONE_OFF = "ONE_OFF"
 
     FREQUENCY_OF_PAYMENTS_CHOICE = (
-        (REGULAR, _("Regular")),
         (ONE_OFF, _("One-off")),
+        (REGULAR, _("Regular")),
     )
 
     CHILD_PROTECTION = "CHILD_PROTECTION"
