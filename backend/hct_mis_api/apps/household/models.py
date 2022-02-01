@@ -551,6 +551,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def active_individuals(self):
         return self.individuals.filter(withdrawn=False, duplicate=False)
 
+    @property
+    def active_beneficiary_individuals(self):
+        return self.active_individuals.filter(~Q(relationship=NON_BENEFICIARY))
+
     def __str__(self):
         return f"{self.unicef_id}"
 
