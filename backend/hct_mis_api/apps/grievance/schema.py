@@ -83,43 +83,77 @@ logger = logging.getLogger(__name__)
 class GrievanceTicketFilter(FilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
-            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            ),
             "household": ("unicef_id",),
         },
         "sensitive_ticket_details": {
-            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            ),
             "household": ("unicef_id",),
         },
         "individual_data_update_ticket_details": {
-            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            ),
         },
         "add_individual_ticket_details": {"household": ("unicef_id",)},
         "system_flagging_ticket_details": {
-            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+            "golden_records_individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            )
         },
         "needs_adjudication_ticket_details": {
-            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+            "golden_records_individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            )
         },
     }
     TICKET_TYPES_WITH_FSP = (
         ("complaint_ticket_details", "payment_record__service_provider"),
         ("sensitive_ticket_details", "payment_record__service_provider"),
-        ("payment_verification_ticket_details", "payment_verifications__payment_record__service_provider"),
+        (
+            "payment_verification_ticket_details",
+            "payment_verifications__payment_record__service_provider",
+        ),
     )
 
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
-    status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
+    status = TypedMultipleChoiceFilter(
+        field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int
+    )
     fsp = CharFilter(method="fsp_filter")
     admin = ModelMultipleChoiceFilter(
-        field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
+        field_name="admin",
+        method="admin_filter",
+        queryset=AdminArea.objects.filter(admin_area_level__admin_level=2),
     )
     cash_plan_payment_verification = CharFilter(
         field_name="payment_verification_ticket_details",
         lookup_expr="payment_verifications__cash_plan_payment_verification",
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
-    permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
+    permissions = MultipleChoiceFilter(
+        choices=Permissions.choices(), method="permissions_filter"
+    )
 
     class Meta:
         fields = {
@@ -168,7 +202,9 @@ class GrievanceTicketFilter(FilterSet):
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
-                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__startswith": value})
+                        q_obj |= Q(
+                            **{f"{ticket_type}__{field}__{lookup}__startswith": value}
+                        )
 
         return qs.filter(q_obj)
 
@@ -176,7 +212,9 @@ class GrievanceTicketFilter(FilterSet):
         if value:
             q_obj = Q()
             for ticket_type, path_to_fsp in self.TICKET_TYPES_WITH_FSP:
-                q_obj |= Q(**{f"{ticket_type}__{path_to_fsp}__full_name__istartswith": value})
+                q_obj |= Q(
+                    **{f"{ticket_type}__{path_to_fsp}__full_name__istartswith": value}
+                )
 
             return qs.filter(q_obj)
         return qs
@@ -187,12 +225,25 @@ class GrievanceTicketFilter(FilterSet):
         return qs
 
     def permissions_filter(self, qs, name, value):
-        can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
-        can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
-        can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value
-        can_view_ex_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER.value in value
-        can_view_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR.value in value
-        can_view_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER.value in value
+        can_view_ex_sensitive_all = (
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
+        )
+        can_view_sensitive_all = (
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
+        )
+        can_view_ex_sensitive_creator = (
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value
+            in value
+        )
+        can_view_ex_sensitive_owner = (
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER.value in value
+        )
+        can_view_sensitive_creator = (
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR.value in value
+        )
+        can_view_sensitive_owner = (
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER.value in value
+        )
 
         # can view all
         if can_view_ex_sensitive_all and can_view_sensitive_all:
@@ -202,7 +253,9 @@ class GrievanceTicketFilter(FilterSet):
         filters_1_exclude = {}
         filters_2 = {}
         filters_2_exclude = {}
-        sensitive_category_filter = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
+        sensitive_category_filter = {
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE
+        }
         created_by_filter = {"created_by": self.request.user}
         assigned_to_filter = {"assigned_to": self.request.user}
 
@@ -214,9 +267,13 @@ class GrievanceTicketFilter(FilterSet):
                 filters_2.update(assigned_to_filter)
 
             if can_view_ex_sensitive_all:
-                return qs.filter(~Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2))
+                return qs.filter(
+                    ~Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2)
+                )
             else:
-                return qs.filter(Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_1))
+                return qs.filter(
+                    Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_1)
+                )
 
         else:
             # no full lists so only creator and/or owner lists
@@ -230,7 +287,8 @@ class GrievanceTicketFilter(FilterSet):
                     filters_2_exclude.update(sensitive_category_filter)
             if filters_1 or filters_2:
                 return qs.filter(
-                    Q(Q(**filters_1), ~Q(**filters_1_exclude)) | Q(Q(**filters_2), ~Q(**filters_2_exclude))
+                    Q(Q(**filters_1), ~Q(**filters_1_exclude))
+                    | Q(Q(**filters_2), ~Q(**filters_2_exclude))
                 )
             else:
                 return GrievanceTicket.objects.none()
@@ -238,12 +296,18 @@ class GrievanceTicketFilter(FilterSet):
 
 class ExistingGrievanceTicketFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
-    category = ChoiceFilter(field_name="category", choices=GrievanceTicket.CATEGORY_CHOICES)
-    issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
+    category = ChoiceFilter(
+        field_name="category", choices=GrievanceTicket.CATEGORY_CHOICES
+    )
+    issue_type = ChoiceFilter(
+        field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES
+    )
     household = ModelChoiceFilter(queryset=Household.objects.all())
     individual = ModelChoiceFilter(queryset=Individual.objects.all())
     payment_record = ModelMultipleChoiceFilter(queryset=PaymentRecord.objects.all())
-    permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
+    permissions = MultipleChoiceFilter(
+        choices=Permissions.choices(), method="permissions_filter"
+    )
 
     class Meta:
         fields = ("id",)
@@ -281,7 +345,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
             queryset = self.filters[name].filter(queryset, value)
             assert isinstance(
                 queryset, models.QuerySet
-            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+            ), "Expected '{}.{}' to return a QuerySet, but got a {} instead.".format(
                 type(self).__name__,
                 name,
                 type(queryset).__name__,
@@ -316,8 +380,12 @@ class TicketNoteFilter(FilterSet):
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
-        hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
-        hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER),
+        hopePermissionClass(
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR
+        ),
+        hopePermissionClass(
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER
+        ),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER),
@@ -353,19 +421,31 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
-            creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value
+            creator_perm = (
+                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value
+            )
             owner_perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER.value
         else:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value
-            creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value
-            owner_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value
+            creator_perm = (
+                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value
+            )
+            owner_perm = (
+                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value
+            )
 
-        check_creator = object_instance.created_by == user and user.has_permission(creator_perm, business_area)
-        check_assignee = object_instance.assigned_to == user and user.has_permission(owner_perm, business_area)
+        check_creator = object_instance.created_by == user and user.has_permission(
+            creator_perm, business_area
+        )
+        check_assignee = object_instance.assigned_to == user and user.has_permission(
+            owner_perm, business_area
+        )
         if user.has_permission(perm, business_area) or check_creator or check_assignee:
             return True
 
-        msg = "User is not active creator/assignee and does not have '{perm}' permission"
+        msg = (
+            "User is not active creator/assignee and does not have '{perm}' permission"
+        )
         logger.error(msg)
         raise GraphQLError(msg)
 
@@ -385,7 +465,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         return GrievanceTicketNode._search_for_lookup(grievance_ticket, "individual")
 
     def resolve_payment_record(grievance_ticket, info):
-        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "payment_record")
+        return GrievanceTicketNode._search_for_lookup(
+            grievance_ticket, "payment_record"
+        )
 
     def resolve_admin(grievance_ticket, info):
         if grievance_ticket.admin2:
@@ -430,7 +512,9 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         individual_data = self.individual_data
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
-            images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
+            images_flex_fields_names = FlexibleAttribute.objects.filter(
+                type=TYPE_IMAGE
+            ).values_list("name", flat=True)
             for name, value in flex_fields.items():
                 if value and name in images_flex_fields_names:
                     try:
@@ -453,13 +537,17 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
                 previous_value = document.get("previous_value", {})
                 if previous_value and previous_value.get("photo"):
                     previous_value["photoraw"] = previous_value["photo"]
-                    previous_value["photo"] = default_storage.url(previous_value.get("photo"))
+                    previous_value["photo"] = default_storage.url(
+                        previous_value.get("photo")
+                    )
                     documents_to_edit[index]["previous_value"] = previous_value
 
                 current_value = document.get("value", {})
                 if current_value and current_value.get("photo"):
                     current_value["photoraw"] = current_value["photo"]
-                    current_value["photo"] = default_storage.url(current_value.get("photo"))
+                    current_value["photo"] = default_storage.url(
+                        current_value.get("photo")
+                    )
                     documents_to_edit[index]["value"] = current_value
             individual_data["documents_to_edit"] = documents_to_edit
 
@@ -469,7 +557,9 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
                 current_value = document.get("value", {})
                 if current_value and current_value.get("photo"):
                     current_value["photoraw"] = current_value["photo"]
-                    current_value["photo"] = default_storage.url(current_value.get("photo"))
+                    current_value["photo"] = default_storage.url(
+                        current_value.get("photo")
+                    )
                     documents[index]["value"] = current_value
             individual_data["documents"] = documents
 
@@ -489,7 +579,9 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         individual_data = self.individual_data
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
-            images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
+            images_flex_fields_names = FlexibleAttribute.objects.filter(
+                type=TYPE_IMAGE
+            ).values_list("name", flat=True)
             for name, value in flex_fields.items():
                 if value and name in images_flex_fields_names:
                     try:
@@ -556,7 +648,9 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     def resolve_extra_data(parent, info):
         golden_records = parent.extra_data.get("golden_records")
         possible_duplicate = parent.extra_data.get("possible_duplicate")
-        return TicketNeedsAdjudicationDetailsExtraDataNode(golden_records, possible_duplicate)
+        return TicketNeedsAdjudicationDetailsExtraDataNode(
+            golden_records, possible_duplicate
+        )
 
 
 class TicketSystemFlaggingDetailsNode(DjangoObjectType):
@@ -605,7 +699,10 @@ class IssueTypesObject(graphene.ObjectType):
     sub_categories = graphene.List(ChoiceObject)
 
     def resolve_sub_categories(self, info):
-        return [{"name": value, "value": key} for key, value in self.get("sub_categories").items()]
+        return [
+            {"name": value, "value": key}
+            for key, value in self.get("sub_categories").items()
+        ]
 
 
 class AddIndividualFiledObjectType(graphene.ObjectType):
@@ -629,8 +726,12 @@ class Query(graphene.ObjectType):
         filterset_class=GrievanceTicketFilter,
         permission_classes=(
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE),
-            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR),
-            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER),
+            hopePermissionClass(
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR
+            ),
+            hopePermissionClass(
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER
+            ),
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE),
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR),
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
@@ -641,8 +742,12 @@ class Query(graphene.ObjectType):
         filterset_class=ExistingGrievanceTicketFilter,
         permission_classes=(
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE),
-            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR),
-            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER),
+            hopePermissionClass(
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR
+            ),
+            hopePermissionClass(
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER
+            ),
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE),
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR),
             hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
@@ -658,8 +763,12 @@ class Query(graphene.ObjectType):
         year=graphene.Int(required=True),
         administrative_area=graphene.String(required=False),
     )
-    all_add_individuals_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
-    all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
+    all_add_individuals_fields_attributes = graphene.List(
+        FieldAttributeNode, description="All field datatype meta."
+    )
+    all_edit_household_fields_attributes = graphene.List(
+        FieldAttributeNode, description="All field datatype meta."
+    )
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
@@ -679,7 +788,10 @@ class Query(graphene.ObjectType):
         ]
 
     def resolve_grievance_ticket_all_category_choices(self, info, **kwargs):
-        return [{"name": name, "value": value} for value, name in GrievanceTicket.CATEGORY_CHOICES]
+        return [
+            {"name": name, "value": value}
+            for value, name in GrievanceTicket.CATEGORY_CHOICES
+        ]
 
     def resolve_grievance_ticket_issue_type_choices(self, info, **kwargs):
         categories = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
@@ -721,10 +833,15 @@ class Query(graphene.ObjectType):
             [
                 x
                 for x in CORE_FIELDS_ATTRIBUTES
-                if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
+                if x.get("associated_with") == _INDIVIDUAL
+                and x.get("name") in ACCEPTABLE_FIELDS
             ]
             + list(KOBO_ONLY_INDIVIDUAL_FIELDS.values())
-            + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL))
+            + list(
+                FlexibleAttribute.objects.filter(
+                    associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+                )
+            )
         )
 
         return sort_by_attr(all_options, "label.English(EN)")
@@ -780,8 +897,13 @@ class Query(graphene.ObjectType):
         all_options = [
             x
             for x in HOUSEHOLD_EDIT_ONLY_FIELDS + CORE_FIELDS_ATTRIBUTES
-            if x.get("associated_with") == _HOUSEHOLD and x.get("name") in ACCEPTABLE_FIELDS
-        ] + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD))
+            if x.get("associated_with") == _HOUSEHOLD
+            and x.get("name") in ACCEPTABLE_FIELDS
+        ] + list(
+            FlexibleAttribute.objects.filter(
+                associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
+            )
+        )
 
         return sort_by_attr(all_options, "label.English(EN)")
 
@@ -799,7 +921,9 @@ class Query(graphene.ObjectType):
 
             try:
                 grievance_tickets = grievance_tickets.filter(
-                    admin=AdminArea.objects.get(id=filters.get("administrative_area")).title
+                    admin=AdminArea.objects.get(
+                        id=filters.get("administrative_area")
+                    ).title
                 )
             except AdminArea.DoesNotExist:
                 pass
@@ -814,9 +938,16 @@ class Query(graphene.ObjectType):
         days_30_from_now = datetime.date.today() - datetime.timedelta(days=30)
         days_60_from_now = datetime.date.today() - datetime.timedelta(days=60)
 
-        feedback_categories = [GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK]
-        all_open_tickets = grievance_tickets.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
-        all_closed_tickets = grievance_tickets.filter(status=GrievanceTicket.STATUS_CLOSED)
+        feedback_categories = [
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+        ]
+        all_open_tickets = grievance_tickets.filter(
+            ~Q(status=GrievanceTicket.STATUS_CLOSED)
+        )
+        all_closed_tickets = grievance_tickets.filter(
+            status=GrievanceTicket.STATUS_CLOSED
+        )
 
         datasets = [
             {
@@ -838,8 +969,12 @@ class Query(graphene.ObjectType):
         return {
             "labels": grievance_status_labels,
             "datasets": datasets,
-            "total_number_of_grievances": grievance_tickets.exclude(category__in=feedback_categories).count(),
-            "total_number_of_feedback": grievance_tickets.filter(category__in=feedback_categories).count(),
+            "total_number_of_grievances": grievance_tickets.exclude(
+                category__in=feedback_categories
+            ).count(),
+            "total_number_of_feedback": grievance_tickets.filter(
+                category__in=feedback_categories
+            ).count(),
             "total_number_of_open_sensitive": all_open_tickets.filter(
                 category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
             ).count(),

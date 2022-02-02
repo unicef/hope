@@ -1,12 +1,12 @@
 from decimal import Decimal
 
-from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 
@@ -98,7 +98,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="payment_records",
     )
     head_of_household = models.ForeignKey(
-        "household.Individual", on_delete=models.CASCADE, related_name="payment_records", null=True
+        "household.Individual",
+        on_delete=models.CASCADE,
+        related_name="payment_records",
+        null=True,
     )
 
     full_name = models.CharField(max_length=255)
@@ -114,7 +117,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     target_population_cash_assist_id = models.CharField(max_length=255)
     entitlement_card_number = models.CharField(max_length=255, null=True)
     entitlement_card_status = models.CharField(
-        choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20, null=True
+        choices=ENTITLEMENT_CARD_STATUS_CHOICE,
+        default="ACTIVE",
+        max_length=20,
+        null=True,
     )
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
@@ -135,7 +141,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     service_provider = models.ForeignKey(
@@ -205,14 +214,18 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (VERIFICATION_METHOD_XLSX, "XLSX"),
         (VERIFICATION_METHOD_MANUAL, "MANUAL"),
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True
+    )
     cash_plan = models.ForeignKey(
         "program.CashPlan",
         on_delete=models.CASCADE,
         related_name="verifications",
     )
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
-    verification_method = models.CharField(max_length=50, choices=VERIFICATION_METHOD_CHOICES)
+    verification_method = models.CharField(
+        max_length=50, choices=VERIFICATION_METHOD_CHOICES
+    )
     sample_size = models.PositiveIntegerField(null=True)
     responded_count = models.PositiveIntegerField(null=True)
     received_count = models.PositiveIntegerField(null=True)
@@ -268,8 +281,12 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
     )
-    payment_record = models.ForeignKey("PaymentRecord", on_delete=models.CASCADE, related_name="verifications")
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    payment_record = models.ForeignKey(
+        "PaymentRecord", on_delete=models.CASCADE, related_name="verifications"
+    )
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
+    )
     status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
         decimal_places=2,
@@ -286,7 +303,9 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         ):
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
-        return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
+        return not (
+            self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10
+        )
 
     @property
     def business_area(self):

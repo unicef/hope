@@ -7,7 +7,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
@@ -71,7 +71,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
             ProhibitNullCharactersValidator(),
         ],
     )
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW, db_index=True)
+    status = models.CharField(
+        max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW, db_index=True
+    )
     import_date = models.DateTimeField(auto_now_add=True, db_index=True)
     imported_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -97,7 +99,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
 
     @cached_property
     def all_imported_individuals(self):
-        return ImportedIndividual.objects.filter(registration_data_import=self.datahub_id)
+        return ImportedIndividual.objects.filter(
+            registration_data_import=self.datahub_id
+        )
 
     class Meta:
         unique_together = ("name", "business_area")

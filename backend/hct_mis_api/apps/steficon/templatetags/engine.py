@@ -15,15 +15,17 @@ class HtmlDiff(difflib.HtmlDiff):
     def _format_line(self, side, flag, linenum, text):
         try:
             linenum = "%d" % linenum
-            id = ' id="%s%s"' % (self._prefix[side], linenum)
+            id = f' id="{self._prefix[side]}{linenum}"'
         except TypeError:
             id = ""
         text = text.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;")
         text = text.replace(" ", "&nbsp;").rstrip()
 
-        return '<td class="diff_header lineno"%s>%s</td><td class="code" nowrap="nowrap">%s</td>' % (id, linenum, text)
+        return f'<td class="diff_header lineno"{id}>{linenum}</td><td class="code" nowrap="nowrap">{text}</td>'
 
-    def make_table(self, fromlines, tolines, fromdesc="", todesc="", context=False, numlines=5):
+    def make_table(
+        self, fromlines, tolines, fromdesc="", todesc="", context=False, numlines=5
+    ):
         """Returns HTML table of side by side comparison with change highlights
 
         Arguments:
@@ -82,9 +84,12 @@ class HtmlDiff(difflib.HtmlDiff):
                 if i > 0:
                     s.append("        </tbody>        \n        <tbody>\n")
             else:
-                s.append(fmt % (next_id[i], next_href[i], fromlist[i], next_href[i], tolist[i]))
+                s.append(
+                    fmt
+                    % (next_id[i], next_href[i], fromlist[i], next_href[i], tolist[i])
+                )
         if fromdesc or todesc:
-            header_row = "<thead><tr>%s%s%s%s</tr></thead>" % (
+            header_row = "<thead><tr>{}{}{}{}</tr></thead>".format(
                 '<th class="diff_next"><br /></th>',
                 '<th colspan="2" class="diff_header">%s</th>' % fromdesc,
                 '<th class="diff_next"><br /></th>',
@@ -93,7 +98,9 @@ class HtmlDiff(difflib.HtmlDiff):
         else:
             header_row = ""
 
-        table = self._table_template % dict(data_rows="".join(s), header_row=header_row, prefix=self._prefix[1])
+        table = self._table_template % dict(
+            data_rows="".join(s), header_row=header_row, prefix=self._prefix[1]
+        )
 
         return (
             table.replace("\0+", '<span class="diff_add">')
@@ -116,7 +123,9 @@ def define(val=None):
 
 @register.filter
 def adults(hh):
-    return hh.members.filter(age__gte=18, age__lte=65, work__in=["fulltime", "seasonal", "parttime"]).count()
+    return hh.members.filter(
+        age__gte=18, age__lte=65, work__in=["fulltime", "seasonal", "parttime"]
+    ).count()
 
 
 @register.filter
@@ -160,4 +169,8 @@ def diff(commit, panels="before,after"):
         right_label = f"Version current ({rule.version})"
         right_panel = rule.definition.split("\n")
 
-    return mark_safe(HtmlDiff(wrapcolumn=80).make_table(left_panel, right_panel, left_label, right_label))
+    return mark_safe(
+        HtmlDiff(wrapcolumn=80).make_table(
+            left_panel, right_panel, left_label, right_label
+        )
+    )

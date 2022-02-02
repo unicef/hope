@@ -62,11 +62,15 @@ def get_field_name(field_name: str) -> str:
 
 def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> list:
     if deployed:
-        return [reduce_asset(asset) for asset in assets if asset["has_deployment"] and asset["deployment__active"]]
+        return [
+            reduce_asset(asset)
+            for asset in assets
+            if asset["has_deployment"] and asset["deployment__active"]
+        ]
     return [reduce_asset(asset) for asset in assets]
 
 
-def count_population(results: list, business_area: BusinessArea) -> Tuple[int, int]:
+def count_population(results: list, business_area: BusinessArea) -> tuple[int, int]:
     from hashlib import sha256
 
     from hct_mis_api.apps.core.utils import rename_dict_keys
@@ -84,7 +88,9 @@ def count_population(results: list, business_area: BusinessArea) -> Tuple[int, i
         if business_area.get_sys_option("ignore_amended_kobo_submissions"):
             submission_meta_data["amended"] = False
 
-        submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
+        submission_exists = KoboImportedSubmission.objects.filter(
+            **submission_meta_data
+        ).exists()
         if submission_exists is False:
             total_households_count += 1
             for individual_data in result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME]:
@@ -106,7 +112,10 @@ def count_population(results: list, business_area: BusinessArea) -> Tuple[int, i
                 seen_hash_keys.append(hash_key)
                 total_individuals_count += 1
                 if (
-                    reduced_submission.get("relationship_i_c", RELATIONSHIP_UNKNOWN).upper() == NON_BENEFICIARY
+                    reduced_submission.get(
+                        "relationship_i_c", RELATIONSHIP_UNKNOWN
+                    ).upper()
+                    == NON_BENEFICIARY
                     and seen_hash_keys.count(hash_key) > 1
                 ):
                     total_individuals_count -= 1
@@ -117,6 +126,8 @@ def count_population(results: list, business_area: BusinessArea) -> Tuple[int, i
 def filter_by_owner(data, business_area):
     kobo_username = business_area.kobo_username
     if isinstance(data, list):
-        return [element for element in data if element["owner__username"] == kobo_username]
+        return [
+            element for element in data if element["owner__username"] == kobo_username
+        ]
     if data["owner__username"] == kobo_username:
         return data

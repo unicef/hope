@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os
 
 from .base import *  # noqa: ignore=F403
@@ -34,4 +32,6 @@ ELASTICSEARCH_DSL = {
     "test": {"hosts": "elasticsearch_test:9200"},
 }
 
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)

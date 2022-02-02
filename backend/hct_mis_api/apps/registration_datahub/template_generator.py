@@ -1,8 +1,11 @@
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import openpyxl
 
-from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY, COLLECTORS_FIELDS
+from hct_mis_api.apps.core.core_fields_attributes import (
+    COLLECTORS_FIELDS,
+    CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
+)
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
@@ -19,8 +22,10 @@ class TemplateFileGenerator:
         return wb
 
     @classmethod
-    def _handle_choices(cls, fields: Dict) -> List[List[str]]:
-        rows: List[List[str]] = [["Field Name", "Label", "Value to be used in template"]]
+    def _handle_choices(cls, fields: dict) -> list[list[str]]:
+        rows: list[list[str]] = [
+            ["Field Name", "Label", "Value to be used in template"]
+        ]
 
         for field_name, field_value in fields.items():
             is_admin_level = field_name in ("admin1_h_c", "admin2_h_c")
@@ -29,15 +34,19 @@ class TemplateFileGenerator:
                 choices = AdminArea.get_admin_areas_as_choices(field_name[-5])
             if choices:
                 for choice in field_value["choices"]:
-                    row = [field_name, str(choice["label"]["English(EN)"]), choice["value"]]
+                    row = [
+                        field_name,
+                        str(choice["label"]["English(EN)"]),
+                        choice["value"],
+                    ]
                     rows.append(row)
 
         return rows
 
     @classmethod
-    def _handle_name_and_label_row(cls, fields: Dict) -> Tuple[List[str], List[str]]:
-        names: List[str] = []
-        labels: List[str] = []
+    def _handle_name_and_label_row(cls, fields: dict) -> tuple[list[str], list[str]]:
+        names: list[str] = []
+        labels: list[str] = []
 
         for field_name, field_value in fields.items():
             names.append(field_name)

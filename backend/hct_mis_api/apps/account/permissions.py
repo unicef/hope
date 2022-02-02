@@ -197,11 +197,14 @@ def hopePermissionClass(permission):
             else:
                 if business_area_arg is None:
                     return False
-                business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
+                business_area = BusinessArea.objects.filter(
+                    slug=business_area_arg
+                ).first()
                 if business_area is None:
                     return False
-            return info.context.user.is_authenticated and info.context.user.has_permission(
-                permission.name, business_area
+            return (
+                info.context.user.is_authenticated
+                and info.context.user.has_permission(permission.name, business_area)
             )
 
     return XDPerm
@@ -218,7 +221,9 @@ def hopeOneOfPermissionClass(*permissions):
                 else:
                     if business_area_arg is None:
                         return False
-                    business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
+                    business_area = BusinessArea.objects.filter(
+                        slug=business_area_arg
+                    ).first()
                     if business_area is None:
                         return False
                 for permission in permissions:
@@ -235,7 +240,10 @@ class BaseNodePermissionMixin:
     @classmethod
     def check_node_permission(cls, info, object_instance):
         business_area = object_instance.business_area
-        if not any((perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)):
+        if not any(
+            perm.has_permission(info, business_area=business_area)
+            for perm in cls.permission_classes
+        ):
             logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
 
@@ -288,7 +296,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         self._extra_filter_meta = extra_filter_meta
         self._base_args = None
         self.permission_classes = permission_classes
-        super(DjangoPermissionFilterConnectionField, self).__init__(type, *args, **kwargs)
+        super().__init__(type, *args, **kwargs)
 
     @property
     def args(self):
@@ -306,7 +314,9 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
             if self._extra_filter_meta:
                 meta.update(self._extra_filter_meta)
 
-            filterset_class = self._provided_filterset_class or (self.node_type._meta.filterset_class)
+            filterset_class = self._provided_filterset_class or (
+                self.node_type._meta.filterset_class
+            )
             self._filterset_class = get_filterset_class(filterset_class, **meta)
 
         return self._filterset_class
@@ -316,16 +326,29 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         return get_filtering_args_from_filterset(self.filterset_class, self.node_type)
 
     @classmethod
-    def resolve_queryset(cls, connection, iterable, info, args, filtering_args, filterset_class, permission_classes):
+    def resolve_queryset(
+        cls,
+        connection,
+        iterable,
+        info,
+        args,
+        filtering_args,
+        filterset_class,
+        permission_classes,
+    ):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
-        if not any((perm.has_permission(info, **filter_kwargs) for perm in permission_classes)):
+        if not any(
+            perm.has_permission(info, **filter_kwargs) for perm in permission_classes
+        ):
             logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
         if "permissions" in filtering_args:
-            filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
+            filter_kwargs[
+                "permissions"
+            ] = info.context.user.permissions_in_business_area(
                 filter_kwargs.get("business_area")
             )
-        qs = super(DjangoPermissionFilterConnectionField, cls).resolve_queryset(connection, iterable, info, args)
+        qs = super().resolve_queryset(connection, iterable, info, args)
         return filterset_class(data=filter_kwargs, queryset=qs, request=info.context).qs
 
     def get_queryset_resolver(self):
@@ -384,8 +407,16 @@ class BaseMutationPermissionMixin:
         cls.is_authenticated(info)
         if not (
             cls.has_permission(info, general_permission, business_area_arg, False)
-            or (is_creator and cls.has_permission(info, creator_permission, business_area_arg, False))
-            or (is_owner and cls.has_permission(info, owner_permission, business_area_arg, False))
+            or (
+                is_creator
+                and cls.has_permission(
+                    info, creator_permission, business_area_arg, False
+                )
+            )
+            or (
+                is_owner
+                and cls.has_permission(info, owner_permission, business_area_arg, False)
+            )
         ):
             return cls.raise_permission_denied_error(raise_error=raise_error)
         return True
@@ -399,7 +430,9 @@ class BaseMutationPermissionMixin:
             raise PermissionDenied("Permission Denied: User is not authenticated.")
         else:
             logger.error("Permission Denied: User does not have correct permission.")
-            raise PermissionDenied("Permission Denied: User does not have correct permission.")
+            raise PermissionDenied(
+                "Permission Denied: User does not have correct permission."
+            )
 
 
 class PermissionMutation(BaseMutationPermissionMixin, Mutation):
