@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import logging
 import os
 import re
@@ -195,7 +193,10 @@ TEMPLATES = [
             os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
-            "loaders": ["django.template.loaders.filesystem.Loader", "django.template.loaders.app_directories.Loader"],
+            "loaders": [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
             "context_processors": [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
@@ -283,13 +284,18 @@ INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 # LOGIN_REDIRECT_URL = f'/api/{ADMIN_PANEL_URL}/'
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12}},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-PASSWORD_RESET_TIMEOUT_DAYS = 31
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
@@ -313,20 +319,34 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"},
+        "standard": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"
+        },
         "verbose": {
             "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
         },
     },
     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
     "handlers": {
-        "default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard"},
-        "file": {"level": LOG_LEVEL, "class": "logging.FileHandler", "filename": "debug.log"},
+        "default": {
+            "level": LOG_LEVEL,
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        "file": {
+            "level": LOG_LEVEL,
+            "class": "logging.FileHandler",
+            "filename": "debug.log",
+        },
     },
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
         "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-        "django.request": {"handlers": ["default"], "level": "ERROR", "propagate": False},
+        "django.request": {
+            "handlers": ["default"],
+            "level": "ERROR",
+            "propagate": False,
+        },
         "django.security.DisallowedHost": {
             # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
             "handlers": ["default"],
@@ -356,9 +376,13 @@ HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
 REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis:6379")
 if "CACHE_URL" not in os.environ:
     if REDIS_INSTANCE:
-        os.environ["CACHE_URL"] = f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
+        os.environ[
+            "CACHE_URL"
+        ] = f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
     else:
-        os.environ["CACHE_URL"] = f"dummycache://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
+        os.environ[
+            "CACHE_URL"
+        ] = f"dummycache://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
 
 CACHES = {
     "default": env.cache(),
@@ -440,15 +464,24 @@ CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0), MaxValueValidator(100)]},
+        {
+            "widget": "django.forms.widgets.NumberInput",
+            "validators": [MinValueValidator(0), MaxValueValidator(100)],
+        },
     ),
     "positive_integers": (
         "django.forms.fields.IntegerField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0)]},
+        {
+            "widget": "django.forms.widgets.NumberInput",
+            "validators": [MinValueValidator(0)],
+        },
     ),
     "positive_floats": (
         "django.forms.fields.FloatField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0)]},
+        {
+            "widget": "django.forms.widgets.NumberInput",
+            "validators": [MinValueValidator(0)],
+        },
     ),
 }
 
@@ -469,7 +502,11 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
-    "CASHASSIST_DOAP_RECIPIENT": ("", "UNHCR email address where to send DOAP updates", str),
+    "CASHASSIST_DOAP_RECIPIENT": (
+        "",
+        "UNHCR email address where to send DOAP updates",
+        str,
+    ),
     "KOBO_ADMIN_CREDENTIALS": (
         "",
         "Kobo superuser credentislas in format user:password",
@@ -501,7 +538,10 @@ CONSTANCE_CONFIG = {
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
     # CASH ASSIST
-    "CASH_ASSIST_URL_PREFIX": ("", "Cash Assist base url used to generate url to cash assist"),
+    "CASH_ASSIST_URL_PREFIX": (
+        "",
+        "Cash Assist base url used to generate url to cash assist",
+    ),
     "SEND_GRIEVANCES_NOTIFICATION": (
         False,
         "Should send grievances notification",
@@ -560,7 +600,8 @@ if SENTRY_DSN:
     from hct_mis_api import get_full_version
 
     sentry_logging = LoggingIntegration(
-        level=logging.INFO, event_level=logging.ERROR  # Capture info and above as breadcrumbs  # Send errors as events
+        level=logging.INFO,
+        event_level=logging.ERROR,  # Capture info and above as breadcrumbs  # Send errors as events
     )
 
     sentry_sdk.init(
@@ -660,7 +701,9 @@ SMART_ADMIN_BOOKMARKS = "hct_mis_api.apps.administration.site.get_bookmarks"
 
 SMART_ADMIN_BOOKMARKS_PERMISSION = None
 SMART_ADMIN_PROFILE_LINK = True
-SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root-token") == env("ROOT_TOKEN")
+SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get(
+    "x-root-token"
+) == env("ROOT_TOKEN")
 
 EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
 

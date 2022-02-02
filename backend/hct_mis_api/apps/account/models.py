@@ -4,7 +4,7 @@ from enum import Enum, unique
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
+from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
@@ -12,10 +12,11 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
+from django.db.models import JSONField
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 from model_utils.models import UUIDModel
@@ -54,9 +55,13 @@ class Partner(models.Model):
 
 
 class User(AbstractUser, UUIDModel):
-    status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
+    status = models.CharField(
+        choices=USER_STATUS_CHOICES, max_length=10, default=INVITED
+    )
     # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
-    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
+    partner = models.ForeignKey(
+        Partner, on_delete=models.PROTECT, null=True, blank=True
+    )
     email = models.EmailField(_("email address"), blank=True, unique=True)
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
@@ -64,7 +69,9 @@ class User(AbstractUser, UUIDModel):
     custom_fields = JSONField(default=dict, blank=True)
 
     job_title = models.CharField(max_length=255, blank=True)
-    ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
+    ad_uuid = models.CharField(
+        max_length=64, unique=True, null=True, blank=True, editable=False
+    )
 
     # CashAssist DOAP fields
     last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
@@ -72,7 +79,9 @@ class User(AbstractUser, UUIDModel):
         default=None, null=True, blank=True, help_text="Timestamp of last sync with CA"
     )
     doap_hash = models.TextField(
-        editable=False, default="", help_text="System field used to check if changes need to be sent to CA"
+        editable=False,
+        default="",
+        help_text="System field used to check if changes need to be sent to CA",
     )
 
     def __str__(self):
@@ -89,17 +98,22 @@ class User(AbstractUser, UUIDModel):
 
     def permissions_in_business_area(self, business_area_slug):
         all_roles_permissions_list = list(
-            Role.objects.filter(user_roles__user=self, user_roles__business_area__slug=business_area_slug).values_list(
-                "permissions", flat=True
-            )
+            Role.objects.filter(
+                user_roles__user=self,
+                user_roles__business_area__slug=business_area_slug,
+            ).values_list("permissions", flat=True)
         )
         return [
-            permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
+            permission
+            for roles_permissions in all_roles_permissions_list
+            for permission in roles_permissions or []
         ]
 
     def has_permission(self, permission, business_area, write=False):
         query = Role.objects.filter(
-            permissions__contains=[permission], user_roles__user=self, user_roles__business_area=business_area
+            permissions__contains=[permission],
+            user_roles__user=self,
+            user_roles__business_area=business_area,
         )
         return query.count() > 0
 
@@ -126,9 +140,15 @@ class ChoiceArrayField(ArrayField):
 
 
 class UserRole(TimeStampedUUIDModel):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
-    user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
-    role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+    business_area = models.ForeignKey(
+        "core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        "account.User", related_name="user_roles", on_delete=models.CASCADE
+    )
+    role = models.ForeignKey(
+        "account.Role", related_name="user_roles", on_delete=models.CASCADE
+    )
 
     class Meta:
         unique_together = ("business_area", "user", "role")
@@ -159,7 +179,9 @@ class Role(TimeStampedUUIDModel):
     )
     subsystem = models.CharField(choices=SUBSYSTEMS, max_length=30, default=HOPE)
     permissions = ChoiceArrayField(
-        models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
+        models.CharField(choices=Permissions.choices(), max_length=255),
+        null=True,
+        blank=True,
     )
 
     def clean(self):
@@ -203,14 +225,22 @@ def post_save_user(sender, instance, created, *args, **kwargs):
     business_area = BusinessArea.objects.filter(slug="global").first()
     role = Role.objects.filter(name="Basic User").first()
     if business_area and role:
-        UserRole.objects.get_or_create(business_area=business_area, user=instance, role=role)
+        UserRole.objects.get_or_create(
+            business_area=business_area, user=instance, role=role
+        )
 
 
 class IncompatibleRolesManager(models.Manager):
     def validate_user_role(self, user, business_area, role):
         incompatible_roles = list(
-            IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
-        ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
+            IncompatibleRoles.objects.filter(role_one=role).values_list(
+                "role_two", flat=True
+            )
+        ) + list(
+            IncompatibleRoles.objects.filter(role_two=role).values_list(
+                "role_one", flat=True
+            )
+        )
         incompatible_userroles = UserRole.objects.filter(
             business_area=business_area,
             role__id__in=incompatible_roles,
@@ -234,8 +264,12 @@ class IncompatibleRoles(TimeStampedUUIDModel):
     user cannot be assigned both of the roles in the same business area at the same time
     """
 
-    role_one = models.ForeignKey("account.Role", related_name="incompatible_roles_one", on_delete=models.CASCADE)
-    role_two = models.ForeignKey("account.Role", related_name="incompatible_roles_two", on_delete=models.CASCADE)
+    role_one = models.ForeignKey(
+        "account.Role", related_name="incompatible_roles_one", on_delete=models.CASCADE
+    )
+    role_two = models.ForeignKey(
+        "account.Role", related_name="incompatible_roles_two", on_delete=models.CASCADE
+    )
 
     objects = IncompatibleRolesManager()
 
@@ -254,10 +288,15 @@ class IncompatibleRoles(TimeStampedUUIDModel):
             raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
-        for role_pair in [(self.role_one, self.role_two), (self.role_two, self.role_one)]:
+        for role_pair in [
+            (self.role_one, self.role_two),
+            (self.role_two, self.role_one),
+        ]:
             for userrole in UserRole.objects.filter(role=role_pair[0]):
                 if UserRole.objects.filter(
-                    user=userrole.user, business_area=userrole.business_area, role=role_pair[1]
+                    user=userrole.user,
+                    business_area=userrole.business_area,
+                    role=role_pair[1],
                 ).exists():
                     failing_users.add(userrole.user.email)
 
@@ -277,8 +316,12 @@ class IncompatibleRoles(TimeStampedUUIDModel):
         super().validate_unique(*args, **kwargs)
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
-        if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():
+        if IncompatibleRoles.objects.filter(
+            role_one=self.role_two, role_two=self.role_one
+        ).exists():
             logger.error(
                 f"This combination of roles ({self.role_one}, {self.role_two}) already exists as incompatible pair."
             )
-            raise ValidationError(_("This combination of roles already exists as incompatible pair."))
+            raise ValidationError(
+                _("This combination of roles already exists as incompatible pair.")
+            )

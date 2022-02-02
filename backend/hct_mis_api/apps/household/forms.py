@@ -10,7 +10,9 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 class UpdateByXlsxStage1Form(forms.Form):
     business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
-    registration_data_import = forms.ModelChoiceField(queryset=RegistrationDataImport.objects.all())
+    registration_data_import = forms.ModelChoiceField(
+        queryset=RegistrationDataImport.objects.all()
+    )
     file = forms.FileField()
 
     def clean_registration_data_import(self) -> Optional[RegistrationDataImport]:
@@ -32,18 +34,22 @@ class UpdateByXlsxStage1Form(forms.Form):
 
     def _retrieve_rdi_by_name(self) -> RegistrationDataImport:
         data = self.cleaned_data.get("registration_data_import")
-        registration_data_import = RegistrationDataImport.objects.filter(name=data).first()
+        registration_data_import = RegistrationDataImport.objects.filter(
+            name=data
+        ).first()
         if not registration_data_import:
             raise ValidationError(f"Rdi with the name {data} doesn't exist")
         return registration_data_import
 
 
 class UpdateByXlsxStage2Form(forms.Form):
-    xlsx_update_file = forms.ModelChoiceField(queryset=XlsxUpdateFile.objects.all(), widget=forms.HiddenInput())
+    xlsx_update_file = forms.ModelChoiceField(
+        queryset=XlsxUpdateFile.objects.all(), widget=forms.HiddenInput()
+    )
 
     def __init__(self, *args, **kwargs):
         self.xlsx_columns = kwargs.pop("xlsx_columns", [])
-        super(UpdateByXlsxStage2Form, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["xlsx_match_columns"] = forms.MultipleChoiceField(
             widget=forms.CheckboxSelectMultiple,
             choices=[(xlsx_column, xlsx_column) for xlsx_column in self.xlsx_columns],

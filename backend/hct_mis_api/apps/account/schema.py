@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.db.models.functions import Lower
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.functional import Promise
 
 import graphene
@@ -49,8 +49,12 @@ class UsersFilter(FilterSet):
     business_area = CharFilter(required=True, method="business_area_filter")
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
-    partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices(), method="partners_filter")
-    roles = MultipleChoiceFilter(choices=Role.get_roles_as_choices(), method="roles_filter")
+    partner = MultipleChoiceFilter(
+        choices=Partner.get_partners_as_choices(), method="partners_filter"
+    )
+    roles = MultipleChoiceFilter(
+        choices=Role.get_roles_as_choices(), method="roles_filter"
+    )
 
     class Meta:
         model = get_user_model()
@@ -62,7 +66,14 @@ class UsersFilter(FilterSet):
         }
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("first_name"), Lower("last_name"), "last_login", "status", "partner", "email")
+        fields=(
+            Lower("first_name"),
+            Lower("last_name"),
+            "last_login",
+            "status",
+            "partner",
+            "email",
+        )
     )
 
     def search_filter(self, qs, name, value):
@@ -87,7 +98,10 @@ class UsersFilter(FilterSet):
         business_area_slug = self.data.get("business_area")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(user_roles__role__id=value, user_roles__business_area__slug=business_area_slug)
+            q_obj |= Q(
+                user_roles__role__id=value,
+                user_roles__business_area__slug=business_area_slug,
+            )
         return qs.filter(q_obj)
 
 
@@ -107,7 +121,9 @@ class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
 
     def resolve_permissions(self, info):
-        user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
+        user_roles = UserRole.objects.filter(
+            user=info.context.user, business_area_id=self.id
+        )
         return permissions_resolver(user_roles)
 
     class Meta:
@@ -150,8 +166,8 @@ class UserNode(DjangoObjectType):
 class LazyEncoder(DjangoJSONEncoder):
     def default(self, obj):
         if isinstance(obj, Promise):
-            return force_text(obj)
-        return super(LazyEncoder, self).default(obj)
+            return force_str(obj)
+        return super().default(obj)
 
 
 class JSONLazyString(graphene.Scalar):
@@ -182,14 +198,18 @@ class Query(graphene.ObjectType):
         UserNode,
         filterset_class=UsersFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
+            hopeOneOfPermissionClass(
+                Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY
+            ),
         ),
     )
     # all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
     user_roles_choices = graphene.List(ChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
-    has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
+    has_available_users_to_export = graphene.Boolean(
+        business_area_slug=graphene.String(required=True)
+    )
 
     # def resolve_all_log_entries(self, info, **kwargs):
     #     object_id = kwargs.get('object_id')
@@ -221,6 +241,10 @@ class Query(graphene.ObjectType):
         return (
             get_user_model()
             .objects.prefetch_related("user_roles")
-            .filter(available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug)
+            .filter(
+                available_for_export=True,
+                is_superuser=False,
+                user_roles__business_area__slug=business_area_slug,
+            )
             .exists()
         )

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 # import defaults
 from importlib import import_module
 

@@ -9,11 +9,11 @@ from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
+from django.db.models import JSONField
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -72,7 +72,9 @@ class TestRapidproForm(forms.Form):
         label="Phone number",
         required=True,
     )
-    flow_name = forms.CharField(label="Name of the test flow", initial="Test", required=True)
+    flow_name = forms.CharField(
+        label="Name of the test flow", initial="Test", required=True
+    )
 
 
 class BusinessOfficeCodeValidator(RegexValidator):
@@ -116,8 +118,11 @@ class GroupConcat(Aggregate):
     template = "%(function)s(%(distinct)s%(expressions)s)"
 
     def __init__(self, expression, distinct=False, **extra):
-        super(GroupConcat, self).__init__(
-            expression, distinct="DISTINCT " if distinct else "", output_field=CharField(), **extra
+        super().__init__(
+            expression,
+            distinct="DISTINCT " if distinct else "",
+            output_field=CharField(),
+            **extra,
         )
 
 
@@ -131,7 +136,12 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         "region_code",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
+    list_filter = (
+        "has_data_sharing_agreement",
+        "region_name",
+        BusinessofficeFilter,
+        "is_split",
+    )
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
     # formfield_overrides = {
@@ -174,7 +184,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 preserved_filters = self.get_preserved_filters(request)
 
                 redirect_url = reverse(
-                    "admin:%s_%s_change" % (opts.app_label, opts.model_name),
+                    f"admin:{opts.app_label}_{opts.model_name}_change",
                     args=(office.pk,),
                     current_app=self.admin_site.name,
                 )
@@ -189,7 +199,11 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
     def _get_doap_matrix(self, obj):
         matrix = []
-        ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
+        ca_roles = (
+            Role.objects.filter(subsystem=Role.CA)
+            .order_by("name")
+            .values_list("name", flat=True)
+        )
         fields = ["org", "Last Name", "First Name", "Email", "Action"] + list(ca_roles)
         matrix.append(fields)
         all_user_data = {}
@@ -197,7 +211,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             user_data = {}
             if member.user.pk not in all_user_data:
                 user_roles = list(
-                    member.user.user_roles.filter(role__subsystem="CA").values_list("role__name", flat=True)
+                    member.user.user_roles.filter(role__subsystem="CA").values_list(
+                        "role__name", flat=True
+                    )
                 )
                 user_data["org"] = member.user.partner.name
                 user_data["Last Name"] = member.user.last_name
@@ -210,7 +226,11 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 # user_data["user_roles"] = user_roles
                 all_user_data[member.user.pk] = user_data
 
-                values = {key: value for (key, value) in user_data.items() if key not in ["action"]}
+                values = {
+                    key: value
+                    for (key, value) in user_data.items()
+                    if key not in ["action"]
+                }
                 signature = str(hash(frozenset(values.items())))
 
                 user_data["signature"] = signature
@@ -239,7 +259,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         matrix = self._get_doap_matrix(obj)
         for row in matrix[1:]:
             User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
-        return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
+        return HttpResponseRedirect(
+            reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk])
+        )
 
     @button(label="Send DOAP", group="doap")
     def send_doap(self, request, pk):
@@ -252,11 +274,15 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             writer.writeheader()
             for row in matrix[1:]:
                 writer.writerow(row)
-            recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
+            recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(
+                ";"
+            )
             self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
             buffer.seek(0)
             mail = EmailMessage(
-                f"DOAP updates for {obj.name}", f"Please find in attachment DOAP updates for {obj.name}", to=recipients
+                f"DOAP updates for {obj.name}",
+                f"Please find in attachment DOAP updates for {obj.name}",
+                to=recipients,
             )
             mail.attach(f"doap_{obj.name}.csv", buffer.read(), "text/csv")
             mail.send()
@@ -264,15 +290,21 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 if row["Action"] == "REMOVE":
                     User.objects.filter(email=row["Email"]).update(doap_hash="")
                 else:
-                    User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
+                    User.objects.filter(email=row["Email"]).update(
+                        doap_hash=row["signature"]
+                    )
             obj.custom_fields.update({"hope": {"last_doap_sync": str(timezone.now())}})
             obj.save()
-            self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
+            self.message_user(
+                request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS
+            )
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-        return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
+        return HttpResponseRedirect(
+            reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk])
+        )
 
     @button(label="Export DOAP", group="doap", permission="can_export_doap")
     def export_doap(self, request, pk):
@@ -303,7 +335,12 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         context = self.get_common_context(request, pk, title="Members")
         context["members"] = (
             context["original"]
-            .user_roles.values("user__id", "user__email", "user__username", "user__custom_fields__kobo_username")
+            .user_roles.values(
+                "user__id",
+                "user__email",
+                "user__username",
+                "user__custom_fields__kobo_username",
+            )
             .annotate(roles=ArrayAgg("role__name"))
             .order_by("user__username")
         )
@@ -327,7 +364,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     context["phone_number"] = phone_number
                     context["flow_name"] = flow_name
 
-                    error, response = api.test_connection_start_flow(flow_name, phone_number)
+                    error, response = api.test_connection_start_flow(
+                        flow_name, phone_number
+                    )
                     if response:
                         context["flow_uuid"] = response["flow"]["uuid"]
                         context["flow_status"] = response["status"]
@@ -338,7 +377,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     else:
                         messages.success(request, "Connection successful")
             except Exception as e:
-                self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+                self.message_user(
+                    request, f"{e.__class__.__name__}: {e}", messages.ERROR
+                )
             context["form"] = form
 
         return TemplateResponse(request, "core/test_rapidpro.html", context)
@@ -358,7 +399,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             except Exception as e:
                 logger.exception(e)
                 self.message_user(request, str(e), messages.ERROR)
-            return HttpResponseRedirect(reverse("admin:core_businessarea_change", args=[business_area.id]))
+            return HttpResponseRedirect(
+                reverse("admin:core_businessarea_change", args=[business_area.id])
+            )
         else:
             return _confirm_action(
                 self,
@@ -379,7 +422,9 @@ class CountryFilter(SimpleListFilter):
     parameter_name = "country"
 
     def lookups(self, request, model_admin):
-        return AdminArea.objects.filter(admin_area_level__admin_level=0).values_list("id", "title")
+        return AdminArea.objects.filter(admin_area_level__admin_level=0).values_list(
+            "id", "title"
+        )
 
     def value(self):
         return self.used_parameters.get(self.parameter_name)
@@ -443,37 +488,57 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 logger.exception(e)
         if admin_areas_country_name:
             for admin_area, country_name in admin_areas_country_name:
-                AdminAreaLevel.objects.filter(country_name=country_name).update(country=admin_area)
+                AdminAreaLevel.objects.filter(country_name=country_name).update(
+                    country=admin_area
+                )
 
 
 class LoadAdminAreaForm(forms.Form):
     # country = forms.ChoiceField(choices=AdminAreaLevel.objects.get_countries())
-    country = forms.ModelChoiceField(queryset=AdminAreaLevel.objects.filter(admin_level=0).order_by("country_name"))
+    country = forms.ModelChoiceField(
+        queryset=AdminAreaLevel.objects.filter(admin_level=0).order_by("country_name")
+    )
     geometries = forms.BooleanField(required=False)
     run_in_background = forms.BooleanField(required=False)
 
     page_size = forms.IntegerField(required=True, validators=[lambda x: x >= 1])
-    max_records = forms.IntegerField(required=False, help_text="Leave blank for all records")
+    max_records = forms.IntegerField(
+        required=False, help_text="Leave blank for all records"
+    )
 
-    skip_rebuild = forms.BooleanField(required=False, help_text="Do not rebuild MPTT tree")
+    skip_rebuild = forms.BooleanField(
+        required=False, help_text="Do not rebuild MPTT tree"
+    )
 
 
 class ExportLocationsForm(forms.Form):
     country = forms.ModelChoiceField(
-        queryset=AdminArea.objects.filter(admin_area_level__admin_level=0).order_by("title")
+        queryset=AdminArea.objects.filter(admin_area_level__admin_level=0).order_by(
+            "title"
+        )
     )
 
 
 class ImportAreaForm(forms.Form):
     # country = forms.ChoiceField(choices=AdminAreaLevel.objects.get_countries())
-    country = forms.ModelChoiceField(queryset=AdminArea.objects.filter(admin_area_level__admin_level=0))
+    country = forms.ModelChoiceField(
+        queryset=AdminArea.objects.filter(admin_area_level__admin_level=0)
+    )
     file = forms.FileField()
 
 
 @admin.register(AdminArea)
 class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
     search_fields = ("p_code", "title")
-    list_display = ("title", "country", "parent", "tree_id", "external_id", "admin_area_level", "p_code")
+    list_display = (
+        "title",
+        "country",
+        "parent",
+        "tree_id",
+        "external_id",
+        "admin_area_level",
+        "p_code",
+    )
     list_filter = (
         AdminLevelFilter,
         CountryFilter,
@@ -486,7 +551,9 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
         try:
             AdminArea.objects.rebuild()
         except Exception as e:
-            self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+            self.message_user(
+                request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR
+            )
 
     @button(permission="core.import_from_csv")
     def import_file(self, request):
@@ -501,14 +568,26 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                     csv_file = form.cleaned_data["file"]
                     # If file is too large
                     if csv_file.multiple_chunks():
-                        raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
+                        raise Exception(
+                            "Uploaded file is too big (%.2f MB)"
+                            % (csv_file.size(1000 * 1000))
+                        )
 
                     data_set = csv_file.read().decode("utf-8-sig").splitlines()
-                    reader = csv.DictReader(data_set, quoting=csv.QUOTE_NONE, delimiter=";")
+                    reader = csv.DictReader(
+                        data_set, quoting=csv.QUOTE_NONE, delimiter=";"
+                    )
                     provided = set(reader.fieldnames)
-                    minimum_set = {"area_code", "area_level", "parent_area_code", "area_name"}
+                    minimum_set = {
+                        "area_code",
+                        "area_level",
+                        "parent_area_code",
+                        "area_name",
+                    }
                     if not minimum_set.issubset(provided):
-                        raise Exception(f"Invalid columns {reader.fieldnames}. {provided.difference(minimum_set)}")
+                        raise Exception(
+                            f"Invalid columns {reader.fieldnames}. {provided.difference(minimum_set)}"
+                        )
                     lines = []
                     infos = {"skipped": 0}
                     # country = form.cleaned_data['country']
@@ -522,13 +601,21 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                                 level, __ = AdminAreaLevel.objects.get_or_create(
                                     country=country.admin_area_level,
                                     admin_level=level_number,
-                                    defaults={"name": row.get("level_name", f"{country.title} {level_number}")},
+                                    defaults={
+                                        "name": row.get(
+                                            "level_name",
+                                            f"{country.title} {level_number}",
+                                        )
+                                    },
                                 )
                                 parent = AdminArea.objects.filter(
-                                    tree_id=country.tree_id, p_code=row["parent_area_code"]
+                                    tree_id=country.tree_id,
+                                    p_code=row["parent_area_code"],
                                 ).first()
                                 if parent is None:
-                                    assert level_number == 0, f"Cannot find parent area for {row}"
+                                    assert (
+                                        level_number == 0
+                                    ), f"Cannot find parent area for {row}"
                                 AdminArea.objects.create(
                                     external_id=external_id,
                                     title=row["area_name"],
@@ -556,7 +643,9 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
-                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+                    self.message_user(
+                        request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR
+                    )
             else:
                 context["form"] = form
 
@@ -588,13 +677,19 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                         context["run_in_background"] = True
                     else:
                         results = load_admin_area(
-                            country.id, geom, page_size, max_records, rebuild_mptt=not form.cleaned_data["skip_rebuild"]
+                            country.id,
+                            geom,
+                            page_size,
+                            max_records,
+                            rebuild_mptt=not form.cleaned_data["skip_rebuild"],
                         )
                         context["admin_areas"] = results
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
-                    self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+                    self.message_user(
+                        request, f"{e.__class__.__name__}: {e}", messages.ERROR
+                    )
             else:
                 context["form"] = form
 
@@ -616,7 +711,9 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
-                    self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+                    self.message_user(
+                        request, f"{e.__class__.__name__}: {e}", messages.ERROR
+                    )
             else:
                 context["form"] = form
         return TemplateResponse(request, "core/admin/export_locations.html", context)
@@ -673,7 +770,13 @@ class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
 
 @admin.register(XLSXKoboTemplate)
 class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelAdmin):
-    list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
+    list_display = (
+        "original_file_name",
+        "uploaded_by",
+        "created_at",
+        "file",
+        "import_status",
+    )
     list_filter = (
         "status",
         ("uploaded_by", AutoCompleteFilter),
@@ -681,7 +784,13 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelA
     search_fields = ("file_name",)
     date_hierarchy = "created_at"
     exclude = ("is_removed", "file_name", "status", "template_id")
-    readonly_fields = ("original_file_name", "uploaded_by", "file", "import_status", "error_description")
+    readonly_fields = (
+        "original_file_name",
+        "uploaded_by",
+        "file",
+        "import_status",
+        "error_description",
+    )
 
     def import_status(self, obj):
         if obj.status == self.model.SUCCESSFUL:
@@ -716,7 +825,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelA
             level=ERROR,
         )
 
-    @button(label="Rerun KOBO Import", visible=lambda o: o is not None and o.status != XLSXKoboTemplate.SUCCESSFUL)
+    @button(
+        label="Rerun KOBO Import",
+        visible=lambda o: o is not None and o.status != XLSXKoboTemplate.SUCCESSFUL,
+    )
     def rerun_kobo_import(self, request, pk):
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
         upload_new_kobo_template_and_update_flex_fields_task.run(
@@ -752,9 +864,14 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelA
                     "survey_sheet": wb.sheet_by_name("survey"),
                     "choices_sheet": wb.sheet_by_name("choices"),
                 }
-                validation_errors = KoboTemplateValidator.validate_kobo_template(**sheets)
+                validation_errors = KoboTemplateValidator.validate_kobo_template(
+                    **sheets
+                )
                 if validation_errors:
-                    errors = [f"Field: {error['field']} - {error['message']}" for error in validation_errors]
+                    errors = [
+                        f"Field: {error['field']} - {error['message']}"
+                        for error in validation_errors
+                    ]
                     form.add_error(field=None, error=errors)
             except ValidationError as validation_error:
                 logger.exception(validation_error)
@@ -785,10 +902,14 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelA
         return TemplateResponse(request, "core/xls_form.html", payload)
 
     def change_view(self, request, object_id=None, form_url="", extra_context=None):
-        extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
+        extra_context = dict(
+            show_save=False, show_save_and_continue=False, show_delete=True
+        )
         has_add_permission = self.has_add_permission
         self.has_add_permission = lambda __: False
-        template_response = super().change_view(request, object_id, form_url, extra_context)
+        template_response = super().change_view(
+            request, object_id, form_url, extra_context
+        )
         self.has_add_permission = has_add_permission
 
         return template_response
