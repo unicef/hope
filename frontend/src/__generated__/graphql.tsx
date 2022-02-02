@@ -4309,8 +4309,7 @@ export enum RoleSubsystem {
 }
 
 export enum RuleCommitLanguage {
-  Python = 'PYTHON',
-  Internal = 'INTERNAL'
+  Python = 'PYTHON'
 }
 
 export type RuleCommitNode = Node & {
@@ -4372,8 +4371,7 @@ export type RuleCommitNodeEdge = {
 };
 
 export enum RuleLanguage {
-  Python = 'PYTHON',
-  Internal = 'INTERNAL'
+  Python = 'PYTHON'
 }
 
 export enum RuleSecurity {
@@ -4686,6 +4684,7 @@ export type SteficonRuleNode = Node & {
   updatedBy?: Maybe<UserNode>,
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  flags: Scalars['JSONString'],
   history: RuleCommitNodeConnection,
 };
 
@@ -8397,6 +8396,35 @@ export type UserChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
+);
+
+export type UsersFilterQueryVariables = {
+  businessArea: Scalars['String'],
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UsersFilterQuery = (
+  { __typename?: 'Query' }
+  & { allUsers: Maybe<(
+    { __typename?: 'UserNodeConnection' }
+    & Pick<UserNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'UserNodeEdge' }
+      & Pick<UserNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+      )> }
+    )>> }
+  )> }
 );
 
 export type AllImportedHouseholdsQueryVariables = {
@@ -15803,6 +15831,77 @@ export function useUserChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQu
 export type UserChoiceDataQueryHookResult = ReturnType<typeof useUserChoiceDataQuery>;
 export type UserChoiceDataLazyQueryHookResult = ReturnType<typeof useUserChoiceDataLazyQuery>;
 export type UserChoiceDataQueryResult = ApolloReactCommon.QueryResult<UserChoiceDataQuery, UserChoiceDataQueryVariables>;
+export const UsersFilterDocument = gql`
+    query UsersFilter($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String) {
+  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        firstName
+        lastName
+        email
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type UsersFilterComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<UsersFilterQuery, UsersFilterQueryVariables>, 'query'> & ({ variables: UsersFilterQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const UsersFilterComponent = (props: UsersFilterComponentProps) => (
+      <ApolloReactComponents.Query<UsersFilterQuery, UsersFilterQueryVariables> query={UsersFilterDocument} {...props} />
+    );
+    
+export type UsersFilterProps<TChildProps = {}> = ApolloReactHoc.DataProps<UsersFilterQuery, UsersFilterQueryVariables> & TChildProps;
+export function withUsersFilter<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UsersFilterQuery,
+  UsersFilterQueryVariables,
+  UsersFilterProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, UsersFilterQuery, UsersFilterQueryVariables, UsersFilterProps<TChildProps>>(UsersFilterDocument, {
+      alias: 'usersFilter',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUsersFilterQuery__
+ *
+ * To run a query within a React component, call `useUsersFilterQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsersFilterQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUsersFilterQuery({
+ *   variables: {
+ *      businessArea: // value for 'businessArea'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useUsersFilterQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<UsersFilterQuery, UsersFilterQueryVariables>) {
+        return ApolloReactHooks.useQuery<UsersFilterQuery, UsersFilterQueryVariables>(UsersFilterDocument, baseOptions);
+      }
+export function useUsersFilterLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<UsersFilterQuery, UsersFilterQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<UsersFilterQuery, UsersFilterQueryVariables>(UsersFilterDocument, baseOptions);
+        }
+export type UsersFilterQueryHookResult = ReturnType<typeof useUsersFilterQuery>;
+export type UsersFilterLazyQueryHookResult = ReturnType<typeof useUsersFilterLazyQuery>;
+export type UsersFilterQueryResult = ApolloReactCommon.QueryResult<UsersFilterQuery, UsersFilterQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
     query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
   allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {
@@ -19568,6 +19667,7 @@ export type SteficonRuleNodeResolvers<ContextType = any, ParentType extends Reso
   updatedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  flags?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   history?: Resolver<ResolversTypes['RuleCommitNodeConnection'], ParentType, ContextType, SteficonRuleNodeHistoryArgs>,
 };
 
