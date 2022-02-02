@@ -78,7 +78,7 @@ class SendTPToDatahubTask:
     }
 
     def execute(self, target_population):
-        self.send_target_population(target_population)
+        return self.send_target_population(target_population)
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="cash_assist_datahub_mis")
@@ -140,8 +140,13 @@ class SendTPToDatahubTask:
                     households_to_sync.update(last_sync_at=timezone.now())
                     individuals_to_sync.update(last_sync_at=timezone.now())
                     return {
+                        "session": self.dh_session.id,
                         "program": str(program),
                         "target_population": str(target_population),
+                        "households_count": len(households_to_bulk_create),
+                        "individuals_count": len(individuals_to_bulk_create),
+                        "roles_count": len(roles_to_bulk_create),
+                        "tp_entries_count": len(tp_entries_to_bulk_create),
                     }
         except Exception as e:
             logger.exception(e)
