@@ -418,7 +418,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return resolve_flex_fields_choices_to_string(parent)
 
     def resolve_active_individuals_count(parent, info):
-        return parent.active_beneficiary_individuals.count()
+        return parent.active_individuals.count()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
