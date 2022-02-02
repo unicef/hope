@@ -57,6 +57,7 @@ export const householdMinimal = gql`
 export const householdDetailed = gql`
   fragment householdDetailed on HouseholdNode {
     ...householdMinimal
+    activeIndividualsCount
     countryOrigin
     country
     femaleAgeGroup05Count

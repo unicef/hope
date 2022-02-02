@@ -866,6 +866,7 @@ type HouseholdNode implements Node {
   admin2: AdminAreaNode
   status: String
   programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
+  activeIndividualsCount: Int
 }
 
 type HouseholdNodeConnection {
