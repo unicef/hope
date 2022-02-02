@@ -258,9 +258,9 @@ export function GrievanceDetailsPage(): React.ReactElement {
       household =
         ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
     }
-    const isMoreThanOneIndividual = household?.individuals?.totalCount !== 1;
-    if (!isMoreThanOneIndividual) return false;
+    const isOneIndividual = household.activeIndividualsCount === 1;
 
+    if (isOneIndividual) return false;
     const isRightCategory =
       (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
         ticket.issueType.toString() ===
@@ -298,6 +298,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
         isProperDataChange = false;
       }
     }
+
     return (isHeadOfHousehold || hasRolesToReassign) && isProperDataChange;
   };
 
