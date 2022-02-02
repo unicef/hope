@@ -109,7 +109,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("cash_plan_payment_verification__cash_plan", AutoCompleteFilter),
         ("cash_plan_payment_verification__cash_plan__business_area", AutoCompleteFilter),
-        TextFieldFilter.factory("payment_record__household__unicef_id", "Household ID"),
+        ("payment_record__household__unicef_id", TextFieldFilter.factory(title="Household ID")),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_record", "cash_plan_payment_verification")
