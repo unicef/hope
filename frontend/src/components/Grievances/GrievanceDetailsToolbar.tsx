@@ -134,30 +134,34 @@ export const GrievanceDetailsToolbar = ({
       return '';
     }
 
-    // added msg handling for
-    let confirmationMessage = '';
-    if (
+    const notApprovedDeleteIndividualChanges =
       ticket.issueType?.toString() ===
         GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
-      ticket.deleteIndividualTicketDetails?.approveStatus === false
-    ) {
+      ticket.deleteIndividualTicketDetails?.approveStatus === false;
+
+    const notApprovedAddIndividualChanges =
+      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
+      ticket.addIndividualTicketDetails?.approveStatus === false;
+
+    const notApprovedSystemFlaggingChanges =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+
+    const noDuplicatesFound =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+      !ticket.needsAdjudicationTicketDetails?.selectedIndividual;
+
+    // added msg handling for
+    let confirmationMessage = '';
+    if (notApprovedDeleteIndividualChanges) {
       confirmationMessage = t(
         'You did not approve any changes. Are you sure you want to close the ticket?',
       );
-    } else if (
-      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
-      ticket.addIndividualTicketDetails?.approveStatus === false
-    ) {
+    } else if (notApprovedAddIndividualChanges) {
       confirmationMessage = t('You did not approve any changes.');
-    } else if (
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
-      ticket.systemFlaggingTicketDetails?.approveStatus === false
-    ) {
+    } else if (notApprovedSystemFlaggingChanges) {
       confirmationMessage = '';
-    } else if (
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-      !ticket.needsAdjudicationTicketDetails?.selectedIndividual
-    ) {
+    } else if (noDuplicatesFound) {
       confirmationMessage = t(
         'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
       );
@@ -204,16 +208,25 @@ export const GrievanceDetailsToolbar = ({
     if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
       return getClosingConfirmationExtraText();
     }
-    if (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
-      let additionalContent = '';
-      if (!ticket.systemFlaggingTicketDetails.approveStatus) {
-        additionalContent = t(
-          ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found',
-        );
-      }
-      return `${closingConfirmationText}${additionalContent}`;
+    let additionalContent = '';
+    const notApprovedSystemFlaggingChanges =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+
+    if (notApprovedSystemFlaggingChanges) {
+      additionalContent = t(
+        ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found',
+      );
     }
-    return closingConfirmationText;
+
+    const householdHasOneIndividual =
+      ticket.household?.activeIndividualsCount === 1;
+    if (householdHasOneIndividual) {
+      additionalContent = t(
+        ' When you close this ticket, the household that this Individual is a member of will be deactivated.',
+      );
+    }
+    return `${closingConfirmationText}${additionalContent}`;
   };
 
   let closeButton = (
@@ -253,6 +266,7 @@ export const GrievanceDetailsToolbar = ({
       />
     );
   }
+
   return (
     <PageHeader
       title={`Ticket ID: ${ticket.unicefId}`}
