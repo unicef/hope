@@ -2591,7 +2591,6 @@ enum RoleSubsystem {
 
 enum RuleCommitLanguage {
   PYTHON
-  INTERNAL
 }
 
 type RuleCommitNode implements Node {
@@ -2624,7 +2623,6 @@ type RuleCommitNodeEdge {
 
 enum RuleLanguage {
   PYTHON
-  INTERNAL
 }
 
 enum RuleSecurity {
@@ -2854,6 +2852,7 @@ type SteficonRuleNode implements Node {
   updatedBy: UserNode
   createdAt: DateTime!
   updatedAt: DateTime!
+  flags: JSONString!
   history(before: String, after: String, first: Int, last: Int): RuleCommitNodeConnection!
 }
 
