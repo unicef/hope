@@ -77,12 +77,8 @@ class SendTPToDatahubTask:
         "type": "type.type",
     }
 
-    def execute(self):
-        target_populations = TargetPopulation.objects.filter(
-            status=TargetPopulation.STATUS_PROCESSING, sent_to_datahub=False
-        ).select_related("program")
-        for target_population in target_populations:
-            self.send_target_population(target_population)
+    def execute(self, target_population):
+        self.send_target_population(target_population)
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="cash_assist_datahub_mis")
