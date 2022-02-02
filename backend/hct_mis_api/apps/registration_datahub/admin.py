@@ -34,7 +34,7 @@ class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixi
     list_filter = (
         "created_at",
         "import_done",
-        TextFieldFilter.factory("business_area_slug__istartswith"),
+        ("business_area_slug__istartswith", TextFieldFilter.factory(title="Business area slug")),
     )
     advanced_filter_fields = (
         "created_at",
@@ -162,8 +162,8 @@ class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_filter = (
         ("deduplication_batch_results", ScoreFilter),
         ("deduplication_golden_record_results", ScoreFilter),
-        TextFieldFilter.factory("registration_data_import__name__istartswith"),
-        TextFieldFilter.factory("individual_id__istartswith"),
+        ("registration_data_import__name__istartswith", TextFieldFilter.factory(title="Registration data import")),
+        ("individual_id__istartswith", TextFieldFilter.factory(title="Individual Id")),
         "deduplication_batch_status",
         "deduplication_golden_record_status",
     )
@@ -223,8 +223,8 @@ class ImportedHouseholdAdmin(HOPEModelAdminBase):
     list_filter = (
         ("country", ChoicesFieldComboFilter),
         ("country_origin", ChoicesFieldComboFilter),
-        TextFieldFilter.factory("registration_data_import__name__istartswith"),
-        TextFieldFilter.factory("kobo_submission_uuid__istartswith"),
+        ("registration_data_import__name__istartswith", TextFieldFilter.factory(title="Registration Data Import Name")),
+        ("kobo_submission_uuid__istartswith", TextFieldFilter.factory(title="Kobo Submission UUID")),
     )
 
 
