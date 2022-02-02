@@ -71,7 +71,7 @@ django-celery-results = "^2.0.1"
 django-concurrency = "^2.2"
 django-constance = { version = "2.8.0", extras = ["redis"] }
 django-cors-headers = "3.2.0"
-django-countries = "7.0"
+django-countries = "^7.0"
 django-elasticsearch-dsl = "7.1.4"
 django-environ = "*"
 django-extensions = "2.2.6"
