@@ -47,7 +47,7 @@ DEFAULT_CHARSET = "utf-8"
 ROOT_URLCONF = "hct_mis_api.urls"
 
 DATA_VOLUME = env("DATA_VOLUME")
-
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ALLOWED_EXTENSIONS = (
     "pdf",
     "doc",
@@ -284,9 +284,7 @@ INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 # LOGIN_REDIRECT_URL = f'/api/{ADMIN_PANEL_URL}/'
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
         "OPTIONS": {"min_length": 12},
@@ -319,9 +317,7 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "standard": {
-            "format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"
-        },
+        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"},
         "verbose": {
             "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
         },
@@ -376,13 +372,9 @@ HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
 REDIS_INSTANCE = os.getenv("REDIS_INSTANCE", "redis:6379")
 if "CACHE_URL" not in os.environ:
     if REDIS_INSTANCE:
-        os.environ[
-            "CACHE_URL"
-        ] = f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
+        os.environ["CACHE_URL"] = f"redis://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
     else:
-        os.environ[
-            "CACHE_URL"
-        ] = f"dummycache://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
+        os.environ["CACHE_URL"] = f"dummycache://{REDIS_INSTANCE}/1?client_class=django_redis.client.DefaultClient"
 
 CACHES = {
     "default": env.cache(),
@@ -701,9 +693,7 @@ SMART_ADMIN_BOOKMARKS = "hct_mis_api.apps.administration.site.get_bookmarks"
 
 SMART_ADMIN_BOOKMARKS_PERMISSION = None
 SMART_ADMIN_PROFILE_LINK = True
-SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get(
-    "x-root-token"
-) == env("ROOT_TOKEN")
+SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root-token") == env("ROOT_TOKEN")
 
 EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
 

@@ -50,9 +50,8 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraUrlMixin, AdminAdvancedFilte
         ("registration_data_import", AutoCompleteFilter),
         ("created_by", AutoCompleteFilter),
         ("assigned_to", AutoCompleteFilter),
-        # TextFieldFilter.factory("created_by__username__istartswith"),
-        # TextFieldFilter.factory("created_by__username__istartswith"),
-        # TextFieldFilter.factory("assigned_to__username__istartswith"),
+        # ("created_by__username__istartswith", TextFieldFilter.factory(title="Create by")),
+        # ("assigned_to__username__istartswith", TextFieldFilter.factory(title="Assigned to")),
         "updated_at",
     )
     advanced_filter_fields = (

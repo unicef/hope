@@ -109,7 +109,7 @@ class FundsCommitmentAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         SplitBusinessAreaFilter,
         "mis_sync_date",
         "ca_sync_date",
-        TextFieldFilter.factory("business_area"),
+        ("business_area", TextFieldFilter.factory(title="Business Area")),
     )
     date_hierarchy = "create_date"
     form = FundsCommitmentAddForm
@@ -201,7 +201,7 @@ class DownPaymentAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_filter = (
         "mis_sync_date",
         "ca_sync_date",
-        TextFieldFilter.factory("business_area"),
+        ("business_area", TextFieldFilter.factory(title="Business Area")),
     )
     form = DownPaymentAddForm
     date_hierarchy = "create_date"
