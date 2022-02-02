@@ -3,7 +3,6 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from urllib.parse import unquote
 
 from django import forms
@@ -18,11 +17,10 @@ from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserCreationForm, UsernameField
 from django.contrib.auth.models import Group, Permission
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import router, transaction
-from django.db.models import Q
+from django.db.models import JSONField, Q
 from django.db.transaction import atomic
 from django.forms import EmailField, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
@@ -40,8 +38,9 @@ from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import AllValuesComboFilter
 from constance import config
-from import_export import resources, fields
+from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
+from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 from smart_admin.decorators import smart_register
@@ -87,7 +86,9 @@ class UserRoleAdminForm(ModelForm):
         user = self.cleaned_data["user"]
         business_area = self.cleaned_data["business_area"]
 
-        account_models.IncompatibleRoles.objects.validate_user_role(user, business_area, role)
+        account_models.IncompatibleRoles.objects.validate_user_role(
+            user, business_area, role
+        )
 
 
 class UserRoleInlineFormSet(BaseInlineFormSet):
@@ -110,22 +111,28 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
                 business_area = form.cleaned_data["business_area"]
                 role = form.cleaned_data["role"]
                 incompatible_roles = list(
-                    account_models.IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+                    account_models.IncompatibleRoles.objects.filter(
+                        role_one=role
+                    ).values_list("role_two", flat=True)
                 ) + list(
-                    account_models.IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True)
+                    account_models.IncompatibleRoles.objects.filter(
+                        role_two=role
+                    ).values_list("role_one", flat=True)
                 )
                 error_forms = [
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
                     if form_two.cleaned_data
-                       and not form_two.cleaned_data.get("DELETE")
-                       and form_two.cleaned_data["business_area"] == business_area
-                       and form_two.cleaned_data["role"].id in incompatible_roles
+                    and not form_two.cleaned_data.get("DELETE")
+                    and form_two.cleaned_data["business_area"] == business_area
+                    and form_two.cleaned_data["role"].id in incompatible_roles
                 ]
                 if error_forms:
                     if "role" not in form._errors:
                         form._errors["role"] = ErrorList()
-                    form._errors["role"].append(_(f"{role.name} is incompatible with {', '.join(error_forms)}."))
+                    form._errors["role"].append(
+                        _(f"{role.name} is incompatible with {', '.join(error_forms)}.")
+                    )
 
 
 class UserRoleInline(admin.TabularInline):
@@ -148,11 +155,13 @@ The HOPE team.
 
 
 def get_valid_kobo_username(user: User):
-    return user.username.replace("@", "_at_").replace(".", "_").replace("+", "_").lower()
+    return (
+        user.username.replace("@", "_at_").replace(".", "_").replace("+", "_").lower()
+    )
 
 
 class DjAdminManager:
-    regex = re.compile('class="errorlist"><li>(.*)(?=<\/li>)')
+    regex = re.compile(r'class="errorlist"><li>(.*)(?=<\/li>)')
 
     class ResponseException(Exception):
         pass
@@ -183,7 +192,11 @@ class DjAdminManager:
             self._last_error = self._last_response
             raise self.ResponseException(msg)
 
-        if location and (redir_to := self._last_response.headers.get("location", "N/A")) != location:
+        if (
+            location
+            and (redir_to := self._last_response.headers.get("location", "N/A"))
+            != location
+        ):
             msg = f"Unexpected redirect:{redir_to} <> {location}: {custom_error}"
             self._last_error = self._last_response
             raise self.ResponseException(msg)
@@ -257,8 +270,7 @@ class DjAdminManager:
             if matches[0] == last_match:
                 break
             last_match = matches[0]
-            for m in matches:
-                yield m
+            yield from matches
 
             page += 1
 
@@ -272,10 +284,16 @@ class DjAdminManager:
 
     def delete_user(self, username, pk):
         self.login()
-        for url in [f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"]:
+        for url in [
+            f"{self.admin_url_kc}auth/user/{pk}/delete/",
+            f"{self.admin_url}auth/user/{pk}/delete/",
+        ]:
             self._get(url)
             self.assert_response([200, 404, 302], custom_error=url)
-            if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
+            if (
+                self._last_response.status_code == 302
+                and "/login/" in self._last_response.headers["Location"]
+            ):
                 raise Exception(f"Cannot access to {url}")
 
             if self._last_response.status_code == 200:
@@ -298,7 +316,9 @@ class HasKoboAccount(SimpleListFilter):
                 Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None),
             )
         elif self.value() == "1":
-            return queryset.filter(custom_fields__kobo_pk__isnull=False).exclude(custom_fields__kobo_pk=None)
+            return queryset.filter(custom_fields__kobo_pk__isnull=False).exclude(
+                custom_fields__kobo_pk=None
+            )
         return queryset
 
 
@@ -308,7 +328,11 @@ class BusinessAreaFilter(SimpleListFilter):
     template = "adminfilters/combobox.html"
 
     def lookups(self, request, model_admin):
-        return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
+        return (
+            BusinessArea.objects.filter(user_roles__isnull=False)
+            .values_list("id", "name")
+            .distinct()
+        )
 
     def queryset(self, request, queryset):
         if self.value():
@@ -433,7 +457,9 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
         return obj.custom_fields.get("kobo_username")
 
     def get_deleted_objects(self, objs, request):
-        to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        to_delete, model_count, perms_needed, protected = super().get_deleted_objects(
+            objs, request
+        )
         user = objs[0]
         kobo_pk = user.custom_fields.get("kobo_pk", None)
         kobo_username = user.custom_fields.get("kobo_username", None)
@@ -453,7 +479,11 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                 api = DjAdminManager()
                 api.login(request)
                 extra_context["kobo_pk"] = kobo_pk
-                self.message_user(request, "This action will also delete linked Kobo account", messages.WARNING)
+                self.message_user(
+                    request,
+                    "This action will also delete linked Kobo account",
+                    messages.WARNING,
+                )
             except Exception as e:
                 extra_context["kobo_failed"] = True
                 self.message_user(request, str(e), messages.ERROR)
@@ -466,7 +496,9 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
             if "kobo_username" in obj.custom_fields:
                 api = DjAdminManager()
                 api.login(request)
-                api.delete_user(obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"])
+                api.delete_user(
+                    obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"]
+                )
             super().delete_model(request, obj)
         except Exception as e:
             logger.exception(e)
@@ -484,7 +516,9 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
         for role in user.user_roles.all():
             ba_roles[role.business_area.slug].append(role.role)
 
-        for role in user.user_roles.values_list("business_area__slug", flat=True).distinct("business_area"):
+        for role in user.user_roles.values_list(
+            "business_area__slug", flat=True
+        ).distinct("business_area"):
             ba_perms[role].extend(user.permissions_in_business_area(role))
 
         context["business_ares_permissions"] = dict(ba_perms)
@@ -492,7 +526,7 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
         return TemplateResponse(request, "admin/account/user/privileges.html", context)
 
     def get_actions(self, request):
-        actions = super(UserAdmin, self).get_actions(request)
+        actions = super().get_actions(request)
         if not request.user.has_perm("account.can_create_kobo_user"):
             if "create_kobo_user_qs" in actions:
                 del actions["create_kobo_user_qs"]
@@ -516,21 +550,31 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                         for role in roles:
                             if crud == "ADD":
                                 try:
-                                    IncompatibleRoles.objects.validate_user_role(u, ba, role)
-                                    ur, is_new = u.user_roles.get_or_create(business_area=ba, role=role)
+                                    IncompatibleRoles.objects.validate_user_role(
+                                        u, ba, role
+                                    )
+                                    ur, is_new = u.user_roles.get_or_create(
+                                        business_area=ba, role=role
+                                    )
                                     if is_new:
                                         added += 1
                                         self.log_addition(request, ur, "Role added")
                                 except ValidationError as e:
                                     self.message_user(request, str(e), messages.ERROR)
                             elif crud == "REMOVE":
-                                to_delete = u.user_roles.filter(business_area=ba, role=role).first()
+                                to_delete = u.user_roles.filter(
+                                    business_area=ba, role=role
+                                ).first()
                                 if to_delete:
                                     removed += 1
-                                    self.log_deletion(request, to_delete, str(to_delete))
+                                    self.log_deletion(
+                                        request, to_delete, str(to_delete)
+                                    )
                                     to_delete.delete()
                             else:
-                                raise ValueError("Bug found. {} not valid operation for add/rem role")
+                                raise ValueError(
+                                    "Bug found. {} not valid operation for add/rem role"
+                                )
                     if removed:
                         msg = f"{removed} roles removed from {users} users"
                     elif added:
@@ -543,12 +587,14 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
         else:
             ctx = self.get_common_context(request, title="Add Role", selection=queryset)
             ctx["form"] = AddRoleForm()
-            return render(request, "admin/account/user/business_area_role.html", context=ctx)
+            return render(
+                request, "admin/account/user/business_area_role.html", context=ctx
+            )
 
     add_business_area_role.short_description = "Add/Remove Business Area roles"
 
     def _grant_kobo_accesss_to_user(self, user, notify=True, sync=True):
-        password = get_random_string()
+        password = get_random_string(length=12)
         url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
         username = get_valid_kobo_username(user)
         res = requests.post(
@@ -578,7 +624,9 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
         if res.status_code == 201 and notify:
             send_mail(
                 "Kobo credentials",
-                KOBO_ACCESS_EMAIL.format(email=user.email, password=password, kobo_url=settings.KOBO_KF_URL),
+                KOBO_ACCESS_EMAIL.format(
+                    email=user.email, password=password, kobo_url=settings.KOBO_KF_URL
+                ),
                 settings.DEFAULT_FROM_EMAIL,
                 [user.email],
             )
@@ -591,35 +639,60 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                 self._grant_kobo_accesss_to_user(request, user)
             except Exception as e:
                 logger.exception(e)
-                self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
-        self.message_user(request, f"User successfully `{user.username}` created on Kobo", messages.SUCCESS)
+                self.message_user(
+                    request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR
+                )
+        self.message_user(
+            request,
+            f"User successfully `{user.username}` created on Kobo",
+            messages.SUCCESS,
+        )
 
-    @button(permission="account.can_create_kobo_user", visible=lambda o, r: not o.custom_fields.get("kobo_username"))
+    @button(
+        permission="account.can_create_kobo_user",
+        visible=lambda o, r: not o.custom_fields.get("kobo_username"),
+    )
     def create_kobo_user(self, request, pk):
         try:
             self._grant_kobo_accesss_to_user(self.get_queryset(request).get(pk=pk))
-            self.message_user(request, f"Granted access to {settings.KOBO_KF_URL}", messages.SUCCESS)
+            self.message_user(
+                request, f"Granted access to {settings.KOBO_KF_URL}", messages.SUCCESS
+            )
         except Exception as e:
             logger.exception(e)
-            self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+            self.message_user(
+                request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR
+            )
 
-    @button(permission="account.can_create_kobo_user", visible=lambda o, r: o.custom_fields.get("kobo_username"))
+    @button(
+        permission="account.can_create_kobo_user",
+        visible=lambda o, r: o.custom_fields.get("kobo_username"),
+    )
     def remove_kobo_access(self, request, pk):
         try:
             obj = self.get_object(request, pk)
             api = DjAdminManager()
-            api.delete_user(obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"])
+            api.delete_user(
+                obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"]
+            )
             obj.custom_fields["kobo_username"] = None
             obj.custom_fields["kobo_pk"] = None
             obj.save()
-            self.message_user(request, f"Kobo Access removed from {settings.KOBO_KF_URL}", messages.WARNING)
+            self.message_user(
+                request,
+                f"Kobo Access removed from {settings.KOBO_KF_URL}",
+                messages.WARNING,
+            )
         except Exception as e:
             logger.exception(e)
-            self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+            self.message_user(
+                request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR
+            )
 
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request):
         from django.contrib.admin.helpers import AdminForm
+
         context = self.get_common_context(request, processed=False)
         if request.method == "GET":
             form = ImportCSVForm(initial={"partner": Partner.objects.first()})
@@ -636,7 +709,10 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                     role = form.cleaned_data["role"]
 
                     if csv_file.multiple_chunks():
-                        raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
+                        raise Exception(
+                            "Uploaded file is too big (%.2f MB)"
+                            % (csv_file.size(1000 * 1000))
+                        )
                     data_set = csv_file.read().decode("utf-8-sig").splitlines()
                     reader = csv.DictReader(
                         data_set,
@@ -654,27 +730,55 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                                 try:
                                     email = row["email"].strip()
                                 except Exception as e:
-                                    raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
+                                    raise Exception(
+                                        f"{e.__class__.__name__}: {e} on `{row}`"
+                                    )
 
-                                user_info = {"email": email, "is_new": False, "kobo": False, "error": ""}
+                                user_info = {
+                                    "email": email,
+                                    "is_new": False,
+                                    "kobo": False,
+                                    "error": "",
+                                }
                                 if "username" in row:
                                     username = row["username"].strip()
                                 else:
-                                    username = row["email"].replace("@", "_").replace(".", "_").lower()
+                                    username = (
+                                        row["email"]
+                                        .replace("@", "_")
+                                        .replace(".", "_")
+                                        .lower()
+                                    )
                                 u, isnew = account_models.User.objects.get_or_create(
-                                    email=email, partner=partner, defaults={"username": username}
+                                    email=email,
+                                    partner=partner,
+                                    defaults={"username": username},
                                 )
                                 if isnew:
-                                    ur = u.user_roles.create(business_area=business_area, role=role)
-                                    self.log_addition(request, u, "User imported by CSV")
+                                    ur = u.user_roles.create(
+                                        business_area=business_area, role=role
+                                    )
+                                    self.log_addition(
+                                        request, u, "User imported by CSV"
+                                    )
                                     self.log_addition(request, ur, "User Role added")
                                 else:  # check role validity
                                     try:
-                                        IncompatibleRoles.objects.validate_user_role(u, business_area, role)
-                                        u.user_roles.get_or_create(business_area=business_area, role=role)
-                                        self.log_addition(request, ur, "User Role added")
+                                        IncompatibleRoles.objects.validate_user_role(
+                                            u, business_area, role
+                                        )
+                                        u.user_roles.get_or_create(
+                                            business_area=business_area, role=role
+                                        )
+                                        self.log_addition(
+                                            request, ur, "User Role added"
+                                        )
                                     except ValidationError as e:
-                                        self.message_user(request, f"Error on {u}: {e}", messages.ERROR)
+                                        self.message_user(
+                                            request,
+                                            f"Error on {u}: {e}",
+                                            messages.ERROR,
+                                        )
 
                                 if enable_kobo:
                                     self._grant_kobo_accesss_to_user(u, sync=False)
@@ -686,9 +790,13 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                     logger.exception(e)
                     context["form"] = form
                     context["errors"] = [str(e)]
-                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+                    self.message_user(
+                        request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR
+                    )
             else:
-                self.message_user(request, "Please correct errors below", messages.ERROR)
+                self.message_user(
+                    request, "Please correct errors below", messages.ERROR
+                )
                 context["form"] = form
         fs = form._fieldsets or [(None, {"fields": form.base_fields})]
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})
@@ -709,7 +817,10 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                         email=entry[2],
                         defaults={
                             "username": entry[1],
-                            "custom_fields": {"kobo_pk": entry[0], "kobo_username": entry[1]},
+                            "custom_fields": {
+                                "kobo_pk": entry[0],
+                                "kobo_username": entry[1],
+                            },
                         },
                     )
                     local.custom_fields["kobo_pk"] = entry[0]
@@ -765,9 +876,17 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                 except Http404:
                     not_found.append(str(user))
             if not_found:
-                self.message_user(request, f"These users were not found: {', '.join(not_found)}", messages.WARNING)
+                self.message_user(
+                    request,
+                    f"These users were not found: {', '.join(not_found)}",
+                    messages.WARNING,
+                )
             else:
-                self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
+                self.message_user(
+                    request,
+                    "Active Directory data successfully fetched",
+                    messages.SUCCESS,
+                )
         except Exception as e:
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
@@ -776,7 +895,9 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
     def sync_single(self, request, pk):
         try:
             self._sync_ad_data(self.get_object(request, pk))
-            self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
+            self.message_user(
+                request, "Active Directory data successfully fetched", messages.SUCCESS
+            )
         except Exception as e:
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
@@ -805,7 +926,11 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                 business_area = form.cleaned_data["business_area"]
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
-                existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
+                existing = set(
+                    account_models.User.objects.filter(email__in=emails).values_list(
+                        "email", flat=True
+                    )
+                )
                 results = self.Results([], [], [], [])
                 try:
                     ms_graph = MicrosoftGraphAPI()
@@ -817,7 +942,9 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                                 results.updated.append(user)
                             else:
                                 user_data = ms_graph.get_user_data(email=email)
-                                user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+                                user_args = build_arg_dict_from_dict(
+                                    user_data, DJANGO_USER_MAP
+                                )
                                 user = account_models.User(**user_args)
                                 if user.first_name is None:
                                     user.first_name = ""
@@ -828,18 +955,26 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                                     user.job_title = job_title
                                 user.set_unusable_password()
                                 users_to_bulk_create.append(user)
-                                global_business_area = BusinessArea.objects.filter(slug="global").first()
-                                basic_role = account_models.Role.objects.filter(name="Basic User").first()
+                                global_business_area = BusinessArea.objects.filter(
+                                    slug="global"
+                                ).first()
+                                basic_role = account_models.Role.objects.filter(
+                                    name="Basic User"
+                                ).first()
                                 if global_business_area and basic_role:
                                     users_role_to_bulk_create.append(
                                         account_models.UserRole(
-                                            business_area=global_business_area, user=user, role=basic_role
+                                            business_area=global_business_area,
+                                            user=user,
+                                            role=basic_role,
                                         )
                                     )
                                 results.created.append(user)
 
                             users_role_to_bulk_create.append(
-                                account_models.UserRole(role=role, business_area=business_area, user=user)
+                                account_models.UserRole(
+                                    role=role, business_area=business_area, user=user
+                                )
                             )
                         except HTTPError as e:
                             if e.response.status_code != 404:
@@ -848,7 +983,9 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
                         except Http404:
                             results.missing.append(email)
                     account_models.User.objects.bulk_create(users_to_bulk_create)
-                    account_models.UserRole.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
+                    account_models.UserRole.objects.bulk_create(
+                        users_role_to_bulk_create, ignore_conflicts=True
+                    )
                     ctx["results"] = results
                     return TemplateResponse(request, "admin/load_users.html", ctx)
                 except Exception as e:
@@ -877,7 +1014,7 @@ class PermissionFilter(SimpleListFilter):
 class RoleResource(resources.ModelResource):
     class Meta:
         model = account_models.Role
-        fields = ('name', 'subsystem', 'permissions')
+        fields = ("name", "subsystem", "permissions")
         import_id_fields = ("name", "subsystem")
 
 
@@ -900,7 +1037,7 @@ class RoleAdmin(ImportExportModelAdmin, ExtraUrlMixin, HOPEModelAdminBase):
         ctx = self.get_common_context(request, action="Matrix")
         matrix1 = {}
         matrix2 = {}
-        perms = sorted([str(x.value) for x in Permissions])
+        perms = sorted(str(x.value) for x in Permissions)
         roles = account_models.Role.objects.order_by("name").filter(subsystem="HOPE")
         for perm in perms:
             granted_to_roles = []
@@ -987,14 +1124,14 @@ class IncompatibleRolesAdmin(HOPEModelAdminBase):
 
 
 class GroupResource(resources.ModelResource):
-    permissions = fields.Field(widget=ManyToManyWidget(Permission,
-                                                       field='codename'),
-                               attribute='permissions')
+    permissions = fields.Field(
+        widget=ManyToManyWidget(Permission, field="codename"), attribute="permissions"
+    )
 
     class Meta:
         model = Group
-        fields = ('name', 'permissions')
-        import_id_fields = ("name", )
+        fields = ("name", "permissions")
+        import_id_fields = ("name",)
 
 
 @smart_register(Group)
@@ -1009,7 +1146,11 @@ class GroupAdmin(ImportExportModelAdmin, ExtraUrlMixin, _GroupAdmin):
         return _import_fixture(self, request)
 
     def _perms(self, request, object_id) -> set:
-        return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
+        return set(
+            self.get_object(request, object_id).permissions.values_list(
+                "codename", flat=True
+            )
+        )
 
     @button()
     def users(self, request, pk):

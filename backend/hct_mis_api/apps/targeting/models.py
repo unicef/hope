@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField, IntegerRangeField, JSONField
+from django.contrib.postgres.fields import CICharField, IntegerRangeField
 from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
     RangeMinValueValidator,
@@ -14,9 +14,9 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Case, Count, Q, Value, When
+from django.db.models import Case, Count, JSONField, Q, Value, When
 from django.utils.text import Truncator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from model_utils import Choices
@@ -70,7 +70,10 @@ def get_integer_range(min_range=None, max_range=None):
     return IntegerRangeField(
         default=get_serialized_range,
         blank=True,
-        validators=[RangeMinValueValidator(min_range), RangeMaxValueValidator(max_range)],
+        validators=[
+            RangeMinValueValidator(min_range),
+            RangeMaxValueValidator(max_range),
+        ],
     )
 
 
@@ -81,8 +84,14 @@ class TargetPopulationManager(SoftDeletableManager):
             .get_queryset()
             .annotate(
                 number_of_households=Case(
-                    When(status=TargetPopulation.STATUS_LOCKED, then="candidate_list_total_households"),
-                    When(status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST, then="final_list_total_households"),
+                    When(
+                        status=TargetPopulation.STATUS_LOCKED,
+                        then="candidate_list_total_households",
+                    ),
+                    When(
+                        status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
+                        then="final_list_total_households",
+                    ),
                     default=Value(0),
                 )
             )
@@ -184,8 +193,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         null=True,
         blank=True,
     )
-    business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
-    status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default=STATUS_DRAFT, db_index=True)
+    business_area = models.ForeignKey(
+        "core.BusinessArea", null=True, on_delete=models.CASCADE
+    )
+    status = models.CharField(
+        max_length=_MAX_LEN, choices=STATUS_CHOICES, default=STATUS_DRAFT, db_index=True
+    )
     households = models.ManyToManyField(
         "household.Household",
         related_name="target_populations",
@@ -243,30 +256,48 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         db_index=True,
     )
     steficon_rule = models.ForeignKey(
-        RuleCommit, null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
+        RuleCommit,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="target_populations",
+        blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
     vulnerability_score_min = models.DecimalField(
-        null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
     )
     vulnerability_score_max = models.DecimalField(
-        null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
     )
     excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
 
     @property
     def excluded_household_ids(self):
-        excluded_household_ids_array = map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
+        excluded_household_ids_array = map_unicef_ids_to_households_unicef_ids(
+            self.excluded_ids
+        )
         return excluded_household_ids_array
 
     @property
     def vulnerability_score_filtered_households(self):
         queryset = self.households
         if self.vulnerability_score_max is not None:
-            queryset = queryset.filter(selections__vulnerability_score__lte=self.vulnerability_score_max)
+            queryset = queryset.filter(
+                selections__vulnerability_score__lte=self.vulnerability_score_max
+            )
         if self.vulnerability_score_min is not None:
-            queryset = queryset.filter(selections__vulnerability_score__gte=self.vulnerability_score_min)
+            queryset = queryset.filter(
+                selections__vulnerability_score__gte=self.vulnerability_score_min
+            )
 
         queryset = queryset.filter(~Q(unicef_id__in=self.excluded_household_ids))
         return queryset.distinct()
@@ -275,9 +306,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     def candidate_list(self):
         if self.status != TargetPopulation.STATUS_DRAFT:
             return []
-        return Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).filter(
-            business_area=self.business_area
-        )
+        return Household.objects.filter(
+            self.candidate_list_targeting_criteria.get_query()
+        ).filter(business_area=self.business_area)
 
     @property
     def final_list(self):
@@ -294,14 +325,26 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         if self.status == TargetPopulation.STATUS_DRAFT:
             households_ids = self.candidate_list.values_list("id")
         else:
-            households_ids = self.vulnerability_score_filtered_households.values_list("id")
+            households_ids = self.vulnerability_score_filtered_households.values_list(
+                "id"
+            )
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
-            child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+        targeted_individuals = Individual.objects.filter(
+            household__id__in=households_ids
+        ).aggregate(
+            child_male=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)
+            ),
+            child_female=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)
+            ),
+            adult_male=Count(
+                "id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)
+            ),
+            adult_female=Count(
+                "id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)
+            ),
         )
         return {
             "child_male": targeted_individuals.get("child_male"),
@@ -331,7 +374,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return None
         elif self.status == TargetPopulation.STATUS_LOCKED:
             households_ids = (
-                self.vulnerability_score_filtered_households.filter(self.final_list_targeting_criteria.get_query())
+                self.vulnerability_score_filtered_households.filter(
+                    self.final_list_targeting_criteria.get_query()
+                )
                 .filter(business_area=self.business_area)
                 .values_list("id")
                 .distinct()
@@ -341,11 +386,21 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
 
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
-            child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+        targeted_individuals = Individual.objects.filter(
+            household__id__in=households_ids
+        ).aggregate(
+            child_male=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)
+            ),
+            child_female=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)
+            ),
+            adult_male=Count(
+                "id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)
+            ),
+            adult_female=Count(
+                "id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)
+            ),
         )
 
         return {
@@ -361,7 +416,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return None
         tp = (
             TargetPopulation.objects.filter(
-                program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_PROCESSING
+                program=self.program,
+                steficon_rule__isnull=False,
+                status=TargetPopulation.STATUS_PROCESSING,
             )
             .order_by("-created_at")
             .first()
@@ -375,7 +432,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.sent_to_datahub = True
 
     def is_finalized(self):
-        return self.status in [self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST]
+        return self.status in [
+            self.STATUS_PROCESSING,
+            self.STATUS_READY_FOR_CASH_ASSIST,
+        ]
 
     def is_locked(self):
         return self.status == self.STATUS_LOCKED
@@ -407,7 +467,9 @@ class HouseholdSelection(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="selections",
     )
-    target_population = models.ForeignKey("TargetPopulation", on_delete=models.CASCADE, related_name="selections")
+    target_population = models.ForeignKey(
+        "TargetPopulation", on_delete=models.CASCADE, related_name="selections"
+    )
     vulnerability_score = models.DecimalField(
         blank=True,
         null=True,
@@ -508,12 +570,16 @@ class TargetingCriteriaRuleQueryingMixin:
             if isinstance(self.individuals_filters_blocks, list)
             else self.individuals_filters_blocks.all()
         )
-        individuals_filters_blocks_strings = [x.get_criteria_string() for x in individuals_filters_blocks]
+        individuals_filters_blocks_strings = [
+            x.get_criteria_string() for x in individuals_filters_blocks
+        ]
         all_strings = []
         if len(filters_strings):
             all_strings.append(f"H({' AND '.join(filters_strings).strip()})")
         if len(individuals_filters_blocks_strings):
-            all_strings.append(f"I({' AND '.join(individuals_filters_blocks_strings).strip()})")
+            all_strings.append(
+                f"I({' AND '.join(individuals_filters_blocks_strings).strip()})"
+            )
         return " AND ".join(all_strings).strip()
 
     def get_query(self):
@@ -580,7 +646,9 @@ class TargetingIndividualRuleFilterBlockMixin:
         if self.target_only_hoh:
             # only filtering against heads of household
             individuals_query &= Q(heading_household__isnull=False)
-        households_id = Individual.objects.filter(individuals_query).values_list("household_id", flat=True)
+        households_id = Individual.objects.filter(individuals_query).values_list(
+            "household_id", flat=True
+        )
         return Q(id__in=households_id)
 
 
@@ -589,7 +657,9 @@ class TargetingIndividualRuleFilterBlock(
     TargetingIndividualRuleFilterBlockMixin,
 ):
     targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule", on_delete=models.CASCADE, related_name="individuals_filters_blocks"
+        "TargetingCriteriaRule",
+        on_delete=models.CASCADE,
+        related_name="individuals_filters_blocks",
     )
     target_only_hoh = models.BooleanField(default=False)
 
@@ -602,7 +672,12 @@ class TargetingCriteriaFilterMixin:
             "negative": False,
             "supported_types": ["INTEGER", "SELECT_ONE", "STRING", "BOOL"],
         },
-        "NOT_EQUALS": {"arguments": 1, "lookup": "", "negative": True, "supported_types": ["INTEGER", "SELECT_ONE"]},
+        "NOT_EQUALS": {
+            "arguments": 1,
+            "lookup": "",
+            "negative": True,
+            "supported_types": ["INTEGER", "SELECT_ONE"],
+        },
         "CONTAINS": {
             "min_arguments": 1,
             "arguments": 1,
@@ -610,7 +685,12 @@ class TargetingCriteriaFilterMixin:
             "negative": False,
             "supported_types": ["SELECT_MANY", "STRING"],
         },
-        "NOT_CONTAINS": {"arguments": 1, "lookup": "__icontains", "negative": True, "supported_types": ["STRING"]},
+        "NOT_CONTAINS": {
+            "arguments": 1,
+            "lookup": "__icontains",
+            "negative": True,
+            "supported_types": ["STRING"],
+        },
         "RANGE": {
             "arguments": 2,
             "lookup": "__range",
@@ -629,7 +709,12 @@ class TargetingCriteriaFilterMixin:
             "negative": False,
             "supported_types": ["INTEGER", "DECIMAL"],
         },
-        "LESS_THAN": {"arguments": 1, "lookup": "__lte", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
+        "LESS_THAN": {
+            "arguments": 1,
+            "lookup": "__lte",
+            "negative": False,
+            "supported_types": ["INTEGER", "DECIMAL"],
+        },
     }
 
     COMPARISON_CHOICES = Choices(
@@ -666,17 +751,25 @@ class TargetingCriteriaFilterMixin:
         field_attr,
     ):
         select_many = get_attr_value("type", field_attr, None) == TYPE_SELECT_MANY
-        comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(self.comparision_method)
+        comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(
+            self.comparision_method
+        )
         args_count = comparision_attribute.get("arguments")
         if self.arguments is None:
-            logger.error(f"{self.field_name} {self.comparision_method} filter query expect {args_count} " f"arguments")
+            logger.error(
+                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"arguments"
+            )
             raise ValidationError(
-                f"{self.field_name} {self.comparision_method} filter query expect {args_count} " f"arguments"
+                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"arguments"
             )
         args_input_count = len(self.arguments)
         if select_many:
             if args_input_count < 1:
-                logger.error(f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument")
+                logger.error(
+                    f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
+                )
                 raise ValidationError(
                     f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
                 )
@@ -707,9 +800,13 @@ class TargetingCriteriaFilterMixin:
 
     def get_query_for_core_field(self):
         core_fields = self.get_core_fields()
-        core_field_attrs = [attr for attr in core_fields if attr.get("name") == self.field_name]
+        core_field_attrs = [
+            attr for attr in core_fields if attr.get("name") == self.field_name
+        ]
         if len(core_field_attrs) != 1:
-            logger.error(f"There are no Core Field Attributes associated with this fieldName {self.field_name}")
+            logger.error(
+                f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
+            )
             raise ValidationError(
                 f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
             )
@@ -733,11 +830,15 @@ class TargetingCriteriaFilterMixin:
     def get_query_for_flex_field(self):
         flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
         if not flex_field_attr:
-            logger.error(f"There are no Flex Field Attributes associated with this fieldName {self.field_name}")
+            logger.error(
+                f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
+            )
             raise ValidationError(
                 f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
             )
-        lookup_prefix = self.get_lookup_prefix(_INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD)
+        lookup_prefix = self.get_lookup_prefix(
+            _INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD
+        )
         lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
         return self.get_query_for_lookup(lookup, flex_field_attr)
 
@@ -781,7 +882,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
     )
 
 
-class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterMixin):
+class TargetingIndividualBlockRuleFilter(
+    TimeStampedUUIDModel, TargetingCriteriaFilterMixin
+):
     """
     This is one explicit filter like:
         :Age <> 10-20

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
@@ -65,7 +65,9 @@ class LastSyncDateResetMixin(ExtraUrlMixin):
             )
 
 
-class HOPEModelAdminBase(SmartDisplayAllMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin):
+class HOPEModelAdminBase(
+    SmartDisplayAllMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin
+):
     list_per_page = 50
 
     def get_fields(self, request, obj=None):

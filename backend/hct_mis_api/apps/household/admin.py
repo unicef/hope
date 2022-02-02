@@ -7,9 +7,8 @@ from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.admin.models import LogEntry
 from django.contrib.messages import DEFAULT_TAGS
-from django.contrib.postgres.fields import JSONField
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, JSONField, Q
 from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -136,7 +135,12 @@ class HouseholdAdmin(
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("representatives", "programs")
-    raw_id_fields = ("registration_data_import", "admin_area", "head_of_household", "business_area")
+    raw_id_fields = (
+        "registration_data_import",
+        "admin_area",
+        "head_of_household",
+        "business_area",
+    )
     fieldsets = [
         (None, {"fields": (("unicef_id", "head_of_household"),)}),
         (
@@ -182,9 +186,13 @@ class HouseholdAdmin(
         context["status"] = new_withdrawn_status
         tickets = GrievanceTicket.objects.belong_household(obj)
         if obj.withdrawn:
-            tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
+            tickets = filter(
+                lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets
+            )
         else:
-            tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
+            tickets = filter(
+                lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets
+            )
 
         context["tickets"] = tickets
         if request.method == "POST":
@@ -199,20 +207,34 @@ class HouseholdAdmin(
                         message = "{} has been restored"
                     obj.withdrawn = withdrawn
                     withdrawns = list(obj.individuals.values_list("id", flat=True))
-                    for ind in Individual.objects.filter(id__in=withdrawns, duplicate=False):
+                    for ind in Individual.objects.filter(
+                        id__in=withdrawns, duplicate=False
+                    ):
                         ind.withdrawn = withdrawn
                         ind.save()
                         self.log_change(request, ind, message.format("Individual"))
                     for tkt in context["tickets"]:
                         if withdrawn:
-                            tkt.ticket.extras["status_before_withdrawn"] = tkt.ticket.status
+                            tkt.ticket.extras[
+                                "status_before_withdrawn"
+                            ] = tkt.ticket.status
                             tkt.ticket.status = GrievanceTicket.STATUS_CLOSED
-                            self.log_change(request, tkt.ticket, "Ticket closed due to Household withdrawn")
+                            self.log_change(
+                                request,
+                                tkt.ticket,
+                                "Ticket closed due to Household withdrawn",
+                            )
                         else:
                             if tkt.ticket.extras.get("status_before_withdrawn"):
-                                tkt.ticket.status = tkt.ticket.extras["status_before_withdrawn"]
+                                tkt.ticket.status = tkt.ticket.extras[
+                                    "status_before_withdrawn"
+                                ]
                                 tkt.ticket.extras["status_before_withdrawn"] = ""
-                            self.log_change(request, tkt.ticket, "Ticket reopened due to Household restore")
+                            self.log_change(
+                                request,
+                                tkt.ticket,
+                                "Ticket reopened due to Household restore",
+                            )
                         tkt.ticket.save()
 
                     obj.save()
@@ -221,17 +243,23 @@ class HouseholdAdmin(
             except Exception as e:
                 self.message_user(request, str(e), messages.ERROR)
 
-        return TemplateResponse(request, "admin/household/household/withdrawn.html", context)
+        return TemplateResponse(
+            request, "admin/household/household/withdrawn.html", context
+        )
 
     @button()
     def tickets(self, request, pk):
         context = self.get_common_context(request, pk, title="Tickets")
         obj = context["original"]
         tickets = []
-        for entry in chain(obj.sensitive_ticket_details.all(), obj.complaint_ticket_details.all()):
+        for entry in chain(
+            obj.sensitive_ticket_details.all(), obj.complaint_ticket_details.all()
+        ):
             tickets.append(entry.ticket)
         context["tickets"] = tickets
-        return TemplateResponse(request, "admin/household/household/tickets.html", context)
+        return TemplateResponse(
+            request, "admin/household/household/tickets.html", context
+        )
 
     @button()
     def members(self, request, pk):
@@ -248,11 +276,15 @@ class HouseholdAdmin(
         primary = None
         head = None
         try:
-            primary = IndividualRoleInHousehold.objects.get(household=hh, role=ROLE_PRIMARY)
+            primary = IndividualRoleInHousehold.objects.get(
+                household=hh, role=ROLE_PRIMARY
+            )
         except IndividualRoleInHousehold.DoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
-        alternate = IndividualRoleInHousehold.objects.filter(household=hh, role=ROLE_ALTERNATE).first()
+        alternate = IndividualRoleInHousehold.objects.filter(
+            household=hh, role=ROLE_ALTERNATE
+        ).first()
         try:
             head = hh.individuals.get(relationship=HEAD)
         except IndividualRoleInHousehold.DoesNotExist:
@@ -264,8 +296,12 @@ class HouseholdAdmin(
                 field = f"{gender}_age_group_{num_range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
-        active_individuals = hh.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
-        ghosts_individuals = hh.individuals.filter(Q(duplicate=True) | Q(withdrawn=True))
+        active_individuals = hh.individuals.exclude(
+            Q(duplicate=True) | Q(withdrawn=True)
+        )
+        ghosts_individuals = hh.individuals.filter(
+            Q(duplicate=True) | Q(withdrawn=True)
+        )
         all_individuals = hh.individuals.all()
         if hh.collect_individual_data:
             if active_individuals.count() != hh.size:
@@ -273,11 +309,16 @@ class HouseholdAdmin(
 
         else:
             if all_individuals.count() > 1:
-                warnings.append([messages.ERROR, "Individual data not collected but members found"])
+                warnings.append(
+                    [messages.ERROR, "Individual data not collected but members found"]
+                )
 
         if hh.size != total_in_ranges:
             warnings.append(
-                [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"]
+                [
+                    messages.ERROR,
+                    f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match",
+                ]
             )
 
         aaaa = active_individuals.values_list("unicef_id", flat=True)
@@ -296,7 +337,9 @@ class HouseholdAdmin(
             "alternate": alternate,
             "warnings": [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings],
         }
-        return TemplateResponse(request, "admin/household/household/sanity_check.html", context)
+        return TemplateResponse(
+            request, "admin/household/household/sanity_check.html", context
+        )
 
 
 class IndividualRoleInHouseholdInline(TabularInline):
@@ -410,7 +453,9 @@ class IndividualAdmin(
     def household_members(self, request, pk):
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
-        return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.household.unicef_id}")
+        return HttpResponseRedirect(
+            f"{url}?household|unicef_id|iexact={obj.household.unicef_id}"
+        )
 
     @button()
     def sanity_check(self, request, pk):
@@ -419,7 +464,9 @@ class IndividualAdmin(
         context["roles"] = obj.households_and_roles.all()
         context["duplicates"] = Individual.objects.filter(unicef_id=obj.unicef_id)
 
-        return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
+        return TemplateResponse(
+            request, "admin/household/individual/sanity_check.html", context
+        )
 
 
 @admin.register(IndividualRoleInHousehold)
@@ -452,7 +499,13 @@ class EntitlementCardAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 @admin.register(XlsxUpdateFile)
 class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    readonly_fields = ("file", "business_area", "rdi", "xlsx_match_columns", "uploaded_by")
+    readonly_fields = (
+        "file",
+        "business_area",
+        "rdi",
+        "xlsx_match_columns",
+        "uploaded_by",
+    )
     list_filter = (
         ("business_area", AutoCompleteFilter),
         ("uploaded_by", AutoCompleteFilter),
@@ -470,21 +523,32 @@ class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
             updater = IndividualXlsxUpdate(xlsx_update_file)
         except InvalidColumnsError as e:
             self.message_user(request, str(e), messages.ERROR)
-            context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
-            return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
+            context = self.get_common_context(
+                request,
+                title="Update Individual by xlsx",
+                form=UpdateByXlsxStage1Form(),
+            )
+            return TemplateResponse(
+                request, "admin/household/individual/xlsx_update.html", context
+            )
 
         context = self.get_common_context(
             request,
             title="Update Individual by xlsx",
             form=UpdateByXlsxStage2Form(
-                xlsx_columns=updater.columns_names, initial={"xlsx_update_file": xlsx_update_file}
+                xlsx_columns=updater.columns_names,
+                initial={"xlsx_update_file": xlsx_update_file},
             ),
         )
-        return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
+        return TemplateResponse(
+            request, "admin/household/individual/xlsx_update_stage2.html", context
+        )
 
     def xlsx_update_stage3(self, request, old_form):
         xlsx_update_file = old_form.cleaned_data["xlsx_update_file"]
-        xlsx_update_file.xlsx_match_columns = old_form.cleaned_data["xlsx_match_columns"]
+        xlsx_update_file.xlsx_match_columns = old_form.cleaned_data[
+            "xlsx_match_columns"
+        ]
         xlsx_update_file.save()
         updater = IndividualXlsxUpdate(xlsx_update_file)
         report = updater.get_matching_report()
@@ -492,11 +556,15 @@ class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
             request,
             title="Update Individual by xlsx Report",
             unique_report_rows=report[IndividualXlsxUpdate.STATUS_UNIQUE],
-            multiple_match_report_rows=report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH],
+            multiple_match_report_rows=report[
+                IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH
+            ],
             no_match_report_rows=report[IndividualXlsxUpdate.STATUS_NO_MATCH],
             xlsx_update_file=xlsx_update_file.id,
         )
-        return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
+        return TemplateResponse(
+            request, "admin/household/individual/xlsx_update_stage3.html", context
+        )
 
     def add_view(self, request, form_url="", extra_context=None):
         return self.xlsx_update(request)
@@ -504,30 +572,52 @@ class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     def xlsx_update(self, request):
         if request.method == "GET":
             form = UpdateByXlsxStage1Form()
-            form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
-            form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
-            context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
+            form.fields["registration_data_import"].widget = AutocompleteWidget(
+                RegistrationDataImport, self.admin_site
+            )
+            form.fields["business_area"].widget = AutocompleteWidget(
+                BusinessArea, self.admin_site
+            )
+            context = self.get_common_context(
+                request, title="Update Individual by xlsx", form=form
+            )
         elif request.POST.get("stage") == "2":
             form = UpdateByXlsxStage1Form(request.POST, request.FILES)
-            context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
+            context = self.get_common_context(
+                request, title="Update Individual by xlsx", form=form
+            )
             if form.is_valid():
                 try:
                     return self.xlsx_update_stage2(request, form)
                 except Exception as e:
-                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
-            return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
+                    self.message_user(
+                        request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR
+                    )
+            return TemplateResponse(
+                request, "admin/household/individual/xlsx_update.html", context
+            )
 
         elif request.POST.get("stage") == "3":
-            xlsx_update_file = XlsxUpdateFile.objects.get(pk=request.POST["xlsx_update_file"])
+            xlsx_update_file = XlsxUpdateFile.objects.get(
+                pk=request.POST["xlsx_update_file"]
+            )
             updater = IndividualXlsxUpdate(xlsx_update_file)
-            form = UpdateByXlsxStage2Form(request.POST, request.FILES, xlsx_columns=updater.columns_names)
-            context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
+            form = UpdateByXlsxStage2Form(
+                request.POST, request.FILES, xlsx_columns=updater.columns_names
+            )
+            context = self.get_common_context(
+                request, title="Update Individual by xlsx", form=form
+            )
             if form.is_valid():
                 try:
                     return self.xlsx_update_stage3(request, form)
                 except Exception as e:
-                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
-            return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
+                    self.message_user(
+                        request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR
+                    )
+            return TemplateResponse(
+                request, "admin/household/individual/xlsx_update_stage2.html", context
+            )
 
         elif request.POST.get("stage") == "4":
             xlsx_update_file_id = request.POST.get("xlsx_update_file")
@@ -537,18 +627,30 @@ class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 with transaction.atomic():
                     updater.update_individuals()
                 self.message_user(request, "Done", messages.SUCCESS)
-                return HttpResponseRedirect(reverse("admin:household_individual_changelist"))
+                return HttpResponseRedirect(
+                    reverse("admin:household_individual_changelist")
+                )
             except Exception as e:
-                self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+                self.message_user(
+                    request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR
+                )
                 report = updater.report_dict
                 context = self.get_common_context(
                     request,
                     title="Update Individual by xlsx Report",
                     unique_report_rows=report[IndividualXlsxUpdate.STATUS_UNIQUE],
-                    multiple_match_report_rows=report[IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH],
+                    multiple_match_report_rows=report[
+                        IndividualXlsxUpdate.STATUS_MULTIPLE_MATCH
+                    ],
                     no_match_report_rows=report[IndividualXlsxUpdate.STATUS_NO_MATCH],
                     xlsx_update_file=xlsx_update_file.id,
                 )
-                return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
+                return TemplateResponse(
+                    request,
+                    "admin/household/individual/xlsx_update_stage3.html",
+                    context,
+                )
 
-        return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
+        return TemplateResponse(
+            request, "admin/household/individual/xlsx_update.html", context
+        )

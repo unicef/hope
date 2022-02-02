@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os
 
 from django.conf import settings
@@ -9,7 +7,9 @@ import xmlrunner
 from snapshottest.django import TestRunner
 
 
-def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, serialize=True, keepdb=False):
+def create_test_db_and_schemas(
+    creation, verbosity=1, autoclobber=False, serialize=True, keepdb=False
+):
     """
     Create a test database, prompting the user for confirmation if the
     database already exists. Return the name of the test database created.
@@ -61,7 +61,9 @@ def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, seriali
     # who are testing on databases without transactions or who are using
     # a TransactionTestCase still get a clean database on every test run.
     if serialize:
-        creation.connection._test_serialized_contents = creation.serialize_db_to_string()
+        creation.connection._test_serialized_contents = (
+            creation.serialize_db_to_string()
+        )
 
     call_command("createcachetable", database=creation.connection.alias)
 
@@ -71,7 +73,9 @@ def create_test_db_and_schemas(creation, verbosity=1, autoclobber=False, seriali
     return test_database_name
 
 
-def create_fake_test_db(creation, verbosity=1, autoclobber=False, serialize=True, keepdb=False):
+def create_fake_test_db(
+    creation, verbosity=1, autoclobber=False, serialize=True, keepdb=False
+):
     """
     Create a test database, prompting the user for confirmation if the
     database already exists. Return the name of the test database created.
@@ -119,7 +123,15 @@ def create_fake_test_db(creation, verbosity=1, autoclobber=False, serialize=True
     return test_database_name
 
 
-def _setup_schema_database(verbosity, interactive, keepdb=False, debug_sql=False, parallel=0, alias=None, **kwargs):
+def _setup_schema_database(
+    verbosity,
+    interactive,
+    keepdb=False,
+    debug_sql=False,
+    parallel=0,
+    alias=None,
+    **kwargs
+):
     """Create the test databases."""
 
     connection = connections[alias]
@@ -202,7 +214,9 @@ class PostgresTestRunner(TestRunner):
             read_only = connection.settings_dict.get("TEST", {}).get("READ_ONLY", False)
             if read_only:
                 if self.verbosity >= 1:
-                    connection.creation.log("Skipping ReadOnly test database for alias '%s'..." % alias)
+                    connection.creation.log(
+                        "Skipping ReadOnly test database for alias '%s'..." % alias
+                    )
                 aliases = kwargs.get("aliases")
                 aliases.discard(alias)
                 continue
@@ -218,7 +232,12 @@ class PostgresTestRunner(TestRunner):
                 if not created:
                     old_names.extend(
                         _setup_schema_database(
-                            self.verbosity, self.interactive, self.keepdb, self.debug_sql, self.parallel, alias=alias
+                            self.verbosity,
+                            self.interactive,
+                            self.keepdb,
+                            self.debug_sql,
+                            self.parallel,
+                            alias=alias,
                         )
                     )
                     created = True
@@ -228,7 +247,9 @@ class PostgresTestRunner(TestRunner):
                         verbosity=self.verbosity,
                         autoclobber=not self.interactive,
                         keepdb=self.keepdb,
-                        serialize=connection.settings_dict.get("TEST", {}).get("SERIALIZE", True),
+                        serialize=connection.settings_dict.get("TEST", {}).get(
+                            "SERIALIZE", True
+                        ),
                     )
         old_names.extend(super().setup_databases(**kwargs))
 
