@@ -12,8 +12,8 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { usePermissions } from '../../hooks/usePermissions';
 import { renderUserName } from '../../utils/utils';
 import {
-  useAllUsersQuery,
   useGrievancesChoiceDataQuery,
+  useUsersFilterQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { PageHeader } from '../PageHeader';
@@ -42,7 +42,7 @@ export function GrievancesTablePage(): React.ReactElement {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  const { data: userData, loading: userDataLoading } = useAllUsersQuery({
+  const { data: userData, loading: userDataLoading } = useUsersFilterQuery({
     variables: { businessArea },
   });
 
