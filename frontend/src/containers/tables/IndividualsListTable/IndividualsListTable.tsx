@@ -2,8 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  AllIndividualsQueryVariables,
   IndividualNode,
+  AllIndividualsQueryVariables,
   useAllIndividualsQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
