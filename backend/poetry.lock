@@ -748,11 +748,11 @@ sftp = ["paramiko"]
 
 [[package]]
 name = "django-sysinfo"
-version = "2.6.0"
+version = "2.6.2"
 description = "Simple django app to expose system infos: libraries version, databae server infos..."
 category = "main"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = ">=3.9,<4.0"
 
 [package.dependencies]
 psutil = "*"
@@ -923,7 +923,7 @@ test = ["pytest", "pytest-benchmark", "pytest-cov", "pytest-mock", "fastdiff (==
 
 [[package]]
 name = "graphene-django"
-version = "2.7.1"
+version = "2.15.0"
 description = "Graphene Django integration"
 category = "main"
 optional = false
@@ -936,15 +936,16 @@ graphql-core = ">=2.1.0,<3"
 promise = ">=2.1"
 singledispatch = ">=3.4.0.3"
 six = ">=1.10.0"
+text-unidecode = "*"
 
 [package.extras]
-dev = ["black (==19.3b0)", "flake8 (==3.7.7)", "flake8-black (==0.1.0)", "flake8-bugbear (==19.3.0)", "pytest (>=3.6.3)", "pytest-cov", "coveralls", "mock", "pytz", "pytest-django (>=3.3.2)", "djangorestframework (>=3.6.3)", "django-filter (<2)", "django-filter (>=2)"]
+dev = ["black (==19.10b0)", "flake8 (==3.7.9)", "flake8-black (==0.1.1)", "flake8-bugbear (==20.1.4)", "pytest (>=3.6.3)", "pytest-cov", "coveralls", "mock", "pytz", "pytest-django (>=3.3.2)", "djangorestframework (>=3.6.3)", "django-filter (<2)", "django-filter (>=2)"]
 rest_framework = ["djangorestframework (>=3.6.3)"]
 test = ["pytest (>=3.6.3)", "pytest-cov", "coveralls", "mock", "pytz", "pytest-django (>=3.3.2)", "djangorestframework (>=3.6.3)", "django-filter (<2)", "django-filter (>=2)"]
 
 [[package]]
 name = "graphene-file-upload"
-version = "1.2.2"
+version = "1.3.0"
 description = "Lib for adding file upload functionality to GraphQL mutations in Graphene Django and Flask-Graphql"
 category = "main"
 optional = false
@@ -957,6 +958,7 @@ six = ">=1.11.0"
 all = ["Flask (>=1.0.2)", "graphene (>=2.1.2)", "Flask-Graphql (>=2.0.0)", "graphene-django (>=2.0.0)"]
 django = ["graphene-django (>=2.0.0)"]
 flask = ["Flask (>=1.0.2)", "graphene (>=2.1.2)", "Flask-Graphql (>=2.0.0)"]
+tests = ["coverage", "pytest", "pytest-cov", "pytest-django"]
 
 [[package]]
 name = "graphql-core"
@@ -1764,7 +1766,7 @@ python-versions = "*"
 name = "text-unidecode"
 version = "1.3"
 description = "The most basic Text::Unidecode port"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1952,7 +1954,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.10"
-content-hash = "129e3199b0bf4f85f4dc7dac35711990e3b8bfb80f3702815f9d5d375dd55b02"
+content-hash = "2d27a1683a39d74f9d3ea7a654699b5468c12ac6c445577369b5c5e9a878ffd5"
 
 [metadata.files]
 amqp = [
@@ -2250,7 +2252,8 @@ django-storages = [
     {file = "django_storages-1.8-py2.py3-none-any.whl", hash = "sha256:0a9b7e620e969fb0797523695329ed223bf540bbfdf6cd163b061fc11dab2d1c"},
 ]
 django-sysinfo = [
-    {file = "django-sysinfo-2.6.0.tar.gz", hash = "sha256:396f0c69f3b40daaac1f8d3dd374714f985576e907e828c4f1087ad255980433"},
+    {file = "django-sysinfo-2.6.2.tar.gz", hash = "sha256:2efe6c1a3bedc5766549b8872c7d8b3266ecb45db9a6423b94365d7d089c86dd"},
+    {file = "django_sysinfo-2.6.2-py3-none-any.whl", hash = "sha256:9589d4bff0605ed7681a2ca22ce2326a4b64db768038da39180a2ba31ab3ffea"},
 ]
 django-timezone-field = [
     {file = "django-timezone-field-4.2.3.tar.gz", hash = "sha256:5dd5bd9249382bef8847d3e7e4c32b7be182a4b538f354130d1252ed228892f8"},
@@ -2322,12 +2325,12 @@ graphene = [
     {file = "graphene-2.1.9.tar.gz", hash = "sha256:b9f2850e064eebfee9a3ef4a1f8aa0742848d97652173ab44c82cc8a62b9ed93"},
 ]
 graphene-django = [
-    {file = "graphene-django-2.7.1.tar.gz", hash = "sha256:233037a82a56d9d4a1357f51743a2948016a358a0b58d071faa2ae56bf47e65d"},
-    {file = "graphene_django-2.7.1-py2.py3-none-any.whl", hash = "sha256:eab206e013eca3366b1a8f78ac9aa1024c7fbabed5cbd0c09fda6d325b37aa32"},
+    {file = "graphene-django-2.15.0.tar.gz", hash = "sha256:b78c9b05bc899016b9cc5bf13faa1f37fe1faa8c5407552c6ddd1a28f46fc31a"},
+    {file = "graphene_django-2.15.0-py2.py3-none-any.whl", hash = "sha256:02671d195f0c09c8649acff2a8f4ad4f297d0f7d98ea6e6cdf034b81bab92880"},
 ]
 graphene-file-upload = [
-    {file = "graphene_file_upload-1.2.2-py3-none-any.whl", hash = "sha256:034ff72d2834b7aebd06fda412fa88a10aba34bac604317f7552457e47040654"},
-    {file = "graphene_file_upload-1.2.2.tar.gz", hash = "sha256:b5f47a81f5614d1184ba9480a63835769b26303cb7759316122401784858e9c7"},
+    {file = "graphene_file_upload-1.3.0-py3-none-any.whl", hash = "sha256:5afe50f409f50e3d198fd92c883d98d868e6c6aaadf5df3a3f4d88ecad90ed97"},
+    {file = "graphene_file_upload-1.3.0.tar.gz", hash = "sha256:6898480b0556826472c80971032917c01968ade5800d84054008fe598795b063"},
 ]
 graphql-core = [
     {file = "graphql-core-2.3.2.tar.gz", hash = "sha256:aac46a9ac524c9855910c14c48fc5d60474def7f99fd10245e76608eba7af746"},
