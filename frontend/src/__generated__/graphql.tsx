@@ -7029,7 +7029,23 @@ export type AllHouseholdsQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & HouseholdMinimalFragment
+        & Pick<HouseholdNode, 'id' | 'unicefId' | 'hasDuplicates' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'size' | 'residenceStatus' | 'totalCashReceived' | 'currency' | 'lastRegistrationDate'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+        ), admin2: Maybe<(
+          { __typename?: 'AdminAreaNode' }
+          & Pick<AdminAreaNode, 'id' | 'title'>
+        )>, programs: (
+          { __typename?: 'ProgramNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'ProgramNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'ProgramNode' }
+              & Pick<ProgramNode, 'id' | 'name'>
+            )> }
+          )>> }
+        ) }
       )> }
     )>> }
   )> }
@@ -7093,7 +7109,50 @@ export type AllIndividualsQuery = (
       & Pick<IndividualNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
-        & IndividualMinimalFragment
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex' | 'lastRegistrationDate'>
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'unicefId'>
+          & { admin2: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'id' | 'title'>
+          )>, programs: (
+            { __typename?: 'ProgramNodeConnection' }
+            & { edges: Array<Maybe<(
+              { __typename?: 'ProgramNodeEdge' }
+              & { node: Maybe<(
+                { __typename?: 'ProgramNode' }
+                & Pick<ProgramNode, 'id' | 'name'>
+              )> }
+            )>> }
+          ) }
+        )>, documents: (
+          { __typename?: 'DocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'DocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'DocumentNode' }
+              & Pick<DocumentNode, 'id' | 'country' | 'documentNumber' | 'photo'>
+              & { type: (
+                { __typename?: 'DocumentTypeNode' }
+                & Pick<DocumentTypeNode, 'country' | 'label' | 'type' | 'countryIso3'>
+              ) }
+            )> }
+          )>> }
+        ), identities: (
+          { __typename?: 'IndividualIdentityNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'IndividualIdentityNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'IndividualIdentityNode' }
+              & Pick<IndividualIdentityNode, 'id' | 'number'>
+              & { agency: (
+                { __typename?: 'AgencyNode' }
+                & Pick<AgencyNode, 'country' | 'label' | 'countryIso3'>
+              ) }
+            )> }
+          )>> }
+        ) }
       )> }
     )>> }
   )> }
@@ -12389,12 +12448,37 @@ export const AllHouseholdsDocument = gql`
     edges {
       cursor
       node {
-        ...householdMinimal
+        id
+        unicefId
+        hasDuplicates
+        sanctionListPossibleMatch
+        sanctionListConfirmedMatch
+        headOfHousehold {
+          id
+          fullName
+        }
+        size
+        admin2 {
+          id
+          title
+        }
+        residenceStatus
+        totalCashReceived
+        currency
+        lastRegistrationDate
+        programs {
+          edges {
+            node {
+              id
+              name
+            }
+          }
+        }
       }
     }
   }
 }
-    ${HouseholdMinimalFragmentDoc}`;
+    `;
 export type AllHouseholdsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>, 'query'>;
 
     export const AllHouseholdsComponent = (props: AllHouseholdsComponentProps) => (
@@ -12533,12 +12617,67 @@ export const AllIndividualsDocument = gql`
     edges {
       cursor
       node {
-        ...individualMinimal
+        id
+        unicefId
+        sanctionListPossibleMatch
+        sanctionListConfirmedMatch
+        deduplicationGoldenRecordStatus
+        sanctionListLastCheck
+        fullName
+        household {
+          id
+          unicefId
+          admin2 {
+            id
+            title
+          }
+          programs {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
+        }
+        relationship
+        age
+        sex
+        lastRegistrationDate
+        documents {
+          edges {
+            node {
+              id
+              country
+              documentNumber
+              photo
+              type {
+                country
+                label
+                type
+                countryIso3
+              }
+            }
+          }
+        }
+        identities {
+          edges {
+            node {
+              id
+              agency {
+                country
+                label
+                countryIso3
+              }
+              number
+            }
+          }
+        }
       }
     }
   }
 }
-    ${IndividualMinimalFragmentDoc}`;
+    `;
 export type AllIndividualsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllIndividualsQuery, AllIndividualsQueryVariables>, 'query'>;
 
     export const AllIndividualsComponent = (props: AllIndividualsComponentProps) => (
