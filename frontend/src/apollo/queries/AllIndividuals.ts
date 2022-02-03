@@ -51,7 +51,62 @@ export const AllIndividuals = gql`
       edges {
         cursor
         node {
-          ...individualMinimal
+          id
+          unicefId
+          sanctionListPossibleMatch
+          sanctionListConfirmedMatch
+          deduplicationGoldenRecordStatus
+          sanctionListLastCheck
+          fullName
+          household {
+            id
+            unicefId
+            admin2 {
+              id
+              title
+            }
+            programs {
+              edges {
+                node {
+                  id
+                  name
+                }
+              }
+            }
+          }
+          relationship
+          age
+          sex
+          lastRegistrationDate
+          documents {
+            edges {
+              node {
+                id
+                country
+                documentNumber
+                photo
+                type {
+                  country
+                  label
+                  type
+                  countryIso3
+                }
+              }
+            }
+          }
+          identities {
+            edges {
+              node {
+                id
+                agency {
+                  country
+                  label
+                  countryIso3
+                }
+                number
+              }
+            }
+          }
         }
       }
     }
