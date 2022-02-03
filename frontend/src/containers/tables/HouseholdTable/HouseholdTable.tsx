@@ -2,10 +2,10 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   HouseholdNode,
-  useAllHouseholdsQuery,
+  HouseholdsListQueryVariables,
+  useHouseholdsListQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
@@ -29,7 +29,7 @@ export const HouseholdTable = ({
   canViewDetails,
 }: HouseholdTableProps): React.ReactElement => {
   const { t } = useTranslation();
-  const initialVariables: AllHouseholdsQueryVariables = {
+  const initialVariables: HouseholdsListQueryVariables = {
     businessArea,
     familySize: JSON.stringify(filter.householdSize),
     search: filter.text,
@@ -42,11 +42,11 @@ export const HouseholdTable = ({
 
   return (
     <TableWrapper>
-      <UniversalTable<HouseholdNode, AllHouseholdsQueryVariables>
+      <UniversalTable<HouseholdNode, HouseholdsListQueryVariables>
         title={t('Households')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllHouseholdsQuery}
+        query={useHouseholdsListQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
         renderRow={(row) => (
