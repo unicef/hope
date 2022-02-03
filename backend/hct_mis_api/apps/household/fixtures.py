@@ -8,6 +8,7 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
     MARITAL_STATUS_CHOICE,
+    NOT_DISABLED,
     ORG_ENUMERATOR_CHOICES,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
@@ -155,7 +156,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
-    disability = False
+    disability = NOT_DISABLED
     flex_fields = factory.LazyAttribute(flex_field_individual)
     first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
