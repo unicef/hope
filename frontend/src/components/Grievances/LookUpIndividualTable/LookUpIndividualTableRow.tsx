@@ -10,6 +10,7 @@ import { BlackLink } from '../../BlackLink';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
+
   radioChangeHandler: (
     individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
   ) => void;
