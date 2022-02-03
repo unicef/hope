@@ -8160,6 +8160,56 @@ export type ImportedIndividualPhotosQuery = (
   )> }
 );
 
+export type IndividualsListQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  fullNameContains?: Maybe<Scalars['String']>,
+  sex?: Maybe<Array<Maybe<Scalars['String']>>>,
+  age?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  lastRegistrationDate?: Maybe<Scalars['String']>,
+  householdId?: Maybe<Scalars['UUID']>,
+  excludedId?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  adminArea?: Maybe<Scalars['ID']>,
+  withdrawn?: Maybe<Scalars['Boolean']>,
+  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  flags?: Maybe<Array<Maybe<Scalars['String']>>>
+};
+
+
+export type IndividualsListQuery = (
+  { __typename?: 'Query' }
+  & { allIndividuals: Maybe<(
+    { __typename?: 'IndividualNodeConnection' }
+    & Pick<IndividualNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'IndividualNodeEdge' }
+      & Pick<IndividualNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex'>
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'unicefId'>
+          & { admin2: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'id' | 'title'>
+          )> }
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
 export type LookUpPaymentRecordsQueryVariables = {
   cashPlan?: Maybe<Scalars['ID']>,
   household?: Maybe<Scalars['ID']>,
@@ -15135,6 +15185,101 @@ export function useImportedIndividualPhotosLazyQuery(baseOptions?: ApolloReactHo
 export type ImportedIndividualPhotosQueryHookResult = ReturnType<typeof useImportedIndividualPhotosQuery>;
 export type ImportedIndividualPhotosLazyQueryHookResult = ReturnType<typeof useImportedIndividualPhotosLazyQuery>;
 export type ImportedIndividualPhotosQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>;
+export const IndividualsListDocument = gql`
+    query IndividualsList($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        unicefId
+        sanctionListPossibleMatch
+        sanctionListConfirmedMatch
+        deduplicationGoldenRecordStatus
+        sanctionListLastCheck
+        fullName
+        household {
+          id
+          unicefId
+          admin2 {
+            id
+            title
+          }
+        }
+        relationship
+        age
+        sex
+      }
+    }
+  }
+}
+    `;
+export type IndividualsListComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IndividualsListQuery, IndividualsListQueryVariables>, 'query'>;
+
+    export const IndividualsListComponent = (props: IndividualsListComponentProps) => (
+      <ApolloReactComponents.Query<IndividualsListQuery, IndividualsListQueryVariables> query={IndividualsListDocument} {...props} />
+    );
+    
+export type IndividualsListProps<TChildProps = {}> = ApolloReactHoc.DataProps<IndividualsListQuery, IndividualsListQueryVariables> & TChildProps;
+export function withIndividualsList<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  IndividualsListQuery,
+  IndividualsListQueryVariables,
+  IndividualsListProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, IndividualsListQuery, IndividualsListQueryVariables, IndividualsListProps<TChildProps>>(IndividualsListDocument, {
+      alias: 'individualsList',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useIndividualsListQuery__
+ *
+ * To run a query within a React component, call `useIndividualsListQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIndividualsListQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIndividualsListQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      fullNameContains: // value for 'fullNameContains'
+ *      sex: // value for 'sex'
+ *      age: // value for 'age'
+ *      orderBy: // value for 'orderBy'
+ *      search: // value for 'search'
+ *      programs: // value for 'programs'
+ *      status: // value for 'status'
+ *      lastRegistrationDate: // value for 'lastRegistrationDate'
+ *      householdId: // value for 'householdId'
+ *      excludedId: // value for 'excludedId'
+ *      businessArea: // value for 'businessArea'
+ *      adminArea: // value for 'adminArea'
+ *      withdrawn: // value for 'withdrawn'
+ *      admin2: // value for 'admin2'
+ *      flags: // value for 'flags'
+ *   },
+ * });
+ */
+export function useIndividualsListQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IndividualsListQuery, IndividualsListQueryVariables>) {
+        return ApolloReactHooks.useQuery<IndividualsListQuery, IndividualsListQueryVariables>(IndividualsListDocument, baseOptions);
+      }
+export function useIndividualsListLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IndividualsListQuery, IndividualsListQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IndividualsListQuery, IndividualsListQueryVariables>(IndividualsListDocument, baseOptions);
+        }
+export type IndividualsListQueryHookResult = ReturnType<typeof useIndividualsListQuery>;
+export type IndividualsListLazyQueryHookResult = ReturnType<typeof useIndividualsListLazyQuery>;
+export type IndividualsListQueryResult = ApolloReactCommon.QueryResult<IndividualsListQuery, IndividualsListQueryVariables>;
 export const LookUpPaymentRecordsDocument = gql`
     query LookUpPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
   allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {

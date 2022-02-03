@@ -2,9 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  AllIndividualsQueryVariables,
   IndividualNode,
-  useAllIndividualsQuery,
+  IndividualsListQueryVariables,
+  useIndividualsListQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
@@ -37,11 +37,11 @@ export const IndividualsListTable = ({
 
   return (
     <TableWrapper>
-      <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
+      <UniversalTable<IndividualNode, IndividualsListQueryVariables>
         title={t('Individuals')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllIndividualsQuery}
+        query={useIndividualsListQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
         renderRow={(row) => (
