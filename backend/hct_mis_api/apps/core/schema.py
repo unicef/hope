@@ -46,7 +46,7 @@ class AdminAreaFilter(FilterSet):
         model = AdminArea
         fields = {
             "title": ["exact", "istartswith"],
-            "business_area": ["exact"],
+            # "business_area": ["exact"],
         }
 
 
