@@ -45,7 +45,32 @@ export const AllHouseholds = gql`
       edges {
         cursor
         node {
-          ...householdMinimal
+          id
+          unicefId
+          hasDuplicates
+          sanctionListPossibleMatch
+          sanctionListConfirmedMatch
+          headOfHousehold {
+            id
+            fullName
+          }
+          size
+          admin2 {
+            id
+            title
+          }
+          residenceStatus
+          totalCashReceived
+          currency
+          lastRegistrationDate
+          programs {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
         }
       }
     }
