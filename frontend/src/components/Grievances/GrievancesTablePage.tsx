@@ -13,7 +13,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { renderUserName } from '../../utils/utils';
 import {
   useGrievancesChoiceDataQuery,
-  useUsersFilterQuery,
+  useAllUsersForFiltersQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { PageHeader } from '../PageHeader';
@@ -42,7 +42,7 @@ export function GrievancesTablePage(): React.ReactElement {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  const { data: userData, loading: userDataLoading } = useUsersFilterQuery({
+  const { data: userData, loading: userDataLoading } = useAllUsersForFiltersQuery({
     variables: { businessArea },
   });
 

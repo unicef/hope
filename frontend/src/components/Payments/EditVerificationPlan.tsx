@@ -12,7 +12,7 @@ import { Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CashPlan } from '../../apollo/queries/CashPlan';
+import { CashPlan } from '../../apollo/queries/payment/CashPlan';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';

@@ -14,7 +14,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { ALL_REPORTS_QUERY } from '../../apollo/queries/AllReports';
+import { ALL_REPORTS_QUERY } from '../../apollo/queries/reporting/AllReports';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
