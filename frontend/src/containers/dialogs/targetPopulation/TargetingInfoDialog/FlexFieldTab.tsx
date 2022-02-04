@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import InputLabel from '../../../../shared/InputLabel';
 import Select from '../../../../shared/Select';
 import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
-import { FlexFieldsTable } from '../../../tables/TargetPopulation/FlexFields';
+import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
