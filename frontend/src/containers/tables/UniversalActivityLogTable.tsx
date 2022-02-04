@@ -3,7 +3,7 @@ import {
   LogEntryNode,
   useAllLogEntriesQuery,
 } from '../../__generated__/graphql';
-import { ActivityLogTable } from '../../components/ActivityLogTable/ActivityLogTable';
+import { ActivityLogTable } from '../../components/core/ActivityLogTable/ActivityLogTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { decodeIdString } from '../../utils/utils';
 

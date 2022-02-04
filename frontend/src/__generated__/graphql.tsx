@@ -8611,6 +8611,23 @@ export type AllRegistrationDataImportsQuery = (
   )> }
 );
 
+export type ImportDataQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ImportDataQuery = (
+  { __typename?: 'Query' }
+  & { importData: Maybe<(
+    { __typename?: 'ImportDataNode' }
+    & Pick<ImportDataNode, 'id' | 'status' | 'numberOfIndividuals' | 'numberOfHouseholds' | 'error'>
+    & { validationErrors: Maybe<(
+      { __typename?: 'KoboErrorNode' }
+      & Pick<KoboErrorNode, 'header' | 'message'>
+    )> }
+  )> }
+);
+
 export type ImportedHouseholdQueryVariables = {
   id: Scalars['ID']
 };
@@ -16111,6 +16128,64 @@ export function useAllRegistrationDataImportsLazyQuery(baseOptions?: ApolloReact
 export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsQuery>;
 export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
 export type AllRegistrationDataImportsQueryResult = ApolloReactCommon.QueryResult<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>;
+export const ImportDataDocument = gql`
+    query ImportData($id: ID!) {
+  importData(id: $id) {
+    id
+    status
+    numberOfIndividuals
+    numberOfHouseholds
+    error
+    validationErrors {
+      header
+      message
+    }
+  }
+}
+    `;
+export type ImportDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportDataQuery, ImportDataQueryVariables>, 'query'> & ({ variables: ImportDataQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ImportDataComponent = (props: ImportDataComponentProps) => (
+      <ApolloReactComponents.Query<ImportDataQuery, ImportDataQueryVariables> query={ImportDataDocument} {...props} />
+    );
+    
+export type ImportDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportDataQuery, ImportDataQueryVariables> & TChildProps;
+export function withImportData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportDataQuery,
+  ImportDataQueryVariables,
+  ImportDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportDataQuery, ImportDataQueryVariables, ImportDataProps<TChildProps>>(ImportDataDocument, {
+      alias: 'importData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportDataQuery__
+ *
+ * To run a query within a React component, call `useImportDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportDataQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useImportDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportDataQuery, ImportDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportDataQuery, ImportDataQueryVariables>(ImportDataDocument, baseOptions);
+      }
+export function useImportDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportDataQuery, ImportDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportDataQuery, ImportDataQueryVariables>(ImportDataDocument, baseOptions);
+        }
+export type ImportDataQueryHookResult = ReturnType<typeof useImportDataQuery>;
+export type ImportDataLazyQueryHookResult = ReturnType<typeof useImportDataLazyQuery>;
+export type ImportDataQueryResult = ApolloReactCommon.QueryResult<ImportDataQuery, ImportDataQueryVariables>;
 export const ImportedHouseholdDocument = gql`
     query ImportedHousehold($id: ID!) {
   importedHousehold(id: $id) {

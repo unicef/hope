@@ -7,7 +7,7 @@ import {
   ProgramNode,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/LoadingComponent';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
