@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='household',
             name='child_hoh',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='household',
             name='consent',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='household',
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='household',
             name='fchild_hoh',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='household',
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='household',
             name='returnee',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='household',
@@ -63,17 +63,17 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='individual',
             name='administration_of_rutf',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='individual',
             name='enrolled_in_nutrition_programme',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='individual',
             name='pregnant',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.DeleteModel(
             name='HouseholdIdentity',

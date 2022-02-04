@@ -1,9 +1,10 @@
 import datetime
 import random
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.management import BaseCommand
+
+from dateutil.relativedelta import relativedelta
 from faker import Faker
 from openpyxl.drawing.image import Image
 
@@ -18,7 +19,9 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.utils import get_combined_attributes
 from hct_mis_api.apps.household.models import HEAD
-from hct_mis_api.apps.registration_datahub.template_generator import TemplateFileGenerator
+from hct_mis_api.apps.registration_datahub.template_generator import (
+    TemplateFileGenerator,
+)
 
 
 class Command(BaseCommand):

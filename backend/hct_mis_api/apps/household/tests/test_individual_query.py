@@ -1,16 +1,14 @@
 import unittest
 
 from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import (
-    IndividualFactory,
-    HouseholdFactory,
-)
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 

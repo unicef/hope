@@ -1,16 +1,20 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from itertools import permutations
 
-import dateutil.parser
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.template.loader import render_to_string
-from openpyxl import load_workbook, Workbook
+
+import dateutil.parser
+from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.writer.excel import save_virtual_workbook
 
-from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile, SanctionListIndividual
+from hct_mis_api.apps.sanction_list.models import (
+    SanctionListIndividual,
+    UploadedXLSXFile,
+)
 
 
 class CheckAgainstSanctionListTask:

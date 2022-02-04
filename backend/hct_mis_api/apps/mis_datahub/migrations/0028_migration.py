@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='individual',
             name='pregnant',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
     ]

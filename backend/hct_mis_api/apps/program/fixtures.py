@@ -8,7 +8,7 @@ from pytz import utc
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.models import Program, CashPlan
+from hct_mis_api.apps.program.models import CashPlan, Program
 
 
 class ProgramFactory(factory.DjangoModelFactory):

@@ -104,11 +104,11 @@ def initialise_countries():
 def copy_admin_area_data():
     areas = {}
     from django.db import models
+
     from hct_mis_api.apps.grievance.models import GrievanceTicket
     from hct_mis_api.apps.household.models import Household
     from hct_mis_api.apps.program.models import Program
-    from hct_mis_api.apps.reporting.models import DashboardReport
-    from hct_mis_api.apps.reporting.models import Report
+    from hct_mis_api.apps.reporting.models import DashboardReport, Report
 
     models_to_update = (
         GrievanceTicket,
@@ -140,14 +140,15 @@ def copy_admin_area_data():
 
 def copy_country_data():
     from django.db import models
-    from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
-    from hct_mis_api.apps.sanction_list.models import SanctionListIndividualDocument
-    from hct_mis_api.apps.sanction_list.models import SanctionListIndividualNationalities
-    from hct_mis_api.apps.sanction_list.models import SanctionListIndividualCountries
-    from hct_mis_api.apps.household.models import Agency
-    from hct_mis_api.apps.household.models import DocumentType
-    from hct_mis_api.apps.household.models import Household
+
     from hct_mis_api.apps.core.models import CountryCodeMap
+    from hct_mis_api.apps.household.models import Agency, DocumentType, Household
+    from hct_mis_api.apps.sanction_list.models import (
+        SanctionListIndividual,
+        SanctionListIndividualCountries,
+        SanctionListIndividualDocument,
+        SanctionListIndividualNationalities,
+    )
 
     models_to_update = (
         CountryCodeMap,

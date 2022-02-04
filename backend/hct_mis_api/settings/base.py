@@ -20,7 +20,7 @@ from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 from .config import env
 
 # domains/hosts etc.
