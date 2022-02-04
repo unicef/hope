@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 from django.db.models import Prefetch, Q
@@ -239,11 +240,21 @@ class RegistrationDataImportDatahubNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class KoboErrorNode(graphene.ObjectType):
+    header = graphene.String()
+    message = graphene.String()
+
+
 class ImportDataNode(DjangoObjectType):
+    validation_errors = graphene.Field(KoboErrorNode)
+
     class Meta:
         model = ImportData
         filter_fields = []
         interfaces = (relay.Node,)
+
+    def resolve_validation_errors(parrent, info):
+        return json.loads(parrent.validation_errors)
 
 
 class ImportedDocumentTypeNode(DjangoObjectType):
@@ -289,11 +300,6 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
 
 class XlsxRowErrorNode(graphene.ObjectType):
     row_number = graphene.Int()
-    header = graphene.String()
-    message = graphene.String()
-
-
-class KoboErrorNode(graphene.ObjectType):
     header = graphene.String()
     message = graphene.String()
 

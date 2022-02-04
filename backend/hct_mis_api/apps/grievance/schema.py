@@ -697,6 +697,9 @@ class Query(graphene.ObjectType):
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
+    def resolve_all_grievance_ticket(self, info, **kwargs):
+        return GrievanceTicket.objects.select_related("assigned_to", "created_by")
+
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
 

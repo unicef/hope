@@ -16,8 +16,8 @@ import {
   ButtonPlaceHolder,
   Cell,
   Row,
-} from '../../../components/ActivityLogTable/TableStyledComponents';
-import { Dashable } from '../../../components/Dashable';
+} from '../../../components/core/ActivityLogTable/TableStyledComponents';
+import { Dashable } from '../../../components/core/Dashable';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { headCells } from './MainActivityLogTableHeadCells';
 

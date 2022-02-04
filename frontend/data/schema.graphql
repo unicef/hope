@@ -866,6 +866,7 @@ type HouseholdNode implements Node {
   admin2: AdminAreaNode
   status: String
   programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
+  activeIndividualsCount: Int
 }
 
 type HouseholdNodeConnection {
@@ -968,11 +969,24 @@ type ImportDataNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  file: String!
+  status: ImportDataStatus!
+  businessAreaSlug: String!
+  file: String
   dataType: ImportDataDataType!
-  numberOfHouseholds: Int!
-  numberOfIndividuals: Int!
+  numberOfHouseholds: Int
+  numberOfIndividuals: Int
+  error: String!
+  validationErrors: KoboErrorNode
+  createdById: UUID
   registrationDataImport: RegistrationDataImportDatahubNode
+}
+
+enum ImportDataStatus {
+  PENDING
+  RUNNING
+  FINISHED
+  ERROR
+  VALIDATION_ERROR
 }
 
 type ImportXlsxCashPlanVerification {
@@ -2026,6 +2040,7 @@ type Mutations {
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportData(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataMutation
+  saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsyncMutation
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
   refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
@@ -2591,7 +2606,6 @@ enum RoleSubsystem {
 
 enum RuleCommitLanguage {
   PYTHON
-  INTERNAL
 }
 
 type RuleCommitNode implements Node {
@@ -2624,7 +2638,6 @@ type RuleCommitNodeEdge {
 
 enum RuleLanguage {
   PYTHON
-  INTERNAL
 }
 
 enum RuleSecurity {
@@ -2775,6 +2788,10 @@ type SanctionListIndividualNodeEdge {
   cursor: String!
 }
 
+type SaveKoboProjectImportDataAsyncMutation {
+  importData: ImportDataNode
+}
+
 type SaveKoboProjectImportDataMutation {
   importData: ImportDataNode
   errors: [KoboErrorNode]
@@ -2854,6 +2871,7 @@ type SteficonRuleNode implements Node {
   updatedBy: UserNode
   createdAt: DateTime!
   updatedAt: DateTime!
+  flags: JSONString!
   history(before: String, after: String, first: Int, last: Int): RuleCommitNodeConnection!
 }
 
