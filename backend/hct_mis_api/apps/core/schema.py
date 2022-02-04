@@ -38,7 +38,7 @@ class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
         field_name="admin_area_level__country__business_areas__slug",
     )
-    title = CharFilter(lookup_name="title", lookup_expr=["exact", "istartswith"])
+    title = CharFilter(field_name="title", lookup_expr=["exact", "istartswith"])
     level = IntegerFilter(
         field_name="level",
     )
