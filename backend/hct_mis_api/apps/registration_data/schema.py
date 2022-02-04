@@ -26,16 +26,11 @@ from hct_mis_api.apps.registration_datahub.models import UNIQUE_IN_BATCH
 class RegistrationDataImportFilter(FilterSet):
     import_date = DateFilter(field_name="import_date__date")
     business_area = CharFilter(field_name="business_area__slug")
+    name = CharFilter(field_name="name", lookup_expr=["exact", "startswith"])
 
     class Meta:
         model = RegistrationDataImport
-        fields = {
-            "imported_by__id": ["exact"],
-            "import_date": ["exact"],
-            "status": ["exact"],
-            "name": ["exact", "startswith"],
-            "business_area": ["exact"],
-        }
+        fields = ["imported_by__id", "import_date", "status", "name", "business_area"]
 
     order_by = CustomOrderingFilter(
         fields=(

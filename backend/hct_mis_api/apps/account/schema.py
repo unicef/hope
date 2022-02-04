@@ -47,23 +47,19 @@ def permissions_resolver(user_roles):
 
 class UsersFilter(FilterSet):
     business_area = CharFilter(required=True, method="business_area_filter")
-    search = CharFilter(method="search_filter")
+    search = CharFilter(method="search_filter", lookup_expr=["exact", "startswith"])
     status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
-    partner = MultipleChoiceFilter(
-        choices=Partner.get_partners_as_choices(), method="partners_filter"
-    )
-    roles = MultipleChoiceFilter(
-        choices=Role.get_roles_as_choices(), method="roles_filter"
-    )
+    partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices(), method="partners_filter")
+    roles = MultipleChoiceFilter(choices=Role.get_roles_as_choices(), method="roles_filter")
 
     class Meta:
         model = get_user_model()
-        fields = {
-            "search": ["exact", "startswith"],
-            "status": ["exact"],
-            "partner": ["exact"],
-            "roles": ["exact"],
-        }
+        fields = [
+            "search",
+            "status",
+            "partner",
+            "roles",
+        ]
 
     order_by = CustomOrderingFilter(
         fields=(
@@ -121,9 +117,7 @@ class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
 
     def resolve_permissions(self, info):
-        user_roles = UserRole.objects.filter(
-            user=info.context.user, business_area_id=self.id
-        )
+        user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
         return permissions_resolver(user_roles)
 
     class Meta:
@@ -198,18 +192,14 @@ class Query(graphene.ObjectType):
         UserNode,
         filterset_class=UsersFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(
-                Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY
-            ),
+            hopeOneOfPermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
     )
     # all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
     user_roles_choices = graphene.List(ChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
-    has_available_users_to_export = graphene.Boolean(
-        business_area_slug=graphene.String(required=True)
-    )
+    has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
 
     # def resolve_all_log_entries(self, info, **kwargs):
     #     object_id = kwargs.get('object_id')
