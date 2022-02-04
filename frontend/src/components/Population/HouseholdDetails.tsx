@@ -8,13 +8,13 @@ import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../__generated__/graphql';
-import { ContentLink } from '../ContentLink';
-import { LabelizedField } from '../LabelizedField';
+import { ContentLink } from '../core/ContentLink';
+import { LabelizedField } from '../core/LabelizedField';
 import { MiśTheme } from '../../theme';
 import {
   BigValue,
   BigValueContainer,
-} from '../../containers/registration/details/RegistrationDetails';
+} from '../rdi/details/RegistrationDetails';
 
 const Container = styled.div`
   display: flex;

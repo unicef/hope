@@ -1,4 +1,4 @@
-import { HeadCell } from '../../Table/EnhancedTableHead';
+import { HeadCell } from '../../core/Table/EnhancedTableHead';
 import { AllSanctionListIndividualsQuery } from '../../../__generated__/graphql';
 
 export const headCells: HeadCell<

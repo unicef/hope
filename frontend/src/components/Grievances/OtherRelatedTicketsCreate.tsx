@@ -6,9 +6,9 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
 import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
-import { ContentLink } from '../ContentLink';
-import { LabelizedField } from '../LabelizedField';
-import { LoadingComponent } from '../LoadingComponent';
+import { ContentLink } from '../core/ContentLink';
+import { LabelizedField } from '../core/LabelizedField';
+import { LoadingComponent } from '../core/LoadingComponent';
 
 const StyledBox = styled(Paper)`
   border-radius: 3px;

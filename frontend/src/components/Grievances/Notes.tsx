@@ -20,8 +20,8 @@ import {
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../__generated__/graphql';
-import { OverviewContainerColumn } from '../OverviewContainerColumn';
-import { UniversalMoment } from '../UniversalMoment';
+import { OverviewContainerColumn } from '../core/OverviewContainerColumn';
+import { UniversalMoment } from '../core/UniversalMoment';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;

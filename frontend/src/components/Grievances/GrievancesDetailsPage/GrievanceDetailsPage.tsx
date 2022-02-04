@@ -23,14 +23,14 @@ import {
   useGrievanceTicketQuery,
   useMeQuery,
 } from '../../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../../ContainerColumnWithBorder';
-import { ContentLink } from '../../ContentLink';
-import { LabelizedField } from '../../LabelizedField';
-import { LoadingComponent } from '../../LoadingComponent';
-import { OverviewContainer } from '../../OverviewContainer';
-import { PermissionDenied } from '../../PermissionDenied';
-import { StatusBox } from '../../StatusBox';
-import { UniversalMoment } from '../../UniversalMoment';
+import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
+import { ContentLink } from '../../core/ContentLink';
+import { LabelizedField } from '../../core/LabelizedField';
+import { LoadingComponent } from '../../core/LoadingComponent';
+import { OverviewContainer } from '../../core/OverviewContainer';
+import { PermissionDenied } from '../../core/PermissionDenied';
+import { StatusBox } from '../../core/StatusBox';
+import { UniversalMoment } from '../../core/UniversalMoment';
 import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails';
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
 import { FlagDetails } from '../FlagDetails';

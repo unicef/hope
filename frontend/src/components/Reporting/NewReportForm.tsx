@@ -28,8 +28,8 @@ import {
   useCreateReportMutation,
   useReportChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { FieldLabel } from '../FieldLabel';
-import { LoadingComponent } from '../LoadingComponent';
+import { FieldLabel } from '../core/FieldLabel';
+import { LoadingComponent } from '../core/LoadingComponent';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

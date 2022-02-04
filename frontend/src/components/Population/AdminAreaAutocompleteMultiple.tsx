@@ -11,8 +11,8 @@ import {
   AllAdminAreasQuery,
   useAllAdminAreasQuery,
 } from '../../__generated__/graphql';
-import { FieldLabel } from '../FieldLabel';
-import { LoadingComponent } from '../LoadingComponent';
+import { FieldLabel } from '../core/FieldLabel';
+import { LoadingComponent } from '../core/LoadingComponent';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;

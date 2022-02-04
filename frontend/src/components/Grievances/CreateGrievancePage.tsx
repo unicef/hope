@@ -33,11 +33,11 @@ import {
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../BreadCrumbs';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { LoadingComponent } from '../LoadingComponent';
-import { PageHeader } from '../PageHeader';
-import { PermissionDenied } from '../PermissionDenied';
+import { BreadCrumbsItem } from '../core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
+import { LoadingComponent } from '../core/LoadingComponent';
+import { PageHeader } from '../core/PageHeader';
+import { PermissionDenied } from '../core/PermissionDenied';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { Consent } from './Consent';
 import { EditHouseholdDataChange } from './EditHouseholdDataChange/EditHouseholdDataChange';

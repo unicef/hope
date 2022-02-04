@@ -14,7 +14,7 @@ import {
   IndividualRoleInHouseholdRole,
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../ConfirmationDialog';
+import { ConfirmationDialog } from '../core/ConfirmationDialog';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
 
 const StyledBox = styled(Paper)`

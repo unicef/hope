@@ -9,8 +9,8 @@ import {
   HouseholdDetailedFragment,
   useAllHouseholdsFlexFieldsAttributesQuery,
 } from '../../__generated__/graphql';
-import { LabelizedField } from '../LabelizedField';
-import { LoadingComponent } from '../LoadingComponent';
+import { LabelizedField } from '../core/LabelizedField';
+import { LoadingComponent } from '../core/LoadingComponent';
 import { HouseholdFlexFieldPhotoModal } from './HouseholdFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`

@@ -3,7 +3,7 @@ import React from 'react';
 import moment from 'moment';
 import { DATE_FORMAT } from '../../../config';
 import { AllSanctionListIndividualsQuery } from '../../../__generated__/graphql';
-import { UniversalMoment } from '../../UniversalMoment';
+import { UniversalMoment } from '../../core/UniversalMoment';
 
 export const SanctionListIndividualsTableRow = ({
   individual,

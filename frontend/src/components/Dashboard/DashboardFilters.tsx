@@ -13,8 +13,8 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import { useAllProgramsQuery } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { AdminAreaAutocomplete } from '../Population/AdminAreaAutocomplete';
+import { LoadingComponent } from '../core/LoadingComponent';
+import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
 
 const Container = styled(Paper)`
   display: flex;

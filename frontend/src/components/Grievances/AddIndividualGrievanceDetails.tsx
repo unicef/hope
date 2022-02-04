@@ -11,8 +11,8 @@ import {
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { LabelizedField } from '../LabelizedField';
+import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { LabelizedField } from '../core/LabelizedField';
 
 const StyledBox = styled(Paper)`
   display: flex;

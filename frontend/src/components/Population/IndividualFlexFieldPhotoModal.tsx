@@ -2,7 +2,7 @@ import { Box } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useIndividualFlexFieldsQuery } from '../../__generated__/graphql';
-import { PhotoModal } from '../PhotoModal/PhotoModal';
+import { PhotoModal } from '../core/PhotoModal/PhotoModal';
 
 export const IndividualFlexFieldPhotoModal = ({
   field,

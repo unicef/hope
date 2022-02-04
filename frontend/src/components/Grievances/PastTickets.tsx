@@ -2,10 +2,10 @@ import { Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { LabelizedField } from '../LabelizedField';
-import { Missing } from '../Missing';
-import { OverviewContainer } from '../OverviewContainer';
+import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
+import { LabelizedField } from '../core/LabelizedField';
+import { Missing } from '../core/Missing';
+import { OverviewContainer } from '../core/OverviewContainer';
 
 const PastContainer = styled.div`
   padding: 22px 22px 22px 0;
