@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FieldChooser } from '../../components/TargetPopulation/FieldChooser';
-import { SubField } from '../../components/TargetPopulation/SubField';
+import { FieldChooser } from '../../components/targeting/FieldChooser';
+import { SubField } from '../../components/targeting/SubField';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 
 const Divider = styled.div`

@@ -5,8 +5,8 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import { Box, Collapse, IconButton, TableRow } from '@material-ui/core';
 import { UserNode } from '../../../__generated__/graphql';
-import { UniversalMoment } from '../../../components/UniversalMoment';
-import { StatusBox } from '../../../components/StatusBox';
+import { UniversalMoment } from '../../../components/core/UniversalMoment';
+import { StatusBox } from '../../../components/core/StatusBox';
 import { userStatusToColor } from '../../../utils/utils';
 
 const StatusContainer = styled.div`
