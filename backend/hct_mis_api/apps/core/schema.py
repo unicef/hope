@@ -38,16 +38,17 @@ class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
         field_name="admin_area_level__country__business_areas__slug",
     )
+    title = CharFilter(lookup_name="title", lookup_expr=["exact", "istartswith"])
     level = IntegerFilter(
         field_name="level",
     )
 
     class Meta:
         model = AdminArea
-        fields = {
-            "title": ["exact", "istartswith"],
+        fields = [
+            "title",
             # "business_area": ["exact"],
-        }
+        ]
 
 
 class ChoiceObject(graphene.ObjectType):
