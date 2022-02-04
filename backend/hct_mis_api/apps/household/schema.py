@@ -105,6 +105,10 @@ INDIVIDUALS_CHART_LABELS = [
 
 class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
+    country_origin = CharFilter(field_name="country_origin", lookup_expr=["exact", "startswith"])
+    head_of_household__full_name = CharFilter(
+        field_name="head_of_household__full_name", lookup_expr=["exact", "startswith"]
+    )
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
@@ -113,18 +117,18 @@ class HouseholdFilter(FilterSet):
 
     class Meta:
         model = Household
-        fields = {
-            "business_area": ["exact"],
-            "country_origin": ["exact", "startswith"],
-            "address": ["exact", "startswith"],
-            "head_of_household__full_name": ["exact", "startswith"],
-            "size": ["range", "lte", "gte"],
-            "admin_area": ["exact"],
-            "target_populations": ["exact"],
-            "programs": ["exact"],
-            "residence_status": ["exact"],
-            "withdrawn": ["exact"],
-        }
+        fields = [
+            "business_area",
+            "country_origin",
+            "address",
+            "head_of_household__full_name",
+            "size",
+            "admin_area",
+            "target_populations",
+            "programs",
+            "residence_status",
+            "withdrawn",
+        ]
 
     order_by = CustomOrderingFilter(
         fields=(
@@ -167,7 +171,7 @@ class IndividualFilter(FilterSet):
     business_area = CharFilter(
         field_name="business_area__slug",
     )
-    age = AgeRangeFilter(field_name="birth_date")
+    age = AgeRangeFilter(field_name="birth_date", lookup_expr=["range", "lte", "gte"])
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
@@ -176,20 +180,21 @@ class IndividualFilter(FilterSet):
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
+    full_name = CharFilter(field_name="full_name", lookup_expr=["exact", "startswith", "endswith"])
     flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
 
     class Meta:
         model = Individual
-        fields = {
-            "household__id": ["exact"],
-            "programs": ["exact"],
-            "business_area": ["exact"],
-            "full_name": ["exact", "startswith", "endswith"],
-            "age": ["range", "lte", "gte"],
-            "sex": ["exact"],
-            "household__admin_area": ["exact"],
-            "withdrawn": ["exact"],
-        }
+        fields = [
+            "household__id",
+            "programs",
+            "business_area",
+            "full_name",
+            "age",
+            "sex",
+            "household__admin_area",
+            "withdrawn",
+        ]
 
     order_by = CustomOrderingFilter(
         fields=(

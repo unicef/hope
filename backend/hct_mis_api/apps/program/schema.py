@@ -116,19 +116,23 @@ class CashPlanFilter(FilterSet):
     verification_status = MultipleChoiceFilter(
         field_name="verification_status", choices=CashPlanPaymentVerification.STATUS_CHOICES
     )
-    business_area = CharFilter(
-        field_name="business_area__slug",
+    assistance_through = CharFilter(field_name="assistance_through", lookup_expr=["exact", "startswith"])
+    service_provider__full_name = CharFilter(
+        field_name="service_provider__full_name", lookup_expr=["exact", "startswith"]
     )
+    end_date = DateFilter(field_name="end_date", lookup_expr=["exact", "lte", "gte"])
+    start_date = DateFilter(field_name="start_date", lookup_expr=["exact", "lte", "gte"])
+    business_area = CharFilter(field_name="business_area__slug", lookup_expr=["exact", "startswith"])
 
     class Meta:
-        fields = {
-            "program": ["exact"],
-            "assistance_through": ["exact", "startswith"],
-            "service_provider__full_name": ["exact", "startswith"],
-            "start_date": ["exact", "lte", "gte"],
-            "end_date": ["exact", "lte", "gte"],
-            "business_area": ["exact"],
-        }
+        fields = (
+            "program",
+            "assistance_through",
+            "service_provider__full_name",
+            "start_date",
+            "end_date",
+            "business_area",
+        )
         model = CashPlan
 
     order_by = OrderingFilter(
