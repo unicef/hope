@@ -49,7 +49,7 @@ export function DeleteIndividualGrievanceDetails({
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const isHeadOfHousehold =
     ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
-  const isOneIndividual = ticket?.household.activeIndividualsCount === 1;
+  const isOneIndividual = ticket?.household?.activeIndividualsCount === 1;
   const primaryCollectorRolesCount =
     ticket?.individual?.householdsAndRoles.filter(
       (el) => el.role === IndividualRoleInHouseholdRole.Primary,
