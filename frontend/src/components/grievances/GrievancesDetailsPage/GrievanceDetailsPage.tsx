@@ -258,7 +258,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
       household =
         ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
     }
-    const isOneIndividual = household.activeIndividualsCount === 1;
+    const isOneIndividual = household?.activeIndividualsCount === 1;
 
     if (isOneIndividual) return false;
     const isRightCategory =
