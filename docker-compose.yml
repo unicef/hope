@@ -115,14 +115,14 @@ services:
       - redis
 
   db:
-    image: mdillon/postgis:9.5-alpine
+    image: mdillon/postgis:11-alpine
     volumes:
       - db:/var/lib/postgresql/data
     env_file:
       - .env
 
   cash_assist_datahub_db:
-    image: mdillon/postgis:9.5-alpine
+    image: mdillon/postgis:11-alpine
     volumes:
       - db_ca:/var/lib/postgresql/data
     env_file:
@@ -131,7 +131,7 @@ services:
       - "5433:5432"
 
   registration_datahub_db:
-    image: mdillon/postgis:9.5-alpine
+    image: mdillon/postgis:11-alpine
     volumes:
       - db_reg:/var/lib/postgresql/data
     env_file:

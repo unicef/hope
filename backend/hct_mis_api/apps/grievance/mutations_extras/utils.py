@@ -25,16 +25,12 @@ def handle_role(role, household, individual):
     )
 
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
-        already_existing_role = IndividualRoleInHousehold.objects.filter(
-            household=household, role=role
-        ).first()
+        already_existing_role = IndividualRoleInHousehold.objects.filter(household=household, role=role).first()
         if already_existing_role:
             already_existing_role.individual = individual
             already_existing_role.save()
         else:
-            IndividualRoleInHousehold.objects.create(
-                individual=individual, household=household, role=role
-            )
+            IndividualRoleInHousehold.objects.create(individual=individual, household=household, role=role)
 
 
 def handle_add_document(document, individual):
@@ -53,20 +49,12 @@ def handle_add_document(document, individual):
         photo = photoraw
     document_type = DocumentType.objects.get(country=country, type=type_name)
 
-    document_already_exists = Document.objects.filter(
-        document_number=number, type=document_type
-    ).exists()
+    document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
     if document_already_exists:
-        logger.error(
-            f"Document with number {number} of type {type_name} for country {country} already exist"
-        )
-        raise GraphQLError(
-            f"Document with number {number} of type {type_name} for country {country} already exist"
-        )
+        logger.error(f"Document with number {number} of type {type_name} for country {country} already exist")
+        raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
 
-    return Document(
-        document_number=number, individual=individual, type=document_type, photo=photo
-    )
+    return Document(document_number=number, individual=individual, type=document_type, photo=photo)
 
 
 def handle_edit_document(document_data: dict):
@@ -96,17 +84,11 @@ def handle_edit_document(document_data: dict):
     document_type = DocumentType.objects.get(country=country, type=type_name)
 
     document_already_exists = (
-        Document.objects.exclude(pk=document_id)
-        .filter(document_number=number, type=document_type)
-        .exists()
+        Document.objects.exclude(pk=document_id).filter(document_number=number, type=document_type).exists()
     )
     if document_already_exists:
-        logger.error(
-            f"Document with number {number} of type {type_name} for country {country} already exist"
-        )
-        raise GraphQLError(
-            f"Document with number {number} of type {type_name} for country {country} already exist"
-        )
+        logger.error(f"Document with number {number} of type {type_name} for country {country} already exist")
+        raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
 
     document.document_number = number
     document.type = document_type
@@ -134,16 +116,10 @@ def handle_add_identity(identity, individual):
         },
     )
 
-    identity_already_exists = IndividualIdentity.objects.filter(
-        number=number, agency=agency_type
-    ).exists()
+    identity_already_exists = IndividualIdentity.objects.filter(number=number, agency=agency_type).exists()
     if identity_already_exists:
-        logger.error(
-            f"Identity with number {number}, agency: {agency_name} already exist"
-        )
-        raise GraphQLError(
-            f"Identity with number {number}, agency: {agency_name} already exist"
-        )
+        logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
+        raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
 
     return IndividualIdentity(number=number, individual=individual, agency=agency_type)
 
@@ -178,17 +154,11 @@ def handle_edit_identity(identity_data: dict):
     )
 
     identity_already_exists = (
-        IndividualIdentity.objects.exclude(pk=identity_id)
-        .filter(number=number, agency=agency_type)
-        .exists()
+        IndividualIdentity.objects.exclude(pk=identity_id).filter(number=number, agency=agency_type).exists()
     )
     if identity_already_exists:
-        logger.error(
-            f"Identity with number {number}, agency: {agency_name} already exist"
-        )
-        raise GraphQLError(
-            f"Identity with number {number}, agency: {agency_name} already exist"
-        )
+        logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
+        raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
 
     identity.number = number
     identity.agency = agency_type
@@ -306,18 +276,14 @@ def prepare_edit_identities(identities):
                     "id": encoded_id,
                     "country": country,
                     "agency": agency,
-                    "individual": encode_id_base64(
-                        identity.individual.id, "Individual"
-                    ),
+                    "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": number,
                 },
                 "previous_value": {
                     "id": encoded_id,
                     "country": identity.agency.country.alpha3,
                     "agency": identity.agency.type,
-                    "individual": encode_id_base64(
-                        identity.individual.id, "Individual"
-                    ),
+                    "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": identity.number,
                 },
             }
@@ -357,12 +323,8 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
     if associated_with not in ("households", "individuals"):
-        logger.error(
-            "associated_with argument must be one of ['household', 'individual']"
-        )
-        raise ValueError(
-            "associated_with argument must be one of ['household', 'individual']"
-        )
+        logger.error("associated_with argument must be one of ['household', 'individual']")
+        raise ValueError("associated_with argument must be one of ['household', 'individual']")
 
     all_flex_fields = serialize_flex_attributes().get(associated_with, {})
 
@@ -373,10 +335,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
             raise ValueError(f"{name} is not a correct `flex field")
         field_type = flex_field["type"]
         field_choices = {f.get("value") for f in flex_field["choices"]}
-        if (
-            not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type])
-            or value is None
-        ):
+        if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
             logger.error(f"invalid value type for a field {name}")
             raise ValueError(f"invalid value type for a field {name}")
 
@@ -395,30 +354,16 @@ def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove,
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(
-        ticket_details.ticket,
-        individual_to_remove,
-        ticket_details.role_reassign_data,
-        info,
-    )
+    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
     withdraw_individual(individual_to_remove, info, old_individual, household)
 
 
-def mark_as_duplicate_individual_and_reassign_roles(
-    ticket_details, individual_to_remove, info, unique_individual
-):
+def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_to_remove, info, unique_individual):
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(
-        ticket_details.ticket,
-        individual_to_remove,
-        ticket_details.role_reassign_data,
-        info,
-    )
-    mark_as_duplicate_individual(
-        individual_to_remove, info, old_individual, household, unique_individual
-    )
+    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
+    mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
 
 
 def get_data_from_role_data(role_data):
@@ -439,9 +384,7 @@ def get_data_from_role_data(role_data):
     return role_name, old_individual, new_individual, household
 
 
-def reassign_roles_on_disable_individual(
-    ticket, individual_to_remove, role_reassign_data, info=None
-):
+def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_data, info=None):
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -467,9 +410,7 @@ def reassign_roles_on_disable_individual(
             household.head_of_household = new_individual
             # can be directly saved, because there is always only one head of household to update
             household.save()
-            household.individuals.exclude(id=new_individual.id).update(
-                relationship=RELATIONSHIP_UNKNOWN
-            )
+            household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             new_individual.relationship = HEAD
             new_individual.save()
             if info:
@@ -482,9 +423,7 @@ def reassign_roles_on_disable_individual(
                 )
 
         if role_name == ROLE_ALTERNATE and new_individual.role == ROLE_PRIMARY:
-            raise GraphQLError(
-                "Cannot reassign the role. Selected individual has primary collector role."
-            )
+            raise GraphQLError("Cannot reassign the role. Selected individual has primary collector role.")
 
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
@@ -496,40 +435,25 @@ def reassign_roles_on_disable_individual(
             role.individual = new_individual
             roles_to_bulk_update.append(role)
 
-    primary_roles_count = Counter(
-        [role.get("role") for role in role_reassign_data.values()]
-    )[ROLE_PRIMARY]
+    primary_roles_count = Counter([role.get("role") for role in role_reassign_data.values()])[ROLE_PRIMARY]
 
     household_to_remove = individual_to_remove.household
-    is_one_individual = (
-        household_to_remove.individuals.count() == 1 if household_to_remove else False
-    )
+    is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False
 
-    if (
-        primary_roles_count != individual_to_remove.count_primary_roles()
-        and not is_one_individual
-    ):
+    if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
         logger.error("Ticket cannot be closed, not all roles have been reassigned")
-        raise GraphQLError(
-            "Ticket cannot be closed, not all roles have been reassigned"
-        )
+        raise GraphQLError("Ticket cannot be closed, not all roles have been reassigned")
 
     if (
         all(HEAD not in key for key in role_reassign_data.keys())
         and individual_to_remove.is_head()
         and not is_one_individual
     ):
-        logger.error(
-            "Ticket cannot be closed head of household has not been reassigned"
-        )
-        raise GraphQLError(
-            "Ticket cannot be closed head of household has not been reassigned"
-        )
+        logger.error("Ticket cannot be closed head of household has not been reassigned")
+        raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
 
     if roles_to_bulk_update:
-        IndividualRoleInHousehold.objects.bulk_update(
-            roles_to_bulk_update, ["individual"]
-        )
+        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
     return household_to_remove
 
@@ -569,9 +493,7 @@ def reassign_roles_on_update(individual, role_reassign_data, info=None):
                 )
 
         if role_name == ROLE_ALTERNATE and new_individual.role == ROLE_PRIMARY:
-            raise GraphQLError(
-                "Cannot reassign the role. Selected individual has primary collector role."
-            )
+            raise GraphQLError("Cannot reassign the role. Selected individual has primary collector role.")
 
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
@@ -584,14 +506,10 @@ def reassign_roles_on_update(individual, role_reassign_data, info=None):
             roles_to_bulk_update.append(role)
 
     if roles_to_bulk_update:
-        IndividualRoleInHousehold.objects.bulk_update(
-            roles_to_bulk_update, ["individual"]
-        )
+        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
 
-def withdraw_individual(
-    individual_to_remove, info, old_individual_to_remove, removed_individual_household
-):
+def withdraw_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household):
     individual_to_remove.withdraw()
     log_and_withdraw_household_if_needed(
         individual_to_remove,
@@ -630,10 +548,7 @@ def log_and_withdraw_household_if_needed(
         individual_to_remove,
     )
     removed_individual_household.refresh_from_db()
-    if (
-        removed_individual_household
-        and removed_individual_household.active_individuals.count() == 0
-    ):
+    if removed_individual_household and removed_individual_household.active_individuals.count() == 0:
         removed_individual_household.withdraw()
 
 
@@ -642,12 +557,8 @@ def save_images(flex_fields, associated_with):
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
     if associated_with not in ("households", "individuals"):
-        logger.error(
-            "associated_with argument must be one of ['household', 'individual']"
-        )
-        raise ValueError(
-            "associated_with argument must be one of ['household', 'individual']"
-        )
+        logger.error("associated_with argument must be one of ['household', 'individual']")
+        raise ValueError("associated_with argument must be one of ['household', 'individual']")
 
     all_flex_fields = serialize_flex_attributes().get(associated_with, {})
 
@@ -659,12 +570,8 @@ def save_images(flex_fields, associated_with):
 
         if flex_field["type"] == TYPE_IMAGE:
             if isinstance(value, InMemoryUploadedFile):
-                file_name = "".join(
-                    random.choices(string.ascii_uppercase + string.digits, k=3)
-                )
-                flex_fields[name] = default_storage.save(
-                    f"{file_name}-{timezone.now()}.jpg", value
-                )
+                file_name = "".join(random.choices(string.ascii_uppercase + string.digits, k=3))
+                flex_fields[name] = default_storage.save(f"{file_name}-{timezone.now()}.jpg", value)
             elif isinstance(value, str):
                 file_name = value.replace(default_storage.base_url, "")
                 unquoted_value = urllib.parse.unquote(file_name)
@@ -676,9 +583,7 @@ def generate_filename() -> str:
     return f"{file_name}-{timezone.now()}"
 
 
-def handle_photo(
-    photo: Union[InMemoryUploadedFile, str], photoraw: str
-) -> Optional[str]:
+def handle_photo(photo: Union[InMemoryUploadedFile, str], photoraw: str) -> Optional[str]:
     if isinstance(photo, InMemoryUploadedFile):
         return default_storage.save(f"{generate_filename()}.jpg", photo)
     elif isinstance(photo, str):
