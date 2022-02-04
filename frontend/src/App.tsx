@@ -10,13 +10,13 @@ import { ApolloProvider } from '@apollo/react-hooks';
 import * as Sentry from '@sentry/react';
 import { theme } from './theme';
 import { HomeRouter } from './containers/HomeRouter';
-import { ProfilePage } from './containers/pages/ProfilePage';
+import { ProfilePage } from './containers/pages/core/ProfilePage';
 import { client } from './apollo/client';
-import { LoginPage } from './containers/pages/LoginPage';
+import { LoginPage } from './containers/pages/core/LoginPage';
 import { DefaultRoute } from './containers/DefaultRoute';
-import { SanctionList } from './containers/pages/SanctionList';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { AutoLogout } from './components/AutoLogout';
+import { SanctionList } from './containers/pages/core/SanctionList';
+import { ProtectedRoute } from './components/core/ProtectedRoute';
+import { AutoLogout } from './components/core/AutoLogout';
 
 export const App: React.FC = () => {
   return (

@@ -8,7 +8,7 @@ import {
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { LoadingComponent } from '../../../components/LoadingComponent';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 
 const IconContainer = styled.span`
   button {

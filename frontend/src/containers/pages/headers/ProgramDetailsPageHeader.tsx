@@ -1,7 +1,7 @@
 import React from 'react';
 import { ProgramNode, ProgramStatus } from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/PageHeader';
-import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
