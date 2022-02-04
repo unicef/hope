@@ -14,8 +14,8 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 class TestIndividualQuery(APITestCase):
     ALL_INDIVIDUALS_QUERY = """
-    query AllIndividuals {
-      allIndividuals(businessArea: "afghanistan") {
+    query AllIndividuals($search: String) {
+      allIndividuals(businessArea: "afghanistan", search: $search) {
         edges {
           node {
             fullName
@@ -181,4 +181,19 @@ class TestIndividualQuery(APITestCase):
             request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
             context={"user": self.user},
             variables={"programs": [self.program_two.id]},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_filter(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user},
+            variables={"search": "001-296-358-5428-607"},
         )

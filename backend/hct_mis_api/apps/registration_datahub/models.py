@@ -80,39 +80,17 @@ class ImportedHousehold(TimeStampedUUIDModel):
     male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_0_5_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    female_age_group_18_59_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    female_age_group_60_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    male_age_group_0_5_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    male_age_group_6_11_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    male_age_group_12_17_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    male_age_group_18_59_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    male_age_group_60_disabled_count = models.PositiveIntegerField(
-        default=None, null=True
-    )
-    head_of_household = models.OneToOneField(
-        "ImportedIndividual", on_delete=models.CASCADE, null=True
-    )
+    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    head_of_household = models.OneToOneField("ImportedIndividual", on_delete=models.CASCADE, null=True)
     fchild_hoh = models.BooleanField(null=True)
     child_hoh = models.BooleanField(null=True)
     registration_data_import = models.ForeignKey(
@@ -127,17 +105,11 @@ class ImportedHousehold(TimeStampedUUIDModel):
     start = models.DateTimeField(blank=True, null=True)
     deviceid = models.CharField(max_length=250, blank=True)
     name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
-    org_enumerator = models.CharField(
-        max_length=250, choices=ORG_ENUMERATOR_CHOICES, blank=True, default=BLANK
-    )
+    org_enumerator = models.CharField(max_length=250, choices=ORG_ENUMERATOR_CHOICES, blank=True, default=BLANK)
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
-    registration_method = models.CharField(
-        max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK
-    )
-    collect_individual_data = models.CharField(
-        max_length=250, choices=YES_NO_CHOICE, default=BLANK
-    )
+    registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
+    collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
@@ -192,9 +164,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         related_name="individuals",
         on_delete=models.CASCADE,
     )
-    disability = models.CharField(
-        max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED
-    )
+    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
     work_status = models.CharField(
         max_length=20,
         choices=WORK_STATUS_CHOICE,
@@ -220,24 +190,12 @@ class ImportedIndividual(TimeStampedUUIDModel):
     flex_fields = JSONField(default=dict)
     pregnant = models.BooleanField(null=True)
     observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE)
-    seeing_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
-    )
-    hearing_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
-    )
-    physical_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
-    )
-    memory_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
-    )
-    selfcare_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
-    )
-    comms_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
-    )
+    seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    physical_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    memory_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    selfcare_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
@@ -319,9 +277,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    import_done = models.CharField(
-        max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED
-    )
+    import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
     business_area_slug = models.CharField(max_length=250, blank=True)
 
     class Meta:
@@ -342,11 +298,33 @@ class ImportData(TimeStampedUUIDModel):
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
     )
+    STATUS_PENDING = "PENDING"
+    STATUS_RUNNING = "RUNNING"
+    STATUS_FINISHED = "FINISHED"
+    STATUS_ERROR = "ERROR"
+    STATUS_VALIDATION_ERROR = "VALIDATION_ERROR"
 
-    file = models.FileField()
+    STATUS_CHOICES = (
+        (STATUS_PENDING, _("Pending")),
+        (STATUS_RUNNING, _("Running")),
+        (STATUS_FINISHED, _("Finished")),
+        (STATUS_ERROR, _("Error")),
+        (STATUS_VALIDATION_ERROR, _("Validation Error")),
+    )
+    status = models.CharField(max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES)
+    business_area_slug = models.CharField(max_length=200, blank=True)
+    file = models.FileField(null=True)
     data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
-    number_of_households = models.PositiveIntegerField()
-    number_of_individuals = models.PositiveIntegerField()
+    number_of_households = models.PositiveIntegerField(null=True)
+    number_of_individuals = models.PositiveIntegerField(null=True)
+    error = models.TextField(blank=True)
+    validation_errors = models.TextField(blank=True)
+    created_by_id = models.UUIDField(null=True)
+
+
+class KoboImportData(ImportData):
+    kobo_asset_id = models.CharField(max_length=100)
+    only_active_submissions = models.BooleanField(default=True)
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -373,9 +351,7 @@ class ImportedDocumentType(TimeStampedUUIDModel):
 class ImportedDocument(TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
-    individual = models.ForeignKey(
-        "ImportedIndividual", related_name="documents", on_delete=models.CASCADE
-    )
+    individual = models.ForeignKey("ImportedIndividual", related_name="documents", on_delete=models.CASCADE)
     type = models.ForeignKey(
         "ImportedDocumentType",
         related_name="documents",
@@ -408,9 +384,7 @@ class ImportedAgency(models.Model):
 
 
 class ImportedIndividualIdentity(models.Model):
-    agency = models.ForeignKey(
-        "ImportedAgency", related_name="identities", on_delete=models.CASCADE
-    )
+    agency = models.ForeignKey("ImportedAgency", related_name="identities", on_delete=models.CASCADE)
     individual = models.ForeignKey(
         "ImportedIndividual",
         related_name="identities",
@@ -425,17 +399,13 @@ class ImportedIndividualIdentity(models.Model):
 
 
 class KoboImportedSubmission(models.Model):
-    created_at = models.DateTimeField(
-        auto_now_add=True, db_index=True, null=True, blank=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, null=True, blank=True)
     kobo_submission_uuid = models.UUIDField()
     kobo_asset_id = models.CharField(max_length=150)
     kobo_submission_time = models.DateTimeField()
     # we use on_delete=models.SET_NULL because we want to be able to delete
     # ImportedHousehold without loosing track of importing
-    imported_household = models.ForeignKey(
-        ImportedHousehold, blank=True, null=True, on_delete=models.SET_NULL
-    )
+    imported_household = models.ForeignKey(ImportedHousehold, blank=True, null=True, on_delete=models.SET_NULL)
     amended = models.BooleanField(default=False, blank=True)
 
     registration_data_import = models.ForeignKey(
