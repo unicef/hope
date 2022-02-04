@@ -14,10 +14,10 @@ import {
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { LabelizedField } from '../LabelizedField';
-import { LoadingComponent } from '../LoadingComponent';
-import { UniversalMoment } from '../UniversalMoment';
+import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { LabelizedField } from '../core/LabelizedField';
+import { LoadingComponent } from '../core/LoadingComponent';
+import { UniversalMoment } from '../core/UniversalMoment';
 
 const StyledBox = styled(Paper)`
   display: flex;

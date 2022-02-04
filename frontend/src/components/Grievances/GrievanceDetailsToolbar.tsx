@@ -17,10 +17,10 @@ import {
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../BreadCrumbs';
-import { ButtonDialog } from '../ButtonDialog';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { PageHeader } from '../PageHeader';
+import { BreadCrumbsItem } from '../core/BreadCrumbs';
+import { ButtonDialog } from '../core/ButtonDialog';
+import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { PageHeader } from '../core/PageHeader';
 
 const Separator = styled.div`
   width: 1px;

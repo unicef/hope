@@ -9,8 +9,8 @@ import {
   IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
 } from '../../__generated__/graphql';
-import { LabelizedField } from '../LabelizedField';
-import { LoadingComponent } from '../LoadingComponent';
+import { LabelizedField } from '../core/LabelizedField';
+import { LoadingComponent } from '../core/LoadingComponent';
 import { IndividualFlexFieldPhotoModal } from './IndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`

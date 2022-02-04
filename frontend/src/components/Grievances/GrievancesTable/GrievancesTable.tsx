@@ -16,7 +16,7 @@ import {
   useGrievancesChoiceDataQuery,
   useMeQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../LoadingComponent';
+import { LoadingComponent } from '../../core/LoadingComponent';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 

@@ -9,7 +9,7 @@ import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../ConfirmationDialog';
+import { ConfirmationDialog } from '../core/ConfirmationDialog';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 
 const StyledBox = styled(Paper)`

@@ -3,15 +3,15 @@ import styled from 'styled-components';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../Table/ClickableTableRow';
-import { StatusBox } from '../../StatusBox';
+import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+import { StatusBox } from '../../core/StatusBox';
 import {
   grievanceTicketStatusToColor,
   renderUserName,
 } from '../../../utils/utils';
-import { UniversalMoment } from '../../UniversalMoment';
+import { UniversalMoment } from '../../core/UniversalMoment';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
-import { BlackLink } from '../../BlackLink';
+import { BlackLink } from '../../core/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;

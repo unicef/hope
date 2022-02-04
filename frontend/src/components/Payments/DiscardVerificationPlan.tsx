@@ -7,8 +7,8 @@ import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useDiscardCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
-import { ErrorButton } from '../ErrorButton';
-import { ErrorButtonContained } from '../ErrorButtonContained';
+import { ErrorButton } from '../core/ErrorButton';
+import { ErrorButtonContained } from '../core/ErrorButtonContained';
 
 export interface Props {
   cashPlanVerificationId: string;

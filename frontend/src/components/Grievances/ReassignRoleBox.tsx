@@ -11,8 +11,8 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../utils/constants';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
-import { ContentLink } from '../ContentLink';
-import { LabelizedField } from '../LabelizedField';
+import { ContentLink } from '../core/ContentLink';
+import { LabelizedField } from '../core/LabelizedField';
 import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUpReassignRole/ReassignRoleUnique';
 

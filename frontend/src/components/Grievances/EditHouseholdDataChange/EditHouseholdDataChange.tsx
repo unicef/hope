@@ -9,7 +9,7 @@ import {
   useAllEditHouseholdFieldsQuery,
   useHouseholdLazyQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../LoadingComponent';
+import { LoadingComponent } from '../../core/LoadingComponent';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
 
 const Title = styled.div`

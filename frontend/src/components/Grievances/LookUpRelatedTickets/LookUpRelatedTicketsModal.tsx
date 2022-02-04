@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../LoadingComponent';
+import { LoadingComponent } from '../../core/LoadingComponent';
 import { LookUpRelatedTicketsFilters } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
 import { LookUpRelatedTicketsTable } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
 

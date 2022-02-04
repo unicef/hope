@@ -14,7 +14,7 @@ import {
   AllAddIndividualFieldsQuery,
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
+import { LoadingComponent } from '../core/LoadingComponent';
 import { AgencyField } from './AgencyField';
 import { DocumentField } from './DocumentField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';

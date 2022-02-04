@@ -3,7 +3,7 @@ import {
   IndividualNode,
   useIndividualPhotosQuery,
 } from '../../__generated__/graphql';
-import { PhotoModal } from '../PhotoModal/PhotoModal';
+import { PhotoModal } from '../core/PhotoModal/PhotoModal';
 
 interface DocumentPopulationPhotoModalProps {
   individual: IndividualNode;

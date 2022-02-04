@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
-import { PhotoModal } from '../../PhotoModal/PhotoModal';
+import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`

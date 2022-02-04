@@ -12,10 +12,10 @@ import {
   PaymentRecordNode,
   PaymentVerificationNode,
 } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { LabelizedField } from '../LabelizedField';
-import { StatusBox } from '../StatusBox';
-import { UniversalMoment } from '../UniversalMoment';
+import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
+import { LabelizedField } from '../core/LabelizedField';
+import { StatusBox } from '../core/StatusBox';
+import { UniversalMoment } from '../core/UniversalMoment';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;

@@ -9,12 +9,12 @@ import {
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
 import { PaymentVerificationNode } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { LabelizedField } from '../LabelizedField';
-import { StatusBox } from '../StatusBox';
-import { UniversalMoment } from '../UniversalMoment';
+import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
+import { LabelizedField } from '../core/LabelizedField';
+import { StatusBox } from '../core/StatusBox';
+import { UniversalMoment } from '../core/UniversalMoment';
 import { useBusinessArea } from "../../hooks/useBusinessArea";
-import { BlackLink } from "../BlackLink";
+import { BlackLink } from "../core/BlackLink";
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;

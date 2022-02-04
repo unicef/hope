@@ -4,7 +4,7 @@ import {
   AllEditHouseholdFieldsQuery,
   useHouseholdFlexFieldsQuery,
 } from '../../../__generated__/graphql';
-import { PhotoModal } from '../../PhotoModal/PhotoModal';
+import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalNewHouseholdProps {
   flexField: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];

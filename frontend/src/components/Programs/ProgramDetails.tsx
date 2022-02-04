@@ -8,11 +8,11 @@ import {
   ProgrammeChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { LabelizedField } from '../LabelizedField';
-import { OverviewContainer } from '../OverviewContainer';
-import { StatusBox } from '../StatusBox';
-import { UniversalMoment } from '../UniversalMoment';
+import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
+import { LabelizedField } from '../core/LabelizedField';
+import { OverviewContainer } from '../core/OverviewContainer';
+import { StatusBox } from '../core/StatusBox';
+import { UniversalMoment } from '../core/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
