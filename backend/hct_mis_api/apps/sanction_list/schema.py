@@ -1,7 +1,7 @@
 from django.db.models.functions import Lower
 
 import graphene
-from django_filters import FilterSet
+from django_filters import CharFilter, FilterSet
 from graphene import relay
 from graphene_django import DjangoObjectType
 
