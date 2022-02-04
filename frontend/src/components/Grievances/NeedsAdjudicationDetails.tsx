@@ -21,9 +21,9 @@ import {
   GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
-import { BlackLink } from '../BlackLink';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { UniversalMoment } from '../UniversalMoment';
+import { BlackLink } from '../core/BlackLink';
+import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { UniversalMoment } from '../core/UniversalMoment';
 
 const StyledBox = styled(Paper)`
   display: flex;

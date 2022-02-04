@@ -1,5 +1,5 @@
 import { AllIndividualsQuery } from '../../../__generated__/graphql';
-import { HeadCell } from '../../Table/EnhancedTableHead';
+import { HeadCell } from '../../core/Table/EnhancedTableHead';
 
 export const headCells: HeadCell<
   AllIndividualsQuery['allIndividuals']['edges'][number]['node']

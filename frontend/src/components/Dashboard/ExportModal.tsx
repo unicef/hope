@@ -22,7 +22,7 @@ import {
   useCreateDashboardReportMutation,
   useDashboardReportChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
+import { LoadingComponent } from '../core/LoadingComponent';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

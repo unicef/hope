@@ -15,9 +15,9 @@ import {
   useGrievancesChoiceDataQuery,
   useAllUsersForFiltersQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { PageHeader } from '../PageHeader';
-import { PermissionDenied } from '../PermissionDenied';
+import { LoadingComponent } from '../core/LoadingComponent';
+import { PageHeader } from '../core/PageHeader';
+import { PermissionDenied } from '../core/PermissionDenied';
 import { GrievancesFilters } from './GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from './GrievancesTable/GrievancesTable';
 

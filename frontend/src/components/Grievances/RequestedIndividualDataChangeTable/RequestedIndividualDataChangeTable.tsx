@@ -4,7 +4,7 @@ import {
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../LoadingComponent';
+import { LoadingComponent } from '../../core/LoadingComponent';
 import { DocumentsTable } from './DocumentsTable';
 import { DocumentsToEditTable } from './DocumentsToEditTable';
 import { DocumentsToRemoveTable } from './DocumentsToRemoveTable';

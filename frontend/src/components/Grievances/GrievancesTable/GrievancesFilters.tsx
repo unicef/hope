@@ -16,9 +16,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import TextField from '../../../shared/TextField';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
-import { ContainerWithBorder } from '../../ContainerWithBorder';
-import { FieldLabel } from '../../FieldLabel';
-import { AdminAreaAutocomplete } from '../../Population/AdminAreaAutocomplete';
+import { ContainerWithBorder } from '../../core/ContainerWithBorder';
+import { FieldLabel } from '../../core/FieldLabel';
+import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
 
 const SearchTextField = styled(TextField)`
   flex: 1;

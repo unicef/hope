@@ -12,7 +12,7 @@ import { Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CashPlan } from '../../apollo/queries/payment/CashPlan';
+import { CashPlan } from '../../apollo/queries/payments/CashPlan';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -30,8 +30,8 @@ import {
   useEditCashPlanPaymentVerificationMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
-import { FormikEffect } from '../FormikEffect';
-import { TabPanel } from '../TabPanel';
+import { FormikEffect } from '../core/FormikEffect';
+import { TabPanel } from '../core/TabPanel';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

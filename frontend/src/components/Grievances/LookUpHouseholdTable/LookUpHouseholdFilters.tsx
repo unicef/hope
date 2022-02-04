@@ -21,9 +21,9 @@ import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../../__generated__/graphql';
-import { ContainerWithBorder } from '../../ContainerWithBorder';
-import { FieldLabel } from '../../FieldLabel';
-import { AdminAreaAutocomplete } from '../../Population/AdminAreaAutocomplete';
+import { ContainerWithBorder } from '../../core/ContainerWithBorder';
+import { FieldLabel } from '../../core/FieldLabel';
+import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,

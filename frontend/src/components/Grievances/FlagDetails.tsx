@@ -21,9 +21,9 @@ import {
   GrievanceTicketQuery,
   useApproveSystemFlaggingMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { FlagTooltip } from '../FlagTooltip';
-import { UniversalMoment } from '../UniversalMoment';
+import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { FlagTooltip } from '../core/FlagTooltip';
+import { UniversalMoment } from '../core/UniversalMoment';
 import { ViewSanctionList } from './ViewSanctionList';
 
 const StyledBox = styled(Paper)`

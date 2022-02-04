@@ -8,9 +8,9 @@ import {
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
-import { ClickableTableRow } from '../../Table/ClickableTableRow';
-import { StatusBox } from '../../StatusBox';
-import { BlackLink } from '../../BlackLink';
+import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+import { StatusBox } from '../../core/StatusBox';
+import { BlackLink } from '../../core/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;

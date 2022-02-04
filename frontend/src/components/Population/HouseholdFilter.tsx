@@ -14,8 +14,8 @@ import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
-import { ContainerWithBorder } from '../ContainerWithBorder';
-import { FieldLabel } from '../FieldLabel';
+import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { FieldLabel } from '../core/FieldLabel';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`

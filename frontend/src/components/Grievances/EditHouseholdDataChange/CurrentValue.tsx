@@ -2,7 +2,7 @@ import { Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllEditHouseholdFieldsQuery } from '../../../__generated__/graphql';
-import { LabelizedField } from '../../LabelizedField';
+import { LabelizedField } from '../../core/LabelizedField';
 import { GrievanceFlexFieldPhotoModalNewHousehold } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewHousehold';
 
 export interface CurrentValueProps {

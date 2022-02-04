@@ -9,8 +9,8 @@ import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
-import { ContainerWithBorder } from '../ContainerWithBorder';
-import { FieldLabel } from '../FieldLabel';
+import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { FieldLabel } from '../core/FieldLabel';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 

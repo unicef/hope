@@ -20,7 +20,7 @@ import {
   useAllProgramsQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { TabPanel } from '../../TabPanel';
+import { TabPanel } from '../../core/TabPanel';
 import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdFilters';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';

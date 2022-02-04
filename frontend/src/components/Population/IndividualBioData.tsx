@@ -13,10 +13,10 @@ import {
   IndividualNode,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { ContentLink } from '../ContentLink';
-import { LabelizedField } from '../LabelizedField';
-import { LoadingComponent } from '../LoadingComponent';
-import { UniversalMoment } from '../UniversalMoment';
+import { ContentLink } from '../core/ContentLink';
+import { LabelizedField } from '../core/LabelizedField';
+import { LoadingComponent } from '../core/LoadingComponent';
+import { UniversalMoment } from '../core/UniversalMoment';
 import { DocumentPopulationPhotoModal } from './DocumentPopulationPhotoModal';
 
 const Overview = styled(Paper)`

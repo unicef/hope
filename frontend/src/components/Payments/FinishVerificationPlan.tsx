@@ -17,7 +17,7 @@ import {
   useCashPlanQuery,
   useFinishCashPlanPaymentVerificationMutation,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
+import { LoadingComponent } from '../core/LoadingComponent';
 
 export interface Props {
   cashPlanVerificationId: string;

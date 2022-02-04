@@ -8,8 +8,8 @@ import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
 } from '../../../__generated__/graphql';
-import { LabelizedField } from '../../LabelizedField';
-import { PhotoModal } from '../../PhotoModal/PhotoModal';
+import { LabelizedField } from '../../core/LabelizedField';
+import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
 
 const DisabledDiv = styled.div`

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useCountryChartsLazyQuery } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../LoadingComponent';
+import { LoadingComponent } from '../../core/LoadingComponent';
 import { CardTextLightLarge } from '../DashboardCard';
 import { DashboardPaper } from '../DashboardPaper';
 import { TotalAmountTransferredByAdminAreaTable } from '../TotalAmountTransferredByAdminAreaTable';

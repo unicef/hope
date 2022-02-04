@@ -9,7 +9,7 @@ import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
 } from '../../../__generated__/graphql';
-import { LabelizedField } from '../../LabelizedField';
+import { LabelizedField } from '../../core/LabelizedField';
 import { AgencyField } from '../AgencyField';
 
 const DisabledDiv = styled.div`

@@ -4,9 +4,9 @@ import { Radio } from '@material-ui/core';
 import { AllIndividualsQuery } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { sexToCapitalize } from '../../../utils/utils';
-import { ClickableTableRow } from '../../Table/ClickableTableRow';
-import { UniversalMoment } from '../../UniversalMoment';
-import { BlackLink } from '../../BlackLink';
+import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../core/UniversalMoment';
+import { BlackLink } from '../../core/BlackLink';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
