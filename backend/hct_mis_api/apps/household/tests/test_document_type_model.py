@@ -9,7 +9,7 @@ from hct_mis_api.apps.household.models import (
 
 
 class TestDocumentTypeModel(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     def test_create_document_type_with_specific_country(self):
         document_type = DocumentType.objects.create(

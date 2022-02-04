@@ -3,10 +3,13 @@ import logging
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+
 from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import XlsxExportTargetingService
+from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
+    XlsxExportTargetingService,
+)
 
 logger = logging.getLogger(__name__)
 

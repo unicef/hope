@@ -10,7 +10,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 
 class TestRefuseRdiMutation(APITestCase):
-    multi_db = True
+    databases = "__all__"
 
     QUERY = """
       mutation RefuseRegistrationDataImportMutation(

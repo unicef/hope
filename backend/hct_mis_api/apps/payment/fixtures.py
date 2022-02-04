@@ -11,10 +11,10 @@ from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import (
-    PaymentRecord,
-    ServiceProvider,
     CashPlanPaymentVerification,
+    PaymentRecord,
     PaymentVerification,
+    ServiceProvider,
 )
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
 from hct_mis_api.apps.program.models import CashPlan, Program
