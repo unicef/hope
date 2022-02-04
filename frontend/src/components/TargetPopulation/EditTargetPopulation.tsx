@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
+import { TARGET_POPULATION_QUERY } from '../../apollo/queries/targeting/TargetPopulation';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
