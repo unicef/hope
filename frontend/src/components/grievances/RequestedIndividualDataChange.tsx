@@ -6,7 +6,10 @@ import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import {
+  GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_TICKET_STATES,
+} from '../../utils/constants';
 import {
   GrievanceTicketQuery,
   HouseholdNode,
@@ -144,9 +147,14 @@ export function RequestedIndividualDataChange({
       el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
   ).length;
 
-  const approveEnabled =
-    isForApproval &&
-    primaryCollectorRolesCount === primaryColletorRolesReassignedCount;
+  let approveEnabled = false;
+  if (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
+    approveEnabled =
+      isForApproval &&
+      primaryCollectorRolesCount === primaryColletorRolesReassignedCount;
+  } else {
+    approveEnabled = isForApproval;
+  }
 
   const shouldShowEditButton = (allChangesLength): boolean =>
     allChangesLength && !isEdit && isForApproval;
