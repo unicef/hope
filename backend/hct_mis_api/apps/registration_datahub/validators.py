@@ -1,11 +1,6 @@
-import cProfile
 import copy
-import io
 import logging
-import pstats
-import random
 import re
-import string
 from collections import Counter, defaultdict
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
@@ -15,12 +10,10 @@ from pathlib import Path
 from typing import List, Union
 from zipfile import BadZipfile
 
-from django.core import validators as django_core_validators
-
 import openpyxl
 import phonenumbers
-import pycountry
 from dateutil import parser
+from django.core import validators as django_core_validators
 from openpyxl import load_workbook
 
 from hct_mis_api.apps.core.core_fields_attributes import (
@@ -39,7 +32,6 @@ from hct_mis_api.apps.core.kobo.common import (
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     SheetImageLoader,
-    get_combined_attributes,
     rename_dict_keys,
     serialize_flex_attributes,
 )
@@ -48,7 +40,6 @@ from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import (
     collectors_str_ids_to_list,
-    get_submission_metadata,
 )
 
 logger = logging.getLogger(__name__)
@@ -1162,8 +1153,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def choice_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
         try:
             message = f"Invalid choice {value} for field {field}"
-            # if "admin1_h_c" == field:
-            #     import ipdb;ipdb.set_trace()
             field = self.all_fields.get(field)
             if not value:
                 return message
@@ -1412,55 +1401,3 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:
             logger.exception(e)
             raise
-
-
-def doprofile(fnc):
-    """decorator for routine profiling"""
-
-    def inner(*args, **kwargs):
-        pr = cProfile.Profile()
-        pr.enable()
-        retval = fnc(*args, **kwargs)
-        pr.disable()
-        s = io.StringIO()
-        sortby = "cumulative"
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
-        return retval
-
-    return inner
-
-
-def randomString(size):
-    chars = string.ascii_uppercase + string.digits
-    return "".join(random.choice(chars) for _ in range(size))
-
-
-def do_profile(func):
-    """decorator for routine profiling from Mikolaj (using snakeviz)"""
-
-    def profiled_func(*args, **kwargs):
-        profile = cProfile.Profile()
-        try:
-            profile.enable()
-            result = func(*args, **kwargs)
-            profile.disable()
-            return result
-        finally:
-            profile.dump_stats("{}.prof".format(randomString(8)))
-
-    return profiled_func
-
-
-def validatejson():
-    import json
-    from time import time
-
-    with open("json_data.json") as json_file:
-        submissions = json.load(json_file)
-    business_area = BusinessArea.objects.get(slug="afghanistan")
-    st = time()
-    validator = KoboProjectImportDataInstanceValidator()
-    errors = validator.validate_everything(submissions, business_area)
-    print(time() - st)
