@@ -1,12 +1,16 @@
 from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.fixtures import TicketNoteFactory, GrievanceTicketFactory
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceTicketFactory,
+    TicketNoteFactory,
+)
 
 
 class TestTicketNotes(APITestCase):

@@ -1,6 +1,8 @@
 from django.core.management.commands import makemigrations
 
-from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import PullFromDatahubTask
+from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
+    PullFromDatahubTask,
+)
 
 
 class Command(makemigrations.Command):

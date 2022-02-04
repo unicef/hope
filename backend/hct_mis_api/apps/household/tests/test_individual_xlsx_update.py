@@ -45,7 +45,7 @@ def invalid_file():
 
 
 class TestIndividualXlsxUpdate(APITestCase):
-    multi_db = True
+    databases = "__all__"
 
     def setUp(self) -> None:
         call_command("loadbusinessareas")

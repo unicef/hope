@@ -1,13 +1,11 @@
 import io
-from parameterized import parameterized
 
-from PIL import Image
 from django.conf import settings
-from django.core.files.uploadedfile import (
-    InMemoryUploadedFile,
-    SimpleUploadedFile,
-)
+from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
 from django.core.management import call_command
+
+from parameterized import parameterized
+from PIL import Image
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -17,7 +15,7 @@ from hct_mis_api.apps.registration_datahub.models import ImportData
 
 
 class TestRegistrationDataImportDatahubMutations(APITestCase):
-    multi_db = True
+    databases = "__all__"
 
     UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB = """
     mutation UploadImportDataXLSXFile(

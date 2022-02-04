@@ -32,7 +32,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestSendTpToDatahub(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     @staticmethod
     def _pre_test_commands():
