@@ -1,5 +1,11 @@
+import cProfile
+import copy
+import io
 import logging
+import pstats
+import random
 import re
+import string
 from collections import Counter, defaultdict
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
@@ -245,6 +251,61 @@ class ImportDataInstanceValidator:
         "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
     }
 
+    def get_combined_attributes(self):
+        from hct_mis_api.apps.core.core_fields_attributes import (
+            CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
+        )
+
+        core_fields_dict = copy.deepcopy(CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY)
+        for field in core_fields_dict["individuals"].values():
+            field["choices"] = [x.get("value") for x in field["choices"]]
+        for field in core_fields_dict["households"].values():
+            field["choices"] = [x.get("value") for x in field["choices"]]
+
+        flex_attrs = self.serialize_flex_attributes()
+        return {
+            **core_fields_dict["individuals"],
+            **flex_attrs["individuals"],
+            **core_fields_dict["households"],
+            **flex_attrs["households"],
+        }
+
+    def serialize_flex_attributes(self):
+        from hct_mis_api.apps.core.models import FlexibleAttribute
+
+        flex_attributes = FlexibleAttribute.objects.prefetch_related("choices").all()
+
+        result_dict = {
+            "individuals": {},
+            "households": {},
+        }
+
+        for attr in flex_attributes:
+            associated_with = "Household" if attr.associated_with == 0 else "Individual"
+            dict_key = associated_with.lower() + "s"
+
+            result_dict[dict_key][attr.name] = {
+                "id": attr.id,
+                "type": attr.type,
+                "name": attr.name,
+                "xlsx_field": attr.name,
+                "lookup": attr.name,
+                "required": attr.required,
+                "label": attr.label,
+                "hint": attr.hint,
+                "choices": attr.choices.values_list("name", flat=True),
+                "associated_with": associated_with,
+            }
+
+        return result_dict
+
+    def get_all_fields(self):
+        try:
+            return self.get_combined_attributes()
+        except Exception as e:
+            logger.exception(e)
+            raise
+
     def documents_validator(self, documents_numbers_dict, is_xlsx=True, *args, **kwargs):
         try:
             invalid_rows = []
@@ -366,13 +427,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def get_all_fields(self):
-        try:
-            return get_combined_attributes()
-        except Exception as e:
-            logger.exception(e)
-            raise
-
     def __init__(self):
         self.head_of_household_count = defaultdict(int)
         self.core_fields = self.get_core_fields()
@@ -479,7 +533,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if value is None:
                 return True
 
-            choices = [x.get("value") for x in field["choices"]]
+            choices = field["choices"]
 
             choice_type = self.all_fields[header]["type"]
 
@@ -964,13 +1018,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def get_all_fields(self):
-        try:
-            return get_combined_attributes()
-        except Exception as e:
-            logger.exception(e)
-            raise
-
     def get_expected_household_core_fields(self):
         try:
             return {field["xlsx_field"] for field in self.core_fields["households"].values() if field["required"]}
@@ -1115,13 +1162,15 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def choice_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
         try:
             message = f"Invalid choice {value} for field {field}"
-
+            # if "admin1_h_c" == field:
+            #     import ipdb;ipdb.set_trace()
             field = self.all_fields.get(field)
             if not value:
                 return message
 
             custom_validate_choices_method = field.get("custom_validate_choices")
-            choices = [x.get("value") for x in field["choices"]]
+
+            choices = field["choices"]
 
             choice_type = field["type"]
 
@@ -1242,14 +1291,23 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 },
                 "other_id_no_i_c": None,
             }
+            kobo_asset_id = None
+            if len(reduced_submissions) > 0:
+                kobo_asset_id = reduced_submissions[0]["_xform_id_string"]
+            all_saved_submissions = KoboImportedSubmission.objects.filter(kobo_asset_id=kobo_asset_id)
+            if business_area.get_sys_option("ignore_amended_kobo_submissions"):
+                all_saved_submissions = all_saved_submissions.filter(amended=False)
+            all_saved_submissions = all_saved_submissions.values("kobo_submission_uuid", "kobo_submission_time")
 
+            all_saved_submissions_dict = {}
+            for submission in all_saved_submissions:
+                item = all_saved_submissions_dict.get(str(submission["kobo_submission_uuid"]), [])
+                item.append(submission.get("kobo_submission_time").isoformat())
+                all_saved_submissions_dict[str(submission["kobo_submission_uuid"])] = item
             for household in reduced_submissions:
-                submission_meta_data = get_submission_metadata(household)
-
-                if business_area.get_sys_option("ignore_amended_kobo_submissions"):
-                    submission_meta_data["amended"] = False
-
-                submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
+                submission_exists = household.get("_submission_time") in all_saved_submissions_dict.get(
+                    household.get("_uuid"), []
+                )
                 if submission_exists is True:
                     continue
                 head_of_hh_counter = 0
@@ -1354,3 +1412,55 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:
             logger.exception(e)
             raise
+
+
+def doprofile(fnc):
+    """decorator for routine profiling"""
+
+    def inner(*args, **kwargs):
+        pr = cProfile.Profile()
+        pr.enable()
+        retval = fnc(*args, **kwargs)
+        pr.disable()
+        s = io.StringIO()
+        sortby = "cumulative"
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+
+    return inner
+
+
+def randomString(size):
+    chars = string.ascii_uppercase + string.digits
+    return "".join(random.choice(chars) for _ in range(size))
+
+
+def do_profile(func):
+    """decorator for routine profiling from Mikolaj (using snakeviz)"""
+
+    def profiled_func(*args, **kwargs):
+        profile = cProfile.Profile()
+        try:
+            profile.enable()
+            result = func(*args, **kwargs)
+            profile.disable()
+            return result
+        finally:
+            profile.dump_stats("{}.prof".format(randomString(8)))
+
+    return profiled_func
+
+
+def validatejson():
+    import json
+    from time import time
+
+    with open("json_data.json") as json_file:
+        submissions = json.load(json_file)
+    business_area = BusinessArea.objects.get(slug="afghanistan")
+    st = time()
+    validator = KoboProjectImportDataInstanceValidator()
+    errors = validator.validate_everything(submissions, business_area)
+    print(time() - st)
