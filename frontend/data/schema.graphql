@@ -969,11 +969,24 @@ type ImportDataNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  file: String!
+  status: ImportDataStatus!
+  businessAreaSlug: String!
+  file: String
   dataType: ImportDataDataType!
-  numberOfHouseholds: Int!
-  numberOfIndividuals: Int!
+  numberOfHouseholds: Int
+  numberOfIndividuals: Int
+  error: String!
+  validationErrors: KoboErrorNode
+  createdById: UUID
   registrationDataImport: RegistrationDataImportDatahubNode
+}
+
+enum ImportDataStatus {
+  PENDING
+  RUNNING
+  FINISHED
+  ERROR
+  VALIDATION_ERROR
 }
 
 type ImportXlsxCashPlanVerification {
@@ -2027,6 +2040,7 @@ type Mutations {
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportData(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataMutation
+  saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsyncMutation
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
   refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
@@ -2772,6 +2786,10 @@ type SanctionListIndividualNodeConnection {
 type SanctionListIndividualNodeEdge {
   node: SanctionListIndividualNode
   cursor: String!
+}
+
+type SaveKoboProjectImportDataAsyncMutation {
+  importData: ImportDataNode
 }
 
 type SaveKoboProjectImportDataMutation {
