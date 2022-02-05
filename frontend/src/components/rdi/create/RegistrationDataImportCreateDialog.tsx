@@ -9,7 +9,7 @@ import {
   Select,
 } from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -93,6 +93,12 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
   const [importType, setImportType] = useState('');
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [submitForm, setSubmitForm] = usePassFunctionFromChild();
+  useEffect(() => {
+    if (!open) {
+      setImportType('');
+      setSubmitDisabled(true);
+    }
+  }, [open]);
   const openModalButton = (
     <span>
       <Button
