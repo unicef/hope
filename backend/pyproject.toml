@@ -51,7 +51,7 @@ description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
 [tool.poetry.dependencies]
-python = "3.9.10"
+python = "3.9.1"
 Django = "3.2"
 Jinja2 = "2.11.2"
 #name = "HCT MIS Backend"
