@@ -1470,9 +1470,10 @@ export type ImportDataNode = Node & {
   numberOfHouseholds?: Maybe<Scalars['Int']>,
   numberOfIndividuals?: Maybe<Scalars['Int']>,
   error: Scalars['String'],
-  validationErrors?: Maybe<KoboErrorNode>,
+  validationErrors: Scalars['String'],
   createdById?: Maybe<Scalars['UUID']>,
   registrationDataImport?: Maybe<RegistrationDataImportDatahubNode>,
+  koboimportdata?: Maybe<KoboImportDataNode>,
 };
 
 export enum ImportDataStatus {
@@ -2610,6 +2611,26 @@ export type KoboErrorNode = {
   message?: Maybe<Scalars['String']>,
 };
 
+export type KoboImportDataNode = Node & {
+   __typename?: 'KoboImportDataNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  importdataPtr: ImportDataNode,
+  status: ImportDataStatus,
+  businessAreaSlug: Scalars['String'],
+  file?: Maybe<Scalars['String']>,
+  dataType: ImportDataDataType,
+  numberOfHouseholds?: Maybe<Scalars['Int']>,
+  numberOfIndividuals?: Maybe<Scalars['Int']>,
+  error: Scalars['String'],
+  validationErrors: Scalars['String'],
+  createdById?: Maybe<Scalars['UUID']>,
+  koboAssetId: Scalars['String'],
+  onlyActiveSubmissions: Scalars['Boolean'],
+  koboValidationErrors?: Maybe<Array<Maybe<KoboErrorNode>>>,
+};
+
 export type LabelNode = {
    __typename?: 'LabelNode',
   language?: Maybe<Scalars['String']>,
@@ -3412,6 +3433,7 @@ export type Query = {
   importedIndividual?: Maybe<ImportedIndividualNode>,
   allImportedIndividuals?: Maybe<ImportedIndividualNodeConnection>,
   importData?: Maybe<ImportDataNode>,
+  koboImportData?: Maybe<KoboImportDataNode>,
   deduplicationBatchStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   deduplicationGoldenRecordStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
@@ -4028,6 +4050,11 @@ export type QueryImportDataArgs = {
 };
 
 
+export type QueryKoboImportDataArgs = {
+  id: Scalars['ID']
+};
+
+
 export type QueryRegistrationDataImportArgs = {
   id: Scalars['ID']
 };
@@ -4604,7 +4631,7 @@ export type SanctionListIndividualNodeEdge = {
 
 export type SaveKoboProjectImportDataAsyncMutation = {
    __typename?: 'SaveKoboProjectImportDataAsyncMutation',
-  importData?: Maybe<ImportDataNode>,
+  importData?: Maybe<KoboImportDataNode>,
 };
 
 export type SaveKoboProjectImportDataMutation = {
@@ -6741,7 +6768,7 @@ export type SaveKoboImportDataMutation = (
 
 export type SaveKoboImportDataAsyncMutationVariables = {
   businessAreaSlug: Scalars['String'],
-  projectId: Scalars['Upload'],
+  koboAssetId: Scalars['Upload'],
   onlyActiveSubmissions: Scalars['Boolean']
 };
 
@@ -6751,8 +6778,8 @@ export type SaveKoboImportDataAsyncMutation = (
   & { saveKoboImportDataAsync: Maybe<(
     { __typename?: 'SaveKoboProjectImportDataAsyncMutation' }
     & { importData: Maybe<(
-      { __typename?: 'ImportDataNode' }
-      & Pick<ImportDataNode, 'id' | 'status'>
+      { __typename?: 'KoboImportDataNode' }
+      & Pick<KoboImportDataNode, 'id' | 'status'>
     )> }
   )> }
 );
@@ -8611,23 +8638,6 @@ export type AllRegistrationDataImportsQuery = (
   )> }
 );
 
-export type ImportDataQueryVariables = {
-  id: Scalars['ID']
-};
-
-
-export type ImportDataQuery = (
-  { __typename?: 'Query' }
-  & { importData: Maybe<(
-    { __typename?: 'ImportDataNode' }
-    & Pick<ImportDataNode, 'id' | 'status' | 'numberOfIndividuals' | 'numberOfHouseholds' | 'error'>
-    & { validationErrors: Maybe<(
-      { __typename?: 'KoboErrorNode' }
-      & Pick<KoboErrorNode, 'header' | 'message'>
-    )> }
-  )> }
-);
-
 export type ImportedHouseholdQueryVariables = {
   id: Scalars['ID']
 };
@@ -8664,6 +8674,23 @@ export type ImportedIndividualFlexFieldsQuery = (
   & { importedIndividual: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'flexFields'>
+  )> }
+);
+
+export type KoboImportDataQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type KoboImportDataQuery = (
+  { __typename?: 'Query' }
+  & { koboImportData: Maybe<(
+    { __typename?: 'KoboImportDataNode' }
+    & Pick<KoboImportDataNode, 'id' | 'status' | 'numberOfIndividuals' | 'numberOfHouseholds' | 'error'>
+    & { koboValidationErrors: Maybe<Array<Maybe<(
+      { __typename?: 'KoboErrorNode' }
+      & Pick<KoboErrorNode, 'header' | 'message'>
+    )>>> }
   )> }
 );
 
@@ -11487,8 +11514,8 @@ export type SaveKoboImportDataMutationHookResult = ReturnType<typeof useSaveKobo
 export type SaveKoboImportDataMutationResult = ApolloReactCommon.MutationResult<SaveKoboImportDataMutation>;
 export type SaveKoboImportDataMutationOptions = ApolloReactCommon.BaseMutationOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>;
 export const SaveKoboImportDataAsyncDocument = gql`
-    mutation SaveKoboImportDataAsync($businessAreaSlug: String!, $projectId: Upload!, $onlyActiveSubmissions: Boolean!) {
-  saveKoboImportDataAsync(businessAreaSlug: $businessAreaSlug, uid: $projectId, onlyActiveSubmissions: $onlyActiveSubmissions) {
+    mutation SaveKoboImportDataAsync($businessAreaSlug: String!, $koboAssetId: Upload!, $onlyActiveSubmissions: Boolean!) {
+  saveKoboImportDataAsync(businessAreaSlug: $businessAreaSlug, uid: $koboAssetId, onlyActiveSubmissions: $onlyActiveSubmissions) {
     importData {
       id
       status
@@ -11529,7 +11556,7 @@ export function withSaveKoboImportDataAsync<TProps, TChildProps = {}>(operationO
  * const [saveKoboImportDataAsyncMutation, { data, loading, error }] = useSaveKoboImportDataAsyncMutation({
  *   variables: {
  *      businessAreaSlug: // value for 'businessAreaSlug'
- *      projectId: // value for 'projectId'
+ *      koboAssetId: // value for 'koboAssetId'
  *      onlyActiveSubmissions: // value for 'onlyActiveSubmissions'
  *   },
  * });
@@ -16128,64 +16155,6 @@ export function useAllRegistrationDataImportsLazyQuery(baseOptions?: ApolloReact
 export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsQuery>;
 export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
 export type AllRegistrationDataImportsQueryResult = ApolloReactCommon.QueryResult<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>;
-export const ImportDataDocument = gql`
-    query ImportData($id: ID!) {
-  importData(id: $id) {
-    id
-    status
-    numberOfIndividuals
-    numberOfHouseholds
-    error
-    validationErrors {
-      header
-      message
-    }
-  }
-}
-    `;
-export type ImportDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportDataQuery, ImportDataQueryVariables>, 'query'> & ({ variables: ImportDataQueryVariables; skip?: boolean; } | { skip: boolean; });
-
-    export const ImportDataComponent = (props: ImportDataComponentProps) => (
-      <ApolloReactComponents.Query<ImportDataQuery, ImportDataQueryVariables> query={ImportDataDocument} {...props} />
-    );
-    
-export type ImportDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportDataQuery, ImportDataQueryVariables> & TChildProps;
-export function withImportData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
-  TProps,
-  ImportDataQuery,
-  ImportDataQueryVariables,
-  ImportDataProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, ImportDataQuery, ImportDataQueryVariables, ImportDataProps<TChildProps>>(ImportDataDocument, {
-      alias: 'importData',
-      ...operationOptions
-    });
-};
-
-/**
- * __useImportDataQuery__
- *
- * To run a query within a React component, call `useImportDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useImportDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useImportDataQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useImportDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportDataQuery, ImportDataQueryVariables>) {
-        return ApolloReactHooks.useQuery<ImportDataQuery, ImportDataQueryVariables>(ImportDataDocument, baseOptions);
-      }
-export function useImportDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportDataQuery, ImportDataQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<ImportDataQuery, ImportDataQueryVariables>(ImportDataDocument, baseOptions);
-        }
-export type ImportDataQueryHookResult = ReturnType<typeof useImportDataQuery>;
-export type ImportDataLazyQueryHookResult = ReturnType<typeof useImportDataLazyQuery>;
-export type ImportDataQueryResult = ApolloReactCommon.QueryResult<ImportDataQuery, ImportDataQueryVariables>;
 export const ImportedHouseholdDocument = gql`
     query ImportedHousehold($id: ID!) {
   importedHousehold(id: $id) {
@@ -16337,6 +16306,64 @@ export function useImportedIndividualFlexFieldsLazyQuery(baseOptions?: ApolloRea
 export type ImportedIndividualFlexFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFlexFieldsQuery>;
 export type ImportedIndividualFlexFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFlexFieldsLazyQuery>;
 export type ImportedIndividualFlexFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>;
+export const KoboImportDataDocument = gql`
+    query KoboImportData($id: ID!) {
+  koboImportData(id: $id) {
+    id
+    status
+    numberOfIndividuals
+    numberOfHouseholds
+    error
+    koboValidationErrors {
+      header
+      message
+    }
+  }
+}
+    `;
+export type KoboImportDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<KoboImportDataQuery, KoboImportDataQueryVariables>, 'query'> & ({ variables: KoboImportDataQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const KoboImportDataComponent = (props: KoboImportDataComponentProps) => (
+      <ApolloReactComponents.Query<KoboImportDataQuery, KoboImportDataQueryVariables> query={KoboImportDataDocument} {...props} />
+    );
+    
+export type KoboImportDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<KoboImportDataQuery, KoboImportDataQueryVariables> & TChildProps;
+export function withKoboImportData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  KoboImportDataQuery,
+  KoboImportDataQueryVariables,
+  KoboImportDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, KoboImportDataQuery, KoboImportDataQueryVariables, KoboImportDataProps<TChildProps>>(KoboImportDataDocument, {
+      alias: 'koboImportData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useKoboImportDataQuery__
+ *
+ * To run a query within a React component, call `useKoboImportDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useKoboImportDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useKoboImportDataQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useKoboImportDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<KoboImportDataQuery, KoboImportDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<KoboImportDataQuery, KoboImportDataQueryVariables>(KoboImportDataDocument, baseOptions);
+      }
+export function useKoboImportDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<KoboImportDataQuery, KoboImportDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<KoboImportDataQuery, KoboImportDataQueryVariables>(KoboImportDataDocument, baseOptions);
+        }
+export type KoboImportDataQueryHookResult = ReturnType<typeof useKoboImportDataQuery>;
+export type KoboImportDataLazyQueryHookResult = ReturnType<typeof useKoboImportDataLazyQuery>;
+export type KoboImportDataQueryResult = ApolloReactCommon.QueryResult<KoboImportDataQuery, KoboImportDataQueryVariables>;
 export const RegistrationChoicesDocument = gql`
     query registrationChoices {
   registrationDataStatusChoices {
@@ -17752,6 +17779,7 @@ export type ResolversTypes = {
   ImportDataNode: ResolverTypeWrapper<ImportDataNode>,
   ImportDataStatus: ImportDataStatus,
   ImportDataDataType: ImportDataDataType,
+  KoboImportDataNode: ResolverTypeWrapper<KoboImportDataNode>,
   KoboErrorNode: ResolverTypeWrapper<KoboErrorNode>,
   RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ResolverTypeWrapper<ImportedHouseholdNodeConnection>,
@@ -18105,6 +18133,7 @@ export type ResolversParentTypes = {
   ImportDataNode: ImportDataNode,
   ImportDataStatus: ImportDataStatus,
   ImportDataDataType: ImportDataDataType,
+  KoboImportDataNode: KoboImportDataNode,
   KoboErrorNode: KoboErrorNode,
   RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection,
@@ -18898,9 +18927,10 @@ export type ImportDataNodeResolvers<ContextType = any, ParentType extends Resolv
   numberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   numberOfIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   error?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  validationErrors?: Resolver<Maybe<ResolversTypes['KoboErrorNode']>, ParentType, ContextType>,
+  validationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType>,
+  koboimportdata?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType>,
 };
 
 export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNode'] = ResolversParentTypes['ImportedDocumentNode']> = {
@@ -19259,6 +19289,25 @@ export type KoboErrorNodeResolvers<ContextType = any, ParentType extends Resolve
   message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboImportDataNode'] = ResolversParentTypes['KoboImportDataNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  importdataPtr?: Resolver<ResolversTypes['ImportDataNode'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['ImportDataStatus'], ParentType, ContextType>,
+  businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>,
+  numberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  numberOfIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  error?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  validationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  onlyActiveSubmissions?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  koboValidationErrors?: Resolver<Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>, ParentType, ContextType>,
+};
+
 export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
   language?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -19342,7 +19391,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -19593,6 +19642,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   importedIndividual?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType, RequireFields<QueryImportedIndividualArgs, 'id'>>,
   allImportedIndividuals?: Resolver<Maybe<ResolversTypes['ImportedIndividualNodeConnection']>, ParentType, ContextType, QueryAllImportedIndividualsArgs>,
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType, RequireFields<QueryImportDataArgs, 'id'>>,
+  koboImportData?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType, RequireFields<QueryKoboImportDataArgs, 'id'>>,
   deduplicationBatchStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   deduplicationGoldenRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportArgs, 'id'>>,
@@ -19927,7 +19977,7 @@ export type SanctionListIndividualNodeEdgeResolvers<ContextType = any, ParentTyp
 };
 
 export type SaveKoboProjectImportDataAsyncMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SaveKoboProjectImportDataAsyncMutation'] = ResolversParentTypes['SaveKoboProjectImportDataAsyncMutation']> = {
-  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
+  importData?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType>,
 };
 
 export type SaveKoboProjectImportDataMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SaveKoboProjectImportDataMutation'] = ResolversParentTypes['SaveKoboProjectImportDataMutation']> = {
@@ -20645,6 +20695,7 @@ export type Resolvers<ContextType = any> = {
   KoboAssetObjectConnection?: KoboAssetObjectConnectionResolvers<ContextType>,
   KoboAssetObjectEdge?: KoboAssetObjectEdgeResolvers<ContextType>,
   KoboErrorNode?: KoboErrorNodeResolvers<ContextType>,
+  KoboImportDataNode?: KoboImportDataNodeResolvers<ContextType>,
   LabelNode?: LabelNodeResolvers<ContextType>,
   LogEntryNode?: LogEntryNodeResolvers<ContextType>,
   LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,

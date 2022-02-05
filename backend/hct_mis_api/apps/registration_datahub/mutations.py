@@ -41,7 +41,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
     KoboErrorNode,
-    XlsxRowErrorNode,
+    XlsxRowErrorNode, KoboImportDataNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
@@ -399,7 +399,7 @@ class SaveKoboProjectImportDataMutation(PermissionMutation):
 
 
 class SaveKoboProjectImportDataAsyncMutation(PermissionMutation):
-    import_data = graphene.Field(ImportDataNode)
+    import_data = graphene.Field(KoboImportDataNode)
 
     class Arguments:
         uid = Upload(required=True)
@@ -417,10 +417,10 @@ class SaveKoboProjectImportDataAsyncMutation(PermissionMutation):
             only_active_submissions=only_active_submissions,
             status=ImportData.STATUS_PENDING,
             business_area_slug=business_area_slug,
-            created_by_id=info.context.request.user.id,
+            created_by_id=info.context.user.id,
         )
         pull_kobo_submissions_task.delay(import_data.id)
-        return SaveKoboProjectImportDataMutation(import_data, [])
+        return SaveKoboProjectImportDataAsyncMutation(import_data=import_data)
 
 
 class DeleteRegistrationDataImport(graphene.Mutation):

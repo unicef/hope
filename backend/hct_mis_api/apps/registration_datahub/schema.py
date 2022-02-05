@@ -46,7 +46,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
+    RegistrationDataImportDatahub, KoboImportData,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
@@ -244,17 +244,26 @@ class KoboErrorNode(graphene.ObjectType):
     header = graphene.String()
     message = graphene.String()
 
+class KoboImportDataNode(DjangoObjectType):
+    kobo_validation_errors = graphene.List(KoboErrorNode)
+
+    class Meta:
+        model = KoboImportData
+        filter_fields = []
+        interfaces = (relay.Node,)
+
+    def resolve_kobo_validation_errors(parrent, info):
+        if not parrent.validation_errors:
+            return []
+        return json.loads(parrent.validation_errors)
 
 class ImportDataNode(DjangoObjectType):
-    validation_errors = graphene.Field(KoboErrorNode)
 
     class Meta:
         model = ImportData
         filter_fields = []
         interfaces = (relay.Node,)
 
-    def resolve_validation_errors(parrent, info):
-        return json.loads(parrent.validation_errors)
 
 
 class ImportedDocumentTypeNode(DjangoObjectType):
@@ -328,6 +337,7 @@ class Query(graphene.ObjectType):
         ),
     )
     import_data = relay.Node.Field(ImportDataNode)
+    kobo_import_data = relay.Node.Field(KoboImportDataNode)
     deduplication_batch_status_choices = graphene.List(ChoiceObject)
     deduplication_golden_record_status_choices = graphene.List(ChoiceObject)
 
