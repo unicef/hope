@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function useInterval(callback, delay): void {
   const savedCallback = useRef();
@@ -21,4 +21,17 @@ export function useInterval(callback, delay): void {
       return () => clearInterval(id);
     }
   }, [delay]);
+}
+
+export function useLazyInterval(callback, delay): [(args) => void, () => void] {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [intervalId, setIntervalId] = useState(null as any);
+  const startInterval = (args): void => {
+    setIntervalId(setInterval(()=>callback(args), delay));
+  };
+  const cancelInterval = (): void => {
+    console.log('interval stopped')
+    clearInterval(intervalId);
+  };
+  return [startInterval, cancelInterval];
 }

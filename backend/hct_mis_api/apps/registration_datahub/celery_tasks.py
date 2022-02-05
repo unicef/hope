@@ -196,7 +196,7 @@ def pull_kobo_submissions_task(import_data_id):
     logger.info("pull_kobo_submissions_task start")
     from hct_mis_api.apps.registration_datahub.models import KoboImportData
 
-    kobo_import_data = KoboImportData.objects.get(import_data_id)
+    kobo_import_data = KoboImportData.objects.get(id=import_data_id)
     from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import PullKoboSubmissions
 
     try:
