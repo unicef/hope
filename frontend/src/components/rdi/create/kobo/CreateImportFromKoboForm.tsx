@@ -64,8 +64,7 @@ export function CreateImportFromKoboForm({
   };
   useEffect(() => stopPullingImportData, []);
   useEffect(() => {
-    console.log(formik.values);
-    // saveKoboInputData();
+    saveKoboInputData();
   }, [formik.values.koboAssetId, formik.values.onlyActiveSubmissions]);
   useEffect(() => {
     setSubmitForm(formik.submitForm);
