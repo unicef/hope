@@ -1,14 +1,14 @@
 import { gql } from 'apollo-boost';
 
-export const IMPORT_DATA_QUERY = gql`
-  query ImportData($id: ID!) {
-    importData(id: $id) {
+export const KOBO_IMPORT_DATA_QUERY = gql`
+  query KoboImportData($id: ID!) {
+    koboImportData(id: $id) {
       id
       status
       numberOfIndividuals
       numberOfHouseholds
       error
-      validationErrors {
+      koboValidationErrors {
         header
         message
       }

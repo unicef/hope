@@ -976,9 +976,10 @@ type ImportDataNode implements Node {
   numberOfHouseholds: Int
   numberOfIndividuals: Int
   error: String!
-  validationErrors: KoboErrorNode
+  validationErrors: String!
   createdById: UUID
   registrationDataImport: RegistrationDataImportDatahubNode
+  koboimportdata: KoboImportDataNode
 }
 
 enum ImportDataStatus {
@@ -1962,6 +1963,25 @@ type KoboErrorNode {
   message: String
 }
 
+type KoboImportDataNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  importdataPtr: ImportDataNode!
+  status: ImportDataStatus!
+  businessAreaSlug: String!
+  file: String
+  dataType: ImportDataDataType!
+  numberOfHouseholds: Int
+  numberOfIndividuals: Int
+  error: String!
+  validationErrors: String!
+  createdById: UUID
+  koboAssetId: String!
+  onlyActiveSubmissions: Boolean!
+  koboValidationErrors: [KoboErrorNode]
+}
+
 type LabelNode {
   language: String
   label: String
@@ -2380,6 +2400,7 @@ type Query {
   importedIndividual(id: ID!): ImportedIndividualNode
   allImportedIndividuals(before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): ImportedIndividualNodeConnection
   importData(id: ID!): ImportDataNode
+  koboImportData(id: ID!): KoboImportDataNode
   deduplicationBatchStatusChoices: [ChoiceObject]
   deduplicationGoldenRecordStatusChoices: [ChoiceObject]
   registrationDataImport(id: ID!): RegistrationDataImportNode
@@ -2789,7 +2810,7 @@ type SanctionListIndividualNodeEdge {
 }
 
 type SaveKoboProjectImportDataAsyncMutation {
-  importData: ImportDataNode
+  importData: KoboImportDataNode
 }
 
 type SaveKoboProjectImportDataMutation {
