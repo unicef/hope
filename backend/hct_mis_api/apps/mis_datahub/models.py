@@ -157,8 +157,8 @@ class Program(SessionModel):
     business_area = models.CharField(
         max_length=20
     )  # TODO: potentially remove in future since base model has it already
-    ca_id = models.CharField(max_length=255)
-    ca_hash_id = models.CharField(max_length=255)
+    ca_id = models.CharField(max_length=255, null=True)
+    ca_hash_id = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255)
     scope = models.CharField(choices=SCOPE_CHOICE, max_length=50)
     start_date = models.DateTimeField()
