@@ -31,11 +31,12 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
-    registration_xlsx_import_task,
+    registration_xlsx_import_task, pull_kobo_submissions_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     RegistrationDataImportDatahub,
+    KoboImportData,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
@@ -389,11 +390,37 @@ class SaveKoboProjectImportDataMutation(PermissionMutation):
 
         created = ImportData.objects.create(
             file=file,
+            data_type=ImportData.JSON,
             number_of_households=number_of_households,
             number_of_individuals=number_of_individuals,
         )
 
         return SaveKoboProjectImportDataMutation(created, [])
+
+
+class SaveKoboProjectImportDataAsyncMutation(PermissionMutation):
+    import_data = graphene.Field(ImportDataNode)
+
+    class Arguments:
+        uid = Upload(required=True)
+        business_area_slug = graphene.String(required=True)
+        only_active_submissions = graphene.Boolean(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, uid, business_area_slug, only_active_submissions):
+        cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
+
+        import_data = KoboImportData.objects.create(
+            data_type=ImportData.JSON,
+            kobo_asset_id=uid,
+            only_active_submissions=only_active_submissions,
+            status=ImportData.STATUS_PENDING,
+            business_area_slug=business_area_slug,
+            created_by_id=info.context.request.user.id,
+        )
+        pull_kobo_submissions_task.delay(import_data.id)
+        return SaveKoboProjectImportDataMutation(import_data, [])
 
 
 class DeleteRegistrationDataImport(graphene.Mutation):
@@ -419,6 +446,7 @@ class Mutations(graphene.ObjectType):
     registration_xlsx_import = RegistrationXlsxImportMutation.Field()
     registration_kobo_import = RegistrationKoboImportMutation.Field()
     save_kobo_import_data = SaveKoboProjectImportDataMutation.Field()
+    save_kobo_import_data_async = SaveKoboProjectImportDataAsyncMutation.Field()
     merge_registration_data_import = MergeRegistrationDataImportMutation.Field()
     refuse_registration_data_import = RefuseRegistrationDataImportMutation.Field()
     rerun_dedupe = RegistrationDeduplicationMutation.Field()

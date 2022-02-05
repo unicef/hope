@@ -359,7 +359,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
             ).update(final=False)
 
             target_population.save()
-        send_target_population_task.delay()
+        send_target_population_task.delay(target_population.id)
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
