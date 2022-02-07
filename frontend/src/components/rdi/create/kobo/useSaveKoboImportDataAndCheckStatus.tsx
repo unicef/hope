@@ -10,7 +10,7 @@ import {
 import { useLazyInterval } from '../../../../hooks/useInterval';
 
 export interface UseSaveKoboImportDataAndCheckStatusReturnType {
-  saveAndStartPulling: (
+  saveAndStartPolling: (
     variables: SaveKoboImportDataAsyncMutationVariables,
   ) => Promise<void>;
   stopPollingImportData: () => void;
@@ -76,8 +76,8 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
     }
   };
   return {
-    saveAndStartPulling: saveAndStartPolling,
-    stopPollingImportData: stopPollingImportData,
+    saveAndStartPolling,
+    stopPollingImportData,
     loading,
     koboImportData: koboImportData?.koboImportData,
   };

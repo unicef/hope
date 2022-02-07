@@ -31,8 +31,8 @@ export function CreateImportFromKoboForm({
   setSubmitDisabled,
 }): React.ReactElement {
   const {
-    saveAndStartPulling,
-    stopPullingImportData,
+    saveAndStartPolling,
+    stopPollingImportData,
     loading: saveKoboLoading,
     koboImportData,
   } = useSaveKoboImportDataAndCheckStatus();
@@ -55,14 +55,14 @@ export function CreateImportFromKoboForm({
     if (!formik.values.koboAssetId) {
       return;
     }
-    stopPullingImportData();
-    await saveAndStartPulling({
+    stopPollingImportData();
+    await saveAndStartPolling({
       businessAreaSlug,
       onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
       koboAssetId: formik.values.koboAssetId,
     });
   };
-  useEffect(() => stopPullingImportData, []);
+  useEffect(() => stopPollingImportData, []);
   useEffect(() => {
     saveKoboInputData();
   }, [formik.values.koboAssetId, formik.values.onlyActiveSubmissions]);
