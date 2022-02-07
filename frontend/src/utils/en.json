@@ -576,5 +576,7 @@
   "Verification Plans Summary": "Verification Plans Summary",
   "Activation Date": "Activation Date",
   "Number of Verification Plans": "Number of Verification Plans",
-  " When you close this ticket, the household that this Individual is a member of will be deactivated.": " When you close this ticket, the household that this Individual is a member of will be deactivated."
+  " When you close this ticket, the household that this Individual is a member of will be deactivated.": " When you close this ticket, the household that this Individual is a member of will be deactivated.",
+  "Import XLSX": "Import XLSX",
+  "Export XLSX": "Export XLSX"
 }

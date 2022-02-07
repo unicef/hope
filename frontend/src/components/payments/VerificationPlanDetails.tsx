@@ -1,4 +1,5 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { GetApp, Publish } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,15 +61,15 @@ export const VerificationPlanDetails = ({
   const permissions = usePermissions();
   if (!verificationPlan || !samplingChoicesData || !permissions) return null;
 
-  const canEditAndActivate = verificationPlan.status === 'PENDING';
+  const canEditAndActivateAndDelete = verificationPlan.status === 'PENDING';
   const canFinishAndDiscard = verificationPlan.status === 'ACTIVE';
 
   const canEdit =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_UPDATE, permissions) &&
-    canEditAndActivate;
+    canEditAndActivateAndDelete;
   const canActivate =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_ACTIVATE, permissions) &&
-    canEditAndActivate;
+    canEditAndActivateAndDelete;
 
   const canFinish =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_FINISH, permissions) &&
@@ -92,14 +93,16 @@ export const VerificationPlanDetails = ({
           <Typography variant='h6'>{t('Verification Plan Details')}</Typography>
         </Title>
         <Box display='flex' alignItems='center'>
-          <Box mr={2}>
-            <ErrorButton
-              onClick={() => handleDelete()}
-              startIcon={<DeleteIcon />}
-            >
-              {t('Delete')}
-            </ErrorButton>
-          </Box>
+          {canEditAndActivateAndDelete && (
+            <Box mr={2}>
+              <ErrorButton
+                onClick={() => handleDelete()}
+                startIcon={<DeleteIcon />}
+              >
+                {t('Delete')}
+              </ErrorButton>
+            </Box>
+          )}
           {canEdit && (
             <EditVerificationPlan
               cashPlanId={cashPlan.id}
@@ -117,6 +120,30 @@ export const VerificationPlanDetails = ({
           )}
           {(canFinish || canDiscard) && (
             <Box display='flex'>
+              {verificationPlan.verificationMethod === 'XLSX' && (
+                <Box alignItems='center' display='flex'>
+                  <Box p={2}>
+                    <Button
+                      color='primary'
+                      variant='outlined'
+                      startIcon={<GetApp />}
+                      onClick={() => console.log('IMPORT XLSX')}
+                    >
+                      {t('Export XLSX')}
+                    </Button>
+                  </Box>
+                  <Box p={2}>
+                    <Button
+                      color='primary'
+                      variant='outlined'
+                      startIcon={<Publish />}
+                      onClick={() => console.log('IMPORT XLSX')}
+                    >
+                      {t('Import XLSX')}
+                    </Button>
+                  </Box>
+                </Box>
+              )}
               {canFinish && (
                 <FinishVerificationPlan
                   cashPlanVerificationId={verificationPlan.id}
