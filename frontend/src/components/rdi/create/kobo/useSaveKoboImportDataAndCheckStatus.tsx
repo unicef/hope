@@ -13,7 +13,7 @@ export interface UseSaveKoboImportDataAndCheckStatusReturnType {
   saveAndStartPulling: (
     variables: SaveKoboImportDataAsyncMutationVariables,
   ) => Promise<void>;
-  stopPullingImportData: () => void;
+  stopPollingImportData: () => void;
   loading: boolean;
   koboImportData: KoboImportDataQueryResult['data']['koboImportData'];
 }
@@ -77,7 +77,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
   };
   return {
     saveAndStartPulling: saveAndStartPolling,
-    stopPullingImportData: stopPollingImportData,
+    stopPollingImportData: stopPollingImportData,
     loading,
     koboImportData: koboImportData?.koboImportData,
   };
