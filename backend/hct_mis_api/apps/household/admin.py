@@ -27,6 +27,7 @@ from adminfilters.filters import (
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
+from adminfilters.lookup import GenericLookupFieldFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
@@ -359,8 +360,8 @@ class IndividualAdmin(
     exclude = ("created_at", "updated_at")
     inlines = [IndividualRoleInHouseholdInline]
     list_filter = (
-        ("unicef_id__iexact", TextFieldFilter.factory(title="UNICEF ID")),
-        ("household__unicef_id__iexact", TextFieldFilter.factory(title="Household ID")),
+        GenericLookupFieldFilter.factory(title="UNICEF ID", lookup="unicef_id__iexact"),
+        GenericLookupFieldFilter.factory(title="Household ID", lookup="household__unicef_id__iexact"),
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),

@@ -38,7 +38,7 @@ class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
         field_name="admin_area_level__country__business_areas__slug",
     )
-    title = CharFilter(field_name="title", lookup_expr=["exact", "istartswith"])
+    title__istartswith = CharFilter(field_name="title", lookup_expr="istartswith")
     level = IntegerFilter(
         field_name="level",
     )
@@ -47,6 +47,7 @@ class AdminAreaFilter(FilterSet):
         model = AdminArea
         fields = [
             "title",
+            "title__istartswith",
             # "business_area": ["exact"],
         ]
 
@@ -88,9 +89,7 @@ class FlexibleAttributeChoiceNode(DjangoObjectType):
         model = FlexibleAttributeChoice
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-        exclude_fields = [
-            "history",
-        ]
+        exclude_fields = []
 
 
 class FlexibleAttributeNode(DjangoObjectType):

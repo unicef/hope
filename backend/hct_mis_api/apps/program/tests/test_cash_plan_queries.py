@@ -139,7 +139,6 @@ class TestCashPlanQueries(APITestCase):
     )
     def test_cash_plans(self, name, permissions, query):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
         variables = {}
         if "single" in name:
             variables["id"] = self.id_to_base64("c7e768f1-5626-413e-a032-5fb18789f985", "CashPlanNode")

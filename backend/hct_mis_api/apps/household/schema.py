@@ -1,12 +1,13 @@
 import re
 
-from django.db.models import Prefetch, Q, Sum
+from django.db.models import IntegerField, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce, Lower
 
 import graphene
 from django_filters import (
     BooleanFilter,
     CharFilter,
+    DateFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
@@ -105,11 +106,12 @@ INDIVIDUALS_CHART_LABELS = [
 
 class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
-    country_origin = CharFilter(field_name="country_origin", lookup_expr=["exact", "startswith"])
-    head_of_household__full_name = CharFilter(
-        field_name="head_of_household__full_name", lookup_expr=["exact", "startswith"]
-    )
     size = IntegerRangeFilter(field_name="size")
+    search = CharFilter(method="search_filter")
+    country_origin__startswith = CharFilter(field_name="country_origin", lookup_expr="startswith")
+    head_of_household__full_name__startswith = CharFilter(
+        field_name="head_of_household__full_name", lookup_expr="startswith"
+    )
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=AdminArea.objects.filter(level=2))
@@ -120,8 +122,10 @@ class HouseholdFilter(FilterSet):
         fields = [
             "business_area",
             "country_origin",
+            "country_origin__startswith",
             "address",
             "head_of_household__full_name",
+            "head_of_household__full_name__startswith",
             "size",
             "admin_area",
             "target_populations",
@@ -171,7 +175,10 @@ class IndividualFilter(FilterSet):
     business_area = CharFilter(
         field_name="business_area__slug",
     )
-    age = AgeRangeFilter(field_name="birth_date", lookup_expr=["range", "lte", "gte"])
+    age = DateFilter(field_name="birth_date__date")
+    age__range = AgeRangeFilter(field_name="birth_date__date", lookup_expr="range")
+    age__lte = DateRangeFilter(field_name="birth_date__date", lookup_expr="lte")
+    age__gte = DateRangeFilter(field_name="birth_date__date", lookup_expr="gte")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
@@ -179,8 +186,9 @@ class IndividualFilter(FilterSet):
     admin2 = ModelMultipleChoiceFilter(field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2))
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
+    full_name__startswith = CharFilter(field_name="full_name", lookup_expr="startswith")
+    full_name__endswith = CharFilter(field_name="full_name", lookup_expr="endswith")
     withdrawn = BooleanFilter(field_name="withdrawn")
-    full_name = CharFilter(field_name="full_name", lookup_expr=["exact", "startswith", "endswith"])
     flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
 
     class Meta:
@@ -190,7 +198,12 @@ class IndividualFilter(FilterSet):
             "programs",
             "business_area",
             "full_name",
+            "full_name__startswith",
+            "full_name__endswith",
             "age",
+            "age__range",
+            "age__lte",
+            "age__gte",
             "sex",
             "household__admin_area",
             "withdrawn",
@@ -655,9 +668,9 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
-        return Household.objects.annotate(total_cash=Coalesce(Sum("payment_records__delivered_quantity"), 0)).order_by(
-            "created_at"
-        )
+        return Household.objects.annotate(
+            total_cash=Coalesce(Sum("payment_records__delivered_quantity"), 0, output_field=IntegerField())
+        ).order_by("created_at")
 
     def resolve_residence_status_choices(self, info, **kwargs):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
