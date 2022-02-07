@@ -1,4 +1,14 @@
-from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
+from django.db.models import (
+    Case,
+    Count,
+    DecimalField,
+    FloatField,
+    IntegerField,
+    Q,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce, Lower
 
 import graphene
@@ -116,22 +126,32 @@ class CashPlanFilter(FilterSet):
     verification_status = MultipleChoiceFilter(
         field_name="verification_status", choices=CashPlanPaymentVerification.STATUS_CHOICES
     )
-    assistance_through = CharFilter(field_name="assistance_through", lookup_expr=["exact", "startswith"])
-    service_provider__full_name = CharFilter(
-        field_name="service_provider__full_name", lookup_expr=["exact", "startswith"]
+    assistance_through__startswith = CharFilter(field_name="assistance_through", lookup_expr="startswith")
+    service_provider__full_name__startswith = CharFilter(
+        field_name="service_provider__full_name", lookup_expr="startswith"
     )
-    end_date = DateFilter(field_name="end_date", lookup_expr=["exact", "lte", "gte"])
-    start_date = DateFilter(field_name="start_date", lookup_expr=["exact", "lte", "gte"])
-    business_area = CharFilter(field_name="business_area__slug", lookup_expr=["exact", "startswith"])
+    end_date__lte = DateFilter(field_name="end_date", lookup_expr="lte")
+    end_date__gte = DateFilter(field_name="end_date", lookup_expr="gte")
+    start_date__lte = DateFilter(field_name="start_date", lookup_expr="lte")
+    start_date__gte = DateFilter(field_name="start_date", lookup_expr="gte")
+    business_area__slug__startswith = CharFilter(field_name="business_area__slug", lookup_expr="startswith")
 
     class Meta:
         fields = (
             "program",
             "assistance_through",
+            "assistance_through__startswith",
             "service_provider__full_name",
+            "service_provider__full_name__startswith",
             "start_date",
+            "start_date__lte",
+            "start_date__gte",
             "end_date",
+            "end_date__lte",
+            "end_date__gte",
             "business_area",
+            "business_area__slug",
+            "business_area__slug__startswith",
         )
         model = CashPlan
 
@@ -260,7 +280,9 @@ class Query(graphene.ObjectType):
                     output_field=IntegerField(),
                 )
             )
-            .annotate(households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0))
+            .annotate(
+                households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
+            )
             .order_by("custom_order", "start_date")
         )
 
@@ -331,12 +353,16 @@ class Query(graphene.ObjectType):
             .order_by("delivery_date__month")
             .annotate(
                 total_delivered_cash=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
+                    output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_delivered_voucher=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
+                    output_field=DecimalField(),
                 )
             )
         )

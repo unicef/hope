@@ -47,7 +47,7 @@ def permissions_resolver(user_roles):
 
 class UsersFilter(FilterSet):
     business_area = CharFilter(required=True, method="business_area_filter")
-    search = CharFilter(method="search_filter", lookup_expr=["exact", "startswith"])
+    search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
     partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices(), method="partners_filter")
     roles = MultipleChoiceFilter(choices=Role.get_roles_as_choices(), method="roles_filter")
