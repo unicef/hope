@@ -51,11 +51,6 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 
-const ChartContainer = styled.div`
-  width: 150px;
-  height: 150px;
-`;
-
 export const VerificationPlanDetails = ({
   verificationPlan,
   samplingChoicesData,
