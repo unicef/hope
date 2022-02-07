@@ -8,6 +8,7 @@ import { BlackLink } from '../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { LabelizedField } from '../../../components/core/LabelizedField';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { Missing } from '../../../components/core/Missing';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
@@ -15,24 +16,23 @@ import { ActivateVerificationPlan } from '../../../components/payments/ActivateV
 import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
 import { DiscardVerificationPlan } from '../../../components/payments/DiscardVerificationPlan';
 import { FinishVerificationPlan } from '../../../components/payments/FinishVerificationPlan';
+import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
-  useCashPlanQuery,
-  useCashPlanVerificationSamplingChoicesQuery,
-} from '../../../__generated__/graphql';
-import { VerificationPlanDetails } from '../../components/payments/VerificationPlanDetails';
-import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
-import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
-import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import {
   countPercentage,
   decodeIdString,
   isPermissionDeniedError,
-  paymentVerificationStatusToColor,
 } from '../../../utils/utils';
+import {
+  useCashPlanQuery,
+  useCashPlanVerificationSamplingChoicesQuery,
+} from '../../../__generated__/graphql';
+import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
+import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
+import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
   display: flex;
