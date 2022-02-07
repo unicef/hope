@@ -80,6 +80,11 @@ class CreatePaymentVerificationMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         arg = lambda name: input.get(name)
+        cash_plan_id = decode_id_string(arg("cash_plan_id"))
+        cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
+
         cls.verify_required_arguments(
             input,
             "sampling",
@@ -113,15 +118,6 @@ class CreatePaymentVerificationMutation(PermissionMutation):
             },
         )
 
-        cash_plan_id = decode_id_string(arg("cash_plan_id"))
-        cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
-
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
-
-        verification_channel = arg("verification_channel")
-        if cash_plan.verifications.count() > 0:
-            logger.error("Verification plan for this Cash Plan already exists")
-            raise GraphQLError("Verification plan for this Cash Plan already exists")
         (
             payment_records,
             confidence_interval,
@@ -132,6 +128,9 @@ class CreatePaymentVerificationMutation(PermissionMutation):
             sex,
             age,
         ) = cls.process_sampling(cash_plan, input)
+
+        verification_channel = arg("verification_channel")
+
         cash_plan_verification = CashPlanPaymentVerification(
             cash_plan=cash_plan,
             confidence_interval=confidence_interval,
