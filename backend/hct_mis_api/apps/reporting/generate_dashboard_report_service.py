@@ -8,7 +8,7 @@ from itertools import chain
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import Count, F, Q, Sum
+from django.db.models import Count, DecimalField, F, Q, Sum
 from django.template.loader import render_to_string
 from django.urls import reverse
 
@@ -59,29 +59,17 @@ class GenerateDashboardReportContentHelpers:
                 valid_households,
                 individual_count_fields,
             )
-            instance["total_children"] = cls._reduce_aggregate(
-                households_aggr, children_count_fields
-            )
-            instance["total_individuals"] = cls._reduce_aggregate(
-                households_aggr, individual_count_fields
-            )
+            instance["total_children"] = cls._reduce_aggregate(households_aggr, children_count_fields)
+            instance["total_individuals"] = cls._reduce_aggregate(households_aggr, individual_count_fields)
             instance["num_households"] = valid_households.count()
 
         # get total distincts (can't use the sum of column since some households might belong to multiple programs)
-        households = Household.objects.filter(
-            payment_records__in=valid_payment_records
-        ).distinct()
-        households_aggr = cls._aggregate_instances_sum(
-            households, individual_count_fields
-        )
+        households = Household.objects.filter(payment_records__in=valid_payment_records).distinct()
+        households_aggr = cls._aggregate_instances_sum(households, individual_count_fields)
         totals = {
             "num_households": households.count(),
-            "total_individuals": cls._reduce_aggregate(
-                households_aggr, individual_count_fields
-            ),
-            "total_children": cls._reduce_aggregate(
-                households_aggr, children_count_fields
-            ),
+            "total_individuals": cls._reduce_aggregate(households_aggr, individual_count_fields),
+            "total_children": cls._reduce_aggregate(households_aggr, children_count_fields),
         }
         # return instances for rows and totals row info
         return instances, totals
@@ -101,18 +89,14 @@ class GenerateDashboardReportContentHelpers:
                 **{valid_payment_records_in_instance_filter_key: instance["id"]}
             )
             households_aggr = cls._aggregate_instances_sum(
-                Household.objects.filter(
-                    payment_records__in=valid_payment_records_in_instance
-                ).distinct(),
+                Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct(),
                 individual_count_fields,
             )
             instance.update(households_aggr)
 
         # get total distincts (can't use the sum of column since some households might belong to multiple programs)
         households_aggr = cls._aggregate_instances_sum(
-            Household.objects.filter(
-                payment_records__in=valid_payment_records
-            ).distinct(),
+            Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
             individual_count_fields,
         )
         # return instances for rows and totals row info
@@ -133,7 +117,7 @@ class GenerateDashboardReportContentHelpers:
                 value = delivery_type[0]
                 result[value] = (
                     payment_records.filter(delivery_type=value)
-                    .aggregate(Sum("delivered_quantity_usd"))
+                    .aggregate(Sum("delivered_quantity_usd", output_field=DecimalField()))
                     .get("delivered_quantity_usd__sum")
                 )
             return result
@@ -142,9 +126,7 @@ class GenerateDashboardReportContentHelpers:
             valid_payment_records_in_instance = valid_payment_records.filter(
                 **{valid_payment_records_in_instance_filter_key: instance["id"]}
             )
-            aggregated_by_delivery_type = aggregate_by_delivery_type(
-                valid_payment_records_in_instance
-            )
+            aggregated_by_delivery_type = aggregate_by_delivery_type(valid_payment_records_in_instance)
             instance.update(aggregated_by_delivery_type)
 
         totals = aggregate_by_delivery_type(valid_payment_records)
@@ -182,6 +164,7 @@ class GenerateDashboardReportContentHelpers:
                 label: Sum(
                     "cash_plans__payment_records__delivered_quantity_usd",
                     filter=get_filter_query(cash, index_number + 1),
+                    output_field=DecimalField(),
                 )
             }
 
@@ -231,23 +214,13 @@ class GenerateDashboardReportContentHelpers:
         instances = (
             BusinessArea.objects.filter(tickets__in=valid_grievances)
             .distinct()
-            .annotate(
-                total_grievances=Count(
-                    "tickets", filter=~Q(tickets__category__in=feedback_categories)
-                )
-            )
-            .annotate(
-                total_feedback=Count(
-                    "tickets", filter=Q(tickets__category__in=feedback_categories)
-                )
-            )
+            .annotate(total_grievances=Count("tickets", filter=~Q(tickets__category__in=feedback_categories)))
+            .annotate(total_feedback=Count("tickets", filter=Q(tickets__category__in=feedback_categories)))
             .annotate(total_resolved=Count("tickets", filter=status_closed_query))
             .annotate(
                 total_unresolved_lte_30=Count(
                     "tickets",
-                    filter=Q(
-                        status_open_query, tickets__created_at__gte=days_30_from_now
-                    ),
+                    filter=Q(status_open_query, tickets__created_at__gte=days_30_from_now),
                 )
             )
             .annotate(
@@ -263,9 +236,7 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_unresolved_60=Count(
                     "tickets",
-                    filter=Q(
-                        status_open_query, tickets__created_at__lt=days_60_from_now
-                    ),
+                    filter=Q(status_open_query, tickets__created_at__lt=days_60_from_now),
                 )
             )
             .annotate(
@@ -301,23 +272,15 @@ class GenerateDashboardReportContentHelpers:
         if not cls._is_report_global(report):
             filter_vars["payment_record__business_area"] = report.business_area
         valid_verifications = PaymentVerification.objects.filter(**filter_vars)
-        path_to_payment_record_verifications = (
-            "cash_plans__verifications__payment_record_verifications"
-        )
+        path_to_payment_record_verifications = "cash_plans__verifications__payment_record_verifications"
 
         def format_status_filter(status):
             return Q(**{f"{path_to_payment_record_verifications}__status": status})
 
         programs = (
-            Program.objects.filter(
-                **{f"{path_to_payment_record_verifications}__in": valid_verifications}
-            )
+            Program.objects.filter(**{f"{path_to_payment_record_verifications}__in": valid_verifications})
             .distinct()
-            .annotate(
-                total_cash_plan_verifications=Count(
-                    "cash_plans__verifications", distinct=True
-                )
-            )
+            .annotate(total_cash_plan_verifications=Count("cash_plans__verifications", distinct=True))
             .annotate(
                 total_households=Count(
                     f"{path_to_payment_record_verifications}__payment_record__household",
@@ -341,11 +304,7 @@ class GenerateDashboardReportContentHelpers:
                     ),
                 )
             )
-            .annotate(
-                total_verifications_done=Count(
-                    path_to_payment_record_verifications, distinct=True
-                )
-            )
+            .annotate(total_verifications_done=Count(path_to_payment_record_verifications, distinct=True))
             .annotate(
                 received=Count(
                     path_to_payment_record_verifications,
@@ -356,18 +315,14 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 not_received=Count(
                     path_to_payment_record_verifications,
-                    filter=format_status_filter(
-                        PaymentVerification.STATUS_NOT_RECEIVED
-                    ),
+                    filter=format_status_filter(PaymentVerification.STATUS_NOT_RECEIVED),
                     distinct=True,
                 )
             )
             .annotate(
                 received_with_issues=Count(
                     path_to_payment_record_verifications,
-                    filter=format_status_filter(
-                        PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-                    ),
+                    filter=format_status_filter(PaymentVerification.STATUS_RECEIVED_WITH_ISSUES),
                     distinct=True,
                 )
             )
@@ -393,17 +348,15 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_cash=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(
-                        paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH
-                    ),
+                    filter=Q(paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
+                    output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_voucher=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(
-                        paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER
-                    ),
+                    filter=Q(paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
+                    output_field=DecimalField(),
                 )
             )
         )
@@ -422,38 +375,26 @@ class GenerateDashboardReportContentHelpers:
                 household__payment_records__in=valid_payment_records,
             )
             .distinct()
-            .annotate(
-                total_transferred=Sum(
-                    "household__payment_records__delivered_quantity_usd"
-                )
-            )
+            .annotate(total_transferred=Sum("household__payment_records__delivered_quantity_usd"))
             .annotate(num_households=Count("household", distinct=True))
         )
 
         totals = admin_areas.aggregate(Sum("total_transferred"), Sum("num_households"))
-        admin_areas = admin_areas.values(
-            "id", "title", "p_code", "num_households", "total_transferred"
-        )
+        admin_areas = admin_areas.values("id", "title", "p_code", "num_households", "total_transferred")
 
         individual_count_fields = cls._get_all_individual_count_fields()
 
         for admin_area in admin_areas:
-            valid_payment_records_in_instance = valid_payment_records.filter(
-                household__admin_area=admin_area["id"]
-            )
+            valid_payment_records_in_instance = valid_payment_records.filter(household__admin_area=admin_area["id"])
             households_aggr = cls._aggregate_instances_sum(
-                Household.objects.filter(
-                    payment_records__in=valid_payment_records_in_instance
-                ).distinct(),
+                Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct(),
                 individual_count_fields,
             )
             admin_area.update(households_aggr)
 
         totals.update(
             cls._aggregate_instances_sum(
-                Household.objects.filter(
-                    payment_records__in=valid_payment_records
-                ).distinct(),
+                Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
                 individual_count_fields,
             )
         )
@@ -513,9 +454,7 @@ class GenerateDashboardReportContentHelpers:
         return result
 
     @staticmethod
-    def format_total_transferred_by_country(
-        instance: BusinessArea, is_totals: bool, *args
-    ) -> tuple:
+    def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args) -> tuple:
         if is_totals:
             return (
                 "",
@@ -571,13 +510,7 @@ class GenerateDashboardReportContentHelpers:
             instance.name,
             instance.total_cash_plan_verifications,
             instance.total_households,
-            round(
-                (
-                    instance.total_verifications_done
-                    / instance.all_possible_payment_records
-                )
-                * 100
-            )
+            round((instance.total_verifications_done / instance.all_possible_payment_records) * 100)
             if instance.total_payment_records
             else 0,
             instance.received,
@@ -587,14 +520,10 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def format_total_transferred_by_admin_area_row(
-        cls, instance, is_totals: bool, *args
-    ):
+    def format_total_transferred_by_admin_area_row(cls, instance, is_totals: bool, *args):
         fields_list = cls._get_all_individual_count_fields()
 
-        shared_cells = tuple(
-            instance.get(f"{field_name}__sum", 0) for field_name in fields_list
-        )
+        shared_cells = tuple(instance.get(f"{field_name}__sum", 0) for field_name in fields_list)
 
         if is_totals:
             return (
@@ -629,9 +558,7 @@ class GenerateDashboardReportContentHelpers:
         if date_path:
             filter_vars.update({f"{date_path}__year": report.year})
         if admin_area_path and report.admin_area:
-            filter_vars.update(
-                {admin_area_path: report.admin_area, f"{admin_area_path}__level": 2}
-            )
+            filter_vars.update({admin_area_path: report.admin_area, f"{admin_area_path}__level": 2})
         if program_path and report.program:
             filter_vars.update({program_path: report.program})
         if not cls._is_report_global(report) and business_area_path:
@@ -658,15 +585,11 @@ class GenerateDashboardReportContentHelpers:
     def _get_business_areas_or_programs(cls, report, valid_payment_records):
         if cls._is_report_global(report):
             business_area_code_path = "code"
-            instances = BusinessArea.objects.filter(
-                paymentrecord__in=valid_payment_records
-            )
+            instances = BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
             valid_payment_records_in_instance_filter_key = "business_area"
         else:
             business_area_code_path = "business_area__code"
-            instances = Program.objects.filter(
-                cash_plans__payment_records__in=valid_payment_records
-            )
+            instances = Program.objects.filter(cash_plans__payment_records__in=valid_payment_records)
             valid_payment_records_in_instance_filter_key = "cash_plan__program"
 
         instances = (
@@ -939,9 +862,7 @@ class GenerateDashboardReportService:
         self.report = report
         self.report_types = report.report_type
         self.business_area = report.business_area
-        self.hq_or_country = (
-            self.HQ if report.business_area.slug == "global" else self.COUNTRY
-        )
+        self.hq_or_country = self.HQ if report.business_area.slug == "global" else self.COUNTRY
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -963,10 +884,7 @@ class GenerateDashboardReportService:
         self.ws_meta.append(info_row)
 
     def _add_headers(self, active_sheet, report_type) -> int:
-        headers_row = (
-            self.HEADERS[report_type][self.hq_or_country]
-            + self.HEADERS[report_type][self.SHARED]
-        )
+        headers_row = self.HEADERS[report_type][self.hq_or_country] + self.HEADERS[report_type][self.SHARED]
         headers_row = self._stringify_all_values(headers_row)
         active_sheet.append(headers_row)
         return len(headers_row)
@@ -1016,9 +934,7 @@ class GenerateDashboardReportService:
         try:
             self.generate_workbook()
             file_name = (
-                self._report_type_to_str(self.report_types[0])
-                if len(self.report_types) == 1
-                else "Multiple reports"
+                self._report_type_to_str(self.report_types[0]) if len(self.report_types) == 1 else "Multiple reports"
             )
             self.report.file.save(
                 f"{file_name}-{self._format_date(self.report.created_at)}.xlsx",
@@ -1056,9 +972,7 @@ class GenerateDashboardReportService:
     @staticmethod
     def _adjust_column_width_from_col(ws, min_col, max_col, min_row):
         column_widths = []
-        for i, col in enumerate(
-            ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)
-        ):
+        for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
             for cell in col:
                 value = cell.value
                 if value is not None:
@@ -1098,9 +1012,7 @@ class GenerateDashboardReportService:
         return label[:31]
 
     def _report_types_to_joined_str(self) -> str:
-        return ", ".join(
-            [self._report_type_to_str(report_type) for report_type in self.report_types]
-        )
+        return ", ".join([self._report_type_to_str(report_type) for report_type in self.report_types])
 
     @staticmethod
     def _stringify_all_values(row: tuple) -> tuple:
@@ -1119,9 +1031,7 @@ class GenerateDashboardReportService:
     @staticmethod
     def _format_user_name(user: User) -> str:
         return (
-            f"{user.first_name} {user.last_name}"
-            if user.first_name or user.last_name
-            else user.email or user.username
+            f"{user.first_name} {user.last_name}" if user.first_name or user.last_name else user.email or user.username
         )
 
     @staticmethod
