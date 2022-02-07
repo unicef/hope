@@ -50,6 +50,8 @@ class Rule(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
+    flags = JSONField(default=dict, blank=True)
+
     objects = RuleManager()
 
     def __str__(self):
@@ -59,15 +61,11 @@ class Rule(models.Model):
         super().__init__(*args, **kwargs)
         self.__original_security = self.security
 
+    def get_flag(self, name, default=None):
+        return self.flags.get(name, default)
+
     def as_dict(self):
         return model_to_dict(self, MONITORED_FIELDS)
-
-    def get_changes(self):
-        current = Rule.objects.get(pk=self.pk)
-        data1 = current.as_dict()
-        data2 = self.as_dict()
-        diff = set(data1.items()).symmetric_difference(data2.items())
-        return data1, list(dict(diff).keys())
 
     def clean(self):
         if self.pk:
@@ -76,46 +74,83 @@ class Rule(models.Model):
     def clean_definition(self):
         self.interpreter.validate()
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        with atomic():
-            if self.pk:
-                self.commit()
-            super().save(force_insert, force_update, using, update_fields)
-
     def delete(self, using=None, keep_parents=False):
         self.enabled = False
         self.save()
 
-    def used_by(self):
-        raise NotImplementedError
+    def get_changes(self):
+        prev = self.latest_commit
+        if prev:
+            data1 = prev.after
+            data2 = self.as_dict()
+        else:
+            data1 = {}
+            data2 = self.as_dict()
+
+        diff = set(data1.items()).symmetric_difference(data2.items())
+        return data1, list(dict(diff).keys())
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if "individual_data_needed" not in self.flags:
+            self.flags["individual_data_needed"] = False
+        with atomic():
+            super().save(force_insert, force_update, using, update_fields)
+            self.commit()
 
     def commit(self, is_release=False, force=False):
-        if self.pk:
-            stored, changes = self.get_changes()
-        else:
-            stored, changes = {}, []
-        if force or changes or not self.pk:
-            return RuleCommit.objects.create(
-                rule=self,
-                enabled=self.enabled,
-                definition=self.definition,
-                version=self.version,
-                is_release=is_release,
-                updated_by=self.updated_by,
-                before=stored,
-                after=self.as_dict(),
-                affected_fields=changes,
-            )
+        stored, changes = self.get_changes()
+        release = None
+        values = {
+            "enabled": self.enabled,
+            "definition": self.definition,
+            "is_release": is_release,
+            "updated_by": self.updated_by,
+            "before": stored,
+            "after": self.as_dict(),
+            "affected_fields": changes,
+        }
+        if changes:
+            release = RuleCommit.objects.create(rule=self, version=self.version, **values)
+        elif force:
+            release, __ = RuleCommit.objects.update_or_create(rule=self, version=self.version, defaults=values)
+        if is_release:
+            self.history.exclude(pk=release.pk).update(deprecated=True)
+        return release
 
     def release(self):
         if self.deprecated or not self.enabled:
             raise ValueError("Cannot release disabled/deprecated rules")
-        self.commit(is_release=True)
+        commit = self.history.filter(version=self.version).first()
+        if commit and not commit.is_release:
+            commit.is_release = True
+            commit.save()
+            self.history.exclude(pk=commit.pk).update(deprecated=True)
+        else:
+            commit = self.commit(is_release=True, force=True)
+        return commit
 
     @property
     def latest(self):
         try:
             return self.history.filter(is_release=True).order_by("-version").first()
+        except RuleCommit.DoesNotExist:
+            pass
+
+    @property
+    def latest_commit(self):
+        try:
+            return self.history.order_by("version").last()
+        except RuleCommit.DoesNotExist:
+            pass
+
+    @property
+    def last_changes(self):
+        try:
+            return {
+                "fields": self.latest_commit.affected_fields,
+                "before": self.latest_commit.before,
+                "after": self.latest_commit.after,
+            }
         except RuleCommit.DoesNotExist:
             pass
 
@@ -158,21 +193,37 @@ class RuleCommit(models.Model):
     after = JSONField(help_text="The record after apply changes", editable=False)
 
     class Meta:
-        verbose_name = "Rule (History)"
-        verbose_name_plural = "Rules (History)"
+        verbose_name = "RuleCommit"
+        verbose_name_plural = "Rule Commits"
+        unique_together = (
+            "rule",
+            "version",
+        )
         ordering = ("-timestamp",)
         get_latest_by = "-timestamp"
 
     def __str__(self):
         value = f"{self.rule} #{self.id}"
-        if not self.is_release:
-            return f"{value} (Draft)"
+        if not self.enabled:
+            value = f"{value} (Disabled)"
+        elif self.deprecated:
+            value = f"{value} (Deprecated)"
+        elif not self.is_release:
+            value = f"{value} (Draft)"
         return value
+
+    @cached_property
+    def prev(self):
+        return self.rule.history.filter(id__lt=self.id).first()
+
+    @cached_property
+    def next(self):
+        return self.rule.history.filter(id__gt=self.id).first()
 
     @atomic
     def revert(self, fields=MONITORED_FIELDS):
         for field in fields:
-            setattr(self.rule, field, self.before[field])
+            setattr(self.rule, field, self.after[field])
         self.rule.save()
 
     @cached_property
