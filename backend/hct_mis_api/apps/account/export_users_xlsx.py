@@ -20,6 +20,8 @@ class GenericField:
 
 class PartnerField(GenericField):
     def value(self, user: User, business_area: str) -> str:
+        if not user.partner:
+            return ""
         return user.partner.name
 
 

@@ -1,19 +1,14 @@
-import json
 import logging
 import pickle
-from builtins import __build_class__
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
-from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import QuerySet
 from django.template import Context, Template
 from django.utils import timezone
-from django.utils.functional import cached_property
 
-import tablib
-from concurrency.utils import fqn
 from django_celery_beat.models import CrontabSchedule
 from sentry_sdk import capture_exception
 
@@ -70,33 +65,41 @@ class Query(models.Model):
             pass
         return False
 
+    def _invoke(self, query_id):
+        query = Query.objects.get(id=query_id)
+        result, debug_info = query.execute(persist=False)
+        return result, debug_info
+
     def execute(self, persist=False, query_args=None):
         model = self.target.model_class()
         filters = query_args or {}
+        _error = None
         try:
-            self.error = None
             locals_ = dict()
-            locals_["conn"] = model._default_manager.using("read_only")
+            locals_["conn"] = model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
             locals_["query"] = self
             locals_["query_filters"] = filters
+            locals_["invoke"] = self._invoke
             exec(self.code, globals(), locals_)
             result = locals_.get("result", None)
+            debug_info = locals_.get("debug_info", None)
 
-            if persist:
+            if persist and result:
                 info = {
                     "type": type(result).__name__,
-                    "fqn": fqn(result),
+                    "debug_info": debug_info,
                 }
                 r, __ = Dataset.objects.update_or_create(
                     query=self, defaults={"last_run": timezone.now(), "result": pickle.dumps(result), "info": info}
                 )
 
-            return result
+            return result, debug_info
         except Exception as e:
-            id = capture_exception(e)
-            self.error = id
+            _error = capture_exception(e)
+            logger.exception(e)
         finally:
-            self.save(update_fields=["error"])
+            Query.objects.filter(pk=self.pk).update(error=_error)
+        return None, None
 
 
 class Dataset(models.Model):
@@ -150,14 +153,19 @@ class Report(models.Model):
     last_run = models.DateTimeField(null=True, blank=True)
     result = models.BinaryField(null=True, blank=True)
 
-    def execute(self):
-        self.query.execute(True)
-        output = self.formatter.render(
-            {
-                "dataset": self.query.dataset,
-                "report": "self",
-            }
-        )
-        self.last_run = timezone.now()
-        self.result = pickle.dumps(output)
-        self.save()
+    def execute(self, run_query=False):
+        if run_query:
+            self.query.execute(True)
+        try:
+            output = self.formatter.render(
+                {
+                    "dataset": self.query.dataset,
+                    "report": "self",
+                }
+            )
+            self.last_run = timezone.now()
+            self.result = pickle.dumps(output)
+            self.save()
+            return output
+        except ObjectDoesNotExist:
+            pass

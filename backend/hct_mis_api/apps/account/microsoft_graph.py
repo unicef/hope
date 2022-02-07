@@ -44,7 +44,7 @@ class MicrosoftGraphAPI:
         return token
 
     def get_results(self, url):
-        headers = {"Authorization": "Bearer {}".format(self.access_token)}
+        headers = {"Authorization": f"Bearer {self.access_token}"}
         response = requests.get(url, headers=headers)
         try:
             response.raise_for_status()

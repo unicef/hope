@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.DeleteModel(name='RuleCommit'),
         migrations.RemoveField(
             model_name='rule',
             name='id',

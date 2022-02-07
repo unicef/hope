@@ -4,7 +4,6 @@ import pickle
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
@@ -18,11 +17,10 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from import_export import fields, resources
 from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
-from tablib import Dataset
 
+from .celery_tasks import queue, refresh_reports
 from .forms import ExportForm, FormatterTestForm, QueryForm
 from .models import Dataset, Formatter, Query, Report
-from .tasks import queue
 from .utils import to_dataset
 from .widget import FormatterEditor
 
@@ -57,6 +55,7 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
         ("owner", AutoCompleteFilter),
     )
     autocomplete_fields = ("target", "owner")
+    readonly_fields = ("error",)
     form = QueryForm
     change_form_template = None
     resource_class = QueryResource
@@ -113,9 +112,11 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
                 context["dataset"] = ret
             elif isinstance(ret, dict):
                 context["result"] = ret
+            elif isinstance(ret, list):
+                context["result"] = ret
             else:
-                self.message_user(f"Query does not returns a valid result. It returned {type(ret)}")
-            return render(request, "power_query/preview.html", context)
+                self.message_user(request, f"Query does not returns a valid result. It returned {type(ret)}")
+            return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
@@ -237,6 +238,7 @@ class ReportAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
     readonly_fields = ("last_run",)
     list_filter = (("query", AutoCompleteFilter), ("formatter", AutoCompleteFilter))
     resource_class = ReportResource
+    change_list_template = None
 
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser or obj.owner == request.user
@@ -266,13 +268,13 @@ class ReportAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
 
     @button(visible=lambda o, r: o.result and "/change" in r.path)
     def view(self, request, pk):
+        url = reverse("power_query:report", args=[pk])
+        return HttpResponseRedirect(url)
+
+    @button(visible=lambda o, r: r.path.endswith("/power_query/report/"))
+    def refresh(self, request):
         try:
-            obj = self.get_object(request, pk)
-            if request.user.is_superuser or Report.objects.filter(pk=obj.pk, available_to=request.user).exists():
-                data = pickle.loads(obj.result)
-                return HttpResponse(data)
-            else:
-                raise PermissionDenied()
+            refresh_reports.delay()
+            self.message_user(request, "Reports refresh queued", messages.SUCCESS)
         except Exception as e:
-            logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)

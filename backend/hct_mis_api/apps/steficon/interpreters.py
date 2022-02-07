@@ -1,3 +1,5 @@
+import datetime
+import importlib
 import logging
 import sys
 import traceback
@@ -25,7 +27,9 @@ class Interpreter:
     def validate(self):
         try:
             self.execute()
+            return True
         except Exception as e:
+            logger.exception(e)
             raise ValidationError(e)
 
     def get_result(self):
@@ -43,6 +47,13 @@ class PythonFunction(Interpreter):
         return self.code(**context)
 
 
+def call_rule(rule_id, context):
+    from .models import Rule
+
+    rule: Rule = Rule.objects.get(id=rule_id)
+    return rule.execute(context)
+
+
 class PythonExec(Interpreter):
     label = "Python"
 
@@ -55,9 +66,13 @@ class PythonExec(Interpreter):
             "__builtins__": {
                 "__build_class__": __build_class__,
                 "__name__": __name__,
+                "__import__": __import__,
+                "date": datetime.date,
+                # "relativedelta": dateutil.relativedelta,
                 "bytearray": bytearray,
                 "bytes": bytes,
                 "Decimal": Decimal,
+                "invoke": call_rule,
                 "complex": complex,
                 "dict": dict,
                 "float": float,
@@ -72,8 +87,11 @@ class PythonExec(Interpreter):
             }
         }
         for module_name in config.BUILTIN_MODULES:
-            mod = __import__(module_name)
-            gl["__builtins__"][module_name] = mod
+            try:
+                mod = importlib.import_module(module_name)
+                gl["__builtins__"][module_name] = mod
+            except Exception as e:
+                logger.exception(e)
 
         pts = self.get_result()
         locals_ = dict()
@@ -125,6 +143,7 @@ class PythonExec(Interpreter):
             raise ValidationError(errors)
         try:
             compile(self.init_string, "<code>", mode="exec")
+            return True
         except Exception as e:
             logger.exception(e)
             tb = traceback.format_exc(limit=-1)
@@ -145,6 +164,6 @@ def get_env(**options) -> Environment:
 
 interpreters = [
     PythonExec,
-    PythonFunction,
+    # PythonFunction,
 ]
 mapping = {a.label.lower(): a for a in interpreters}

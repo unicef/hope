@@ -15,8 +15,14 @@
     <li>{{ original.latest.version|default_if_none:"No release" }}</li>
 {% endblock %}
 {% block submit_buttons_bottom %}
+    <div class="submit-row">
     <input type="submit" value="{% trans 'Save and continue editing' %}" name="_continue">
     <input type="submit" value="{% trans 'Release' %}" name="_save">
+    {% if not is_popup and has_delete_permission and original %}
+        {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+        <p class="deletelink-box"><a href="{% add_preserved_filters delete_url %}" class="deletelink">{% trans "Delete" %}</a></p>
+    {% endif %}
+    </div>
 {% endblock %}
 
 {% block admin_change_form_document_ready %}{{ block.super }}
@@ -48,7 +54,6 @@
             django.jQuery(document).keydown(function(e) {
                 // only do J/K nav on result lists and when the search field isn't focused
                 var do_jk_nav = django.jQuery('#result_list').length && django.jQuery('input:focus').length == 0;
-                console.log(11111, 'ctrlKey:', e.ctrlKey, 'metaKey:', e.metaKey, 'which:', e.which);
                 if ((e.ctrlKey || e.metaKey) && (e.which === 83 || e.which === 115)) { // s or S
                     e.preventDefault();
                     django.jQuery("input[name='_continue']").click();

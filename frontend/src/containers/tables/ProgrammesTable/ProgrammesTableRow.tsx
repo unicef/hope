@@ -7,15 +7,15 @@ import {
   ProgrammeChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/Table/ClickableTableRow';
+import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
 import {
   choicesToDict,
   formatCurrency,
   programStatusToColor,
 } from '../../../utils/utils';
-import { StatusBox } from '../../../components/StatusBox';
-import { UniversalMoment } from '../../../components/UniversalMoment';
-import { BlackLink } from '../../../components/BlackLink';
+import { StatusBox } from '../../../components/core/StatusBox';
+import { UniversalMoment } from '../../../components/core/UniversalMoment';
+import { BlackLink } from '../../../components/core/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
