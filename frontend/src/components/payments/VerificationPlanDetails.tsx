@@ -1,7 +1,6 @@
 import { Box, Grid, Typography } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import React from 'react';
-import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
@@ -18,7 +17,11 @@ import { ErrorButton } from '../core/ErrorButton';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
 import { UniversalMoment } from '../core/UniversalMoment';
+import { ActivateVerificationPlan } from './ActivateVerificationPlan';
+import { DiscardVerificationPlan } from './DiscardVerificationPlan';
 import { EditVerificationPlan } from './EditVerificationPlan';
+import { FinishVerificationPlan } from './FinishVerificationPlan';
+import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 
 interface VerificationPlanDetailsProps {
   verificationPlan: CashPlanQuery['cashPlan']['verifications']['edges'][number]['node'];
@@ -62,12 +65,23 @@ export const VerificationPlanDetails = ({
   const permissions = usePermissions();
   if (!verificationPlan || !samplingChoicesData || !permissions) return null;
 
-  const canEditAndActivate =
-    cashPlan.verificationStatus === 'PENDING' &&
-    cashPlan.verifications?.edges?.length !== 0;
+  const canEditAndActivate = verificationPlan.status === 'PENDING';
+  const canFinishAndDiscard = verificationPlan.status === 'ACTIVE';
+
   const canEdit =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_UPDATE, permissions) &&
     canEditAndActivate;
+  const canActivate =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_ACTIVATE, permissions) &&
+    canEditAndActivate;
+
+  const canFinish =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_FINISH, permissions) &&
+    canFinishAndDiscard;
+  const canDiscard =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_DISCARD, permissions) &&
+    canFinishAndDiscard;
+
   const samplingChoicesDict = choicesToDict(
     samplingChoicesData.cashPlanVerificationSamplingChoices,
   );
@@ -94,8 +108,31 @@ export const VerificationPlanDetails = ({
           {canEdit && (
             <EditVerificationPlan
               cashPlanId={cashPlan.id}
-              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+              cashPlanVerificationId={verificationPlan.id}
             />
+          )}
+          {canActivate && (
+            <Box alignItems='center' display='flex'>
+              {canActivate && (
+                <ActivateVerificationPlan
+                  cashPlanVerificationId={verificationPlan.id}
+                />
+              )}
+            </Box>
+          )}
+          {(canFinish || canDiscard) && (
+            <Box display='flex'>
+              {canFinish && (
+                <FinishVerificationPlan
+                  cashPlanVerificationId={verificationPlan.id}
+                />
+              )}
+              {canDiscard && (
+                <DiscardVerificationPlan
+                  cashPlanVerificationId={verificationPlan.id}
+                />
+              )}
+            </Box>
           )}
         </Box>
       </Box>
@@ -168,50 +205,7 @@ export const VerificationPlanDetails = ({
           </Grid>
         </Grid>
         <Grid item xs={1}>
-          <ChartContainer>
-            <Doughnut
-              width={200}
-              height={200}
-              options={{
-                maintainAspectRatio: false,
-                cutoutPercentage: 80,
-                legend: {
-                  display: false,
-                },
-              }}
-              data={{
-                labels: [
-                  t('RECEIVED'),
-                  t('RECEIVED WITH ISSUES'),
-                  t('NOT RECEIVED'),
-                  t('PENDING'),
-                ],
-                datasets: [
-                  {
-                    data: [
-                      verificationPlan.receivedCount,
-                      verificationPlan.receivedWithProblemsCount,
-                      verificationPlan.notReceivedCount,
-                      verificationPlan.sampleSize -
-                        verificationPlan.respondedCount,
-                    ],
-                    backgroundColor: [
-                      '#31D237',
-                      '#F57F1A',
-                      '#FF0100',
-                      '#DCDCDC',
-                    ],
-                    hoverBackgroundColor: [
-                      '#31D237',
-                      '#F57F1A',
-                      '#FF0100',
-                      '#DCDCDC',
-                    ],
-                  },
-                ],
-              }}
-            />
-          </ChartContainer>
+          <VerificationPlanDetailsChart verificationPlan={verificationPlan} />
         </Grid>
       </Grid>
     </Container>

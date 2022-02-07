@@ -124,27 +124,6 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_CREATE, permissions) &&
     cashPlan.verificationStatus === 'PENDING';
 
-  const canEditAndActivate =
-    cashPlan.verificationStatus === 'PENDING' &&
-    cashPlan.verifications &&
-    cashPlan.verifications.edges.length !== 0;
-
-  const canActivate =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_ACTIVATE, permissions) &&
-    canEditAndActivate;
-
-  const canFinishAndDiscard =
-    cashPlan.verificationStatus === 'ACTIVE' &&
-    cashPlan.verifications &&
-    cashPlan.verifications.edges.length !== 0;
-
-  const canFinish =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_FINISH, permissions) &&
-    canFinishAndDiscard;
-  const canDiscard =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_DISCARD, permissions) &&
-    canFinishAndDiscard;
-
   const isFinished = cashPlan.verificationStatus === 'FINISHED';
 
   const toolbar = (
@@ -164,29 +143,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         {canCreate && (
           <CreateVerificationPlan disabled={false} cashPlanId={cashPlan.id} />
         )}
-        {canActivate && (
-          <Box alignItems='center' display='flex'>
-            {canActivate && (
-              <ActivateVerificationPlan
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            )}
-          </Box>
-        )}
-        {(canFinish || canDiscard) && (
-          <Box display='flex'>
-            {canFinish && (
-              <FinishVerificationPlan
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            )}
-            {canDiscard && (
-              <DiscardVerificationPlan
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            )}
-          </Box>
-        )}
+
         {isFinished && (
           <Button
             variant='contained'
@@ -341,6 +298,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       {cashPlan.verifications?.edges?.length
         ? cashPlan.verifications.edges.map((edge) => (
             <VerificationPlanDetails
+              key={edge.node.id}
               samplingChoicesData={choicesData}
               verificationPlan={edge.node}
               cashPlan={cashPlan}
