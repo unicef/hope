@@ -1,6 +1,5 @@
 from django.core.management import call_command
 from django.test import TestCase
-
 from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
@@ -208,7 +207,7 @@ class TestSendTpToDatahub(TestCase):
 
     def test_individual_data_needed_true(self):
         task = SendTPToDatahubTask()
-        task.send_tp(self.target_population_first)
+        task.send_target_population(self.target_population_first)
 
         dh_household = dh_models.Household.objects.all()
         dh_individuals = dh_models.Individual.objects.all()
@@ -222,7 +221,7 @@ class TestSendTpToDatahub(TestCase):
 
     def test_individual_data_needed_false(self):
         task = SendTPToDatahubTask()
-        task.send_tp(self.target_population_second)
+        task.send_target_population(self.target_population_second)
 
         dh_household = dh_models.Household.objects.all()
         dh_individuals = dh_models.Individual.objects.all()
@@ -236,7 +235,7 @@ class TestSendTpToDatahub(TestCase):
 
     def test_individual_sharing_is_true_and_unhcr_id(self):
         task = SendTPToDatahubTask()
-        task.send_tp(self.target_population_third)
+        task.send_target_population(self.target_population_third)
 
         dh_household = dh_models.Household.objects.all()
         dh_individuals = dh_models.Individual.objects.all()
@@ -282,12 +281,12 @@ class TestSendTpToDatahub(TestCase):
         target_population_second.households.set([household])
 
         task = SendTPToDatahubTask()
-        task.send_tp(target_population_first)
+        task.send_target_population(target_population_first)
         dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
         dh_individuals_count = dh_models.Individual.objects.filter(household_mis_id=household.id).count()
         self.assertEqual(dh_households_count, 1)
         self.assertEqual(dh_individuals_count, 1)
-        task.send_tp(target_population_second)
+        task.send_target_population(target_population_second)
         dh_individuals_count = dh_models.Individual.objects.filter(household_mis_id=household.id).count()
         dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
         self.assertEqual(dh_households_count, 1)
@@ -304,8 +303,8 @@ class TestSendTpToDatahub(TestCase):
         household.country = iso_code2
         household.save()
         task = SendTPToDatahubTask()
-        dh_session = dh_models.Session()
-        (dh_household, *_) = task.send_household(household, self.program_individual_data_needed_true, dh_session, [])
+        task.dh_session = dh_models.Session()
+        dh_household = task._prepare_datahub_object_household(household)
         self.assertEqual(dh_household.country, expected_ca_code)
 
     def test_trim_targeting_criteria(self):
@@ -325,7 +324,7 @@ class TestSendTpToDatahub(TestCase):
         )
 
         task = SendTPToDatahubTask()
-        task.send_tp(target_population)
+        task.send_target_population(target_population)
 
         dh_target_population = dh_models.TargetPopulation.objects.filter(mis_id=target_population.id).first()
 
@@ -349,7 +348,7 @@ class TestSendTpToDatahub(TestCase):
         )
 
         task = SendTPToDatahubTask()
-        task.send_tp(target_population)
+        task.send_target_population(target_population)
 
         dh_target_population = dh_models.TargetPopulation.objects.filter(mis_id=target_population.id).first()
 

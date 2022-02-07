@@ -1,6 +1,4 @@
-from django import forms
-from django.contrib import admin, messages
-from django.core.validators import MinValueValidator
+from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -8,12 +6,7 @@ from django.urls import reverse
 
 from admin_extra_urls.api import ExtraUrlMixin, button
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-    MaxMinFilter,
-    RelatedFieldComboFilter,
-    TextFieldFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, TextFieldFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
@@ -29,15 +22,20 @@ class TargetPopulationAdmin(
     list_display = (
         "name",
         "status",
-        "candidate_list_total_households",
-        "candidate_list_total_individuals",
+        "sent_to_datahub",
+        "business_area",
+        "program",
+        # "candidate_list_total_households",
+        # "candidate_list_total_individuals",
         "final_list_total_households",
-        "final_list_total_individuals",
+        # "final_list_total_individuals",
     )
     search_fields = ("name",)
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
+        ("steficon_rule__rule", AutoCompleteFilter),
+        ("program", AutoCompleteFilter),
         "sent_to_datahub",
     )
     raw_id_fields = (
@@ -87,13 +85,17 @@ class HouseholdSelectionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     )
     list_filter = (
         TextFieldFilter.factory("household__unicef_id", "Household ID"),
+        ("target_population", AutoCompleteFilter),
         TextFieldFilter.factory("target_population__id", "Target Population ID"),
         "final",
         ("vulnerability_score", MaxMinFilter),
     )
-    actions = ["reset_sync_date"]
+    actions = ["reset_sync_date", "reset_vulnerability_score"]
 
     def reset_sync_date(self, request, queryset):
         from hct_mis_api.apps.household.models import Household
 
         Household.objects.filter(selections__in=queryset).update(last_sync_at=None)
+
+    def reset_vulnerability_score(self, request, queryset):
+        queryset.update(vulnerability_score=None)

@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';
-import { TabPanel } from '../../../../components/TabPanel';
+import { TabPanel } from '../../../../components/core/TabPanel';
 import { FlexFieldTab } from './FlexFieldTab';
 
 export interface FinalizeTargetPopulationPropTypes {

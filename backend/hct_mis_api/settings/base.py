@@ -106,7 +106,7 @@ ENV = env("ENV")
 
 # prefix all non-production emails
 if ENV != "prod":
-    EMAIL_SUBJECT_PREFIX = "{}".format(ENV)
+    EMAIL_SUBJECT_PREFIX = f"{ENV}"
 
 # BACKWARD_COMPATIBILITY SNIPPET
 if "DATABASE_URL" not in os.environ:
@@ -584,7 +584,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_INSTANCE}/0"
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_TASK_TIME_LIMIT = 120 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
 
@@ -607,6 +607,9 @@ SMART_ADMIN_SECTIONS = {
         "core",
         "constance",
         "household.agency",
+    ],
+    "Power Query & Reports": [
+        "power_query",
     ],
     "Rule Engine": [
         "steficon",
@@ -733,3 +736,5 @@ IMPERSONATE = {
 #     'social_auth',
 #     'django_admin',
 # )
+
+POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")

@@ -298,11 +298,33 @@ class ImportData(TimeStampedUUIDModel):
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
     )
+    STATUS_PENDING = "PENDING"
+    STATUS_RUNNING = "RUNNING"
+    STATUS_FINISHED = "FINISHED"
+    STATUS_ERROR = "ERROR"
+    STATUS_VALIDATION_ERROR = "VALIDATION_ERROR"
 
-    file = models.FileField()
+    STATUS_CHOICES = (
+        (STATUS_PENDING, _("Pending")),
+        (STATUS_RUNNING, _("Running")),
+        (STATUS_FINISHED, _("Finished")),
+        (STATUS_ERROR, _("Error")),
+        (STATUS_VALIDATION_ERROR, _("Validation Error"))
+    )
+    status = models.CharField(max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES)
+    business_area_slug = models.CharField(max_length=200, blank=True)
+    file = models.FileField(null=True)
     data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
-    number_of_households = models.PositiveIntegerField()
-    number_of_individuals = models.PositiveIntegerField()
+    number_of_households = models.PositiveIntegerField(null=True)
+    number_of_individuals = models.PositiveIntegerField(null=True)
+    error = models.TextField(blank=True)
+    validation_errors = models.TextField(blank=True)
+    created_by_id = models.UUIDField(null=True)
+
+
+class KoboImportData(ImportData):
+    kobo_asset_id = models.CharField(max_length=100)
+    only_active_submissions = models.BooleanField(default=True)
 
 
 class DocumentValidator(TimeStampedUUIDModel):

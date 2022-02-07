@@ -20,8 +20,15 @@ from django.utils.translation import get_language
 from admin_extra_urls.api import ExtraUrlMixin, button
 from admin_extra_urls.utils import labelize
 from adminfilters.autocomplete import AutoCompleteFilter
+from import_export import fields
+from import_export.admin import ImportExportMixin
+from import_export.resources import ModelResource
+from import_export.widgets import ForeignKeyWidget
+from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import LinkedObjectsMixin
 
+from ..account.models import User
+from ..administration.widgets import JsonWidget
 from ..utils.security import is_root
 from .forms import (
     RuleDownloadCSVFileProcessForm,
@@ -117,7 +124,8 @@ class TestRuleMixin:
                     title = f"Test result for '{rule}' using sample data"
                 elif selection == "optTargetPopulation":
                     tp = form.cleaned_data.get("target_population")
-                    data = [e.household for e in tp.selections.all()]
+                    context["target_population"] = tp
+                    data = [{"household": e.household} for e in tp.selections.all()]
                     title = f"Test result for '{rule}' using TargetPopulation '{tp}'"
                 elif selection == "optContentType":
                     ct: ContentType = form.cleaned_data["content_type"]
@@ -130,6 +138,7 @@ class TestRuleMixin:
                 if not isinstance(data, (list, tuple, QuerySet)):
                     data = [data]
                 context["title"] = title
+                context["selection"] = selection
                 results = []
                 for values in data:
                     row = {
@@ -152,16 +161,42 @@ class TestRuleMixin:
             else:
                 context["form"] = form
         else:
+            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
+        if "form" in context:
             from hct_mis_api.apps.targeting.models import TargetPopulation
 
-            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
             context["form"].fields["target_population"].widget = AutocompleteWidget(TargetPopulation, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 
 
+class RuleResource(ModelResource):
+    created_by = fields.Field(
+        column_name="created_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+    )
+
+    updated_by = fields.Field(
+        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+    )
+
+    class Meta:
+        model = Rule
+        fields = (
+            "name",
+            "version",
+            "definition",
+            "enabled",
+            "deprecated",
+            "language",
+            "security",
+            "created_by",
+            "updated_by",
+        )
+        import_id_fields = ("name",)
+
+
 @register(Rule)
-class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
+class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
@@ -174,6 +209,8 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
         "version",
     )
     change_form_template = None
+    change_list_template = None
+    resource_class = RuleResource
     fieldsets = [
         (
             None,
@@ -181,7 +218,6 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
                 "fields": (
                     ("name", "version"),
                     ("enabled", "deprecated"),
-                    ("description",),
                 )
             },
         ),
@@ -196,6 +232,13 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
             },
         ),
         (
+            "Info",
+            {
+                "classes": ["collapse"],
+                "fields": ("description", "flags"),
+            },
+        ),
+        (
             "Data",
             {
                 "classes": ("collapse",),
@@ -206,6 +249,18 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
             },
         ),
     ]
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "flags":
+            if is_root(request):
+                kwargs = {"widget": JSONEditor}
+            else:
+                kwargs = {"widget": JsonWidget}
+            return db_field.formfield(**kwargs)
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def has_delete_permission(self, request, obj=None):
+        return is_root(request)
 
     def has_change_permission(self, request, obj=None):
         return is_root(request)
@@ -222,6 +277,12 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
             return mark_safe(f'<a href="{url}">{obj.latest.version}</a>')
         except (RuleCommit.DoesNotExist, AttributeError):
             pass
+
+    def delete_view(self, request, object_id, extra_context=None):
+        return super().delete_view(request, object_id, extra_context)
+
+    def render_delete_form(self, request, context):
+        return super().render_delete_form(request, context)
 
     def _get_csv_config(self, form):
         return dict(
@@ -380,26 +441,26 @@ class RuleAdmin(ExtraUrlMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
             obj.created_by = request.user
         obj.updated_by = request.user
         obj.save()
-        if "_save" in request.POST:
-            obj.commit(is_release=True, force=True)
-        if not obj.latest:
-            obj.commit(force=True)
+
+
+class RuleCommitResource(ModelResource):
+    rule = fields.Field(column_name="rule", attribute="rule", widget=ForeignKeyWidget(Rule, "name"))
+    updated_by = fields.Field(
+        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+    )
+
+    class Meta:
+        model = RuleCommit
+        fields = ("timestamp", "rule", "version", "updated_by", "affected_fields", "is_release")
+        import_id_fields = ("rule", "version")
 
 
 @register(RuleCommit)
-class RuleCommitAdmin(ExtraUrlMixin, TestRuleMixin, ModelAdmin):
-    list_display = (
-        "timestamp",
-        "rule",
-        "version",
-        "updated_by",
-        "affected_fields",
-        "is_release",
-    )
-    list_filter = (
-        ("rule", AutoCompleteFilter),
-        "is_release",
-    )
+class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin):
+    list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
+    list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
     readonly_fields = ("updated_by", "rule", "affected_fields", "version")
     change_form_template = None
+    change_list_template = None
+    resource_class = RuleCommitResource

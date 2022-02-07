@@ -176,7 +176,7 @@ class RuleTestForm(forms.Form):
             raise ValidationError({"raw_data": "Please provide sample data"})
         elif selection == "optTargetPopulation":
             if not self.cleaned_data.get("target_population"):
-                raise ValidationError({"content_type": "Please select a TargetPopulation"})
+                raise ValidationError({"target_population": "Please select a TargetPopulation"})
         elif selection == "optContentType":
             if not self.cleaned_data.get("content_type"):
                 raise ValidationError({"content_type": "Please select a Content Type"})

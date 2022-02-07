@@ -202,7 +202,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         vulnerability_score_max = input.get("vulnerability_score_max")
         excluded_ids = input.get("excluded_ids")
         exclusion_reason = input.get("exclusion_reason")
-        if target_population.status != TargetPopulation.STATUS_LOCKED and (
+        if not target_population.is_approved() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
             logger.error(
@@ -359,7 +359,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
             ).update(final=False)
 
             target_population.save()
-        send_target_population_task.delay()
+        send_target_population_task.delay(target_population.id)
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
