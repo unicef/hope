@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Typography } from '@material-ui/core';
-import { GetApp, Publish } from '@material-ui/icons';
+import { GetApp } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,7 @@ import { ActivateVerificationPlan } from './ActivateVerificationPlan';
 import { DiscardVerificationPlan } from './DiscardVerificationPlan';
 import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
+import { ImportXlsx } from './ImportXlsx';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 
 interface VerificationPlanDetailsProps {
@@ -41,6 +42,10 @@ const Container = styled.div`
   border-color: #b1b1b5;
   border-bottom-width: 1px;
   border-bottom-style: solid;
+`;
+
+const StyledLink = styled.a`
+  text-decoration: none;
 `;
 
 const Title = styled.div`
@@ -77,6 +82,14 @@ export const VerificationPlanDetails = ({
   const canDiscard =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_DISCARD, permissions) &&
     canFinishAndDiscard;
+  const canImport = hasPermissions(
+    PERMISSIONS.PAYMENT_VERIFICATION_IMPORT,
+    permissions,
+  );
+  const canExport = hasPermissions(
+    PERMISSIONS.PAYMENT_VERIFICATION_EXPORT,
+    permissions,
+  );
 
   const samplingChoicesDict = choicesToDict(
     samplingChoicesData.cashPlanVerificationSamplingChoices,
@@ -94,55 +107,59 @@ export const VerificationPlanDetails = ({
         </Title>
         <Box display='flex' alignItems='center'>
           {canEditAndActivateAndDelete && (
-            <Box mr={2}>
-              <ErrorButton
-                onClick={() => handleDelete()}
-                startIcon={<DeleteIcon />}
-              >
-                {t('Delete')}
-              </ErrorButton>
-            </Box>
-          )}
-          {canEdit && (
-            <EditVerificationPlan
-              cashPlanId={cashPlan.id}
-              cashPlanVerificationId={verificationPlan.id}
-            />
-          )}
-          {canActivate && (
-            <Box alignItems='center' display='flex'>
-              {canActivate && (
-                <ActivateVerificationPlan
+            <>
+              <Box mr={2}>
+                <ErrorButton
+                  onClick={() => handleDelete()}
+                  startIcon={<DeleteIcon />}
+                >
+                  {t('Delete')}
+                </ErrorButton>
+              </Box>
+
+              {canEdit && (
+                <EditVerificationPlan
+                  cashPlanId={cashPlan.id}
                   cashPlanVerificationId={verificationPlan.id}
                 />
               )}
-            </Box>
+              {canActivate && (
+                <Box alignItems='center' display='flex'>
+                  {canActivate && (
+                    <ActivateVerificationPlan
+                      cashPlanVerificationId={verificationPlan.id}
+                    />
+                  )}
+                </Box>
+              )}
+            </>
           )}
-          {(canFinish || canDiscard) && (
+          {canFinishAndDiscard && (
             <Box display='flex'>
               {verificationPlan.verificationMethod === 'XLSX' && (
-                <Box alignItems='center' display='flex'>
-                  <Box p={2}>
-                    <Button
-                      color='primary'
-                      variant='outlined'
-                      startIcon={<GetApp />}
-                      onClick={() => console.log('IMPORT XLSX')}
-                    >
-                      {t('Export XLSX')}
-                    </Button>
-                  </Box>
-                  <Box p={2}>
-                    <Button
-                      color='primary'
-                      variant='outlined'
-                      startIcon={<Publish />}
-                      onClick={() => console.log('IMPORT XLSX')}
-                    >
-                      {t('Import XLSX')}
-                    </Button>
-                  </Box>
-                </Box>
+                <>
+                  {canExport && (
+                    <Box p={2}>
+                      <StyledLink
+                        download
+                        href={`/api/download-cash-plan-payment-verification/${verificationPlan.id}`}
+                      >
+                        <Button
+                          color='primary'
+                          variant='outlined'
+                          startIcon={<GetApp />}
+                        >
+                          {t('Export XLSX')}
+                        </Button>
+                      </StyledLink>
+                    </Box>
+                  )}
+                  {canImport && (
+                    <Box p={2}>
+                      <ImportXlsx verificationPlanId={verificationPlan.id} />
+                    </Box>
+                  )}
+                </>
               )}
               {canFinish && (
                 <FinishVerificationPlan
@@ -158,7 +175,6 @@ export const VerificationPlanDetails = ({
           )}
         </Box>
       </Box>
-
       <Grid container>
         <Grid item xs={11}>
           <Grid container>
