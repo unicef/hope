@@ -46,7 +46,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub, KoboImportData,
+    RegistrationDataImportDatahub,
+    KoboImportData,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
@@ -244,6 +245,13 @@ class KoboErrorNode(graphene.ObjectType):
     header = graphene.String()
     message = graphene.String()
 
+
+class XlsxRowErrorNode(graphene.ObjectType):
+    row_number = graphene.Int()
+    header = graphene.String()
+    message = graphene.String()
+
+
 class KoboImportDataNode(DjangoObjectType):
     kobo_validation_errors = graphene.List(KoboErrorNode)
 
@@ -257,13 +265,19 @@ class KoboImportDataNode(DjangoObjectType):
             return []
         return json.loads(parrent.validation_errors)
 
+
 class ImportDataNode(DjangoObjectType):
+    xlsx_validation_errors = graphene.List(XlsxRowErrorNode)
 
     class Meta:
         model = ImportData
         filter_fields = []
         interfaces = (relay.Node,)
 
+    def resolve_xlsx_validation_errors(parrent, info):
+        if not parrent.validation_errors:
+            return []
+        return json.loads(parrent.validation_errors)
 
 
 class ImportedDocumentTypeNode(DjangoObjectType):
@@ -305,12 +319,6 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-
-class XlsxRowErrorNode(graphene.ObjectType):
-    row_number = graphene.Int()
-    header = graphene.String()
-    message = graphene.String()
 
 
 class Query(graphene.ObjectType):
