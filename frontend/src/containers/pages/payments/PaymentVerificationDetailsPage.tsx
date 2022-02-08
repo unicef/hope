@@ -158,18 +158,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           </Container>
           <Container>
             <VerificationRecordsTable
-              verificationMethod={verificationPlan.verificationMethod}
               filter={debouncedFilter}
               id={verificationPlan.id}
               businessArea={businessArea}
-              canImport={hasPermissions(
-                PERMISSIONS.PAYMENT_VERIFICATION_IMPORT,
-                permissions,
-              )}
-              canExport={hasPermissions(
-                PERMISSIONS.PAYMENT_VERIFICATION_EXPORT,
-                permissions,
-              )}
               canViewRecordDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
                 permissions,
