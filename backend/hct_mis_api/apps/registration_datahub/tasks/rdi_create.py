@@ -692,7 +692,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             filename = attachment.get("filename", "")
             current_download_url = attachment.get("download_url", "")
             if filename.endswith(value):
-                download_url = current_download_url
+                download_url = current_download_url.replace("?format=json", "")
 
         if not download_url:
             return download_url
