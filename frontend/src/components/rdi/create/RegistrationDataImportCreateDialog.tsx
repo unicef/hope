@@ -1,23 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-} from '@material-ui/core';
+import {Button, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select,} from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { useTranslation } from 'react-i18next';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import styled from 'styled-components';
-import { LoadingComponent } from '../../core/LoadingComponent';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../containers/dialogs/DialogActions';
-import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
-import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
+import {Dialog} from '../../../containers/dialogs/Dialog';
+import {DialogActions} from '../../../containers/dialogs/DialogActions';
+import {usePassFunctionFromChild} from '../../../hooks/usePassFunctionFromChild';
+import {CreateImportFromKoboForm} from './kobo/CreateImportFromKoboForm';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -39,23 +29,6 @@ const ComboBox = styled(Select)`
 const StyledInputLabel = styled(InputLabel)`
   background-color: #fff;
 `;
-const DropzoneContainer = styled.div`
-  width: 100%;
-  height: 100px;
-  background-color: rgba(2, 62, 144, 0.1);
-  color: #023e90;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  line-height: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: ${({ theme }) => theme.spacing(5)}px;
-  cursor: pointer;
-
-  ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
-`;
 
 const StyledDialogFooter = styled(DialogFooter)`
   && {
@@ -64,28 +37,6 @@ const StyledDialogFooter = styled(DialogFooter)`
     justify-content: space-between;
   }
 `;
-
-function DropzoneField({ onChange, loading }): React.ReactElement {
-  const onDrop = useCallback((acceptedFiles) => {
-    onChange(acceptedFiles);
-  }, []);
-  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
-    disabled: loading,
-    accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    onDrop,
-  });
-  const acceptedFilename =
-    acceptedFiles.length > 0 ? acceptedFiles[0].name : null;
-  return (
-    <div>
-      <DropzoneContainer {...getRootProps()} disabled={loading}>
-        <LoadingComponent isLoading={loading} absolute />
-        <input {...getInputProps()} data-cy='rdi-file-input' />
-        {acceptedFilename || 'UPLOAD FILE'}
-      </DropzoneContainer>
-    </div>
-  );
-}
 
 export function RegistrationDataImportCreateDialog(): React.ReactElement {
   const { t } = useTranslation();

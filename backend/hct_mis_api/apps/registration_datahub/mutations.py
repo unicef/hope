@@ -31,7 +31,8 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
-    registration_xlsx_import_task, pull_kobo_submissions_task,
+    registration_xlsx_import_task,
+    pull_kobo_submissions_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -41,7 +42,8 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
     KoboErrorNode,
-    XlsxRowErrorNode, KoboImportDataNode,
+    XlsxRowErrorNode,
+    KoboImportDataNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
@@ -323,35 +325,12 @@ class UploadImportDataXLSXFile(PermissionMutation):
     def mutate(cls, root, info, file, business_area_slug):
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
-        errors = UploadXLSXInstanceValidator().validate_everything(file, business_area_slug)
-        if errors:
-            errors.sort(key=operator.itemgetter("row_number", "header"))
-            return UploadImportDataXLSXFile(None, errors)
-
-        wb = openpyxl.load_workbook(file)
-
-        hh_sheet = wb["Households"]
-        ind_sheet = wb["Individuals"]
-
-        number_of_households = 0
-        number_of_individuals = 0
-
-        # Could just return max_row if openpyxl won't count empty rows too
-        for row in hh_sheet.iter_rows(min_row=3):
-            if not any([cell.value for cell in row]):
-                continue
-            number_of_households += 1
-
-        for row in ind_sheet.iter_rows(min_row=3):
-
-            if not any([cell.value for cell in row]):
-                continue
-            number_of_individuals += 1
-
         created = ImportData.objects.create(
             file=file,
-            number_of_households=number_of_households,
-            number_of_individuals=number_of_individuals,
+            type=ImportData.XLSX,
+            status=ImportData.STATUS_PENDING,
+            created_by_id=info.context.user.id,
+            business_area_slug=business_area_slug,
         )
 
         return UploadImportDataXLSXFile(created, [])
