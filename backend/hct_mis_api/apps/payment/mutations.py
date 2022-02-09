@@ -1,9 +1,7 @@
-import json
 import logging
 import math
 from decimal import Decimal
 
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -38,6 +36,9 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
 )
+from hct_mis_api.apps.payment.payment_verification_create import (
+    PaymentVerificationCreate,
+)
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode
 from hct_mis_api.apps.payment.utils import (
@@ -55,7 +56,7 @@ from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 logger = logging.getLogger(__name__)
 
 
-class CreatePaymentVerificationMutation(PermissionMutation):
+class CreateCashPlanPaymentVerificationMutation(PermissionMutation):
     cash_plan = graphene.Field(CashPlanNode)
 
     class Arguments:
@@ -85,75 +86,8 @@ class CreatePaymentVerificationMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
 
-        cls.verify_required_arguments(
-            input,
-            "sampling",
-            {
-                CashPlanPaymentVerification.SAMPLING_FULL_LIST: {
-                    "required": ["full_list_arguments"],
-                    "not_allowed": ["random_sampling_arguments"],
-                },
-                CashPlanPaymentVerification.SAMPLING_RANDOM: {
-                    "required": ["random_sampling_arguments"],
-                    "not_allowed": ["full_list_arguments"],
-                },
-            },
-        )
-        cls.verify_required_arguments(
-            input,
-            "verification_channel",
-            {
-                CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO: {
-                    "required": ["rapid_pro_arguments"],
-                    "not_allowed": ["xlsx_arguments", "manual_arguments"],
-                },
-                CashPlanPaymentVerification.VERIFICATION_METHOD_XLSX: {
-                    "required": [],
-                    "not_allowed": ["rapid_pro_arguments", "manual_arguments"],
-                },
-                CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL: {
-                    "required": [],
-                    "not_allowed": ["rapid_pro_arguments", "xlsx_arguments"],
-                },
-            },
-        )
-
-        (
-            payment_records,
-            confidence_interval,
-            margin_of_error,
-            payment_records_sample_count,
-            sampling,
-            excluded_admin_areas,
-            sex,
-            age,
-        ) = cls.process_sampling(cash_plan, input)
-
-        verification_channel = arg("verification_channel")
-
-        cash_plan_verification = CashPlanPaymentVerification(
-            cash_plan=cash_plan,
-            confidence_interval=confidence_interval,
-            margin_of_error=margin_of_error,
-            sample_size=payment_records_sample_count,
-            sampling=sampling,
-            verification_method=verification_channel,
-        )
-        cash_plan_verification.sex_filter = sex
-        cash_plan_verification.age_filter = age
-        cash_plan_verification.excluded_admin_areas_filter = excluded_admin_areas
-        payment_record_verifications_to_create = []
-        for payment_record in payment_records:
-            payment_record_verification = PaymentVerification(
-                status_date=timezone.now(),
-                cash_plan_payment_verification=cash_plan_verification,
-                payment_record=payment_record,
-            )
-            payment_record_verifications_to_create.append(payment_record_verification)
-        cash_plan_verification.save()
-        PaymentVerification.objects.bulk_create(payment_record_verifications_to_create)
-        cash_plan.refresh_from_db()
-        cls.process_verification_method(cash_plan_verification, input)
+        action = PaymentVerificationCreate(input, cash_plan)
+        cash_plan_verification = action.execute()
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
@@ -162,73 +96,8 @@ class CreatePaymentVerificationMutation(PermissionMutation):
             None,
             cash_plan_verification,
         )
+        cash_plan.refresh_from_db()
         return cls(cash_plan=cash_plan)
-
-    @classmethod
-    def process_sampling(cls, cash_plan, input):
-        arg = lambda name: input.get(name)
-        sampling = arg("sampling")
-        excluded_admin_areas = []
-        sex = None
-        age = None
-        confidence_interval = None
-        margin_of_error = None
-        payment_records = cash_plan.payment_records.filter(
-            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
-        )
-        if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
-            excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
-        elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            random_sampling_arguments = arg("random_sampling_arguments")
-            confidence_interval = random_sampling_arguments.get("confidence_interval")
-            margin_of_error = random_sampling_arguments.get("margin_of_error")
-            sex = random_sampling_arguments.get("sex")
-            age = random_sampling_arguments.get("age")
-            excluded_admin_areas = random_sampling_arguments.get("excluded_admin_areas", [])
-        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
-
-        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
-        if sex is not None:
-            payment_records = payment_records.filter(household__head_of_household__sex=sex)
-        if age is not None:
-            payment_records = filter_age(
-                "household__head_of_household__birth_date",
-                payment_records,
-                age.get("min"),
-                age.get("max"),
-            )
-        payment_records_sample_count = payment_records.count()
-        if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            payment_records_sample_count = get_number_of_samples(
-                payment_records_sample_count,
-                confidence_interval,
-                margin_of_error,
-            )
-            payment_records = payment_records.order_by("?")[:payment_records_sample_count]
-        return (
-            payment_records,
-            confidence_interval,
-            margin_of_error,
-            payment_records_sample_count,
-            sampling,
-            excluded_admin_areas,
-            sex,
-            age,
-        )
-
-    @classmethod
-    def process_verification_method(cls, cash_plan_payment_verification, input):
-        verification_method = cash_plan_payment_verification.verification_method
-        if verification_method == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO:
-            cls.process_rapid_pro_method(cash_plan_payment_verification, input)
-
-    @classmethod
-    def process_rapid_pro_method(cls, cash_plan_payment_verification, input):
-        rapid_pro_arguments = input["rapid_pro_arguments"]
-        flow_id = rapid_pro_arguments["flow_id"]
-        cash_plan_payment_verification.rapid_pro_flow_id = flow_id
-
-        cash_plan_payment_verification.save()
 
 
 class EditPaymentVerificationMutation(PermissionMutation):
@@ -807,7 +676,7 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
 
 
 class Mutations(graphene.ObjectType):
-    create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
+    create_cash_plan_payment_verification = CreateCashPlanPaymentVerificationMutation.Field()
     edit_cash_plan_payment_verification = EditPaymentVerificationMutation.Field()
     import_xlsx_cash_plan_verification = ImportXlsxCashPlanVerification.Field()
     activate_cash_plan_payment_verification = ActivateCashPlanVerificationMutation.Field()
