@@ -4,34 +4,41 @@ import {
   ImportDataStatus,
   KoboImportDataQueryResult,
   SaveKoboImportDataAsyncMutationVariables,
+  UploadImportDataXlsxFileMutationVariables,
   useKoboImportDataLazyQuery,
   useSaveKoboImportDataAsyncMutation,
+  useUploadImportDataXlsxFileMutation,
+  useXlsxImportDataLazyQuery,
+  useXlsxImportDataQuery,
+  XlsxImportDataQuery,
+  XlsxImportDataQueryResult,
 } from '../../../../__generated__/graphql';
 import { useLazyInterval } from '../../../../hooks/useInterval';
 
-export interface UseSaveKoboImportDataAndCheckStatusReturnType {
+export interface UseSaveXlsxImportDataAndCheckStatusReturnType {
   saveAndStartPolling: (
-    variables: SaveKoboImportDataAsyncMutationVariables,
+    variables: UploadImportDataXlsxFileMutationVariables,
   ) => Promise<void>;
   stopPollingImportData: () => void;
   loading: boolean;
-  koboImportData: KoboImportDataQueryResult['data']['koboImportData'];
+  xlsxImportData: XlsxImportDataQueryResult['data']['importData'];
 }
 
-export function useSaveXlsxImportDataAndCheckStatus(): UseSaveKoboImportDataAndCheckStatusReturnType {
+export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndCheckStatusReturnType {
   const [loading, setLoading] = useState(false);
   const [
-    saveKoboImportDataMutate,
-    { data: koboImportDataFromMutation },
-  ] = useSaveKoboImportDataAsyncMutation();
-  const [loadImportData, { data: koboImportData,error:error1 }] = useKoboImportDataLazyQuery(
-    {
-      variables: {
-        id: koboImportDataFromMutation?.saveKoboImportDataAsync?.importData?.id,
-      },
-      fetchPolicy: 'network-only',
+    saveXlsxImportDataMutate,
+    { data: xlsxImportDataFromMutation },
+  ] = useUploadImportDataXlsxFileMutation();
+  const [
+    loadImportData,
+    { data: xlsxImportData, error: error1 },
+  ] = useXlsxImportDataLazyQuery({
+    variables: {
+      id: xlsxImportDataFromMutation?.uploadImportDataXlsxFile?.importData?.id,
     },
-  );
+    fetchPolicy: 'network-only',
+  });
   const [startPollingImportData, stopPollingImportData] = useLazyInterval(
     (args) =>
       loadImportData({
@@ -42,15 +49,15 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
     3000,
   );
   useEffect(() => {
-    if (koboImportDataFromMutation?.saveKoboImportDataAsync?.importData) {
+    if (xlsxImportDataFromMutation?.uploadImportDataXlsxFile?.importData) {
       startPollingImportData({
-        id: koboImportDataFromMutation.saveKoboImportDataAsync.importData.id,
+        id: xlsxImportDataFromMutation.uploadImportDataXlsxFile.importData.id,
       });
     }
-  }, [koboImportDataFromMutation]);
-  console.log('koboImportData',koboImportData,error1)
+  }, [xlsxImportDataFromMutation]);
+  console.log('xlsxImportData', xlsxImportData, error1);
   useEffect(() => {
-    if (!koboImportData) {
+    if (!xlsxImportData) {
       return;
     }
     if (
@@ -58,18 +65,18 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
         ImportDataStatus.Error,
         ImportDataStatus.ValidationError,
         ImportDataStatus.Finished,
-      ].includes(koboImportData?.koboImportData?.status)
+      ].includes(xlsxImportData?.importData?.status)
     ) {
       stopPollingImportData();
       setLoading(false);
     }
-  }, [koboImportData]);
+  }, [xlsxImportData]);
   const saveAndStartPolling = async (
-    variables: SaveKoboImportDataAsyncMutationVariables,
+    variables: UploadImportDataXlsxFileMutationVariables,
   ): Promise<void> => {
     try {
       setLoading(true);
-      await saveKoboImportDataMutate({ variables });
+      await saveXlsxImportDataMutate({ variables });
     } catch (error) {
       setLoading(false);
       throw error;
@@ -79,6 +86,6 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
     saveAndStartPolling,
     stopPollingImportData,
     loading,
-    koboImportData: koboImportData?.koboImportData,
+    xlsxImportData: xlsxImportData?.importData,
   };
 }

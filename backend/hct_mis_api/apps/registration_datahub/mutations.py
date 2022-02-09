@@ -32,7 +32,7 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     rdi_deduplication_task,
     registration_kobo_import_task,
     registration_xlsx_import_task,
-    pull_kobo_submissions_task,
+    pull_kobo_submissions_task, validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -325,15 +325,15 @@ class UploadImportDataXLSXFile(PermissionMutation):
     def mutate(cls, root, info, file, business_area_slug):
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
-        created = ImportData.objects.create(
+        import_data = ImportData.objects.create(
             file=file,
-            type=ImportData.XLSX,
+            data_type=ImportData.XLSX,
             status=ImportData.STATUS_PENDING,
             created_by_id=info.context.user.id,
             business_area_slug=business_area_slug,
         )
-
-        return UploadImportDataXLSXFile(created, [])
+        validate_xlsx_import_task.delay(import_data.id)
+        return UploadImportDataXLSXFile(import_data, [])
 
 
 class SaveKoboProjectImportDataMutation(PermissionMutation):
