@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
+    TicketDeleteHouseholdDetailsFactory,
     TicketDeleteIndividualDetailsFactory,
     TicketHouseholdDataUpdateDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
@@ -465,3 +466,39 @@ class TestCloseDataChangeTickets(APITestCase):
             },
         )
         self.assertTrue(Individual.objects.filter(id=self.individuals_household_two[0].id).exists())
+
+    def test_close_household_delete(self):
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+        )
+
+        grievance_ticket = GrievanceTicketFactory(
+            id="32c3ae7d-fb39-4d69-8559-9d0fa4284790",
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
+            admin2=self.admin_area_1,
+            business_area=self.business_area,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        TicketDeleteHouseholdDetailsFactory(
+            ticket=grievance_ticket,
+            household=self.household_one,
+            approve_status=True,
+        )
+
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(grievance_ticket.id, "GrievanceTicketNode"),
+                "status": GrievanceTicket.STATUS_CLOSED,
+            },
+        )
+
+        self.household_one.refresh_from_db()
+        self.individuals[0].refresh_from_db()
+        self.individuals[1].refresh_from_db()
+
+        self.assertTrue(self.household_one.withdrawn)
+        self.assertTrue(self.individuals[0].withdrawn)
+        self.assertTrue(self.individuals[1].withdrawn)

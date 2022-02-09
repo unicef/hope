@@ -19,6 +19,7 @@ from hct_mis_api.apps.grievance.celery_tasks import (
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
+    TicketDeleteHouseholdDetails,
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
@@ -38,6 +39,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     reassign_roles_on_update,
     save_images,
     verify_flex_fields,
+    withdraw_household,
     withdraw_individual_and_reassign_roles,
 )
 from hct_mis_api.apps.household.models import (
@@ -232,6 +234,10 @@ class IndividualDeleteIssueTypeExtras(graphene.InputObjectType):
     individual = graphene.GlobalID(node=IndividualNode, required=True)
 
 
+class HouseholdDeleteIssueTypeExtras(graphene.InputObjectType):
+    household = graphene.GlobalID(node=HouseholdNode, required=True)
+
+
 def to_date_string(dict, field_name):
     date = dict.get(field_name)
     if date:
@@ -252,6 +258,8 @@ def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwarg
         return save_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL:
         return save_individual_delete_extras(root, info, input, grievance_ticket, extras, **kwargs)
+    if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD:
+        return save_household_delete_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
         return save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
 
@@ -502,6 +510,21 @@ def save_individual_delete_extras(root, info, input, grievance_ticket, extras, *
         ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
+    grievance_ticket.refresh_from_db()
+    return [grievance_ticket]
+
+
+def save_household_delete_extras(root, info, input, grievance_ticket, extras, **kwargs):
+    data_change_extras = extras.get("issue_type")
+    household_data_update_issue_type_extras = data_change_extras.get("household_delete_issue_type_extras")
+    household_encoded_id = household_data_update_issue_type_extras.get("household")
+    household_id = decode_id_string(household_encoded_id)
+    household = get_object_or_404(Household, id=household_id)
+    ticket_household_data_update_details = TicketDeleteHouseholdDetails(
+        household=household,
+        ticket=grievance_ticket,
+    )
+    ticket_household_data_update_details.save()
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
 
@@ -799,3 +822,10 @@ def close_delete_individual_ticket(grievance_ticket, info):
     if household:
         household.refresh_from_db()
         household.recalculate_data()
+
+
+def close_delete_household_ticket(grievance_ticket, info):
+    ticket_details = grievance_ticket.ticket_details
+    if not ticket_details or ticket_details.approve_status is False:
+        return
+    withdraw_household(ticket_details.household)

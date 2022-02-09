@@ -12,6 +12,7 @@ from django.utils import timezone
 from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.household.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN
 
 logger = logging.getLogger(__name__)
@@ -348,6 +349,19 @@ def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove,
     old_individual = Individual.objects.get(id=individual_to_remove.id)
     household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
     withdraw_individual(individual_to_remove, info, old_individual, household)
+
+
+def withdraw_household(household_to_remove):
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
+    from hct_mis_api.apps.household.models import Household
+
+    household = Household.objects.get(id=household_to_remove.id)
+    tickets = GrievanceTicket.objects.belong_household(household)
+    if household.withdrawn:
+        tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
+    else:
+        tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
+    HouseholdWithdraw().execute(household, tickets)
 
 
 def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_to_remove, info, unique_individual):
