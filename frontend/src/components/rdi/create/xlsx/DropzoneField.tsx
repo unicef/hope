@@ -1,7 +1,11 @@
-import React, {useCallback} from "react";
-import {useDropzone} from "react-dropzone";
-import {LoadingComponent} from "../../../core/LoadingComponent";
+/* eslint-disable */
+import React, { useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { LoadingComponent } from '../../../core/LoadingComponent';
 import styled from 'styled-components';
+import { useField } from 'formik';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
+import {useTranslation} from "react-i18next";
 
 const DropzoneContainer = styled.div`
   width: 100%;
@@ -15,28 +19,44 @@ const DropzoneContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: ${({theme}) => theme.spacing(5)}px;
+  margin-top: ${({ theme }) => theme.spacing(5)}px;
   cursor: pointer;
 
-  ${({disabled}) => (disabled ? 'filter: grayscale(100%);' : '')}
+  ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
-export function DropzoneField({onChange, loading}): React.ReactElement {
+export function DropzoneField({ loading }): React.ReactElement {
+  const [field, meta, helpers] = useField('file');
+  const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
   const onDrop = useCallback((acceptedFiles) => {
-    onChange(acceptedFiles);
+    if (acceptedFiles.length !== 1) {
+      return;
+    }
+    const file = acceptedFiles[0];
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > 200) {
+      showMessage(
+        `${t('File size is to big. It should be under 200MB')}, ${t(
+          'File size is',
+        )} ${fileSizeMB}MB`,
+      );
+      return;
+    }
+    helpers.setValue(file);
   }, []);
-  const {getRootProps, getInputProps, acceptedFiles} = useDropzone({
+  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
     accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     onDrop,
   });
+
   const acceptedFilename =
     acceptedFiles.length > 0 ? acceptedFiles[0].name : null;
   return (
     <div>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
-        <LoadingComponent isLoading={loading} absolute/>
-        <input {...getInputProps()} data-cy='rdi-file-input'/>
+        <input {...getInputProps()} data-cy='rdi-file-input' />
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
     </div>
