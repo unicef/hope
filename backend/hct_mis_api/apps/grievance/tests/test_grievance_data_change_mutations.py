@@ -408,3 +408,39 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             context={"user": self.user},
             variables=variables,
         )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_delete_household_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        variables = {
+            "input": {
+                "description": "Test",
+                "businessArea": "afghanistan",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "issueType": 17,
+                "category": 2,
+                "consent": True,
+                "language": "PL",
+                "extras": {
+                    "issueType": {
+                        "householdDeleteIssueTypeExtras": {
+                            "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
+                        }
+                    }
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
