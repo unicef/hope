@@ -252,20 +252,6 @@ class XlsxRowErrorNode(graphene.ObjectType):
     message = graphene.String()
 
 
-class KoboImportDataNode(DjangoObjectType):
-    kobo_validation_errors = graphene.List(KoboErrorNode)
-
-    class Meta:
-        model = KoboImportData
-        filter_fields = []
-        interfaces = (relay.Node,)
-
-    def resolve_kobo_validation_errors(parrent, info):
-        if not parrent.validation_errors:
-            return []
-        return json.loads(parrent.validation_errors)
-
-
 class ImportDataNode(DjangoObjectType):
     xlsx_validation_errors = graphene.List(XlsxRowErrorNode)
 
@@ -275,6 +261,21 @@ class ImportDataNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
     def resolve_xlsx_validation_errors(parrent, info):
+        if not parrent.validation_errors:
+            return []
+        return json.loads(parrent.validation_errors)
+
+
+class KoboImportDataNode(DjangoObjectType):
+    kobo_validation_errors = graphene.List(KoboErrorNode)
+    import_data = graphene.Field(ImportDataNode)
+
+    class Meta:
+        model = KoboImportData
+        filter_fields = []
+        interfaces = (relay.Node,)
+
+    def resolve_kobo_validation_errors(parrent, info):
         if not parrent.validation_errors:
             return []
         return json.loads(parrent.validation_errors)

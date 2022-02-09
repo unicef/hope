@@ -1,13 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import {Button, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select,} from '@material-ui/core';
+import {
+  Button,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import React, {useEffect, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {Dialog} from '../../../containers/dialogs/Dialog';
-import {DialogActions} from '../../../containers/dialogs/DialogActions';
-import {usePassFunctionFromChild} from '../../../hooks/usePassFunctionFromChild';
-import {CreateImportFromKoboForm} from './kobo/CreateImportFromKoboForm';
+import { Dialog } from '../../../containers/dialogs/Dialog';
+import { DialogActions } from '../../../containers/dialogs/DialogActions';
+import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
+import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
+import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -73,8 +82,13 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
         />
       );
       break;
-    case 'xlsx':
-      importTypeForm = null;
+    case 'excel':
+      importTypeForm = (
+        <CreateImportFromXlsxForm
+          setSubmitForm={setSubmitForm}
+          setSubmitDisabled={setSubmitDisabled}
+        />
+      );
       break;
     default:
       importTypeForm = null;

@@ -11,8 +11,10 @@ from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.models import KoboImportData, ImportData
-from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataInstanceValidator, \
-    UploadXLSXInstanceValidator
+from hct_mis_api.apps.registration_datahub.validators import (
+    KoboProjectImportDataInstanceValidator,
+    UploadXLSXInstanceValidator,
+)
 
 
 class ValidateXlsxImport:
@@ -27,7 +29,6 @@ class ValidateXlsxImport:
             import_data.validation_errors = json.dumps(errors)
         else:
             import_data.status = ImportData.STATUS_FINISHED
-
 
         wb = openpyxl.load_workbook(import_data.file)
 
@@ -48,5 +49,7 @@ class ValidateXlsxImport:
             if not any([cell.value for cell in row]):
                 continue
             number_of_individuals += 1
+        import_data.number_of_households = number_of_households
+        import_data.number_of_individuals = number_of_individuals
         import_data.save()
         return {"import_data_id": import_data.id}

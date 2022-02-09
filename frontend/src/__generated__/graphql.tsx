@@ -1474,6 +1474,7 @@ export type ImportDataNode = Node & {
   createdById?: Maybe<Scalars['UUID']>,
   registrationDataImport?: Maybe<RegistrationDataImportDatahubNode>,
   koboimportdata?: Maybe<KoboImportDataNode>,
+  xlsxValidationErrors?: Maybe<Array<Maybe<XlsxRowErrorNode>>>,
 };
 
 export enum ImportDataStatus {
@@ -6758,11 +6759,8 @@ export type SaveKoboImportDataMutation = (
     { __typename?: 'SaveKoboProjectImportDataMutation' }
     & { importData: Maybe<(
       { __typename?: 'ImportDataNode' }
-      & Pick<ImportDataNode, 'id' | 'numberOfHouseholds' | 'numberOfIndividuals'>
-    )>, errors: Maybe<Array<Maybe<(
-      { __typename?: 'KoboErrorNode' }
-      & Pick<KoboErrorNode, 'header' | 'message'>
-    )>>> }
+      & Pick<ImportDataNode, 'id'>
+    )> }
   )> }
 );
 
@@ -8715,6 +8713,23 @@ export type RegistrationDataImportQuery = (
   & { registrationDataImport: Maybe<(
     { __typename?: 'RegistrationDataImportNode' }
     & RegistrationDetailedFragment
+  )> }
+);
+
+export type XlsxImportDataQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type XlsxImportDataQuery = (
+  { __typename?: 'Query' }
+  & { importData: Maybe<(
+    { __typename?: 'ImportDataNode' }
+    & Pick<ImportDataNode, 'id' | 'status' | 'numberOfIndividuals' | 'numberOfHouseholds' | 'error'>
+    & { xlsxValidationErrors: Maybe<Array<Maybe<(
+      { __typename?: 'XlsxRowErrorNode' }
+      & Pick<XlsxRowErrorNode, 'rowNumber' | 'header' | 'message'>
+    )>>> }
   )> }
 );
 
@@ -11459,12 +11474,6 @@ export const SaveKoboImportDataDocument = gql`
   saveKoboImportData(businessAreaSlug: $businessAreaSlug, uid: $projectId, onlyActiveSubmissions: $onlyActiveSubmissions) {
     importData {
       id
-      numberOfHouseholds
-      numberOfIndividuals
-    }
-    errors {
-      header
-      message
     }
   }
 }
@@ -16464,6 +16473,65 @@ export function useRegistrationDataImportLazyQuery(baseOptions?: ApolloReactHook
 export type RegistrationDataImportQueryHookResult = ReturnType<typeof useRegistrationDataImportQuery>;
 export type RegistrationDataImportLazyQueryHookResult = ReturnType<typeof useRegistrationDataImportLazyQuery>;
 export type RegistrationDataImportQueryResult = ApolloReactCommon.QueryResult<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>;
+export const XlsxImportDataDocument = gql`
+    query XlsxImportData($id: ID!) {
+  importData(id: $id) {
+    id
+    status
+    numberOfIndividuals
+    numberOfHouseholds
+    error
+    xlsxValidationErrors {
+      rowNumber
+      header
+      message
+    }
+  }
+}
+    `;
+export type XlsxImportDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<XlsxImportDataQuery, XlsxImportDataQueryVariables>, 'query'> & ({ variables: XlsxImportDataQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const XlsxImportDataComponent = (props: XlsxImportDataComponentProps) => (
+      <ApolloReactComponents.Query<XlsxImportDataQuery, XlsxImportDataQueryVariables> query={XlsxImportDataDocument} {...props} />
+    );
+    
+export type XlsxImportDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<XlsxImportDataQuery, XlsxImportDataQueryVariables> & TChildProps;
+export function withXlsxImportData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  XlsxImportDataQuery,
+  XlsxImportDataQueryVariables,
+  XlsxImportDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, XlsxImportDataQuery, XlsxImportDataQueryVariables, XlsxImportDataProps<TChildProps>>(XlsxImportDataDocument, {
+      alias: 'xlsxImportData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useXlsxImportDataQuery__
+ *
+ * To run a query within a React component, call `useXlsxImportDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useXlsxImportDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useXlsxImportDataQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useXlsxImportDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<XlsxImportDataQuery, XlsxImportDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<XlsxImportDataQuery, XlsxImportDataQueryVariables>(XlsxImportDataDocument, baseOptions);
+      }
+export function useXlsxImportDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<XlsxImportDataQuery, XlsxImportDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<XlsxImportDataQuery, XlsxImportDataQueryVariables>(XlsxImportDataDocument, baseOptions);
+        }
+export type XlsxImportDataQueryHookResult = ReturnType<typeof useXlsxImportDataQuery>;
+export type XlsxImportDataLazyQueryHookResult = ReturnType<typeof useXlsxImportDataLazyQuery>;
+export type XlsxImportDataQueryResult = ApolloReactCommon.QueryResult<XlsxImportDataQuery, XlsxImportDataQueryVariables>;
 export const AllReportsDocument = gql`
     query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: DateTime, $createdTo: DateTime, $reportType: [String], $createdBy: ID, $orderBy: String) {
   allReports(before: $before, after: $after, first: $first, last: $last, status: $status, businessArea: $businessArea, createdFrom: $createdFrom, createdTo: $createdTo, reportType: $reportType, createdBy: $createdBy, orderBy: $orderBy) {
@@ -17781,6 +17849,7 @@ export type ResolversTypes = {
   ImportDataDataType: ImportDataDataType,
   KoboImportDataNode: ResolverTypeWrapper<KoboImportDataNode>,
   KoboErrorNode: ResolverTypeWrapper<KoboErrorNode>,
+  XlsxRowErrorNode: ResolverTypeWrapper<XlsxRowErrorNode>,
   RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ResolverTypeWrapper<ImportedHouseholdNodeConnection>,
   ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
@@ -17879,7 +17948,6 @@ export type ResolversTypes = {
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>,
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>,
   UploadImportDataXLSXFile: ResolverTypeWrapper<UploadImportDataXlsxFile>,
-  XlsxRowErrorNode: ResolverTypeWrapper<XlsxRowErrorNode>,
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
   RegistrationXlsxImportMutation: ResolverTypeWrapper<RegistrationXlsxImportMutation>,
@@ -18135,6 +18203,7 @@ export type ResolversParentTypes = {
   ImportDataDataType: ImportDataDataType,
   KoboImportDataNode: KoboImportDataNode,
   KoboErrorNode: KoboErrorNode,
+  XlsxRowErrorNode: XlsxRowErrorNode,
   RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
   ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection,
   ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
@@ -18233,7 +18302,6 @@ export type ResolversParentTypes = {
   UpdateProgram: UpdateProgram,
   DeleteProgram: DeleteProgram,
   UploadImportDataXLSXFile: UploadImportDataXlsxFile,
-  XlsxRowErrorNode: XlsxRowErrorNode,
   DeleteRegistrationDataImport: DeleteRegistrationDataImport,
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
   RegistrationXlsxImportMutation: RegistrationXlsxImportMutation,
@@ -18931,6 +18999,7 @@ export type ImportDataNodeResolvers<ContextType = any, ParentType extends Resolv
   createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType>,
   koboimportdata?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType>,
+  xlsxValidationErrors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxRowErrorNode']>>>, ParentType, ContextType>,
 };
 
 export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNode'] = ResolversParentTypes['ImportedDocumentNode']> = {

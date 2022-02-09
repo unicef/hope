@@ -1,14 +1,15 @@
 import { gql } from 'apollo-boost';
 
-export const KOBO_IMPORT_DATA_QUERY = gql`
-  query ImportData($id: ID!) {
+export const IMPORT_DATA_QUERY = gql`
+  query XlsxImportData($id: ID!) {
     importData(id: $id) {
       id
       status
       numberOfIndividuals
       numberOfHouseholds
       error
-      koboValidationErrors {
+      xlsxValidationErrors {
+        rowNumber
         header
         message
       }

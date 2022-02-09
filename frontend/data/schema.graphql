@@ -980,6 +980,7 @@ type ImportDataNode implements Node {
   createdById: UUID
   registrationDataImport: RegistrationDataImportDatahubNode
   koboimportdata: KoboImportDataNode
+  xlsxValidationErrors: [XlsxRowErrorNode]
 }
 
 enum ImportDataStatus {

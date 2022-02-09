@@ -5,17 +5,20 @@ import * as Yup from 'yup';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { CircularProgress } from '@material-ui/core';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-import { useCreateRegistrationKoboImportMutation } from '../../../../__generated__/graphql';
-import { handleValidationErrors } from '../../../../utils/utils';
+import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
+import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
+import { DropzoneField } from './DropzoneField';
+
+import { useHistory } from 'react-router-dom';
+import {
+  ImportDataStatus,
+  useCreateRegistrationXlsxImportMutation,
+} from '../../../../__generated__/graphql';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
-import { KoboProjectSelect } from './KoboProjectSelect';
-import { KoboImportDataRepresentation } from './KoboImportDataRepresentation';
+import { handleValidationErrors } from '../../../../utils/utils';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -30,27 +33,27 @@ const validationSchema = Yup.object().shape({
     .min(2, 'Too short')
     .max(255, 'Too long'),
 });
-export function CreateImportFromKoboForm({
+export function CreateImportFromXlsxForm({
   setSubmitForm,
   setSubmitDisabled,
 }): React.ReactElement {
   const {
     saveAndStartPolling,
     stopPollingImportData,
-    loading: saveKoboLoading,
-    koboImportData,
-  } = useSaveKoboImportDataAndCheckStatus();
+    loading: saveXlsxLoading,
+    xlsxImportData,
+  } = useSaveXlsxImportDataAndCheckStatus();
+  const businessAreaSlug = useBusinessArea();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const history = useHistory();
-  const businessAreaSlug = useBusinessArea();
-  const [createImport] = useCreateRegistrationKoboImportMutation();
+  const [createImport] = useCreateRegistrationXlsxImportMutation();
   const onSubmit = async (values, { setFieldError }): Promise<void> => {
     try {
       const data = await createImport({
         variables: {
           registrationDataImportData: {
-            importDataId: koboImportData.id,
+            importDataId: xlsxImportData.id,
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug,
@@ -78,47 +81,40 @@ export function CreateImportFromKoboForm({
   const formik = useFormik({
     initialValues: {
       name: '',
-      koboAssetId: '',
-      onlyActiveSubmissions: true,
       screenBeneficiary: false,
+      file: null,
     },
     validationSchema,
     onSubmit,
   });
-  const saveKoboInputData = async (): Promise<void> => {
-    if (!formik.values.koboAssetId) {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  const saveXlsxInputData = async (): Promise<void> => {
+    if (!formik.values.file) {
       return;
     }
+    setSubmitDisabled(true);
     stopPollingImportData();
     await saveAndStartPolling({
       businessAreaSlug,
-      onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
-      koboAssetId: formik.values.koboAssetId,
+      file: formik.values.file,
     });
   };
   useEffect(() => stopPollingImportData, []);
   useEffect(() => {
-    saveKoboInputData();
-  }, [formik.values.koboAssetId, formik.values.onlyActiveSubmissions]);
+    saveXlsxInputData();
+  }, [formik.values.file]);
   useEffect(() => {
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
+  useEffect(() => {
+    if (xlsxImportData?.status === ImportDataStatus.Finished) {
+      setSubmitDisabled(false);
+    }
+  }, [xlsxImportData]);
   return (
     <div>
       <FormikProvider value={formik}>
-        <Field
-          name='onlyActiveSubmissions'
-          label={t('Only approved submissions')}
-          color='primary'
-          component={FormikCheckboxField}
-        />
-        <Field
-          name='pullPictures'
-          label={t('Pull pictures')}
-          color='primary'
-          component={FormikCheckboxField}
-        />
-        <KoboProjectSelect />
+        <DropzoneField loading={saveXlsxLoading} />
         <Field
           name='name'
           fullWidth
@@ -129,11 +125,11 @@ export function CreateImportFromKoboForm({
         />
         <ScreenBeneficiaryField />
         <CircularProgressContainer>
-          {saveKoboLoading && <CircularProgress />}
+          {saveXlsxLoading && <CircularProgress />}
         </CircularProgressContainer>
-        <KoboImportDataRepresentation
-          koboImportData={koboImportData}
-          loading={saveKoboLoading}
+        <XlsxImportDataRepresentation
+          xlsxImportData={xlsxImportData}
+          loading={saveXlsxLoading}
         />
       </FormikProvider>
     </div>
