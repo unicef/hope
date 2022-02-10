@@ -19,4 +19,6 @@ module.exports = {
     '/src/serviceWorker.ts',
     '.*\\.d\\.ts',
   ],
+  testMatch: ['<rootDir>/src/**/*.test.{ts,tsx}'],
+  testEnvironment: 'jest-environment-jsdom-fourteen',
 };
