@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { RegistrationDataImport } from '../../../components/rdi/create/RegistrationDataImport';
+import { RegistrationDataImportCreateDialog } from '../../../components/rdi/create/RegistrationDataImportCreateDialog';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -22,7 +22,7 @@ export function RegistrationDataImportPage(): React.ReactElement {
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
       {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (
-        <RegistrationDataImport />
+        <RegistrationDataImportCreateDialog />
       )}
     </PageHeader>
   );
