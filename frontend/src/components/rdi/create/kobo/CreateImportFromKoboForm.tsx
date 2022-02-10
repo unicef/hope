@@ -50,7 +50,7 @@ export function CreateImportFromKoboForm({
       const data = await createImport({
         variables: {
           registrationDataImportData: {
-            importDataId: koboImportData.id,
+            importDataId: koboImportData.importData.id,
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug,
@@ -58,10 +58,9 @@ export function CreateImportFromKoboForm({
         },
       });
       history.push(
-        `/${businessAreaSlug}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
+        `/${businessAreaSlug}/registration-data-import/${data.data.registrationKoboImport.registrationDataImport.id}`,
       );
     } catch (error) {
-      console.error(error);
       const { nonValidationErrors } = handleValidationErrors(
         'registrationXlsxImport',
         error,

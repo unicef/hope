@@ -1,11 +1,10 @@
 /* eslint-disable */
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { LoadingComponent } from '../../../core/LoadingComponent';
 import styled from 'styled-components';
 import { useField } from 'formik';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import {useTranslation} from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
 const DropzoneContainer = styled.div`
   width: 100%;

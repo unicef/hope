@@ -6,7 +6,7 @@ export const SAVE_KOBO_IMPORT_DATA = gql`
     $projectId: Upload!
     $onlyActiveSubmissions: Boolean!
   ) {
-    saveKoboImportData(
+    saveKoboImportDataAsync(
       businessAreaSlug: $businessAreaSlug
       uid: $projectId
       onlyActiveSubmissions: $onlyActiveSubmissions

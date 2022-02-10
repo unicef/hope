@@ -312,7 +312,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         return RefuseRegistrationDataImportMutation(obj_hct)
 
 
-class UploadImportDataXLSXFile(PermissionMutation):
+class UploadImportDataXLSXFileAsync(PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(XlsxRowErrorNode)
 
@@ -333,51 +333,10 @@ class UploadImportDataXLSXFile(PermissionMutation):
             business_area_slug=business_area_slug,
         )
         validate_xlsx_import_task.delay(import_data.id)
-        return UploadImportDataXLSXFile(import_data, [])
+        return UploadImportDataXLSXFileAsync(import_data, [])
 
 
-class SaveKoboProjectImportDataMutation(PermissionMutation):
-    import_data = graphene.Field(ImportDataNode)
-    errors = graphene.List(KoboErrorNode)
-
-    class Arguments:
-        uid = Upload(required=True)
-        business_area_slug = graphene.String(required=True)
-        only_active_submissions = graphene.Boolean(required=True)
-
-    @classmethod
-    @is_authenticated
-    def mutate(cls, root, info, uid, business_area_slug, only_active_submissions):
-        cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
-
-        kobo_api = KoboAPI(business_area_slug)
-
-        submissions = kobo_api.get_project_submissions(uid, only_active_submissions)
-
-        business_area = BusinessArea.objects.get(slug=business_area_slug)
-        validator = KoboProjectImportDataInstanceValidator()
-        errors = validator.validate_everything(submissions, business_area)
-
-        if errors:
-            errors.sort(key=operator.itemgetter("header"))
-            return UploadImportDataXLSXFile(None, errors)
-
-        number_of_households, number_of_individuals = count_population(submissions, business_area)
-
-        import_file_name = f"project-uid-{uid}-{time.time()}.json"
-        file = File(BytesIO(json.dumps(submissions).encode()), name=import_file_name)
-
-        created = ImportData.objects.create(
-            file=file,
-            data_type=ImportData.JSON,
-            number_of_households=number_of_households,
-            number_of_individuals=number_of_individuals,
-        )
-
-        return SaveKoboProjectImportDataMutation(created, [])
-
-
-class SaveKoboProjectImportDataAsyncMutation(PermissionMutation):
+class SaveKoboProjectImportDataAsync(PermissionMutation):
     import_data = graphene.Field(KoboImportDataNode)
 
     class Arguments:
@@ -399,7 +358,7 @@ class SaveKoboProjectImportDataAsyncMutation(PermissionMutation):
             created_by_id=info.context.user.id,
         )
         pull_kobo_submissions_task.delay(import_data.id)
-        return SaveKoboProjectImportDataAsyncMutation(import_data=import_data)
+        return SaveKoboProjectImportDataAsync(import_data=import_data)
 
 
 class DeleteRegistrationDataImport(graphene.Mutation):
@@ -420,12 +379,11 @@ class DeleteRegistrationDataImport(graphene.Mutation):
 
 
 class Mutations(graphene.ObjectType):
-    upload_import_data_xlsx_file = UploadImportDataXLSXFile.Field()
+    upload_import_data_xlsx_file_async = UploadImportDataXLSXFileAsync.Field()
     delete_registration_data_import = DeleteRegistrationDataImport.Field()
     registration_xlsx_import = RegistrationXlsxImportMutation.Field()
     registration_kobo_import = RegistrationKoboImportMutation.Field()
-    save_kobo_import_data = SaveKoboProjectImportDataMutation.Field()
-    save_kobo_import_data_async = SaveKoboProjectImportDataAsyncMutation.Field()
+    save_kobo_import_data_async = SaveKoboProjectImportDataAsync.Field()
     merge_registration_data_import = MergeRegistrationDataImportMutation.Field()
     refuse_registration_data_import = RefuseRegistrationDataImportMutation.Field()
     rerun_dedupe = RegistrationDeduplicationMutation.Field()

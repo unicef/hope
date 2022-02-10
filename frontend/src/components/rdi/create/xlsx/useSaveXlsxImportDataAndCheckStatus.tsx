@@ -2,22 +2,16 @@
 import { useEffect, useState } from 'react';
 import {
   ImportDataStatus,
-  KoboImportDataQueryResult,
-  SaveKoboImportDataAsyncMutationVariables,
-  UploadImportDataXlsxFileMutationVariables,
-  useKoboImportDataLazyQuery,
-  useSaveKoboImportDataAsyncMutation,
-  useUploadImportDataXlsxFileMutation,
+  UploadImportDataXlsxFileAsyncMutationVariables,
+  useUploadImportDataXlsxFileAsyncMutation,
   useXlsxImportDataLazyQuery,
-  useXlsxImportDataQuery,
-  XlsxImportDataQuery,
   XlsxImportDataQueryResult,
 } from '../../../../__generated__/graphql';
 import { useLazyInterval } from '../../../../hooks/useInterval';
 
 export interface UseSaveXlsxImportDataAndCheckStatusReturnType {
   saveAndStartPolling: (
-    variables: UploadImportDataXlsxFileMutationVariables,
+    variables: UploadImportDataXlsxFileAsyncMutationVariables,
   ) => Promise<void>;
   stopPollingImportData: () => void;
   loading: boolean;
@@ -29,16 +23,17 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
   const [
     saveXlsxImportDataMutate,
     { data: xlsxImportDataFromMutation },
-  ] = useUploadImportDataXlsxFileMutation();
-  const [
-    loadImportData,
-    { data: xlsxImportData, error: error1 },
-  ] = useXlsxImportDataLazyQuery({
-    variables: {
-      id: xlsxImportDataFromMutation?.uploadImportDataXlsxFile?.importData?.id,
+  ] = useUploadImportDataXlsxFileAsyncMutation();
+  const [loadImportData, { data: xlsxImportData }] = useXlsxImportDataLazyQuery(
+    {
+      variables: {
+        id:
+          xlsxImportDataFromMutation?.uploadImportDataXlsxFileAsync?.importData
+            ?.id,
+      },
+      fetchPolicy: 'network-only',
     },
-    fetchPolicy: 'network-only',
-  });
+  );
   const [startPollingImportData, stopPollingImportData] = useLazyInterval(
     (args) =>
       loadImportData({
@@ -49,13 +44,14 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
     3000,
   );
   useEffect(() => {
-    if (xlsxImportDataFromMutation?.uploadImportDataXlsxFile?.importData) {
+    if (xlsxImportDataFromMutation?.uploadImportDataXlsxFileAsync?.importData) {
       startPollingImportData({
-        id: xlsxImportDataFromMutation.uploadImportDataXlsxFile.importData.id,
+        id:
+          xlsxImportDataFromMutation.uploadImportDataXlsxFileAsync.importData
+            .id,
       });
     }
   }, [xlsxImportDataFromMutation]);
-  console.log('xlsxImportData', xlsxImportData, error1);
   useEffect(() => {
     if (!xlsxImportData) {
       return;
@@ -72,7 +68,7 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
     }
   }, [xlsxImportData]);
   const saveAndStartPolling = async (
-    variables: UploadImportDataXlsxFileMutationVariables,
+    variables: UploadImportDataXlsxFileAsyncMutationVariables,
   ): Promise<void> => {
     try {
       setLoading(true);
