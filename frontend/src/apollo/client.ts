@@ -3,12 +3,9 @@ import { createUploadLink } from 'apollo-upload-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
-import { GraphQLError } from 'graphql';
 import { GRAPHQL_URL } from '../config';
+import { ValidationGraphQLError } from './ValidationGraphQLError';
 
-export class ValidationGraphQLError extends GraphQLError {
-  validationErrors;
-}
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
     graphQLErrors.forEach(({ message }) => {
