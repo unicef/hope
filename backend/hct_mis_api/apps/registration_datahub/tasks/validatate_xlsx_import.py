@@ -26,6 +26,7 @@ class ValidateXlsxImport:
         errors = UploadXLSXInstanceValidator().validate_everything(import_data.file, import_data.business_area_slug)
         if errors:
             errors.sort(key=operator.itemgetter("row_number", "header"))
+            import_data.status = ImportData.STATUS_VALIDATION_ERROR
             import_data.validation_errors = json.dumps(errors)
         else:
             import_data.status = ImportData.STATUS_FINISHED
