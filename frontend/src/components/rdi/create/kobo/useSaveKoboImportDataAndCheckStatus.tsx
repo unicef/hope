@@ -26,7 +26,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
   ] = useSaveKoboImportDataAsyncMutation();
   const [
     loadImportData,
-    { data: koboImportData, error: error1 },
+    { data: koboImportData},
   ] = useKoboImportDataLazyQuery({
     variables: {
       id: koboImportDataFromMutation?.saveKoboImportDataAsync?.importData?.id,
