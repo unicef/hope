@@ -41,4 +41,5 @@ class PullKoboSubmissions:
             kobo_import_data.status = KoboImportData.STATUS_FINISHED
         kobo_import_data.number_of_households = number_of_households
         kobo_import_data.number_of_individuals = number_of_individuals
+        kobo_import_data.save()
         return {"kobo_import_data_id": kobo_import_data.id}
