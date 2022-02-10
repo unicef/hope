@@ -10,7 +10,7 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-import { useCreateRegistrationKoboImportMutation } from '../../../../__generated__/graphql';
+import {ImportDataStatus, useCreateRegistrationKoboImportMutation} from '../../../../__generated__/graphql';
 import { handleValidationErrors } from '../../../../utils/utils';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
@@ -88,6 +88,7 @@ export function CreateImportFromKoboForm({
     if (!formik.values.koboAssetId) {
       return;
     }
+    setSubmitDisabled(true);
     stopPollingImportData();
     await saveAndStartPolling({
       businessAreaSlug,
@@ -102,6 +103,11 @@ export function CreateImportFromKoboForm({
   useEffect(() => {
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
+  useEffect(() => {
+    if (koboImportData?.status === ImportDataStatus.Finished) {
+      setSubmitDisabled(false);
+    }
+  }, [koboImportData]);
   return (
     <div>
       <FormikProvider value={formik}>
