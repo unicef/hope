@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useField } from 'formik';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import styled from 'styled-components';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { useAllKoboProjectsQuery } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 const ComboBox = styled(Select)`
   & {

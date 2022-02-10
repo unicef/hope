@@ -30,7 +30,6 @@ export function useLazyInterval(callback, delay): [(args) => void, () => void] {
     setIntervalId(setInterval(()=>callback(args), delay));
   };
   const cancelInterval = (): void => {
-    console.log('interval stopped')
     clearInterval(intervalId);
   };
   return [startInterval, cancelInterval];
