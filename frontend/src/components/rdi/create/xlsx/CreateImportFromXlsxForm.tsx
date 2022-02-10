@@ -5,20 +5,19 @@ import * as Yup from 'yup';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { CircularProgress } from '@material-ui/core';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
-import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
-import { DropzoneField } from './DropzoneField';
-
-import { useHistory } from 'react-router-dom';
 import {
   ImportDataStatus,
   useCreateRegistrationXlsxImportMutation,
 } from '../../../../__generated__/graphql';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { handleValidationErrors } from '../../../../utils/utils';
+import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
+import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
+import { DropzoneField } from './DropzoneField';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -64,7 +63,6 @@ export function CreateImportFromXlsxForm({
         `/${businessAreaSlug}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
       );
     } catch (error) {
-      console.error(error);
       const { nonValidationErrors } = handleValidationErrors(
         'registrationXlsxImport',
         error,

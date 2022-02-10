@@ -35736,22 +35736,6 @@
             "deprecationReason": null
           },
           {
-            "name": "importdataPtr",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "ImportDataNode",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "status",
             "description": null,
             "args": [],
@@ -35880,6 +35864,22 @@
             "deprecationReason": null
           },
           {
+            "name": "importdataPtr",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ImportDataNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "koboAssetId",
             "description": null,
             "args": [],
@@ -35923,6 +35923,18 @@
                 "name": "KoboErrorNode",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "importData",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ImportDataNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -41339,7 +41351,7 @@
             "deprecationReason": null
           },
           {
-            "name": "uploadImportDataXlsxFile",
+            "name": "uploadImportDataXlsxFileAsync",
             "description": null,
             "args": [
               {
@@ -41373,7 +41385,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "UploadImportDataXLSXFile",
+              "name": "UploadImportDataXLSXFileAsync",
               "ofType": null
             },
             "isDeprecated": false,
@@ -41461,61 +41473,6 @@
             "deprecationReason": null
           },
           {
-            "name": "saveKoboImportData",
-            "description": null,
-            "args": [
-              {
-                "name": "businessAreaSlug",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "onlyActiveSubmissions",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Boolean",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "uid",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Upload",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "OBJECT",
-              "name": "SaveKoboProjectImportDataMutation",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "saveKoboImportDataAsync",
             "description": null,
             "args": [
@@ -41564,7 +41521,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "SaveKoboProjectImportDataAsyncMutation",
+              "name": "SaveKoboProjectImportDataAsync",
               "ofType": null
             },
             "isDeprecated": false,
@@ -45996,7 +45953,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "UploadImportDataXLSXFile",
+        "name": "UploadImportDataXLSXFileAsync",
         "description": null,
         "fields": [
           {
@@ -46240,46 +46197,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "SaveKoboProjectImportDataMutation",
-        "description": null,
-        "fields": [
-          {
-            "name": "importData",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "ImportDataNode",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "errors",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "KoboErrorNode",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "SaveKoboProjectImportDataAsyncMutation",
+        "name": "SaveKoboProjectImportDataAsync",
         "description": null,
         "fields": [
           {
