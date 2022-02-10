@@ -492,7 +492,6 @@ export const handleValidationErrors = (
   const nonValidationErrors = e.graphQLErrors.filter(
     (error) => !(error instanceof ValidationGraphQLError),
   );
-  console.log('APMU_-_ACTED_-_Kunduz_-_Winterization_Response20220128_22h10m25s - I',validationErrors)
   for (const validationError of validationErrors) {
     Object.entries(validationError.validationErrors[fieldName]).map(
       // eslint-disable-next-line array-callback-return

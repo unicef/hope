@@ -139,9 +139,6 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
             color='primary'
             component='a'
             href='/api/download-template'
-            onClick={() => {
-              console.log('test');
-            }}
             data-cy='a-download-template'
           >
             {t('DOWNLOAD TEMPLATE')}
