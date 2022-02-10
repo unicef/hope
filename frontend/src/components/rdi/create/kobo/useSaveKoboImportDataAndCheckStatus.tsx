@@ -49,7 +49,6 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
       });
     }
   }, [koboImportDataFromMutation]);
-  console.log('koboImportData', koboImportData, error1);
   useEffect(() => {
     if (!koboImportData) {
       return;
