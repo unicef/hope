@@ -2617,7 +2617,6 @@ export type KoboImportDataNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  importdataPtr: ImportDataNode,
   status: ImportDataStatus,
   businessAreaSlug: Scalars['String'],
   file?: Maybe<Scalars['String']>,
@@ -2627,9 +2626,11 @@ export type KoboImportDataNode = Node & {
   error: Scalars['String'],
   validationErrors: Scalars['String'],
   createdById?: Maybe<Scalars['UUID']>,
+  importdataPtr: ImportDataNode,
   koboAssetId: Scalars['String'],
   onlyActiveSubmissions: Scalars['Boolean'],
   koboValidationErrors?: Maybe<Array<Maybe<KoboErrorNode>>>,
+  importData?: Maybe<ImportDataNode>,
 };
 
 export type LabelNode = {
@@ -2711,12 +2712,11 @@ export type Mutations = {
   createProgram?: Maybe<CreateProgram>,
   updateProgram?: Maybe<UpdateProgram>,
   deleteProgram?: Maybe<DeleteProgram>,
-  uploadImportDataXlsxFile?: Maybe<UploadImportDataXlsxFile>,
+  uploadImportDataXlsxFileAsync?: Maybe<UploadImportDataXlsxFileAsync>,
   deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>,
   registrationXlsxImport?: Maybe<RegistrationXlsxImportMutation>,
   registrationKoboImport?: Maybe<RegistrationKoboImportMutation>,
-  saveKoboImportData?: Maybe<SaveKoboProjectImportDataMutation>,
-  saveKoboImportDataAsync?: Maybe<SaveKoboProjectImportDataAsyncMutation>,
+  saveKoboImportDataAsync?: Maybe<SaveKoboProjectImportDataAsync>,
   mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>,
   refuseRegistrationDataImport?: Maybe<RefuseRegistrationDataImportMutation>,
   rerunDedupe?: Maybe<RegistrationDeduplicationMutation>,
@@ -2930,7 +2930,7 @@ export type MutationsDeleteProgramArgs = {
 };
 
 
-export type MutationsUploadImportDataXlsxFileArgs = {
+export type MutationsUploadImportDataXlsxFileAsyncArgs = {
   businessAreaSlug: Scalars['String'],
   file: Scalars['Upload']
 };
@@ -2948,13 +2948,6 @@ export type MutationsRegistrationXlsxImportArgs = {
 
 export type MutationsRegistrationKoboImportArgs = {
   registrationDataImportData: RegistrationKoboImportMutationInput
-};
-
-
-export type MutationsSaveKoboImportDataArgs = {
-  businessAreaSlug: Scalars['String'],
-  onlyActiveSubmissions: Scalars['Boolean'],
-  uid: Scalars['Upload']
 };
 
 
@@ -4630,15 +4623,9 @@ export type SanctionListIndividualNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export type SaveKoboProjectImportDataAsyncMutation = {
-   __typename?: 'SaveKoboProjectImportDataAsyncMutation',
+export type SaveKoboProjectImportDataAsync = {
+   __typename?: 'SaveKoboProjectImportDataAsync',
   importData?: Maybe<KoboImportDataNode>,
-};
-
-export type SaveKoboProjectImportDataMutation = {
-   __typename?: 'SaveKoboProjectImportDataMutation',
-  importData?: Maybe<ImportDataNode>,
-  errors?: Maybe<Array<Maybe<KoboErrorNode>>>,
 };
 
 export type SectionTotalNode = {
@@ -5370,8 +5357,8 @@ export type UpdateTargetPopulationMutation = {
 };
 
 
-export type UploadImportDataXlsxFile = {
-   __typename?: 'UploadImportDataXLSXFile',
+export type UploadImportDataXlsxFileAsync = {
+   __typename?: 'UploadImportDataXLSXFileAsync',
   importData?: Maybe<ImportDataNode>,
   errors?: Maybe<Array<Maybe<XlsxRowErrorNode>>>,
 };
@@ -6755,11 +6742,11 @@ export type SaveKoboImportDataMutationVariables = {
 
 export type SaveKoboImportDataMutation = (
   { __typename?: 'Mutations' }
-  & { saveKoboImportData: Maybe<(
-    { __typename?: 'SaveKoboProjectImportDataMutation' }
+  & { saveKoboImportDataAsync: Maybe<(
+    { __typename?: 'SaveKoboProjectImportDataAsync' }
     & { importData: Maybe<(
-      { __typename?: 'ImportDataNode' }
-      & Pick<ImportDataNode, 'id'>
+      { __typename?: 'KoboImportDataNode' }
+      & Pick<KoboImportDataNode, 'id'>
     )> }
   )> }
 );
@@ -6774,7 +6761,7 @@ export type SaveKoboImportDataAsyncMutationVariables = {
 export type SaveKoboImportDataAsyncMutation = (
   { __typename?: 'Mutations' }
   & { saveKoboImportDataAsync: Maybe<(
-    { __typename?: 'SaveKoboProjectImportDataAsyncMutation' }
+    { __typename?: 'SaveKoboProjectImportDataAsync' }
     & { importData: Maybe<(
       { __typename?: 'KoboImportDataNode' }
       & Pick<KoboImportDataNode, 'id' | 'status'>
@@ -6782,16 +6769,16 @@ export type SaveKoboImportDataAsyncMutation = (
   )> }
 );
 
-export type UploadImportDataXlsxFileMutationVariables = {
+export type UploadImportDataXlsxFileAsyncMutationVariables = {
   file: Scalars['Upload'],
   businessAreaSlug: Scalars['String']
 };
 
 
-export type UploadImportDataXlsxFileMutation = (
+export type UploadImportDataXlsxFileAsyncMutation = (
   { __typename?: 'Mutations' }
-  & { uploadImportDataXlsxFile: Maybe<(
-    { __typename?: 'UploadImportDataXLSXFile' }
+  & { uploadImportDataXlsxFileAsync: Maybe<(
+    { __typename?: 'UploadImportDataXLSXFileAsync' }
     & { errors: Maybe<Array<Maybe<(
       { __typename?: 'XlsxRowErrorNode' }
       & Pick<XlsxRowErrorNode, 'header' | 'message' | 'rowNumber'>
@@ -8685,7 +8672,10 @@ export type KoboImportDataQuery = (
   & { koboImportData: Maybe<(
     { __typename?: 'KoboImportDataNode' }
     & Pick<KoboImportDataNode, 'id' | 'status' | 'numberOfIndividuals' | 'numberOfHouseholds' | 'error'>
-    & { koboValidationErrors: Maybe<Array<Maybe<(
+    & { importData: Maybe<(
+      { __typename?: 'ImportDataNode' }
+      & Pick<ImportDataNode, 'id'>
+    )>, koboValidationErrors: Maybe<Array<Maybe<(
       { __typename?: 'KoboErrorNode' }
       & Pick<KoboErrorNode, 'header' | 'message'>
     )>>> }
@@ -11471,7 +11461,7 @@ export type RerunDedupeMutationResult = ApolloReactCommon.MutationResult<RerunDe
 export type RerunDedupeMutationOptions = ApolloReactCommon.BaseMutationOptions<RerunDedupeMutation, RerunDedupeMutationVariables>;
 export const SaveKoboImportDataDocument = gql`
     mutation SaveKoboImportData($businessAreaSlug: String!, $projectId: Upload!, $onlyActiveSubmissions: Boolean!) {
-  saveKoboImportData(businessAreaSlug: $businessAreaSlug, uid: $projectId, onlyActiveSubmissions: $onlyActiveSubmissions) {
+  saveKoboImportDataAsync(businessAreaSlug: $businessAreaSlug, uid: $projectId, onlyActiveSubmissions: $onlyActiveSubmissions) {
     importData {
       id
     }
@@ -11576,9 +11566,9 @@ export function useSaveKoboImportDataAsyncMutation(baseOptions?: ApolloReactHook
 export type SaveKoboImportDataAsyncMutationHookResult = ReturnType<typeof useSaveKoboImportDataAsyncMutation>;
 export type SaveKoboImportDataAsyncMutationResult = ApolloReactCommon.MutationResult<SaveKoboImportDataAsyncMutation>;
 export type SaveKoboImportDataAsyncMutationOptions = ApolloReactCommon.BaseMutationOptions<SaveKoboImportDataAsyncMutation, SaveKoboImportDataAsyncMutationVariables>;
-export const UploadImportDataXlsxFileDocument = gql`
-    mutation UploadImportDataXlsxFile($file: Upload!, $businessAreaSlug: String!) {
-  uploadImportDataXlsxFile(file: $file, businessAreaSlug: $businessAreaSlug) {
+export const UploadImportDataXlsxFileAsyncDocument = gql`
+    mutation UploadImportDataXlsxFileAsync($file: Upload!, $businessAreaSlug: String!) {
+  uploadImportDataXlsxFileAsync(file: $file, businessAreaSlug: $businessAreaSlug) {
     errors {
       header
       message
@@ -11595,49 +11585,49 @@ export const UploadImportDataXlsxFileDocument = gql`
   }
 }
     `;
-export type UploadImportDataXlsxFileMutationFn = ApolloReactCommon.MutationFunction<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
-export type UploadImportDataXlsxFileComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>, 'mutation'>;
+export type UploadImportDataXlsxFileAsyncMutationFn = ApolloReactCommon.MutationFunction<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>;
+export type UploadImportDataXlsxFileAsyncComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>, 'mutation'>;
 
-    export const UploadImportDataXlsxFileComponent = (props: UploadImportDataXlsxFileComponentProps) => (
-      <ApolloReactComponents.Mutation<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables> mutation={UploadImportDataXlsxFileDocument} {...props} />
+    export const UploadImportDataXlsxFileAsyncComponent = (props: UploadImportDataXlsxFileAsyncComponentProps) => (
+      <ApolloReactComponents.Mutation<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables> mutation={UploadImportDataXlsxFileAsyncDocument} {...props} />
     );
     
-export type UploadImportDataXlsxFileProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables> & TChildProps;
-export function withUploadImportDataXlsxFile<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type UploadImportDataXlsxFileAsyncProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables> & TChildProps;
+export function withUploadImportDataXlsxFileAsync<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  UploadImportDataXlsxFileMutation,
-  UploadImportDataXlsxFileMutationVariables,
-  UploadImportDataXlsxFileProps<TChildProps>>) {
-    return ApolloReactHoc.withMutation<TProps, UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables, UploadImportDataXlsxFileProps<TChildProps>>(UploadImportDataXlsxFileDocument, {
-      alias: 'uploadImportDataXlsxFile',
+  UploadImportDataXlsxFileAsyncMutation,
+  UploadImportDataXlsxFileAsyncMutationVariables,
+  UploadImportDataXlsxFileAsyncProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables, UploadImportDataXlsxFileAsyncProps<TChildProps>>(UploadImportDataXlsxFileAsyncDocument, {
+      alias: 'uploadImportDataXlsxFileAsync',
       ...operationOptions
     });
 };
 
 /**
- * __useUploadImportDataXlsxFileMutation__
+ * __useUploadImportDataXlsxFileAsyncMutation__
  *
- * To run a mutation, you first call `useUploadImportDataXlsxFileMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUploadImportDataXlsxFileMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUploadImportDataXlsxFileAsyncMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadImportDataXlsxFileAsyncMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [uploadImportDataXlsxFileMutation, { data, loading, error }] = useUploadImportDataXlsxFileMutation({
+ * const [uploadImportDataXlsxFileAsyncMutation, { data, loading, error }] = useUploadImportDataXlsxFileAsyncMutation({
  *   variables: {
  *      file: // value for 'file'
  *      businessAreaSlug: // value for 'businessAreaSlug'
  *   },
  * });
  */
-export function useUploadImportDataXlsxFileMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>) {
-        return ApolloReactHooks.useMutation<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>(UploadImportDataXlsxFileDocument, baseOptions);
+export function useUploadImportDataXlsxFileAsyncMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>) {
+        return ApolloReactHooks.useMutation<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>(UploadImportDataXlsxFileAsyncDocument, baseOptions);
       }
-export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileMutation>;
-export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
-export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
+export type UploadImportDataXlsxFileAsyncMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileAsyncMutation>;
+export type UploadImportDataXlsxFileAsyncMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileAsyncMutation>;
+export type UploadImportDataXlsxFileAsyncMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>;
 export const CreateDashboardReportDocument = gql`
     mutation CreateDashboardReport($reportData: CreateDashboardReportInput!) {
   createDashboardReport(reportData: $reportData) {
@@ -16323,6 +16313,9 @@ export const KoboImportDataDocument = gql`
     numberOfIndividuals
     numberOfHouseholds
     error
+    importData {
+      id
+    }
     koboValidationErrors {
       header
       message
@@ -17947,14 +17940,13 @@ export type ResolversTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>,
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>,
-  UploadImportDataXLSXFile: ResolverTypeWrapper<UploadImportDataXlsxFile>,
+  UploadImportDataXLSXFileAsync: ResolverTypeWrapper<UploadImportDataXlsxFileAsync>,
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
   RegistrationXlsxImportMutation: ResolverTypeWrapper<RegistrationXlsxImportMutation>,
   RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput,
   RegistrationKoboImportMutation: ResolverTypeWrapper<RegistrationKoboImportMutation>,
-  SaveKoboProjectImportDataMutation: ResolverTypeWrapper<SaveKoboProjectImportDataMutation>,
-  SaveKoboProjectImportDataAsyncMutation: ResolverTypeWrapper<SaveKoboProjectImportDataAsyncMutation>,
+  SaveKoboProjectImportDataAsync: ResolverTypeWrapper<SaveKoboProjectImportDataAsync>,
   MergeRegistrationDataImportMutation: ResolverTypeWrapper<MergeRegistrationDataImportMutation>,
   RefuseRegistrationDataImportMutation: ResolverTypeWrapper<RefuseRegistrationDataImportMutation>,
   RegistrationDeduplicationMutation: ResolverTypeWrapper<RegistrationDeduplicationMutation>,
@@ -18301,14 +18293,13 @@ export type ResolversParentTypes = {
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: UpdateProgram,
   DeleteProgram: DeleteProgram,
-  UploadImportDataXLSXFile: UploadImportDataXlsxFile,
+  UploadImportDataXLSXFileAsync: UploadImportDataXlsxFileAsync,
   DeleteRegistrationDataImport: DeleteRegistrationDataImport,
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
   RegistrationXlsxImportMutation: RegistrationXlsxImportMutation,
   RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput,
   RegistrationKoboImportMutation: RegistrationKoboImportMutation,
-  SaveKoboProjectImportDataMutation: SaveKoboProjectImportDataMutation,
-  SaveKoboProjectImportDataAsyncMutation: SaveKoboProjectImportDataAsyncMutation,
+  SaveKoboProjectImportDataAsync: SaveKoboProjectImportDataAsync,
   MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation,
   RefuseRegistrationDataImportMutation: RefuseRegistrationDataImportMutation,
   RegistrationDeduplicationMutation: RegistrationDeduplicationMutation,
@@ -19362,7 +19353,6 @@ export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends Re
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  importdataPtr?: Resolver<ResolversTypes['ImportDataNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['ImportDataStatus'], ParentType, ContextType>,
   businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -19372,9 +19362,11 @@ export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends Re
   error?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   validationErrors?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   createdById?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  importdataPtr?: Resolver<ResolversTypes['ImportDataNode'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   onlyActiveSubmissions?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   koboValidationErrors?: Resolver<Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>, ParentType, ContextType>,
+  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
 };
 
 export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
@@ -19443,12 +19435,11 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
   deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
-  uploadImportDataXlsxFile?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFile']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileArgs, 'businessAreaSlug' | 'file'>>,
+  uploadImportDataXlsxFileAsync?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileAsyncArgs, 'businessAreaSlug' | 'file'>>,
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
   registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>,
   registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>,
-  saveKoboImportData?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataMutation']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'uid'>>,
-  saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsyncMutation']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'uid'>>,
+  saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'uid'>>,
   mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>,
   refuseRegistrationDataImport?: Resolver<Maybe<ResolversTypes['RefuseRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsRefuseRegistrationDataImportArgs, 'id'>>,
   rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>,
@@ -20045,13 +20036,8 @@ export type SanctionListIndividualNodeEdgeResolvers<ContextType = any, ParentTyp
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
-export type SaveKoboProjectImportDataAsyncMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SaveKoboProjectImportDataAsyncMutation'] = ResolversParentTypes['SaveKoboProjectImportDataAsyncMutation']> = {
+export type SaveKoboProjectImportDataAsyncResolvers<ContextType = any, ParentType extends ResolversParentTypes['SaveKoboProjectImportDataAsync'] = ResolversParentTypes['SaveKoboProjectImportDataAsync']> = {
   importData?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType>,
-};
-
-export type SaveKoboProjectImportDataMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SaveKoboProjectImportDataMutation'] = ResolversParentTypes['SaveKoboProjectImportDataMutation']> = {
-  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
-  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>, ParentType, ContextType>,
 };
 
 export type SectionTotalNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SectionTotalNode'] = ResolversParentTypes['SectionTotalNode']> = {
@@ -20534,7 +20520,7 @@ export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
   name: 'Upload'
 }
 
-export type UploadImportDataXlsxFileResolvers<ContextType = any, ParentType extends ResolversParentTypes['UploadImportDataXLSXFile'] = ResolversParentTypes['UploadImportDataXLSXFile']> = {
+export type UploadImportDataXlsxFileAsyncResolvers<ContextType = any, ParentType extends ResolversParentTypes['UploadImportDataXLSXFileAsync'] = ResolversParentTypes['UploadImportDataXLSXFileAsync']> = {
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxRowErrorNode']>>>, ParentType, ContextType>,
 };
@@ -20825,8 +20811,7 @@ export type Resolvers<ContextType = any> = {
   SanctionListIndividualNode?: SanctionListIndividualNodeResolvers<ContextType>,
   SanctionListIndividualNodeConnection?: SanctionListIndividualNodeConnectionResolvers<ContextType>,
   SanctionListIndividualNodeEdge?: SanctionListIndividualNodeEdgeResolvers<ContextType>,
-  SaveKoboProjectImportDataAsyncMutation?: SaveKoboProjectImportDataAsyncMutationResolvers<ContextType>,
-  SaveKoboProjectImportDataMutation?: SaveKoboProjectImportDataMutationResolvers<ContextType>,
+  SaveKoboProjectImportDataAsync?: SaveKoboProjectImportDataAsyncResolvers<ContextType>,
   SectionTotalNode?: SectionTotalNodeResolvers<ContextType>,
   ServiceProviderNode?: ServiceProviderNodeResolvers<ContextType>,
   ServiceProviderNodeConnection?: ServiceProviderNodeConnectionResolvers<ContextType>,
@@ -20891,7 +20876,7 @@ export type Resolvers<ContextType = any> = {
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
   UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>,
   Upload?: GraphQLScalarType,
-  UploadImportDataXLSXFile?: UploadImportDataXlsxFileResolvers<ContextType>,
+  UploadImportDataXLSXFileAsync?: UploadImportDataXlsxFileAsyncResolvers<ContextType>,
   UserBusinessAreaNode?: UserBusinessAreaNodeResolvers<ContextType>,
   UserBusinessAreaNodeConnection?: UserBusinessAreaNodeConnectionResolvers<ContextType>,
   UserBusinessAreaNodeEdge?: UserBusinessAreaNodeEdgeResolvers<ContextType>,

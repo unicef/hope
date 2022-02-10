@@ -24,14 +24,15 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
     saveKoboImportDataMutate,
     { data: koboImportDataFromMutation },
   ] = useSaveKoboImportDataAsyncMutation();
-  const [loadImportData, { data: koboImportData,error:error1 }] = useKoboImportDataLazyQuery(
-    {
-      variables: {
-        id: koboImportDataFromMutation?.saveKoboImportDataAsync?.importData?.id,
-      },
-      fetchPolicy: 'network-only',
+  const [
+    loadImportData,
+    { data: koboImportData, error: error1 },
+  ] = useKoboImportDataLazyQuery({
+    variables: {
+      id: koboImportDataFromMutation?.saveKoboImportDataAsync?.importData?.id,
     },
-  );
+    fetchPolicy: 'network-only',
+  });
   const [startPollingImportData, stopPollingImportData] = useLazyInterval(
     (args) =>
       loadImportData({
@@ -48,7 +49,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
       });
     }
   }, [koboImportDataFromMutation]);
-  console.log('koboImportData',koboImportData,error1)
+  console.log('koboImportData', koboImportData, error1);
   useEffect(() => {
     if (!koboImportData) {
       return;
