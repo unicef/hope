@@ -3,19 +3,30 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { FlagTooltip } from '../../../../components/core/FlagTooltip';
-import { WarningTooltip } from '../../../../components/core/WarningTooltip';
+import { StatusBox } from '../../../../components/core/StatusBox';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { choicesToDict, formatCurrencyWithSymbol } from '../../../../utils/utils';
+import {
+  choicesToDict,
+  formatCurrencyWithSymbol,
+  householdStatusToColor,
+  userStatusToColor,
+} from '../../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../../__generated__/graphql';
 
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
+`;
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
@@ -71,6 +82,14 @@ export function HouseHoldTableRow({
       </TableCell>
       <TableCell align='left'>
         <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
+      </TableCell>
+      <TableCell align='left'>
+        <StatusContainer>
+          <StatusBox
+            status={household.status}
+            statusToColor={householdStatusToColor}
+          />
+        </StatusContainer>
       </TableCell>
       <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>

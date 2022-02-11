@@ -5818,7 +5818,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'adminAreaTitle' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'status' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'adminAreaTitle' | 'address'>
   & { admin1: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
@@ -8051,7 +8051,7 @@ export type PaymentRecordQuery = (
     & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
     & { household: (
       { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'size' | 'unicefId'>
+      & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
       & { headOfHousehold: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
@@ -8124,7 +8124,7 @@ export type AllPaymentVerificationsQuery = (
           & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity' | 'currency'>
           & { household: (
             { __typename?: 'HouseholdNode' }
-            & Pick<HouseholdNode, 'unicefId' | 'id'>
+            & Pick<HouseholdNode, 'status' | 'unicefId' | 'id'>
             & { headOfHousehold: (
               { __typename?: 'IndividualNode' }
               & Pick<IndividualNode, 'id' | 'fullName' | 'phoneNo' | 'phoneNoAlternative'>
@@ -8195,7 +8195,7 @@ export type PaymentRecordVerificationQuery = (
       & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
       & { household: (
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'unicefId' | 'id' | 'size'>
+        & Pick<HouseholdNode, 'status' | 'unicefId' | 'id' | 'size'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
@@ -8294,7 +8294,7 @@ export type AllHouseholdsQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'unicefId' | 'hasDuplicates' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'size' | 'residenceStatus' | 'totalCashReceived' | 'currency' | 'lastRegistrationDate'>
+        & Pick<HouseholdNode, 'id' | 'status' | 'unicefId' | 'hasDuplicates' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'size' | 'residenceStatus' | 'totalCashReceived' | 'currency' | 'lastRegistrationDate'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'fullName'>
@@ -9204,6 +9204,7 @@ export type TargetPopulationQuery = (
 export const HouseholdMinimalFragmentDoc = gql`
     fragment householdMinimal on HouseholdNode {
   id
+  status
   createdAt
   residenceStatus
   size
@@ -14557,6 +14558,7 @@ export const PaymentRecordDocument = gql`
     registrationCaId
     household {
       id
+      status
       size
       unicefId
       headOfHousehold {
@@ -14731,6 +14733,7 @@ export const AllPaymentVerificationsDocument = gql`
           deliveredQuantity
           currency
           household {
+            status
             unicefId
             id
             headOfHousehold {
@@ -14974,6 +14977,7 @@ export const PaymentRecordVerificationDocument = gql`
       caHashId
       registrationCaId
       household {
+        status
         unicefId
         id
         size
@@ -15233,6 +15237,7 @@ export const AllHouseholdsDocument = gql`
       cursor
       node {
         id
+        status
         unicefId
         hasDuplicates
         sanctionListPossibleMatch
