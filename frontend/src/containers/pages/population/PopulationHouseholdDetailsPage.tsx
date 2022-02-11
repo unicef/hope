@@ -11,7 +11,6 @@ import { LabelizedField } from '../../../components/core/LabelizedField';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
 import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -28,6 +27,7 @@ import { HouseholdCompositionTable } from '../../tables/population/HouseholdComp
 import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable';
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordHouseholdTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
 
 const Container = styled.div`
   padding: 20px;
@@ -131,6 +131,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}
+        businessArea={businessArea}
       />
       <HouseholdCompositionTable
         household={household as HouseholdDetailedFragment}
