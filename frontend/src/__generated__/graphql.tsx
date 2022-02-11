@@ -1069,6 +1069,7 @@ export type GrievanceTicketNode = Node & {
   individualDataUpdateTicketDetails?: Maybe<TicketIndividualDataUpdateDetailsNode>,
   addIndividualTicketDetails?: Maybe<TicketAddIndividualDetailsNode>,
   deleteIndividualTicketDetails?: Maybe<TicketDeleteIndividualDetailsNode>,
+  deleteHouseholdTicketDetails?: Maybe<TicketDeleteHouseholdDetailsNode>,
   systemFlaggingTicketDetails?: Maybe<TicketSystemFlaggingDetailsNode>,
   needsAdjudicationTicketDetails?: Maybe<TicketNeedsAdjudicationDetailsNode>,
   paymentVerificationTicketDetails?: Maybe<TicketPaymentVerificationDetailsNode>,
@@ -1150,6 +1151,10 @@ export type HouseholdDataUpdateIssueTypeExtras = {
   householdData: HouseholdUpdateDataObjectType,
 };
 
+export type HouseholdDeleteIssueTypeExtras = {
+  household: Scalars['ID'],
+};
+
 export type HouseholdNode = Node & {
    __typename?: 'HouseholdNode',
   id: Scalars['ID'],
@@ -1222,6 +1227,7 @@ export type HouseholdNode = Node & {
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
   householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNodeConnection,
   addIndividualTicketDetails: TicketAddIndividualDetailsNodeConnection,
+  deleteHouseholdTicketDetails: TicketDeleteHouseholdDetailsNodeConnection,
   positiveFeedbackTicketDetails: TicketPositiveFeedbackDetailsNodeConnection,
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNodeConnection,
   referralTicketDetails: TicketReferralDetailsNodeConnection,
@@ -1294,6 +1300,14 @@ export type HouseholdNodeHouseholdDataUpdateTicketDetailsArgs = {
 
 
 export type HouseholdNodeAddIndividualTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdNodeDeleteHouseholdTicketDetailsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2569,6 +2583,7 @@ export type IssueTypeExtrasInput = {
   householdDataUpdateIssueTypeExtras?: Maybe<HouseholdDataUpdateIssueTypeExtras>,
   individualDataUpdateIssueTypeExtras?: Maybe<IndividualDataUpdateIssueTypeExtras>,
   individualDeleteIssueTypeExtras?: Maybe<IndividualDeleteIssueTypeExtras>,
+  householdDeleteIssueTypeExtras?: Maybe<HouseholdDeleteIssueTypeExtras>,
   addIndividualIssueTypeExtras?: Maybe<AddIndividualIssueTypeExtras>,
 };
 
@@ -2690,6 +2705,7 @@ export type Mutations = {
   approveHouseholdDataChange?: Maybe<HouseholdDataChangeApproveMutation>,
   approveAddIndividual?: Maybe<SimpleApproveMutation>,
   approveDeleteIndividual?: Maybe<SimpleApproveMutation>,
+  approveDeleteHousehold?: Maybe<SimpleApproveMutation>,
   approveSystemFlagging?: Maybe<SimpleApproveMutation>,
   approveNeedsAdjudication?: Maybe<NeedsAdjudicationApproveMutation>,
   reassignRole?: Maybe<ReassignRoleMutation>,
@@ -2788,6 +2804,13 @@ export type MutationsApproveAddIndividualArgs = {
 
 
 export type MutationsApproveDeleteIndividualArgs = {
+  approveStatus: Scalars['Boolean'],
+  grievanceTicketId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsApproveDeleteHouseholdArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
@@ -4994,6 +5017,31 @@ export type TicketComplaintDetailsNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type TicketDeleteHouseholdDetailsNode = Node & {
+   __typename?: 'TicketDeleteHouseholdDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  household?: Maybe<HouseholdNode>,
+  roleReassignData: Scalars['JSONString'],
+  approveStatus: Scalars['Boolean'],
+  householdData?: Maybe<Scalars['Arg']>,
+};
+
+export type TicketDeleteHouseholdDetailsNodeConnection = {
+   __typename?: 'TicketDeleteHouseholdDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketDeleteHouseholdDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketDeleteHouseholdDetailsNodeEdge = {
+   __typename?: 'TicketDeleteHouseholdDetailsNodeEdge',
+  node?: Maybe<TicketDeleteHouseholdDetailsNode>,
+  cursor: Scalars['String'],
+};
+
 export type TicketDeleteIndividualDetailsNode = Node & {
    __typename?: 'TicketDeleteIndividualDetailsNode',
   id: Scalars['ID'],
@@ -6207,6 +6255,23 @@ export type ApproveAddIndividualDataChangeMutationVariables = {
 export type ApproveAddIndividualDataChangeMutation = (
   { __typename?: 'Mutations' }
   & { approveAddIndividual: Maybe<(
+    { __typename?: 'SimpleApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
+export type ApproveDeleteHouseholdDataChangeMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  approveStatus: Scalars['Boolean']
+};
+
+
+export type ApproveDeleteHouseholdDataChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { approveDeleteHousehold: Maybe<(
     { __typename?: 'SimpleApproveMutation' }
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
@@ -7529,6 +7594,9 @@ export type GrievanceTicketQuery = (
     )>, deleteIndividualTicketDetails: Maybe<(
       { __typename?: 'TicketDeleteIndividualDetailsNode' }
       & Pick<TicketDeleteIndividualDetailsNode, 'id' | 'roleReassignData' | 'approveStatus'>
+    )>, deleteHouseholdTicketDetails: Maybe<(
+      { __typename?: 'TicketDeleteHouseholdDetailsNode' }
+      & Pick<TicketDeleteHouseholdDetailsNode, 'id' | 'approveStatus'>
     )>, systemFlaggingTicketDetails: Maybe<(
       { __typename?: 'TicketSystemFlaggingDetailsNode' }
       & Pick<TicketSystemFlaggingDetailsNode, 'id' | 'approveStatus' | 'roleReassignData'>
@@ -9919,6 +9987,59 @@ export function useApproveAddIndividualDataChangeMutation(baseOptions?: ApolloRe
 export type ApproveAddIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>;
+export const ApproveDeleteHouseholdDataChangeDocument = gql`
+    mutation ApproveDeleteHouseholdDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approveDeleteHousehold(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveDeleteHouseholdDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables>;
+export type ApproveDeleteHouseholdDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables>, 'mutation'>;
+
+    export const ApproveDeleteHouseholdDataChangeComponent = (props: ApproveDeleteHouseholdDataChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables> mutation={ApproveDeleteHouseholdDataChangeDocument} {...props} />
+    );
+    
+export type ApproveDeleteHouseholdDataChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables> & TChildProps;
+export function withApproveDeleteHouseholdDataChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveDeleteHouseholdDataChangeMutation,
+  ApproveDeleteHouseholdDataChangeMutationVariables,
+  ApproveDeleteHouseholdDataChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables, ApproveDeleteHouseholdDataChangeProps<TChildProps>>(ApproveDeleteHouseholdDataChangeDocument, {
+      alias: 'approveDeleteHouseholdDataChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveDeleteHouseholdDataChangeMutation__
+ *
+ * To run a mutation, you first call `useApproveDeleteHouseholdDataChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveDeleteHouseholdDataChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveDeleteHouseholdDataChangeMutation, { data, loading, error }] = useApproveDeleteHouseholdDataChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      approveStatus: // value for 'approveStatus'
+ *   },
+ * });
+ */
+export function useApproveDeleteHouseholdDataChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables>(ApproveDeleteHouseholdDataChangeDocument, baseOptions);
+      }
+export type ApproveDeleteHouseholdDataChangeMutationHookResult = ReturnType<typeof useApproveDeleteHouseholdDataChangeMutation>;
+export type ApproveDeleteHouseholdDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveDeleteHouseholdDataChangeMutation>;
+export type ApproveDeleteHouseholdDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables>;
 export const ApproveDeleteIndividualDataChangeDocument = gql`
     mutation ApproveDeleteIndividualDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!) {
   approveDeleteIndividual(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
@@ -13498,6 +13619,10 @@ export const GrievanceTicketDocument = gql`
     deleteIndividualTicketDetails {
       id
       roleReassignData
+      approveStatus
+    }
+    deleteHouseholdTicketDetails {
+      id
       approveStatus
     }
     systemFlaggingTicketDetails {
@@ -17781,6 +17906,9 @@ export type ResolversTypes = {
   TicketAddIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketAddIndividualDetailsNodeConnection>,
   TicketAddIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketAddIndividualDetailsNodeEdge>,
   TicketAddIndividualDetailsNode: ResolverTypeWrapper<TicketAddIndividualDetailsNode>,
+  TicketDeleteHouseholdDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteHouseholdDetailsNodeConnection>,
+  TicketDeleteHouseholdDetailsNodeEdge: ResolverTypeWrapper<TicketDeleteHouseholdDetailsNodeEdge>,
+  TicketDeleteHouseholdDetailsNode: ResolverTypeWrapper<TicketDeleteHouseholdDetailsNode>,
   ProgramsWithDeliveredQuantityNode: ResolverTypeWrapper<ProgramsWithDeliveredQuantityNode>,
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>,
   CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
@@ -17891,6 +18019,7 @@ export type ResolversTypes = {
   IndividualIdentityObjectType: IndividualIdentityObjectType,
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
+  HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
   CreateGrievanceTicketMutation: ResolverTypeWrapper<CreateGrievanceTicketMutation>,
@@ -18134,6 +18263,9 @@ export type ResolversParentTypes = {
   TicketAddIndividualDetailsNodeConnection: TicketAddIndividualDetailsNodeConnection,
   TicketAddIndividualDetailsNodeEdge: TicketAddIndividualDetailsNodeEdge,
   TicketAddIndividualDetailsNode: TicketAddIndividualDetailsNode,
+  TicketDeleteHouseholdDetailsNodeConnection: TicketDeleteHouseholdDetailsNodeConnection,
+  TicketDeleteHouseholdDetailsNodeEdge: TicketDeleteHouseholdDetailsNodeEdge,
+  TicketDeleteHouseholdDetailsNode: TicketDeleteHouseholdDetailsNode,
   ProgramsWithDeliveredQuantityNode: ProgramsWithDeliveredQuantityNode,
   DeliveredQuantityNode: DeliveredQuantityNode,
   CountAndPercentageNode: CountAndPercentageNode,
@@ -18244,6 +18376,7 @@ export type ResolversParentTypes = {
   IndividualIdentityObjectType: IndividualIdentityObjectType,
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
+  HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
   CreateGrievanceTicketMutation: CreateGrievanceTicketMutation,
@@ -18823,6 +18956,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   individualDataUpdateTicketDetails?: Resolver<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNode']>, ParentType, ContextType>,
   addIndividualTicketDetails?: Resolver<Maybe<ResolversTypes['TicketAddIndividualDetailsNode']>, ParentType, ContextType>,
   deleteIndividualTicketDetails?: Resolver<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNode']>, ParentType, ContextType>,
+  deleteHouseholdTicketDetails?: Resolver<Maybe<ResolversTypes['TicketDeleteHouseholdDetailsNode']>, ParentType, ContextType>,
   systemFlaggingTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSystemFlaggingDetailsNode']>, ParentType, ContextType>,
   needsAdjudicationTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsNode']>, ParentType, ContextType>,
   paymentVerificationTicketDetails?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNode']>, ParentType, ContextType>,
@@ -18931,6 +19065,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeSensitiveTicketDetailsArgs>,
   householdDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeHouseholdDataUpdateTicketDetailsArgs>,
   addIndividualTicketDetails?: Resolver<ResolversTypes['TicketAddIndividualDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeAddIndividualTicketDetailsArgs>,
+  deleteHouseholdTicketDetails?: Resolver<ResolversTypes['TicketDeleteHouseholdDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeDeleteHouseholdTicketDetailsArgs>,
   positiveFeedbackTicketDetails?: Resolver<ResolversTypes['TicketPositiveFeedbackDetailsNodeConnection'], ParentType, ContextType, HouseholdNodePositiveFeedbackTicketDetailsArgs>,
   negativeFeedbackTicketDetails?: Resolver<ResolversTypes['TicketNegativeFeedbackDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeNegativeFeedbackTicketDetailsArgs>,
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeReferralTicketDetailsArgs>,
@@ -19413,6 +19548,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveHouseholdDataChange?: Resolver<Maybe<ResolversTypes['HouseholdDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveHouseholdDataChangeArgs, 'grievanceTicketId'>>,
   approveAddIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveDeleteIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
+  approveDeleteHousehold?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteHouseholdArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
@@ -19451,7 +19587,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -20267,6 +20403,28 @@ export type TicketComplaintDetailsNodeEdgeResolvers<ContextType = any, ParentTyp
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type TicketDeleteHouseholdDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteHouseholdDetailsNode'] = ResolversParentTypes['TicketDeleteHouseholdDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  householdData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+};
+
+export type TicketDeleteHouseholdDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteHouseholdDetailsNodeConnection'] = ResolversParentTypes['TicketDeleteHouseholdDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketDeleteHouseholdDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketDeleteHouseholdDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteHouseholdDetailsNodeEdge'] = ResolversParentTypes['TicketDeleteHouseholdDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketDeleteHouseholdDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type TicketDeleteIndividualDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNode'] = ResolversParentTypes['TicketDeleteIndividualDetailsNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -20837,6 +20995,9 @@ export type Resolvers<ContextType = any> = {
   TicketComplaintDetailsNode?: TicketComplaintDetailsNodeResolvers<ContextType>,
   TicketComplaintDetailsNodeConnection?: TicketComplaintDetailsNodeConnectionResolvers<ContextType>,
   TicketComplaintDetailsNodeEdge?: TicketComplaintDetailsNodeEdgeResolvers<ContextType>,
+  TicketDeleteHouseholdDetailsNode?: TicketDeleteHouseholdDetailsNodeResolvers<ContextType>,
+  TicketDeleteHouseholdDetailsNodeConnection?: TicketDeleteHouseholdDetailsNodeConnectionResolvers<ContextType>,
+  TicketDeleteHouseholdDetailsNodeEdge?: TicketDeleteHouseholdDetailsNodeEdgeResolvers<ContextType>,
   TicketDeleteIndividualDetailsNode?: TicketDeleteIndividualDetailsNodeResolvers<ContextType>,
   TicketDeleteIndividualDetailsNodeConnection?: TicketDeleteIndividualDetailsNodeConnectionResolvers<ContextType>,
   TicketDeleteIndividualDetailsNodeEdge?: TicketDeleteIndividualDetailsNodeEdgeResolvers<ContextType>,
