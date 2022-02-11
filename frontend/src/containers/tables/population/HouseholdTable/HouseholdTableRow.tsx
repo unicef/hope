@@ -16,7 +16,6 @@ import {
   choicesToDict,
   formatCurrencyWithSymbol,
   householdStatusToColor,
-  userStatusToColor,
 } from '../../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
