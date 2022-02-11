@@ -313,9 +313,6 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
 
     @property
     def filtering_args(self):
-        import ipdb
-
-        ipdb.set_trace()
         return get_filtering_args_from_filterset(self.filterset_class, self.node_type)
 
     @classmethod
