@@ -8,6 +8,7 @@ import { ClickableTableRow } from '../../../../components/core/Table/ClickableTa
 import { StatusBox } from '../../../../components/core/StatusBox';
 import {
   formatCurrencyWithSymbol,
+  householdStatusToColor,
   paymentRecordStatusToColor,
 } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
@@ -58,6 +59,14 @@ export function PaymentRecordTableRow({
       </TableCell>
       <AnonTableCell>{paymentRecord.headOfHousehold?.fullName}</AnonTableCell>
       <TableCell align='left'>{paymentRecord.household.unicefId}</TableCell>
+      <TableCell align='left'>
+        <StatusContainer>
+          <StatusBox
+            status={paymentRecord.household.status}
+            statusToColor={householdStatusToColor}
+          />
+        </StatusContainer>
+      </TableCell>
       <TableCell align='left'>{paymentRecord.household.size}</TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
