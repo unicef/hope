@@ -237,6 +237,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         "add_individual_ticket_details": ("household",),
         "household_data_update_ticket_details": ("household",),
         "delete_individual_ticket_details": ("individual",),
+        "delete_household_ticket_details": ("household",),
         "system_flagging_ticket_details": (
             {"individual": "golden_records_individual"},
             {"household": "golden_records_individual.household"},
