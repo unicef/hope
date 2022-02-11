@@ -39,9 +39,9 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     reassign_roles_on_update,
     save_images,
     verify_flex_fields,
-    withdraw_household,
     withdraw_individual_and_reassign_roles,
 )
+from hct_mis_api.apps.household.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
@@ -51,6 +51,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
     IndividualIdentity,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.utils.schema import Arg
@@ -824,8 +825,30 @@ def close_delete_individual_ticket(grievance_ticket, info):
         household.recalculate_data()
 
 
+def check_external_collector(household):
+    individuals = household.individuals.all()
+    external_collectors = IndividualRoleInHousehold.objects.filter(individual__in=individuals).exclude(
+        household=household
+    )
+    if external_collectors.count():
+        raise GraphQLError("One of the Household member is an external collector. This household cannot be withdrawn.")
+
+
 def close_delete_household_ticket(grievance_ticket, info):
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
+    from hct_mis_api.apps.household.models import Household
+
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
-    withdraw_household(ticket_details.household)
+
+    household = Household.objects.get(id=ticket_details.household.id)
+    check_external_collector(household)
+
+    tickets = GrievanceTicket.objects.belong_household(household)
+    if household.withdrawn:
+        tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
+    else:
+        tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
+
+    HouseholdWithdraw().execute(household, tickets)
