@@ -39,8 +39,8 @@ stages:
                 $(Build.BuildId)
                 dev-latest
 
-  - stage: test
-    displayName: TEST
+  - stage: test_backend
+    displayName: Test-Backend
     jobs:
       - job: django_tests
         pool:
@@ -85,3 +85,21 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
+
+ - stage: test_frontend
+    displayName: Test-Frontend
+    jobs:
+      - job: django_tests
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[FRONTEND TEST]"
+        steps:
+          - task: NodeTool@0
+              inputs:
+                versionSpec: "14.x"
+              displayName: "Install Node.js"
+          - script: yarn
+            displayName: "Yarn Install"
+
+          - script: npm test -- --watchAll=false
+            displayName: "Test"
