@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/HouseholdDetails should render 1`] = `
+exports[`components/population/HouseholdDetails should render 1`] = `
 <div>
   <div
     class="sc-jzJRlG ezheHU"

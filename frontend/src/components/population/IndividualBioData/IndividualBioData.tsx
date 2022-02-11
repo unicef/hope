@@ -2,22 +2,20 @@ import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
   choicesToDict,
   formatAge,
   renderBoolean,
   sexToCapitalize,
-} from '../../utils/utils';
+} from '../../../utils/utils';
 import {
+  HouseholdChoiceDataQuery,
   IndividualNode,
-  useHouseholdChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { ContentLink } from '../core/ContentLink';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { UniversalMoment } from '../core/UniversalMoment';
-import { DocumentPopulationPhotoModal } from './DocumentPopulationPhotoModal';
+} from '../../../__generated__/graphql';
+import { ContentLink } from '../../core/ContentLink';
+import { LabelizedField } from '../../core/LabelizedField';
+import { UniversalMoment } from '../../core/UniversalMoment';
+import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -35,21 +33,15 @@ const BorderBox = styled.div`
 
 interface IndividualBioDataProps {
   individual: IndividualNode;
+  businessArea: string;
+  choicesData: HouseholdChoiceDataQuery;
 }
-export function IndividualsBioData({
+export function IndividualBioData({
   individual,
+  businessArea,
+  choicesData,
 }: IndividualBioDataProps): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
-
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
-
-  if (choicesLoading) {
-    return <LoadingComponent />;
-  }
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
