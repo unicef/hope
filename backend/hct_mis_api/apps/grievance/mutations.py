@@ -1025,6 +1025,7 @@ class Mutations(graphene.ObjectType):
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
     approve_add_individual = SimpleApproveMutation.Field()
     approve_delete_individual = SimpleApproveMutation.Field()
+    approve_delete_household = SimpleApproveMutation.Field()
     approve_system_flagging = SimpleApproveMutation.Field()
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()
