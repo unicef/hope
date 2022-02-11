@@ -2,19 +2,18 @@ import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { choicesToDict, formatCurrencyWithSymbol } from '../../utils/utils';
+import { MiśTheme } from '../../../theme';
+import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
-} from '../../__generated__/graphql';
-import { ContentLink } from '../core/ContentLink';
-import { LabelizedField } from '../core/LabelizedField';
-import { MiśTheme } from '../../theme';
+} from '../../../__generated__/graphql';
+import { ContentLink } from '../../core/ContentLink';
+import { LabelizedField } from '../../core/LabelizedField';
 import {
   BigValue,
   BigValueContainer,
-} from '../rdi/details/RegistrationDetails';
+} from '../../rdi/details/RegistrationDetails';
 
 const Container = styled.div`
   display: flex;
@@ -54,13 +53,14 @@ const Label = styled.span`
 interface HouseholdDetailsProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
+  businessArea: string;
 }
 export function HouseholdDetails({
   household,
   choicesData,
+  businessArea,
 }: HouseholdDetailsProps): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
@@ -180,7 +180,7 @@ export function HouseholdDetails({
             </Grid>
             {household.programsWithDeliveredQuantity.length ? (
               household.programsWithDeliveredQuantity.map((item) => (
-                <Box mb={2}>
+                <Box key={item.id} mb={2}>
                   <Grid container key={item.id}>
                     <Grid item xs={6}>
                       <ContentLink
