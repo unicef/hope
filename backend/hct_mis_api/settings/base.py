@@ -25,7 +25,7 @@ from .config import env
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
-WWW_ROOT = "http://%s/" % DOMAIN_NAME
+WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
 FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")

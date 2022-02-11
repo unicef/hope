@@ -9,7 +9,7 @@ TEMPLATES[0]["OPTIONS"]["debug"] = True
 
 # domains/hosts etc.
 DOMAIN_NAME = "localhost:8000"
-WWW_ROOT = "http://%s/" % DOMAIN_NAME
+WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
 
 # other
@@ -26,9 +26,7 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "standard": {
-            "format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"
-        },
+        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s line %(lineno)d: %(message)s"},
         "verbose": {
             "format": "[%(asctime)s][%(levelname)s][%(name)s] %(filename)s.%(funcName)s:%(lineno)d %(message)s",
         },
