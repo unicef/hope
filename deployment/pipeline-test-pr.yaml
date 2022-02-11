@@ -36,7 +36,7 @@ stages:
             displayName: "Yarn Install"
             workingDirectory: 'frontend'
 
-          - script: npm test --watchAll=false
+          - script: yarn test --watchAll=false
             workingDirectory: 'frontend'
             displayName: "Test"
   - stage: build_and_push
