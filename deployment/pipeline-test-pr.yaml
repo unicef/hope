@@ -86,7 +86,7 @@ stages:
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
 
- - stage: test_frontend
+  - stage: test_frontend
     displayName: Test-Frontend
     jobs:
       - job: django_tests
@@ -95,9 +95,9 @@ stages:
         displayName: "[FRONTEND TEST]"
         steps:
           - task: NodeTool@0
-              inputs:
-                versionSpec: "14.x"
-              displayName: "Install Node.js"
+            inputs:
+              versionSpec: "14.x"
+            displayName: "Install Node.js"
           - script: yarn
             displayName: "Yarn Install"
 
