@@ -1,15 +1,15 @@
 import React from 'react';
 import { render } from '../../../testUtils/testUtils';
-import { HouseholdDetails } from './HouseholdDetails';
-import { fakeHousehold } from '../../../../fixtures/population/fakeHousehold';
 import { fakeHouseholdChoices } from '../../../../fixtures/population/fakeHouseholdChoices';
+import { fakeIndividual } from '../../../../fixtures/population/fakeIndividual';
+import { IndividualBioData } from './IndividualBioData';
 
-describe('components/population/HouseholdDetails', () => {
+describe('components/population/IndividualBioData', () => {
   it('should render', () => {
     const { container } = render(
-      <HouseholdDetails
+      <IndividualBioData
         businessArea='afghanistan'
-        household={fakeHousehold}
+        individual={fakeIndividual}
         choicesData={fakeHouseholdChoices}
       />,
     );
