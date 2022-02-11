@@ -32,6 +32,7 @@ import { PermissionDenied } from '../../core/PermissionDenied';
 import { StatusBox } from '../../core/StatusBox';
 import { UniversalMoment } from '../../core/UniversalMoment';
 import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails';
+import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
 import { FlagDetails } from '../FlagDetails';
 import { GrievanceDetailsToolbar } from '../GrievanceDetailsToolbar';
@@ -425,6 +426,15 @@ export function GrievanceDetailsPage(): React.ReactElement {
             GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL && (
             <PaddingContainer>
               <DeleteIndividualGrievanceDetails
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
+            </PaddingContainer>
+          )}
+          {ticket?.issueType?.toString() ===
+            GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD && (
+            <PaddingContainer>
+              <DeleteHouseholdGrievanceDetails
                 ticket={ticket}
                 canApproveDataChange={canApproveDataChange}
               />
