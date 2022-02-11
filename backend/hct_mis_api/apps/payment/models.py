@@ -227,6 +227,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     sex_filter = models.CharField(null=True, max_length=10)
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
+    unicef_id = models.CharField(blank=True, max_length=250)
 
     @property
     def business_area(self):
