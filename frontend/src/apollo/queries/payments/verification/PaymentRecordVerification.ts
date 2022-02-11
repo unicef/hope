@@ -16,6 +16,7 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
         caHashId
         registrationCaId
         household {
+          status
           unicefId
           id
           size
