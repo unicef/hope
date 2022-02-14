@@ -119,7 +119,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           </span>
           <div>
             <time
-              datetime="-894679200000"
+              datetime="-894672000000"
             >
               26 Aug 1941
             </time>
