@@ -30,6 +30,7 @@ class GrievanceTicketManager(models.Manager):
             ).distinct(),
             (TicketSystemFlaggingDetails.objects.filter(golden_records_individual__in=individuals)),
             (TicketDeleteIndividualDetails.objects.filter(individual__in=individuals)),
+            (TicketDeleteHouseholdDetails.objects.filter(household=household)),
             (TicketAddIndividualDetails.objects.filter(household=household)),
             (TicketIndividualDataUpdateDetails.objects.filter(individual__in=individuals)),
             (TicketHouseholdDataUpdateDetails.objects.filter(household=household)),
