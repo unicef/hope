@@ -153,6 +153,9 @@
             "name": "ImportDataNode"
           },
           {
+            "name": "KoboImportDataNode"
+          },
+          {
             "name": "ImportedDocumentNode"
           },
           {
