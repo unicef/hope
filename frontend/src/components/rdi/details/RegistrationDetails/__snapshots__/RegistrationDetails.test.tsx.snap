@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/rdi/RegistrationDetails should render 1`] = `
+exports[`components/rdi/details/RegistrationDetails should render 1`] = `
 <div>
   <div
     class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
