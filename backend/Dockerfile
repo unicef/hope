@@ -3,6 +3,7 @@ FROM python:3.9.1-slim-buster
 
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends \
+    python3-dev \
     build-essential \
     libjpeg-dev \
     zlib1g-dev \

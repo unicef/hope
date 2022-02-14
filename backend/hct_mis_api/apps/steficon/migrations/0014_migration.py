@@ -16,11 +16,6 @@ class Migration(migrations.Migration):
             field=models.JSONField(blank=True, default=dict),
         ),
         migrations.AlterField(
-            model_name='rule',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
-        ),
-        migrations.AlterField(
             model_name='rulecommit',
             name='after',
             field=models.JSONField(editable=False, help_text='The record after apply changes'),
