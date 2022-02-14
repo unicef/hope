@@ -835,7 +835,12 @@ def check_external_collector(household):
 
 
 def close_delete_household_ticket(grievance_ticket, info):
-    from hct_mis_api.apps.grievance.models import GrievanceTicket
+    from django.db.models import Q
+
+    from hct_mis_api.apps.grievance.models import (
+        GrievanceTicket,
+        TicketNeedsAdjudicationDetails,
+    )
     from hct_mis_api.apps.household.models import Household
 
     ticket_details = grievance_ticket.ticket_details
@@ -845,10 +850,9 @@ def close_delete_household_ticket(grievance_ticket, info):
     household = Household.objects.get(id=ticket_details.household.id)
     check_external_collector(household)
 
-    tickets = GrievanceTicket.objects.belong_household(household)
-    if household.withdrawn:
-        tickets = filter(lambda t: t.ticket.extras.get("status_before_withdrawn", False), tickets)
-    else:
-        tickets = filter(lambda t: t.ticket.status != GrievanceTicket.STATUS_CLOSED, tickets)
+    individuals = household.individuals.values_list("id", flat=True)
+    tickets = TicketNeedsAdjudicationDetails.objects.filter(
+        Q(selected_individual__in=individuals) | Q(golden_records_individual__in=individuals)
+    ).exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
 
     HouseholdWithdraw().execute(household, tickets)
