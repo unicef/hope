@@ -164,6 +164,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - node.name=es02
+      - discovery.type=single-node
       - cluster.name=es-docker-cluster-test
       - cluster.initial_master_nodes=es02
       - bootstrap.memory_lock=true
