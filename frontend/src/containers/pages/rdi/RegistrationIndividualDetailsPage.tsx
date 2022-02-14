@@ -10,15 +10,13 @@ import { ImportedIndividualPhotoModal } from '../../../components/population/Imp
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import {
-  decodeIdString,
-  isPermissionDeniedError,
-} from '../../../utils/utils';
+import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
   ImportedIndividualNode,
+  useHouseholdChoiceDataQuery,
   useImportedIndividualQuery,
 } from '../../../__generated__/graphql';
-import { RegistrationIndividualsBioData } from '../../../components/rdi/details/individual/RegistrationIndividualBioData';
+import { RegistrationIndividualBioData } from '../../../components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
 import { RegistrationIndividualVulnerabilities } from '../../../components/rdi/details/individual/RegistrationIndividualVulnerabilities';
 
 const Container = styled.div`
@@ -40,10 +38,14 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
       id,
     },
   });
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery();
 
-  if (loading) return <LoadingComponent />;
+  if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || permissions === null) return null;
+  if (!data || !choicesData || permissions === null) return null;
 
   const { importedIndividual } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -85,7 +87,11 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
         ) : null}
       </PageHeader>
       <Container>
-        <RegistrationIndividualsBioData individual={importedIndividual} />
+        <RegistrationIndividualBioData
+          businessArea={businessArea}
+          individual={importedIndividual}
+          choicesData={choicesData}
+        />
         <RegistrationIndividualVulnerabilities
           individual={importedIndividual}
         />
