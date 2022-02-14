@@ -2,23 +2,23 @@ import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContentLink } from '../../../core/ContentLink';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { ContentLink } from '../../../../core/ContentLink';
+import { LabelizedField } from '../../../../core/LabelizedField';
+import { LoadingComponent } from '../../../../core/LoadingComponent';
+import { UniversalMoment } from '../../../../core/UniversalMoment';
+import { useBusinessArea } from '../../../../../hooks/useBusinessArea';
 import {
   choicesToDict,
   decodeIdString,
   formatAge,
   renderBoolean,
   sexToCapitalize,
-} from '../../../../utils/utils';
+} from '../../../../../utils/utils';
 import {
+  HouseholdChoiceDataQuery,
   ImportedIndividualDetailedFragment,
-  useHouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { DocumentRegistrationPhotoModal } from './DocumentRegistrationPhotoModal';
+} from '../../../../../__generated__/graphql';
+import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -36,22 +36,16 @@ const BorderBox = styled.div`
 
 interface RegistrationIndividualBioDataProps {
   individual: ImportedIndividualDetailedFragment;
+  businessArea: string;
+  choicesData: HouseholdChoiceDataQuery;
 }
 
-export function RegistrationIndividualsBioData({
+export function RegistrationIndividualBioData({
   individual,
+  choicesData,
+  businessArea,
 }: RegistrationIndividualBioDataProps): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
-
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
-
-  if (choicesLoading) {
-    return <LoadingComponent />;
-  }
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
