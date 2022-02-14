@@ -60,7 +60,7 @@ exports[`components/ProgramDetails should render 1`] = `
                 color="textSecondary"
               >
                 <time
-                  datetime="1582588800000"
+                  datetime="1582585200000"
                 >
                   25 Feb 2020
                 </time>
@@ -84,7 +84,7 @@ exports[`components/ProgramDetails should render 1`] = `
                 color="textSecondary"
               >
                 <time
-                  datetime="1602979200000"
+                  datetime="1602972000000"
                 >
                   18 Oct 2020
                 </time>

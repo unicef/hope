@@ -12,7 +12,7 @@ export function UniversalMoment({
   withTime,
 }: Props): React.ReactElement {
   return children ? (
-    <Moment utc format={withTime ? DATE_FORMAT_LONG : DATE_FORMAT}>
+    <Moment format={withTime ? DATE_FORMAT_LONG : DATE_FORMAT}>
       {children}
     </Moment>
   ) : (
