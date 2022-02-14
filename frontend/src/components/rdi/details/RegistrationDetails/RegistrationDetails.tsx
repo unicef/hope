@@ -2,15 +2,15 @@ import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../core/LabelizedField';
-import { OverviewContainer } from '../../core/OverviewContainer';
-import { StatusBox } from '../../core/StatusBox';
-import { UniversalMoment } from '../../core/UniversalMoment';
-import { MiśTheme } from '../../../theme';
-import { registrationDataImportStatusToColor } from '../../../utils/utils';
-import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
-import { DedupeBox } from './DedupeBox';
+import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
+import { LabelizedField } from '../../../core/LabelizedField';
+import { OverviewContainer } from '../../../core/OverviewContainer';
+import { StatusBox } from '../../../core/StatusBox';
+import { UniversalMoment } from '../../../core/UniversalMoment';
+import { MiśTheme } from '../../../../theme';
+import { registrationDataImportStatusToColor } from '../../../../utils/utils';
+import { RegistrationDetailedFragment } from '../../../../__generated__/graphql';
+import { DedupeBox } from '../DedupeBox';
 
 const StatusContainer = styled.div`
   min-width: 120px;
