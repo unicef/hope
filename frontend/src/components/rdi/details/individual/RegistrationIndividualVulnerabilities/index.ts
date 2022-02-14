@@ -1,0 +1,1 @@
+export { RegistrationIndividualVulnerabilities } from './RegistrationIndividualVulnerabilities';
