@@ -1,9 +1,6 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import {
-  IconButton,
-  Collapse
-} from '@material-ui/core';
+import { Collapse, IconButton } from '@material-ui/core';
 import { ExpandLessRounded, ExpandMoreRounded } from '@material-ui/icons';
 import { XlsxRowErrorNode } from '../../../../__generated__/graphql';
 
@@ -17,7 +14,7 @@ const ErrorsContainer = styled.div`
   align-items: center;
 `;
 
-export function Errors({
+export function XlsxErrors({
   errors,
 }: {
   errors: XlsxRowErrorNode[];

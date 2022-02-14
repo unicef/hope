@@ -976,9 +976,11 @@ type ImportDataNode implements Node {
   numberOfHouseholds: Int
   numberOfIndividuals: Int
   error: String!
-  validationErrors: KoboErrorNode
+  validationErrors: String!
   createdById: UUID
   registrationDataImport: RegistrationDataImportDatahubNode
+  koboimportdata: KoboImportDataNode
+  xlsxValidationErrors: [XlsxRowErrorNode]
 }
 
 enum ImportDataStatus {
@@ -1962,6 +1964,26 @@ type KoboErrorNode {
   message: String
 }
 
+type KoboImportDataNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  status: ImportDataStatus!
+  businessAreaSlug: String!
+  file: String
+  dataType: ImportDataDataType!
+  numberOfHouseholds: Int
+  numberOfIndividuals: Int
+  error: String!
+  validationErrors: String!
+  createdById: UUID
+  importdataPtr: ImportDataNode!
+  koboAssetId: String!
+  onlyActiveSubmissions: Boolean!
+  koboValidationErrors: [KoboErrorNode]
+  importData: ImportDataNode
+}
+
 type LabelNode {
   language: String
   label: String
@@ -2035,12 +2057,11 @@ type Mutations {
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
-  uploadImportDataXlsxFile(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFile
+  uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
-  saveKoboImportData(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataMutation
-  saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsyncMutation
+  saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsync
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
   refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
@@ -2380,6 +2401,7 @@ type Query {
   importedIndividual(id: ID!): ImportedIndividualNode
   allImportedIndividuals(before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): ImportedIndividualNodeConnection
   importData(id: ID!): ImportDataNode
+  koboImportData(id: ID!): KoboImportDataNode
   deduplicationBatchStatusChoices: [ChoiceObject]
   deduplicationGoldenRecordStatusChoices: [ChoiceObject]
   registrationDataImport(id: ID!): RegistrationDataImportNode
@@ -2788,13 +2810,8 @@ type SanctionListIndividualNodeEdge {
   cursor: String!
 }
 
-type SaveKoboProjectImportDataAsyncMutation {
-  importData: ImportDataNode
-}
-
-type SaveKoboProjectImportDataMutation {
-  importData: ImportDataNode
-  errors: [KoboErrorNode]
+type SaveKoboProjectImportDataAsync {
+  importData: KoboImportDataNode
 }
 
 type SectionTotalNode {
@@ -3410,7 +3427,7 @@ type UpdateTargetPopulationMutation {
 
 scalar Upload
 
-type UploadImportDataXLSXFile {
+type UploadImportDataXLSXFileAsync {
   importData: ImportDataNode
   errors: [XlsxRowErrorNode]
 }
