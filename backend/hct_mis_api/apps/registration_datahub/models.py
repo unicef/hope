@@ -309,7 +309,7 @@ class ImportData(TimeStampedUUIDModel):
         (STATUS_RUNNING, _("Running")),
         (STATUS_FINISHED, _("Finished")),
         (STATUS_ERROR, _("Error")),
-        (STATUS_VALIDATION_ERROR, _("Validation Error"))
+        (STATUS_VALIDATION_ERROR, _("Validation Error")),
     )
     status = models.CharField(max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES)
     business_area_slug = models.CharField(max_length=200, blank=True)
@@ -325,6 +325,8 @@ class ImportData(TimeStampedUUIDModel):
 class KoboImportData(ImportData):
     kobo_asset_id = models.CharField(max_length=100)
     only_active_submissions = models.BooleanField(default=True)
+
+
 
 
 class DocumentValidator(TimeStampedUUIDModel):
