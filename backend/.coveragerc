@@ -1,0 +1,6 @@
+[run]
+omit =
+	# omit all the migrations
+	*migrations*
+	# omit all the t snapshots
+	*snapshots*
