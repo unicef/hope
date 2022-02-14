@@ -13,7 +13,7 @@ import { LabelizedField } from '../../core/LabelizedField';
 import {
   BigValue,
   BigValueContainer,
-} from '../../rdi/details/RegistrationDetails';
+} from '../../rdi/details/RegistrationDetails/RegistrationDetails';
 
 const Container = styled.div`
   display: flex;
