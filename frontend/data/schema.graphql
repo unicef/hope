@@ -269,6 +269,7 @@ type CashPlanPaymentVerificationNode implements Node {
   sexFilter: String
   activationDate: DateTime
   completionDate: DateTime
+  unicefId: String!
   paymentRecordVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
