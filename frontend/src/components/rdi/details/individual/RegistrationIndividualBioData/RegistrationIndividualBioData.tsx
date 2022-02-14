@@ -2,11 +2,6 @@ import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContentLink } from '../../../../core/ContentLink';
-import { LabelizedField } from '../../../../core/LabelizedField';
-import { LoadingComponent } from '../../../../core/LoadingComponent';
-import { UniversalMoment } from '../../../../core/UniversalMoment';
-import { useBusinessArea } from '../../../../../hooks/useBusinessArea';
 import {
   choicesToDict,
   decodeIdString,
@@ -18,6 +13,9 @@ import {
   HouseholdChoiceDataQuery,
   ImportedIndividualDetailedFragment,
 } from '../../../../../__generated__/graphql';
+import { ContentLink } from '../../../../core/ContentLink';
+import { LabelizedField } from '../../../../core/LabelizedField';
+import { UniversalMoment } from '../../../../core/UniversalMoment';
 import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 
 const Overview = styled(Paper)`
@@ -61,7 +59,7 @@ export function RegistrationIndividualBioData({
   );
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
-    <Grid item xs={3}>
+    <Grid key={edge.node.id} item xs={3}>
       <Box flexDirection='column'>
         <Box mb={1}>
           <LabelizedField label={edge.node.type.label}>
@@ -82,7 +80,7 @@ export function RegistrationIndividualBioData({
   ));
 
   const mappedIdentities = individual.identities?.edges?.map((item) => (
-    <Grid item xs={3}>
+    <Grid key={item.node.id} item xs={3}>
       <Box flexDirection='column'>
         <Box mb={1}>
           <LabelizedField label={`${item.node.type} ID`}>
