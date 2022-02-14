@@ -1,0 +1,1 @@
+export { RegistrationDetails } from './RegistrationDetails';
