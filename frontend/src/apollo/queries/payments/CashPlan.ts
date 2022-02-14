@@ -30,6 +30,7 @@ export const CashPlan = gql`
         edges {
           node {
             id
+            unicefId
             status
             sampleSize
             receivedCount

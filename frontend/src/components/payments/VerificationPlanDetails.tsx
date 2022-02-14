@@ -103,7 +103,9 @@ export const VerificationPlanDetails = ({
     <Container>
       <Box display='flex' justifyContent='space-between'>
         <Title>
-          <Typography variant='h6'>{t('Verification Plan Details')}</Typography>
+          <Typography variant='h6'>
+            {t('Verification Plan')} #{verificationPlan.unicefId}
+          </Typography>
         </Title>
         <Box display='flex' alignItems='center'>
           {canEditAndActivateAndDelete && (
