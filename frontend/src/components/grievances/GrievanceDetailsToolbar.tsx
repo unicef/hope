@@ -267,25 +267,6 @@ export const GrievanceDetailsToolbar = ({
       />
     );
   }
-  if (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD) {
-    const householdIndividualsRoles = ticket.household.individuals.edges.map(
-      (edge) => edge.node.role,
-    );
-    const householdHasAlternateCollector = householdIndividualsRoles.includes(
-      'ALTERNATE',
-    );
-    if (householdHasAlternateCollector) {
-      closeButton = (
-        <ButtonDialog
-          title={t('Alternate Collector Issue')}
-          buttonText={t('Close Ticket')}
-          message={t(
-            'One of the Household members is an alternate collector. This household cannot be withdrawn.',
-          )}
-        />
-      );
-    }
-  }
 
   return (
     <PageHeader
