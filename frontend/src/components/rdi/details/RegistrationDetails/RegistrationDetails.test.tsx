@@ -3,7 +3,7 @@ import { fakeRegistrationDetailedFragment } from '../../../../../fixtures/regist
 import { render } from '../../../../testUtils/testUtils';
 import { RegistrationDetails } from './RegistrationDetails';
 
-describe('components/rdi/RegistrationDetails', () => {
+describe('components/rdi/details/RegistrationDetails', () => {
   it('should render', () => {
     const { container } = render(
       <RegistrationDetails registration={fakeRegistrationDetailedFragment} />,

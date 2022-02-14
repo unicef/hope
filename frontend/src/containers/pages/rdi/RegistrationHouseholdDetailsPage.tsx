@@ -9,16 +9,13 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import {
-  decodeIdString,
-  isPermissionDeniedError,
-} from '../../../utils/utils';
+import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
   useHouseholdChoiceDataQuery,
   useImportedHouseholdQuery,
 } from '../../../__generated__/graphql';
 import { HouseholdImportedIndividualsTable } from '../../tables/rdi/HouseholdIndividualsTable';
-import { HouseholdDetails } from '../../../components/rdi/details/households/HouseholdDetails';
+import { HouseholdDetails } from '../../../components/rdi/details/households/HouseholdDetails/HouseholdDetails';
 import { RegistrationDetails } from '../../../components/rdi/details/households/RegistrationDetails';
 
 const Container = styled.div`
@@ -73,6 +70,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         breadCrumbs={breadCrumbsItems}
       />
       <HouseholdDetails
+        businessArea={businessArea}
         choicesData={choicesData}
         household={importedHousehold}
       />
