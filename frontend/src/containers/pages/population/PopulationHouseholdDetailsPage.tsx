@@ -23,7 +23,7 @@ import {
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../../__generated__/graphql';
-import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable';
+import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable';
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordHouseholdTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
@@ -133,9 +133,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
         household={household as HouseholdNode}
         businessArea={businessArea}
       />
-      <HouseholdCompositionTable
-        household={household as HouseholdDetailedFragment}
-      />
+      <HouseholdCompositionTable household={household as HouseholdNode} />
       <Container>
         <HouseholdIndividualsTable
           choicesData={choicesData}
