@@ -56,7 +56,7 @@ from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 logger = logging.getLogger(__name__)
 
 
-class CreateCashPlanPaymentVerificationMutation(PermissionMutation):
+class CreatePaymentVerificationMutation(PermissionMutation):
     cash_plan = graphene.Field(CashPlanNode)
 
     class Arguments:
@@ -676,7 +676,7 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
 
 
 class Mutations(graphene.ObjectType):
-    create_cash_plan_payment_verification = CreateCashPlanPaymentVerificationMutation.Field()
+    create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
     edit_cash_plan_payment_verification = EditPaymentVerificationMutation.Field()
     import_xlsx_cash_plan_verification = ImportXlsxCashPlanVerification.Field()
     activate_cash_plan_payment_verification = ActivateCashPlanVerificationMutation.Field()
