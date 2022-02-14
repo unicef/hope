@@ -13,11 +13,12 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
   ImportedIndividualNode,
+  useAllIndividualsFlexFieldsAttributesQuery,
   useHouseholdChoiceDataQuery,
   useImportedIndividualQuery,
 } from '../../../__generated__/graphql';
 import { RegistrationIndividualBioData } from '../../../components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
-import { RegistrationIndividualVulnerabilities } from '../../../components/rdi/details/individual/RegistrationIndividualVulnerabilities';
+import { RegistrationIndividualVulnerabilities } from '../../../components/rdi/details/individual/RegistrationIndividualVulnerabilities/RegistrationIndividualVulnerabilities';
 
 const Container = styled.div`
   padding: 20px;
@@ -33,6 +34,10 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const {
+    data: flexFieldsData,
+    loading: flexFieldsDataLoading,
+  } = useAllIndividualsFlexFieldsAttributesQuery();
   const { data, loading, error } = useImportedIndividualQuery({
     variables: {
       id,
@@ -43,9 +48,11 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading || choicesLoading || flexFieldsDataLoading)
+    return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || permissions === null) return null;
+  if (!data || !choicesData || !flexFieldsData || permissions === null)
+    return null;
 
   const { importedIndividual } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -94,6 +101,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
         />
         <RegistrationIndividualVulnerabilities
           individual={importedIndividual}
+          flexFieldsData={flexFieldsData}
         />
       </Container>
     </div>

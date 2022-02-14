@@ -149,6 +149,7 @@
     "apollo": "^2.16.0",
     "eslint": ">=6.6.0 <7",
     "graphql-codegen-compiler": "^0.13.0",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "string.prototype.replaceall": "^1.0.6"
   }
 }
