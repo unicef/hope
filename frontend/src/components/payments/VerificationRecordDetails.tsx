@@ -13,12 +13,9 @@ import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
 import { UniversalMoment } from '../core/UniversalMoment';
-import { useBusinessArea } from "../../hooks/useBusinessArea";
-import { BlackLink } from "../core/BlackLink";
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { BlackLink } from '../core/BlackLink';
+import { Title } from '../core/Title';
 
 const Overview = styled(Paper)`
   margin: 20px;

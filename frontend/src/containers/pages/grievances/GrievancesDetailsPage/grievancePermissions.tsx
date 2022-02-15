@@ -2,9 +2,9 @@ import {
   hasCreatorOrOwnerPermissions,
   PERMISSIONS,
   hasPermissions,
-} from '../../../config/permissions';
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
-import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
+} from '../../../../config/permissions';
+import { GRIEVANCE_CATEGORIES } from '../../../../utils/constants';
+import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
 
 export const grievancePermissions = (
   isCreator: boolean,

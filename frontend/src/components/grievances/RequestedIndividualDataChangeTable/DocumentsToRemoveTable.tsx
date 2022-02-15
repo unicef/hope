@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { TableTitle } from '../../core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
@@ -21,10 +22,6 @@ const GreenIcon = styled.div`
 `;
 const StyledTable = styled(Table)`
   min-width: 100px;
-`;
-const Title = styled.div`
-  padding-top: ${({ theme }) => theme.spacing(4)}px;
-  padding-bottom: ${({ theme }) => theme.spacing(2)}px;
 `;
 
 export interface DocumentsToRemoveTableProps {
@@ -69,11 +66,11 @@ export const DocumentsToRemoveTable = ({
 
   return (
     <>
-      <Title>
+      <TableTitle>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>{t('Documents to be removed')}</Typography>
         </Box>
-      </Title>
+      </TableTitle>
       <StyledTable>
         {documentsTableHead}
         <TableBody>
