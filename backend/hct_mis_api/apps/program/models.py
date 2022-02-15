@@ -261,5 +261,14 @@ class CashPlan(TimeStampedUUIDModel):
         payment_record = self.payment_records.first()
         return payment_record.currency if payment_record else None
 
+    @property
+    def can_create_payment_verification_plan(self):
+        return self.available_payment_records().count() > 0
+
+    def available_payment_records(self):
+        return self.payment_records.filter(
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0, is_included=False
+        )
+
     class Meta:
         verbose_name = "Cash Plan"
