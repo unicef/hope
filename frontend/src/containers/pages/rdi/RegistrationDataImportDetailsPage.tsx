@@ -1,12 +1,14 @@
 import { Paper, Tab } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
-import Typography from '@material-ui/core/Typography';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { Title } from '../../../components/core/Title';
+import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
+import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -14,8 +16,6 @@ import { isPermissionDeniedError } from '../../../utils/utils';
 import { useRegistrationDataImportQuery } from '../../../__generated__/graphql';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
-import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
-import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
 
 const Container = styled.div`
   && {
@@ -37,9 +37,7 @@ const TabsContainer = styled.div`
 const TableWrapper = styled.div`
   padding: ${({ theme }) => theme.spacing(4)}px;
 `;
-const Title = styled(Typography)`
-  padding: ${({ theme }) => theme.spacing(6)}px;
-`;
+
 interface TabPanelProps {
   children: React.ReactNode;
   index: number;

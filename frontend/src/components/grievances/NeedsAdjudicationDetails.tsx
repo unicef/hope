@@ -23,6 +23,7 @@ import {
 } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
 import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 
 const StyledBox = styled(Paper)`
@@ -35,10 +36,6 @@ const StyledTable = styled(Table)`
   && {
     min-width: 100px;
   }
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 export function NeedsAdjudicationDetails({
@@ -78,7 +75,7 @@ export function NeedsAdjudicationDetails({
 
   const getSimilarity = (records, individualId): number => {
     return records?.find(findRecord(individualId))?.score;
-  }
+  };
 
   const getGoldenRecordSimilarity = (): number | string => {
     const { extraData, goldenRecordsIndividual, possibleDuplicate } = details;
@@ -230,9 +227,7 @@ export function NeedsAdjudicationDetails({
                 {details.goldenRecordsIndividual?.birthDate}
               </UniversalMoment>
             </TableCell>
-            <TableCell align='left'>
-              {getGoldenRecordSimilarity()}
-            </TableCell>
+            <TableCell align='left'>{getGoldenRecordSimilarity()}</TableCell>
             <TableCell align='left'>
               <UniversalMoment>
                 {details.goldenRecordsIndividual?.lastRegistrationDate}

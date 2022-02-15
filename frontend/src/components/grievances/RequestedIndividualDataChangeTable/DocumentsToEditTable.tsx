@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+import { TableTitle } from '../../core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
@@ -26,11 +27,6 @@ const GreyText = styled.div`
 
 const StyledTable = styled(Table)`
   min-width: 100px;
-`;
-
-const Title = styled.div`
-  padding-top: ${({ theme }) => theme.spacing(4)}px;
-  padding-bottom: ${({ theme }) => theme.spacing(2)}px;
 `;
 
 export interface DocumentsToEditTableProps {
@@ -82,11 +78,11 @@ export const DocumentsToEditTable = ({
 
   return (
     <div key={document.previous_value.number}>
-      <Title>
+      <TableTitle>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>{t('Document to be edited')}</Typography>
         </Box>
-      </Title>
+      </TableTitle>
       <StyledTable>
         <TableHead>
           <TableRow>
