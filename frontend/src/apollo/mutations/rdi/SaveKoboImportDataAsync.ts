@@ -1,14 +1,14 @@
 import { gql } from 'apollo-boost';
 
-export const SAVE_KOBO_IMPORT_DATA = gql`
+export const SAVE_KOBO_IMPORT_DATA_ASYNC = gql`
   mutation SaveKoboImportDataAsync(
     $businessAreaSlug: String!
-    $projectId: Upload!
+    $koboAssetId: Upload!
     $onlyActiveSubmissions: Boolean!
   ) {
     saveKoboImportDataAsync(
       businessAreaSlug: $businessAreaSlug
-      uid: $projectId
+      uid: $koboAssetId
       onlyActiveSubmissions: $onlyActiveSubmissions
     ) {
       importData {

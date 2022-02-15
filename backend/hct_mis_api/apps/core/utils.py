@@ -63,9 +63,7 @@ def encode_id_base64(id_string, model_name):
     return b64encode(f"{model_name}Node:{str(id_string)}".encode()).decode()
 
 
-def unique_slugify(
-    instance, value, slug_field_name="slug", queryset=None, slug_separator="-"
-):
+def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-"):
     """
     Calculates and stores a unique slug of ``value`` for an instance.
 
@@ -134,7 +132,8 @@ def _slug_strip(value, separator="-"):
     if separator:
         if separator != "-":
             re_sep = re.escape(separator)
-        value = re.sub(fr"^{re_sep}+|{re_sep}+$", "", value)
+
+        value = re.sub(r"^{}+|{}+$".format(re_sep, re_sep), "", value)
     return value
 
 
@@ -303,9 +302,7 @@ def to_dict(instance, fields=None, dict_fields=None):
     for field in fields:
         main_field = getattr(instance, field, "__NOT_EXIST__")
         if main_field != "__NOT_EXIST__":
-            data[field] = (
-                main_field if issubclass(type(main_field), Model) else main_field
-            )
+            data[field] = main_field if issubclass(type(main_field), Model) else main_field
 
     if dict_fields and isinstance(dict_fields, dict):
         for main_field_key, nested_fields in dict_fields.items():
@@ -391,9 +388,7 @@ class CustomOrderingFilter(OrderingFilter):
             return OrderedDict(fields)
 
         # convert iterable of values => iterable of pairs (field name, param name)
-        assert is_iterable(
-            fields
-        ), "'fields' must be an iterable (e.g., a list, tuple, or mapping)."
+        assert is_iterable(fields), "'fields' must be an iterable (e.g., a list, tuple, or mapping)."
 
         # fields is an iterable of field names
         assert all(
@@ -413,9 +408,7 @@ class CustomOrderingFilter(OrderingFilter):
             new_fields.append(field_name)
             self.lower_dict[field_name] = field
 
-        return OrderedDict(
-            [(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields]
-        )
+        return OrderedDict([(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields])
 
 
 def is_valid_uuid(uuid_str):
@@ -463,9 +456,7 @@ def check_concurrency_version_in_mutation(version, target):
     from graphql import GraphQLError
 
     if version != target.version:
-        logger.error(
-            f"Someone has modified this {target} record, versions {version} != {target.version}"
-        )
+        logger.error(f"Someone has modified this {target} record, versions {version} != {target.version}")
         raise GraphQLError("Someone has modified this record")
 
 
@@ -493,13 +484,10 @@ def update_labels_mapping(csv_file):
     labels_mapping = {
         core_field_data["xlsx_field"]: {
             "old": core_field_data["label"],
-            "new": {
-                "English(EN)": fields_mapping.get(core_field_data["xlsx_field"], "")
-            },
+            "new": {"English(EN)": fields_mapping.get(core_field_data["xlsx_field"], "")},
         }
         for core_field_data in CORE_FIELDS_ATTRIBUTES
-        if core_field_data["label"].get("English(EN)", "")
-        != fields_mapping.get(core_field_data["xlsx_field"], "")
+        if core_field_data["label"].get("English(EN)", "") != fields_mapping.get(core_field_data["xlsx_field"], "")
     }
 
     file_path = f"{settings.PROJECT_ROOT}/apps/core/core_fields_attributes.py"
@@ -565,14 +553,9 @@ def chart_get_filtered_qs(
         year_filter = {"created_at__year": year}
     else:
         year_filter = {f"{year_filter_path}__year": year}
-    if (
-        business_area_slug_filter is None
-        or "global" in business_area_slug_filter.values()
-    ):
+    if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
-    return obj.objects.filter(
-        **year_filter, **business_area_slug_filter, **additional_filters
-    )
+    return obj.objects.filter(**year_filter, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse):
@@ -601,10 +584,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
         if resolve_info.context.user.is_authenticated:
             business_area_slug = kwargs.get("business_area_slug", "global")
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
-            if any(
-                resolve_info.context.user.has_permission(per.name, business_area)
-                for per in permissions
-            ):
+            if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
             logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
@@ -613,14 +593,10 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
 
 
 def chart_filters_decoder(filters):
-    return {
-        filter_name: decode_id_string(value) for filter_name, value in filters.items()
-    }
+    return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
-def chart_create_filter_query(
-    filters, program_id_path="id", administrative_area_path="admin_areas"
-):
+def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
     filter_query = {}
     if filters.get("program") is not None:
         filter_query.update({program_id_path: filters.get("program")})
@@ -667,9 +643,7 @@ def resolve_flex_fields_choices_to_string(parent):
 
         if flex_field in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
             if isinstance(value, list):
-                new_value = [
-                    str(current_choice_value) for current_choice_value in value
-                ]
+                new_value = [str(current_choice_value) for current_choice_value in value]
             else:
                 new_value = str(value)
             flex_fields_with_str_choices[flex_field_name] = new_value
@@ -698,10 +672,7 @@ class SheetImageLoader:
         col_holder = list(
             itertools.chain(
                 string.ascii_uppercase,
-                (
-                    "".join(pair)
-                    for pair in itertools.product(string.ascii_uppercase, repeat=2)
-                ),
+                ("".join(pair) for pair in itertools.product(string.ascii_uppercase, repeat=2)),
             )
         )
         """Loads all sheet images"""
@@ -739,15 +710,9 @@ def fix_flex_type_fields(items, flex_fields):
 def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
     excluded_ids_array = excluded_ids_string.split(",")
     excluded_ids_array = [excluded_id.strip() for excluded_id in excluded_ids_array]
-    excluded_household_ids_array = [
-        excluded_id
-        for excluded_id in excluded_ids_array
-        if excluded_id.startswith("HH")
-    ]
+    excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]
     excluded_individuals_ids_array = [
-        excluded_id
-        for excluded_id in excluded_ids_array
-        if excluded_id.startswith("IND")
+        excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("IND")
     ]
     from hct_mis_api.apps.household.models import Household
 

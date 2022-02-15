@@ -653,7 +653,9 @@ class Query(graphene.ObjectType):
 
     def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(
-            total_cash=Coalesce(Sum("payment_records__delivered_quantity"), 0, output_field=IntegerField())
+            total_cash=Coalesce(
+                Sum("payment_records__delivered_quantity", output_field=DecimalField()), 0, output_field=IntegerField()
+            )
         ).order_by("created_at")
 
     def resolve_residence_status_choices(self, info, **kwargs):

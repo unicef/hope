@@ -10,12 +10,12 @@ snapshots['TestProgramChoices::test_program_frequency_of_payments_choices 1'] = 
     'data': {
         'programFrequencyOfPaymentsChoices': [
             {
-                'name': 'Regular',
-                'value': 'REGULAR'
-            },
-            {
                 'name': 'One-off',
                 'value': 'ONE_OFF'
+            },
+            {
+                'name': 'Regular',
+                'value': 'REGULAR'
             }
         ]
     }
@@ -75,12 +75,12 @@ snapshots['TestProgramChoices::test_status_choices_query 1'] = {
     'data': {
         'programStatusChoices': [
             {
-                'name': 'Draft',
-                'value': 'DRAFT'
-            },
-            {
                 'name': 'Active',
                 'value': 'ACTIVE'
+            },
+            {
+                'name': 'Draft',
+                'value': 'DRAFT'
             },
             {
                 'name': 'Finished',

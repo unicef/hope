@@ -35,11 +35,11 @@ INVITED = "INVITED"
 ACTIVE = "ACTIVE"
 INACTIVE = "INACTIVE"
 USER_STATUS_CHOICES = (
-    (INVITED, _("Invited")),
     (ACTIVE, _("Active")),
     (INACTIVE, _("Inactive")),
+    (INVITED, _("Invited")),
 )
-USER_PARTNER_CHOICES = Choices("UNHCR", "WFP", "UNICEF")
+USER_PARTNER_CHOICES = Choices("UNICEF", "UNHCR", "WFP")
 
 
 class Partner(models.Model):
@@ -55,13 +55,9 @@ class Partner(models.Model):
 
 
 class User(AbstractUser, UUIDModel):
-    status = models.CharField(
-        choices=USER_STATUS_CHOICES, max_length=10, default=INVITED
-    )
+    status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
-    partner = models.ForeignKey(
-        Partner, on_delete=models.PROTECT, null=True, blank=True
-    )
+    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
     email = models.EmailField(_("email address"), blank=True, unique=True)
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
@@ -69,9 +65,7 @@ class User(AbstractUser, UUIDModel):
     custom_fields = JSONField(default=dict, blank=True)
 
     job_title = models.CharField(max_length=255, blank=True)
-    ad_uuid = models.CharField(
-        max_length=64, unique=True, null=True, blank=True, editable=False
-    )
+    ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     # CashAssist DOAP fields
     last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
@@ -104,9 +98,7 @@ class User(AbstractUser, UUIDModel):
             ).values_list("permissions", flat=True)
         )
         return [
-            permission
-            for roles_permissions in all_roles_permissions_list
-            for permission in roles_permissions or []
+            permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
         ]
 
     def has_permission(self, permission, business_area, write=False):
@@ -140,15 +132,9 @@ class ChoiceArrayField(ArrayField):
 
 
 class UserRole(TimeStampedUUIDModel):
-    business_area = models.ForeignKey(
-        "core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE
-    )
-    user = models.ForeignKey(
-        "account.User", related_name="user_roles", on_delete=models.CASCADE
-    )
-    role = models.ForeignKey(
-        "account.Role", related_name="user_roles", on_delete=models.CASCADE
-    )
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
+    user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
+    role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("business_area", "user", "role")
@@ -225,22 +211,14 @@ def post_save_user(sender, instance, created, *args, **kwargs):
     business_area = BusinessArea.objects.filter(slug="global").first()
     role = Role.objects.filter(name="Basic User").first()
     if business_area and role:
-        UserRole.objects.get_or_create(
-            business_area=business_area, user=instance, role=role
-        )
+        UserRole.objects.get_or_create(business_area=business_area, user=instance, role=role)
 
 
 class IncompatibleRolesManager(models.Manager):
     def validate_user_role(self, user, business_area, role):
         incompatible_roles = list(
-            IncompatibleRoles.objects.filter(role_one=role).values_list(
-                "role_two", flat=True
-            )
-        ) + list(
-            IncompatibleRoles.objects.filter(role_two=role).values_list(
-                "role_one", flat=True
-            )
-        )
+            IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+        ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
         incompatible_userroles = UserRole.objects.filter(
             business_area=business_area,
             role__id__in=incompatible_roles,
@@ -264,12 +242,8 @@ class IncompatibleRoles(TimeStampedUUIDModel):
     user cannot be assigned both of the roles in the same business area at the same time
     """
 
-    role_one = models.ForeignKey(
-        "account.Role", related_name="incompatible_roles_one", on_delete=models.CASCADE
-    )
-    role_two = models.ForeignKey(
-        "account.Role", related_name="incompatible_roles_two", on_delete=models.CASCADE
-    )
+    role_one = models.ForeignKey("account.Role", related_name="incompatible_roles_one", on_delete=models.CASCADE)
+    role_two = models.ForeignKey("account.Role", related_name="incompatible_roles_two", on_delete=models.CASCADE)
 
     objects = IncompatibleRolesManager()
 
@@ -316,12 +290,8 @@ class IncompatibleRoles(TimeStampedUUIDModel):
         super().validate_unique(*args, **kwargs)
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
-        if IncompatibleRoles.objects.filter(
-            role_one=self.role_two, role_two=self.role_one
-        ).exists():
+        if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():
             logger.error(
                 f"This combination of roles ({self.role_one}, {self.role_two}) already exists as incompatible pair."
             )
-            raise ValidationError(
-                _("This combination of roles already exists as incompatible pair.")
-            )
+            raise ValidationError(_("This combination of roles already exists as incompatible pair."))
