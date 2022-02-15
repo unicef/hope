@@ -10,15 +10,12 @@ import {
   HouseholdChoiceDataQuery,
   ImportedHouseholdDetailedFragment,
 } from '../../../../../__generated__/graphql';
+import { Title } from '../../../../core/Title';
 
 const Overview = styled.div`
   display: flex;
   flex-direction: row;
   width: 100%;
-`;
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 interface HouseholdDetailsProps {

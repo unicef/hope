@@ -10,6 +10,7 @@ import {
 } from '../../../__generated__/graphql';
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
+import { Title } from '../../core/Title';
 import {
   BigValue,
   BigValueContainer,
@@ -42,10 +43,7 @@ const OverviewPaper = styled(Paper)`
   margin: 20px 20px 0 20px;
   padding: 20px ${({ theme }) => theme.spacing(11)}px;
 `;
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
+
 const Label = styled.span`
   ${({ theme }: { theme: MiśTheme }) => theme.styledMixins.label}
 `;

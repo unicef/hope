@@ -7,25 +7,25 @@ import styled from 'styled-components';
 import {
   hasCreatorOrOwnerPermissions,
   PERMISSIONS,
-} from '../../config/permissions';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { usePermissions } from '../../hooks/usePermissions';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
+} from '../../../config/permissions';
+import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { useSnackbar } from '../../../hooks/useSnackBar';
+import { FormikAdminAreaAutocomplete } from '../../../shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
+import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
+} from '../../../utils/constants';
 import {
   isInvalid,
   isPermissionDeniedError,
   renderUserName,
   thingForSpecificGrievanceType,
-} from '../../utils/utils';
+} from '../../../utils/utils';
 import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
@@ -36,23 +36,23 @@ import {
   useGrievanceTicketStatusChangeMutation,
   useMeQuery,
   useUpdateGrievanceMutation,
-} from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { PageHeader } from '../core/PageHeader';
-import { PermissionDenied } from '../core/PermissionDenied';
-import { Consent } from './Consent';
-import { LookUpSection } from './LookUpSection';
-import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
+} from '../../../__generated__/graphql';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { Consent } from '../../../components/grievances/Consent';
+import { LookUpSection } from '../../../components/grievances/LookUpSection';
+import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
 import {
   dataChangeComponentDict,
   EmptyComponent,
   prepareInitialValues,
   prepareVariables,
-} from './utils/editGrievanceUtils';
-import { validate } from './utils/validateGrievance';
-import { validationSchema } from './utils/validationSchema';
+} from '../../../components/grievances/utils/editGrievanceUtils';
+import { validate } from '../../../components/grievances/utils/validateGrievance';
+import { validationSchema } from '../../../components/grievances/utils/validationSchema';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
