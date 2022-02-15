@@ -353,14 +353,14 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-admin-extra-urls"
-version = "3.5.1"
+version = "4.1.1"
 description = "Django mixin to easily add urls to any ModelAdmin"
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.extras]
-dev = ["autopep8", "check-manifest", "django", "flake8", "pep8", "readme", "sphinx", "wheel", "coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox (>=2.3)", "wheel"]
+dev = ["autopep8", "check-manifest", "django", "flake8", "pep8", "readme", "sphinx", "wheel", "isort"]
 test = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox (>=2.3)", "wheel"]
 
 [[package]]
@@ -432,6 +432,7 @@ python-dateutil = "2.6.0"
 [package.source]
 type = "url"
 url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip"
+
 [[package]]
 name = "django-celery-beat"
 version = "2.2.1"
@@ -1939,7 +1940,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "bf76de93961d2419c81fdff9b3641e10d3d3004ec9695d6728efce380f476ddf"
+content-hash = "e4b445ea7029137b305d6fd608e5df5795b026493b54d1ae10ea5edf9f57c3a4"
 
 [metadata.files]
 amqp = [
@@ -2120,7 +2121,7 @@ django = [
     {file = "Django-2.2.26.tar.gz", hash = "sha256:dfa537267d52c6243a62b32855a744ca83c37c70600aacffbfd98bc5d6d8518f"},
 ]
 django-admin-extra-urls = [
-    {file = "django-admin-extra-urls-3.5.1.tar.gz", hash = "sha256:fc68efd40569f2301cb329a0c445dd3517b0aa9c03c1ab7d9fc8a006d22de9b8"},
+    {file = "django-admin-extra-urls-4.1.1.tar.gz", hash = "sha256:b896eebc24779081f5bb5015c41fb12a741c61d520eec88688749e4991f7cbf5"},
 ]
 django-adminactions = [
     {file = "django-adminactions-1.14.0.tar.gz", hash = "sha256:78d77cb795070726ec1aa157dad67cf2f78f920f0f6a99fccb2ec61de3142501"},
