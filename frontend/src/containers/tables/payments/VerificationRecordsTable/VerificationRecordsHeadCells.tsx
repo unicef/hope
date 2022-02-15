@@ -28,6 +28,12 @@ export const headCells: HeadCell<PaymentVerificationNode>[] = [
   },
   {
     disablePadding: false,
+    label: 'Household Status',
+    id: 'payment_record__household__status',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Delivered',
     id: 'payment_record__delivered_quantity',
     numeric: true,
