@@ -15,11 +15,8 @@ import {
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
+import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
 
 const Overview = styled(Paper)`
   margin: 20px;

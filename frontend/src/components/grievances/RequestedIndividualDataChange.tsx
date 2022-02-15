@@ -18,6 +18,7 @@ import {
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { Title } from '../core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
 
 const StyledBox = styled(Paper)`
@@ -25,10 +26,6 @@ const StyledBox = styled(Paper)`
   flex-direction: column;
   width: 100%;
   padding: 26px 22px;
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 export type RoleReassignData = {

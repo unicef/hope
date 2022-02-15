@@ -3,10 +3,10 @@
 exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-gzVnrw hIQLzs MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root sc-htoDjs beQuXv MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-htoDjs cguslC"
+      class="sc-htpNat hUqbZq"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"

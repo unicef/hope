@@ -35,6 +35,7 @@ import {
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
+import { Title } from '../../../components/core/Title';
 
 const Container = styled.div`
   display: flex;
@@ -47,10 +48,6 @@ const Container = styled.div`
   border-color: #b1b1b5;
   border-bottom-width: 1px;
   border-bottom-style: solid;
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 const ChartContainer = styled.div`
