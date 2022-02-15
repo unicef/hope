@@ -4,14 +4,13 @@ import Paper from '@material-ui/core/Paper';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { useArrayToDict } from '../../../../hooks/useArrayToDict';
+import { useArrayToDict } from '../../../../../hooks/useArrayToDict';
 import {
+  AllIndividualsFlexFieldsAttributesQuery,
   ImportedIndividualDetailedFragment,
-  useAllIndividualsFlexFieldsAttributesQuery,
-} from '../../../../__generated__/graphql';
-import { ImportedIndividualFlexFieldPhotoModal } from './ImportedIndividualFlexFieldPhotoModal';
+} from '../../../../../__generated__/graphql';
+import { LabelizedField } from '../../../../core/LabelizedField';
+import { ImportedIndividualFlexFieldPhotoModal } from '../ImportedIndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -27,27 +26,20 @@ const Title = styled.div`
 
 interface RegistrationIndividualVulnerabilitiesProps {
   individual: ImportedIndividualDetailedFragment;
+  flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
 }
 
 export function RegistrationIndividualVulnerabilities({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   individual,
+  flexFieldsData,
 }: RegistrationIndividualVulnerabilitiesProps): React.ReactElement {
   const { t } = useTranslation();
-  const { data, loading } = useAllIndividualsFlexFieldsAttributesQuery();
   const flexAttributesDict = useArrayToDict(
-    data?.allIndividualsFlexFieldsAttributes,
+    flexFieldsData?.allIndividualsFlexFieldsAttributes,
     'name',
     '*',
   );
-
-  if (loading) {
-    return <LoadingComponent />;
-  }
-
-  if (!data || !flexAttributesDict) {
-    return null;
-  }
 
   const getLabelOrDash = (choices, value): string =>
     choices.find((item) => item.value === value)?.labelEn || '-';

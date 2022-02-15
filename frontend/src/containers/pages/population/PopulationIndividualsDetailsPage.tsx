@@ -9,7 +9,7 @@ import { WarningTooltip } from '../../../components/core/WarningTooltip';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { IndividualsBioData } from '../../../components/population/IndividualBioData';
+import { IndividualBioData } from '../../../components/population/IndividualBioData/IndividualBioData';
 import { IndividualPhotoModal } from '../../../components/population/IndividualPhotoModal';
 import { IndividualVulnerabilities } from '../../../components/population/IndividualVunerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -18,6 +18,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
   IndividualNode,
+  useHouseholdChoiceDataQuery,
   useIndividualQuery,
 } from '../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
@@ -43,7 +44,12 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     },
   });
 
-  if (loading) return <LoadingComponent />;
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery();
+
+  if (loading || choicesLoading) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
@@ -106,7 +112,11 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
       </PageHeader>
 
       <Container>
-        <IndividualsBioData individual={individual as IndividualNode} />
+        <IndividualBioData
+          businessArea={businessArea}
+          individual={individual as IndividualNode}
+          choicesData={choicesData}
+        />
         <IndividualVulnerabilities individual={individual as IndividualNode} />
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTable objectId={individual.id} />

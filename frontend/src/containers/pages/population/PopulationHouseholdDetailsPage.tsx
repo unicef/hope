@@ -11,23 +11,23 @@ import { LabelizedField } from '../../../components/core/LabelizedField';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
-import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities';
+import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
-  HouseholdDetailedFragment,
   HouseholdNode,
+  useAllHouseholdsFlexFieldsAttributesQuery,
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../../__generated__/graphql';
-import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable';
+import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable';
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordHouseholdTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
 
 const Container = styled.div`
   padding: 20px;
@@ -71,15 +71,21 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     variables: { id },
   });
   const {
+    data: flexFieldsData,
+    loading: flexFieldsDataLoading,
+  } = useAllHouseholdsFlexFieldsAttributesQuery();
+  const {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading || choicesLoading || flexFieldsDataLoading)
+    return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || permissions === null) return null;
+  if (!data || !choicesData || !flexFieldsData || permissions === null)
+    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -131,10 +137,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}
+        businessArea={businessArea}
       />
-      <HouseholdCompositionTable
-        household={household as HouseholdDetailedFragment}
-      />
+      <HouseholdCompositionTable household={household as HouseholdNode} />
       <Container>
         <HouseholdIndividualsTable
           choicesData={choicesData}
@@ -155,7 +160,8 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           />
         )}
         <HouseholdVulnerabilities
-          household={household as HouseholdDetailedFragment}
+          household={household as HouseholdNode}
+          flexFieldsData={flexFieldsData}
         />
         <Overview>
           <Title>

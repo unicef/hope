@@ -2,16 +2,15 @@ import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { MiśTheme } from '../../theme';
-import { cashPlanStatusToColor } from '../../utils/utils';
-import { CashPlanNode } from '../../__generated__/graphql';
-import { ContainerWithBorder } from './ContainerWithBorder';
-import { ContentLink } from './ContentLink';
-import { LabelizedField } from './LabelizedField';
-import { OverviewContainer } from './OverviewContainer';
-import { StatusBox } from './StatusBox';
-import { UniversalMoment } from './UniversalMoment';
+import { MiśTheme } from '../../../theme';
+import { cashPlanStatusToColor } from '../../../utils/utils';
+import { CashPlanNode } from '../../../__generated__/graphql';
+import { ContainerWithBorder } from '../ContainerWithBorder';
+import { ContentLink } from '../ContentLink';
+import { LabelizedField } from '../LabelizedField';
+import { OverviewContainer } from '../OverviewContainer';
+import { StatusBox } from '../StatusBox';
+import { UniversalMoment } from '../UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -39,13 +38,13 @@ const Title = styled.div`
 
 interface CashPlanProps {
   cashPlan: CashPlanNode;
+  businessArea: string
 }
 
 export function CashPlanDetails({
-  cashPlan,
+  cashPlan, businessArea
 }: CashPlanProps): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
 
   const filteredTps = (): Array<{
     id: string;
