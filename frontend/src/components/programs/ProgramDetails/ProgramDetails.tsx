@@ -2,17 +2,17 @@ import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { MiśTheme } from '../../theme';
-import { choicesToDict, programStatusToColor } from '../../utils/utils';
+import { MiśTheme } from '../../../theme';
+import { choicesToDict, programStatusToColor } from '../../../utils/utils';
 import {
   ProgrammeChoiceDataQuery,
   ProgramNode,
-} from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../core/LabelizedField';
-import { OverviewContainer } from '../core/OverviewContainer';
-import { StatusBox } from '../core/StatusBox';
-import { UniversalMoment } from '../core/UniversalMoment';
+} from '../../../__generated__/graphql';
+import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
+import { LabelizedField } from '../../core/LabelizedField';
+import { OverviewContainer } from '../../core/OverviewContainer';
+import { StatusBox } from '../../core/StatusBox';
+import { UniversalMoment } from '../../core/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;

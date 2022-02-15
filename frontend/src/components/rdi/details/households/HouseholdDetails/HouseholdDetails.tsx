@@ -2,15 +2,14 @@ import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { ContentLink } from '../../../core/ContentLink';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { choicesToDict } from '../../../../utils/utils';
+import { ContainerColumnWithBorder } from '../../../../core/ContainerColumnWithBorder';
+import { ContentLink } from '../../../../core/ContentLink';
+import { LabelizedField } from '../../../../core/LabelizedField';
+import { choicesToDict } from '../../../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ImportedHouseholdDetailedFragment,
-} from '../../../../__generated__/graphql';
+} from '../../../../../__generated__/graphql';
 
 const Overview = styled.div`
   display: flex;
@@ -25,13 +24,14 @@ const Title = styled.div`
 interface HouseholdDetailsProps {
   household: ImportedHouseholdDetailedFragment;
   choicesData: HouseholdChoiceDataQuery;
+  businessArea: string;
 }
 export function HouseholdDetails({
   household,
   choicesData,
+  businessArea,
 }: HouseholdDetailsProps): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
 
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
