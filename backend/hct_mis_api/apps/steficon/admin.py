@@ -57,10 +57,7 @@ class AutocompleteWidget(forms.Widget):
 
     def get_url(self):
         model = self.model
-        return reverse(
-            self.url_name
-            % (self.admin_site.name, model._meta.app_label, model._meta.model_name)
-        )
+        return reverse(self.url_name % (self.admin_site.name, model._meta.app_label, model._meta.model_name))
 
     def get_context(self, name, value, attrs):
         context = {}
@@ -83,9 +80,7 @@ class AutocompleteWidget(forms.Widget):
     def media(self):
         extra = "" if settings.DEBUG else ".min"
         i18n_name = SELECT2_TRANSLATIONS.get(get_language())
-        i18n_file = (
-            ("admin/js/vendor/select2/i18n/%s.js" % i18n_name,) if i18n_name else ()
-        )
+        i18n_file = ("admin/js/vendor/select2/i18n/%s.js" % i18n_name,) if i18n_name else ()
         return forms.Media(
             js=(
                 "admin/js/vendor/jquery/jquery%s.js" % extra,
@@ -134,9 +129,7 @@ class TestRuleMixin:
                     title = f"Test result for '{rule}' using TargetPopulation '{tp}'"
                 elif selection == "optContentType":
                     ct: ContentType = form.cleaned_data["content_type"]
-                    filters = json.loads(
-                        form.cleaned_data.get("content_type_filters") or "{}"
-                    )
+                    filters = json.loads(form.cleaned_data.get("content_type_filters") or "{}")
                     qs = ct.model_class().objects.filter(**filters)
                     data = qs.all()
                     title = f"Test result for '{rule}' using ContentType '{ct}'"
@@ -168,18 +161,12 @@ class TestRuleMixin:
             else:
                 context["form"] = form
         else:
-            context["form"] = RuleTestForm(
-                initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"}
-            )
+            context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
         if "form" in context:
             from hct_mis_api.apps.targeting.models import TargetPopulation
 
-            context["form"].fields["target_population"].widget = AutocompleteWidget(
-                TargetPopulation, self.admin_site
-            )
-            context["form"].fields["content_type"].widget = AutocompleteWidget(
-                ContentType, self.admin_site
-            )
+            context["form"].fields["target_population"].widget = AutocompleteWidget(TargetPopulation, self.admin_site)
+            context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 
 
@@ -213,9 +200,7 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(
-    ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin
-):
+class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = (
         "name",
         "version",
@@ -337,9 +322,7 @@ class RuleAdmin(
                     csv_config = self._get_csv_config(form)
                     f = request.FILES["file"]
                     input = f.read().decode("utf-8")
-                    data = csv.DictReader(
-                        StringIO(input), fieldnames=None, **csv_config
-                    )
+                    data = csv.DictReader(StringIO(input), fieldnames=None, **csv_config)
                     context["fields"] = data.fieldnames
                     for attr in form.cleaned_data["results"]:
                         context["fields"].append(labelize(attr))
@@ -347,13 +330,9 @@ class RuleAdmin(
                     results = []
                     for entry in data:
                         try:
-                            result = rule.execute(
-                                entry, only_enabled=False, only_release=False
-                            )
+                            result = rule.execute(entry, only_enabled=False, only_release=False)
                             for attr in form.cleaned_data["results"]:
-                                entry[labelize(attr)] = getattr(
-                                    result, attr, "<ATTR NOT FOUND>"
-                                )
+                                entry[labelize(attr)] = getattr(result, attr, "<ATTR NOT FOUND>")
                         except Exception as e:
                             entry[info_col] = str(e)
                         results.append(entry)
@@ -383,14 +362,11 @@ class RuleAdmin(
                         response = HttpResponse(
                             content_type="text/csv",
                             headers={
-                                "Content-Disposition": 'attachment; filename="%s"'
-                                % form.cleaned_data["filename"]
+                                "Content-Disposition": 'attachment; filename="%s"' % form.cleaned_data["filename"]
                             },
                         )
 
-                        writer = csv.DictWriter(
-                            response, fieldnames=fields, **csv_config
-                        )
+                        writer = csv.DictWriter(response, fieldnames=fields, **csv_config)
                         writer.writeheader()
                         writer.writerows(data)
                         return response
@@ -401,15 +377,11 @@ class RuleAdmin(
         else:
             context["form"] = RuleFileProcessForm(initial={"results": "value"})
 
-        return TemplateResponse(
-            request, "admin/steficon/rule/file_process.html", context
-        )
+        return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
     @button(visible=lambda o, r: "/changelog/" not in r.path)
     def changelog(self, request, pk):
-        context = self.get_common_context(
-            request, pk, title="Changelog", state_opts=RuleCommit._meta
-        )
+        context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
 
     @button(
@@ -427,9 +399,7 @@ class RuleAdmin(
             state = self.object.history.get(pk=state)
             if request.method == "GET":
                 context["state"] = state
-                return TemplateResponse(
-                    request, "admin/steficon/rule/revert.html", context
-                )
+                return TemplateResponse(request, "admin/steficon/rule/revert.html", context)
             else:
                 with atomic():
                     if "_restore" in request.POST:
@@ -465,8 +435,7 @@ class RuleAdmin(
 
             context["state"] = state
             context["title"] = (
-                f"Change #{state.version} on "
-                f"{state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
+                f"Change #{state.version} on " f"{state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
             )
             return TemplateResponse(request, "admin/steficon/rule/diff.html", context)
         except Exception as e:
@@ -491,9 +460,7 @@ class RuleAdmin(
 
 
 class RuleCommitResource(ModelResource):
-    rule = fields.Field(
-        column_name="rule", attribute="rule", widget=ForeignKeyWidget(Rule, "name")
-    )
+    rule = fields.Field(column_name="rule", attribute="rule", widget=ForeignKeyWidget(Rule, "name"))
     updated_by = fields.Field(
         column_name="updated_by",
         attribute="created_by",
@@ -514,9 +481,7 @@ class RuleCommitResource(ModelResource):
 
 
 @register(RuleCommit)
-class RuleCommitAdmin(
-    ExtraUrlMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin
-):
+class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin):
     list_display = (
         "timestamp",
         "rule",

@@ -10,16 +10,15 @@ import { ImportedIndividualPhotoModal } from '../../../components/population/Imp
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import {
-  decodeIdString,
-  isPermissionDeniedError,
-} from '../../../utils/utils';
+import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
   ImportedIndividualNode,
+  useAllIndividualsFlexFieldsAttributesQuery,
+  useHouseholdChoiceDataQuery,
   useImportedIndividualQuery,
 } from '../../../__generated__/graphql';
-import { RegistrationIndividualsBioData } from '../../../components/rdi/details/individual/RegistrationIndividualBioData';
-import { RegistrationIndividualVulnerabilities } from '../../../components/rdi/details/individual/RegistrationIndividualVulnerabilities';
+import { RegistrationIndividualBioData } from '../../../components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
+import { RegistrationIndividualVulnerabilities } from '../../../components/rdi/details/individual/RegistrationIndividualVulnerabilities/RegistrationIndividualVulnerabilities';
 
 const Container = styled.div`
   padding: 20px;
@@ -35,15 +34,25 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const {
+    data: flexFieldsData,
+    loading: flexFieldsDataLoading,
+  } = useAllIndividualsFlexFieldsAttributesQuery();
   const { data, loading, error } = useImportedIndividualQuery({
     variables: {
       id,
     },
   });
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery();
 
-  if (loading) return <LoadingComponent />;
+  if (loading || choicesLoading || flexFieldsDataLoading)
+    return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || permissions === null) return null;
+  if (!data || !choicesData || !flexFieldsData || permissions === null)
+    return null;
 
   const { importedIndividual } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -85,9 +94,14 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
         ) : null}
       </PageHeader>
       <Container>
-        <RegistrationIndividualsBioData individual={importedIndividual} />
+        <RegistrationIndividualBioData
+          businessArea={businessArea}
+          individual={importedIndividual}
+          choicesData={choicesData}
+        />
         <RegistrationIndividualVulnerabilities
           individual={importedIndividual}
+          flexFieldsData={flexFieldsData}
         />
       </Container>
     </div>

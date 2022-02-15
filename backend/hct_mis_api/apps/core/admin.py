@@ -510,8 +510,8 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
     list_filter = (
         AdminLevelFilter,
         CountryFilter,
-        ("tree_id", TextFieldFilter.factory(title="Tree Id")),
-        ("external_id", TextFieldFilter.factory(title="External Id")),
+        ("tree_id", TextFieldFilter.factory(title="Tree Id", lookup="exact")),
+        ("external_id", TextFieldFilter.factory(title="External Id", lookup="exact")),
     )
 
     @button(permission=lambda r, __: r.user.is_superuser)

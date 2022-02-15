@@ -21,10 +21,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_NOT_DISTRIBUTED = "Not Distributed"
     ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS)
     STATUS_CHOICE = (
-        (STATUS_SUCCESS, _("Transaction Successful")),
-        (STATUS_ERROR, _("Transaction Erroneous")),
         (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),
         (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),
+        (STATUS_SUCCESS, _("Transaction Successful")),
+        (STATUS_ERROR, _("Transaction Erroneous")),
     )
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -214,18 +214,14 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (VERIFICATION_METHOD_XLSX, "XLSX"),
         (VERIFICATION_METHOD_MANUAL, "MANUAL"),
     )
-    status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True
-    )
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     cash_plan = models.ForeignKey(
         "program.CashPlan",
         on_delete=models.CASCADE,
         related_name="verifications",
     )
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
-    verification_method = models.CharField(
-        max_length=50, choices=VERIFICATION_METHOD_CHOICES
-    )
+    verification_method = models.CharField(max_length=50, choices=VERIFICATION_METHOD_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
     responded_count = models.PositiveIntegerField(null=True)
     received_count = models.PositiveIntegerField(null=True)
@@ -281,12 +277,8 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
     )
-    payment_record = models.ForeignKey(
-        "PaymentRecord", on_delete=models.CASCADE, related_name="verifications"
-    )
-    status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
-    )
+    payment_record = models.ForeignKey("PaymentRecord", on_delete=models.CASCADE, related_name="verifications")
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
         decimal_places=2,
@@ -303,9 +295,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         ):
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
-        return not (
-            self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10
-        )
+        return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
 
     @property
     def business_area(self):

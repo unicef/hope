@@ -22,7 +22,7 @@ class LogEntryAdmin(AdminAdvancedFiltersMixin, SmartLogEntryAdmin):
     list_filter = (
         ("user", AutoCompleteFilter),
         ("content_type", AutoCompleteFilter),
-        ("object_id", ForeignKeyFieldFilter.factory(title="Object Id")),
+        ("object_id", ForeignKeyFieldFilter.factory(title="Object Id", lookup="exact")),
         "action_time",
         "action_flag",
     )

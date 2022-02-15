@@ -8,12 +8,12 @@ snapshots = Snapshot()
 
 snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_0_with_permission 1'] = {
     'data': {
-        'uploadImportDataXlsxFile': {
+        'uploadImportDataXlsxFileAsync': {
             'errors': [
             ],
             'importData': {
-                'numberOfHouseholds': 3,
-                'numberOfIndividuals': 6
+                'numberOfHouseholds': None,
+                'numberOfIndividuals': None
             }
         }
     }
@@ -21,7 +21,7 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
 
 snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_import_datahub_upload_1_without_permission 1'] = {
     'data': {
-        'uploadImportDataXlsxFile': None
+        'uploadImportDataXlsxFileAsync': None
     },
     'errors': [
         {
@@ -33,7 +33,7 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
             ],
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
-                'uploadImportDataXlsxFile'
+                'uploadImportDataXlsxFileAsync'
             ]
         }
     ]
