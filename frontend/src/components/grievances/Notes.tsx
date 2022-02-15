@@ -21,11 +21,9 @@ import {
   useMeQuery,
 } from '../../__generated__/graphql';
 import { OverviewContainerColumn } from '../core/OverviewContainerColumn';
+import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
 const Name = styled.span`
   font-size: 16px;
 `;

@@ -15,14 +15,11 @@ import {
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { Title } from '../core/Title';
 import { AgencyField } from './AgencyField';
 import { DocumentField } from './DocumentField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
 `;

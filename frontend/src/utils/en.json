@@ -573,5 +573,10 @@
   "Document Type": "Document Type",
   "Not updated": "Not updated",
   "Show only Individuals from this household": "Show only Individuals from this household",
-  " When you close this ticket, the household that this Individual is a member of will be deactivated.": " When you close this ticket, the household that this Individual is a member of will be deactivated."
+  " When you close this ticket, the household that this Individual is a member of will be deactivated.": " When you close this ticket, the household that this Individual is a member of will be deactivated.",
+  "You did not approve the following household to be withdrawn. Are you sure you want to continue?": "You did not approve the following household to be withdrawn. Are you sure you want to continue?",
+  "You are approving the following household to be withdrawn. Are you sure you want to continue?": "You are approving the following household to be withdrawn. Are you sure you want to continue?",
+  "Household to be withdrawn": "Household to be withdrawn",
+  "Alternate Collector Issue": "Alternate Collector Issue",
+  "One of the Household members is an alternate collector. This household cannot be withdrawn.": "One of the Household members is an alternate collector. This household cannot be withdrawn."
 }

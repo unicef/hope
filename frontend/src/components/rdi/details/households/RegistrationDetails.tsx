@@ -6,11 +6,7 @@ import styled from 'styled-components';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
-
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
+import { Title } from '../../../core/Title';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px

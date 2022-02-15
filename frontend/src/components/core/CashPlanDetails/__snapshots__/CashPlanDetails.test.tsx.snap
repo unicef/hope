@@ -6,7 +6,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
     class="MuiPaper-root sc-bdVaJa iGsvgX MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-dnqmqq dnsnIA"
+      class="sc-bZQynM ghLfwz"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -32,7 +32,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
             </span>
             <div>
               <div
-                class="sc-bZQynM hTcAyj"
+                class="sc-gzVnrw bspsIV"
               >
                 <div
                   class="sc-EHOje zcMBJ"
@@ -277,7 +277,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
         </div>
       </div>
       <div
-        class="sc-gzVnrw bCMxAI"
+        class="sc-htoDjs eWsWTE"
       >
         <div>
           <span
@@ -288,7 +288,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
           </span>
           <div>
             <div
-              class="sc-htoDjs psyrE"
+              class="sc-dnqmqq dXXPUY"
             >
               5
             </div>

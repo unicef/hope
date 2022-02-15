@@ -26,6 +26,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
+    close_delete_household_ticket,
     close_delete_individual_ticket,
     close_update_household_grievance_ticket,
     close_update_individual_grievance_ticket,
@@ -181,6 +182,13 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             "not_allowed": [
                 "individual_data_update_issue_type_extras",
                 "individual_delete_issue_type_extras",
+            ],
+        },
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {
+            "required": ["extras.issue_type.household_delete_issue_type_extras"],
+            "not_allowed": [
+                "household_data_update_issue_type_extras",
+                "individual_data_update_issue_type_extras",
             ],
         },
         GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
@@ -350,6 +358,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             "required": [],
             "not_allowed": [],
         },
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {"required": [], "not_allowed": []},
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {
             "required": [],
@@ -599,6 +609,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: close_update_individual_grievance_ticket,
             GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: close_add_individual_grievance_ticket,
             GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: close_delete_individual_ticket,
+            GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: close_delete_household_ticket,
         },
         GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: {
             GrievanceTicket.ISSUE_TYPE_DATA_BREACH: _no_operation_close_method,
@@ -1190,6 +1201,7 @@ class Mutations(graphene.ObjectType):
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
     approve_add_individual = SimpleApproveMutation.Field()
     approve_delete_individual = SimpleApproveMutation.Field()
+    approve_delete_household = SimpleApproveMutation.Field()
     approve_system_flagging = SimpleApproveMutation.Field()
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()

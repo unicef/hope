@@ -6,7 +6,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
     class="sc-jzJRlG ezheHU"
   >
     <div
-      class="sc-chPdSV bmwXmg"
+      class="sc-bxivhb jsIVNl"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -273,7 +273,7 @@ Jameschester, SC 24934
     class="MuiPaper-root sc-kAzzGY evDEes MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-chPdSV bmwXmg"
+      class="sc-bxivhb jsIVNl"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -294,7 +294,7 @@ Jameschester, SC 24934
             class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
           >
             <span
-              class="sc-kgoBCf gevMDU"
+              class="sc-chPdSV SJTLX"
               color="textSecondary"
             >
               PrOgRAmmE(S) ENROLLED
@@ -304,7 +304,7 @@ Jameschester, SC 24934
             class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
           >
             <span
-              class="sc-kgoBCf gevMDU"
+              class="sc-chPdSV SJTLX"
               color="textSecondary"
             >
               Cash received
@@ -392,7 +392,7 @@ Jameschester, SC 24934
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
       >
         <div
-          class="sc-gqjmRU hHtKwy"
+          class="sc-VigVT ZeWFY"
         >
           <div>
             <span
@@ -403,7 +403,7 @@ Jameschester, SC 24934
             </span>
             <div>
               <div
-                class="sc-VigVT cfztFP"
+                class="sc-jTzLTM dhULVO"
               >
                 USD 24,697.00
               </div>

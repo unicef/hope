@@ -15,17 +15,13 @@ import {
 } from '../../../../../__generated__/graphql';
 import { ContentLink } from '../../../../core/ContentLink';
 import { LabelizedField } from '../../../../core/LabelizedField';
+import { Title } from '../../../../core/Title';
 import { UniversalMoment } from '../../../../core/UniversalMoment';
 import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
     ${({ theme }) => theme.spacing(11)}px;
-`;
-
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 const BorderBox = styled.div`

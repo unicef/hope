@@ -132,6 +132,9 @@
             "name": "TicketAddIndividualDetailsNode"
           },
           {
+            "name": "TicketDeleteHouseholdDetailsNode"
+          },
+          {
             "name": "TicketNoteNode"
           },
           {

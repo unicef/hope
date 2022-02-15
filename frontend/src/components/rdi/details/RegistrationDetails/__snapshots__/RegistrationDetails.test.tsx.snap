@@ -6,7 +6,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
     class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-jTzLTM bjOEbH"
+      class="sc-iwsKbI hbxXQf"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -41,7 +41,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   </span>
                   <div>
                     <div
-                      class="sc-iwsKbI dUmvrG"
+                      class="sc-gZMcBi exawVs"
                     >
                       <div
                         class="sc-ifAKCX jzRoPs"
@@ -131,7 +131,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <div
-                class="sc-gZMcBi fOOBAy"
+                class="sc-gqjmRU hHtKwy"
               >
                 <div
                   data-cy="labelized-field-container-households"
@@ -144,7 +144,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   </span>
                   <div>
                     <div
-                      class="sc-gqjmRU cEkYfv"
+                      class="sc-VigVT cfztFP"
                     >
                       2
                     </div>
@@ -156,7 +156,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
             >
               <div
-                class="sc-gZMcBi fOOBAy"
+                class="sc-gqjmRU hHtKwy"
               >
                 <div
                   data-cy="labelized-field-container-individuals"
@@ -169,7 +169,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   </span>
                   <div>
                     <div
-                      class="sc-gqjmRU cEkYfv"
+                      class="sc-VigVT cfztFP"
                     >
                       6
                     </div>
