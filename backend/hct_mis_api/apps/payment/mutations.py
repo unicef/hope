@@ -62,20 +62,6 @@ class CreatePaymentVerificationMutation(PermissionMutation):
     class Arguments:
         input = CreatePaymentVerificationInput(required=True)
 
-    @staticmethod
-    def verify_required_arguments(input, field_name, options):
-        for key, value in options.items():
-            if key != input.get(field_name):
-                continue
-            for required in value.get("required"):
-                if input.get(required) is None:
-                    logger.error(f"You have to provide {required} in {key}")
-                    raise GraphQLError(f"You have to provide {required} in {key}")
-            for not_allowed in value.get("not_allowed"):
-                if input.get(not_allowed) is not None:
-                    logger.error(f"You can't provide {not_allowed} in {key}")
-                    raise GraphQLError(f"You can't provide {not_allowed} in {key}")
-
     @classmethod
     @is_authenticated
     @transaction.atomic
@@ -86,8 +72,7 @@ class CreatePaymentVerificationMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
 
-        action = PaymentVerificationCreate(input, cash_plan)
-        cash_plan_verification = action.execute()
+        cash_plan_verification = PaymentVerificationCreate(input, cash_plan).execute()
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
