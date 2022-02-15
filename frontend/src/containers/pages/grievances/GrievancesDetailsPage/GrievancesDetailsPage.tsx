@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { AddIndividualGrievanceDetails } from '../../../../components/grievances/AddIndividualGrievanceDetails';
+import { DeleteHouseholdGrievanceDetails } from '../../../../components/grievances/DeleteHouseholdGrievanceDetails';
 import { DeleteIndividualGrievanceDetails } from '../../../../components/grievances/DeleteIndividualGrievanceDetails';
 import { FlagDetails } from '../../../../components/grievances/FlagDetails';
 import { GrievanceDetailsToolbar } from '../../../../components/grievances/GrievanceDetailsToolbar';
@@ -234,6 +235,15 @@ export function GrievancesDetailsPage(): React.ReactElement {
             GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL && (
             <PaddingContainer>
               <DeleteIndividualGrievanceDetails
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
+            </PaddingContainer>
+          )}
+          {ticket?.issueType?.toString() ===
+            GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD && (
+            <PaddingContainer>
+              <DeleteHouseholdGrievanceDetails
                 ticket={ticket}
                 canApproveDataChange={canApproveDataChange}
               />
