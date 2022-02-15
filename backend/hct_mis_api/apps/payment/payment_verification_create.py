@@ -113,9 +113,7 @@ class PaymentVerificationCreate:
         age = None
         confidence_interval = None
         margin_of_error = None
-        payment_records = self.cash_plan.payment_records.filter(
-            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0, is_included=False
-        )
+        payment_records = self.cash_plan.available_payment_records()
 
         if not payment_records:
             raise ValueError("There are no free payment records.")

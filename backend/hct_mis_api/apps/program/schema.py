@@ -1,6 +1,7 @@
-import graphene
-from django.db.models import Case, IntegerField, Q, Sum, Value, When, Count
+from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.functions import Coalesce, Lower
+
+import graphene
 from django_filters import (
     CharFilter,
     DateFilter,
@@ -12,22 +13,22 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
-    hopePermissionClass,
     Permissions,
     hopeOneOfPermissionClass,
-    ALL_GRIEVANCES_CREATE_MODIFY,
+    hopePermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    to_choice_object,
     CustomOrderingFilter,
+    chart_filters_decoder,
     chart_map_choices,
     chart_permission_decorator,
-    chart_filters_decoder,
+    to_choice_object,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
@@ -177,6 +178,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     delivery_type = graphene.String()
     total_number_of_households = graphene.Int()
     currency = graphene.String(source="currency")
+    can_create_payment_verification_plan = graphene.Boolean()
 
     class Meta:
         model = CashPlan
@@ -185,6 +187,9 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_number_of_households(self, info, **kwargs):
         return self.total_number_of_households
+
+    def resolve_can_create_payment_verification_plan(self, info, **kwargs):
+        return self.can_create_payment_verification_plan
 
 
 class ChartProgramFilter(FilterSet):
