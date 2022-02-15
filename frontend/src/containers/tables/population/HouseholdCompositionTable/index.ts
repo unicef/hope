@@ -1,0 +1,1 @@
+export {HouseholdCompositionTable} from './HouseholdCompositionTable'

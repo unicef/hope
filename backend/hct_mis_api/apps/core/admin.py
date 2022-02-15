@@ -10,6 +10,7 @@ from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import JSONField
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
@@ -174,7 +175,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 preserved_filters = self.get_preserved_filters(request)
 
                 redirect_url = reverse(
-                    "admin:%s_%s_change" % (opts.app_label, opts.model_name),
+                    "admin:{}_{}_change".format(opts.app_label, opts.model_name),
                     args=(office.pk,),
                     current_app=self.admin_site.name,
                 )
@@ -190,7 +191,8 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     def _get_doap_matrix(self, obj):
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
-        fields = ["org", "Last Name", "First Name", "Email", "Action"] + list(ca_roles)
+        fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
+        fields += list(ca_roles)
         matrix.append(fields)
         all_user_data = {}
         for member in obj.user_roles.all():
@@ -203,6 +205,8 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 user_data["Last Name"] = member.user.last_name
                 user_data["First Name"] = member.user.first_name
                 user_data["Email"] = member.user.email
+                user_data["Business Unit"] = f"UNICEF - {obj.name}"
+                user_data["Partner Instance ID"] = int(obj.code)
                 user_data["Action"] = ""
                 for role in ca_roles:
                     user_data[role] = {True: "Yes", False: ""}[role in user_roles]
@@ -255,10 +259,19 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
             self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
             buffer.seek(0)
+            environment = Site.objects.first().name
             mail = EmailMessage(
-                f"DOAP updates for {obj.name}", f"Please find in attachment DOAP updates for {obj.name}", to=recipients
+                f"CashAssist - UNICEF - {obj.name} user updates",
+                f"""Dear GSD,
+                
+In CashAssist, please update the users in {environment} UNICEF - {obj.name} business unit as per the attached DOAP.
+
+Many thanks,
+
+UNICEF HOPE""",
+                to=recipients,
             )
-            mail.attach(f"doap_{obj.name}.csv", buffer.read(), "text/csv")
+            mail.attach(f"UNICEF - {obj.name} {environment} DOAP.csv", buffer.read(), "text/csv")
             mail.send()
             for row in matrix[1:]:
                 if row["Action"] == "REMOVE":
@@ -278,8 +291,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     def export_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="DOAP matrix")
         obj = context["original"]
+        environment = Site.objects.first().name
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename=doap_{obj.name}.csv"
+        response["Content-Disposition"] = f"attachment; filename=UNICEF - {obj.name} {environment} DOAP.csv"
         matrix = self._get_doap_matrix(obj)
         writer = csv.DictWriter(response, matrix[0], extrasaction="ignore")
         writer.writeheader()

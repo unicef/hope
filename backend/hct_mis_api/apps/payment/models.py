@@ -21,10 +21,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_NOT_DISTRIBUTED = "Not Distributed"
     ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS)
     STATUS_CHOICE = (
-        (STATUS_SUCCESS, _("Transaction Successful")),
-        (STATUS_ERROR, _("Transaction Erroneous")),
         (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),
         (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),
+        (STATUS_SUCCESS, _("Transaction Successful")),
+        (STATUS_ERROR, _("Transaction Erroneous")),
     )
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"

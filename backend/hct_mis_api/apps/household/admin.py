@@ -78,7 +78,9 @@ logger = logging.getLogger(__name__)
 
 @admin.register(Agency)
 class AgencyTypeAdmin(HOPEModelAdminBase):
+    search_fields = ("label", "country")
     list_display = ("label", "type", "country")
+    list_filter = ("type", TextFieldFilter.factory("country", "Country ISO CODE 2"))
 
 
 @admin.register(Document)
@@ -90,11 +92,14 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         ("type", RelatedFieldComboFilter),
         ("individual", AutoCompleteFilter),
     )
+    autocomplete_fields = ["type"]
 
 
 @admin.register(DocumentType)
 class DocumentTypeAdmin(HOPEModelAdminBase):
+    search_fields = ("label", "country")
     list_display = ("label", "country", "type")
+    list_filter = ("type", "label", TextFieldFilter.factory("country", "Country ISO CODE 2"))
 
 
 class FlexFieldFilter(SimpleListFilter):
@@ -509,7 +514,9 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
-    pass
+    list_display = ("agency", "individual", "number")
+    list_filter = (TextFieldFilter.factory("individual__unicef_id__icontains"),)
+    autocomplete_fields = ["agency"]
 
 
 @admin.register(EntitlementCard)

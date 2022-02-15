@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/population/HouseholdVulnerabilities should render 1`] = `
+<div>
+  <div>
+    <div
+      class="MuiPaper-root sc-gzVnrw hiftfX MuiPaper-elevation1 MuiPaper-rounded"
+    >
+      <div
+        class="sc-htoDjs cguslC"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-h6"
+        >
+          Vulnerabilities
+        </h6>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div>
+            <span
+              class="sc-bdVaJa kwsjSG"
+              color="textSecondary"
+            >
+              months displaced
+            </span>
+            <div>
+              <span
+                class="sc-bwzfXH emFVa"
+                color="textSecondary"
+              >
+                12
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div>
+            <span
+              class="sc-bdVaJa kwsjSG"
+              color="textSecondary"
+            >
+              difficulty breathing h f
+            </span>
+            <div>
+              <span
+                class="sc-bwzfXH emFVa"
+                color="textSecondary"
+              >
+                Yes
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

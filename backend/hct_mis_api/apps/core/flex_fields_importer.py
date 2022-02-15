@@ -2,21 +2,26 @@ import logging
 from collections import defaultdict
 from os.path import isfile
 
-import xlrd
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.html import strip_tags
 
+import xlrd
+
 from hct_mis_api.apps.core.core_fields_attributes import (
-    TYPE_STRING,
-    TYPE_INTEGER,
-    TYPE_DECIMAL,
     TYPE_DATE,
+    TYPE_DECIMAL,
     TYPE_IMAGE,
-    TYPE_SELECT_ONE,
+    TYPE_INTEGER,
     TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    TYPE_STRING,
 )
-from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeGroup, FlexibleAttributeChoice
+from hct_mis_api.apps.core.models import (
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+    FlexibleAttributeGroup,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +200,7 @@ class FlexibleAttributeImporter:
             if row[0].value.startswith("select_"):
                 fields_with_choices.append(row)
 
-        return set(row[0].value.split(" ")[1] for row in fields_with_choices)
+        return {row[0].value.split(" ")[1] for row in fields_with_choices}
 
     def _get_field_choice_name(self, row):
         has_choice = row[0].value.startswith("select_")

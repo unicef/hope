@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 from django.db.models import Prefetch, Q
@@ -46,6 +47,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
     RegistrationDataImportDatahub,
+    KoboImportData,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
@@ -239,11 +241,44 @@ class RegistrationDataImportDatahubNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class KoboErrorNode(graphene.ObjectType):
+    header = graphene.String()
+    message = graphene.String()
+
+
+class XlsxRowErrorNode(graphene.ObjectType):
+    row_number = graphene.Int()
+    header = graphene.String()
+    message = graphene.String()
+
+
 class ImportDataNode(DjangoObjectType):
+    xlsx_validation_errors = graphene.List(XlsxRowErrorNode)
+
     class Meta:
         model = ImportData
         filter_fields = []
         interfaces = (relay.Node,)
+
+    def resolve_xlsx_validation_errors(parrent, info):
+        if not parrent.validation_errors:
+            return []
+        return json.loads(parrent.validation_errors)
+
+
+class KoboImportDataNode(DjangoObjectType):
+    kobo_validation_errors = graphene.List(KoboErrorNode)
+    import_data = graphene.Field(ImportDataNode)
+
+    class Meta:
+        model = KoboImportData
+        filter_fields = []
+        interfaces = (relay.Node,)
+
+    def resolve_kobo_validation_errors(parrent, info):
+        if not parrent.validation_errors:
+            return []
+        return json.loads(parrent.validation_errors)
 
 
 class ImportedDocumentTypeNode(DjangoObjectType):
@@ -287,17 +322,6 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class XlsxRowErrorNode(graphene.ObjectType):
-    row_number = graphene.Int()
-    header = graphene.String()
-    message = graphene.String()
-
-
-class KoboErrorNode(graphene.ObjectType):
-    header = graphene.String()
-    message = graphene.String()
-
-
 class Query(graphene.ObjectType):
     imported_household = relay.Node.Field(ImportedHouseholdNode)
     all_imported_households = DjangoPermissionFilterConnectionField(
@@ -322,6 +346,7 @@ class Query(graphene.ObjectType):
         ),
     )
     import_data = relay.Node.Field(ImportDataNode)
+    kobo_import_data = relay.Node.Field(KoboImportDataNode)
     deduplication_batch_status_choices = graphene.List(ChoiceObject)
     deduplication_golden_record_status_choices = graphene.List(ChoiceObject)
 
