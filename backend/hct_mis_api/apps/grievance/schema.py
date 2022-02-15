@@ -281,7 +281,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
             queryset = self.filters[name].filter(queryset, value)
             assert isinstance(
                 queryset, models.QuerySet
-            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+            ), "Expected '{}.{}' to return a QuerySet, but got a {} instead.".format(
                 type(self).__name__,
                 name,
                 type(queryset).__name__,

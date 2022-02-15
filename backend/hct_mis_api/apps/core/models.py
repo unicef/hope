@@ -273,14 +273,14 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     DATE = "DATE"
     GEOPOINT = "GEOPOINT"
     TYPE_CHOICE = Choices(
-        (STRING, _("String")),
+        (DATE, _("Date")),
+        (DECIMAL, _("Decimal")),
         (IMAGE, _("Image")),
         (INTEGER, _("Integer")),
-        (DECIMAL, _("Decimal")),
+        (GEOPOINT, _("Geopoint")),
         (SELECT_ONE, _("Select One")),
         (SELECT_MANY, _("Select Many")),
-        (DATE, _("Date")),
-        (GEOPOINT, _("Geopoint")),
+        (STRING, _("String")),
     )
     ASSOCIATED_WITH_CHOICES = (
         (0, _("Household")),
@@ -363,11 +363,11 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     PROCESSING = "PROCESSING"
     CONNECTION_FAILED = "CONNECTION_FAILED"
     KOBO_FORM_UPLOAD_STATUS_CHOICES = (
-        (SUCCESSFUL, _("Successful")),
-        (UPLOADED, _("Successful")),
-        (UNSUCCESSFUL, _("Unsuccessful")),
-        (PROCESSING, _("Processing")),
         (CONNECTION_FAILED, _("Connection failed")),
+        (PROCESSING, _("Processing")),
+        (SUCCESSFUL, _("Successful")),
+        (UNSUCCESSFUL, _("Unsuccessful")),
+        (UPLOADED, _("Uploaded")),
     )
 
     class Meta:
