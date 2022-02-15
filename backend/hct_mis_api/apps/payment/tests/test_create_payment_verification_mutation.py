@@ -6,6 +6,9 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
@@ -40,7 +43,15 @@ class TestCreatePaymentVerificationMutation(APITestCase):
     )
     def test_create_cash_plan_payment_verification(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
+        (household, _) = create_household(household_args={"size": 1})
+        PaymentRecordFactory.create(
+            cash_plan=self.cash_plan,
+            business_area=self.cash_plan.business_area,
+            delivered_quantity=1000,
+            delivered_quantity_usd=None,
+            household=household,
+            status=PaymentRecord.STATUS_SUCCESS,
+        )
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
             context={"user": self.user},
@@ -112,6 +123,25 @@ class TestCreatePaymentVerificationMutation(APITestCase):
                     "rapidProArguments": {
                         "flowId": 123,
                     },
+                }
+            },
+        )
+
+    def test_can_t_create_cash_plan_payment_verification_when_there_are_not_available_payment_record(self):
+        self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_CREATE], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "cashPlanId": self.id_to_base64(self.cash_plan.id, "CashPlanNode"),
+                    "sampling": "FULL_LIST",
+                    "fullListArguments": {"excludedAdminAreas": []},
+                    "verificationChannel": "MANUAL",
+                    "rapidProArguments": None,
+                    "randomSamplingArguments": None,
+                    "businessAreaSlug": "afghanistan",
                 }
             },
         )
