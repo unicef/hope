@@ -95,3 +95,23 @@ snapshots['TestCreatePaymentVerificationMutation::test_create_cash_plan_payment_
         }
     ]
 }
+
+snapshots['TestCreatePaymentVerificationMutation::test_can_t_create_cash_plan_payment_verification_when_there_are_not_available_payment_record 1'] = {
+    'data': {
+        'createCashPlanPaymentVerification': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 13,
+                    'line': 3
+                }
+            ],
+            'message': 'There are no free payment records.',
+            'path': [
+                'createCashPlanPaymentVerification'
+            ]
+        }
+    ]
+}
