@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
@@ -6,7 +7,6 @@ import {
   ProgramStatus,
   TargetPopulationStatus,
 } from '../__generated__/graphql';
-import { ValidationGraphQLError } from '../apollo/client';
 import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
 
 const Gender = new Map([

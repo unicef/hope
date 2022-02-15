@@ -10,7 +10,7 @@ import {
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { HouseholdDetailedFragment } from '../../../__generated__/graphql';
+import { HouseholdNode } from '../../../../__generated__/graphql';
 
 const GreyTableCell = styled(TableCell)`
   background-color: #eeeeee;
@@ -25,7 +25,7 @@ const Title = styled.div`
 `;
 
 export interface HouseholdCompositionTableProps {
-  household: HouseholdDetailedFragment;
+  household: HouseholdNode;
 }
 
 export function HouseholdCompositionTable({

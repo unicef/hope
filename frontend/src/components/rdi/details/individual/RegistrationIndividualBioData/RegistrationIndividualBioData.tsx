@@ -2,22 +2,21 @@ import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
   choicesToDict,
+  decodeIdString,
   formatAge,
   renderBoolean,
   sexToCapitalize,
-} from '../../utils/utils';
+} from '../../../../../utils/utils';
 import {
-  IndividualNode,
-  useHouseholdChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { ContentLink } from '../core/ContentLink';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { UniversalMoment } from '../core/UniversalMoment';
-import { DocumentPopulationPhotoModal } from './DocumentPopulationPhotoModal';
+  HouseholdChoiceDataQuery,
+  ImportedIndividualDetailedFragment,
+} from '../../../../../__generated__/graphql';
+import { ContentLink } from '../../../../core/ContentLink';
+import { LabelizedField } from '../../../../core/LabelizedField';
+import { UniversalMoment } from '../../../../core/UniversalMoment';
+import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -33,23 +32,18 @@ const BorderBox = styled.div`
   border-bottom: 1px solid #e1e1e1;
 `;
 
-interface IndividualBioDataProps {
-  individual: IndividualNode;
+interface RegistrationIndividualBioDataProps {
+  individual: ImportedIndividualDetailedFragment;
+  businessArea: string;
+  choicesData: HouseholdChoiceDataQuery;
 }
-export function IndividualsBioData({
+
+export function RegistrationIndividualBioData({
   individual,
-}: IndividualBioDataProps): React.ReactElement {
+  choicesData,
+  businessArea,
+}: RegistrationIndividualBioDataProps): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
-
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
-
-  if (choicesLoading) {
-    return <LoadingComponent />;
-  }
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
@@ -57,21 +51,20 @@ export function IndividualsBioData({
     choicesData.maritalStatusChoices,
   );
   const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
-  const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const observedDisabilityChoicesDict = choicesToDict(
     choicesData.observedDisabilityChoices,
   );
   const severityOfDisabilityChoicesDict = choicesToDict(
     choicesData.severityOfDisabilityChoices,
   );
-
+  const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
-    <Grid item xs={3} key={edge.node.id}>
+    <Grid key={edge.node.id} item xs={3}>
       <Box flexDirection='column'>
         <Box mb={1}>
           <LabelizedField label={edge.node.type.label}>
             {edge.node.photo ? (
-              <DocumentPopulationPhotoModal
+              <DocumentRegistrationPhotoModal
                 documentNumber={edge.node.documentNumber}
                 documentId={edge.node.id}
                 individual={individual}
@@ -81,37 +74,23 @@ export function IndividualsBioData({
             )}
           </LabelizedField>
         </Box>
-        <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{edge.node.country}</LabelizedField>
       </Box>
     </Grid>
   ));
 
   const mappedIdentities = individual.identities?.edges?.map((item) => (
-    <Grid item xs={3} key={item.node.id}>
+    <Grid key={item.node.id} item xs={3}>
       <Box flexDirection='column'>
         <Box mb={1}>
           <LabelizedField label={`${item.node.type} ID`}>
-            {item.node.number}
+            {item.node.documentNumber}
           </LabelizedField>
         </Box>
-        <LabelizedField label='issued'>{item.node.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{item.node.country}</LabelizedField>
       </Box>
     </Grid>
   ));
-
-  const mappedRoles = (
-    <Grid item xs={3}>
-      <LabelizedField label={t('Linked Households')}>
-        {individual.householdsAndRoles.length
-          ? individual.householdsAndRoles?.map((item) => (
-              <Box key={item.id}>
-                {item.household.unicefId} - {roleChoicesDict[item.role]}
-              </Box>
-            ))
-          : '-'}
-      </LabelizedField>
-    </Grid>
-  );
 
   return (
     <Overview>
@@ -178,12 +157,12 @@ export function IndividualsBioData({
           <LabelizedField label={t('Household ID')}>
             {individual?.household?.id ? (
               <ContentLink
-                href={`/${businessArea}/population/household/${individual?.household?.id}`}
+                href={`/${businessArea}/registration-data-import/household/${individual?.household?.id}`}
               >
-                {individual?.household?.unicefId}
+                {decodeIdString(individual?.household?.id)}
               </ContentLink>
             ) : (
-              <span>-</span>
+              '-'
             )}
           </LabelizedField>
         </Grid>
@@ -197,7 +176,6 @@ export function IndividualsBioData({
             {relationshipChoicesDict[individual.relationship]}
           </LabelizedField>
         </Grid>
-        {mappedRoles}
         <Grid item xs={12}>
           <BorderBox />
         </Grid>
@@ -257,20 +235,8 @@ export function IndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label={t('Alternative Phone Number')}>
+          <LabelizedField label={t('Alternate Phone Number')}>
             {individual.phoneNoAlternative}
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={12}>
-          <BorderBox />
-        </Grid>
-        <Grid item xs={3}>
-          <LabelizedField
-            label={t('Date of last screening against sanctions list')}
-          >
-            <UniversalMoment>
-              {individual.sanctionListLastCheck}
-            </UniversalMoment>
           </LabelizedField>
         </Grid>
       </Grid>

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { CashPlanDetails } from '../../../components/core/CashPlanDetails';
+import { CashPlanDetails } from '../../../components/core/CashPlanDetails/CashPlanDetails';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -89,7 +89,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
         </Button>
       </PageHeader>
       <Container>
-        <CashPlanDetails cashPlan={cashPlan} />
+        <CashPlanDetails cashPlan={cashPlan} businessArea={businessArea} />
         <TableWrapper>
           <PaymentRecordTable cashPlan={cashPlan} businessArea={businessArea} />
         </TableWrapper>
