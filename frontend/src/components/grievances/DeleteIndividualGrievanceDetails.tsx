@@ -17,6 +17,7 @@ import {
 import { ConfirmationDialog } from '../core/ConfirmationDialog';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 
 const StyledBox = styled(Paper)`
@@ -24,10 +25,6 @@ const StyledBox = styled(Paper)`
   flex-direction: column;
   width: 100%;
   padding: 26px 22px;
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 export type RoleReassignData = {
