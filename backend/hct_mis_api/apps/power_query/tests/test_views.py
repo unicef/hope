@@ -88,7 +88,7 @@ class TestPowerQueryBasicAuth(TestCase):
         self.assertEqual(response.status_code, 401)
 
         username, password = self.report1.owner.username, self.USER_PASSWORD
-        headers = {"HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii")}
+        headers = {"Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii")}
         response = self.client.get(url, **headers)
         self.assertEqual(response.status_code, 400)
         self.assertContains(response, b"This report is not currently available", status_code=400)
@@ -98,7 +98,7 @@ class TestPowerQueryBasicAuth(TestCase):
         username, password = self.report2.owner.username, self.USER_PASSWORD
         assert password == "123", password
         headers = {
-            "HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
+            "Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
         }
         response = self.client.get(url, **headers)
         self.assertEqual(response.status_code, 200)
@@ -121,7 +121,7 @@ class TestPowerQueryResponses(TestCase):
         cls.USER_PASSWORD = "123"
         cls.formatter_json = FormatterFactory(name="Queryset To JSON")
         cls.user = UserFactory(
-            username="superuser-%s" % random.randint(1, 100),
+            username="superuser-{}".format(random.randint(1, 100)),
             is_superuser=True,
             is_staff=True,
             password=cls.USER_PASSWORD,
