@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/population/HouseholdDetails should render 1`] = `
+exports[`components/grievances/GrievancesDetails should render 1`] = `
 <div>
   <div
     class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
