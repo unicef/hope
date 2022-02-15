@@ -198,6 +198,21 @@ export function userStatusToColor(
       return theme.palette.error.main;
   }
 }
+
+export function householdStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'ACTIVE':
+      return theme.hctPalette.green;
+    case 'INACTIVE':
+      return theme.palette.error.main;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
 export function grievanceTicketStatusToColor(
   theme: typeof themeObj,
   status: string,
