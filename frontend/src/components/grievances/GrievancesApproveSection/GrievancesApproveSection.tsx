@@ -4,7 +4,6 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
-
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails';
 import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
@@ -36,56 +35,69 @@ export function GrievancesApproveSection({
       );
     }
     if (ticket?.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
-      <NeedsAdjudicationDetails
-        ticket={ticket}
-        canApprove={canApproveFlagAndAdjudication}
-      />;
+      return (
+        <NeedsAdjudicationDetails
+          ticket={ticket}
+          canApprove={canApproveFlagAndAdjudication}
+        />
+      );
     }
     if (
       ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
     ) {
-      <AddIndividualGrievanceDetails
-        ticket={ticket}
-        canApproveDataChange={canApproveDataChange}
-      />;
+      return (
+        <AddIndividualGrievanceDetails
+          ticket={ticket}
+          canApproveDataChange={canApproveDataChange}
+        />
+      );
     }
     if (
       ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
     ) {
-      <DeleteIndividualGrievanceDetails
-        ticket={ticket}
-        canApproveDataChange={canApproveDataChange}
-      />;
+      return (
+        <DeleteIndividualGrievanceDetails
+          ticket={ticket}
+          canApproveDataChange={canApproveDataChange}
+        />
+      );
     }
     if (
       ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD
     ) {
-      <DeleteHouseholdGrievanceDetails
-        ticket={ticket}
-        canApproveDataChange={canApproveDataChange}
-      />;
+      return (
+        <DeleteHouseholdGrievanceDetails
+          ticket={ticket}
+          canApproveDataChange={canApproveDataChange}
+        />
+      );
     }
     if (
       ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
     ) {
-      <RequestedIndividualDataChange
-        ticket={ticket}
-        canApproveDataChange={canApproveDataChange}
-      />;
+      return (
+        <RequestedIndividualDataChange
+          ticket={ticket}
+          canApproveDataChange={canApproveDataChange}
+        />
+      );
     }
     if (
       ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
     ) {
-      <RequestedHouseholdDataChange
-        ticket={ticket}
-        canApproveDataChange={canApproveDataChange}
-      />;
+      return (
+        <RequestedHouseholdDataChange
+          ticket={ticket}
+          canApproveDataChange={canApproveDataChange}
+        />
+      );
     }
+    return null;
   };
 
   return (
     <Grid item xs={12}>
-      <Box p={4}>{matchDetailsComponent()}</Box>
+      <Box p={3}>{matchDetailsComponent()}</Box>
     </Grid>
   );
 }
