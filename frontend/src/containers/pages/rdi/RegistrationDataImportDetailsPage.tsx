@@ -15,7 +15,7 @@ import { useRegistrationDataImportQuery } from '../../../__generated__/graphql';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
 import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
-import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails';
+import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
 
 const Container = styled.div`
   && {

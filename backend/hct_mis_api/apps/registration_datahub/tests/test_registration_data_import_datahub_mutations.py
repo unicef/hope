@@ -21,7 +21,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     mutation UploadImportDataXLSXFile(
       $file: Upload!, $businessAreaSlug: String!
     ) {
-      uploadImportDataXlsxFile(
+      uploadImportDataXlsxFileAsync(
         file: $file, businessAreaSlug: $businessAreaSlug
       ) {
         importData {

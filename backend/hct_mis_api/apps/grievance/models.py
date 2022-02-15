@@ -23,49 +23,17 @@ class GrievanceTicketManager(models.Manager):
         #           TicketDeleteIndividualDetails, TicketAddIndividualDetails, TicketIndividualDataUpdateDetails,
         #           TicketHouseholdDataUpdateDetails, TicketSensitiveDetails, TicketComplaintDetails, TicketNote]
         return chain(
-            (
-                TicketReferralDetails.objects.filter(
-                    Q(individual__in=individuals) | Q(household=household)
-                )
-            ),
-            (
-                TicketNegativeFeedbackDetails.objects.filter(
-                    Q(individual__in=individuals) | Q(household=household)
-                )
-            ),
-            (
-                TicketPositiveFeedbackDetails.objects.filter(
-                    Q(individual__in=individuals) | Q(household=household)
-                )
-            ),
-            (
-                TicketNeedsAdjudicationDetails.objects.filter(
-                    selected_individual__in=individuals
-                )
-            ),
-            (
-                TicketSystemFlaggingDetails.objects.filter(
-                    golden_records_individual__in=individuals
-                )
-            ),
+            (TicketReferralDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+            (TicketNegativeFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+            (TicketPositiveFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+            (TicketNeedsAdjudicationDetails.objects.filter(selected_individual__in=individuals)),
+            (TicketSystemFlaggingDetails.objects.filter(golden_records_individual__in=individuals)),
             (TicketDeleteIndividualDetails.objects.filter(individual__in=individuals)),
             (TicketAddIndividualDetails.objects.filter(household=household)),
-            (
-                TicketIndividualDataUpdateDetails.objects.filter(
-                    individual__in=individuals
-                )
-            ),
+            (TicketIndividualDataUpdateDetails.objects.filter(individual__in=individuals)),
             (TicketHouseholdDataUpdateDetails.objects.filter(household=household)),
-            (
-                TicketSensitiveDetails.objects.filter(
-                    Q(individual__in=individuals) | Q(household=household)
-                )
-            ),
-            (
-                TicketComplaintDetails.objects.filter(
-                    Q(individual__in=individuals) | Q(household=household)
-                )
-            ),
+            (TicketSensitiveDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
+            (TicketComplaintDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
         )
 
 
@@ -152,66 +120,54 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL = 16
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
+            ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
             ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: _("Household Data Update"),
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: _("Individual Data Update"),
-            ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
+            ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),
             ISSUE_TYPE_DATA_BREACH: _("Data breach"),
-            ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _(
-                "Bribery, corruption or kickback"
-            ),
+            ISSUE_TYPE_CONFLICT_OF_INTEREST: _("Conflict of interest"),
             ISSUE_TYPE_FRAUD_FORGERY: _("Fraud and forgery"),
-            ISSUE_TYPE_FRAUD_MISUSE: _(
-                "Fraud involving misuse of programme funds by third party"
-            ),
+            ISSUE_TYPE_FRAUD_MISUSE: _("Fraud involving misuse of programme funds by third party"),
+            ISSUE_TYPE_GROSS_MISMANAGEMENT: _("Gross mismanagement"),
             ISSUE_TYPE_HARASSMENT: _("Harassment and abuse of authority"),
             ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: _("Inappropriate staff conduct"),
-            ISSUE_TYPE_UNAUTHORIZED_USE: _(
-                "Unauthorized use, misuse or waste of UNICEF property or funds"
-            ),
-            ISSUE_TYPE_CONFLICT_OF_INTEREST: _("Conflict of interest"),
-            ISSUE_TYPE_GROSS_MISMANAGEMENT: _("Gross mismanagement"),
-            ISSUE_TYPE_PERSONAL_DISPUTES: _("Personal disputes"),
-            ISSUE_TYPE_SEXUAL_HARASSMENT: _(
-                "Sexual harassment and sexual exploitation"
-            ),
             ISSUE_TYPE_MISCELLANEOUS: _("Miscellaneous"),
+            ISSUE_TYPE_PERSONAL_DISPUTES: _("Personal disputes"),
+            ISSUE_TYPE_SEXUAL_HARASSMENT: _("Sexual harassment and sexual exploitation"),
+            ISSUE_TYPE_UNAUTHORIZED_USE: _("Unauthorized use, misuse or waste of UNICEF property or funds"),
         },
     }
-    ALL_ISSUE_TYPES = [
-        choice
-        for choices_group in ISSUE_TYPES_CHOICES.values()
-        for choice in choices_group.items()
-    ]
+    ALL_ISSUE_TYPES = [choice for choices_group in ISSUE_TYPES_CHOICES.values() for choice in choices_group.items()]
     STATUS_CHOICES = (
         (STATUS_NEW, _("New")),
         (STATUS_ASSIGNED, _("Assigned")),
+        (STATUS_CLOSED, _("Closed")),
+        (STATUS_FOR_APPROVAL, _("For Approval")),
         (STATUS_IN_PROGRESS, _("In Progress")),
         (STATUS_ON_HOLD, _("On Hold")),
-        (STATUS_FOR_APPROVAL, _("For Approval")),
-        (STATUS_CLOSED, _("Closed")),
     )
 
     CATEGORY_CHOICES = (
-        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_DATA_CHANGE, _("Data Change")),
-        (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
         (CATEGORY_GRIEVANCE_COMPLAINT, _("Grievance Complaint")),
-        (CATEGORY_NEGATIVE_FEEDBACK, _("Negative Feedback")),
-        (CATEGORY_REFERRAL, _("Referral")),
-        (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
         (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
+        (CATEGORY_NEGATIVE_FEEDBACK, _("Negative Feedback")),
+        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
+        (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
+        (CATEGORY_REFERRAL, _("Referral")),
+        (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
     MANUAL_CATEGORIES = (
         CATEGORY_DATA_CHANGE,
-        CATEGORY_SENSITIVE_GRIEVANCE,
         CATEGORY_GRIEVANCE_COMPLAINT,
         CATEGORY_NEGATIVE_FEEDBACK,
-        CATEGORY_REFERRAL,
         CATEGORY_POSITIVE_FEEDBACK,
+        CATEGORY_REFERRAL,
+        CATEGORY_SENSITIVE_GRIEVANCE,
     )
 
     SEARCH_TICKET_TYPES_LOOKUPS = {
@@ -351,9 +307,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         blank=True,
         verbose_name=_("Assigned to"),
     )
-    status = models.IntegerField(
-        verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_NEW
-    )
+    status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_NEW)
     category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
     description = models.TextField(
@@ -361,18 +315,12 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         blank=True,
         help_text=_("The content of the customers query."),
     )
-    admin2 = models.ForeignKey(
-        "core.AdminArea", null=True, blank=True, on_delete=models.SET_NULL
-    )
-    admin2_new = models.ForeignKey(
-        "geo.Area", null=True, blank=True, on_delete=models.SET_NULL
-    )
+    admin2 = models.ForeignKey("core.AdminArea", null=True, blank=True, on_delete=models.SET_NULL)
+    admin2_new = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
     area = models.CharField(max_length=250, blank=True)
     language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
-    business_area = models.ForeignKey(
-        "core.BusinessArea", related_name="tickets", on_delete=models.CASCADE
-    )
+    business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
     linked_tickets = models.ManyToManyField(
         to="GrievanceTicket",
         through="GrievanceTicketThrough",
@@ -391,9 +339,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
     @property
     def related_tickets(self):
-        combined_related_tickets = (
-            self.linked_tickets.all() | self.linked_tickets_related.all()
-        ).distinct()
+        combined_related_tickets = (self.linked_tickets.all() | self.linked_tickets_related.all()).distinct()
         yield from combined_related_tickets
 
     @property
@@ -441,19 +387,11 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     def clean(self):
         issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
         should_contain_issue_types = bool(issue_types)
-        has_invalid_issue_type = (
-            should_contain_issue_types is True and self.issue_type not in issue_types
-        )
-        has_issue_type_for_category_without_issue_types = bool(
-            should_contain_issue_types is False and self.issue_type
-        )
+        has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types
+        has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
-            logger.error(
-                f"Invalid issue type {self.issue_type} for selected category {self.category}"
-            )
-            raise ValidationError(
-                {"issue_type": "Invalid issue type for selected category"}
-            )
+            logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
+            raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -625,9 +563,7 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
         related_name="system_flagging_ticket_details",
         on_delete=models.CASCADE,
     )
-    golden_records_individual = models.ForeignKey(
-        "household.Individual", on_delete=models.CASCADE
-    )
+    golden_records_individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
     sanction_list_individual = models.ForeignKey(
         "sanction_list.SanctionListIndividual",
         related_name="+",
@@ -643,12 +579,8 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         related_name="needs_adjudication_ticket_details",
         on_delete=models.CASCADE,
     )
-    golden_records_individual = models.ForeignKey(
-        "household.Individual", related_name="+", on_delete=models.CASCADE
-    )
-    possible_duplicate = models.ForeignKey(
-        "household.Individual", related_name="+", on_delete=models.CASCADE
-    )
+    golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
+    possible_duplicate = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
     selected_individual = models.ForeignKey(
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
     )
@@ -657,14 +589,8 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
 
     @property
     def has_duplicated_document(self):
-        documents1 = [
-            f"{x.document_number}--{x.type_id}"
-            for x in self.golden_records_individual.documents.all()
-        ]
-        documents2 = [
-            f"{x.document_number}--{x.type_id}"
-            for x in self.possible_duplicate.documents.all()
-        ]
+        documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
+        documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
         return bool(set(documents1) & set(documents2))
 
 
@@ -674,9 +600,7 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         related_name="payment_verification_ticket_details",
         on_delete=models.CASCADE,
     )
-    payment_verifications = models.ManyToManyField(
-        "payment.PaymentVerification", related_name="ticket_details"
-    )
+    payment_verifications = models.ManyToManyField("payment.PaymentVerification", related_name="ticket_details")
     payment_verification_status = models.CharField(
         max_length=50,
         choices=PaymentVerification.STATUS_CHOICES,

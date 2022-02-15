@@ -138,11 +138,7 @@ class BusinessArea(TimeStampedUUIDModel):
 
 class AdminAreaLevelManager(models.Manager):
     def get_countries(self):
-        return (
-            self.filter(admin_level=0)
-            .order_by("country_name")
-            .values_list("id", "country_name")
-        )
+        return self.filter(admin_level=0).order_by("country_name").values_list("id", "country_name")
 
 
 class AdminAreaLevel(TimeStampedUUIDModel):
@@ -151,12 +147,8 @@ class AdminAreaLevel(TimeStampedUUIDModel):
     """
 
     name = models.CharField(max_length=64, verbose_name=_("Name"))
-    display_name = models.CharField(
-        max_length=64, blank=True, null=True, verbose_name=_("Display Name")
-    )
-    admin_level = models.PositiveSmallIntegerField(
-        verbose_name=_("Admin Level"), blank=True, null=True
-    )
+    display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
+    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"), blank=True, null=True)
     business_area = models.ForeignKey(
         "BusinessArea",
         on_delete=models.SET_NULL,
@@ -194,9 +186,7 @@ class AdminAreaLevel(TimeStampedUUIDModel):
 
 class AdminAreaManager(TreeManager):
     def get_queryset(self):
-        return (
-            super().get_queryset().order_by("title").select_related("admin_area_level")
-        )
+        return super().get_queryset().order_by("title").select_related("admin_area_level")
 
 
 class AdminArea(MPTTModel, TimeStampedUUIDModel):
@@ -227,9 +217,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
 
-    p_code = models.CharField(
-        max_length=32, blank=True, null=True, verbose_name="P Code"
-    )
+    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="P Code")
 
     parent = TreeForeignKey(
         "self",
@@ -268,13 +256,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
 
     @property
     def geo_point(self):
-        return (
-            self.point
-            if self.point
-            else self.geom.point_on_surface
-            if self.geom
-            else ""
-        )
+        return self.point if self.point else self.geom.point_on_surface if self.geom else ""
 
     @property
     def point_lat_long(self):
@@ -321,14 +303,14 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     DATE = "DATE"
     GEOPOINT = "GEOPOINT"
     TYPE_CHOICE = Choices(
-        (STRING, _("String")),
+        (DATE, _("Date")),
+        (DECIMAL, _("Decimal")),
         (IMAGE, _("Image")),
         (INTEGER, _("Integer")),
-        (DECIMAL, _("Decimal")),
+        (GEOPOINT, _("Geopoint")),
         (SELECT_ONE, _("Select One")),
         (SELECT_MANY, _("Select Many")),
-        (DATE, _("Date")),
-        (GEOPOINT, _("Geopoint")),
+        (STRING, _("String")),
     )
     ASSOCIATED_WITH_CHOICES = (
         (0, _("Household")),
@@ -383,9 +365,7 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     label = JSONField(default=dict)
-    flex_attributes = models.ManyToManyField(
-        "core.FlexibleAttribute", related_name="choices"
-    )
+    flex_attributes = models.ManyToManyField("core.FlexibleAttribute", related_name="choices")
 
     def __str__(self):
         return f"list name: {self.list_name}, name: {self.name}"
@@ -413,11 +393,11 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     PROCESSING = "PROCESSING"
     CONNECTION_FAILED = "CONNECTION_FAILED"
     KOBO_FORM_UPLOAD_STATUS_CHOICES = (
-        (SUCCESSFUL, _("Successful")),
-        (UPLOADED, _("Successful")),
-        (UNSUCCESSFUL, _("Unsuccessful")),
-        (PROCESSING, _("Processing")),
         (CONNECTION_FAILED, _("Connection failed")),
+        (PROCESSING, _("Processing")),
+        (SUCCESSFUL, _("Successful")),
+        (UNSUCCESSFUL, _("Unsuccessful")),
+        (UPLOADED, _("Uploaded")),
     )
 
     class Meta:
@@ -464,28 +444,17 @@ class CountryCodeMapManager(models.Manager):
         return self._cache["ca2"].get(ca_code, ca_code)
 
     def build_cache(self):
-        if (
-            not self._cache[2]
-            or not self._cache[3]
-            or not self._cache["ca2"]
-            or not self._cache["ca3"]
-        ):
+        if not self._cache[2] or not self._cache[3] or not self._cache["ca2"] or not self._cache["ca3"]:
             for entry in self.all():
                 self._cache[2][entry.country.code] = entry.ca_code
-                self._cache[3][
-                    entry.country.countries.alpha3(entry.country.code)
-                ] = entry.ca_code
+                self._cache[3][entry.country.countries.alpha3(entry.country.code)] = entry.ca_code
                 self._cache["ca2"][entry.ca_code] = entry.country.code
-                self._cache["ca3"][entry.ca_code] = entry.country.countries.alpha3(
-                    entry.country.code
-                )
+                self._cache["ca3"][entry.ca_code] = entry.country.countries.alpha3(entry.country.code)
 
 
 class CountryCodeMap(models.Model):
     country = CountryField(unique=True)
-    country_new = models.ForeignKey(
-        "geo.Country", blank=True, null=True, unique=True, on_delete=models.PROTECT
-    )
+    country_new = models.ForeignKey("geo.Country", blank=True, null=True, unique=True, on_delete=models.PROTECT)
     ca_code = models.CharField(max_length=5, unique=True)
 
     objects = CountryCodeMapManager()

@@ -414,7 +414,9 @@ class Query(graphene.ObjectType):
         payment_records = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-        volume_by_delivery_type = payment_records.values("delivery_type").annotate(volume=Sum("delivered_quantity_usd"))
+        volume_by_delivery_type = payment_records.values("delivery_type").annotate(
+            volume=Sum("delivered_quantity_usd", output_field=DecimalField())
+        )
         labels = []
         data = []
         for volume_dict in volume_by_delivery_type:
@@ -446,7 +448,11 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
         payment_records = get_payment_records_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs))
-        return {"total": payment_records.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
+        return {
+            "total": payment_records.aggregate(Sum("delivered_quantity_usd", output_field=DecimalField()))[
+                "delivered_quantity_usd__sum"
+            ]
+        }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
@@ -464,7 +470,9 @@ class Query(graphene.ObjectType):
                 household__payment_records__in=payment_records,
             )
             .distinct()
-            .annotate(total_transferred=Sum("household__payment_records__delivered_quantity_usd"))
+            .annotate(
+                total_transferred=Sum("household__payment_records__delivered_quantity_usd", output_field=DecimalField())
+            )
             .annotate(num_households=Count("household", distinct=True))
         )
 
@@ -499,12 +507,16 @@ class Query(graphene.ObjectType):
             .order_by("business_area__name")
             .annotate(
                 total_delivered_cash=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
+                    output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_delivered_voucher=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
+                    output_field=DecimalField(),
                 )
             )
         )

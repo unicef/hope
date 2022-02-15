@@ -361,7 +361,9 @@ class GenerateDashboardReportContentHelpers:
             )
         )
 
-        totals = business_areas.aggregate(Sum("total_cash"), Sum("total_voucher"))
+        totals = business_areas.aggregate(
+            Sum("total_cash", output_field=DecimalField()), Sum("total_voucher", output_field=DecimalField())
+        )
 
         return business_areas, totals
 
@@ -375,11 +377,15 @@ class GenerateDashboardReportContentHelpers:
                 household__payment_records__in=valid_payment_records,
             )
             .distinct()
-            .annotate(total_transferred=Sum("household__payment_records__delivered_quantity_usd"))
+            .annotate(
+                total_transferred=Sum("household__payment_records__delivered_quantity_usd", output_field=DecimalField())
+            )
             .annotate(num_households=Count("household", distinct=True))
         )
 
-        totals = admin_areas.aggregate(Sum("total_transferred"), Sum("num_households"))
+        totals = admin_areas.aggregate(
+            Sum("total_transferred", output_field=DecimalField()), Sum("num_households", output_field=DecimalField())
+        )
         admin_areas = admin_areas.values("id", "title", "p_code", "num_households", "total_transferred")
 
         individual_count_fields = cls._get_all_individual_count_fields()
