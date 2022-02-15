@@ -10,6 +10,7 @@ import { DeleteHouseholdGrievanceDetails } from '../../../../components/grievanc
 import { DeleteIndividualGrievanceDetails } from '../../../../components/grievances/DeleteIndividualGrievanceDetails';
 import { FlagDetails } from '../../../../components/grievances/FlagDetails';
 import { GrievanceDetailsToolbar } from '../../../../components/grievances/GrievanceDetailsToolbar';
+import { GrievancesApproveSection } from '../../../../components/grievances/GrievancesApproveSection/GrievancesApproveSection';
 import { GrievancesDetails } from '../../../../components/grievances/GrievancesDetails/GrievancesDetails';
 import { NeedsAdjudicationDetails } from '../../../../components/grievances/NeedsAdjudicationDetails';
 import { Notes } from '../../../../components/grievances/Notes';
@@ -203,71 +204,12 @@ export function GrievancesDetailsPage(): React.ReactElement {
           canViewHouseholdDetails={canViewHouseholdDetails}
           canViewIndividualDetails={canViewIndividualDetails}
         />
-        <Grid item xs={12}>
-          {ticket?.category?.toString() ===
-            GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING && (
-            <PaddingContainer>
-              <FlagDetails
-                ticket={ticket}
-                canApproveFlag={canApproveFlagAndAdjudication}
-              />
-            </PaddingContainer>
-          )}
-          {ticket?.category?.toString() ===
-            GRIEVANCE_CATEGORIES.DEDUPLICATION && (
-            <PaddingContainer>
-              <NeedsAdjudicationDetails
-                ticket={ticket}
-                canApprove={canApproveFlagAndAdjudication}
-              />
-            </PaddingContainer>
-          )}
-          {ticket?.issueType?.toString() ===
-            GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
-            <PaddingContainer>
-              <AddIndividualGrievanceDetails
-                ticket={ticket}
-                canApproveDataChange={canApproveDataChange}
-              />
-            </PaddingContainer>
-          )}
-          {ticket?.issueType?.toString() ===
-            GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL && (
-            <PaddingContainer>
-              <DeleteIndividualGrievanceDetails
-                ticket={ticket}
-                canApproveDataChange={canApproveDataChange}
-              />
-            </PaddingContainer>
-          )}
-          {ticket?.issueType?.toString() ===
-            GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD && (
-            <PaddingContainer>
-              <DeleteHouseholdGrievanceDetails
-                ticket={ticket}
-                canApproveDataChange={canApproveDataChange}
-              />
-            </PaddingContainer>
-          )}
-          {ticket?.issueType?.toString() ===
-            GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
-            <PaddingContainer>
-              <RequestedIndividualDataChange
-                ticket={ticket}
-                canApproveDataChange={canApproveDataChange}
-              />
-            </PaddingContainer>
-          )}
-          {ticket?.issueType?.toString() ===
-            GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
-            <PaddingContainer>
-              <RequestedHouseholdDataChange
-                ticket={ticket}
-                canApproveDataChange={canApproveDataChange}
-              />
-            </PaddingContainer>
-          )}
-        </Grid>
+        <GrievancesApproveSection
+          ticket={ticket}
+          businessArea={businessArea}
+          canApproveFlagAndAdjudication={canApproveFlagAndAdjudication}
+          canApproveDataChange={canApproveDataChange}
+        />
         <Grid item xs={9}>
           <PaddingContainer>
             <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
