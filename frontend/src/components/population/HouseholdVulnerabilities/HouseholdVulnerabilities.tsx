@@ -4,14 +4,13 @@ import Paper from '@material-ui/core/Paper';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
+import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import {
-  HouseholdDetailedFragment,
-  useAllHouseholdsFlexFieldsAttributesQuery,
-} from '../../__generated__/graphql';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { HouseholdFlexFieldPhotoModal } from './HouseholdFlexFieldPhotoModal';
+  HouseholdNode,
+  AllHouseholdsFlexFieldsAttributesQuery,
+} from '../../../__generated__/graphql';
+import { LabelizedField } from '../../core/LabelizedField';
+import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -28,27 +27,22 @@ const Title = styled.div`
 `;
 
 interface HouseholdVulnerabilitiesProps {
-  household: HouseholdDetailedFragment;
+  household: HouseholdNode;
+  flexFieldsData: AllHouseholdsFlexFieldsAttributesQuery;
 }
 
 export function HouseholdVulnerabilities({
   household,
+  flexFieldsData,
 }: HouseholdVulnerabilitiesProps): React.ReactElement {
   const { t } = useTranslation();
-  const { data, loading } = useAllHouseholdsFlexFieldsAttributesQuery();
+
   const flexAttributesDict = useArrayToDict(
-    data?.allHouseholdsFlexFieldsAttributes,
+    flexFieldsData?.allHouseholdsFlexFieldsAttributes,
     'name',
     '*',
   );
 
-  if (loading) {
-    return <LoadingComponent />;
-  }
-
-  if (!data || !flexAttributesDict) {
-    return null;
-  }
   const fields = Object.entries(household.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
       if (flexAttributesDict[key]?.type === 'IMAGE') {

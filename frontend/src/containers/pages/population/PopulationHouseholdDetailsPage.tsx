@@ -11,15 +11,15 @@ import { LabelizedField } from '../../../components/core/LabelizedField';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities';
+import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
-  HouseholdDetailedFragment,
   HouseholdNode,
+  useAllHouseholdsFlexFieldsAttributesQuery,
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../../__generated__/graphql';
@@ -71,15 +71,21 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     variables: { id },
   });
   const {
+    data: flexFieldsData,
+    loading: flexFieldsDataLoading,
+  } = useAllHouseholdsFlexFieldsAttributesQuery();
+  const {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading || choicesLoading || flexFieldsDataLoading)
+    return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || permissions === null) return null;
+  if (!data || !choicesData || !flexFieldsData || permissions === null)
+    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -154,7 +160,8 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           />
         )}
         <HouseholdVulnerabilities
-          household={household as HouseholdDetailedFragment}
+          household={household as HouseholdNode}
+          flexFieldsData={flexFieldsData}
         />
         <Overview>
           <Title>
