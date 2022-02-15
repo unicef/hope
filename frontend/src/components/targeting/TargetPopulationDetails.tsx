@@ -1,16 +1,12 @@
 import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { TargetPopulationNode } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { OverviewContainer } from '../core/OverviewContainer';
+import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
 
 interface ProgramDetailsProps {
   targetPopulation: TargetPopulationNode;
