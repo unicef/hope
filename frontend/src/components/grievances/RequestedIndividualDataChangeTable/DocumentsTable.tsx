@@ -15,12 +15,8 @@ import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+import { TableTitle } from '../../core/TableTitle';
 import { handleSelected } from '../utils/helpers';
-
-const Title = styled.div`
-  padding-top: ${({ theme }) => theme.spacing(4)}px;
-  padding-bottom: ${({ theme }) => theme.spacing(2)}px;
-`;
 
 const StyledTable = styled(Table)`
   color: #9e9e9e;
@@ -72,11 +68,11 @@ export const DocumentsTable = ({
   );
   return (
     <>
-      <Title>
+      <TableTitle>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>{t('Documents to be added')}</Typography>
         </Box>
-      </Title>
+      </TableTitle>
       <StyledTable>
         {documentsTableHead}
         <TableBody>

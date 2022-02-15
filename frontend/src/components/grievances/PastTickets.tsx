@@ -6,12 +6,10 @@ import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { Missing } from '../core/Missing';
 import { OverviewContainer } from '../core/OverviewContainer';
+import { Title } from '../core/Title';
 
 const PastContainer = styled.div`
   padding: 22px 22px 22px 0;
-`;
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 export function PastTickets({ tickets }): React.ReactElement {

@@ -15,6 +15,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
+    TicketDeleteHouseholdDetails,
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
@@ -100,6 +101,11 @@ class TicketAddIndividualDetailsAdmin(HOPEModelAdminBase):
 @admin.register(TicketDeleteIndividualDetails)
 class TicketDeleteIndividualDetailsAdmin(HOPEModelAdminBase):
     raw_id_fields = ("ticket", "individual")
+
+
+@admin.register(TicketDeleteHouseholdDetails)
+class TicketDeleteHouseholdDetailsAdmin(HOPEModelAdminBase):
+    raw_id_fields = ("ticket", "household")
 
 
 @admin.register(TicketNeedsAdjudicationDetails)

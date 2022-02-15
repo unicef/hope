@@ -28,6 +28,7 @@ import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndi
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordHouseholdTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
+import { Title } from '../../../components/core/Title';
 
 const Container = styled.div`
   padding: 20px;
@@ -36,11 +37,6 @@ const Container = styled.div`
     flex-direction: column;
     width: 100%;
   }
-`;
-
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 const Overview = styled(Paper)`

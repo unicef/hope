@@ -13,16 +13,13 @@ import {
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { Title } from '../core/Title';
 
 const StyledBox = styled(Paper)`
   display: flex;
   flex-direction: column;
   width: 100%;
   padding: 26px 22px;
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 const BlueBold = styled.div`
