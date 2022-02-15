@@ -39,7 +39,7 @@ class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         ("business_area", AutoCompleteFilter),
         ("delivery_type", ChoicesFieldComboFilter),
         ("verification_status", ChoicesFieldComboFilter),
-        TextFieldFilter.factory("program__id", "Program ID"),
+        TextFieldFilter.factory("program__id__contains", "Program ID"),
         TextFieldFilter.factory("vision_id", "Vision ID"),
     )
     raw_id_fields = ("business_area", "program", "service_provider")
