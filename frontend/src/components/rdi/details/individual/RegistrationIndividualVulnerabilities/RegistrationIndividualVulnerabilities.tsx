@@ -10,6 +10,7 @@ import {
   ImportedIndividualDetailedFragment,
 } from '../../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../core/LabelizedField';
+import { Title } from '../../../../core/Title';
 import { ImportedIndividualFlexFieldPhotoModal } from '../ImportedIndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
@@ -17,11 +18,6 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
   margin-top: ${({ theme }) => theme.spacing(6)}px;
   margin-bottom: ${({ theme }) => theme.spacing(6)}px;
-`;
-
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 interface RegistrationIndividualVulnerabilitiesProps {

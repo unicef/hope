@@ -6,20 +6,20 @@ import {
   hasPermissionInModule,
   hasPermissions,
   PERMISSIONS,
-} from '../../config/permissions';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useDebounce } from '../../hooks/useDebounce';
-import { usePermissions } from '../../hooks/usePermissions';
-import { renderUserName } from '../../utils/utils';
+} from '../../../config/permissions';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { renderUserName } from '../../../utils/utils';
 import {
   useGrievancesChoiceDataQuery,
   useAllUsersForFiltersQuery,
-} from '../../__generated__/graphql';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { PageHeader } from '../core/PageHeader';
-import { PermissionDenied } from '../core/PermissionDenied';
-import { GrievancesFilters } from './GrievancesTable/GrievancesFilters';
-import { GrievancesTable } from './GrievancesTable/GrievancesTable';
+} from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
+import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
 
 export function GrievancesTablePage(): React.ReactElement {
   const { t } = useTranslation();
@@ -42,7 +42,10 @@ export function GrievancesTablePage(): React.ReactElement {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  const { data: userData, loading: userDataLoading } = useAllUsersForFiltersQuery({
+  const {
+    data: userData,
+    loading: userDataLoading,
+  } = useAllUsersForFiltersQuery({
     variables: { businessArea },
   });
 

@@ -11,6 +11,7 @@ import { MiśTheme } from '../../../../theme';
 import { registrationDataImportStatusToColor } from '../../../../utils/utils';
 import { RegistrationDetailedFragment } from '../../../../__generated__/graphql';
 import { DedupeBox } from '../DedupeBox';
+import { Title } from '../../../core/Title';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -36,10 +37,6 @@ export const BigValue = styled.div`
 const Error = styled.p`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
 `;
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
 interface RegistrationDetailsProps {
   registration: RegistrationDetailedFragment;
 }

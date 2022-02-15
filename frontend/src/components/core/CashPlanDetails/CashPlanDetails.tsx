@@ -10,6 +10,7 @@ import { ContentLink } from '../ContentLink';
 import { LabelizedField } from '../LabelizedField';
 import { OverviewContainer } from '../OverviewContainer';
 import { StatusBox } from '../StatusBox';
+import { Title } from '../Title';
 import { UniversalMoment } from '../UniversalMoment';
 
 const StatusContainer = styled.div`
@@ -31,18 +32,14 @@ const NumberOfHouseHoldsValue = styled.div`
   line-height: 32px;
   margin-top: ${({ theme }) => theme.spacing(2)}px;
 `;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
 interface CashPlanProps {
   cashPlan: CashPlanNode;
-  businessArea: string
+  businessArea: string;
 }
 
 export function CashPlanDetails({
-  cashPlan, businessArea
+  cashPlan,
+  businessArea,
 }: CashPlanProps): React.ReactElement {
   const { t } = useTranslation();
 

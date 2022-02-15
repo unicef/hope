@@ -11,6 +11,7 @@ import {
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { Title } from '../core/Title';
 import { IndividualFlexFieldPhotoModal } from './IndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
@@ -19,12 +20,6 @@ const Overview = styled(Paper)`
   margin-top: ${({ theme }) => theme.spacing(6)}px;
   margin-bottom: ${({ theme }) => theme.spacing(6)}px;
 `;
-
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
 interface IndividualVulnerabilitesProps {
   individual: IndividualNode;
 }

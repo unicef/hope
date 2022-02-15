@@ -23,6 +23,7 @@ import {
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../core/ConfirmationDialog';
 import { FlagTooltip } from '../core/FlagTooltip';
+import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 import { ViewSanctionList } from './ViewSanctionList';
 
@@ -31,10 +32,6 @@ const StyledBox = styled(Paper)`
   flex-direction: column;
   width: 100%;
   padding: 26px 22px;
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 export function FlagDetails({
