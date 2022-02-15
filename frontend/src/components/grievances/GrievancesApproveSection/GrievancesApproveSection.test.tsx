@@ -1,18 +1,16 @@
 import React from 'react';
 import { render } from '../../../testUtils/testUtils';
-import { GrievancesDetails } from './GrievancesDetails';
+import { GrievancesApproveSection } from './GrievancesApproveSection';
 import { fakeGrievanceTicket } from '../../../../fixtures/grievances/fakeGrievanceTicket';
-import { fakeGrievancesChoices } from '../../../../fixtures/grievances/fakeGrievancesChoices';
 
-describe('components/grievances/GrievancesDetails', () => {
+describe('components/grievances/GrievancesApproveSection', () => {
   it('should render', () => {
     const { container } = render(
-      <GrievancesDetails
+      <GrievancesApproveSection
         businessArea='afghanistan'
         ticket={fakeGrievanceTicket}
-        choicesData={fakeGrievancesChoices}
-        canViewHouseholdDetails={true}
-        canViewIndividualDetails={true}
+        canApproveFlagAndAdjudication={true}
+        canApproveDataChange={true}
       />,
     );
     expect(container).toMatchSnapshot();
