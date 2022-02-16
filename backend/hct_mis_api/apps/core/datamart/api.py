@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 
 class DatamartAPI:
     PAGE_SIZE = 100
-    LOCATIONS_ENDPOINT = (
-        "/api/latest/datamart/locations/?-serializer=geo&format=json&ordering=id"
-    )
+    LOCATIONS_ENDPOINT = "/api/latest/datamart/locations/?-serializer=geo&format=json&ordering=id"
 
     def __init__(self):
         self._client = requests.session()
@@ -45,9 +43,7 @@ class DatamartAPI:
         url = f"/api/latest/datamart/locations/{id}/"
         return self._handle_get_request(url)
 
-    def get_locations(
-        self, *, country=None, gis=False, max_records=None, page_size=None
-    ):
+    def get_locations(self, *, country=None, gis=False, max_records=None, page_size=None):
         url = f"/api/latest/datamart/locations/?&ordering=id,page_size={page_size or self.PAGE_SIZE}"
         if country:
             url = f"{url}&country_name={country}"
@@ -81,9 +77,7 @@ class DatamartAPI:
         if geometry_type != "MultiPolygon":
             logger.error("Geometry type should be MultiPolygon")
             raise ValidationError("Geometry type should be MultiPolygon")
-        return MultiPolygon(
-            [Polygon(polygon) for polygon in geometry.get("coordinates")[0]]
-        )
+        return MultiPolygon([Polygon(polygon) for polygon in geometry.get("coordinates")[0]])
 
     def generate_admin_areas(self, locations, business_area):
         self.generate_admin_areas_old_models(locations, business_area)
@@ -117,9 +111,7 @@ class DatamartAPI:
             admin_area.title = properties.get("name")
             admin_area.admin_area_level = admin_area_level
             admin_area.p_code = properties.get("p_code")
-            admin_area.point = Point(
-                properties.get("longitude"), properties.get("latitude")
-            )
+            admin_area.point = Point(properties.get("longitude"), properties.get("latitude"))
             admin_area.geom = self._features_to_multi_polygon(location.get("geometry"))
             admin_areas_to_create.append(admin_area)
             admin_areas_external_id_dict[external_id] = admin_area
@@ -151,9 +143,7 @@ class DatamartAPI:
             external_id = location.get("id")
             admin_area_level = admin_area_level_dict.get(gateway)
             if admin_area_level is None:
-                admin_area_level = AreaType.objects.filter(
-                    area_level=gateway, country__name=business_area.name
-                ).first()
+                admin_area_level = AreaType.objects.filter(area_level=gateway, country__name=business_area.name).first()
             if admin_area_level is None:
                 country = Country.objects.get(name=business_area.name)
                 admin_area_level = AreaType(
@@ -163,17 +153,13 @@ class DatamartAPI:
                 )
             admin_area_level_dict[gateway] = admin_area_level
 
-            admin_area = Area.objects.filter(
-                area_type=admin_area_level, name=properties.get("name")
-            ).first()
+            admin_area = Area.objects.filter(area_type=admin_area_level, name=properties.get("name")).first()
             if admin_area is None:
                 admin_area = Area()
             admin_area.name = properties.get("name")
             admin_area.area_type = admin_area_level
             admin_area.p_code = properties.get("p_code")
-            admin_area.point = Point(
-                properties.get("longitude"), properties.get("latitude")
-            )
+            admin_area.point = Point(properties.get("longitude"), properties.get("latitude"))
             admin_area.geom = self._features_to_multi_polygon(location.get("geometry"))
             admin_areas_to_create.append(admin_area)
             admin_areas_external_id_dict[external_id] = admin_area

@@ -14,6 +14,7 @@ def send_target_population_task(target_population_id):
             SendTPToDatahubTask,
         )
         from hct_mis_api.apps.targeting.models import TargetPopulation
+
         target_population = TargetPopulation.objects.select_related("program").get(id=target_population_id)
         return SendTPToDatahubTask().execute(target_population)
     except Exception as e:
