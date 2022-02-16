@@ -1,6 +1,6 @@
 import re
 
-from django.db.models import IntegerField, Prefetch, Q, Sum
+from django.db.models import IntegerField, Prefetch, Q, Sum, DecimalField
 from django.db.models.functions import Coalesce, Lower
 
 import graphene
