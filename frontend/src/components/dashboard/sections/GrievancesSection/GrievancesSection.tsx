@@ -2,10 +2,10 @@ import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { formatNumber } from '../../../utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { GrievancesChart } from '../charts/GrievancesChart';
-import { DashboardPaper } from '../DashboardPaper';
+import { formatNumber } from '../../../../utils/utils';
+import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { GrievancesChart } from '../../charts/GrievancesChart';
+import { DashboardPaper } from '../../DashboardPaper';
 
 const CardTitleSmaller = styled.div`
   text-transform: capitalize;
@@ -22,7 +22,6 @@ export const GrievancesSection = ({
   data,
 }: GrievancesSectionProps): React.ReactElement => {
   const { t } = useTranslation();
-
   if (!data) return null;
   return (
     <DashboardPaper title='Grievances and Feedback'>

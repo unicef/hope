@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/dashboard/PaymentVerificationSection should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root sc-bdVaJa hInPwd MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="MuiBox-root MuiBox-root-1"
+    >
+      Payment Verification
+    </div>
+    <div
+      class="MuiBox-root MuiBox-root-2"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-subtitle2"
+      >
+        0
+         
+        Households contacted
+      </h6>
+      <span
+        class="MuiTypography-root MuiTypography-caption"
+      >
+        0
+        % 
+        average sampling
+      </span>
+    </div>
+    <div
+      class="MuiBox-root MuiBox-root-3"
+    >
+      <canvas
+        class="chartjs-render-monitor"
+        height="0"
+        style="display: block;"
+        width="0"
+      />
+    </div>
+  </div>
+</div>
+`;

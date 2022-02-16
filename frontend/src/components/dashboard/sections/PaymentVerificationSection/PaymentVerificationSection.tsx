@@ -1,9 +1,9 @@
 import { Box, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { PaymentVerificationChart } from '../charts/PaymentVerificationChart';
-import { DashboardPaper } from '../DashboardPaper';
+import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { PaymentVerificationChart } from '../../charts/PaymentVerificationChart';
+import { DashboardPaper } from '../../DashboardPaper';
 
 interface PaymentVerificationSectionProps {
   data: AllChartsQuery['chartPaymentVerification'];
@@ -12,8 +12,8 @@ export const PaymentVerificationSection = ({
   data,
 }: PaymentVerificationSectionProps): React.ReactElement => {
   const { t } = useTranslation();
-
   if (!data) return null;
+
   return (
     <DashboardPaper title={t('Payment Verification')}>
       <Box mt={3}>
