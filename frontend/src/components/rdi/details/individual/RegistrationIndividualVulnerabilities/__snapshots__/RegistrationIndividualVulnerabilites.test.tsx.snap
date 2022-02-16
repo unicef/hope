@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root sc-htoDjs beQuXv MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="sc-htpNat hUqbZq"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        Vulnerabilities
+      </h6>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+      >
+        <div>
+          <span
+            class="sc-bdVaJa kwsjSG"
+            color="textSecondary"
+          >
+            muac
+          </span>
+          <div>
+            <span
+              class="sc-bwzfXH emFVa"
+              color="textSecondary"
+            >
+              12
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+      >
+        <div>
+          <span
+            class="sc-bdVaJa kwsjSG"
+            color="textSecondary"
+          >
+            school enrolled
+          </span>
+          <div>
+            <span
+              class="sc-bwzfXH emFVa"
+              color="textSecondary"
+            >
+              No
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+      >
+        <div>
+          <span
+            class="sc-bdVaJa kwsjSG"
+            color="textSecondary"
+          >
+            school enrolled before
+          </span>
+          <div>
+            <span
+              class="sc-bwzfXH emFVa"
+              color="textSecondary"
+            >
+              Yes
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

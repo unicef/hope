@@ -1,0 +1,1 @@
+export { GrievancesDetails } from './GrievancesDetails';

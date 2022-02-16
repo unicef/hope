@@ -180,14 +180,14 @@ class LoadSanctionListXMLTask:
         path = "INDIVIDUAL_ADDRESS/COUNTRY"
         result = self._get_country_field(individual_tag, path)
         if result:
-            return set(
+            return {
                 SanctionListIndividualCountries(
                     individual=self._get_individual_from_db_or_file(individual),
                     country=alpha2,
                     country_new=geo_models.Country.objects.get(iso_code2=alpha2),
                 )
                 for alpha2 in result
-            )
+            }
         return set()
 
     def _get_country_of_birth(self, individual_tag: ET.Element, *args, **kwargs) -> str:
@@ -208,14 +208,14 @@ class LoadSanctionListXMLTask:
         path = "NATIONALITY/VALUE"
         result = self._get_country_field(individual_tag, path)
         if result:
-            return set(
+            return {
                 SanctionListIndividualNationalities(
                     individual=self._get_individual_from_db_or_file(individual),
                     nationality=alpha2,
                     nationality_new=geo_models.Country.objects.get(iso_code2=alpha2),
                 )
                 for alpha2 in result
-            )
+            }
         return set()
 
     def _get_documents(

@@ -11,6 +11,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       registrationCaId
       household {
         id
+        status
         size
       }
       fullName

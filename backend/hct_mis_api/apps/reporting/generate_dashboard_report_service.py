@@ -502,7 +502,7 @@ class GenerateDashboardReportContentHelpers:
     def format_total_transferred_by_admin_area_row(cls, instance, is_totals: bool, *args):
         fields_list = cls._get_all_individual_count_fields()
 
-        shared_cells = tuple([instance.get(f"{field_name}__sum", 0) for field_name in fields_list])
+        shared_cells = tuple(instance.get(f"{field_name}__sum", 0) for field_name in fields_list)
 
         if is_totals:
             return (
@@ -745,7 +745,7 @@ class GenerateDashboardReportService:
                 "business area",
                 "programme",
             ),
-            SHARED: tuple([choice[1] for choice in PaymentRecord.DELIVERY_TYPE_CHOICE]),
+            SHARED: tuple(choice[1] for choice in PaymentRecord.DELIVERY_TYPE_CHOICE),
         },
         DashboardReport.INDIVIDUALS_REACHED: {
             HQ: (

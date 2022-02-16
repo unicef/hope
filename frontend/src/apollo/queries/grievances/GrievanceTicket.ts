@@ -90,6 +90,10 @@ export const GrievanceTicket = gql`
         roleReassignData
         approveStatus
       }
+      deleteHouseholdTicketDetails {
+        id
+        approveStatus
+      }
       systemFlaggingTicketDetails {
         id
         approveStatus

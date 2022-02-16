@@ -232,7 +232,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                                         "country": "POL",
                                         "number": "123-123-UX-321",
-                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                        "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                     }
                                 ],
                                 "identities": [
@@ -291,7 +291,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "type": IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
                                         "country": "POL",
                                         "number": "321-321-XU-987",
-                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                        "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                     }
                                 ],
                                 "documentsToEdit": [
@@ -300,7 +300,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                                         "country": "POL",
                                         "number": "321-321-XU-123",
-                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                        "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                     }
                                 ],
                                 "identities": [
@@ -398,6 +398,42 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "country": "AFG",
                                 "size": 4,
                             },
+                        }
+                    }
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_delete_household_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        variables = {
+            "input": {
+                "description": "Test",
+                "businessArea": "afghanistan",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "issueType": 17,
+                "category": 2,
+                "consent": True,
+                "language": "PL",
+                "extras": {
+                    "issueType": {
+                        "householdDeleteIssueTypeExtras": {
+                            "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
                         }
                     }
                 },

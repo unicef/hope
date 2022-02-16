@@ -159,6 +159,26 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function prepareDeleteHouseholdVariables(requiredVariables, values) {
+  return {
+    variables: {
+      input: {
+        ...requiredVariables,
+        issueType: values.issueType,
+        linkedTickets: values.selectedRelatedTickets,
+        extras: {
+          issueType: {
+            householdDeleteIssueTypeExtras: {
+              household: values.selectedHousehold?.id,
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditIndividualVariables(requiredVariables, values) {
   const individualData = values.individualDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
@@ -259,6 +279,7 @@ export const prepareVariablesDict = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
     [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: prepareAddIndividualVariables,
     [GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL]: prepareDeleteIndividualVariables,
+    [GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD]: prepareDeleteHouseholdVariables,
     [GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL]: prepareEditIndividualVariables,
     [GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD]: prepareEditHouseholdVariables,
   },
