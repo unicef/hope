@@ -202,6 +202,9 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     delivery_type = graphene.String()
     total_number_of_households = graphene.Int()
     currency = graphene.String(source="currency")
+    total_delivered_quantity = graphene.Float()
+    total_entitled_quantity = graphene.Float()
+    total_undelivered_quantity = graphene.Float()
 
     class Meta:
         model = CashPlan

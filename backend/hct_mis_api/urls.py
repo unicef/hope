@@ -26,7 +26,6 @@ from hct_mis_api.apps.core.views import (
 actions.add_to_site(site, exclude=["export_delete_tree"])
 
 urlpatterns = [
-    path(f"api/{settings.ADMIN_PANEL_URL}/", admin.site.urls),
     path("api/explorer/", include("explorer.urls")),
     path(f"api/{settings.ADMIN_PANEL_URL}/hijack/", include("hijack.urls")),
     path(f"api/{settings.ADMIN_PANEL_URL}/adminactions/", include("adminactions.urls")),
@@ -63,7 +62,7 @@ urlpatterns = [
         hct_mis_api.apps.sanction_list.views.download_sanction_template,
     ),
     path(
-        "api/unicorn/download-target-population-xlsx/<uuid:target_population_id>/",
+        f"api/{settings.ADMIN_PANEL_URL}/download-target-population-xlsx/<uuid:target_population_id>/",
         hct_mis_api.apps.targeting.views.download_xlsx_households,
         name="admin-download-target-population",
     ),
@@ -72,6 +71,7 @@ urlpatterns = [
         hct_mis_api.apps.core.views.download_dashboard_report,
         name="dashboard_report",
     ),
+    path(f"api/{settings.ADMIN_PANEL_URL}/", admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()

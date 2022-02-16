@@ -1,4 +1,4 @@
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q, Sum, DecimalField
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 
