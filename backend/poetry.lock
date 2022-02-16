@@ -896,7 +896,7 @@ wasmer = {version = ">=0.3.0", markers = "python_version >= \"3.5\" and platform
 
 [[package]]
 name = "filelock"
-version = "3.5.0"
+version = "3.5.1"
 description = "A platform independent file lock."
 category = "dev"
 optional = false
@@ -960,7 +960,7 @@ test = ["pytest", "pytest-benchmark", "pytest-cov", "pytest-mock", "fastdiff (==
 
 [[package]]
 name = "graphene-django"
-version = "2.15.0"
+version = "2.14.0"
 description = "Graphene Django integration"
 category = "main"
 optional = false
@@ -982,7 +982,7 @@ test = ["pytest (>=3.6.3)", "pytest-cov", "coveralls", "mock", "pytz", "pytest-d
 
 [[package]]
 name = "graphene-file-upload"
-version = "1.3.0"
+version = "1.2.2"
 description = "Lib for adding file upload functionality to GraphQL mutations in Graphene Django and Flask-Graphql"
 category = "main"
 optional = false
@@ -995,7 +995,6 @@ six = ">=1.11.0"
 all = ["Flask (>=1.0.2)", "graphene (>=2.1.2)", "Flask-Graphql (>=2.0.0)", "graphene-django (>=2.0.0)"]
 django = ["graphene-django (>=2.0.0)"]
 flask = ["Flask (>=1.0.2)", "graphene (>=2.1.2)", "Flask-Graphql (>=2.0.0)"]
-tests = ["coverage", "pytest", "pytest-cov", "pytest-django"]
 
 [[package]]
 name = "graphql-core"
@@ -2062,7 +2061,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "be635f8705002a41e4ea0a844a4bd29e1cac30bc5dd157fc1d265a2d9f86936c"
+content-hash = "5a4378473fbad779a44ad17fe287af8fb542584c569ffeefd4894e2ce2366207"
 
 [metadata.files]
 amqp = [
@@ -2446,8 +2445,8 @@ fastdiff = [
     {file = "fastdiff-0.2.0.tar.gz", hash = "sha256:623ad3d9055ab78e014d0d10767cb033d98d5d4f66052abf498350c8e42e29aa"},
 ]
 filelock = [
-    {file = "filelock-3.5.0-py3-none-any.whl", hash = "sha256:a7141afb4feca60925cfc090b411fb9faaf542d06d58ece4f93d940265e6b995"},
-    {file = "filelock-3.5.0.tar.gz", hash = "sha256:137b661e657f7850eec9def2a001efadba3414be523b87cd3f9a037372d80a15"},
+    {file = "filelock-3.5.1-py3-none-any.whl", hash = "sha256:7b23620a293cf3e19924e469cb96672dc72b36c26e8f80f85668310117fcbe4e"},
+    {file = "filelock-3.5.1.tar.gz", hash = "sha256:d1eccb164ed020bc84edd9e45bf6cdb177f64749f6b8fe066648832d2e98726d"},
 ]
 freezegun = [
     {file = "freezegun-0.3.14-py2.py3-none-any.whl", hash = "sha256:10336fc80a235847c64033f9727f3847f37db4bd549be1d9f3b5ae0279256c69"},
@@ -2484,12 +2483,12 @@ graphene = [
     {file = "graphene-2.1.9.tar.gz", hash = "sha256:b9f2850e064eebfee9a3ef4a1f8aa0742848d97652173ab44c82cc8a62b9ed93"},
 ]
 graphene-django = [
-    {file = "graphene-django-2.15.0.tar.gz", hash = "sha256:b78c9b05bc899016b9cc5bf13faa1f37fe1faa8c5407552c6ddd1a28f46fc31a"},
-    {file = "graphene_django-2.15.0-py2.py3-none-any.whl", hash = "sha256:02671d195f0c09c8649acff2a8f4ad4f297d0f7d98ea6e6cdf034b81bab92880"},
+    {file = "graphene-django-2.14.0.tar.gz", hash = "sha256:37b399a983e6e70d26696d0052b416a030d14f6d8a591d67711916e1fea95861"},
+    {file = "graphene_django-2.14.0-py2.py3-none-any.whl", hash = "sha256:68d5c52f775dea6f5e0578b2c09c0a7cddeb48a957a0000b289d6e6145d6a86d"},
 ]
 graphene-file-upload = [
-    {file = "graphene_file_upload-1.3.0-py3-none-any.whl", hash = "sha256:5afe50f409f50e3d198fd92c883d98d868e6c6aaadf5df3a3f4d88ecad90ed97"},
-    {file = "graphene_file_upload-1.3.0.tar.gz", hash = "sha256:6898480b0556826472c80971032917c01968ade5800d84054008fe598795b063"},
+    {file = "graphene_file_upload-1.2.2-py3-none-any.whl", hash = "sha256:034ff72d2834b7aebd06fda412fa88a10aba34bac604317f7552457e47040654"},
+    {file = "graphene_file_upload-1.2.2.tar.gz", hash = "sha256:b5f47a81f5614d1184ba9480a63835769b26303cb7759316122401784858e9c7"},
 ]
 graphql-core = [
     {file = "graphql-core-2.3.2.tar.gz", hash = "sha256:aac46a9ac524c9855910c14c48fc5d60474def7f99fd10245e76608eba7af746"},
