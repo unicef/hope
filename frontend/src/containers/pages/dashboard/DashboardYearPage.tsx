@@ -7,14 +7,13 @@ import { ProgrammesBySector } from '../../../components/dashboard/charts/Program
 import { TotalTransferredByMonth } from '../../../components/dashboard/charts/TotalTransferredByMonth';
 import { VolumeByDeliveryMechanism } from '../../../components/dashboard/charts/VolumeByDeliveryMechanism';
 import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
-import { GrievancesSection } from '../../../components/dashboard/sections/GrievancesSection';
-import { PaymentVerificationSection } from '../../../components/dashboard/sections/PaymentVerificationSection';
-import { TotalAmountTransferredSectionByAdminAreaSection } from '../../../components/dashboard/sections/TotalAmountTransferredByAdminAreaSection';
-import { TotalAmountTransferredSectionByCountry } from '../../../components/dashboard/sections/TotalAmountTransferredByCountrySection';
-import { TotalAmountTransferredSection } from '../../../components/dashboard/sections/TotalAmountTransferredSection';
-import { TotalNumberOfChildrenReachedSection } from '../../../components/dashboard/sections/TotalNumberOfChildrenReachedSection';
-import { TotalNumberOfHouseholdsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfHouseholdsReachedSection';
-import { TotalNumberOfIndividualsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfIndividualsReachedSection';
+import { GrievancesSection } from '../../../components/dashboard/sections/GrievancesSection/GrievancesSection';
+import { PaymentVerificationSection } from '../../../components/dashboard/sections/PaymentVerificationSection/PaymentVerificationSection';
+import { TotalAmountTransferredSectionByAdminAreaSection } from '../../../components/dashboard/sections/TotalAmountTransferredByAdminAreaSection/TotalAmountTransferredByAdminAreaSection';
+import { TotalAmountTransferredSection } from '../../../components/dashboard/sections/TotalAmountTransferredSection/TotalAmountTransferredSection';
+import { TotalNumberOfChildrenReachedSection } from '../../../components/dashboard/sections/TotalNumberOfChildrenReachedSection/TotalNumberOfChildrenReachedSection';
+import { TotalNumberOfHouseholdsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfHouseholdsReachedSection/TotalNumberOfHouseholdsReachedSection';
+import { TotalNumberOfIndividualsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfIndividualsReachedSection/TotalNumberOfIndividualsReachedSection';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { TabPanel } from '../../../components/core/TabPanel';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -22,6 +21,7 @@ import {
   useAllChartsQuery,
   useGlobalAreaChartsLazyQuery,
 } from '../../../__generated__/graphql';
+import { TotalAmountTransferredByCountrySection } from '../../../components/dashboard/sections/TotalAmountTransferredByCountrySection';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -97,7 +97,7 @@ export function DashboardYearPage({
             <TotalAmountTransferredSection
               data={data.sectionTotalTransferred}
             />
-            <TotalAmountTransferredSectionByCountry
+            <TotalAmountTransferredByCountrySection
               data={globalData?.chartTotalTransferredCashByCountry}
             />
             <DashboardPaper title={t('Number of Programmes by Sector')}>
@@ -115,6 +115,7 @@ export function DashboardYearPage({
             <TotalAmountTransferredSectionByAdminAreaSection
               year={year}
               filter={filter}
+              businessArea={businessArea}
             />
             <PaymentVerificationSection data={data.chartPaymentVerification} />
           </Grid>
