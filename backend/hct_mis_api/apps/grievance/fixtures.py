@@ -10,6 +10,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
+    TicketDeleteHouseholdDetails,
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
@@ -169,6 +170,21 @@ class TicketDeleteIndividualDetailsFactory(factory.DjangoModelFactory):
         ),
     )
     individual = None
+    approve_status = factory.fuzzy.FuzzyChoice([True, False])
+
+
+class TicketDeleteHouseholdDetailsFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketDeleteHouseholdDetails
+
+    ticket = (
+        factory.SubFactory(
+            GrievanceTicketFactory,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
+        ),
+    )
+    household = None
     approve_status = factory.fuzzy.FuzzyChoice([True, False])
 
 

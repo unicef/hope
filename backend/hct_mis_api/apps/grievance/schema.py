@@ -58,6 +58,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
+    TicketDeleteHouseholdDetails,
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
@@ -281,7 +282,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
             queryset = self.filters[name].filter(queryset, value)
             assert isinstance(
                 queryset, models.QuerySet
-            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+            ), "Expected '{}.{}' to return a QuerySet, but got a {} instead.".format(
                 type(self).__name__,
                 name,
                 type(queryset).__name__,
@@ -517,6 +518,16 @@ class TicketDeleteIndividualDetailsNode(DjangoObjectType):
 
     class Meta:
         model = TicketDeleteIndividualDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketDeleteHouseholdDetailsNode(DjangoObjectType):
+    household_data = Arg()
+
+    class Meta:
+        model = TicketDeleteHouseholdDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

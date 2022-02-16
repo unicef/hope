@@ -123,7 +123,7 @@ class TestKoboTemplateUpload(APITestCase):
 class TestKoboErrorHandling(APITestCase):
     def generate_empty_template(self):
         with NamedTemporaryFile(mode="w+b") as tmp_file:
-            tmp_file.write("abcdefg".encode())
+            tmp_file.write(b"abcdefg")
             tmp_file.seek(0)
             template = XLSXKoboTemplate(file_name="test.xlsx", status=XLSXKoboTemplate.UPLOADED)
             template.file.save("test.xlsx", tmp_file)

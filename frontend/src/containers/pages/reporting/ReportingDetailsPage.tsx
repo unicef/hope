@@ -14,6 +14,7 @@ import { OverviewContainer } from '../../../components/core/OverviewContainer';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { StatusBox } from '../../../components/core/StatusBox';
+import { Title } from '../../../components/core/Title';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -23,10 +24,6 @@ import {
   useReportChoiceDataQuery,
   useReportQuery,
 } from '../../../__generated__/graphql';
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
 
 const StatusContainer = styled.div`
   min-width: 120px;

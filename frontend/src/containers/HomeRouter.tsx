@@ -8,10 +8,10 @@ import { MiśTheme } from '../theme';
 import { Drawer } from '../components/core/Drawer/Drawer';
 import { AppBar } from '../components/core/AppBar';
 import { useSnackbar } from '../hooks/useSnackBar';
-import { GrievanceDetailsPage } from '../components/grievances/GrievancesDetailsPage/GrievanceDetailsPage';
-import { GrievancesTablePage } from '../components/grievances/GrievancesTablePage';
-import { CreateGrievancePage } from '../components/grievances/CreateGrievancePage';
-import { EditGrievancePage } from '../components/grievances/EditGrievancePage';
+import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
+import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
+import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
+import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ProgramsPage } from './pages/program/ProgramsPage';
 import { ProgramDetailsPage } from './pages/program/ProgramDetailsPage';
@@ -216,7 +216,7 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/grievance-and-feedback/:id');
               }}
             >
-              <GrievanceDetailsPage />
+              <GrievancesDetailsPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/grievance-and-feedback'>
