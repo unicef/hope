@@ -232,6 +232,7 @@ type CashPlanNode implements Node {
   bankReconciliationError: Int
   totalNumberOfHouseholds: Int
   currency: String
+  canCreatePaymentVerificationPlan: Boolean
 }
 
 type CashPlanNodeConnection {
@@ -2148,6 +2149,7 @@ type PaymentRecordNode implements Node {
   transactionReferenceId: String
   visionId: String
   registrationCaId: String
+  isIncluded: Boolean!
   verifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
