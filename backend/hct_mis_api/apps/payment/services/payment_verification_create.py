@@ -116,7 +116,7 @@ class PaymentVerificationCreate:
         payment_records = self.cash_plan.available_payment_records()
 
         if not payment_records:
-            raise ValueError("There are no free payment records.")
+            raise ValueError("There are no payment records that could be assigned to a new verification plan.")
 
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = self.input.get("full_list_arguments").get("excluded_admin_areas", [])
