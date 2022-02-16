@@ -88,7 +88,7 @@ class TestPowerQueryBasicAuth(TestCase):
         self.assertEqual(response.status_code, 401)
 
         username, password = self.report1.owner.username, self.USER_PASSWORD
-        headers = {"Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii")}
+        headers = {"HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii")}
         response = self.client.get(url, **headers)
         self.assertEqual(response.status_code, 400)
         self.assertContains(response, b"This report is not currently available", status_code=400)
@@ -98,7 +98,7 @@ class TestPowerQueryBasicAuth(TestCase):
         username, password = self.report2.owner.username, self.USER_PASSWORD
         assert password == "123", password
         headers = {
-            "Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
+            "HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
         }
         response = self.client.get(url, **headers)
         self.assertEqual(response.status_code, 200)
