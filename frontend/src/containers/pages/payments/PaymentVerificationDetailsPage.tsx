@@ -87,9 +87,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     },
   ];
 
-  const canCreate =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_CREATE, permissions) &&
-    cashPlan.verificationStatus === 'PENDING';
+  const canCreate = hasPermissions(
+    PERMISSIONS.PAYMENT_VERIFICATION_CREATE,
+    permissions,
+  );
 
   const isFinished = cashPlan.verificationStatus === 'FINISHED';
 
@@ -108,7 +109,13 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     >
       <>
         {canCreate && (
-          <CreateVerificationPlan disabled={false} cashPlanId={cashPlan.id} />
+          <CreateVerificationPlan
+            disabled={false}
+            cashPlanId={cashPlan.id}
+            canCreatePaymentVerificationPlan={
+              cashPlan.canCreatePaymentVerificationPlan
+            }
+          />
         )}
 
         {isFinished && (

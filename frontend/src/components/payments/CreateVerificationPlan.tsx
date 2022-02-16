@@ -114,10 +114,12 @@ function prepareVariables(cashPlanId, selectedTab, values, businessArea) {
 export interface Props {
   cashPlanId: string;
   disabled: boolean;
+  canCreatePaymentVerificationPlan: boolean;
 }
 export function CreateVerificationPlan({
   cashPlanId,
   disabled,
+  canCreatePaymentVerificationPlan,
 }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -192,6 +194,18 @@ export function CreateVerificationPlan({
     )})`;
   };
 
+  const handleOpen = (): void => {
+    if (canCreatePaymentVerificationPlan) {
+      setOpen(true);
+    } else {
+      showMessage(
+        t(
+          'There are no payment records that could be assigned to a new verification plan.',
+        ),
+      );
+    }
+  };
+
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
@@ -204,7 +218,7 @@ export function CreateVerificationPlan({
             disabled={disabled}
             color='primary'
             variant='contained'
-            onClick={() => setOpen(true)}
+            onClick={() => handleOpen()}
             data-cy='button-new-plan'
           >
             {t('CREATE VERIFICATION PLAN')}
