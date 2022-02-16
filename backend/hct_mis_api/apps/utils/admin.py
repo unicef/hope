@@ -65,9 +65,7 @@ class LastSyncDateResetMixin(ExtraUrlMixin):
             )
 
 
-class HOPEModelAdminBase(
-    SmartDisplayAllMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin
-):
+class HOPEModelAdminBase(SmartDisplayAllMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin):
     list_per_page = 50
 
     def get_fields(self, request, obj=None):

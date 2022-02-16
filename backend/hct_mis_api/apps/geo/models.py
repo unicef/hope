@@ -94,9 +94,7 @@ class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         verbose_name=_("Parent"),
     )
-    p_code = models.CharField(
-        max_length=32, blank=True, null=True, verbose_name="P Code"
-    )
+    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="P Code")
     area_type = models.ForeignKey(AreaType, on_delete=models.CASCADE)
 
     geom = models.MultiPolygonField(null=True, blank=True)

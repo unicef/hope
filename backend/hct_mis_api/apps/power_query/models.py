@@ -31,9 +31,7 @@ mimetype_map = {
 class Query(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, unique=True)
     description = models.TextField(blank=True, null=True)
-    owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="power_queries"
-    )
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="power_queries")
     target = models.ForeignKey(ContentType, on_delete=models.CASCADE, default="")
     code = models.TextField(default="qs=conn.all()", blank=True)
     info = JSONField(default=dict, blank=True)
@@ -48,9 +46,7 @@ class Query(models.Model):
         verbose_name_plural = "Power Queries"
         ordering = ("name",)
 
-    def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
-    ):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if not self.code:
             self.code = "qs=conn.all().order_by('id')"
         self.error = None
@@ -80,9 +76,7 @@ class Query(models.Model):
         _error = None
         try:
             locals_ = dict()
-            locals_["conn"] = model._default_manager.using(
-                settings.POWER_QUERY_DB_ALIAS
-            )
+            locals_["conn"] = model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
             locals_["query"] = self
             locals_["query_filters"] = filters
             locals_["invoke"] = self._invoke
@@ -129,9 +123,7 @@ class Dataset(models.Model):
 
 class Formatter(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    content_type = models.CharField(
-        max_length=5, choices=list(map(list, mimetype_map.items()))
-    )
+    content_type = models.CharField(max_length=5, choices=list(map(list, mimetype_map.items())))
     code = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -159,9 +151,7 @@ class Report(models.Model):
     query = models.ForeignKey(Query, on_delete=models.CASCADE)
     formatter = models.ForeignKey(Formatter, on_delete=models.CASCADE)
     refresh = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        User, blank=True, null=True, on_delete=models.CASCADE, related_name="+"
-    )
+    owner = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name="+")
     available_to = models.ManyToManyField(User, blank=True, related_name="+")
 
     query_args = JSONField(default=dict, blank=True)
