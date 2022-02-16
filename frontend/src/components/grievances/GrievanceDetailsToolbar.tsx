@@ -176,6 +176,7 @@ export const GrievanceDetailsToolbar = ({
         return getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange();
       case GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL:
         return getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange();
+
       default:
         return getClosingConfirmationExtraTextForOtherTypes();
     }

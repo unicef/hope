@@ -46,6 +46,7 @@ export const AllHouseholds = gql`
         cursor
         node {
           id
+          status
           unicefId
           hasDuplicates
           sanctionListPossibleMatch

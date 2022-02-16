@@ -118,7 +118,10 @@ export const LookUpHouseholdIndividualModal = ({
       GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL,
       GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL,
     ];
-    const householdRequiredIssueTypes = [GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD];
+    const householdRequiredIssueTypes = [
+      GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD,
+      GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD,
+    ];
     const isHouseholdRequired = householdRequiredIssueTypes.includes(
       values.issueType,
     );
@@ -171,7 +174,9 @@ export const LookUpHouseholdIndividualModal = ({
                 <Tab
                   disabled={
                     initialValues.issueType ===
-                    GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+                      GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL ||
+                    initialValues.issueType ===
+                      GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD
                   }
                   label={t('LOOK UP INDIVIDUAL')}
                 />

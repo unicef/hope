@@ -20,6 +20,25 @@ variables:
   Kubernetes.namespace: "ictd-hope-dev"
 
 stages:
+  - stage: test_frontend
+    displayName: Test-Frontend
+    jobs:
+      - job: django_tests
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[FRONTEND TEST]"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "14.x"
+            displayName: "Install Node.js"
+          - script: yarn
+            displayName: "Yarn Install"
+            workingDirectory: 'frontend'
+
+          - script: yarn test --watchAll=false
+            workingDirectory: 'frontend'
+            displayName: "Test"
   - stage: build_and_push
     displayName: BUILD and PUSH
     jobs:
@@ -39,8 +58,8 @@ stages:
                 $(Build.BuildId)
                 dev-latest
 
-  - stage: test
-    displayName: TEST
+  - stage: test_backend
+    displayName: Test-Backend
     jobs:
       - job: django_tests
         pool:
@@ -85,3 +104,4 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
+

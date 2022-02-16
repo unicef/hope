@@ -34,11 +34,11 @@ INVITED = "INVITED"
 ACTIVE = "ACTIVE"
 INACTIVE = "INACTIVE"
 USER_STATUS_CHOICES = (
-    (INVITED, _("Invited")),
     (ACTIVE, _("Active")),
     (INACTIVE, _("Inactive")),
+    (INVITED, _("Invited")),
 )
-USER_PARTNER_CHOICES = Choices("UNHCR", "WFP", "UNICEF")
+USER_PARTNER_CHOICES = Choices("UNICEF", "UNHCR", "WFP")
 
 
 class Partner(models.Model):

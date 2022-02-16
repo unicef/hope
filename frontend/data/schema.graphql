@@ -731,6 +731,7 @@ type GrievanceTicketNode implements Node {
   individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNode
   addIndividualTicketDetails: TicketAddIndividualDetailsNode
   deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNode
+  deleteHouseholdTicketDetails: TicketDeleteHouseholdDetailsNode
   systemFlaggingTicketDetails: TicketSystemFlaggingDetailsNode
   needsAdjudicationTicketDetails: TicketNeedsAdjudicationDetailsNode
   paymentVerificationTicketDetails: TicketPaymentVerificationDetailsNode
@@ -777,6 +778,10 @@ type HouseholdDataChangeApproveMutation {
 input HouseholdDataUpdateIssueTypeExtras {
   household: ID!
   householdData: HouseholdUpdateDataObjectType!
+}
+
+input HouseholdDeleteIssueTypeExtras {
+  household: ID!
 }
 
 type HouseholdNode implements Node {
@@ -850,6 +855,7 @@ type HouseholdNode implements Node {
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   householdDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
   addIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
+  deleteHouseholdTicketDetails(before: String, after: String, first: Int, last: Int): TicketDeleteHouseholdDetailsNodeConnection!
   positiveFeedbackTicketDetails(before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
   negativeFeedbackTicketDetails(before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
@@ -1927,6 +1933,7 @@ input IssueTypeExtrasInput {
   householdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras
   individualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras
   individualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras
+  householdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras
   addIndividualIssueTypeExtras: AddIndividualIssueTypeExtras
 }
 
@@ -2037,6 +2044,7 @@ type Mutations {
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
@@ -3107,6 +3115,28 @@ type TicketComplaintDetailsNodeConnection {
 
 type TicketComplaintDetailsNodeEdge {
   node: TicketComplaintDetailsNode
+  cursor: String!
+}
+
+type TicketDeleteHouseholdDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode
+  roleReassignData: JSONString!
+  approveStatus: Boolean!
+  householdData: Arg
+}
+
+type TicketDeleteHouseholdDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketDeleteHouseholdDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketDeleteHouseholdDetailsNodeEdge {
+  node: TicketDeleteHouseholdDetailsNode
   cursor: String!
 }
 

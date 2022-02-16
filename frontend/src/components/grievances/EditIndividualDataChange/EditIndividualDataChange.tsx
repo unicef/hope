@@ -10,16 +10,13 @@ import {
   useIndividualLazyQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
+import { Title } from '../../core/Title';
+import { EditIndividualDataChangeFieldRow } from './EditIndividualDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
-import { EditIndividualDataChangeFieldRow } from './EditIndividualDataChangeFieldRow';
 
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

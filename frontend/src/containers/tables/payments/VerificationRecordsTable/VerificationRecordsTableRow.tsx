@@ -8,6 +8,7 @@ import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
+  householdStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../../../utils/utils';
 import { PaymentVerificationNode } from '../../../../__generated__/graphql';
@@ -53,6 +54,14 @@ export function VerificationRecordsTableRow({
       </AnonTableCell>
       <TableCell align='left'>
         {record.paymentRecord.household.unicefId}
+      </TableCell>
+      <TableCell align='left'>
+        <StatusContainer>
+          <StatusBox
+            status={record.paymentRecord.household.status}
+            statusToColor={householdStatusToColor}
+          />
+        </StatusContainer>
       </TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(

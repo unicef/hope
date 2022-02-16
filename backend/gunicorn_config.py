@@ -48,7 +48,7 @@ def worker_int(worker):
     import threading
     import traceback
 
-    id2name = dict([(th.ident, th.name) for th in threading.enumerate()])
+    id2name = {th.ident: th.name for th in threading.enumerate()}
     code = []
     for threadId, stack in sys._current_frames().items():
         code.append("\n# Thread: %s(%d)" % (id2name.get(threadId, ""), threadId))

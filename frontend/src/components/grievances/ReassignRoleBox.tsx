@@ -25,7 +25,7 @@ const StyledBox = styled(Paper)`
   width: 100%;
   padding: 26px 22px;
 `;
-const Title = styled.div`
+const OrangeTitle = styled.div`
   color: ${({ theme }) => theme.hctPalette.oragne};
 `;
 
@@ -131,12 +131,12 @@ export const ReassignRoleBox = ({
 
   return (
     <StyledBox>
-      <Title>
+      <OrangeTitle>
         <Typography variant='h6'>
           <WarnIcon />
           {t('Individual is the HOH or the external collector for a household')}
         </Typography>
-      </Title>
+      </OrangeTitle>
       <Typography variant='body2'>
         {t(
           'Upon removing you will need to select new individual(s) for this role.',
