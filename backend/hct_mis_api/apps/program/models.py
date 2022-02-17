@@ -261,7 +261,7 @@ class CashPlan(TimeStampedUUIDModel):
 
     def available_payment_records(self):
         return self.payment_records.filter(
-            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0, is_included=False
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0, verification__isnull=True
         )
 
     class Meta:

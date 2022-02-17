@@ -23,6 +23,4 @@ class CreatePaymentVerifications:
                 payment_record=payment_record,
             )
             payment_record_verifications_to_create.append(payment_record_verification)
-            payment_record.mark_as_included()
         PaymentVerification.objects.bulk_create(payment_record_verifications_to_create)
-        PaymentRecord.objects.bulk_update(self.payment_records, ["is_included"])

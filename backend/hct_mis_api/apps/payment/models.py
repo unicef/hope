@@ -146,10 +146,6 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     transaction_reference_id = models.CharField(max_length=255, null=True)
     vision_id = models.CharField(max_length=255, null=True)
     registration_ca_id = models.CharField(max_length=255, null=True)
-    is_included = models.BooleanField(default=False)
-
-    def mark_as_included(self):
-        self.is_included = True
 
 
 class ServiceProvider(TimeStampedUUIDModel):
@@ -304,7 +300,9 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
     )
-    payment_record = models.ForeignKey("PaymentRecord", on_delete=models.CASCADE, related_name="verifications")
+    payment_record = models.OneToOneField(
+        "payment.PaymentRecord", related_name="verification", on_delete=models.CASCADE, null=True, blank=True
+    )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
