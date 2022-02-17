@@ -11,6 +11,8 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
 {{ (.Files.Glob "files/kobocat/uwsgi.ini").AsConfig | indent 2}}
+{{ (.Files.Glob "files/kobocat/wait_for_postgres.bash").AsConfig | indent 2}}
+{{ (.Files.Glob "files/kobocat/wait_for_mongo.bash").AsConfig | indent 2}}
 ---
 apiVersion: v1
 kind: ConfigMap
