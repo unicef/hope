@@ -23,11 +23,11 @@ export const CashPlan = gql`
       caId
       caHashId
       dispersionDate
-      verificationStatus
       bankReconciliationSuccess
       bankReconciliationError
       totalNumberOfHouseholds
       verifications {
+        totalCount
         edges {
           node {
             id
@@ -54,6 +54,14 @@ export const CashPlan = gql`
             sexFilter
           }
         }
+      }
+      cashPlanPaymentVerificationSummary {
+        id
+        createdAt
+        updatedAt
+        status
+        activationDate
+        completionDate
       }
       program {
         id

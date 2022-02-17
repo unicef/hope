@@ -1,10 +1,12 @@
 import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { CashPlanQuery } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
-import { Missing } from '../core/Missing';
+import { paymentVerificationStatusToColor } from '../../utils/utils';
+import { StatusBox } from '../core/StatusBox';
+import { UniversalMoment } from '../core/UniversalMoment';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -12,10 +14,23 @@ const Title = styled.div`
 interface VerificationPlansSummaryProps {
   cashPlan: CashPlanQuery['cashPlan'];
 }
+
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
+`;
+
 export function VerificationPlansSummary({
   cashPlan,
 }: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
+  const {
+    cashPlanPaymentVerificationSummary: {
+      status,
+      activationDate,
+      completionDate,
+    },
+  } = cashPlan;
 
   return (
     <Grid container>
@@ -29,28 +44,33 @@ export function VerificationPlansSummary({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Status')}>
-                <Missing />
+                <StatusContainer>
+                  <StatusBox
+                    status={status}
+                    statusToColor={paymentVerificationStatusToColor}
+                  />
+                </StatusContainer>
               </LabelizedField>
             </Box>
           </Grid>
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Activation Date')}>
-                <Missing />
+                <UniversalMoment>{activationDate}</UniversalMoment>
               </LabelizedField>
             </Box>
           </Grid>
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Completion Date')}>
-                <Missing />
+                <UniversalMoment>{completionDate}</UniversalMoment>
               </LabelizedField>
             </Box>
           </Grid>
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Number of Verification Plans')}>
-                <Missing />
+                {cashPlan.verifications.totalCount}
               </LabelizedField>
             </Box>
           </Grid>

@@ -225,9 +225,9 @@ type CashPlanNode implements Node {
   totalEntitledQuantityRevised: Float
   totalDeliveredQuantity: Float
   totalUndeliveredQuantity: Float
-  verificationStatus: CashPlanVerificationStatus!
   paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   verifications(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
+  cashPlanPaymentVerificationSummary: CashPlanPaymentVerificationSummaryNode
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
   totalNumberOfHouseholds: Int
@@ -297,6 +297,22 @@ enum CashPlanPaymentVerificationStatus {
   FINISHED
 }
 
+type CashPlanPaymentVerificationSummaryNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  status: CashPlanPaymentVerificationSummaryStatus!
+  activationDate: DateTime
+  completionDate: DateTime
+  cashPlan: CashPlanNode!
+}
+
+enum CashPlanPaymentVerificationSummaryStatus {
+  PENDING
+  ACTIVE
+  FINISHED
+}
+
 enum CashPlanPaymentVerificationVerificationMethod {
   RAPIDPRO
   XLSX
@@ -308,12 +324,6 @@ enum CashPlanStatus {
   DISTRIBUTION_COMPLETED_WITH_ERRORS
   TRANSACTION_COMPLETED
   TRANSACTION_COMPLETED_WITH_ERRORS
-}
-
-enum CashPlanVerificationStatus {
-  PENDING
-  ACTIVE
-  FINISHED
 }
 
 input CategoryExtrasInput {
@@ -611,9 +621,9 @@ type DocumentTypeNode {
 enum DocumentTypeType {
   BIRTH_CERTIFICATE
   DRIVERS_LICENSE
+  ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
-  ELECTORAL_CARD
   OTHER
 }
 
@@ -892,14 +902,14 @@ type HouseholdNodeEdge {
 
 enum HouseholdOrgEnumerator {
   A_
-  UNICEF
   PARTNER
+  UNICEF
 }
 
 enum HouseholdRegistrationMethod {
   A_
-  HH_REGISTRATION
   COMMUNITY
+  HH_REGISTRATION
 }
 
 enum HouseholdResidenceStatus {
@@ -1293,9 +1303,9 @@ type ImportedDocumentTypeNode {
 enum ImportedDocumentTypeType {
   BIRTH_CERTIFICATE
   DRIVERS_LICENSE
+  ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
-  ELECTORAL_CARD
   OTHER
 }
 
@@ -1307,10 +1317,10 @@ enum ImportedHouseholdCollectIndividualData {
 
 enum ImportedHouseholdConsentSharing {
   A_
-  UNICEF
+  GOVERNMENT_PARTNER
   HUMANITARIAN_PARTNER
   PRIVATE_PARTNER
-  GOVERNMENT_PARTNER
+  UNICEF
 }
 
 enum ImportedHouseholdCurrency {
@@ -1556,14 +1566,14 @@ type ImportedHouseholdNodeEdge {
 
 enum ImportedHouseholdOrgEnumerator {
   A_
-  UNICEF
   PARTNER
+  UNICEF
 }
 
 enum ImportedHouseholdRegistrationMethod {
   A_
-  HH_REGISTRATION
   COMMUNITY
+  HH_REGISTRATION
 }
 
 enum ImportedHouseholdResidenceStatus {
@@ -1583,10 +1593,10 @@ enum ImportedIndividualDeduplicationBatchStatus {
 }
 
 enum ImportedIndividualDeduplicationGoldenRecordStatus {
-  UNIQUE
   DUPLICATE
   NEEDS_ADJUDICATION
   NOT_PROCESSED
+  UNIQUE
 }
 
 enum ImportedIndividualDisability {
@@ -1616,11 +1626,11 @@ type ImportedIndividualIdentityNodeEdge {
 
 enum ImportedIndividualMaritalStatus {
   A_
-  SINGLE
-  MARRIED
-  WIDOWED
   DIVORCED
+  MARRIED
   SEPARATED
+  SINGLE
+  WIDOWED
 }
 
 type ImportedIndividualNode implements Node {
@@ -1697,17 +1707,17 @@ input IndividualDataUpdateIssueTypeExtras {
 }
 
 enum IndividualDeduplicationBatchStatus {
-  SIMILAR_IN_BATCH
   DUPLICATE_IN_BATCH
-  UNIQUE_IN_BATCH
   NOT_PROCESSED
+  SIMILAR_IN_BATCH
+  UNIQUE_IN_BATCH
 }
 
 enum IndividualDeduplicationGoldenRecordStatus {
-  UNIQUE
   DUPLICATE
   NEEDS_ADJUDICATION
   NOT_PROCESSED
+  UNIQUE
 }
 
 input IndividualDeleteIssueTypeExtras {
@@ -1756,11 +1766,11 @@ input IndividualIdentityObjectType {
 
 enum IndividualMaritalStatus {
   A_
-  SINGLE
-  MARRIED
-  WIDOWED
   DIVORCED
+  MARRIED
   SEPARATED
+  SINGLE
+  WIDOWED
 }
 
 type IndividualNode implements Node {
@@ -1855,20 +1865,20 @@ type IndividualNodeEdge {
 
 enum IndividualRelationship {
   UNKNOWN
-  NON_BENEFICIARY
+  AUNT_UNCLE
+  BROTHER_SISTER
+  COUSIN
+  DAUGHTERINLAW_SONINLAW
+  GRANDDAUGHER_GRANDSON
+  GRANDMOTHER_GRANDFATHER
   HEAD
+  MOTHER_FATHER
+  MOTHERINLAW_FATHERINLAW
+  NEPHEW_NIECE
+  NON_BENEFICIARY
+  SISTERINLAW_BROTHERINLAW
   SON_DAUGHTER
   WIFE_HUSBAND
-  BROTHER_SISTER
-  MOTHER_FATHER
-  AUNT_UNCLE
-  GRANDMOTHER_GRANDFATHER
-  MOTHERINLAW_FATHERINLAW
-  DAUGHTERINLAW_SONINLAW
-  SISTERINLAW_BROTHERINLAW
-  GRANDDAUGHER_GRANDSON
-  NEPHEW_NIECE
-  COUSIN
 }
 
 type IndividualRoleInHouseholdNode {
@@ -1882,9 +1892,9 @@ type IndividualRoleInHouseholdNode {
 }
 
 enum IndividualRoleInHouseholdRole {
-  PRIMARY
-  ALTERNATE
   NO_ROLE
+  ALTERNATE
+  PRIMARY
 }
 
 enum IndividualSex {
@@ -2176,10 +2186,10 @@ type PaymentRecordNodeEdge {
 }
 
 enum PaymentRecordStatus {
-  TRANSACTION_SUCCESSFUL
-  TRANSACTION_ERRONEOUS
   DISTRIBUTION_SUCCESSFUL
   NOT_DISTRIBUTED
+  TRANSACTION_SUCCESSFUL
+  TRANSACTION_ERRONEOUS
 }
 
 type PaymentVerificationNode implements Node {
@@ -2228,8 +2238,8 @@ input PositiveFeedbackTicketExtras {
 }
 
 enum ProgramFrequencyOfPayments {
-  REGULAR
   ONE_OFF
+  REGULAR
 }
 
 type ProgramNode implements Node {
@@ -2294,8 +2304,8 @@ enum ProgramSector {
 }
 
 enum ProgramStatus {
-  DRAFT
   ACTIVE
+  DRAFT
   FINISHED
 }
 
@@ -2553,15 +2563,15 @@ type RegistrationDataImportNodeEdge {
 }
 
 enum RegistrationDataImportStatus {
+  DEDUPLICATION
+  DEDUPLICATION_FAILED
+  IMPORTING
+  IMPORT_ERROR
   IN_REVIEW
   MERGED
   MERGING
-  IMPORTING
-  DEDUPLICATION_FAILED
-  DEDUPLICATION
-  REFUSED
-  IMPORT_ERROR
   MERGE_ERROR
+  REFUSED
 }
 
 type RegistrationDeduplicationMutation {
@@ -3572,9 +3582,9 @@ type UserRoleNode {
 }
 
 enum UserStatus {
-  INVITED
   ACTIVE
   INACTIVE
+  INVITED
 }
 
 type XlsxErrorNode {
