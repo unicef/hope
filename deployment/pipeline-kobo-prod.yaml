@@ -50,4 +50,4 @@ stages:
                 ingress.scheme=https,\
                 ingress.tls=true,\
                 kpi.ravenDsn=$(KPI_SENTRY_DSN),\
-                kobocat.image=$(KOBOCAT_SENTRY_DSN),"
+                kobocat.ravenDsn=$(KOBOCAT_SENTRY_DSN),"
