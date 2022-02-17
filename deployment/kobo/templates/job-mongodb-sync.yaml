@@ -42,8 +42,6 @@ spec:
             - configMapRef:
                 name: kobocat-config
             volumeMounts:
-            - name: media-volume
-              mountPath: /srv/src/kobocat/media
             - name: static-volume
               mountPath: /srv/static
             - name: uwsgi-config
@@ -53,11 +51,7 @@ spec:
               mountPath: /etc/profile.d/
             - name: scripts
               mountPath: /srv/init/
-
           volumes:
-          - name: media-volume
-            persistentVolumeClaim:
-              claimName: kobocat-media-pvc
           - name: static-volume
             emptyDir: {}
           - name: uwsgi-config
