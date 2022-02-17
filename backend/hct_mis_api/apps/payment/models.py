@@ -237,6 +237,27 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     def business_area(self):
         return self.cash_plan.business_area
 
+def build_summary(cash_plan):
+    active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
+    pending_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_PENDING).count()
+    not_finished_count = cash_plan.verifications.exclude(
+        status=CashPlanPaymentVerificationSummary.STATUS_FINISHED
+    ).count()
+    summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=cash_plan)
+    if active_count >= 1:
+        summary.status = CashPlanPaymentVerificationSummary.STATUS_ACTIVE
+        summary.completion_date = None
+        if summary.activation_date is None:
+            summary.activation_date = timezone.now()
+    elif not_finished_count == 0 and pending_count == 0:
+        summary.status = CashPlanPaymentVerificationSummary.STATUS_FINISHED
+        if summary.completion_date is None:
+            summary.completion_date = timezone.now()
+    else:
+        summary.status = CashPlanPaymentVerificationSummary.STATUS_PENDING
+        summary.completion_date = None
+        summary.activation_date = None
+    summary.save()
 
 @receiver(
     post_save,
@@ -244,8 +265,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     dispatch_uid="update_verification_status_in_cash_plan",
 )
 def update_verification_status_in_cash_plan(sender, instance, **kwargs):
-    instance.cash_plan.verification_status = instance.status
-    instance.cash_plan.save()
+    build_summary(instance.cash_plan)
 
 
 class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):

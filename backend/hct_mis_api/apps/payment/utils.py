@@ -86,25 +86,3 @@ def get_payment_records_for_dashboard(year, business_area_slug, filters, only_wi
     )
 
 
-def build_summary(cash_plan):
-    active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
-    pending_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_PENDING).count()
-    not_finished_count = cash_plan.verifications.exclude(
-        status=CashPlanPaymentVerificationSummary.STATUS_FINISHED
-    ).count()
-    summary = CashPlanPaymentVerificationSummary.objects.get(cash_plan=True)
-    if active_count >= 1:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_ACTIVE
-        summary.completion_date = None
-        if summary.activation_date is None:
-            summary.activation_date = timezone.now()
-    elif not_finished_count == 0 and pending_count == 0:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_FINISHED
-        if summary.completion_date is None:
-            summary.completion_date = timezone.now()
-    else:
-        summary.status = CashPlanPaymentVerificationSummary.STATUS_PENDING
-        summary.completion_date = None
-        summary.activation_date = None
-    summary.save()
-
