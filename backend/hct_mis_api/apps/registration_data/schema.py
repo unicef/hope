@@ -29,7 +29,11 @@ class RegistrationDataImportFilter(FilterSet):
 
     class Meta:
         model = RegistrationDataImport
-        fields = ["imported_by__id", "import_date", "status", "name", "business_area"]
+        fields = {
+            "imported_by__id": ["exact"],
+            "status": ["exact"],
+            "name": ["exact", "startswith"],
+        }
 
     order_by = CustomOrderingFilter(
         fields=(
