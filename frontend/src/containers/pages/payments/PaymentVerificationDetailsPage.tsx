@@ -77,6 +77,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   if (!data || !choicesData || permissions === null) return null;
 
   const { cashPlan } = data;
+
   const verificationPlan = cashPlan?.verifications?.edges?.length
     ? cashPlan.verifications.edges[0].node
     : null;
@@ -92,7 +93,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     permissions,
   );
 
-  const isFinished = cashPlan.verificationStatus === 'FINISHED';
+  const isFinished =
+    cashPlan.cashPlanPaymentVerificationSummary.status === 'FINISHED';
 
   const toolbar = (
     <PageHeader
@@ -155,7 +157,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         : null}
       {cashPlan.verifications &&
       cashPlan.verifications.edges.length &&
-      cashPlan.verificationStatus !== 'PENDING' ? (
+      cashPlan.cashPlanPaymentVerificationSummary.status !== 'PENDING' ? (
         <>
           <Container>
             <VerificationRecordsFilters
@@ -178,14 +180,14 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       ) : null}
       {cashPlan.verifications &&
       cashPlan.verifications.edges.length &&
-      cashPlan.verificationStatus !== 'ACTIVE' &&
-      cashPlan.verificationStatus !== 'FINISHED' ? (
+      cashPlan.cashPlanPaymentVerificationSummary.status !== 'ACTIVE' &&
+      cashPlan.cashPlanPaymentVerificationSummary.status !== 'FINISHED' ? (
         <BottomTitle>
           {t('To see more details please activate Verification Plan')}
         </BottomTitle>
       ) : null}
       {!cashPlan.verifications.edges.length &&
-      cashPlan.verificationStatus !== 'ACTIVE' ? (
+      cashPlan.cashPlanPaymentVerificationSummary.status !== 'ACTIVE' ? (
         <BottomTitle>
           {t('To see more details please create Verification Plan')}
         </BottomTitle>

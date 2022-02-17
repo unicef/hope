@@ -78,6 +78,9 @@
             "name": "TicketPaymentVerificationDetailsNode"
           },
           {
+            "name": "CashPlanPaymentVerificationSummaryNode"
+          },
+          {
             "name": "TicketComplaintDetailsNode"
           },
           {

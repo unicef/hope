@@ -489,9 +489,9 @@ export type CashPlanNode = Node & {
   totalEntitledQuantityRevised?: Maybe<Scalars['Float']>,
   totalDeliveredQuantity?: Maybe<Scalars['Float']>,
   totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
-  verificationStatus: CashPlanVerificationStatus,
   paymentRecords: PaymentRecordNodeConnection,
   verifications: CashPlanPaymentVerificationNodeConnection,
+  cashPlanPaymentVerificationSummary?: Maybe<CashPlanPaymentVerificationSummaryNode>,
   bankReconciliationSuccess?: Maybe<Scalars['Int']>,
   bankReconciliationError?: Maybe<Scalars['Int']>,
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
@@ -590,6 +590,23 @@ export enum CashPlanPaymentVerificationStatus {
   Finished = 'FINISHED'
 }
 
+export type CashPlanPaymentVerificationSummaryNode = Node & {
+   __typename?: 'CashPlanPaymentVerificationSummaryNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  status: CashPlanPaymentVerificationSummaryStatus,
+  activationDate?: Maybe<Scalars['DateTime']>,
+  completionDate?: Maybe<Scalars['DateTime']>,
+  cashPlan: CashPlanNode,
+};
+
+export enum CashPlanPaymentVerificationSummaryStatus {
+  Pending = 'PENDING',
+  Active = 'ACTIVE',
+  Finished = 'FINISHED'
+}
+
 export enum CashPlanPaymentVerificationVerificationMethod {
   Rapidpro = 'RAPIDPRO',
   Xlsx = 'XLSX',
@@ -601,12 +618,6 @@ export enum CashPlanStatus {
   DistributionCompletedWithErrors = 'DISTRIBUTION_COMPLETED_WITH_ERRORS',
   TransactionCompleted = 'TRANSACTION_COMPLETED',
   TransactionCompletedWithErrors = 'TRANSACTION_COMPLETED_WITH_ERRORS'
-}
-
-export enum CashPlanVerificationStatus {
-  Pending = 'PENDING',
-  Active = 'ACTIVE',
-  Finished = 'FINISHED'
 }
 
 export type CategoryExtrasInput = {
@@ -946,9 +957,9 @@ export type DocumentTypeNodeDocumentsArgs = {
 export enum DocumentTypeType {
   BirthCertificate = 'BIRTH_CERTIFICATE',
   DriversLicense = 'DRIVERS_LICENSE',
+  ElectoralCard = 'ELECTORAL_CARD',
   NationalId = 'NATIONAL_ID',
   NationalPassport = 'NATIONAL_PASSPORT',
-  ElectoralCard = 'ELECTORAL_CARD',
   Other = 'OTHER'
 }
 
@@ -1392,14 +1403,14 @@ export type HouseholdNodeEdge = {
 
 export enum HouseholdOrgEnumerator {
   A = 'A_',
-  Unicef = 'UNICEF',
-  Partner = 'PARTNER'
+  Partner = 'PARTNER',
+  Unicef = 'UNICEF'
 }
 
 export enum HouseholdRegistrationMethod {
   A = 'A_',
-  HhRegistration = 'HH_REGISTRATION',
-  Community = 'COMMUNITY'
+  Community = 'COMMUNITY',
+  HhRegistration = 'HH_REGISTRATION'
 }
 
 export enum HouseholdResidenceStatus {
@@ -1802,9 +1813,9 @@ export type ImportedDocumentTypeNodeDocumentsArgs = {
 export enum ImportedDocumentTypeType {
   BirthCertificate = 'BIRTH_CERTIFICATE',
   DriversLicense = 'DRIVERS_LICENSE',
+  ElectoralCard = 'ELECTORAL_CARD',
   NationalId = 'NATIONAL_ID',
   NationalPassport = 'NATIONAL_PASSPORT',
-  ElectoralCard = 'ELECTORAL_CARD',
   Other = 'OTHER'
 }
 
@@ -1816,10 +1827,10 @@ export enum ImportedHouseholdCollectIndividualData {
 
 export enum ImportedHouseholdConsentSharing {
   A = 'A_',
-  Unicef = 'UNICEF',
+  GovernmentPartner = 'GOVERNMENT_PARTNER',
   HumanitarianPartner = 'HUMANITARIAN_PARTNER',
   PrivatePartner = 'PRIVATE_PARTNER',
-  GovernmentPartner = 'GOVERNMENT_PARTNER'
+  Unicef = 'UNICEF'
 }
 
 export enum ImportedHouseholdCurrency {
@@ -2076,14 +2087,14 @@ export type ImportedHouseholdNodeEdge = {
 
 export enum ImportedHouseholdOrgEnumerator {
   A = 'A_',
-  Unicef = 'UNICEF',
-  Partner = 'PARTNER'
+  Partner = 'PARTNER',
+  Unicef = 'UNICEF'
 }
 
 export enum ImportedHouseholdRegistrationMethod {
   A = 'A_',
-  HhRegistration = 'HH_REGISTRATION',
-  Community = 'COMMUNITY'
+  Community = 'COMMUNITY',
+  HhRegistration = 'HH_REGISTRATION'
 }
 
 export enum ImportedHouseholdResidenceStatus {
@@ -2103,10 +2114,10 @@ export enum ImportedIndividualDeduplicationBatchStatus {
 }
 
 export enum ImportedIndividualDeduplicationGoldenRecordStatus {
-  Unique = 'UNIQUE',
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
-  NotProcessed = 'NOT_PROCESSED'
+  NotProcessed = 'NOT_PROCESSED',
+  Unique = 'UNIQUE'
 }
 
 export enum ImportedIndividualDisability {
@@ -2139,11 +2150,11 @@ export type ImportedIndividualIdentityNodeEdge = {
 
 export enum ImportedIndividualMaritalStatus {
   A = 'A_',
-  Single = 'SINGLE',
-  Married = 'MARRIED',
-  Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
-  Separated = 'SEPARATED'
+  Married = 'MARRIED',
+  Separated = 'SEPARATED',
+  Single = 'SINGLE',
+  Widowed = 'WIDOWED'
 }
 
 export type ImportedIndividualNode = Node & {
@@ -2246,17 +2257,17 @@ export type IndividualDataUpdateIssueTypeExtras = {
 };
 
 export enum IndividualDeduplicationBatchStatus {
-  SimilarInBatch = 'SIMILAR_IN_BATCH',
   DuplicateInBatch = 'DUPLICATE_IN_BATCH',
-  UniqueInBatch = 'UNIQUE_IN_BATCH',
-  NotProcessed = 'NOT_PROCESSED'
+  NotProcessed = 'NOT_PROCESSED',
+  SimilarInBatch = 'SIMILAR_IN_BATCH',
+  UniqueInBatch = 'UNIQUE_IN_BATCH'
 }
 
 export enum IndividualDeduplicationGoldenRecordStatus {
-  Unique = 'UNIQUE',
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
-  NotProcessed = 'NOT_PROCESSED'
+  NotProcessed = 'NOT_PROCESSED',
+  Unique = 'UNIQUE'
 }
 
 export type IndividualDeleteIssueTypeExtras = {
@@ -2308,11 +2319,11 @@ export type IndividualIdentityObjectType = {
 
 export enum IndividualMaritalStatus {
   A = 'A_',
-  Single = 'SINGLE',
-  Married = 'MARRIED',
-  Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
-  Separated = 'SEPARATED'
+  Married = 'MARRIED',
+  Separated = 'SEPARATED',
+  Single = 'SINGLE',
+  Widowed = 'WIDOWED'
 }
 
 export type IndividualNode = Node & {
@@ -2506,20 +2517,20 @@ export type IndividualNodeEdge = {
 
 export enum IndividualRelationship {
   Unknown = 'UNKNOWN',
-  NonBeneficiary = 'NON_BENEFICIARY',
-  Head = 'HEAD',
-  SonDaughter = 'SON_DAUGHTER',
-  WifeHusband = 'WIFE_HUSBAND',
-  BrotherSister = 'BROTHER_SISTER',
-  MotherFather = 'MOTHER_FATHER',
   AuntUncle = 'AUNT_UNCLE',
-  GrandmotherGrandfather = 'GRANDMOTHER_GRANDFATHER',
-  MotherinlawFatherinlaw = 'MOTHERINLAW_FATHERINLAW',
+  BrotherSister = 'BROTHER_SISTER',
+  Cousin = 'COUSIN',
   DaughterinlawSoninlaw = 'DAUGHTERINLAW_SONINLAW',
-  SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
   GranddaugherGrandson = 'GRANDDAUGHER_GRANDSON',
+  GrandmotherGrandfather = 'GRANDMOTHER_GRANDFATHER',
+  Head = 'HEAD',
+  MotherFather = 'MOTHER_FATHER',
+  MotherinlawFatherinlaw = 'MOTHERINLAW_FATHERINLAW',
   NephewNiece = 'NEPHEW_NIECE',
-  Cousin = 'COUSIN'
+  NonBeneficiary = 'NON_BENEFICIARY',
+  SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
+  SonDaughter = 'SON_DAUGHTER',
+  WifeHusband = 'WIFE_HUSBAND'
 }
 
 export type IndividualRoleInHouseholdNode = {
@@ -2534,9 +2545,9 @@ export type IndividualRoleInHouseholdNode = {
 };
 
 export enum IndividualRoleInHouseholdRole {
-  Primary = 'PRIMARY',
+  NoRole = 'NO_ROLE',
   Alternate = 'ALTERNATE',
-  NoRole = 'NO_ROLE'
+  Primary = 'PRIMARY'
 }
 
 export enum IndividualSex {
@@ -3141,10 +3152,10 @@ export type PaymentRecordNodeEdge = {
 };
 
 export enum PaymentRecordStatus {
-  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
-  TransactionErroneous = 'TRANSACTION_ERRONEOUS',
   DistributionSuccessful = 'DISTRIBUTION_SUCCESSFUL',
-  NotDistributed = 'NOT_DISTRIBUTED'
+  NotDistributed = 'NOT_DISTRIBUTED',
+  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
+  TransactionErroneous = 'TRANSACTION_ERRONEOUS'
 }
 
 export type PaymentVerificationNode = Node & {
@@ -3204,8 +3215,8 @@ export type PositiveFeedbackTicketExtras = {
 };
 
 export enum ProgramFrequencyOfPayments {
-  Regular = 'REGULAR',
-  OneOff = 'ONE_OFF'
+  OneOff = 'ONE_OFF',
+  Regular = 'REGULAR'
 }
 
 export type ProgramNode = Node & {
@@ -3333,8 +3344,8 @@ export enum ProgramSector {
 }
 
 export enum ProgramStatus {
-  Draft = 'DRAFT',
   Active = 'ACTIVE',
+  Draft = 'DRAFT',
   Finished = 'FINISHED'
 }
 
@@ -4277,15 +4288,15 @@ export type RegistrationDataImportNodeEdge = {
 };
 
 export enum RegistrationDataImportStatus {
+  Deduplication = 'DEDUPLICATION',
+  DeduplicationFailed = 'DEDUPLICATION_FAILED',
+  Importing = 'IMPORTING',
+  ImportError = 'IMPORT_ERROR',
   InReview = 'IN_REVIEW',
   Merged = 'MERGED',
   Merging = 'MERGING',
-  Importing = 'IMPORTING',
-  DeduplicationFailed = 'DEDUPLICATION_FAILED',
-  Deduplication = 'DEDUPLICATION',
-  Refused = 'REFUSED',
-  ImportError = 'IMPORT_ERROR',
-  MergeError = 'MERGE_ERROR'
+  MergeError = 'MERGE_ERROR',
+  Refused = 'REFUSED'
 }
 
 export type RegistrationDeduplicationMutation = {
@@ -5799,9 +5810,9 @@ export type UserRoleNode = {
 };
 
 export enum UserStatus {
-  Invited = 'INVITED',
   Active = 'ACTIVE',
-  Inactive = 'INACTIVE'
+  Inactive = 'INACTIVE',
+  Invited = 'INVITED'
 }
 
 
@@ -6515,7 +6526,7 @@ export type ActivateCashPlanPaymentVerificationMutation = (
     & Pick<ActivateCashPlanVerificationMutation, 'validationErrors'>
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verifications: (
         { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
@@ -6525,7 +6536,10 @@ export type ActivateCashPlanPaymentVerificationMutation = (
             & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'activationDate'>
           )> }
         )>> }
-      ) }
+      ), cashPlanPaymentVerificationSummary: Maybe<(
+        { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
+        & Pick<CashPlanPaymentVerificationSummaryNode, 'id' | 'status'>
+      )> }
     )> }
   )> }
 );
@@ -6557,7 +6571,7 @@ export type DiscardCashPlanPaymentVerificationMutation = (
     { __typename?: 'DiscardCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verifications: (
         { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
@@ -6599,7 +6613,7 @@ export type FinishCashPlanPaymentVerificationMutation = (
     { __typename?: 'FinishCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verifications: (
         { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
@@ -6609,7 +6623,10 @@ export type FinishCashPlanPaymentVerificationMutation = (
             & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'completionDate'>
           )> }
         )>> }
-      ) }
+      ), cashPlanPaymentVerificationSummary: Maybe<(
+        { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
+        & Pick<CashPlanPaymentVerificationSummaryNode, 'id' | 'status'>
+      )> }
     )> }
   )> }
 );
@@ -7848,14 +7865,17 @@ export type AllCashPlansQuery = (
       & Pick<CashPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
-        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'totalNumberOfHouseholds' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'currency' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
+        & Pick<CashPlanNode, 'id' | 'caId' | 'assistanceThrough' | 'totalNumberOfHouseholds' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'currency' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
         & { serviceProvider: Maybe<(
           { __typename?: 'ServiceProviderNode' }
           & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
         )>, program: (
           { __typename?: 'ProgramNode' }
           & Pick<ProgramNode, 'id' | 'name'>
-        ) }
+        ), cashPlanPaymentVerificationSummary: Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
+          & Pick<CashPlanPaymentVerificationSummaryNode, 'id' | 'status'>
+        )> }
       )> }
     )>> }
   )> }
@@ -7915,12 +7935,13 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'canCreatePaymentVerificationPlan' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
+    & Pick<CashPlanNode, 'id' | 'canCreatePaymentVerificationPlan' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
     & { serviceProvider: Maybe<(
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
     )>, verifications: (
       { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+      & Pick<CashPlanPaymentVerificationNodeConnection, 'totalCount'>
       & { edges: Array<Maybe<(
         { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
         & { node: Maybe<(
@@ -7932,7 +7953,10 @@ export type CashPlanQuery = (
           )> }
         )> }
       )>> }
-    ), program: (
+    ), cashPlanPaymentVerificationSummary: Maybe<(
+      { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
+      & Pick<CashPlanPaymentVerificationSummaryNode, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'activationDate' | 'completionDate'>
+    )>, program: (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'caId'>
     ), paymentRecords: (
@@ -10671,7 +10695,6 @@ export const ActivateCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
-      verificationStatus
       verifications {
         edges {
           node {
@@ -10680,6 +10703,10 @@ export const ActivateCashPlanPaymentVerificationDocument = gql`
             activationDate
           }
         }
+      }
+      cashPlanPaymentVerificationSummary {
+        id
+        status
       }
     }
     validationErrors
@@ -10786,7 +10813,6 @@ export const DiscardCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
-      verificationStatus
       verifications {
         edges {
           node {
@@ -10906,7 +10932,6 @@ export const FinishCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
-      verificationStatus
       verifications {
         edges {
           node {
@@ -10915,6 +10940,10 @@ export const FinishCashPlanPaymentVerificationDocument = gql`
             completionDate
           }
         }
+      }
+      cashPlanPaymentVerificationSummary {
+        id
+        status
       }
     }
   }
@@ -14048,7 +14077,6 @@ export const AllCashPlansDocument = gql`
       node {
         id
         caId
-        verificationStatus
         assistanceThrough
         totalNumberOfHouseholds
         serviceProvider {
@@ -14072,6 +14100,10 @@ export const AllCashPlansDocument = gql`
         totalDeliveredQuantity
         totalUndeliveredQuantity
         updatedAt
+        cashPlanPaymentVerificationSummary {
+          id
+          status
+        }
       }
     }
   }
@@ -14253,11 +14285,11 @@ export const CashPlanDocument = gql`
     caId
     caHashId
     dispersionDate
-    verificationStatus
     bankReconciliationSuccess
     bankReconciliationError
     totalNumberOfHouseholds
     verifications {
+      totalCount
       edges {
         node {
           id
@@ -14284,6 +14316,14 @@ export const CashPlanDocument = gql`
           sexFilter
         }
       }
+    }
+    cashPlanPaymentVerificationSummary {
+      id
+      createdAt
+      updatedAt
+      status
+      activationDate
+      completionDate
     }
     program {
       id
@@ -17833,7 +17873,6 @@ export type ResolversTypes = {
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
   ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
-  CashPlanVerificationStatus: CashPlanVerificationStatus,
   CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
   CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
   CashPlanPaymentVerificationNode: ResolverTypeWrapper<CashPlanPaymentVerificationNode>,
@@ -17849,6 +17888,8 @@ export type ResolversTypes = {
   TicketPaymentVerificationDetailsNodeEdge: ResolverTypeWrapper<TicketPaymentVerificationDetailsNodeEdge>,
   TicketPaymentVerificationDetailsNode: ResolverTypeWrapper<TicketPaymentVerificationDetailsNode>,
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+  CashPlanPaymentVerificationSummaryNode: ResolverTypeWrapper<CashPlanPaymentVerificationSummaryNode>,
+  CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   TicketComplaintDetailsNodeConnection: ResolverTypeWrapper<TicketComplaintDetailsNodeConnection>,
@@ -18190,7 +18231,6 @@ export type ResolversParentTypes = {
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
   ServiceProviderNode: ServiceProviderNode,
-  CashPlanVerificationStatus: CashPlanVerificationStatus,
   CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
   CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
   CashPlanPaymentVerificationNode: CashPlanPaymentVerificationNode,
@@ -18206,6 +18246,8 @@ export type ResolversParentTypes = {
   TicketPaymentVerificationDetailsNodeEdge: TicketPaymentVerificationDetailsNodeEdge,
   TicketPaymentVerificationDetailsNode: TicketPaymentVerificationDetailsNode,
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+  CashPlanPaymentVerificationSummaryNode: CashPlanPaymentVerificationSummaryNode,
+  CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   TicketComplaintDetailsNodeConnection: TicketComplaintDetailsNodeConnection,
@@ -18643,9 +18685,9 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  verificationStatus?: Resolver<ResolversTypes['CashPlanVerificationStatus'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
   verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
+  cashPlanPaymentVerificationSummary?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationSummaryNode']>, ParentType, ContextType>,
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -18702,6 +18744,16 @@ export type CashPlanPaymentVerificationNodeConnectionResolvers<ContextType = any
 export type CashPlanPaymentVerificationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeEdge'] = ResolversParentTypes['CashPlanPaymentVerificationNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type CashPlanPaymentVerificationSummaryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationSummaryNode'] = ResolversParentTypes['CashPlanPaymentVerificationSummaryNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['CashPlanPaymentVerificationSummaryStatus'], ParentType, ContextType>,
+  activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
 };
 
 export type ChartDatasetNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDatasetNode'] = ResolversParentTypes['ChartDatasetNode']> = {
@@ -19599,7 +19651,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -20843,6 +20895,7 @@ export type Resolvers<ContextType = any> = {
   CashPlanPaymentVerificationNode?: CashPlanPaymentVerificationNodeResolvers<ContextType>,
   CashPlanPaymentVerificationNodeConnection?: CashPlanPaymentVerificationNodeConnectionResolvers<ContextType>,
   CashPlanPaymentVerificationNodeEdge?: CashPlanPaymentVerificationNodeEdgeResolvers<ContextType>,
+  CashPlanPaymentVerificationSummaryNode?: CashPlanPaymentVerificationSummaryNodeResolvers<ContextType>,
   ChartDatasetNode?: ChartDatasetNodeResolvers<ContextType>,
   ChartDetailedDatasetsNode?: ChartDetailedDatasetsNodeResolvers<ContextType>,
   ChartGrievanceTicketsNode?: ChartGrievanceTicketsNodeResolvers<ContextType>,
