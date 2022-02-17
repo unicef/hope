@@ -3,7 +3,7 @@ from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 
 import graphene
-from django_filters import CharFilter, FilterSet, ModelChoiceFilter, OrderingFilter
+from django_filters import CharFilter, FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -28,7 +28,7 @@ from hct_mis_api.apps.core.utils import (
     is_valid_uuid,
     to_choice_object,
 )
-from hct_mis_api.apps.household.models import ROLE_NO_ROLE, Household
+from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -36,7 +36,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     ServiceProvider,
 )
-from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import (
     get_number_of_samples,
     get_payment_records_for_dashboard,
