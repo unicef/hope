@@ -35,7 +35,6 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
 class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("name", "program", "delivery_type", "status", "verification_status")
     list_filter = (
-        ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("delivery_type", ChoicesFieldComboFilter),
         ("verification_status", ChoicesFieldComboFilter),
@@ -45,6 +44,9 @@ class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     raw_id_fields = ("business_area", "program", "service_provider")
     search_fields = ("name",)
 
+    def verification_status(self, obj):
+        return obj.cash_plan_payment_verification_summary.status
+    verification_status.short_description = 'verification_status'
     @button()
     def payments(self, request, pk):
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")

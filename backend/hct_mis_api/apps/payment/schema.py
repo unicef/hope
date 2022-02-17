@@ -34,7 +34,7 @@ from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentRecord,
     PaymentVerification,
-    ServiceProvider,
+    ServiceProvider, CashPlanPaymentVerificationSummary,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import (
@@ -198,6 +198,13 @@ class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+
+class CashPlanPaymentVerificationSummaryNode(DjangoObjectType):
+
+    class Meta:
+        model = CashPlanPaymentVerificationSummary
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
     payment_record_count = graphene.Int()
