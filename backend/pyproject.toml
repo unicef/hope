@@ -75,7 +75,7 @@ django-countries = "^7.0"
 django-elasticsearch-dsl = "7.1.4"
 django-environ = "*"
 django-extensions = "2.2.6"
-django-filter = "^2.2.0"
+django-filter = "2.2.0"
 django-hijack = "*"
 django-jsoneditor = "*"
 django-model-utils = "4.0.0"
@@ -131,8 +131,6 @@ watchdog = "^2.0.2"
 wasmer = "0.4.1"
 parso = "0.7.1"
 argh = "^0.26.2"
-tox = "^3.24.5"
-coverage = "^6.3.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

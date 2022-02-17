@@ -136,8 +136,6 @@ class GrievanceTicketFilter(FilterSet):
             "payment_verifications__payment_record__service_provider",
         ),
     )
-    id__startswith = CharFilter(field_name="id", lookup_expr="startswith")
-    area__startswith = CharFilter(field_name="area", lookup_expr="startswith")
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
@@ -155,15 +153,13 @@ class GrievanceTicketFilter(FilterSet):
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
 
     class Meta:
-        fields = [
-            "id",
-            "id__startswith",
-            "category",
-            "area",
-            "area__startswith",
-            "assigned_to",
-            "registration_data_import",
-        ]
+        fields = {
+            "id": ["exact", "startswith"],
+            "category": ["exact"],
+            "area": ["exact", "startswith"],
+            "assigned_to": ["exact"],
+            "registration_data_import": ["exact"],
+        }
         model = GrievanceTicket
 
     order_by = OrderingFilter(
