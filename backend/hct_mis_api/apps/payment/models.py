@@ -237,6 +237,17 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     def business_area(self):
         return self.cash_plan.business_area
 
+    def set_sample_size(self, sample_count: int):
+        self.sample_size = self.calc_sample_size(sample_count)
+
+    def calc_sample_size(self, sample_count: int) -> int:
+        from hct_mis_api.apps.payment.utils import get_number_of_samples
+
+        if self.sampling == self.SAMPLING_FULL_LIST:
+            return sample_count
+        else:
+            return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
+
 def build_summary(cash_plan):
     active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
     pending_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_PENDING).count()
