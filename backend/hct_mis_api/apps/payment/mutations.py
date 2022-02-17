@@ -36,8 +36,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
 )
-from hct_mis_api.apps.payment.services.payment_verification_create import (
-    PaymentVerificationCreate,
+from hct_mis_api.apps.payment.services.create_payment_verification_plan_service import (
+    CreatePaymentVerificationPlanService,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode
@@ -72,7 +72,7 @@ class CreatePaymentVerificationMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
 
-        cash_plan_verification = PaymentVerificationCreate(input, cash_plan).execute()
+        cash_plan_verification = CreatePaymentVerificationPlanService(input, cash_plan).execute()
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
