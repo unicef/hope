@@ -229,12 +229,6 @@ class CashPlan(TimeStampedUUIDModel):
     total_undelivered_quantity = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
     )
-    verification_status = models.CharField(
-        max_length=10,
-        default=CashPlanPaymentVerification.STATUS_PENDING,
-        choices=CashPlanPaymentVerification.STATUS_CHOICES,
-        db_index=True,
-    )
 
     def __str__(self):
         return self.name

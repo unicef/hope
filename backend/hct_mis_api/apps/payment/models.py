@@ -296,3 +296,20 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     @property
     def business_area(self):
         return self.cash_plan_payment_verification.cash_plan.business_area
+
+
+class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
+    STATUS_PENDING = "PENDING"
+    STATUS_ACTIVE = "ACTIVE"
+    STATUS_FINISHED = "FINISHED"
+    STATUS_CHOICES = (
+        (STATUS_PENDING, "Pending"),
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_FINISHED, "Finished"),
+    )
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
+    activation_date = models.DateTimeField(null=True)
+    completion_date = models.DateTimeField(null=True)
+    cash_plan = models.OneToOneField(
+        "program.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
+    )
