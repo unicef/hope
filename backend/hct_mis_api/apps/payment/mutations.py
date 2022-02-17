@@ -36,10 +36,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
 )
-from hct_mis_api.apps.payment.payment_verification_create import (
+from hct_mis_api.apps.payment.services.payment_verification_create import (
     PaymentVerificationCreate,
 )
-from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode
 from hct_mis_api.apps.payment.utils import (
     calculate_counts,
