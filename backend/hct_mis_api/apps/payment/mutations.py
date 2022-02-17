@@ -45,6 +45,7 @@ from hct_mis_api.apps.payment.utils import (
     calculate_counts,
     from_received_to_status,
     get_number_of_samples,
+    build_summary,
 )
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
@@ -82,6 +83,7 @@ class CreatePaymentVerificationMutation(PermissionMutation):
             cash_plan_verification,
         )
         cash_plan.refresh_from_db()
+        build_summary(cash_plan=cash_plan)
         return cls(cash_plan=cash_plan)
 
 
@@ -293,7 +295,7 @@ class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMu
             cls.activate_rapidpro(cashplan_payment_verification)
         cashplan_payment_verification.activation_date = timezone.now()
         cashplan_payment_verification.save()
-
+        build_summary(cash_plan=cashplan_payment_verification.cash_plan)
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -367,6 +369,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_FINISHED
         cashplan_payment_verification.completion_date = timezone.now()
         cashplan_payment_verification.save()
+        build_summary(cash_plan=cashplan_payment_verification.cash_plan)
         cls.create_grievance_tickets(cashplan_payment_verification)
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
@@ -417,7 +420,7 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
         PaymentVerification.objects.bulk_update(
             payment_record_verifications, ["status_date", "status", "received_amount"]
         )
-
+        build_summary(cash_plan=cashplan_payment_verification.cash_plan)
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
