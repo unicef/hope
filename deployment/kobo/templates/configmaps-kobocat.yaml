@@ -54,7 +54,7 @@ data:
   KOBOCAT_MONGO_USER: "{{ .Values.mongodb.externalDatabase.mongodbUsername }}"
   {{- end }}
 
-  DJANGO_SETTINGS_MODULE: "onadata.settings.kc_environ"
+  DJANGO_SETTINGS_MODULE: "onadata.settings.prod"
 
   KOBOFORM_URL: "{{ printf "%s://%s.%s" .Values.ingress.scheme .Values.kpi.subdomain .Values.ingress.host }}"
   KOBOCAT_URL: "{{ printf "%s://%s.%s" .Values.ingress.scheme .Values.kobocat.subdomain .Values.ingress.host }}"
@@ -63,6 +63,8 @@ data:
   KOBOFORM_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-kpi"
   KOBOCAT_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-kobocat"
   ENKETO_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-enketo"
+
+  KOBOCAT_RAVEN_DSN: "{{ .Values.kobocat.ravenDsn }}"
 
   #TBD
   USE_X_FORWARDED_HOST: "False"
