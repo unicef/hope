@@ -71,6 +71,8 @@ spec:
           subPath: uwsgi.ini
         - name: scripts
           mountPath: /etc/profile.d/
+        - name: scripts
+          mountPath: /srv/init/
       - name: nginx
         image: nginx:1.19.0
         command: [nginx, -g,'daemon off;']
@@ -103,3 +105,7 @@ spec:
           items:
           - key: runtime_variables_kobocat.source.bash
             path: runtime_variables_kobocat.source.bash.sh
+          - key: wait_for_postgres.bash
+            path: wait_for_postgres.bash
+          - key: wait_for_mongo.bash
+            path: wait_for_mongo.bash
