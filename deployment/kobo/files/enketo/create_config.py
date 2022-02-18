@@ -2,6 +2,7 @@ import base64
 import json
 import os
 
+
 CURRENT_DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT_PATH = os.path.abspath(os.path.join(CURRENT_DIR_PATH, "../.."))
 
@@ -18,7 +19,7 @@ def get_or_create_encryption_key():
         secrets_dir_path, "enketo_encryption_key.txt"
     )
     if not encryption_key and os.path.isfile(encryption_key_file_path):
-        with open(encryption_key_file_path) as encryption_key_file:
+        with open(encryption_key_file_path, "r") as encryption_key_file:
             encryption_key = encryption_key_file.read().strip()
     # If the key couldn't be retrieved from disk, generate and store a new one.
     elif not encryption_key:
@@ -35,10 +36,12 @@ def create_config():
 
     CONFIG_FILE_PATH = os.path.join(PROJECT_ROOT_PATH, "config/config.json")
     if not os.path.isfile(CONFIG_FILE_PATH):
-        raise OSError(f"No Enketo Express configuration found at `{CONFIG_FILE_PATH}`.")
+        raise EnvironmentError(
+            "No Enketo Express configuration found at `{}`.".format(CONFIG_FILE_PATH)
+        )
     else:
         try:
-            with open(CONFIG_FILE_PATH) as config_file:
+            with open(CONFIG_FILE_PATH, "r") as config_file:
                 config = json.loads(config_file.read())
         except:
             raise ValueError("Could not parse JSON content from `{}`.").format(
@@ -50,7 +53,7 @@ def create_config():
         "api key", os.environ.get("ENKETO_API_KEY")
     )
     if not config["linked form and data server"]["api key"]:
-        raise OSError("An API key for Enketo Express is required.")
+        raise EnvironmentError("An API key for Enketo Express is required.")
 
     # Retrieve/generate the encryption key if not present.
     config["linked form and data server"].setdefault(
