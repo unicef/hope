@@ -75,8 +75,8 @@ django-countries = "^7.0"
 django-elasticsearch-dsl = "7.1.4"
 django-environ = "*"
 django-extensions = "2.2.6"
-django-filter = "2.2.0"
-django-filter-cps = { git = "https://github.com/srugano/django-filter.git", rev="d6d3641abd98caa04340c3c92d6bdd64cdbf52ed" }
+#django-filter = "2.2.0"
+django-filter = { git = "https://github.com/srugano/django-filter.git", rev="b01c91990550ccf543cf23110f6750016ca38ec6" }
 django-hijack = "*"
 django-jsoneditor = "*"
 django-model-utils = "4.0.0"
@@ -116,6 +116,7 @@ urllib3 = "1.26.2"
 xlrd = "1.2.0"
 argh = "^0.26.2"
 django-import-export = "^2.7.0"
+MarkupSafe = "2.0.1"
 
 [tool.poetry.dev-dependencies]
 django-webtest = "^1.9.7"
