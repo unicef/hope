@@ -76,6 +76,7 @@ django-elasticsearch-dsl = "7.1.4"
 django-environ = "*"
 django-extensions = "2.2.6"
 django-filter = "2.2.0"
+django-filter-cps = { git = "https://github.com/srugano/django-filter.git", rev="d6d3641abd98caa04340c3c92d6bdd64cdbf52ed" }
 django-hijack = "*"
 django-jsoneditor = "*"
 django-model-utils = "4.0.0"
