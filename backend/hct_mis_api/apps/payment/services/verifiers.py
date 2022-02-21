@@ -31,18 +31,18 @@ class PaymentVerificationArgumentVerifier:
         },
     }
 
-    def __init__(self, input):
-        self.input = input
+    def __init__(self, input_data):
+        self.input_data = input_data
 
     def verify(self, field_name):
         options = self.ARGUMENTS.get(field_name)
 
         for key, value in options.items():
-            if key != self.input.get(field_name):
+            if key != self.input_data.get(field_name):
                 continue
             for required in value.get("required"):
-                if self.input.get(required) is None:
+                if self.input_data.get(required) is None:
                     raise GraphQLError(f"You have to provide {required} in {key}")
             for not_allowed in value.get("not_allowed"):
-                if self.input.get(not_allowed) is not None:
+                if self.input_data.get(not_allowed) is not None:
                     raise GraphQLError(f"You can't provide {not_allowed} in {key}")
