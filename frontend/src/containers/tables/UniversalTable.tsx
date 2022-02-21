@@ -1,7 +1,10 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { LoadingComponent } from '../../components/core/LoadingComponent';
 import { HeadCell } from '../../components/core/Table/EnhancedTableHead';
-import { Order, TableComponent } from '../../components/core/Table/TableComponent';
+import {
+  Order,
+  TableComponent,
+} from '../../components/core/Table/TableComponent';
 import { columnToOrderBy } from '../../utils/utils';
 
 interface UniversalTableProps<T, K> {
@@ -62,10 +65,10 @@ export function UniversalTable<T, K>({
     }
   }, [initialVariables]);
   if (error) {
-    // eslint-disable-next-line no-console
+    //  eslint-disable-next-line no-console
     console.error(error);
+    return <div>Unexpected error</div>;
   }
-
   if (!data && loading) return <LoadingComponent />;
 
   let correctTitle = title;
