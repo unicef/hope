@@ -1,3 +1,5 @@
+from graphql import GraphQLError
+
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
@@ -9,7 +11,7 @@ class ActivatePaymentVerificationPlanService:
 
     def execute(self) -> CashPlanPaymentVerification:
         if self.payment_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
-            raise ValueError("You can activate only PENDING verification")
+            raise GraphQLError("You can activate only PENDING verification")
 
         if self.can_activate_via_rapidpro():
             self.activate_rapidpro()
