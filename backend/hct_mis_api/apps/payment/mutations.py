@@ -3,7 +3,6 @@ import math
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -14,7 +13,6 @@ from graphql import GraphQLError
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
@@ -26,14 +24,12 @@ from hct_mis_api.apps.grievance.models import (
     TicketPaymentVerificationDetails,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
 )
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
-    PaymentRecord,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode
@@ -43,12 +39,10 @@ from hct_mis_api.apps.payment.services.activate_payment_verification_plan_servic
 from hct_mis_api.apps.payment.services.create_payment_verification_plan_service import (
     CreatePaymentVerificationPlanService,
 )
-from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.payment.utils import (
-    calculate_counts,
-    from_received_to_status,
-    get_number_of_samples,
+from hct_mis_api.apps.payment.services.edit_payment_verification_plan_service import (
+    EditPaymentVerificationPlanService,
 )
+from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
@@ -95,100 +89,24 @@ class EditPaymentVerificationMutation(PermissionMutation):
         input = EditCashPlanPaymentVerificationInput(required=True)
         version = BigInt(required=False)
 
-    @staticmethod
-    def verify_required_arguments(input, field_name, options):
-        for key, value in options.items():
-            if key != input.get(field_name):
-                continue
-            for required in value.get("required"):
-                if input.get(required) is None:
-                    logger.error(f"You have to provide {required} in {key}")
-                    raise GraphQLError(f"You have to provide {required} in {key}")
-            for not_allowed in value.get("not_allowed"):
-                if input.get(not_allowed) is not None:
-                    logger.error(f"You can't provide {not_allowed} in {key}")
-                    raise GraphQLError(f"You can't provide {not_allowed} in {key}")
-
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        arg = lambda name: input.get(name)
-        cls.verify_required_arguments(
-            input,
-            "sampling",
-            {
-                CashPlanPaymentVerification.SAMPLING_FULL_LIST: {
-                    "required": ["full_list_arguments"],
-                    "not_allowed": ["random_sampling_arguments"],
-                },
-                CashPlanPaymentVerification.SAMPLING_RANDOM: {
-                    "required": ["random_sampling_arguments"],
-                    "not_allowed": ["full_list_arguments"],
-                },
-            },
-        )
-        cls.verify_required_arguments(
-            input,
-            "verification_channel",
-            {
-                CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO: {
-                    "required": ["rapid_pro_arguments"],
-                    "not_allowed": ["xlsx_arguments", "manual_arguments"],
-                },
-                CashPlanPaymentVerification.VERIFICATION_METHOD_XLSX: {
-                    "required": [],
-                    "not_allowed": ["rapid_pro_arguments", "manual_arguments"],
-                },
-                CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL: {
-                    "required": [],
-                    "not_allowed": ["rapid_pro_arguments", "xlsx_arguments"],
-                },
-            },
-        )
-        cash_plan_payment_verification_id = decode_id_string(arg("cash_plan_payment_verification_id"))
+        cash_plan_verification_id = decode_id_string(input.get("cash_plan_payment_verification_id"))
 
-        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_payment_verification_id)
+        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, cash_plan_verification.business_area)
 
-        if cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
-            logger.error("You can only edit PENDING Cash Plan Verification")
-            raise GraphQLError("You can only edit PENDING Cash Plan Verification")
-        cash_plan = cash_plan_verification.cash_plan
-        verification_channel = arg("verification_channel")
-        (
-            payment_records,
-            confidence_interval,
-            margin_of_error,
-            payment_records_sample_count,
-            sampling,
-            excluded_admin_areas,
-            sex,
-            age,
-        ) = cls.process_sampling(cash_plan, input)
         old_cash_plan_verification = copy_model_object(cash_plan_verification)
-        cash_plan_verification.confidence_interval = confidence_interval
-        cash_plan_verification.margin_of_error = margin_of_error
-        cash_plan_verification.sample_size = payment_records_sample_count
-        cash_plan_verification.sampling = sampling
-        cash_plan_verification.verification_method = verification_channel
-        cash_plan_verification.sex_filter = sex
-        cash_plan_verification.age_filter = age
-        cash_plan_verification.excluded_admin_areas_filter = excluded_admin_areas
+        cash_plan_verification.verification_method = input.get("verification_channel")
         cash_plan_verification.payment_record_verifications.all().delete()
-        payment_record_verifications_to_create = []
-        for payment_record in payment_records:
-            payment_record_verification = PaymentVerification(
-                status_date=timezone.now(),
-                cash_plan_payment_verification=cash_plan_verification,
-                payment_record=payment_record,
-            )
-            payment_record_verifications_to_create.append(payment_record_verification)
-        cash_plan_verification.save()
-        PaymentVerification.objects.bulk_create(payment_record_verifications_to_create)
-        cash_plan.refresh_from_db()
+
+        cash_plan_verification = EditPaymentVerificationPlanService(input, cash_plan_verification).execute()
+
+        cash_plan_verification.cash_plan.refresh_from_db()
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -196,75 +114,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
             old_cash_plan_verification,
             cash_plan_verification,
         )
-        cls.process_verification_method(cash_plan_verification, input)
-        return cls(cash_plan=cash_plan)
-
-    @classmethod
-    def process_sampling(cls, cash_plan, input):
-        arg = lambda name: input.get(name)
-        sampling = arg("sampling")
-        excluded_admin_areas = []
-        sex = None
-        age = None
-        confidence_interval = None
-        margin_of_error = None
-        payment_records = cash_plan.payment_records.filter(
-            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
-        )
-        if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
-            excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
-        elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            random_sampling_arguments = arg("random_sampling_arguments")
-            confidence_interval = random_sampling_arguments.get("confidence_interval")
-            margin_of_error = random_sampling_arguments.get("margin_of_error")
-            excluded_admin_areas = random_sampling_arguments.get("excluded_admin_areas", [])
-            sex = random_sampling_arguments.get("sex")
-            age = random_sampling_arguments.get("age")
-
-        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
-
-        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
-        if sex is not None:
-            payment_records = payment_records.filter(household__head_of_household__sex=sex)
-        if age is not None:
-            payment_records = filter_age(
-                "household__head_of_household__birth_date",
-                payment_records,
-                age.get("min"),
-                age.get("max"),
-            )
-        payment_records_sample_count = payment_records.count()
-        if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            payment_records_sample_count = get_number_of_samples(
-                payment_records_sample_count,
-                confidence_interval,
-                margin_of_error,
-            )
-            payment_records = payment_records.order_by("?")[:payment_records_sample_count]
-        return (
-            payment_records,
-            confidence_interval,
-            margin_of_error,
-            payment_records_sample_count,
-            sampling,
-            excluded_admin_areas,
-            sex,
-            age,
-        )
-
-    @classmethod
-    def process_verification_method(cls, cash_plan_payment_verification, input):
-        verification_method = cash_plan_payment_verification.verification_method
-        if verification_method == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO:
-            cls.process_rapid_pro_method(cash_plan_payment_verification, input)
-
-    @classmethod
-    def process_rapid_pro_method(cls, cash_plan_payment_verification, input):
-        rapid_pro_arguments = input["rapid_pro_arguments"]
-        flow_id = rapid_pro_arguments["flow_id"]
-        cash_plan_payment_verification.rapid_pro_flow_id = flow_id
-
-        cash_plan_payment_verification.save()
+        return cls(cash_plan=cash_plan_verification.cash_plan)
 
 
 class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMutationMixin):
@@ -278,23 +128,23 @@ class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMu
     @is_authenticated
     @transaction.atomic
     def processed_mutate(cls, root, info, cash_plan_verification_id, **kwargs):
-        pv_id = decode_id_string(cash_plan_verification_id)
-        payment_verification = get_object_or_404(CashPlanPaymentVerification, id=pv_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
+        pvp_id = decode_id_string(cash_plan_verification_id)
+        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=pvp_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
 
-        old_payment_verification = copy_model_object(payment_verification)
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, payment_verification.business_area)
+        old_cash_plan_verification = copy_model_object(cash_plan_verification)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, cash_plan_verification.business_area)
 
-        payment_verification = ActivatePaymentVerificationPlanService(payment_verification).execute()
+        cash_plan_verification = ActivatePaymentVerificationPlanService(cash_plan_verification).execute()
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_payment_verification,
-            payment_verification,
+            old_cash_plan_verification,
+            cash_plan_verification,
         )
-        return ActivateCashPlanVerificationMutation(cash_plan=payment_verification.cash_plan)
+        return ActivateCashPlanVerificationMutation(cash_plan=cash_plan_verification.cash_plan)
 
 
 class FinishCashPlanVerificationMutation(PermissionMutation):
