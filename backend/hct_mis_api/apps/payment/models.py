@@ -244,6 +244,11 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         else:
             return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
+    def activate(self):
+        self.status = CashPlanPaymentVerification.STATUS_ACTIVE
+        self.activation_date = timezone.now()
+
+
 def build_summary(cash_plan):
     active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
     pending_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_PENDING).count()
@@ -265,6 +270,7 @@ def build_summary(cash_plan):
         summary.completion_date = None
         summary.activation_date = None
     summary.save()
+
 
 @receiver(
     post_save,
