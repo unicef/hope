@@ -2,6 +2,8 @@ from typing import List, Tuple
 
 from django.db.models import Q
 
+from graphql import GraphQLError
+
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
@@ -19,7 +21,7 @@ class Sampling:
         payment_records = self.cash_plan.available_payment_records()
 
         if not payment_records:
-            raise ValueError("There are no payment records that could be assigned to a new verification plan.")
+            raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 
         if cash_plan_verification.sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             sampling = FullListSampling(self.input_data.get("full_list_arguments"))

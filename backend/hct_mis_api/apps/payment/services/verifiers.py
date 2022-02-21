@@ -1,3 +1,5 @@
+from graphql import GraphQLError
+
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 
 
@@ -40,7 +42,7 @@ class PaymentVerificationArgumentVerifier:
                 continue
             for required in value.get("required"):
                 if self.input.get(required) is None:
-                    raise ValueError(f"You have to provide {required} in {key}")
+                    raise GraphQLError(f"You have to provide {required} in {key}")
             for not_allowed in value.get("not_allowed"):
                 if self.input.get(not_allowed) is not None:
-                    raise ValueError(f"You can't provide {not_allowed} in {key}")
+                    raise GraphQLError(f"You can't provide {not_allowed} in {key}")
