@@ -17,7 +17,7 @@ def migrate_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0034_migration'),
+        ('payment', '0036_migration'),
     ]
 
     operations = [
