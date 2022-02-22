@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/ProgrammesTable should render loading 1`] = `
+exports[`containers/tables/rdi/RegistrationDataImportTable should render loading 1`] = `
 <div>
   <div
     class="sc-gzVnrw dRZkta"
@@ -33,7 +33,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
 </div>
 `;
 
-exports[`containers/tables/ProgrammesTable should render with data 1`] = `
+exports[`containers/tables/rdi/RegistrationDataImportTable should render with data 1`] = `
 <div>
   <div
     class="sc-gzVnrw dRZkta"
@@ -56,7 +56,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
               <h6
                 class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
               >
-                Programmes
+                List of Imports (87)
               </h6>
             </div>
             <div
@@ -84,7 +84,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                     role="button"
                     tabindex="0"
                   >
-                    Name
+                    Title
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -121,7 +121,36 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   </span>
                 </th>
                 <th
+                  aria-sort="descending"
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE MuiTableSortLabel-active"
+                    role="button"
+                    tabindex="0"
+                  >
+                    Import Date
+                    <span
+                      class="makeStyles-visuallyHidden-12"
+                    >
+                      sorted descending
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionDesc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-paddingNone"
                   scope="col"
                 >
                   <span
@@ -130,7 +159,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                     role="button"
                     tabindex="0"
                   >
-                    Timeframe
+                    Num. of Individuals
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -144,30 +173,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-                  scope="col"
-                >
-                  <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                    role="button"
-                    tabindex="0"
-                  >
-                    Sector
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
-                  </span>
-                </th>
-                <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-paddingNone"
                   scope="col"
                 >
                   <span
@@ -190,7 +196,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                   scope="col"
                 >
                   <span
@@ -199,7 +205,30 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                     role="button"
                     tabindex="0"
                   >
-                    Budget (USD)
+                    Imported by
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    role="button"
+                    tabindex="0"
+                  >
+                    Data Source
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -226,9 +255,9 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 >
                   <a
                     class="sc-EHOje fJINSq"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
+                    href="/afghanistan/registration-data-import/UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6OWJlMjUwNGMtZGQ3YS00ZDZkLWE4OGEtOTU5YWZkZGY3MTgy"
                   >
-                    Notice hair fall college enough perhaps.
+                    Adam Row ID Test 2
                   </a>
                 </td>
                 <td
@@ -238,10 +267,10 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                     class="sc-bZQynM hTcAyj"
                   >
                     <div
-                      class="sc-ifAKCX iRZDSK"
+                      class="sc-ifAKCX jzRoPs"
                       data-cy="status-container"
                     >
-                      ACTIVE
+                      MERGED
                     </div>
                   </div>
                 </td>
@@ -249,32 +278,30 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <time
-                    datetime="1579478400000"
+                    datetime="1642585999418"
                   >
-                    20 Jan 2020
+                    19 Jan 2022 9:53 AM
                   </time>
-                   -
-                   
-                  <time
-                    datetime="1597795200000"
-                  >
-                    19 Aug 2020
-                  </time>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  6
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                >
+                  3
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Education
+                  Adam Fifield
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  12
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-                >
-                  691946197.49 USD
+                  XLS
                 </td>
               </tr>
             </tbody>
@@ -306,13 +333,13 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 role="button"
                 tabindex="0"
               >
-                5
+                10
               </div>
               <input
                 aria-hidden="true"
                 class="MuiSelect-nativeInput"
                 tabindex="-1"
-                value="5"
+                value="10"
               />
               <svg
                 aria-hidden="true"
@@ -328,7 +355,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
             <p
               class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
             >
-              1-5 of 9
+              1-10 of 87
             </p>
             <div
               class="MuiTablePagination-actions"

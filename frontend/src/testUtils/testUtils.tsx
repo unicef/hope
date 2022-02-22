@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { render, RenderOptions } from '@testing-library/react';
-import cloneDeep from 'lodash/cloneDeep';
 import { TestProviders } from './testProviders';
+import { MockLink } from '@apollo/react-testing';
 
 const customRender = (
   ui: ReactElement,
@@ -36,10 +36,12 @@ export const random = () => {
   return result;
 };
 
-export const makeApolloLoadingMock = (mocks) => {
-  let mocksWithDelay = cloneDeep(mocks);
-  for (const mock of mocksWithDelay) {
-    mock.request.delay = 1e21;
+export class ApolloLoadingLink extends MockLink {
+  constructor() {
+    super([]);
   }
-  return mocksWithDelay;
-};
+
+  request(operation) {
+    return null;
+  }
+}
