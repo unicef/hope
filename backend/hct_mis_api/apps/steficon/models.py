@@ -189,8 +189,8 @@ class RuleCommit(models.Model):
     language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)
 
     affected_fields = ArrayField(models.CharField(max_length=100))
-    before = JSONField(help_text="The record before change", editable=False)
-    after = JSONField(help_text="The record after apply changes", editable=False)
+    before = JSONField(help_text="The record before change", editable=False, default=dict)
+    after = JSONField(help_text="The record after apply changes", editable=False, default=dict)
 
     class Meta:
         verbose_name = "RuleCommit"
@@ -199,8 +199,8 @@ class RuleCommit(models.Model):
             "rule",
             "version",
         )
-        ordering = ("-timestamp",)
-        get_latest_by = "-timestamp"
+        ordering = ("-version",)
+        get_latest_by = "-version"
 
     def __str__(self):
         value = f"{self.rule} #{self.id}"
@@ -214,11 +214,11 @@ class RuleCommit(models.Model):
 
     @cached_property
     def prev(self):
-        return self.rule.history.filter(id__lt=self.id).first()
+        return self.rule.history.order_by("-version").filter(id__lt=self.id).first()
 
     @cached_property
     def next(self):
-        return self.rule.history.filter(id__gt=self.id).first()
+        return self.rule.history.order_by("version").filter(id__gt=self.id).first()
 
     @atomic
     def revert(self, fields=MONITORED_FIELDS):
@@ -232,3 +232,12 @@ class RuleCommit(models.Model):
 
     def execute(self, context):
         return self.interpreter.execute(context)
+
+    def release(self):
+        if self.deprecated or not self.enabled:
+            raise ValueError("Cannot release disabled/deprecated rules")
+        if not self.is_release:
+            self.is_release = True
+            self.save()
+            self.rule.history.exclude(pk=self.pk).update(deprecated=True)
+        return self

@@ -3,10 +3,10 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button
-from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
+from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
@@ -28,8 +28,8 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         ("target_population", AutoCompleteFilter),
         ("cash_plan", AutoCompleteFilter),
         ("service_provider", AutoCompleteFilter),
-        # TextFieldFilter.factory("cash_plan__id", "CashPlan ID"),
-        # TextFieldFilter.factory("target_population__id", "TargetPopulation ID"),
+        # ValueFilter.factory("cash_plan__id", "CashPlan ID"),
+        # ValueFilter.factory("target_population__id", "TargetPopulation ID"),
     )
     advanced_filter_fields = (
         "status",
@@ -58,7 +58,7 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 
 
 @admin.register(CashPlanPaymentVerification)
-class CashPlanPaymentVerificationAdmin(ExtraUrlMixin, LinkedObjectsMixin, HOPEModelAdminBase):
+class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("cash_plan", "status", "verification_method")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
@@ -87,7 +87,7 @@ class CashPlanPaymentVerificationAdmin(ExtraUrlMixin, LinkedObjectsMixin, HOPEMo
             task.execute()
             self.message_user(request, "Rapid Pro synced", messages.SUCCESS)
         else:
-            return _confirm_action(
+            return confirm_action(
                 self,
                 request,
                 self.execute_sync_rapid_pro,
@@ -97,7 +97,7 @@ class CashPlanPaymentVerificationAdmin(ExtraUrlMixin, LinkedObjectsMixin, HOPEMo
                         """
                 ),
                 "Successfully executed",
-                template="admin_extra_urls/confirm.html",
+                template="admin_extra_buttons/confirm.html",
             )
 
 
@@ -109,7 +109,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("cash_plan_payment_verification__cash_plan", AutoCompleteFilter),
         ("cash_plan_payment_verification__cash_plan__business_area", AutoCompleteFilter),
-        TextFieldFilter.factory("payment_record__household__unicef_id", "Household ID"),
+        ("payment_record__household__unicef_id", ValueFilter),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_record", "cash_plan_payment_verification")

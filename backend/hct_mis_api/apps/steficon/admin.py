@@ -17,9 +17,11 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
-from admin_extra_urls.api import ExtraUrlMixin, button
-from admin_extra_urls.utils import labelize
+from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_extra_buttons.decorators import view
+from admin_extra_buttons.utils import labelize
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.mixin import AdminFiltersMixin
 from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
@@ -196,7 +198,7 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
+class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
@@ -268,6 +270,9 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
     def get_ignored_linked_objects(self):
         return ["history"]
 
+    def get_action_buttons(self, context):
+        return []
+
     def get_form(self, request, obj=None, change=False, **kwargs):
         return super().get_form(request, obj, change, **kwargs)
 
@@ -292,7 +297,7 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
             escapechar=form.cleaned_data["escapechar"],
         )
 
-    @button(visible=lambda o, r: "/change/" in r.path)
+    @button(visible=lambda btn: "/change/" in btn.request.path)
     def process_file(self, request, pk):
         context = self.get_common_context(
             request,
@@ -366,13 +371,20 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
 
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
-    @button(visible=lambda o, r: "/changelog/" not in r.path)
+    @button(visible=lambda btn: "/changelog/" not in btn.request.path)
     def changelog(self, request, pk):
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
 
-    @button(urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"], visible=lambda o, r: "/change/" in r.path)
-    def revert(self, request, pk, state=None):
+    # urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"],
+    # @button(visible=lambda btn: "/change/" in btn.request.path)
+
+    @view(pattern=r"<int:pk>/rule_do_revert/<int:state>/")
+    def do_revert(self, request, pk, state):
+        pass
+
+    @view(pattern=r"<int:pk>/revert/<int:state>/")
+    def revert(self, request, pk, state):
         try:
             context = self.get_common_context(
                 request,
@@ -397,7 +409,7 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    @button(visible=lambda o, r: "/change/" in r.path)
+    @button(visible=lambda btn: "/change/" in btn.request.path)
     def diff(self, request, pk):
         try:
             context = self.get_common_context(request, pk, action="Code history")
@@ -456,11 +468,13 @@ class RuleCommitResource(ModelResource):
 
 
 @register(RuleCommit)
-class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin):
+class RuleCommitAdmin(
+    ExtraButtonsMixin, AdminFiltersMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin
+):
     list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
-    readonly_fields = ("updated_by", "rule", "affected_fields", "version")
+    readonly_fields = ("updated_by", "rule", "affected_fields", "version", "definition")
     change_form_template = None
     change_list_template = None
     resource_class = RuleCommitResource

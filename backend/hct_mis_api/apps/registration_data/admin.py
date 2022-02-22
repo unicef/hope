@@ -10,14 +10,13 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button, href
-from admin_extra_urls.extras import ExtraUrlMixin
-from admin_extra_urls.mixins import _confirm_action
+from admin_extra_buttons.api import ExtraButtonsMixin, confirm_action
+from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
-    TextFieldFilter,
+    ValueFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
@@ -44,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImport)
-class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "import_date", "data_source", "business_area")
     search_fields = ("name",)
     list_filter = (
@@ -62,10 +61,10 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
         ("business_area__name", "business area"),
     )
 
-    @href(
+    @link(
         label="HUB RDI",
         # permission=lambda r, o: r.user.is_superuser,
-        # visible=lambda o, r: o.status == RegistrationDataImport.IMPORT_ERROR,
+        # visible=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
     def hub(self, button):
         obj = button.context.get("original")
@@ -77,7 +76,7 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
     @button(
         label="Re-run RDI",
         permission=lambda r, o: r.user.is_superuser,
-        visible=lambda o, r: o.status == RegistrationDataImport.IMPORT_ERROR,
+        enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
     def rerun_rdi(self, request, pk):
         obj = self.get_object(request, pk)
@@ -112,7 +111,7 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
     @button(
         label="Re-run Merging RDI",
         permission=lambda r, o: r.user.is_superuser,
-        visible=lambda o, r: o.status == RegistrationDataImport.MERGE_ERROR,
+        enabled=lambda btn: btn.original.status == RegistrationDataImport.MERGE_ERROR,
     )
     def rerun_merge_rdi(self, request, pk):
         try:
@@ -125,7 +124,7 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
 
     @button(
         permission=is_root,
-        visible=lambda o, r: o.status != RegistrationDataImport.MERGED and o.status != RegistrationDataImport.MERGING,
+        enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
     def delete_rdi(self, request, pk):
         try:
@@ -159,7 +158,7 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
                             reverse("admin:registration_data_registrationdataimport_changelist")
                         )
             else:
-                return _confirm_action(
+                return confirm_action(
                     self,
                     request,
                     self.delete_rdi,
@@ -248,7 +247,7 @@ class RegistrationDataImportAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPE
                             reverse("admin:registration_data_registrationdataimport_changelist")
                         )
             else:
-                return _confirm_action(
+                return confirm_action(
                     self,
                     request,
                     self.delete_rdi,

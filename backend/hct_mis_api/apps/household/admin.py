@@ -17,17 +17,18 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button, href
-from admin_extra_urls.mixins import ExtraUrlMixin
+from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
-    MultiValueTextFieldFilter,
+    MultiValueFilter,
     RelatedFieldComboFilter,
-    TextFieldFilter,
+    ValueFilter,
 )
+from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
@@ -79,7 +80,10 @@ logger = logging.getLogger(__name__)
 class AgencyTypeAdmin(HOPEModelAdminBase):
     search_fields = ("label", "country")
     list_display = ("label", "type", "country")
-    list_filter = ("type", TextFieldFilter.factory("country", "Country ISO CODE 2"))
+    list_filter = (
+        "type",
+        ("country", ValueFilter.factory(label="Country ISO CODE 2")),
+    )
 
 
 @admin.register(Document)
@@ -98,7 +102,11 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 class DocumentTypeAdmin(HOPEModelAdminBase):
     search_fields = ("label", "country")
     list_display = ("label", "country", "type")
-    list_filter = ("type", "label", TextFieldFilter.factory("country", "Country ISO CODE 2"))
+    list_filter = (
+        "type",
+        "label",
+        ("country", ValueFilter.factory(label="Country ISO CODE 2")),
+    )
 
 
 @admin.register(Household)
@@ -130,9 +138,9 @@ class HouseholdAdmin(
         "size",
     )
     list_filter = (
-        MultiValueTextFieldFilter.factory("unicef_id", "UNICEF ID"),
-        MultiValueTextFieldFilter.factory("unhcr_id", "UNHCR ID"),
-        MultiValueTextFieldFilter.factory("id", "MIS ID"),
+        ("unicef_id", MultiValueFilter),
+        ("unhcr_id", MultiValueFilter),
+        ("id", MultiValueFilter),
         # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("size", MaxMinFilter),
@@ -178,7 +186,7 @@ class HouseholdAdmin(
     def get_ignored_linked_objects(self):
         return []
 
-    @button(permission="can_withdrawn")
+    @button(permission="household.can_withdrawn")
     def withdrawn(self, request, pk):
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -340,8 +348,7 @@ class IndividualAdmin(
     exclude = ("created_at", "updated_at")
     inlines = [IndividualRoleInHouseholdInline]
     list_filter = (
-        TextFieldFilter.factory("unicef_id__iexact", "UNICEF ID"),
-        TextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
+        QueryStringFilter,
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
@@ -408,7 +415,7 @@ class IndividualAdmin(
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.household.unicef_id}")
 
-    @button()
+    @button(html_attrs={"class": "aeb-green"})
     def sanity_check(self, request, pk):
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]
@@ -431,25 +438,21 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("agency", "individual", "number")
-    list_filter = (TextFieldFilter.factory("individual__unicef_id__icontains"),)
+    list_filter = (("individual__unicef_id", ValueFilter.factory(lookup_name="icontains")),)
     autocomplete_fields = ["agency"]
 
 
 @admin.register(EntitlementCard)
-class EntitlementCardAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class EntitlementCardAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("id", "card_number", "status", "card_type", "service_provider")
     search_fields = ("card_number",)
     date_hierarchy = "created_at"
     raw_id_fields = ("household",)
-    list_filter = (
-        "status",
-        TextFieldFilter.factory("card_type"),
-        TextFieldFilter.factory("service_provider"),
-    )
+    list_filter = ("status", ("card_type", ValueFilter), ("service_provider", ValueFilter))
 
 
 @admin.register(XlsxUpdateFile)
-class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     readonly_fields = ("file", "business_area", "rdi", "xlsx_match_columns", "uploaded_by")
     list_filter = (
         ("business_area", AutoCompleteFilter),
