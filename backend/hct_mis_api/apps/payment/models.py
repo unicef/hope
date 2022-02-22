@@ -248,6 +248,15 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         self.status = CashPlanPaymentVerification.STATUS_ACTIVE
         self.activation_date = timezone.now()
 
+    def set_pending(self):
+        self.status = CashPlanPaymentVerification.STATUS_PENDING
+        self.responded_count = None
+        self.received_count = None
+        self.not_received_count = None
+        self.received_with_problems_count = None
+        self.activation_date = None
+        self.rapid_pro_flow_start_uuid = ""
+
 
 def build_summary(cash_plan):
     active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
@@ -331,6 +340,11 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     @property
     def business_area(self):
         return self.cash_plan_payment_verification.cash_plan.business_area
+
+    def set_pending(self):
+        self.status_date = timezone.now()
+        self.status = PaymentVerification.STATUS_PENDING
+        self.received_amount = None
 
 
 class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
