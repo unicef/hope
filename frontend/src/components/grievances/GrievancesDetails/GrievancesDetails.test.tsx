@@ -4,7 +4,7 @@ import { GrievancesDetails } from './GrievancesDetails';
 import { fakeGrievanceTicket } from '../../../../fixtures/grievances/fakeGrievanceTicket';
 import { fakeGrievancesChoices } from '../../../../fixtures/grievances/fakeGrievancesChoices';
 
-describe('components/population/HouseholdDetails', () => {
+describe('components/grievances/GrievancesDetails', () => {
   it('should render', () => {
     const { container } = render(
       <GrievancesDetails

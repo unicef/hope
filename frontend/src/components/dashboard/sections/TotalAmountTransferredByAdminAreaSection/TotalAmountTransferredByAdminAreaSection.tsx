@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useCountryChartsLazyQuery } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
-import { CardTextLightLarge } from '../DashboardCard';
-import { DashboardPaper } from '../DashboardPaper';
-import { TotalAmountTransferredByAdminAreaTable } from '../TotalAmountTransferredByAdminAreaTable';
+import { useCountryChartsLazyQuery } from '../../../../__generated__/graphql';
+import { LoadingComponent } from '../../../core/LoadingComponent';
+import { CardTextLightLarge } from '../../DashboardCard';
+import { DashboardPaper } from '../../DashboardPaper';
+import { TotalAmountTransferredByAdminAreaTable } from '../../TotalAmountTransferredByAdminAreaTable';
 
 interface TotalAmountTransferredSectionByAdminAreaSectionProps {
   year: string;
   filter;
+  businessArea: string;
 }
 export const TotalAmountTransferredSectionByAdminAreaSection = ({
   year,
   filter,
+  businessArea,
 }: TotalAmountTransferredSectionByAdminAreaSectionProps): React.ReactElement => {
-  const businessArea = useBusinessArea();
   const { t } = useTranslation();
   const [orderBy, setOrderBy] = useState('totalCashTransferred');
   const [order, setOrder] = useState('desc');

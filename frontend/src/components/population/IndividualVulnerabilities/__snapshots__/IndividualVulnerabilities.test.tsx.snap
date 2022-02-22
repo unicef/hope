@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/population/HouseholdVulnerabilities should render 1`] = `
+exports[`components/population/IndividualVulnerabilities should render 1`] = `
 <div>
   <div>
     <div
-      class="MuiPaper-root sc-gzVnrw hiftfX MuiPaper-elevation1 MuiPaper-rounded"
+      class="MuiPaper-root sc-htoDjs beQuXv MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="sc-htoDjs cguslC"
+        class="sc-htpNat hUqbZq"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -26,14 +26,14 @@ exports[`components/population/HouseholdVulnerabilities should render 1`] = `
               class="sc-bdVaJa kwsjSG"
               color="textSecondary"
             >
-              months displaced
+              muac
             </span>
             <div>
               <span
                 class="sc-bwzfXH emFVa"
                 color="textSecondary"
               >
-                12
+                334
               </span>
             </div>
           </div>
@@ -46,7 +46,7 @@ exports[`components/population/HouseholdVulnerabilities should render 1`] = `
               class="sc-bdVaJa kwsjSG"
               color="textSecondary"
             >
-              difficulty breathing h f
+              school enrolled
             </span>
             <div>
               <span
@@ -54,6 +54,26 @@ exports[`components/population/HouseholdVulnerabilities should render 1`] = `
                 color="textSecondary"
               >
                 Yes
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div>
+            <span
+              class="sc-bdVaJa kwsjSG"
+              color="textSecondary"
+            >
+              school enrolled before
+            </span>
+            <div>
+              <span
+                class="sc-bwzfXH emFVa"
+                color="textSecondary"
+              >
+                No
               </span>
             </div>
           </div>
