@@ -39,6 +39,9 @@ from hct_mis_api.apps.payment.services.activate_payment_verification_plan_servic
 from hct_mis_api.apps.payment.services.create_payment_verification_plan_service import (
     CreatePaymentVerificationPlanService,
 )
+from hct_mis_api.apps.payment.services.discard_payment_verification_plan_service import (
+    DiscardPaymentVerificationPlanService,
+)
 from hct_mis_api.apps.payment.services.edit_payment_verification_plan_service import (
     EditPaymentVerificationPlanService,
 )
@@ -220,43 +223,25 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
-        id = decode_id_string(cash_plan_verification_id)
-        cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), cashplan_payment_verification)
+        cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
+        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
 
-        old_cashplan_payment_verification = copy_model_object(cashplan_payment_verification)
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, cashplan_payment_verification.business_area)
+        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
 
-        if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
-            logger.error("You can discard only ACTIVE verification")
-            raise GraphQLError("You can discard only ACTIVE verification")
-        cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_PENDING
-        cashplan_payment_verification.responded_count = None
-        cashplan_payment_verification.received_count = None
-        cashplan_payment_verification.not_received_count = None
-        cashplan_payment_verification.received_with_problems_count = None
-        cashplan_payment_verification.activation_date = None
-        cashplan_payment_verification.rapid_pro_flow_start_uuid = ""
-        cashplan_payment_verification.save()
+        old_cash_plan_verification = copy_model_object(cash_plan_verification)
 
-        # payment verifications to reset
-        payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
-        for payment_record_verification in payment_record_verifications:
-            payment_record_verification.status_date = timezone.now()
-            payment_record_verification.status = PaymentVerification.STATUS_PENDING
-            payment_record_verification.received_amount = None
-        PaymentVerification.objects.bulk_update(
-            payment_record_verifications, ["status_date", "status", "received_amount"]
-        )
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, cash_plan_verification.business_area)
+
+        cash_plan_verification = DiscardPaymentVerificationPlanService(cash_plan_verification).execute()
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            old_cashplan_payment_verification,
-            cashplan_payment_verification,
+            old_cash_plan_verification,
+            cash_plan_verification,
         )
-        return DiscardCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
+        return DiscardCashPlanVerificationMutation(cash_plan_verification.cash_plan)
 
 
 class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
