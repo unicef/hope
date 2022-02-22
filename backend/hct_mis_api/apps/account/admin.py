@@ -3,7 +3,6 @@ import logging
 import re
 from collections import defaultdict, namedtuple
 from functools import cached_property
-from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from urllib.parse import unquote
 
 from django import forms
@@ -35,13 +34,15 @@ from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
 import requests
-from admin_extra_urls.api import ExtraUrlMixin, button
+from admin_extra_buttons.api import ExtraButtonsMixin, button
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import AllValuesComboFilter
+from adminfilters.mixin import AdminFiltersMixin
 from constance import config
-from import_export import resources, fields
+from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
+from import_export.widgets import ForeignKeyWidget, ManyToManyWidget
 from jsoneditor.forms import JSONEditor
 from requests import HTTPError
 from smart_admin.decorators import smart_register
@@ -118,9 +119,9 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
                     if form_two.cleaned_data
-                       and not form_two.cleaned_data.get("DELETE")
-                       and form_two.cleaned_data["business_area"] == business_area
-                       and form_two.cleaned_data["role"].id in incompatible_roles
+                    and not form_two.cleaned_data.get("DELETE")
+                    and form_two.cleaned_data["business_area"] == business_area
+                    and form_two.cleaned_data["role"].id in incompatible_roles
                 ]
                 if error_forms:
                     if "role" not in form._errors:
@@ -317,7 +318,7 @@ class BusinessAreaFilter(SimpleListFilter):
 
 
 @admin.register(account_models.Partner)
-class PartnerAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class PartnerAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_filter = ("is_un",)
     search_fields = ("name",)
 
@@ -331,7 +332,7 @@ class HopeUserCreationForm(UserCreationForm):
 
 
 @admin.register(account_models.User)
-class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUserAdmin):
+class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminActionPermMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
@@ -620,6 +621,7 @@ class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUse
     @button(label="Import CSV", permission="account.can_upload_to_kobo")
     def import_csv(self, request):
         from django.contrib.admin.helpers import AdminForm
+
         context = self.get_common_context(request, processed=False)
         if request.method == "GET":
             form = ImportCSVForm(initial={"partner": Partner.objects.first()})
@@ -877,12 +879,12 @@ class PermissionFilter(SimpleListFilter):
 class RoleResource(resources.ModelResource):
     class Meta:
         model = account_models.Role
-        fields = ('name', 'subsystem', 'permissions')
+        fields = ("name", "subsystem", "permissions")
         import_id_fields = ("name", "subsystem")
 
 
 @admin.register(account_models.Role)
-class RoleAdmin(ImportExportModelAdmin, ExtraUrlMixin, HOPEModelAdminBase):
+class RoleAdmin(ImportExportModelAdmin, ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
@@ -960,7 +962,7 @@ class UserRoleAdmin(HOPEModelAdminBase):
 
 
 class IncompatibleRoleFilter(SimpleListFilter):
-    template = "adminfilters/fieldcombobox.html"
+    template = "adminfilters/combobox.html"
     title = "Role"
     parameter_name = "role"
 
@@ -987,18 +989,16 @@ class IncompatibleRolesAdmin(HOPEModelAdminBase):
 
 
 class GroupResource(resources.ModelResource):
-    permissions = fields.Field(widget=ManyToManyWidget(Permission,
-                                                       field='codename'),
-                               attribute='permissions')
+    permissions = fields.Field(widget=ManyToManyWidget(Permission, field="codename"), attribute="permissions")
 
     class Meta:
         model = Group
-        fields = ('name', 'permissions')
-        import_id_fields = ("name", )
+        fields = ("name", "permissions")
+        import_id_fields = ("name",)
 
 
 @smart_register(Group)
-class GroupAdmin(ImportExportModelAdmin, ExtraUrlMixin, _GroupAdmin):
+class GroupAdmin(ImportExportModelAdmin, ExtraButtonsMixin, _GroupAdmin):
     resource_class = GroupResource
     change_list_template = "admin/account/group/change_list.html"
 

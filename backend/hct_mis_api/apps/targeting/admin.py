@@ -4,9 +4,9 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-from admin_extra_urls.api import ExtraUrlMixin, button
+from admin_extra_buttons.api import ExtraButtonsMixin, button
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, TextFieldFilter
+from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
@@ -17,7 +17,7 @@ from .steficon import SteficonExecutorMixin
 
 @admin.register(TargetPopulation)
 class TargetPopulationAdmin(
-    SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, ExtraUrlMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase
 ):
     list_display = (
         "name",
@@ -72,7 +72,7 @@ class TargetPopulationAdmin(
 
 
 @admin.register(HouseholdSelection)
-class HouseholdSelectionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class HouseholdSelectionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = (
         "household",
         "target_population",
@@ -84,9 +84,9 @@ class HouseholdSelectionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         "target_population",
     )
     list_filter = (
-        TextFieldFilter.factory("household__unicef_id", "Household ID"),
+        ("household__unicef_id", ValueFilter),
         ("target_population", AutoCompleteFilter),
-        TextFieldFilter.factory("target_population__id", "Target Population ID"),
+        ("target_population__id", ValueFilter),
         "final",
         ("vulnerability_score", MaxMinFilter),
     )

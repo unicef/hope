@@ -25,14 +25,15 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 import xlrd
-from admin_extra_urls.api import ExtraUrlMixin, button
-from admin_extra_urls.mixins import _confirm_action
+from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     AllValuesComboFilter,
     ChoicesFieldComboFilter,
-    TextFieldFilter,
+    ValueFilter,
 )
+from adminfilters.mixin import AdminFiltersMixin
 from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
@@ -123,7 +124,7 @@ class GroupConcat(Aggregate):
 
 
 @admin.register(BusinessArea)
-class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = (
         "name",
         "slug",
@@ -153,7 +154,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     #         return self.readonly_fields + ('slug')
     #     return super().get_readonly_fields(request, obj)
 
-    @button(label="Create Business Office", permission="core.can_split_business_area")
+    @button(label="Create Business Office", permission="core.can_split")
     def split_business_area(self, request, pk):
         context = self.get_common_context(request, pk)
         opts = self.object._meta
@@ -236,7 +237,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     matrix.append(user_data)
         return matrix
 
-    @button(label="Force DOAP SYNC", permission="can_reset_doap", group="doap")
+    @button(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
     def force_sync_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="Members")
         obj = context["original"]
@@ -287,7 +288,7 @@ UNICEF HOPE""",
 
         return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
 
-    @button(label="Export DOAP", group="doap", permission="can_export_doap")
+    @button(label="Export DOAP", group="doap", permission="core.can_export_doap")
     def export_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="DOAP matrix")
         obj = context["original"]
@@ -301,7 +302,7 @@ UNICEF HOPE""",
             writer.writerow(row)
         return response
 
-    @button(permission="can_send_doap")
+    @button(permission="core.can_send_doap")
     def view_ca_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="DOAP matrix")
         context["aeu_groups"] = ["doap"]
@@ -312,7 +313,7 @@ UNICEF HOPE""",
         context["matrix"] = matrix
         return TemplateResponse(request, "core/admin/ca_doap.html", context)
 
-    @button(permission="core.can_view_user")
+    @button(permission="account.view_user")
     def members(self, request, pk):
         context = self.get_common_context(request, pk, title="Members")
         context["members"] = (
@@ -374,7 +375,7 @@ UNICEF HOPE""",
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:core_businessarea_change", args=[business_area.id]))
         else:
-            return _confirm_action(
+            return confirm_action(
                 self,
                 request,
                 self.mark_submissions,
@@ -427,7 +428,7 @@ class AdminLevelFilter(SimpleListFilter):
 
 
 @admin.register(AdminAreaLevel)
-class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class AdminAreaLevelAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("name", "country_name", "admin_level", "area_code")
     list_filter = (
         ("admin_level", AllValuesComboFilter),
@@ -436,7 +437,7 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
     search_fields = ("name",)
     ordering = ("country_name", "admin_level")
 
-    @button(permission="load_from_datamart")
+    @button(permission="core.load_from_datamart")
     def load_from_datamart(self, request):
         api = DatamartAPI()
         admin_areas_country_name = []
@@ -485,14 +486,14 @@ class ImportAreaForm(forms.Form):
 
 
 @admin.register(AdminArea)
-class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
+class AdminAreaAdmin(ExtraButtonsMixin, AdminFiltersMixin, MPTTModelAdmin):
     search_fields = ("p_code", "title")
     list_display = ("title", "country", "parent", "tree_id", "external_id", "admin_area_level", "p_code")
     list_filter = (
         AdminLevelFilter,
         CountryFilter,
-        TextFieldFilter.factory("tree_id"),
-        TextFieldFilter.factory("external_id"),
+        ("tree_id", ValueFilter),
+        ("external_id", ValueFilter),
     )
 
     @button(permission=lambda r, __: r.user.is_superuser)
@@ -686,7 +687,7 @@ class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelAdmin):
+class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
     list_filter = (
         "status",
@@ -730,7 +731,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelA
             level=ERROR,
         )
 
-    @button(label="Rerun KOBO Import", visible=lambda o: o is not None and o.status != XLSXKoboTemplate.SUCCESSFUL)
+    @button(
+        label="Rerun KOBO Import",
+        visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
+    )
     def rerun_kobo_import(self, request, pk):
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
         upload_new_kobo_template_and_update_flex_fields_task.run(
@@ -809,7 +813,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelA
 
 
 @admin.register(CountryCodeMap)
-class CountryCodeMapAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
     search_fields = ("country",)
 

@@ -1,10 +1,10 @@
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ForeignKeyFieldFilter
+from adminfilters.filters import AutoCompleteFilter, ValueFilter
+from adminfilters.mixin import AdminFiltersMixin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.logs.admin import LogEntryAdmin as SmartLogEntryAdmin
 
 
-class LogEntryAdmin(AdminAdvancedFiltersMixin, SmartLogEntryAdmin):
+class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, SmartLogEntryAdmin):
     list_display = (
         "action_time",
         "user",
@@ -22,7 +22,7 @@ class LogEntryAdmin(AdminAdvancedFiltersMixin, SmartLogEntryAdmin):
     list_filter = (
         ("user", AutoCompleteFilter),
         ("content_type", AutoCompleteFilter),
-        ForeignKeyFieldFilter.factory("object_id"),
+        ("object_id", ValueFilter),
         "action_time",
         "action_flag",
     )
