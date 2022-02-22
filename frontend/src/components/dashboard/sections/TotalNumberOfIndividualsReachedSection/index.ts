@@ -1,0 +1,1 @@
+export { TotalNumberOfIndividualsReachedSection } from './TotalNumberOfIndividualsReachedSection';

@@ -3,18 +3,18 @@ import PersonIcon from '@material-ui/icons/Person';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../containers/dialogs/DialogActions';
-import { formatNumber } from '../../../utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { IndividualsReachedByAgeAndGenderGroupsChart } from '../charts/IndividualsReachedByAgeAndGenderGroupsChart';
-import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
+import { Dialog } from '../../../../containers/dialogs/Dialog';
+import { DialogActions } from '../../../../containers/dialogs/DialogActions';
+import { formatNumber } from '../../../../utils/utils';
+import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { IndividualsReachedByAgeAndGenderGroupsChart } from '../../charts/IndividualsReachedByAgeAndGenderGroupsChart';
+import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
 import {
   CardAmountLink,
   CardTitle,
   DashboardCard,
   IconContainer,
-} from '../DashboardCard';
+} from '../../DashboardCard';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -47,6 +47,7 @@ export const TotalNumberOfIndividualsReachedSection = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   if (!data) return null;
+
   return (
     <>
       <DashboardCard color='#345DA0'>
