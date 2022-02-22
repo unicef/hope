@@ -3,7 +3,7 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { ProgrammesTable } from '.';
-import { makeApolloLoadingMock, render } from '../../../testUtils/testUtils';
+import { render, ApolloLoadingLink } from '../../../testUtils/testUtils';
 import { fakeProgramChoices } from '../../../../fixtures/programs/fakeProgramChoices';
 import { fakeApolloAllPrograms } from '../../../../fixtures/programs/fakeApolloAllPrograms';
 
@@ -26,8 +26,9 @@ describe('containers/tables/ProgrammesTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
+        link={new ApolloLoadingLink()}
         addTypename={false}
-        mocks={makeApolloLoadingMock(fakeApolloAllPrograms)}
+        mocks={fakeApolloAllPrograms}
       >
         <ProgrammesTable
           businessArea='afghanistan'
