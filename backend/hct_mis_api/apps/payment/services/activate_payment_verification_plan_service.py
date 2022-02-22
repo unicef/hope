@@ -16,7 +16,7 @@ class ActivatePaymentVerificationPlanService:
         if self.can_activate_via_rapidpro():
             self.activate_rapidpro()
 
-        self.payment_verification.activate()
+        self.payment_verification.set_active()
         self.payment_verification.save()
 
         return self.payment_verification
