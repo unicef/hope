@@ -66,8 +66,7 @@ class CreatePaymentVerificationMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        arg = lambda name: input.get(name)
-        cash_plan_id = decode_id_string(arg("cash_plan_id"))
+        cash_plan_id = decode_id_string(input.get("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
@@ -97,8 +96,8 @@ class EditPaymentVerificationMutation(PermissionMutation):
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         cash_plan_verification_id = decode_id_string(input.get("cash_plan_payment_verification_id"))
-
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
+
         check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, cash_plan_verification.business_area)
@@ -131,8 +130,9 @@ class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMu
     @is_authenticated
     @transaction.atomic
     def processed_mutate(cls, root, info, cash_plan_verification_id, **kwargs):
-        pvp_id = decode_id_string(cash_plan_verification_id)
-        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=pvp_id)
+        cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
+        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
+
         check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
 
         old_cash_plan_verification = copy_model_object(cash_plan_verification)

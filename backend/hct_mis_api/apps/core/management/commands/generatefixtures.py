@@ -132,7 +132,7 @@ class Command(BaseCommand):
             business_area=business_area,
         )
         for _ in range(cash_plans_amount):
-            cash_plan = CashPlanFactory.build(
+            cash_plan = CashPlanFactory(
                 program=program,
                 business_area=business_area,
             )
