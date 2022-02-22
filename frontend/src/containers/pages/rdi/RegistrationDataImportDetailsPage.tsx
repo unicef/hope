@@ -13,7 +13,10 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import { useRegistrationDataImportQuery } from '../../../__generated__/graphql';
+import {
+  useHouseholdChoiceDataQuery,
+  useRegistrationDataImportQuery,
+} from '../../../__generated__/graphql';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
 
@@ -64,11 +67,16 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
     variables: { id },
     pollInterval: 30000,
   });
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery();
+
   const [selectedTab, setSelectedTab] = useState(0);
 
-  if (loading) return <LoadingComponent />;
+  if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || permissions === null) return null;
+  if (!data || !choicesData || permissions === null) return null;
   if (data.registrationDataImport.status !== 'IMPORTING') {
     stopPolling();
   }
@@ -118,6 +126,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
                 rdiId={id}
                 businessArea={businessArea}
                 key={`${data.registrationDataImport.status}-individual`}
+                choicesData={choicesData}
               />
             </TabPanel>
           </Paper>
