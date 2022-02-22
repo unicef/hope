@@ -10,10 +10,11 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.api import button
-from admin_extra_urls.decorators import href
-from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
-from adminfilters.filters import TextFieldFilter
+from admin_extra_buttons.api import button
+from admin_extra_buttons.decorators import link
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
+from adminfilters.mixin import AdminFiltersMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.admin import HUBBusinessAreaFilter as BusinessAreaFilter
@@ -44,10 +45,15 @@ class RollbackException(Exception):
 
 
 @admin.register(Session)
-class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area", "run_time")
+class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+    list_display = ("timestamp", "id", "status", "last_modified_date", "business_area", "run_time")
     date_hierarchy = "timestamp"
-    list_filter = ("status", "source", "last_modified_date", BusinessAreaFilter)
+    list_filter = (
+        BusinessAreaFilter,
+        ("status", ChoicesFieldComboFilter),
+        "source",
+        "last_modified_date",
+    )
     ordering = ("-timestamp",)
     exclude = ("traceback",)
     readonly_fields = ("timestamp", "last_modified_date", "sentry_id", "source", "business_area")
@@ -74,7 +80,8 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
             msg = f"{e.__class__.__name__}: {str(e)}"
             self.message_user(request, msg, messages.ERROR)
 
-    @button(label="test import", permission="account.can_debug")
+    # @button(label="test import", permission="account.can_debug")
+    @button()
     def simulate_import(self, request, pk):
         context = self.get_common_context(request, pk, title="Test Import")
         session: Session = context["original"]
@@ -102,7 +109,7 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 logger.exception(e)
 
         else:
-            return _confirm_action(
+            return confirm_action(
                 self,
                 request,
                 self.simulate_import,
@@ -114,7 +121,7 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 "Successfully executed",
             )
 
-    @href(html_attrs={"target": "_new"}, permission="account.can_debug")
+    @link(html_attrs={"target": "_new"}, permission="account.can_debug")
     def view_error_on_sentry(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -123,7 +130,7 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
         button.visible = False
 
-    @button(visible=lambda x: x.traceback, permission="account.can_debug")
+    @button(visible=lambda btn: btn.original.traceback, permission="account.can_debug")
     def view_error(self, request, pk):
         context = self.get_common_context(request, pk)
         return TemplateResponse(request, "admin/cash_assist_datahub/session/debug.html", context)
@@ -203,18 +210,18 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(CashPlan)
-class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("session", "name", "status", "business_area", "cash_plan_id")
     list_filter = (
         "status",
-        TextFieldFilter.factory("cash_plan_id"),
-        TextFieldFilter.factory("session__id"),
+        ("cash_plan_id", ValueFilter),
+        ("session__id", ValueFilter),
         BusinessAreaFilter,
     )
     date_hierarchy = "session__timestamp"
     raw_id_fields = ("session",)
 
-    @href()
+    @link()
     def payment_records(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -225,7 +232,7 @@ class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(PaymentRecord)
-class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class PaymentRecordAdmin(ExtraButtonsMixin, AdminFiltersMixin, admin.ModelAdmin):
     list_display = ("session", "business_area", "status", "full_name", "service_provider_ca_id")
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
@@ -233,9 +240,9 @@ class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
         "status",
         "delivery_type",
         "service_provider_ca_id",
-        TextFieldFilter.factory("ca_id"),
-        TextFieldFilter.factory("cash_plan_ca_id"),
-        TextFieldFilter.factory("session__id"),
+        ("ca_id", ValueFilter),
+        ("cash_plan_ca_id", ValueFilter),
+        ("session__id", ValueFilter),
         BusinessAreaFilter,
     )
 
@@ -280,7 +287,7 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
     search_fields = ("full_name",)
-    list_filter = (TextFieldFilter.factory("session__id"), BusinessAreaFilter)
+    list_filter = (("session__id", ValueFilter), BusinessAreaFilter)
 
 
 @admin.register(Programme)
@@ -289,10 +296,10 @@ class ProgrammeAdmin(HOPEModelAdminBase):
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
     list_filter = (
-        TextFieldFilter.factory("session__id"),
-        TextFieldFilter.factory("ca_hash_id"),
-        TextFieldFilter.factory("mis_id"),
-        TextFieldFilter.factory("ca_id"),
+        ("session__id", ValueFilter),
+        ("ca_hash_id", ValueFilter),
+        ("mis_id", ValueFilter),
+        ("ca_id", ValueFilter),
     )
 
 
@@ -302,8 +309,8 @@ class TargetPopulationAdmin(HOPEModelAdminBase):
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
     list_filter = (
-        TextFieldFilter.factory("session__id"),
-        TextFieldFilter.factory("ca_hash_id"),
-        TextFieldFilter.factory("mis_id"),
-        TextFieldFilter.factory("ca_id"),
+        ("session__id", ValueFilter),
+        ("ca_hash_id", ValueFilter),
+        ("mis_id", ValueFilter),
+        ("ca_id", ValueFilter),
     )

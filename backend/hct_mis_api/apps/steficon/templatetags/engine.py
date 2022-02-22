@@ -161,5 +161,12 @@ def diff(commit, panels="before,after"):
 
         right_label = f"Version current ({rule.version})"
         right_panel = rule.definition.split("\n")
+    elif panels == "before,current":
+        left_label = f"Version  commit ({commit.version})"
+        left_panel = commit.after["definition"].split("\n")
 
+        right_label = f"Version current ({rule.version})"
+        right_panel = rule.definition.split("\n")
+    else:
+        raise Exception(f"Invalid value for panels: `{panels}`")
     return mark_safe(HtmlDiff(wrapcolumn=80).make_table(left_panel, right_panel, left_label, right_label))

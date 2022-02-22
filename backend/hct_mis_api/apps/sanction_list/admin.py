@@ -3,7 +3,7 @@ from django.contrib import admin
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
-    TextFieldFilter,
+    ValueFilter,
 )
 
 from hct_mis_api.apps.sanction_list.models import (
@@ -31,4 +31,4 @@ class SanctionListIndividualAdmin(HOPEModelAdminBase):
 class SanctionListIndividualDocumentAdmin(HOPEModelAdminBase):
     list_display = ("document_number", "type_of_document", "date_of_issue", "issuing_country")
     raw_id_fields = ("individual",)
-    list_filter = (TextFieldFilter.factory("issuing_country", "Issuing country"), "type_of_document")
+    list_filter = (("issuing_country", ValueFilter), "type_of_document")

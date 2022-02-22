@@ -266,7 +266,7 @@ OTHER_APPS = [
     "corsheaders",
     "django_elasticsearch_dsl",
     "constance",
-    "admin_extra_urls",
+    "admin_extra_buttons",
     "adminfilters",
     "adminactions",
     "multiselectfield",
