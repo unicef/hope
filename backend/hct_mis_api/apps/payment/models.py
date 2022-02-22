@@ -244,7 +244,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         else:
             return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
-    def activate(self):
+    def set_active(self):
         self.status = CashPlanPaymentVerification.STATUS_ACTIVE
         self.activation_date = timezone.now()
 
