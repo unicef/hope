@@ -1,9 +1,10 @@
-import { Paper, Tab } from '@material-ui/core';
+import { Tab, Typography } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { Title } from '../../../components/core/Title';
@@ -96,8 +97,10 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
       <Container>
         <RegistrationDetails registration={data.registrationDataImport} />
         <TableWrapper>
-          <Paper>
-            <Title variant='h6'>{t('Import Preview')}</Title>
+          <ContainerColumnWithBorder>
+            <Title>
+              <Typography variant='h6'>{t('Import Preview')}</Typography>
+            </Title>
             <TabsContainer>
               <StyledTabs
                 value={selectedTab}
@@ -129,7 +132,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
                 choicesData={choicesData}
               />
             </TabPanel>
-          </Paper>
+          </ContainerColumnWithBorder>
         </TableWrapper>
       </Container>
     </div>
