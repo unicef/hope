@@ -4,15 +4,14 @@ import Paper from '@material-ui/core/Paper';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
+import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import {
+  AllIndividualsFlexFieldsAttributesQuery,
   IndividualNode,
-  useAllIndividualsFlexFieldsAttributesQuery,
-} from '../../__generated__/graphql';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { Title } from '../core/Title';
-import { IndividualFlexFieldPhotoModal } from './IndividualFlexFieldPhotoModal';
+} from '../../../__generated__/graphql';
+import { LabelizedField } from '../../core/LabelizedField';
+import { Title } from '../../core/Title';
+import { IndividualFlexFieldPhotoModal } from '../IndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -22,26 +21,19 @@ const Overview = styled(Paper)`
 `;
 interface IndividualVulnerabilitesProps {
   individual: IndividualNode;
+  flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
 }
 
 export function IndividualVulnerabilities({
   individual,
+  flexFieldsData,
 }: IndividualVulnerabilitesProps): React.ReactElement {
   const { t } = useTranslation();
-  const { data, loading } = useAllIndividualsFlexFieldsAttributesQuery();
   const flexAttributesDict = useArrayToDict(
-    data?.allIndividualsFlexFieldsAttributes,
+    flexFieldsData?.allIndividualsFlexFieldsAttributes,
     'name',
     '*',
   );
-
-  if (loading) {
-    return <LoadingComponent />;
-  }
-
-  if (!data || !flexAttributesDict) {
-    return null;
-  }
 
   const fields = Object.entries(individual.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
@@ -96,8 +88,9 @@ export function IndividualVulnerabilities({
           <Typography variant='h6'>{t('Vulnerabilities')}</Typography>
         </Title>
         <Grid container spacing={6}>
-          {fields.map((field) => (
-            <Grid item xs={4}>
+          {fields.map((field, i) => (
+            /* eslint-disable-next-line react/no-array-index-key */
+            <Grid key={i} item xs={4}>
               {field}
             </Grid>
           ))}
