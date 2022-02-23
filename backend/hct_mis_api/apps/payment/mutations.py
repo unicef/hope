@@ -2,11 +2,10 @@ import logging
 import math
 from decimal import Decimal
 
+import graphene
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-import graphene
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
@@ -30,20 +29,9 @@ from hct_mis_api.apps.payment.inputs import (
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode
-from hct_mis_api.apps.payment.services.activate_payment_verification_plan_service import (
-    ActivatePaymentVerificationPlanService,
-)
-from hct_mis_api.apps.payment.services.create_payment_verification_plan_service import (
-    CreatePaymentVerificationPlanService,
-)
-from hct_mis_api.apps.payment.services.DeletePaymentVerificationPlanService import (
-    DeletePaymentVerificationPlanService,
-)
-from hct_mis_api.apps.payment.services.discard_payment_verification_plan_service import (
-    DiscardPaymentVerificationPlanService,
-)
-from hct_mis_api.apps.payment.services.edit_payment_verification_plan_service import (
-    EditPaymentVerificationPlanService,
+from hct_mis_api.apps.payment.services.verification_plan_crud_services import VerificationPlanCrudServices
+from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
+    VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
@@ -71,7 +59,7 @@ class CreatePaymentVerificationMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
 
-        cash_plan_verification = CreatePaymentVerificationPlanService(input, cash_plan).execute()
+        cash_plan_verification = VerificationPlanCrudServices.create(cash_plan, input)
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
@@ -106,7 +94,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
         cash_plan_verification.verification_method = input.get("verification_channel")
         cash_plan_verification.payment_record_verifications.all().delete()
 
-        cash_plan_verification = EditPaymentVerificationPlanService(input, cash_plan_verification).execute()
+        cash_plan_verification = VerificationPlanCrudServices.create(cash_plan_verification, input)
 
         cash_plan_verification.cash_plan.refresh_from_db()
         log_create(
@@ -138,7 +126,7 @@ class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMu
         old_cash_plan_verification = copy_model_object(cash_plan_verification)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, cash_plan_verification.business_area)
 
-        cash_plan_verification = ActivatePaymentVerificationPlanService(cash_plan_verification).execute()
+        cash_plan_verification = VerificationPlanStatusChangeServices(cash_plan_verification).activate()
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
@@ -232,7 +220,7 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, cash_plan_verification.business_area)
 
-        cash_plan_verification = DiscardPaymentVerificationPlanService(cash_plan_verification).execute()
+        cash_plan_verification = VerificationPlanStatusChangeServices(cash_plan_verification).discard()
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
@@ -265,7 +253,7 @@ class DeleteCashPlanVerificationMutation(PermissionMutation):
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DELETE, cash_plan_verification.business_area)
 
-        DeletePaymentVerificationPlanService(cash_plan_verification).execute()
+        VerificationPlanCrudServices.delete(cash_plan_verification)
 
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
