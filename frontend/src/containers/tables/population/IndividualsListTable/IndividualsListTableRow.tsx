@@ -5,37 +5,31 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { FlagTooltip } from '../../../../components/core/FlagTooltip';
-import { WarningTooltip } from '../../../../components/core/WarningTooltip';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { WarningTooltip } from '../../../../components/core/WarningTooltip';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
 import {
+  HouseholdChoiceDataQuery,
   IndividualNode,
-  useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
   canViewDetails: boolean;
+  choicesData: HouseholdChoiceDataQuery;
 }
 
 export function IndividualsListTableRow({
   individual,
   canViewDetails,
+  choicesData,
 }: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
 
-  if (choicesLoading) {
-    return <LoadingComponent />;
-  }
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
