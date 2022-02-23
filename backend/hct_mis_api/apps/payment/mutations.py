@@ -36,7 +36,7 @@ from hct_mis_api.apps.payment.services.activate_payment_verification_plan_servic
 from hct_mis_api.apps.payment.services.create_payment_verification_plan_service import (
     CreatePaymentVerificationPlanService,
 )
-from hct_mis_api.apps.payment.services.DeletePaymentVerificationPlanService import (
+from hct_mis_api.apps.payment.services.delete_payment_verification_plan_service import (
     DeletePaymentVerificationPlanService,
 )
 from hct_mis_api.apps.payment.services.discard_payment_verification_plan_service import (
