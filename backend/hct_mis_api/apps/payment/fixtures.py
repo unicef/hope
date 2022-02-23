@@ -11,12 +11,15 @@ from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import (
-    PaymentRecord,
-    ServiceProvider,
     CashPlanPaymentVerification,
+    PaymentRecord,
     PaymentVerification,
+    ServiceProvider,
 )
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.program.fixtures import (
+    CashPlanFactory,
+    CashPlanPaymentVerificationSummaryFactory,
+)
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
@@ -246,6 +249,13 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     total_entitled_quantity_revised = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+
+    @factory.post_generation
+    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        CashPlanPaymentVerificationSummaryFactory(cash_plan=self)
 
 
 class RealPaymentRecordFactory(factory.DjangoModelFactory):
