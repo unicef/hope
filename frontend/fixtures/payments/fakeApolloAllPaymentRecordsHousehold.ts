@@ -1,12 +1,12 @@
 import { AllPaymentRecordsDocument } from '../../src/__generated__/graphql';
 
-export const fakeApolloAllPaymentRecords = [
+export const fakeApolloAllPaymentRecordsHousehold = [
   {
     request: {
       query: AllPaymentRecordsDocument,
       variables: {
-        cashPlan:
-          'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
+        household:
+          'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
         businessArea: 'afghanistan',
         first: 5,
         orderBy: null,

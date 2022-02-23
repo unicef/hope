@@ -2,23 +2,19 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import React from 'react';
 import wait from 'waait';
-import { PaymentRecordHouseholdTable } from '.';
-import { fakeApolloAllPaymentRecordsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentRecordsHousehold';
-import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
+import { PaymentRecordTable } from '.';
+import { fakeApolloAllPaymentRecords } from '../../../../../fixtures/payments/fakeApolloAllPaymentRecords';
+import { fakeCashPlan } from '../../../../../fixtures/payments/fakeCashPlan';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
 
-describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
+describe('containers/tables/payments/PaymentRecordTable', () => {
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllPaymentRecordsHousehold}
-      >
-        <PaymentRecordHouseholdTable
-          household={fakeHousehold}
+      <MockedProvider addTypename={false} mocks={fakeApolloAllPaymentRecords}>
+        <PaymentRecordTable
+          cashPlan={fakeCashPlan}
           openInNewTab={false}
           businessArea='afghanistan'
-          canViewPaymentRecordDetails={true}
         />
       </MockedProvider>,
     );
@@ -32,13 +28,12 @@ describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
       <MockedProvider
         link={new ApolloLoadingLink()}
         addTypename={false}
-        mocks={fakeApolloAllPaymentRecordsHousehold}
+        mocks={fakeApolloAllPaymentRecords}
       >
-        <PaymentRecordHouseholdTable
-          household={fakeHousehold}
+        <PaymentRecordTable
+          cashPlan={fakeCashPlan}
           openInNewTab={false}
           businessArea='afghanistan'
-          canViewPaymentRecordDetails={true}
         />
       </MockedProvider>,
     );
