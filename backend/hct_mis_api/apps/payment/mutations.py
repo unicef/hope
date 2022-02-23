@@ -28,16 +28,16 @@ from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
 )
-from hct_mis_api.apps.payment.models import (
-    CashPlanPaymentVerification,
-    PaymentVerification,
-)
+from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode
 from hct_mis_api.apps.payment.services.activate_payment_verification_plan_service import (
     ActivatePaymentVerificationPlanService,
 )
 from hct_mis_api.apps.payment.services.create_payment_verification_plan_service import (
     CreatePaymentVerificationPlanService,
+)
+from hct_mis_api.apps.payment.services.DeletePaymentVerificationPlanService import (
+    DeletePaymentVerificationPlanService,
 )
 from hct_mis_api.apps.payment.services.discard_payment_verification_plan_service import (
     DiscardPaymentVerificationPlanService,
@@ -50,7 +50,7 @@ from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
 from hct_mis_api.apps.program.models import CashPlan
-from hct_mis_api.apps.program.schema import CashPlanNode
+from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 logger = logging.getLogger(__name__)
@@ -209,7 +209,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
             old_cashplan_payment_verification,
             cashplan_payment_verification,
         )
-        return FinishCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
+        return FinishCashPlanVerificationMutation(cash_plan=cashplan_payment_verification.cash_plan)
 
 
 class DiscardCashPlanVerificationMutation(PermissionMutation):
@@ -241,7 +241,40 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
             old_cash_plan_verification,
             cash_plan_verification,
         )
-        return DiscardCashPlanVerificationMutation(cash_plan_verification.cash_plan)
+        return cls(cash_plan=cash_plan_verification.cash_plan)
+
+
+class DeleteCashPlanVerificationMutation(PermissionMutation):
+    cash_plan = graphene.Field(CashPlanNode)
+
+    class Arguments:
+        cash_plan_verification_id = graphene.ID(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+        cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
+        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
+        cash_plan = cash_plan_verification.cash_plan
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
+
+        old_cash_plan_verification = copy_model_object(cash_plan_verification)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DELETE, cash_plan_verification.business_area)
+
+        DeletePaymentVerificationPlanService(cash_plan_verification).execute()
+
+        log_create(
+            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_cash_plan_verification,
+            None,
+        )
+        return cls(cash_plan=cash_plan)
 
 
 class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
@@ -483,6 +516,7 @@ class Mutations(graphene.ObjectType):
     activate_cash_plan_payment_verification = ActivateCashPlanVerificationMutation.Field()
     finish_cash_plan_payment_verification = FinishCashPlanVerificationMutation.Field()
     discard_cash_plan_payment_verification = DiscardCashPlanVerificationMutation.Field()
+    delete_cash_plan_payment_verification = DeleteCashPlanVerificationMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
