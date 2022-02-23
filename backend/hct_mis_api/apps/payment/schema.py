@@ -28,13 +28,14 @@ from hct_mis_api.apps.core.utils import (
     is_valid_uuid,
     to_choice_object,
 )
-from hct_mis_api.apps.household.models import ROLE_NO_ROLE
+from hct_mis_api.apps.household.models import ROLE_NO_ROLE, STATUS_ACTIVE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentRecord,
     PaymentVerification,
-    ServiceProvider, CashPlanPaymentVerificationSummary,
+    ServiceProvider,
+    CashPlanPaymentVerificationSummary,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import (
@@ -90,7 +91,7 @@ class PaymentVerificationFilter(FilterSet):
     business_area = CharFilter(field_name="payment_record__business_area__slug")
 
     class Meta:
-        fields = ("cash_plan_payment_verification", "status")
+        fields = ("cash_plan_payment_verification__cash_plan", "status")
         model = PaymentVerification
 
     order_by = OrderingFilter(
@@ -200,11 +201,11 @@ class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class CashPlanPaymentVerificationSummaryNode(DjangoObjectType):
-
     class Meta:
         model = CashPlanPaymentVerificationSummary
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
 
 class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
     payment_record_count = graphene.Int()
@@ -293,6 +294,12 @@ class Query(graphene.ObjectType):
         GetCashplanVerificationSampleSizeObject,
         input=GetCashplanVerificationSampleSizeInput(),
     )
+
+    def resolve_all_payment_verifications(self, info, **kwargs):
+        return PaymentVerification.objects.filter(
+            Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_ACTIVE)
+            | Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_FINISHED)
+        ).distinct()
 
     def resolve_sample_size(self, info, input, **kwargs):
         arg = lambda name: input.get(name)
