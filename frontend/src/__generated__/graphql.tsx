@@ -8168,7 +8168,7 @@ export type AllPaymentVerificationsQuery = (
         & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
         & { cashPlanPaymentVerification: (
           { __typename?: 'CashPlanPaymentVerificationNode' }
-          & Pick<CashPlanPaymentVerificationNode, 'id' | 'verificationChannel'>
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId' | 'verificationChannel'>
         ), paymentRecord: Maybe<(
           { __typename?: 'PaymentRecordNode' }
           & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity' | 'currency'>
@@ -14859,6 +14859,7 @@ export const AllPaymentVerificationsDocument = gql`
         id
         cashPlanPaymentVerification {
           id
+          unicefId
           verificationChannel
         }
         paymentRecord {

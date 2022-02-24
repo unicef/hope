@@ -1,6 +1,5 @@
 import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { GetApp } from '@material-ui/icons';
-import DeleteIcon from '@material-ui/icons/Delete';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -14,7 +13,6 @@ import {
   CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
 } from '../../__generated__/graphql';
-import { ErrorButton } from '../core/ErrorButton';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
 import { UniversalMoment } from '../core/UniversalMoment';
@@ -96,10 +94,6 @@ export const VerificationPlanDetails = ({
     samplingChoicesData.cashPlanVerificationSamplingChoices,
   );
 
-  const handleDelete = (): null => {
-    return null;
-  };
-
   return (
     <Container>
       <Box display='flex' justifyContent='space-between'>
@@ -114,6 +108,7 @@ export const VerificationPlanDetails = ({
               <Box mr={2}>
                 <DeleteVerificationPlan
                   cashPlanVerificationId={verificationPlan.id}
+                  cashPlanId={cashPlan.id}
                 />
               </Box>
 
@@ -128,6 +123,7 @@ export const VerificationPlanDetails = ({
                   {canActivate && (
                     <ActivateVerificationPlan
                       cashPlanVerificationId={verificationPlan.id}
+                      cashPlanId={cashPlan.id}
                     />
                   )}
                 </Box>
@@ -164,11 +160,13 @@ export const VerificationPlanDetails = ({
               {canFinish && (
                 <FinishVerificationPlan
                   cashPlanVerificationId={verificationPlan.id}
+                  cashPlanId={cashPlan.id}
                 />
               )}
               {canDiscard && (
                 <DiscardVerificationPlan
                   cashPlanVerificationId={verificationPlan.id}
+                  cashPlanId={cashPlan.id}
                 />
               )}
             </Box>

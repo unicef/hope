@@ -40,6 +40,7 @@ export const AllPaymentVerifications = gql`
           id
           cashPlanPaymentVerification {
             id
+            unicefId
             verificationChannel
           }
           paymentRecord {
