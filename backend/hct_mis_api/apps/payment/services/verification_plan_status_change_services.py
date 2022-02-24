@@ -1,7 +1,11 @@
 from django.utils import timezone
+
 from graphql import GraphQLError
 
-from hct_mis_api.apps.grievance.models import TicketPaymentVerificationDetails, GrievanceTicket
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketPaymentVerificationDetails,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import (
@@ -47,7 +51,8 @@ class VerificationPlanStatusChangeServices:
 
     def _can_activate_via_rapidpro(self):
         return (
-            self.cash_plan_verification.verification_method == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO
+            self.cash_plan_verification.verification_channel
+            == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO
         )
 
     def _activate_rapidpro(self):

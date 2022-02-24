@@ -2,10 +2,11 @@ import logging
 import math
 from decimal import Decimal
 
-import graphene
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
@@ -29,7 +30,9 @@ from hct_mis_api.apps.payment.inputs import (
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode
-from hct_mis_api.apps.payment.services.verification_plan_crud_services import VerificationPlanCrudServices
+from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
+    VerificationPlanCrudServices,
+)
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
@@ -91,7 +94,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, cash_plan_verification.business_area)
 
         old_cash_plan_verification = copy_model_object(cash_plan_verification)
-        cash_plan_verification.verification_method = input.get("verification_channel")
+        cash_plan_verification.verification_channel = input.get("verification_channel")
         cash_plan_verification.payment_record_verifications.all().delete()
 
         cash_plan_verification = VerificationPlanCrudServices.create(cash_plan_verification, input)
@@ -267,8 +270,8 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         old_payment_verification = copy_model_object(payment_verification)
         if (
-            payment_verification.cash_plan_payment_verification.verification_method
-            != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
+            payment_verification.cash_plan_payment_verification.verification_channel
+            != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         ):
             logger.error(f"You can only update status of payment verification for MANUAL verification method")
             raise GraphQLError(f"You can only update status of payment verification for MANUAL verification method")
@@ -368,8 +371,8 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         old_payment_verification = copy_model_object(payment_verification)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
         if (
-            payment_verification.cash_plan_payment_verification.verification_method
-            != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
+            payment_verification.cash_plan_payment_verification.verification_channel
+            != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         ):
             logger.error("You can only update status of payment verification for MANUAL verification method")
             raise GraphQLError("You can only update status of payment verification for MANUAL verification method")
@@ -453,7 +456,7 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             logger.error("You can only import verification for active CashPlan verification")
             raise GraphQLError("You can only import verification for active CashPlan verification")
-        if cashplan_payment_verification.verification_method != CashPlanPaymentVerification.VERIFICATION_METHOD_XLSX:
+        if cashplan_payment_verification.verification_channel != CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
             logger.error("You can only import verification when XLSX channel is selected")
             raise GraphQLError("You can only import verification when XLSX channel is selected")
         import_service = XlsxVerificationImportService(cashplan_payment_verification, file)

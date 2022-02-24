@@ -2013,7 +2013,7 @@
             "deprecationReason": null
           },
           {
-            "name": "cashPlanVerificationVerificationMethodChoices",
+            "name": "cashPlanVerificationVerificationChannelChoices",
             "description": null,
             "args": [],
             "type": {
@@ -23019,7 +23019,7 @@
             "deprecationReason": null
           },
           {
-            "name": "verificationMethod",
+            "name": "verificationChannel",
             "description": null,
             "args": [],
             "type": {
@@ -23027,7 +23027,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "CashPlanPaymentVerificationVerificationMethod",
+                "name": "CashPlanPaymentVerificationVerificationChannel",
                 "ofType": null
               }
             },
@@ -23353,7 +23353,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "CashPlanPaymentVerificationVerificationMethod",
+        "name": "CashPlanPaymentVerificationVerificationChannel",
         "description": null,
         "fields": null,
         "inputFields": null,
