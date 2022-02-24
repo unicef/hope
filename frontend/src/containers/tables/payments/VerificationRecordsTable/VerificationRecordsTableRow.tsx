@@ -41,6 +41,12 @@ export function VerificationRecordsTableRow({
           <span>{record.paymentRecord?.caId}</span>
         )}
       </TableCell>
+      <TableCell align='right'>
+        {record.cashPlanPaymentVerification.verificationChannel}
+      </TableCell>
+      <TableCell align='right'>
+        {record.cashPlanPaymentVerification.id}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

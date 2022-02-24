@@ -10,7 +10,7 @@ import { headCells } from './VerificationRecordsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
 
 export function VerificationRecordsTable({
-  id,
+  cashPlanId,
   filter,
   canViewRecordDetails,
   businessArea,
@@ -18,10 +18,12 @@ export function VerificationRecordsTable({
   const { t } = useTranslation();
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
-    cashPlanPaymentVerification: id,
+    cashPlanPaymentVerification: filter.cashPlanPaymentVerification,
     search: filter.search,
     status: filter.status,
+    verificationChannel: filter.verifcationChannel,
     businessArea,
+    cashPlanId,
   };
 
   return (

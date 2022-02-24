@@ -37,7 +37,7 @@ export const CashPlan = gql`
             receivedCount
             notReceivedCount
             respondedCount
-            verificationMethod
+            verificationChannel
             sampling
             receivedCount
             receivedWithProblemsCount

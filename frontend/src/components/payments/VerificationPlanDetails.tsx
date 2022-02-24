@@ -19,6 +19,7 @@ import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
 import { UniversalMoment } from '../core/UniversalMoment';
 import { ActivateVerificationPlan } from './ActivateVerificationPlan';
+import { DeleteVerificationPlan } from './DeleteVerificationPlan';
 import { DiscardVerificationPlan } from './DiscardVerificationPlan';
 import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
@@ -95,8 +96,8 @@ export const VerificationPlanDetails = ({
     samplingChoicesData.cashPlanVerificationSamplingChoices,
   );
 
-  const handleDelete = (): void => {
-    console.log('DELETE VERIFICATION PLAN');
+  const handleDelete = (): null => {
+    return null;
   };
 
   return (
@@ -111,12 +112,9 @@ export const VerificationPlanDetails = ({
           {canEditAndActivateAndDelete && (
             <>
               <Box mr={2}>
-                <ErrorButton
-                  onClick={() => handleDelete()}
-                  startIcon={<DeleteIcon />}
-                >
-                  {t('Delete')}
-                </ErrorButton>
+                <DeleteVerificationPlan
+                  cashPlanVerificationId={verificationPlan.id}
+                />
               </Box>
 
               {canEdit && (
@@ -138,7 +136,7 @@ export const VerificationPlanDetails = ({
           )}
           {canFinishAndDiscard && (
             <Box display='flex'>
-              {verificationPlan.verificationMethod === 'XLSX' && (
+              {verificationPlan.verificationChannel === 'XLSX' && (
                 <>
                   {canExport && (
                     <Box p={2}>
@@ -204,8 +202,8 @@ export const VerificationPlanDetails = ({
                 value: verificationPlan.receivedWithProblemsCount,
               },
               {
-                label: t('VERIFICATION METHOD'),
-                value: verificationPlan.verificationMethod,
+                label: t('VERIFICATION CHANNEL'),
+                value: verificationPlan.verificationChannel,
               },
               {
                 label: t('SAMPLE SIZE'),

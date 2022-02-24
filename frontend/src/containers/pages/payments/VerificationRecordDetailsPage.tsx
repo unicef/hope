@@ -60,7 +60,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       title={`${t('Payment ID')} ${paymentVerification.paymentRecord.caId}`}
       breadCrumbs={breadCrumbsItems}
     >
-      {verification.verificationMethod === 'MANUAL' &&
+      {verification.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
         <VerifyManual
           paymentVerificationId={paymentVerification.id}
