@@ -102,8 +102,8 @@ class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
         CashPlanPaymentVerification.SAMPLING_CHOICES,
         getter=lambda c: c[0],
     )
-    verification_method = fuzzy.FuzzyChoice(
-        CashPlanPaymentVerification.VERIFICATION_METHOD_CHOICES,
+    verification_channel = fuzzy.FuzzyChoice(
+        CashPlanPaymentVerification.VERIFICATION_CHANNEL_CHOICES,
         getter=lambda c: c[0],
     )
     cash_plan = factory.Iterator(CashPlan.objects.all())

@@ -90,7 +90,7 @@ class PaymentRecordFilter(FilterSet):
 class PaymentVerificationFilter(FilterSet):
     search = CharFilter(method="search_filter")
     business_area = CharFilter(field_name="payment_record__business_area__slug")
-    verification_channel = CharFilter(field_name="cash_plan_payment_verification__verification_method")
+    verification_channel = CharFilter(field_name="cash_plan_payment_verification__verification_channel")
 
     class Meta:
         fields = ("cash_plan_payment_verification", "cash_plan_payment_verification__cash_plan", "status")
@@ -285,7 +285,7 @@ class Query(graphene.ObjectType):
     payment_record_delivery_type_choices = graphene.List(ChoiceObject)
     cash_plan_verification_status_choices = graphene.List(ChoiceObject)
     cash_plan_verification_sampling_choices = graphene.List(ChoiceObject)
-    cash_plan_verification_verification_method_choices = graphene.List(ChoiceObject)
+    cash_plan_verification_verification_channel_choices = graphene.List(ChoiceObject)
     payment_verification_status_choices = graphene.List(ChoiceObject)
 
     all_rapid_pro_flows = graphene.List(
@@ -334,8 +334,8 @@ class Query(graphene.ObjectType):
     def resolve_cash_plan_verification_sampling_choices(self, info, **kwargs):
         return to_choice_object(CashPlanPaymentVerification.SAMPLING_CHOICES)
 
-    def resolve_cash_plan_verification_verification_method_choices(self, info, **kwargs):
-        return to_choice_object(CashPlanPaymentVerification.VERIFICATION_METHOD_CHOICES)
+    def resolve_cash_plan_verification_verification_channel_choices(self, info, **kwargs):
+        return to_choice_object(CashPlanPaymentVerification.VERIFICATION_CHANNEL_CHOICES)
 
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)

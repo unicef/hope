@@ -166,7 +166,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
             "status",
             "cash_plan",
             "sampling",
-            "verification_method",
+            "verification_channel",
             "sample_size",
             "responded_count",
             "received_count",
@@ -188,9 +188,9 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_FINISHED = "FINISHED"
     SAMPLING_FULL_LIST = "FULL_LIST"
     SAMPLING_RANDOM = "RANDOM"
-    VERIFICATION_METHOD_RAPIDPRO = "RAPIDPRO"
-    VERIFICATION_METHOD_XLSX = "XLSX"
-    VERIFICATION_METHOD_MANUAL = "MANUAL"
+    VERIFICATION_CHANNEL_RAPIDPRO = "RAPIDPRO"
+    VERIFICATION_CHANNEL_XLSX = "XLSX"
+    VERIFICATION_CHANNEL_MANUAL = "MANUAL"
     STATUS_CHOICES = (
         (STATUS_PENDING, "Pending"),
         (STATUS_ACTIVE, "Active"),
@@ -200,10 +200,10 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (SAMPLING_FULL_LIST, "Full list"),
         (SAMPLING_RANDOM, "Random sampling"),
     )
-    VERIFICATION_METHOD_CHOICES = (
-        (VERIFICATION_METHOD_RAPIDPRO, "RAPIDPRO"),
-        (VERIFICATION_METHOD_XLSX, "XLSX"),
-        (VERIFICATION_METHOD_MANUAL, "MANUAL"),
+    VERIFICATION_CHANNEL_CHOICES = (
+        (VERIFICATION_CHANNEL_RAPIDPRO, "RAPIDPRO"),
+        (VERIFICATION_CHANNEL_XLSX, "XLSX"),
+        (VERIFICATION_CHANNEL_MANUAL, "MANUAL"),
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     cash_plan = models.ForeignKey(
@@ -212,7 +212,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="verifications",
     )
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
-    verification_method = models.CharField(max_length=50, choices=VERIFICATION_METHOD_CHOICES)
+    verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
     responded_count = models.PositiveIntegerField(null=True)
     received_count = models.PositiveIntegerField(null=True)
@@ -319,8 +319,8 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     @property
     def is_manually_editable(self):
         if (
-            self.cash_plan_payment_verification.verification_method
-            != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
+            self.cash_plan_payment_verification.verification_channel
+            != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         ):
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60

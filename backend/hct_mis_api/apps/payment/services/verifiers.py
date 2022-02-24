@@ -16,15 +16,15 @@ class PaymentVerificationArgumentVerifier:
             },
         },
         "verification_channel": {
-            CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO: {
+            CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO: {
                 "required": ["rapid_pro_arguments"],
                 "not_allowed": ["xlsx_arguments", "manual_arguments"],
             },
-            CashPlanPaymentVerification.VERIFICATION_METHOD_XLSX: {
+            CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX: {
                 "required": [],
                 "not_allowed": ["rapid_pro_arguments", "manual_arguments"],
             },
-            CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL: {
+            CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL: {
                 "required": [],
                 "not_allowed": ["rapid_pro_arguments", "xlsx_arguments"],
             },

@@ -538,7 +538,7 @@ export type CashPlanPaymentVerificationNode = Node & {
   status: CashPlanPaymentVerificationStatus,
   cashPlan: CashPlanNode,
   sampling: CashPlanPaymentVerificationSampling,
-  verificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  verificationChannel: CashPlanPaymentVerificationVerificationChannel,
   sampleSize?: Maybe<Scalars['Int']>,
   respondedCount?: Maybe<Scalars['Int']>,
   receivedCount?: Maybe<Scalars['Int']>,
@@ -607,7 +607,7 @@ export enum CashPlanPaymentVerificationSummaryStatus {
   Finished = 'FINISHED'
 }
 
-export enum CashPlanPaymentVerificationVerificationMethod {
+export enum CashPlanPaymentVerificationVerificationChannel {
   Rapidpro = 'RAPIDPRO',
   Xlsx = 'XLSX',
   Manual = 'MANUAL'
@@ -3400,7 +3400,7 @@ export type Query = {
   paymentRecordDeliveryTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   cashPlanVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   cashPlanVerificationSamplingChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  cashPlanVerificationVerificationMethodChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  cashPlanVerificationVerificationChannelChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
   sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>,
@@ -6565,6 +6565,32 @@ export type CreateCashPlanPaymentVerificationMutation = (
   )> }
 );
 
+export type DeleteCashPlanPaymentVerificationMutationVariables = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type DeleteCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { deleteCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'DeleteCashPlanVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
 export type DiscardCashPlanPaymentVerificationMutationVariables = {
   cashPlanVerificationId: Scalars['ID']
 };
@@ -7951,7 +7977,7 @@ export type CashPlanQuery = (
         { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'CashPlanPaymentVerificationNode' }
-          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationMethod' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter'>
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationChannel' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter'>
           & { ageFilter: Maybe<(
             { __typename?: 'AgeFilterObject' }
             & Pick<AgeFilterObject, 'min' | 'max'>
@@ -8097,7 +8123,7 @@ export type PaymentRecordQuery = (
           { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
           & { node: Maybe<(
             { __typename?: 'CashPlanPaymentVerificationNode' }
-            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationMethod'>
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
           )> }
         )>> }
       ) }
@@ -8140,7 +8166,10 @@ export type AllPaymentVerificationsQuery = (
       & { node: Maybe<(
         { __typename?: 'PaymentVerificationNode' }
         & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
-        & { paymentRecord: Maybe<(
+        & { cashPlanPaymentVerification: (
+          { __typename?: 'CashPlanPaymentVerificationNode' }
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'verificationChannel'>
+        ), paymentRecord: Maybe<(
           { __typename?: 'PaymentRecordNode' }
           & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity' | 'currency'>
           & { household: (
@@ -8236,7 +8265,7 @@ export type PaymentRecordVerificationQuery = (
             { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
             & { node: Maybe<(
               { __typename?: 'CashPlanPaymentVerificationNode' }
-              & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationMethod'>
+              & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
             )> }
           )>> }
         ) }
@@ -8248,12 +8277,15 @@ export type PaymentRecordVerificationQuery = (
   )> }
 );
 
-export type PaymentVerificationStatusChoicesQueryVariables = {};
+export type PaymentVerificationChoicesQueryVariables = {};
 
 
-export type PaymentVerificationStatusChoicesQuery = (
+export type PaymentVerificationChoicesQuery = (
   { __typename?: 'Query' }
   & { paymentVerificationStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, cashPlanVerificationVerificationChannelChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -10800,6 +10832,74 @@ export function useCreateCashPlanPaymentVerificationMutation(baseOptions?: Apoll
 export type CreateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useCreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<CreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>;
+export const DeleteCashPlanPaymentVerificationDocument = gql`
+    mutation DeleteCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
+  deleteCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+    cashPlan {
+      id
+      status
+      statusDate
+      verifications {
+        edges {
+          node {
+            id
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            receivedCount
+            receivedWithProblemsCount
+            activationDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type DeleteCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>;
+export type DeleteCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const DeleteCashPlanPaymentVerificationComponent = (props: DeleteCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables> mutation={DeleteCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type DeleteCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withDeleteCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DeleteCashPlanPaymentVerificationMutation,
+  DeleteCashPlanPaymentVerificationMutationVariables,
+  DeleteCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables, DeleteCashPlanPaymentVerificationProps<TChildProps>>(DeleteCashPlanPaymentVerificationDocument, {
+      alias: 'deleteCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDeleteCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useDeleteCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCashPlanPaymentVerificationMutation, { data, loading, error }] = useDeleteCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *   },
+ * });
+ */
+export function useDeleteCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>(DeleteCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type DeleteCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useDeleteCashPlanPaymentVerificationMutation>;
+export type DeleteCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<DeleteCashPlanPaymentVerificationMutation>;
+export type DeleteCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>;
 export const DiscardCashPlanPaymentVerificationDocument = gql`
     mutation DiscardCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
   discardCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
@@ -14293,7 +14393,7 @@ export const CashPlanDocument = gql`
           receivedCount
           notReceivedCount
           respondedCount
-          verificationMethod
+          verificationChannel
           sampling
           receivedCount
           receivedWithProblemsCount
@@ -14621,7 +14721,7 @@ export const PaymentRecordDocument = gql`
           node {
             id
             status
-            verificationMethod
+            verificationChannel
           }
         }
       }
@@ -14677,7 +14777,7 @@ export const PaymentRecordDocument = gql`
           node {
             id
             status
-            verificationMethod
+            verificationChannel
           }
         }
       }
@@ -14757,6 +14857,10 @@ export const AllPaymentVerificationsDocument = gql`
       cursor
       node {
         id
+        cashPlanPaymentVerification {
+          id
+          verificationChannel
+        }
         paymentRecord {
           id
           caId
@@ -15038,7 +15142,7 @@ export const PaymentRecordVerificationDocument = gql`
             node {
               id
               status
-              verificationMethod
+              verificationChannel
             }
           }
         }
@@ -15104,56 +15208,60 @@ export function usePaymentRecordVerificationLazyQuery(baseOptions?: ApolloReactH
 export type PaymentRecordVerificationQueryHookResult = ReturnType<typeof usePaymentRecordVerificationQuery>;
 export type PaymentRecordVerificationLazyQueryHookResult = ReturnType<typeof usePaymentRecordVerificationLazyQuery>;
 export type PaymentRecordVerificationQueryResult = ApolloReactCommon.QueryResult<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>;
-export const PaymentVerificationStatusChoicesDocument = gql`
-    query paymentVerificationStatusChoices {
+export const PaymentVerificationChoicesDocument = gql`
+    query paymentVerificationChoices {
   paymentVerificationStatusChoices {
+    name
+    value
+  }
+  cashPlanVerificationVerificationChannelChoices {
     name
     value
   }
 }
     `;
-export type PaymentVerificationStatusChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>, 'query'>;
+export type PaymentVerificationChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>, 'query'>;
 
-    export const PaymentVerificationStatusChoicesComponent = (props: PaymentVerificationStatusChoicesComponentProps) => (
-      <ApolloReactComponents.Query<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables> query={PaymentVerificationStatusChoicesDocument} {...props} />
+    export const PaymentVerificationChoicesComponent = (props: PaymentVerificationChoicesComponentProps) => (
+      <ApolloReactComponents.Query<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables> query={PaymentVerificationChoicesDocument} {...props} />
     );
     
-export type PaymentVerificationStatusChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables> & TChildProps;
-export function withPaymentVerificationStatusChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type PaymentVerificationChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables> & TChildProps;
+export function withPaymentVerificationChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  PaymentVerificationStatusChoicesQuery,
-  PaymentVerificationStatusChoicesQueryVariables,
-  PaymentVerificationStatusChoicesProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables, PaymentVerificationStatusChoicesProps<TChildProps>>(PaymentVerificationStatusChoicesDocument, {
-      alias: 'paymentVerificationStatusChoices',
+  PaymentVerificationChoicesQuery,
+  PaymentVerificationChoicesQueryVariables,
+  PaymentVerificationChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables, PaymentVerificationChoicesProps<TChildProps>>(PaymentVerificationChoicesDocument, {
+      alias: 'paymentVerificationChoices',
       ...operationOptions
     });
 };
 
 /**
- * __usePaymentVerificationStatusChoicesQuery__
+ * __usePaymentVerificationChoicesQuery__
  *
- * To run a query within a React component, call `usePaymentVerificationStatusChoicesQuery` and pass it any options that fit your needs.
- * When your component renders, `usePaymentVerificationStatusChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `usePaymentVerificationChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentVerificationChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = usePaymentVerificationStatusChoicesQuery({
+ * const { data, loading, error } = usePaymentVerificationChoicesQuery({
  *   variables: {
  *   },
  * });
  */
-export function usePaymentVerificationStatusChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>) {
-        return ApolloReactHooks.useQuery<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>(PaymentVerificationStatusChoicesDocument, baseOptions);
+export function usePaymentVerificationChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, baseOptions);
       }
-export function usePaymentVerificationStatusChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>(PaymentVerificationStatusChoicesDocument, baseOptions);
+export function usePaymentVerificationChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, baseOptions);
         }
-export type PaymentVerificationStatusChoicesQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesQuery>;
-export type PaymentVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesLazyQuery>;
-export type PaymentVerificationStatusChoicesQueryResult = ApolloReactCommon.QueryResult<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>;
+export type PaymentVerificationChoicesQueryHookResult = ReturnType<typeof usePaymentVerificationChoicesQuery>;
+export type PaymentVerificationChoicesLazyQueryHookResult = ReturnType<typeof usePaymentVerificationChoicesLazyQuery>;
+export type PaymentVerificationChoicesQueryResult = ApolloReactCommon.QueryResult<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>;
 export const SampleSizeDocument = gql`
     query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
   sampleSize(input: $input) {
@@ -17865,7 +17973,7 @@ export type ResolversTypes = {
   CashPlanPaymentVerificationNode: ResolverTypeWrapper<CashPlanPaymentVerificationNode>,
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
-  CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  CashPlanPaymentVerificationVerificationChannel: CashPlanPaymentVerificationVerificationChannel,
   AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>,
   PaymentVerificationNodeConnection: ResolverTypeWrapper<PaymentVerificationNodeConnection>,
   PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>,
@@ -18224,7 +18332,7 @@ export type ResolversParentTypes = {
   CashPlanPaymentVerificationNode: CashPlanPaymentVerificationNode,
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
-  CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  CashPlanPaymentVerificationVerificationChannel: CashPlanPaymentVerificationVerificationChannel,
   AgeFilterObject: AgeFilterObject,
   PaymentVerificationNodeConnection: PaymentVerificationNodeConnection,
   PaymentVerificationNodeEdge: PaymentVerificationNodeEdge,
@@ -18704,7 +18812,7 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   status?: Resolver<ResolversTypes['CashPlanPaymentVerificationStatus'], ParentType, ContextType>,
   cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
   sampling?: Resolver<ResolversTypes['CashPlanPaymentVerificationSampling'], ParentType, ContextType>,
-  verificationMethod?: Resolver<ResolversTypes['CashPlanPaymentVerificationVerificationMethod'], ParentType, ContextType>,
+  verificationChannel?: Resolver<ResolversTypes['CashPlanPaymentVerificationVerificationChannel'], ParentType, ContextType>,
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   respondedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   receivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -19829,7 +19937,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   paymentRecordDeliveryTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   cashPlanVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   cashPlanVerificationSamplingChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  cashPlanVerificationVerificationMethodChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  cashPlanVerificationVerificationChannelChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
   sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class CheckRapidProVerificationTask:
     def execute(self):
         active_rapidpro_verifications = CashPlanPaymentVerification.objects.filter(
-            verification_method=CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO,
+            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
         )
         for cashplan_payment_verification in active_rapidpro_verifications:

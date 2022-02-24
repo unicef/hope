@@ -6,7 +6,7 @@ export const PaymentVerificationChoices = gql`
       name
       value
     }
-    cashPlanVerificationVerificationMethodChoices {
+    cashPlanVerificationVerificationChannelChoices {
       name
       value
     }
