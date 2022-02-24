@@ -1,3 +1,4 @@
+import abc
 from typing import List, Tuple
 
 from django.db.models import Q
@@ -7,6 +8,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 
 class Sampling:
@@ -17,67 +19,89 @@ class Sampling:
     def process_sampling(
         self, cash_plan_verification: CashPlanPaymentVerification
     ) -> Tuple[CashPlanPaymentVerification, List[PaymentRecord]]:
-        cash_plan_verification.sampling = self.input_data.get("sampling")
         payment_records = self.cash_plan.available_payment_records()
 
         if not payment_records:
             raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 
-        if cash_plan_verification.sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
-            sampling = FullListSampling(self.input_data.get("full_list_arguments"))
-        else:
-            sampling = RandomSampling(self.input_data.get("random_sampling_arguments"))
-        payment_records = sampling.sampling(cash_plan_verification, payment_records)
+        sampling = self._get_sampling()
+        sampling.sampling(payment_records)
+
+        cash_plan_verification.sampling = sampling.sampling_type
+        cash_plan_verification.sex_filter = sampling.sex
+        cash_plan_verification.age_filter = sampling.age
+        cash_plan_verification.confidence_interval = sampling.confidence_interval
+        cash_plan_verification.margin_of_error = sampling.margin_of_error
+        cash_plan_verification.excluded_admin_areas_filter = sampling.excluded_admin_areas
+        cash_plan_verification.sample_size = sampling.sample_size
+
+        payment_records = sampling.payment_records
+
+        if sampling.sampling_type == CashPlanPaymentVerification.SAMPLING_RANDOM:
+            payment_records = payment_records.order_by("?")[: sampling.sample_size]
 
         return cash_plan_verification, payment_records
 
+    def generate_sampling(self) -> Tuple[int, int]:
+        payment_records = self.cash_plan.available_payment_records()
+        payment_record_count = payment_records.count()
+        sampling = self._get_sampling()
+        sampling.sampling(payment_records)
 
-class RandomSampling:
-    def __init__(self, arguments):
+        return payment_record_count, sampling.sample_size
+
+    def _get_sampling(self):
+        sampling_type = self.input_data.get("sampling")
+        if sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
+            arguments = self.input_data.get("full_list_arguments")
+            return FullListSampling(arguments, sampling_type)
+        else:
+            arguments = self.input_data.get("random_sampling_arguments")
+            return RandomSampling(arguments, sampling_type)
+
+
+class BaseSampling(abc.ABC):
+    def __init__(self, arguments, sampling_type: str):
+        self.sampling_type = sampling_type
         self.arguments = arguments
+        self.confidence_interval = self.arguments.get("confidence_interval")
+        self.margin_of_error = self.arguments.get("margin_of_error")
+        self.sex = self.arguments.get("sex")
+        self.age = self.arguments.get("age")
+        self.excluded_admin_areas = self.arguments.get("excluded_admin_areas", [])
+        self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas]
+        self.sample_size = 0
+        self.payment_records = []
 
-    def sampling(self, cash_plan_verification, payment_records):
-        confidence_interval = self.arguments.get("confidence_interval")
-        margin_of_error = self.arguments.get("margin_of_error")
-        sex = self.arguments.get("sex")
-        age = self.arguments.get("age")
-        excluded_admin_areas = self.arguments.get("excluded_admin_areas", [])
+    def calc_sample_size(self, sample_count: int) -> int:
+        if self.sampling_type == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
+            return sample_count
+        else:
+            return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
-        if sex is not None:
-            payment_records = payment_records.filter(household__head_of_household__sex=sex)
-            cash_plan_verification.sex_filter = sex
 
-        if age is not None:
+class RandomSampling(BaseSampling):
+    def sampling(self, payment_records):
+        if self.sex is not None:
+            payment_records = payment_records.filter(household__head_of_household__sex=self.sex)
+
+        if self.age is not None:
             payment_records = filter_age(
                 "household__head_of_household__birth_date",
                 payment_records,
-                age.get("min"),
-                age.get("max"),
+                self.age.get("min"),
+                self.age.get("max"),
             )
-            cash_plan_verification.age_filter = age
 
-        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
-        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
-
-        cash_plan_verification.confidence_interval = confidence_interval
-        cash_plan_verification.margin_of_error = margin_of_error
-        cash_plan_verification.excluded_admin_areas_filter = excluded_admin_areas
-        cash_plan_verification.set_sample_size(payment_records.count())
-
-        payment_records = payment_records.order_by("?")[: cash_plan_verification.sample_size]
-
-        return payment_records
+        self.payment_records = payment_records.filter(
+            ~(Q(household__admin_area__id__in=self.excluded_admin_areas_decoded))
+        )
+        self.sample_size = self.calc_sample_size(payment_records.count())
 
 
-class FullListSampling:
-    def __init__(self, arguments):
-        self.arguments = arguments
-
-    def sampling(self, cash_plan_verification, payment_records):
-        excluded_admin_areas = self.arguments.get("excluded_admin_areas", [])
-        excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
-        payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
-        cash_plan_verification.excluded_admin_areas_filter = excluded_admin_areas
-        cash_plan_verification.set_sample_size(payment_records.count())
-
-        return payment_records
+class FullListSampling(BaseSampling):
+    def sampling(self, payment_records):
+        self.payment_records = payment_records.filter(
+            ~(Q(household__admin_area__id__in=self.excluded_admin_areas_decoded))
+        )
+        self.sample_size = self.calc_sample_size(payment_records.count())

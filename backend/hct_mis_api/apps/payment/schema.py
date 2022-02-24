@@ -38,6 +38,7 @@ from hct_mis_api.apps.payment.models import (
     ServiceProvider,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.utils import (
     get_number_of_samples,
     get_payment_records_for_dashboard,
@@ -303,45 +304,12 @@ class Query(graphene.ObjectType):
         ).distinct()
 
     def resolve_sample_size(self, info, input, **kwargs):
-        arg = lambda name: input.get(name)
-        cash_plan_id = decode_id_string(arg("cash_plan_id"))
+        cash_plan_id = decode_id_string(input.get("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
-        sampling = arg("sampling")
-        excluded_admin_areas = []
-        sex = None
-        age = None
-        confidence_interval = None
-        margin_of_error = None
-        payment_records = cash_plan.payment_records.filter(
-            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
-        )
-        payment_record_count = payment_records.count()
-        if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
-            excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
-        elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            random_sampling_arguments = arg("random_sampling_arguments")
-            confidence_interval = random_sampling_arguments.get("confidence_interval")
-            margin_of_error = random_sampling_arguments.get("margin_of_error")
-            sex = random_sampling_arguments.get("sex")
-            age = random_sampling_arguments.get("age")
-        if excluded_admin_areas is not None:
-            payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
-        if sex is not None:
-            payment_records = payment_records.filter(household__head_of_household__sex=sex)
-        if age is not None:
-            payment_records = filter_age(
-                "household__head_of_household__birth_date",
-                payment_records,
-                age.get("min"),
-                age.get("max"),
-            )
-        payment_records_sample_count = payment_records.count()
-        if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            payment_records_sample_count = get_number_of_samples(
-                payment_records_sample_count,
-                confidence_interval,
-                margin_of_error,
-            )
+
+        sampling = Sampling(input, cash_plan)
+        payment_record_count, payment_records_sample_count = sampling.generate_sampling()
+
         return {
             "payment_record_count": payment_record_count,
             "sample_size": payment_records_sample_count,
