@@ -37,7 +37,7 @@ export function StatusBox({
     >
       {statusNameMapping
         ? statusNameMapping(status)
-        : status.replace(underscoreRemoveRegex, ' ')}
+        : status?.replace(underscoreRemoveRegex, ' ')}
     </StatusBoxContainer>
   );
 }

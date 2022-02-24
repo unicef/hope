@@ -40,10 +40,8 @@ const TableSortLabelStyled = styled(TableSortLabel)`
   }
 `;
 
-const TableRowStyled = styled(TableRow)`
-  & {
-    font-size: 12px;
-  }
+const StyledLabel = styled.span`
+  font-size: 12px;
 `;
 
 interface EnhancedTableProps<T> {
@@ -120,7 +118,7 @@ export function EnhancedTableHead<T>(
                 )}
               </TableSortLabelStyled>
             ) : (
-              <TableRowStyled>{headCell.label}</TableRowStyled>
+              <StyledLabel>{headCell.label}</StyledLabel>
             )}
           </TableCell>
         ))}

@@ -6,19 +6,22 @@ import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
   IndividualNode,
-} from '../../../__generated__/graphql';
-import { Order, TableComponent } from '../../../components/core/Table/TableComponent';
-import { HeadCell } from '../../../components/core/Table/EnhancedTableHead';
-import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { StatusBox } from '../../../components/core/StatusBox';
+} from '../../../../__generated__/graphql';
+import {
+  Order,
+  TableComponent,
+} from '../../../../components/core/Table/TableComponent';
+import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { StatusBox } from '../../../../components/core/StatusBox';
 import {
   choicesToDict,
   populationStatusToColor,
   sexToCapitalize,
-} from '../../../utils/utils';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../components/core/BlackLink';
+} from '../../../../utils/utils';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { BlackLink } from '../../../../components/core/BlackLink';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
