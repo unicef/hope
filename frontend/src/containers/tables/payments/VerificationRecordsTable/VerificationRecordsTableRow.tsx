@@ -41,11 +41,11 @@ export function VerificationRecordsTableRow({
           <span>{record.paymentRecord?.caId}</span>
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align='left'>
         {record.cashPlanPaymentVerification.verificationChannel}
       </TableCell>
-      <TableCell align='right'>
-        {record.cashPlanPaymentVerification.id}
+      <TableCell align='left'>
+        {record.cashPlanPaymentVerification.unicefId}
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>

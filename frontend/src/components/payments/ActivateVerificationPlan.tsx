@@ -4,12 +4,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useActivateCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
-
-export interface Props {
-  cashPlanVerificationId: string;
-}
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -25,10 +22,16 @@ const DialogFooter = styled.div`
 const DialogContainer = styled.div`
   width: 700px;
 `;
+export interface ActivateVerificationPlanProps {
+  cashPlanVerificationId: string;
+  cashPlanId: string;
+}
 
 export function ActivateVerificationPlan({
   cashPlanVerificationId,
-}: Props): React.ReactElement {
+  cashPlanId,
+}: ActivateVerificationPlanProps): React.ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
 
@@ -38,6 +41,7 @@ export function ActivateVerificationPlan({
     try {
       await mutate({
         variables: { cashPlanVerificationId },
+        refetchQueries,
       });
     } catch (error) {
       /* eslint-disable-next-line no-console */

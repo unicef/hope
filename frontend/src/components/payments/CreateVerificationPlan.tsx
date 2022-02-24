@@ -12,10 +12,10 @@ import { Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CashPlan } from '../../apollo/queries/payments/CashPlan';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
@@ -121,6 +121,7 @@ export function CreateVerificationPlan({
   disabled,
   canCreatePaymentVerificationPlan,
 }: Props): React.ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -163,9 +164,7 @@ export function CreateVerificationPlan({
         values,
         businessArea,
       ),
-      refetchQueries: () => [
-        { query: CashPlan, variables: { id: cashPlanId } },
-      ],
+      refetchQueries,
     });
     setOpen(false);
 
@@ -214,15 +213,17 @@ export function CreateVerificationPlan({
             values={values}
             onChange={() => handleFormChange(values)}
           />
-          <ButtonTooltip
-            disabled={disabled}
-            color='primary'
-            variant='contained'
-            onClick={() => handleOpen()}
-            data-cy='button-new-plan'
-          >
-            {t('CREATE VERIFICATION PLAN')}
-          </ButtonTooltip>
+          <Box mr={2}>
+            <ButtonTooltip
+              disabled={disabled}
+              color='primary'
+              variant='contained'
+              onClick={() => handleOpen()}
+              data-cy='button-new-plan'
+            >
+              {t('CREATE VERIFICATION PLAN')}
+            </ButtonTooltip>
+          </Box>
           <Dialog
             open={open}
             onClose={() => setOpen(false)}
