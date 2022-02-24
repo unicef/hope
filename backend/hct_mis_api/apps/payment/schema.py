@@ -32,10 +32,10 @@ from hct_mis_api.apps.household.models import ROLE_NO_ROLE, STATUS_ACTIVE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
+    CashPlanPaymentVerificationSummary,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
-    CashPlanPaymentVerificationSummary,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import (
@@ -89,9 +89,10 @@ class PaymentRecordFilter(FilterSet):
 class PaymentVerificationFilter(FilterSet):
     search = CharFilter(method="search_filter")
     business_area = CharFilter(field_name="payment_record__business_area__slug")
+    verification_channel = CharFilter(field_name="cash_plan_payment_verification__verification_method")
 
     class Meta:
-        fields = ("cash_plan_payment_verification__cash_plan", "status")
+        fields = ("cash_plan_payment_verification", "cash_plan_payment_verification__cash_plan", "status")
         model = PaymentVerification
 
     order_by = OrderingFilter(
