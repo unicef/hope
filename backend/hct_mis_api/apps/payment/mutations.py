@@ -146,34 +146,6 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    def create_grievance_ticket_for_status(cls, cashplan_payment_verification, status):
-        verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
-        if verifications.count() == 0:
-            return
-        grievance_ticket = GrievanceTicket.objects.create(
-            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-            business_area=cashplan_payment_verification.cash_plan.business_area,
-        )
-
-        GrievanceNotification.send_all_notifications(
-            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
-        )
-        details = TicketPaymentVerificationDetails(
-            ticket=grievance_ticket,
-            payment_verification_status=status,
-        )
-        details.payment_verifications.set(verifications)
-        details.save()
-
-    @classmethod
-    def create_grievance_tickets(cls, cashplan_payment_verification):
-        cls.create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_PENDING)
-        cls.create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)
-        cls.create_grievance_ticket_for_status(
-            cashplan_payment_verification, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-        )
-
-    @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
@@ -186,10 +158,8 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             logger.error("You can finish only ACTIVE verification")
             raise GraphQLError("You can finish only ACTIVE verification")
-        cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_FINISHED
-        cashplan_payment_verification.completion_date = timezone.now()
-        cashplan_payment_verification.save()
-        cls.create_grievance_tickets(cashplan_payment_verification)
+        VerificationPlanStatusChangeServices(cashplan_payment_verification).finish()
+        cashplan_payment_verification.refresh_from_db()
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
