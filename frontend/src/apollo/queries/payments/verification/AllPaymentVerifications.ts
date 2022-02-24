@@ -11,6 +11,8 @@ export const AllPaymentVerifications = gql`
     $search: String
     $status: String
     $businessArea: String
+    $cashPlanId: ID
+    $verificationChannel: String
   ) {
     allPaymentVerifications(
       after: $after
@@ -19,9 +21,11 @@ export const AllPaymentVerifications = gql`
       last: $last
       orderBy: $orderBy
       cashPlanPaymentVerification: $cashPlanPaymentVerification
+      cashPlanPaymentVerification_CashPlan: $cashPlanId
       search: $search
       status: $status
       businessArea: $businessArea
+      verificationChannel: $verificationChannel
     ) {
       pageInfo {
         hasNextPage
@@ -34,6 +38,10 @@ export const AllPaymentVerifications = gql`
         cursor
         node {
           id
+          cashPlanPaymentVerification {
+            id
+            verificationChannel
+          }
           paymentRecord {
             id
             caId

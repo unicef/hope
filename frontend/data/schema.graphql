@@ -527,6 +527,10 @@ type DeduplicationResultNode {
   age: Int
 }
 
+type DeleteCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
 type DeleteProgram {
   ok: Boolean
 }
@@ -2064,6 +2068,7 @@ type Mutations {
   activateCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): ActivateCashPlanVerificationMutation
   finishCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): FinishCashPlanVerificationMutation
   discardCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DiscardCashPlanVerificationMutation
+  deleteCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DeleteCashPlanVerificationMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
@@ -2167,8 +2172,7 @@ type PaymentRecordNode implements Node {
   transactionReferenceId: String
   visionId: String
   registrationCaId: String
-  isIncluded: Boolean!
-  verifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  verification: PaymentVerificationNode
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
 }
@@ -2198,7 +2202,7 @@ type PaymentVerificationNode implements Node {
   updatedAt: DateTime!
   version: BigInt!
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode!
-  paymentRecord: PaymentRecordNode!
+  paymentRecord: PaymentRecordNode
   status: PaymentVerificationStatus!
   statusDate: DateTime
   receivedAmount: Float
@@ -2342,7 +2346,7 @@ type Query {
   paymentRecordVerification(id: ID!): PaymentVerificationNode
   cashPlanPaymentVerification(id: ID!): CashPlanPaymentVerificationNode
   allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
-  allPaymentVerifications(before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, status: String, search: String, businessArea: String, orderBy: String): PaymentVerificationNodeConnection
+  allPaymentVerifications(before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, cashPlanPaymentVerification_CashPlan: ID, status: String, search: String, businessArea: String, verificationChannel: String, orderBy: String): PaymentVerificationNodeConnection
   allCashPlanPaymentVerification(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection
   chartPaymentVerification(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartPaymentVerification
   chartVolumeByDeliveryMechanism(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode

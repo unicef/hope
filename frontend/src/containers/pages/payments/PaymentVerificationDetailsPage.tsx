@@ -60,6 +60,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
     search: null,
+    status: null,
+    verificationChannel: null,
+    cashPlanPaymentVerification: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const { id } = useParams();
@@ -78,9 +81,6 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
 
   const { cashPlan } = data;
 
-  const verificationPlan = cashPlan?.verifications?.edges?.length
-    ? cashPlan.verifications.edges[0].node
-    : null;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
@@ -168,7 +168,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           <Container>
             <VerificationRecordsTable
               filter={debouncedFilter}
-              id={verificationPlan.id}
+              cashPlanId={cashPlan.id}
               businessArea={businessArea}
               canViewRecordDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
