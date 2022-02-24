@@ -143,7 +143,7 @@ export function EditVerificationPlan({
     filterSex: verification.sexFilter || '',
     excludedAdminAreasFull: verification.excludedAdminAreasFilter,
     excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
-    verificationChannel: verification.verificationMethod || null,
+    verificationChannel: verification.verificationChannel || null,
     rapidProFlow: verification.rapidProFlowId || null,
     adminCheckbox: verification.excludedAdminAreasFilter.length !== 0,
     ageCheckbox:

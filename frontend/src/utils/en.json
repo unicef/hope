@@ -474,7 +474,7 @@
   "SAMPLING": "SAMPLING",
   "RESPONDED": "RESPONDED",
   "RECEIVED WITH ISSUES": "RECEIVED WITH ISSUES",
-  "VERIFICATION METHOD": "VERIFICATION METHOD",
+  "VERIFICATION CHANNEL": "VERIFICATION CHANNEL",
   "SAMPLE SIZE": "SAMPLE SIZE",
   "RECEIVED": "RECEIVED",
   "NOT RECEIVED": "NOT RECEIVED",
@@ -584,5 +584,6 @@
   "You are approving the following household to be withdrawn. Are you sure you want to continue?": "You are approving the following household to be withdrawn. Are you sure you want to continue?",
   "Household to be withdrawn": "Household to be withdrawn",
   "Alternate Collector Issue": "Alternate Collector Issue",
-  "One of the Household members is an alternate collector. This household cannot be withdrawn.": "One of the Household members is an alternate collector. This household cannot be withdrawn."
+  "One of the Household members is an alternate collector. This household cannot be withdrawn.": "One of the Household members is an alternate collector. This household cannot be withdrawn.",
+  "Are you sure you would like to delete this verification plan?": "Are you sure you would like to delete this verification plan?"
 }

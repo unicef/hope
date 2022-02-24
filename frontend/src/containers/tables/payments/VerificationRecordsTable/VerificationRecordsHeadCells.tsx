@@ -5,7 +5,19 @@ export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Payment ID',
-    id: 'payment_record',
+    id: 'payment_record__id',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Verification Channel',
+    id: 'cash_plan_payment_verification__verification_channel',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Verification Plan Id',
+    id: 'cash_plan_payment_verification__id',
     numeric: false,
   },
   {
@@ -41,7 +53,7 @@ export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Received',
-    id: 'receivedAmount',
+    id: 'payment_record__received_amount',
     numeric: true,
   },
   {

@@ -15,7 +15,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { usePaymentVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
+import { usePaymentVerificationChoicesQuery } from '../../../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;
@@ -55,10 +55,8 @@ export function VerificationRecordsFilters({
   const [show, setShow] = useState(false);
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
-  const {
-    data: statusChoicesData,
-  } = usePaymentVerificationStatusChoicesQuery();
-  if (!statusChoicesData) {
+  const { data: choicesData } = usePaymentVerificationChoicesQuery();
+  if (!choicesData) {
     return null;
   }
   return (
@@ -120,7 +118,31 @@ export function VerificationRecordsFilters({
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
-                  {statusChoicesData.paymentVerificationStatusChoices.map(
+                  {choicesData.paymentVerificationStatusChoices.map((item) => {
+                    return (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </StyledFormControl>
+            </Grid>
+            <Grid item>
+              <StyledFormControl variant='outlined' margin='dense'>
+                <InputLabel>{t('Verification Channel')}</InputLabel>
+                <Select
+                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                  // @ts-ignore
+                  onChange={(e) => handleFilterChange(e, 'verificationChannel')}
+                  variant='outlined'
+                  label={t('Verification Channel')}
+                  value={filter.verificationChannel || ''}
+                >
+                  <MenuItem value=''>
+                    <em>None</em>
+                  </MenuItem>
+                  {choicesData.cashPlanVerificationVerificationMethodChoices.map(
                     (item) => {
                       return (
                         <MenuItem key={item.value} value={item.value}>
@@ -131,6 +153,16 @@ export function VerificationRecordsFilters({
                   )}
                 </Select>
               </StyledFormControl>
+            </Grid>
+            <Grid item>
+              <SearchTextField
+                label={t('Verification Plan Id')}
+                variant='outlined'
+                margin='dense'
+                onChange={(e) =>
+                  handleFilterChange(e, 'cashPlanPaymentVerification')
+                }
+              />
             </Grid>
           </Grid>
         ) : null}
