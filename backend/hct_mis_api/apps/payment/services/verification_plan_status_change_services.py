@@ -1,5 +1,8 @@
+from django.utils import timezone
 from graphql import GraphQLError
 
+from hct_mis_api.apps.grievance.models import TicketPaymentVerificationDetails, GrievanceTicket
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -43,7 +46,9 @@ class VerificationPlanStatusChangeServices:
         return self.cash_plan_verification
 
     def _can_activate_via_rapidpro(self):
-        return self.cash_plan_verification.verification_method == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO
+        return (
+            self.cash_plan_verification.verification_method == CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO
+        )
 
     def _activate_rapidpro(self):
         business_area_slug = self.cash_plan_verification.business_area.slug
@@ -56,3 +61,38 @@ class VerificationPlanStatusChangeServices:
         )
         flow_start_info = api.start_flow(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
         self.cash_plan_verification.rapid_pro_flow_start_uuid = flow_start_info.get("uuid")
+
+    def finish(self) -> CashPlanPaymentVerification:
+        self.cash_plan_verification.status = CashPlanPaymentVerification.STATUS_FINISHED
+        self.cash_plan_verification.completion_date = timezone.now()
+        self.cash_plan_verification.save()
+        self._create_grievance_tickets(self.cash_plan_verification)
+        self.cash_plan_verification.payment_record_verifications.filter(
+            status=PaymentVerification.STATUS_PENDING
+        ).delete()
+        return self.cash_plan_verification
+
+    def _create_grievance_ticket_for_status(self, cashplan_payment_verification, status):
+        verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
+        if verifications.count() == 0:
+            return
+        grievance_ticket = GrievanceTicket.objects.create(
+            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+            business_area=cashplan_payment_verification.cash_plan.business_area,
+        )
+
+        GrievanceNotification.send_all_notifications(
+            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+        )
+        details = TicketPaymentVerificationDetails(
+            ticket=grievance_ticket,
+            payment_verification_status=status,
+        )
+        details.payment_verifications.set(verifications)
+        details.save()
+
+    def _create_grievance_tickets(self, cashplan_payment_verification):
+        self._create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)
+        self._create_grievance_ticket_for_status(
+            cashplan_payment_verification, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        )
