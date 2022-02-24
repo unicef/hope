@@ -20,7 +20,7 @@ class VerificationPlanCrudServices:
 
         cash_plan_verification = CashPlanPaymentVerification()
         cash_plan_verification.cash_plan = cash_plan
-        cash_plan_verification.verification_method = input_data.get("verification_channel")
+        cash_plan_verification.verification_channel = input_data.get("verification_channel")
 
         sampling = Sampling(input_data, cash_plan)
         cash_plan_verification, payment_records = sampling.process_sampling(cash_plan_verification)

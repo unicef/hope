@@ -142,7 +142,7 @@ export function VerificationRecordsFilters({
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
-                  {choicesData.cashPlanVerificationVerificationMethodChoices.map(
+                  {choicesData.cashPlanVerificationVerificationChannelChoices.map(
                     (item) => {
                       return (
                         <MenuItem key={item.value} value={item.value}>

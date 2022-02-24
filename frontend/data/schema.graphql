@@ -255,7 +255,7 @@ type CashPlanPaymentVerificationNode implements Node {
   status: CashPlanPaymentVerificationStatus!
   cashPlan: CashPlanNode!
   sampling: CashPlanPaymentVerificationSampling!
-  verificationMethod: CashPlanPaymentVerificationVerificationMethod!
+  verificationChannel: CashPlanPaymentVerificationVerificationChannel!
   sampleSize: Int
   respondedCount: Int
   receivedCount: Int
@@ -313,7 +313,7 @@ enum CashPlanPaymentVerificationSummaryStatus {
   FINISHED
 }
 
-enum CashPlanPaymentVerificationVerificationMethod {
+enum CashPlanPaymentVerificationVerificationChannel {
   RAPIDPRO
   XLSX
   MANUAL
@@ -2359,7 +2359,7 @@ type Query {
   paymentRecordDeliveryTypeChoices: [ChoiceObject]
   cashPlanVerificationStatusChoices: [ChoiceObject]
   cashPlanVerificationSamplingChoices: [ChoiceObject]
-  cashPlanVerificationVerificationMethodChoices: [ChoiceObject]
+  cashPlanVerificationVerificationChannelChoices: [ChoiceObject]
   paymentVerificationStatusChoices: [ChoiceObject]
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject

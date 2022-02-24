@@ -98,7 +98,7 @@ class TestRapidProVerificationTask(TestCase):
         cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
-            verification_method=CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO,
+            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
             cash_plan=cash_plan,
         )
         for _ in range(payment_record_amount):
