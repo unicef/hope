@@ -1,0 +1,1 @@
+export { HouseholdImportedIndividualsTable } from './HouseholdImportedIndividualsTable';

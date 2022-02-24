@@ -1,24 +1,24 @@
+import { Box, Checkbox, FormControlLabel, Grid } from '@material-ui/core';
 import React, { ReactElement, useState } from 'react';
-import { FormControlLabel, Checkbox, Grid, Box } from '@material-ui/core';
 import {
   AllImportedIndividualsQueryVariables,
+  HouseholdChoiceDataQuery,
   ImportedIndividualMinimalFragment,
   useAllImportedIndividualsQuery,
-  useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { headCells } from './ImportedIndividualsTableHeadCells';
+import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 
 interface ImportedIndividualsTableProps {
-  rdiId?: string;
+  rdiId: string;
   household?: string;
   title?: string;
   showCheckbox?: boolean;
   rowsPerPageOptions?: number[];
   isOnPaper?: boolean;
   businessArea: string;
+  choicesData: HouseholdChoiceDataQuery;
 }
 
 export function ImportedIndividualsTable({
@@ -29,6 +29,7 @@ export function ImportedIndividualsTable({
   rowsPerPageOptions = [10, 15, 20],
   showCheckbox,
   businessArea,
+  choicesData,
 }: ImportedIndividualsTableProps): ReactElement {
   const [showDuplicates, setShowDuplicates] = useState(false);
 
@@ -38,14 +39,6 @@ export function ImportedIndividualsTable({
     duplicatesOnly: showDuplicates,
     businessArea,
   };
-
-  const { data: choicesData, loading } = useHouseholdChoiceDataQuery();
-
-  if (loading) return <LoadingComponent />;
-
-  if (!choicesData) {
-    return null;
-  }
 
   return (
     <>
