@@ -21,7 +21,7 @@ export function VerificationRecordsTable({
     cashPlanPaymentVerification: filter.cashPlanPaymentVerification,
     search: filter.search,
     status: filter.status,
-    verificationChannel: filter.verifcationChannel,
+    verificationChannel: filter.verificationChannel,
     businessArea,
     cashPlanId,
   };
