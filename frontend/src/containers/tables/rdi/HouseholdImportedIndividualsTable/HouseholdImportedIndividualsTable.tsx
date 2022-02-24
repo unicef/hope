@@ -1,15 +1,11 @@
 import React, { ReactElement, useState } from 'react';
-import {
-  ImportedIndividualMinimalFragment,
-  useHouseholdChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { HeadCell } from '../../../components/core/Table/EnhancedTableHead';
+import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
 import {
   Order,
   TableComponent,
-} from '../../../components/core/Table/TableComponent';
-import { ImportedIndividualsTableRow } from './ImportedIndividualsTable/ImportedIndividualsTableRow';
+} from '../../../../components/core/Table/TableComponent';
+import { ImportedIndividualMinimalFragment } from '../../../../__generated__/graphql';
+import { ImportedIndividualsTableRow } from '../ImportedIndividualsTable/ImportedIndividualsTableRow';
 
 const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   {
@@ -62,20 +58,14 @@ const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   },
 ];
 
-export function HouseholdImportedIndividualsTable({ household }): ReactElement {
+export const HouseholdImportedIndividualsTable = ({
+  household,
+  choicesData,
+}): ReactElement => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
-
-  const { data: choicesData, loading } = useHouseholdChoiceDataQuery();
-
-  if (loading) return <LoadingComponent />;
-
-  if (!choicesData) {
-    return null;
-  }
-
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
   if (orderBy) {
     if (orderDirection === 'asc') {
@@ -100,7 +90,11 @@ export function HouseholdImportedIndividualsTable({ household }): ReactElement {
       allowSort={false}
       renderRow={(row) => {
         return (
-          <ImportedIndividualsTableRow choices={choicesData} individual={row} />
+          <ImportedIndividualsTableRow
+            key={row.id}
+            choices={choicesData}
+            individual={row}
+          />
         );
       }}
       headCells={headCells}
@@ -127,4 +121,4 @@ export function HouseholdImportedIndividualsTable({ household }): ReactElement {
       order={orderDirection as Order}
     />
   );
-}
+};
