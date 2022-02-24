@@ -67,7 +67,9 @@ export function PaymentVerificationTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{plan.serviceProvider?.fullName}</TableCell>
+      <TableCell align='left'>
+        {plan.serviceProvider?.fullName || '-'}
+      </TableCell>
       <TableCell align='left'>
         {deliveryTypeChoicesDict[plan.deliveryType]}
       </TableCell>
