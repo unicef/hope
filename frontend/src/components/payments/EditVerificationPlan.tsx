@@ -13,10 +13,10 @@ import { Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CashPlan } from '../../apollo/queries/payments/CashPlan';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
@@ -115,6 +115,7 @@ export function EditVerificationPlan({
   cashPlanVerificationId,
   cashPlanId,
 }: Props): React.ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -190,9 +191,7 @@ export function EditVerificationPlan({
         values,
         businessArea,
       ),
-      refetchQueries: () => [
-        { query: CashPlan, variables: { id: cashPlanId } },
-      ],
+      refetchQueries,
     });
     setOpen(false);
 
