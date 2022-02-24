@@ -277,6 +277,7 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     ca_id = factory.Iterator(CaIdIterator("PR"))
     ca_hash_id = factory.Faker("uuid4")
     household = factory.LazyAttribute(lambda o: Household.objects.order_by("?").first())
+    head_of_household = factory.LazyAttribute(lambda o: o.household.head_of_household)
     total_persons_covered = factory.fuzzy.FuzzyInteger(1, 7)
     distribution_modality = factory.Faker(
         "sentence",
