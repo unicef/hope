@@ -306,7 +306,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-5 of 22
+            1-5 of 6
           </p>
           <div
             class="MuiTablePagination-actions"

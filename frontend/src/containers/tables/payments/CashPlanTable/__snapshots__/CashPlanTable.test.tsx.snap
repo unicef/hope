@@ -265,7 +265,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               >
                 <a
                   class="sc-EHOje fJINSq"
-                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOjI4N2EwMDA4LWI1NWItNGQ1Ny05MTE4LTFlOWNlYzc5NjM2Mg=="
+                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOmNiNzBjYjdmLWY0N2EtNDI5Yy04Y2FjLTk0YzU0MDRiOTFkZA=="
                 >
                   <div
                     style="text-overflow: ellipsis;"
@@ -296,41 +296,300 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Maldivian rufiyaa
+                Aruban florin
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                63,528,696.08
+                81,968,631.29
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                58,615,107.80
+                24,029,588.26
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                81,978,986.49
+                53,795,776.44
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <time
-                  datetime="1602618898000"
+                  datetime="1635902172000"
                 >
-                  13 Oct 2020
+                  3 Nov 2021
                 </time>
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root"
-              style="height: 108px;"
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              role="checkbox"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body"
-                colspan="8"
-              />
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-EHOje fJINSq"
+                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOjhlNGYwMzYxLTRkNGUtNDZmZC05M2M0LWNiMGExZDA5YjJjMA=="
+                >
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    123-21-CSH-00002
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-bZQynM hTcAyj"
+                >
+                  <div
+                    class="sc-ifAKCX iRZDSK"
+                    data-cy="status-container"
+                  >
+                    TRANSACTION COMPLETED
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                5
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Argentine peso
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                43,776,249.87
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                58,957,757.27
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                65,864,422.88
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <time
+                  datetime="1630663309000"
+                >
+                  3 Sep 2021
+                </time>
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-EHOje fJINSq"
+                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOjIxZGZkZDEwLTMwOWMtNDlhYS04ZmQ5LTQ5NTk2ODhmODY2ZA=="
+                >
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    123-21-CSH-00001
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-bZQynM hTcAyj"
+                >
+                  <div
+                    class="sc-ifAKCX iAMwaj"
+                    data-cy="status-container"
+                  >
+                    TRANSACTION COMPLETED WITH ERRORS
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                5
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Guernsey pound
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                81,109,280.05
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                13,479,474.60
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                13,013,349.03
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <time
+                  datetime="1660244356000"
+                >
+                  11 Aug 2022
+                </time>
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-EHOje fJINSq"
+                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOmY1OWVkNDg1LTA4YTctNGMwYS1hYjRkLTczNzNlZmE3NmE4Ng=="
+                >
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    123-21-CSH-00003
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-bZQynM hTcAyj"
+                >
+                  <div
+                    class="sc-ifAKCX iRZDSK"
+                    data-cy="status-container"
+                  >
+                    TRANSACTION COMPLETED
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                0
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Cuban convertible peso
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                35,958,176.84
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                34,133,204.79
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                35,280,201.96
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <time
+                  datetime="1639988895000"
+                >
+                  20 Dec 2021
+                </time>
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-EHOje fJINSq"
+                  href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOmRiYzdhNGZiLTUyOTItNDZkZS1hYzIzLTcxMTQ2ZTQzODYwOQ=="
+                >
+                  <div
+                    style="text-overflow: ellipsis;"
+                  >
+                    123-21-CSH-00002
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-bZQynM hTcAyj"
+                >
+                  <div
+                    class="sc-ifAKCX iAMwaj"
+                    data-cy="status-container"
+                  >
+                    TRANSACTION COMPLETED WITH ERRORS
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                0
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Sri Lankan rupee
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                56,247,007.42
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                43,876,864.16
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                88,674,540.93
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <time
+                  datetime="1643638208000"
+                >
+                  31 Jan 2022
+                </time>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -383,7 +642,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-3 of 3
+            1-5 of 6
           </p>
           <div
             class="MuiTablePagination-actions"
@@ -413,9 +672,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
             </button>
             <button
               aria-label="Next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
-              disabled=""
-              tabindex="-1"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit"
+              tabindex="0"
               title="Next page"
               type="button"
             >
@@ -433,6 +691,9 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   />
                 </svg>
               </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
             </button>
           </div>
         </div>
