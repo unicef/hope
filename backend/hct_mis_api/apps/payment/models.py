@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -276,6 +276,15 @@ def build_summary(cash_plan):
     dispatch_uid="update_verification_status_in_cash_plan",
 )
 def update_verification_status_in_cash_plan(sender, instance, **kwargs):
+    build_summary(instance.cash_plan)
+
+
+@receiver(
+    post_delete,
+    sender=CashPlanPaymentVerification,
+    dispatch_uid="update_verification_status_in_cash_plan_on_delete",
+)
+def update_verification_status_in_cash_plan_on_delete(sender, instance, **kwargs):
     build_summary(instance.cash_plan)
 
 
