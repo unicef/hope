@@ -113,13 +113,16 @@ class PaymentVerificationFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__startswith=value)
-            q_obj |= Q(received_amount__startswith=value)
-            q_obj |= Q(payment_record__id__startswith=value)
-            q_obj |= Q(payment_record__head_of_household__full_name__startswith=value)
-            q_obj |= Q(payment_record__head_of_household__given_name__startswith=value)
-            q_obj |= Q(payment_record__head_of_household__middle_name__startswith=value)
-            q_obj |= Q(payment_record__head_of_household__family_name__startswith=value)
+            q_obj |= Q(payment_record__ca_id__istartswith=value)
+            q_obj |= Q(cash_plan_payment_verification__unicef_id__istartswith=value)
+            q_obj |= Q(received_amount__istartswith=value)
+            q_obj |= Q(payment_record__household__unicef_id__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__full_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__given_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__middle_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__family_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__phone_no__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__phone_no_alternative__istartswith=value)
         return qs.filter(q_obj)
 
 
