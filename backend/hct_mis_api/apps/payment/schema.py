@@ -3,7 +3,7 @@ from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 
 import graphene
-from django_filters import CharFilter, FilterSet, OrderingFilter
+from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -13,8 +13,9 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
+from hct_mis_api.apps.activity_log.models import LogEntry
+from hct_mis_api.apps.activity_log.schema import LogEntryFilter, LogEntryNode
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
@@ -222,6 +223,24 @@ class ChartPaymentVerification(ChartDetailedDatasetsNode):
     average_sample_size = graphene.Float()
 
 
+class PaymentVerificationLogEntryFilter(LogEntryFilter):
+    object_id = UUIDFilter(method="object_id_filter")
+
+    def object_id_filter(self, qs, name, value):
+        cash_plan = CashPlan.objects.get(pk=value)
+        verifications_ids = cash_plan.verifications.all().values_list("pk", flat=True)
+        return qs.filter(object_id__in=verifications_ids)
+
+
+class PaymentVerificationLogEntryNode(LogEntryNode):
+    content_object = graphene.Field(CashPlanPaymentVerificationNode)
+
+    class Meta:
+        model = LogEntry
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     payment_record_verification = relay.Node.Field(PaymentVerificationNode)
@@ -298,6 +317,12 @@ class Query(graphene.ObjectType):
     sample_size = graphene.Field(
         GetCashplanVerificationSampleSizeObject,
         input=GetCashplanVerificationSampleSizeInput(),
+    )
+
+    all_payment_verification_log_entries = DjangoPermissionFilterConnectionField(
+        PaymentVerificationLogEntryNode,
+        filterset_class=PaymentVerificationLogEntryFilter,
+        permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
     )
 
     def resolve_all_payment_verifications(self, info, **kwargs):
