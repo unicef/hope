@@ -8,20 +8,18 @@ import {
   UserNode,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
-import { headCells } from './UsersListTableHeadCells';
-import { UsersListTableRow } from './UsersListTableRow';
+import { headCells } from './UsersTableHeadCells';
+import { UsersTableRow } from './UsersTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;
 `;
 
-interface UsersListTableProps {
+interface UsersTableProps {
   filter;
 }
 
-export const UsersListTable = ({
-  filter,
-}: UsersListTableProps): ReactElement => {
+export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
 
@@ -43,7 +41,7 @@ export const UsersListTable = ({
         defaultOrderBy='status'
         defaultOrderDirection='desc'
         initialVariables={initialVariables}
-        renderRow={(row) => <UsersListTableRow user={row} key={row.id} />}
+        renderRow={(row) => <UsersTableRow user={row} key={row.id} />}
       />
     </TableWrapper>
   );

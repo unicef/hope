@@ -17,13 +17,13 @@ const StatusContainer = styled.div`
 const GreyText = styled.p`
   color: #959698;
 `;
-interface UsersListTableRowProps {
+interface UsersTableRowProps {
   user: UserNode;
 }
 
-export function UsersListTableRow({
+export function UsersTableRow({
   user,
-}: UsersListTableRowProps): React.ReactElement {
+}: UsersTableRowProps): React.ReactElement {
   const [open, setOpen] = useState(false);
 
   const mappedRoles = user?.userRoles?.map((el) => (
