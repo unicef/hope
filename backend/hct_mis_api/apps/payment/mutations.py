@@ -97,7 +97,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
         cash_plan_verification.verification_channel = input.get("verification_channel")
         cash_plan_verification.payment_record_verifications.all().delete()
 
-        cash_plan_verification = VerificationPlanCrudServices.create(cash_plan_verification, input)
+        cash_plan_verification = VerificationPlanCrudServices.update(cash_plan_verification, input)
 
         cash_plan_verification.cash_plan.refresh_from_db()
         log_create(
