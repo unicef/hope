@@ -19,11 +19,6 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketPaymentVerificationDetails,
-)
-from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
