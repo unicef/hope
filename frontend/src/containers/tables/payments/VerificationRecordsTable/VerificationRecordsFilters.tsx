@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Collapse,
   FormControl,
   Grid,
   InputAdornment,
@@ -86,7 +87,7 @@ export function VerificationRecordsFilters({
         )}
       </Box>
       <Container>
-        {show ? (
+        <Collapse in={show}>
           <Grid container spacing={3}>
             <Grid item>
               <SearchTextField
@@ -165,7 +166,7 @@ export function VerificationRecordsFilters({
               />
             </Grid>
           </Grid>
-        ) : null}
+        </Collapse>
       </Container>
     </>
   );
