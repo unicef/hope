@@ -47,10 +47,12 @@ const SearchTextField = styled(TextField)`
 interface VerificationRecordsFiltersProps {
   onFilterChange;
   filter;
+  verifications;
 }
 export function VerificationRecordsFilters({
   onFilterChange,
   filter,
+  verifications,
 }: VerificationRecordsFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const [show, setShow] = useState(false);
@@ -60,6 +62,15 @@ export function VerificationRecordsFilters({
   if (!choicesData) {
     return null;
   }
+
+  const verificationPlanOptions = verifications.edges.map((item) => {
+    return (
+      <MenuItem key={item.node.unicefId} value={item.node.unicefId}>
+        {item.node.unicefId}
+      </MenuItem>
+    );
+  });
+
   return (
     <>
       <Box display='flex' justifyContent='space-between'>
@@ -156,14 +167,24 @@ export function VerificationRecordsFilters({
               </StyledFormControl>
             </Grid>
             <Grid item>
-              <SearchTextField
-                label={t('Verification Plan Id')}
-                variant='outlined'
-                margin='dense'
-                onChange={(e) =>
-                  handleFilterChange(e, 'cashPlanPaymentVerification')
-                }
-              />
+              <StyledFormControl variant='outlined' margin='dense'>
+                <InputLabel>{t('Verification Plan Id')}</InputLabel>
+                <Select
+                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                  // @ts-ignore
+                  onChange={(e) =>
+                    handleFilterChange(e, 'cashPlanPaymentVerification')
+                  }
+                  variant='outlined'
+                  label={t('Verification Plan Id')}
+                  value={filter.cashPlanPaymentVerification || ''}
+                >
+                  <MenuItem value=''>
+                    <em>None</em>
+                  </MenuItem>
+                  {verificationPlanOptions}
+                </Select>
+              </StyledFormControl>
             </Grid>
           </Grid>
         </Collapse>

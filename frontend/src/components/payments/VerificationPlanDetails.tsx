@@ -157,7 +157,10 @@ export const VerificationPlanDetails = ({
                   )}
                   {canImport && (
                     <Box p={2}>
-                      <ImportXlsx verificationPlanId={verificationPlan.id} />
+                      <ImportXlsx
+                        cashPlanId={cashPlan.id}
+                        verificationPlanId={verificationPlan.id}
+                      />
                     </Box>
                   )}
                 </>
