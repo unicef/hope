@@ -137,7 +137,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             color='primary'
             component={Link}
             to={`/${businessArea}/grievance-and-feedback/payment-verification/${decodeIdString(
-              cashPlan.verifications.edges[0].node.id,
+              cashPlan.id,
             )}`}
           >
             {t('View Tickets')}

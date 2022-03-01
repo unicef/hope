@@ -3589,7 +3589,7 @@ export type QueryAllGrievanceTicketArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   fsp?: Maybe<Scalars['String']>,
   admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  cashPlanPaymentVerification?: Maybe<Scalars['String']>,
+  cashPlan?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
   orderBy?: Maybe<Scalars['String']>
@@ -7539,7 +7539,7 @@ export type AllGrievanceTicketQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
   assignedTo?: Maybe<Scalars['ID']>,
-  cashPlanPaymentVerification?: Maybe<Scalars['String']>
+  cashPlan?: Maybe<Scalars['String']>
 };
 
 
@@ -13560,8 +13560,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlanPaymentVerification: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlanPaymentVerification: $cashPlanPaymentVerification) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan) {
     totalCount
     pageInfo {
       startCursor
@@ -13640,7 +13640,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      orderBy: // value for 'orderBy'
  *      registrationDataImport: // value for 'registrationDataImport'
  *      assignedTo: // value for 'assignedTo'
- *      cashPlanPaymentVerification: // value for 'cashPlanPaymentVerification'
+ *      cashPlan: // value for 'cashPlan'
  *   },
  * });
  */
