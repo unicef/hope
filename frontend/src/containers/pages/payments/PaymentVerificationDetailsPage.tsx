@@ -18,6 +18,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
+  CashPlanPaymentVerificationStatus,
   useCashPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
 } from '../../../__generated__/graphql';
@@ -93,6 +94,16 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     permissions,
   );
 
+  const canSeeVerificationRecords = (): boolean => {
+    const statesArray = cashPlan.verifications?.edges?.map(
+      (v) => v.node.status,
+    );
+    const atLeastOneFinished = statesArray.includes(
+      CashPlanPaymentVerificationStatus.Finished,
+    );
+    return atLeastOneFinished;
+  };
+
   const isFinished =
     cashPlan.cashPlanPaymentVerificationSummary.status === 'FINISHED';
 
@@ -155,9 +166,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             />
           ))
         : null}
-      {cashPlan.verifications &&
-      cashPlan.verifications.edges.length &&
-      cashPlan.cashPlanPaymentVerificationSummary.status !== 'PENDING' ? (
+      {canSeeVerificationRecords ? (
         <>
           <Container>
             <VerificationRecordsFilters
