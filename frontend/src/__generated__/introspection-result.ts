@@ -21,6 +21,9 @@
             "name": "LogEntryNode"
           },
           {
+            "name": "PaymentVerificationLogEntryNode"
+          },
+          {
             "name": "UserNode"
           },
           {

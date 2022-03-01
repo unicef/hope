@@ -1,12 +1,12 @@
-import React, { ReactElement, useState } from 'react';
-import moment from 'moment';
-import styled from 'styled-components';
 import { IconButton, makeStyles } from '@material-ui/core';
-import clsx from 'clsx';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
-import { LogEntryNode } from '../../../__generated__/graphql';
+import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
+import clsx from 'clsx';
+import moment from 'moment';
+import React, { ReactElement, useState } from 'react';
+import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
+import { PaymentVerificationLogEntryNode } from '../../../__generated__/graphql';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
 
@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 }));
 
 interface LogRowProps {
-  logEntry: LogEntryNode;
+  logEntry: PaymentVerificationLogEntryNode;
 }
 
 export function LogRow({ logEntry }: LogRowProps): ReactElement {
@@ -50,7 +50,9 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
             ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
             : null}
         </Cell>
-        <Cell weight={headCells[2].weight}>{keys[0]}</Cell>
+        <Cell weight={headCells[2].weight}>
+          {logEntry.contentObject?.unicefId}
+        </Cell>
         <Cell weight={headCells[3].weight}>{changes[keys[0]].from}</Cell>
         <Cell weight={headCells[4].weight}>{changes[keys[0]].to}</Cell>
         <ButtonPlaceHolder />
@@ -68,9 +70,12 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
             ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
             : null}
         </Cell>
-        <Cell weight={headCells[2].weight}>Multiple</Cell>
-        <Cell weight={headCells[3].weight} />
+        <Cell weight={headCells[2].weight}>
+          {logEntry.contentObject?.unicefId}
+        </Cell>
+        <Cell weight={headCells[3].weight}>Multiple</Cell>
         <Cell weight={headCells[4].weight} />
+        <Cell weight={headCells[5].weight} />
         <ButtonContainer>
           <IconButton
             className={clsx(classes.expandIcon, {
@@ -89,9 +94,10 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
             <Row key={logEntry + key}>
               <Cell weight={headCells[0].weight} />
               <Cell weight={headCells[1].weight} />
-              <Cell weight={headCells[2].weight}>{key}</Cell>
-              <Cell weight={headCells[3].weight}>{changes[key].from}</Cell>
-              <Cell weight={headCells[4].weight}>{changes[key].to}</Cell>
+              <Cell weight={headCells[2].weight} />
+              <Cell weight={headCells[3].weight}>{key}</Cell>
+              <Cell weight={headCells[4].weight}>{changes[key].from}</Cell>
+              <Cell weight={headCells[5].weight}>{changes[key].to}</Cell>
               <ButtonPlaceHolder />
             </Row>
           );
