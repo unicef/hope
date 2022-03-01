@@ -81,6 +81,9 @@ export const VerificationPlanDetails = ({
   const canDiscard =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_DISCARD, permissions) &&
     canFinishAndDiscard;
+  const canDelete =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_DELETE, permissions) &&
+    canEditAndActivateAndDelete;
   const canImport = hasPermissions(
     PERMISSIONS.PAYMENT_VERIFICATION_IMPORT,
     permissions,
@@ -106,10 +109,12 @@ export const VerificationPlanDetails = ({
           {canEditAndActivateAndDelete && (
             <>
               <Box mr={2}>
-                <DeleteVerificationPlan
-                  cashPlanVerificationId={verificationPlan.id}
-                  cashPlanId={cashPlan.id}
-                />
+                {canDelete && (
+                  <DeleteVerificationPlan
+                    cashPlanVerificationId={verificationPlan.id}
+                    cashPlanId={cashPlan.id}
+                  />
+                )}
               </Box>
 
               {canEdit && (
