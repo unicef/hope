@@ -305,7 +305,7 @@ export type BusinessAreaNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
-  logentrySet: LogEntryNodeConnection,
+  logentrySet: PaymentVerificationLogEntryNodeConnection,
 };
 
 
@@ -497,6 +497,7 @@ export type CashPlanNode = Node & {
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
   currency?: Maybe<Scalars['String']>,
   canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']>,
+  availablePaymentRecordsCount?: Maybe<Scalars['Int']>,
 };
 
 
@@ -674,7 +675,7 @@ export type ContentTypeObjectType = {
   id: Scalars['ID'],
   appLabel: Scalars['String'],
   model: Scalars['String'],
-  logEntries: LogEntryNodeConnection,
+  logEntries: PaymentVerificationLogEntryNodeConnection,
   name?: Maybe<Scalars['String']>,
 };
 
@@ -3161,6 +3162,34 @@ export enum PaymentRecordStatus {
   TransactionErroneous = 'TRANSACTION_ERRONEOUS'
 }
 
+export type PaymentVerificationLogEntryNode = Node & {
+   __typename?: 'PaymentVerificationLogEntryNode',
+  id: Scalars['ID'],
+  contentType?: Maybe<ContentTypeObjectType>,
+  objectId?: Maybe<Scalars['UUID']>,
+  action: LogEntryAction,
+  objectRepr: Scalars['String'],
+  changes?: Maybe<Scalars['Arg']>,
+  user?: Maybe<UserNode>,
+  businessArea?: Maybe<UserBusinessAreaNode>,
+  timestamp?: Maybe<Scalars['DateTime']>,
+  contentObject?: Maybe<CashPlanPaymentVerificationNode>,
+};
+
+export type PaymentVerificationLogEntryNodeConnection = {
+   __typename?: 'PaymentVerificationLogEntryNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<PaymentVerificationLogEntryNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type PaymentVerificationLogEntryNodeEdge = {
+   __typename?: 'PaymentVerificationLogEntryNodeEdge',
+  node?: Maybe<PaymentVerificationLogEntryNode>,
+  cursor: Scalars['String'],
+};
+
 export type PaymentVerificationNode = Node & {
    __typename?: 'PaymentVerificationNode',
   id: Scalars['ID'],
@@ -3404,6 +3433,7 @@ export type Query = {
   paymentVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
   sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>,
+  allPaymentVerificationLogEntries?: Maybe<PaymentVerificationLogEntryNodeConnection>,
   adminArea?: Maybe<AdminAreaNode>,
   businessArea?: Maybe<BusinessAreaNode>,
   allAdminAreas?: Maybe<AdminAreaNodeConnection>,
@@ -3715,6 +3745,18 @@ export type QueryAllRapidProFlowsArgs = {
 
 export type QuerySampleSizeArgs = {
   input?: Maybe<GetCashplanVerificationSampleSizeInput>
+};
+
+
+export type QueryAllPaymentVerificationLogEntriesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  objectId?: Maybe<Scalars['UUID']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  module?: Maybe<Scalars['String']>
 };
 
 
@@ -5469,7 +5511,7 @@ export type UserBusinessAreaNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
-  logentrySet: LogEntryNodeConnection,
+  logentrySet: PaymentVerificationLogEntryNodeConnection,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 
@@ -5650,7 +5692,7 @@ export type UserNode = Node & {
   finalizedTargetPopulations: TargetPopulationNodeConnection,
   registrationDataImports: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
-  logs: LogEntryNodeConnection,
+  logs: PaymentVerificationLogEntryNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
 };
 
@@ -7966,7 +8008,7 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'canCreatePaymentVerificationPlan' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
+    & Pick<CashPlanNode, 'id' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
     & { serviceProvider: Maybe<(
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
@@ -14361,6 +14403,7 @@ export const CashPlanDocument = gql`
   cashPlan(id: $id) {
     id
     canCreatePaymentVerificationPlan
+    availablePaymentRecordsCount
     name
     startDate
     endDate
@@ -17885,6 +17928,9 @@ export type ResolversTypes = {
   Node: ResolverTypeWrapper<Node>,
   ID: ResolverTypeWrapper<Scalars['ID']>,
   ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
+  PaymentVerificationLogEntryNodeConnection: ResolverTypeWrapper<PaymentVerificationLogEntryNodeConnection>,
+  PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<PaymentVerificationLogEntryNodeEdge>,
+  PaymentVerificationLogEntryNode: ResolverTypeWrapper<PaymentVerificationLogEntryNode>,
   LogEntryAction: LogEntryAction,
   Arg: ResolverTypeWrapper<Scalars['Arg']>,
   UserNode: ResolverTypeWrapper<UserNode>,
@@ -18244,6 +18290,9 @@ export type ResolversParentTypes = {
   Node: Node,
   ID: Scalars['ID'],
   ContentTypeObjectType: ContentTypeObjectType,
+  PaymentVerificationLogEntryNodeConnection: PaymentVerificationLogEntryNodeConnection,
+  PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge,
+  PaymentVerificationLogEntryNode: PaymentVerificationLogEntryNode,
   LogEntryAction: LogEntryAction,
   Arg: Scalars['Arg'],
   UserNode: UserNode,
@@ -18735,7 +18784,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
-  logentrySet?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
+  logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
 };
 
 export type BusinessAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeConnection'] = ResolversParentTypes['BusinessAreaNodeConnection']> = {
@@ -18791,6 +18840,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
@@ -18893,7 +18943,7 @@ export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   model?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  logEntries?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
+  logEntries?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -19754,7 +19804,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'LogEntryNode' | 'PaymentVerificationLogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -19817,6 +19867,31 @@ export type PaymentRecordNodeConnectionResolvers<ContextType = any, ParentType e
 
 export type PaymentRecordNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNodeEdge'] = ResolversParentTypes['PaymentRecordNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type PaymentVerificationLogEntryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNode'] = ResolversParentTypes['PaymentVerificationLogEntryNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  contentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
+  objectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>,
+  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  contentObject?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationLogEntryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNodeConnection'] = ResolversParentTypes['PaymentVerificationLogEntryNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationLogEntryNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNodeEdge'] = ResolversParentTypes['PaymentVerificationLogEntryNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
@@ -19942,6 +20017,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   paymentVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
   sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,
+  allPaymentVerificationLogEntries?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentVerificationLogEntriesArgs, 'businessArea'>>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
@@ -20888,7 +20964,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeRegistrationdataimportSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeReportsArgs>,
-  logentrySet?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
+  logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
   permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
 };
 
@@ -20933,7 +21009,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeFinalizedTargetPopulationsArgs>,
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserNodeReportsArgs>,
-  logs?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
+  logs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserNodeBusinessAreasArgs>,
 };
 
@@ -21091,6 +21167,9 @@ export type Resolvers<ContextType = any> = {
   PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
   PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,
   PaymentRecordNodeEdge?: PaymentRecordNodeEdgeResolvers<ContextType>,
+  PaymentVerificationLogEntryNode?: PaymentVerificationLogEntryNodeResolvers<ContextType>,
+  PaymentVerificationLogEntryNodeConnection?: PaymentVerificationLogEntryNodeConnectionResolvers<ContextType>,
+  PaymentVerificationLogEntryNodeEdge?: PaymentVerificationLogEntryNodeEdgeResolvers<ContextType>,
   PaymentVerificationNode?: PaymentVerificationNodeResolvers<ContextType>,
   PaymentVerificationNodeConnection?: PaymentVerificationNodeConnectionResolvers<ContextType>,
   PaymentVerificationNodeEdge?: PaymentVerificationNodeEdgeResolvers<ContextType>,

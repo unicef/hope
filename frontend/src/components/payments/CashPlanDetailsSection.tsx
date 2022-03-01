@@ -66,7 +66,7 @@ export const CashPlanDetailsSection = ({
             },
             {
               label: t('PAYMENT RECORDS'),
-              value: cashPlan.paymentRecords.totalCount,
+              value: cashPlan.availablePaymentRecordsCount,
             },
             {
               label: t('START DATE'),
