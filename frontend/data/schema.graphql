@@ -177,7 +177,7 @@ type BusinessAreaNode implements Node {
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-  logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  logentrySet(before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
 }
 
 type BusinessAreaNodeConnection {
@@ -373,7 +373,7 @@ type ContentTypeObjectType {
   id: ID!
   appLabel: String!
   model: String!
-  logEntries(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  logEntries(before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   name: String
 }
 
@@ -2196,6 +2196,31 @@ enum PaymentRecordStatus {
   TRANSACTION_ERRONEOUS
 }
 
+type PaymentVerificationLogEntryNode implements Node {
+  id: ID!
+  contentType: ContentTypeObjectType
+  objectId: UUID
+  action: LogEntryAction!
+  objectRepr: String!
+  changes: Arg
+  user: UserNode
+  businessArea: UserBusinessAreaNode
+  timestamp: DateTime
+  contentObject: CashPlanPaymentVerificationNode
+}
+
+type PaymentVerificationLogEntryNodeConnection {
+  pageInfo: PageInfo!
+  edges: [PaymentVerificationLogEntryNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type PaymentVerificationLogEntryNodeEdge {
+  node: PaymentVerificationLogEntryNode
+  cursor: String!
+}
+
 type PaymentVerificationNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -2363,6 +2388,7 @@ type Query {
   paymentVerificationStatusChoices: [ChoiceObject]
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
+  allPaymentVerificationLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): PaymentVerificationLogEntryNodeConnection
   adminArea(id: ID!): AdminAreaNode
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Istartswith: String, businessArea: String, level: Int): AdminAreaNodeConnection
@@ -3517,7 +3543,7 @@ type UserBusinessAreaNode implements Node {
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-  logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  logentrySet(before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   permissions: [String]
 }
 
@@ -3562,7 +3588,7 @@ type UserNode implements Node {
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-  logs(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  logs(before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 

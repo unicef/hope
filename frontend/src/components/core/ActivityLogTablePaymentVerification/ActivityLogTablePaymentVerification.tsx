@@ -8,7 +8,7 @@ import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { LogEntryNode } from '../../../__generated__/graphql';
+import { PaymentVerificationLogEntryNode } from '../../../__generated__/graphql';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
@@ -42,22 +42,22 @@ const Toolbar = styled.div`
   justify-content: space-between;
 `;
 
-interface ActivityLogTableProps {
-  logEntries: LogEntryNode[];
+interface ActivityLogTablePaymentVerificationProps {
+  logEntries: PaymentVerificationLogEntryNode[];
   totalCount: number;
   rowsPerPage: number;
   page: number;
   onChangePage: (event: unknown, newPage: number) => void;
   onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
-export function ActivityLogTable({
+export function ActivityLogTablePaymentVerification({
   logEntries,
   totalCount,
   rowsPerPage,
   page,
   onChangePage,
   onChangeRowsPerPage,
-}: ActivityLogTableProps): ReactElement {
+}: ActivityLogTablePaymentVerificationProps): ReactElement {
   const [expanded, setExpanded] = useState(false);
   const { t } = useTranslation();
 

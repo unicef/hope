@@ -23,7 +23,7 @@ import {
 } from '../../../__generated__/graphql';
 import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
-import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 
 const Container = styled.div`
   display: flex;
@@ -163,6 +163,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             <VerificationRecordsFilters
               filter={filter}
               onFilterChange={setFilter}
+              verifications={cashPlan.verifications}
             />
           </Container>
           <Container>
@@ -195,8 +196,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       {cashPlan.verifications?.edges[0]?.node?.id &&
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <TableWrapper>
-            <UniversalActivityLogTable
-              objectId={cashPlan.verifications.edges[0].node.id}
+            <UniversalActivityLogTablePaymentVerification
+              objectId={cashPlan.id}
             />
           </TableWrapper>
         )}

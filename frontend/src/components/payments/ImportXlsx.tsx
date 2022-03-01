@@ -11,6 +11,7 @@ import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ImportErrors } from '../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import {
   useImportXlsxCashPlanVerificationMutation,
@@ -28,7 +29,8 @@ const Error = styled.div`
   padding: 20px;
 `;
 
-export function ImportXlsx({ verificationPlanId }): ReactElement {
+export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
@@ -53,6 +55,7 @@ export function ImportXlsx({ verificationPlanId }): ReactElement {
             cashPlanVerificationId: verificationPlanId,
             file: fileToImport,
           },
+          refetchQueries,
         });
 
         if (!errors && !data?.importXlsxCashPlanVerification?.errors.length) {
