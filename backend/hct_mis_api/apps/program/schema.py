@@ -179,6 +179,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     total_number_of_households = graphene.Int()
     currency = graphene.String(source="currency")
     can_create_payment_verification_plan = graphene.Boolean()
+    available_payment_records_count = graphene.Int()
 
     class Meta:
         model = CashPlan
@@ -190,6 +191,11 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_can_create_payment_verification_plan(self, info, **kwargs):
         return self.can_create_payment_verification_plan
+
+    def resolve_available_payment_records_count(self, info, **kwargs):
+        return self.payment_records.filter(
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+        ).count()
 
 
 class ChartProgramFilter(FilterSet):
@@ -282,9 +288,18 @@ class Query(graphene.ObjectType):
     def resolve_all_cash_plans(self, info, **kwargs):
         return CashPlan.objects.annotate(
             custom_order=Case(
-                When(cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_ACTIVE, then=Value(1)),
-                When(cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_PENDING, then=Value(2)),
-                When(cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_FINISHED, then=Value(3)),
+                When(
+                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_ACTIVE,
+                    then=Value(1),
+                ),
+                When(
+                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_PENDING,
+                    then=Value(2),
+                ),
+                When(
+                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_FINISHED,
+                    then=Value(3),
+                ),
                 output_field=IntegerField(),
             )
         ).order_by("-updated_at", "custom_order")
