@@ -233,6 +233,7 @@ type CashPlanNode implements Node {
   totalNumberOfHouseholds: Int
   currency: String
   canCreatePaymentVerificationPlan: Boolean
+  availablePaymentRecordsCount: Int
 }
 
 type CashPlanNodeConnection {
