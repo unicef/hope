@@ -5,6 +5,7 @@ export const CashPlan = gql`
     cashPlan(id: $id) {
       id
       canCreatePaymentVerificationPlan
+      availablePaymentRecordsCount
       name
       startDate
       endDate
