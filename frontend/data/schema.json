@@ -716,7 +716,7 @@
                 "defaultValue": null
               },
               {
-                "name": "cashPlanPaymentVerification",
+                "name": "cashPlan",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
