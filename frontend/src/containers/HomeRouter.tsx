@@ -198,7 +198,7 @@ export function HomeRouter(): React.ReactElement {
               <GrievancesTablePage key='rdi' />
             </Sentry.ErrorBoundary>
           </Route>
-          <Route path='/:businessArea/grievance-and-feedback/payment-verification/:verificationId'>
+          <Route path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
                 scope.setTag(
