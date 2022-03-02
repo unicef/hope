@@ -85,22 +85,14 @@ export function FinishVerificationPlan({
   };
 
   const grievanceTickets = (): number => {
-    const sampleSize = verificationPlan?.sampleSize;
-    const responded = verificationPlan?.respondedCount || 0;
-
-    if (sampleSize) {
-      const pendingTicketsCount = sampleSize - responded ? 1 : 0;
+    if (verificationPlan?.sampleSize) {
       const notReceivedTicketsCount = verificationPlan?.notReceivedCount
         ? 1
         : 0;
       const receivedWithProblemsTicketsCount = verificationPlan?.receivedWithProblemsCount
         ? 1
         : 0;
-      return (
-        pendingTicketsCount +
-        notReceivedTicketsCount +
-        receivedWithProblemsTicketsCount
-      );
+      return notReceivedTicketsCount + receivedWithProblemsTicketsCount;
     }
     return null;
   };
