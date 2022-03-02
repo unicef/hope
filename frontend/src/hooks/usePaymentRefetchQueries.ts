@@ -18,7 +18,16 @@ export const usePaymentRefetchQueries = (
   return () => [
     {
       query: AllPaymentVerificationsDocument,
-      variables: { cashPlanId, businessArea },
+      variables: {
+        cashPlanId,
+        businessArea,
+        cashPlanPaymentVerification: null,
+        first: 5,
+        orderBy: null,
+        search: null,
+        status: null,
+        verificationChannel: null,
+      },
     },
     {
       query: CashPlanDocument,
