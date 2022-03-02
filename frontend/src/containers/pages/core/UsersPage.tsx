@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@material-ui/core';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { UsersListTable } from '../../tables/UsersListTable';
+import { UsersTable } from '../../tables/UsersTable';
 import { UsersListFilters } from '../../../components/core/UsersListFilters';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -19,7 +19,7 @@ const Container = styled.div`
   }
 `;
 
-export function UsersList(): React.ReactElement {
+export function UsersPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -54,7 +54,7 @@ export function UsersList(): React.ReactElement {
       </PageHeader>
       <UsersListFilters filter={filter} onFilterChange={setFilter} />
       <Container>
-        <UsersListTable filter={debouncedFilter} />
+        <UsersTable filter={debouncedFilter} />
       </Container>
     </div>
   );
