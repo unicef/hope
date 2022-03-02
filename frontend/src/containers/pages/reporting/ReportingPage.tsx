@@ -8,7 +8,10 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { useReportChoiceDataQuery } from '../../../__generated__/graphql';
+import {
+  useMeQuery,
+  useReportChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { ReportingFilters } from '../../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../../tables/ReportingTable/ReportingTable';
 
@@ -22,6 +25,10 @@ export const ReportingPage = (): React.ReactElement => {
     loading: choicesLoading,
   } = useReportChoiceDataQuery();
 
+  const { data: meData, loading: meLoading } = useMeQuery({
+    fetchPolicy: 'cache-first',
+  });
+
   const [filter, setFilter] = useState({
     type: '',
     createdFrom: undefined,
@@ -30,9 +37,9 @@ export const ReportingPage = (): React.ReactElement => {
     onlyMy: false,
   });
   const debouncedFilter = useDebounce(filter, 500);
-  if (choicesLoading) return <LoadingComponent />;
+  if (choicesLoading || meLoading) return <LoadingComponent />;
 
-  if (permissions === null) return null;
+  if (!choicesData || !meData || permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions))
     return <PermissionDenied />;
 
@@ -50,6 +57,7 @@ export const ReportingPage = (): React.ReactElement => {
         filter={debouncedFilter}
         businessArea={businessArea}
         choicesData={choicesData}
+        meData={meData}
       />
     </>
   );
