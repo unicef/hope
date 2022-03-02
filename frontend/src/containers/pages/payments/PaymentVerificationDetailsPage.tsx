@@ -94,14 +94,22 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     permissions,
   );
 
+  const statesArray = cashPlan.verifications?.edges?.map((v) => v.node.status);
+
   const canSeeVerificationRecords = (): boolean => {
-    const statesArray = cashPlan.verifications?.edges?.map(
-      (v) => v.node.status,
-    );
-    const atLeastOneFinished = statesArray.includes(
-      CashPlanPaymentVerificationStatus.Finished,
-    );
-    return atLeastOneFinished;
+    const showTable =
+      statesArray.includes(CashPlanPaymentVerificationStatus.Finished) ||
+      statesArray.includes(CashPlanPaymentVerificationStatus.Active);
+
+    return showTable && statesArray.length > 0;
+  };
+
+  const canSeeActivationMessage = (): boolean => {
+    return cashPlan.cashPlanPaymentVerificationSummary.status === 'PENDING';
+  };
+
+  const canSeeCreationMessage = (): boolean => {
+    return statesArray.length === 0;
   };
 
   const isFinished =
@@ -166,7 +174,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             />
           ))
         : null}
-      {canSeeVerificationRecords ? (
+      {canSeeVerificationRecords() ? (
         <>
           <Container>
             <VerificationRecordsFilters
@@ -175,29 +183,24 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               verifications={cashPlan.verifications}
             />
           </Container>
-          <Container>
-            <VerificationRecordsTable
-              filter={debouncedFilter}
-              cashPlanId={cashPlan.id}
-              businessArea={businessArea}
-              canViewRecordDetails={hasPermissions(
-                PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
-                permissions,
-              )}
-            />
-          </Container>
+          <VerificationRecordsTable
+            filter={debouncedFilter}
+            cashPlanId={cashPlan.id}
+            businessArea={businessArea}
+            canViewRecordDetails={hasPermissions(
+              PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
+              permissions,
+            )}
+          />
         </>
       ) : null}
-      {cashPlan.verifications &&
-      cashPlan.verifications.edges.length &&
-      cashPlan.cashPlanPaymentVerificationSummary.status !== 'ACTIVE' &&
-      cashPlan.cashPlanPaymentVerificationSummary.status !== 'FINISHED' ? (
+      {canSeeActivationMessage() ? (
         <BottomTitle>
           {t('To see more details please activate Verification Plan')}
         </BottomTitle>
       ) : null}
-      {!cashPlan.verifications.edges.length &&
-      cashPlan.cashPlanPaymentVerificationSummary.status !== 'ACTIVE' ? (
+
+      {canSeeCreationMessage() ? (
         <BottomTitle>
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
