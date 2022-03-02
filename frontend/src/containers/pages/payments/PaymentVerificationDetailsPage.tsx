@@ -105,7 +105,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   };
 
   const canSeeActivationMessage = (): boolean => {
-    return cashPlan.cashPlanPaymentVerificationSummary.status === 'PENDING';
+    return !canSeeVerificationRecords();
   };
 
   const canSeeCreationMessage = (): boolean => {
@@ -183,15 +183,17 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               verifications={cashPlan.verifications}
             />
           </Container>
-          <VerificationRecordsTable
-            filter={debouncedFilter}
-            cashPlanId={cashPlan.id}
-            businessArea={businessArea}
-            canViewRecordDetails={hasPermissions(
-              PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
-              permissions,
-            )}
-          />
+          <TableWrapper>
+            <VerificationRecordsTable
+              filter={debouncedFilter}
+              cashPlanId={cashPlan.id}
+              businessArea={businessArea}
+              canViewRecordDetails={hasPermissions(
+                PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
+                permissions,
+              )}
+            />
+          </TableWrapper>
         </>
       ) : null}
       {canSeeActivationMessage() ? (
