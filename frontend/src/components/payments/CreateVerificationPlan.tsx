@@ -229,6 +229,7 @@ export function CreateVerificationPlan({
             onClose={() => setOpen(false)}
             scroll='paper'
             aria-labelledby='form-dialog-title'
+            maxWidth='md'
           >
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>
