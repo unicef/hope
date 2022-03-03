@@ -8374,6 +8374,9 @@ export type PaymentVerificationChoicesQuery = (
   )>>>, cashPlanVerificationVerificationChannelChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, paymentRecordDeliveryTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -15396,6 +15399,10 @@ export const PaymentVerificationChoicesDocument = gql`
     value
   }
   cashPlanVerificationVerificationChannelChoices {
+    name
+    value
+  }
+  paymentRecordDeliveryTypeChoices {
     name
     value
   }

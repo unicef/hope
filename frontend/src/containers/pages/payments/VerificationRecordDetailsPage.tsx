@@ -14,6 +14,7 @@ import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
   PaymentVerificationNode,
   usePaymentRecordVerificationQuery,
+  usePaymentVerificationChoicesQuery,
 } from '../../../__generated__/graphql';
 
 export function VerificationRecordDetailsPage(): React.ReactElement {
@@ -23,10 +24,14 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   const { data, loading, error } = usePaymentRecordVerificationQuery({
     variables: { id },
   });
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = usePaymentVerificationChoicesQuery();
   const businessArea = useBusinessArea();
-  if (loading) return <LoadingComponent />;
+  if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || permissions === null) return null;
+  if (!data || !choicesData || permissions === null) return null;
 
   const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
   const verification =
@@ -78,6 +83,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
           PERMISSIONS.ACTIVITY_LOG_VIEW,
           permissions,
         )}
+        choicesData={choicesData}
       />
     </div>
   );
