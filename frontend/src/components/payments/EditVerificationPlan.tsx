@@ -176,6 +176,7 @@ export function EditVerificationPlan({
       businessArea,
       cashPlanId,
     ),
+    fetchPolicy: 'network-only',
   });
 
   useEffect(() => {

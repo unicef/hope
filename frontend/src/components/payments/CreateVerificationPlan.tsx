@@ -149,6 +149,7 @@ export function CreateVerificationPlan({
       formValues,
       businessArea,
     ),
+    fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
