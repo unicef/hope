@@ -182,7 +182,7 @@ export function EditVerificationPlan({
   useEffect(() => {
     loadSampleSize();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formValues]);
+  }, [formValues, open]);
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({

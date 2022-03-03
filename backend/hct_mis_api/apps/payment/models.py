@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -228,6 +228,9 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     unicef_id = models.CharField(blank=True, max_length=250)
+
+    class Meta:
+        ordering = ("created_at",)
 
     @property
     def business_area(self):
