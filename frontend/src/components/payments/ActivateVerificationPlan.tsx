@@ -79,6 +79,7 @@ export function ActivateVerificationPlan({
         onClose={() => setActivateDialogOpen(false)}
         scroll='paper'
         aria-labelledby='form-dialog-title'
+        maxWidth='md'
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
