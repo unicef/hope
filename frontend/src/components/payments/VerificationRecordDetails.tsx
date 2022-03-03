@@ -9,10 +9,7 @@ import {
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
-import {
-  PaymentVerificationChoicesQuery,
-  PaymentVerificationNode,
-} from '../../__generated__/graphql';
+import { PaymentVerificationNode } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
@@ -55,7 +52,6 @@ export function VerificationRecordDetails({
     choicesData.paymentRecordDeliveryTypeChoices,
   );
 
-  console.log(deliveryTypeDict);
   return (
     <>
       <ContainerColumnWithBorder>
