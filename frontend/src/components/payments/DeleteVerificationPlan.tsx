@@ -68,6 +68,7 @@ export function DeleteVerificationPlan({
         onClose={() => setFinishDialogOpen(false)}
         scroll='paper'
         aria-labelledby='form-dialog-title'
+        maxWidth='md'
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
