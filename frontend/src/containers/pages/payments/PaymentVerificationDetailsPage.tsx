@@ -103,13 +103,12 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
 
     return showTable && statesArray.length > 0;
   };
-
-  const canSeeActivationMessage = (): boolean => {
-    return !canSeeVerificationRecords();
-  };
-
   const canSeeCreationMessage = (): boolean => {
     return statesArray.length === 0;
+  };
+
+  const canSeeActivationMessage = (): boolean => {
+    return !canSeeVerificationRecords() && !canSeeCreationMessage();
   };
 
   const isFinished =
