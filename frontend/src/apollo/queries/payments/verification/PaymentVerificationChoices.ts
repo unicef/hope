@@ -10,5 +10,9 @@ export const PaymentVerificationChoices = gql`
       name
       value
     }
+    paymentRecordDeliveryTypeChoices {
+      name
+      value
+    }
   }
 `;

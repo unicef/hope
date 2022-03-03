@@ -4,11 +4,15 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import {
+  choicesToDict,
   formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
-import { PaymentVerificationNode } from '../../__generated__/graphql';
+import {
+  PaymentVerificationChoicesQuery,
+  PaymentVerificationNode,
+} from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
@@ -37,14 +41,21 @@ const StatusContainer = styled.div`
 interface VerificationRecordDetailsProps {
   paymentVerification: PaymentVerificationNode;
   canViewActivityLog: boolean;
+  choicesData;
 }
 
 export function VerificationRecordDetails({
   paymentVerification,
   canViewActivityLog,
+  choicesData,
 }: VerificationRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
+  const deliveryTypeDict = choicesToDict(
+    choicesData.paymentRecordDeliveryTypeChoices,
+  );
+
+  console.log(deliveryTypeDict);
   return (
     <>
       <ContainerColumnWithBorder>
@@ -180,7 +191,9 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={paymentVerification.paymentRecord.deliveryType}
+              value={
+                deliveryTypeDict[paymentVerification.paymentRecord.deliveryType]
+              }
             />
           </Grid>
           <Grid item xs={3}>
