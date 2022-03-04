@@ -5,7 +5,7 @@ export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Payment ID',
-    id: 'payment_record__id',
+    id: 'payment_record__ca_id',
     numeric: false,
   },
   {
@@ -29,7 +29,7 @@ export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Head of Household',
-    id: 'payment_record__household__head_of_household__family_name',
+    id: 'payment_record__head_of_household__family_name',
     numeric: false,
   },
   {
@@ -53,19 +53,19 @@ export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Received',
-    id: 'payment_record__received_amount',
+    id: 'received_amount',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Phone #',
-    id: 'payment_record__household__head_of_household__phone_no',
+    id: 'payment_record__head_of_household__phone_no',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Alt. Phone #',
-    id: 'payment_record__household__head_of_household__phone_no_alternative',
+    id: 'payment_record__head_of_household__phone_no_alternative',
     numeric: false,
   },
 ];

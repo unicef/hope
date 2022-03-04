@@ -99,14 +99,17 @@ class PaymentVerificationFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
-            "payment_record",
+            "payment_record__ca_id",
+            "cash_plan_payment_verification__verification_channel",
+            "cash_plan_payment_verification__unicef_id",
             "status",
-            "payment_record__head_of_household__full_name",
             "payment_record__head_of_household__family_name",
-            "payment_record__household",
             "payment_record__household__unicef_id",
+            "payment_record__household__status",
             "payment_record__delivered_quantity",
             "received_amount",
+            "payment_record__head_of_household__phone_no",
+            "payment_record__head_of_household__phone_no_alternative",
         )
     )
 
