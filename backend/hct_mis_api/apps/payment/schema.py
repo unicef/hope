@@ -1,4 +1,4 @@
-from django.db.models import Count, Q, Sum
+from django.db.models import Case, CharField, Count, Q, Sum, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 
@@ -29,7 +29,11 @@ from hct_mis_api.apps.core.utils import (
     is_valid_uuid,
     to_choice_object,
 )
-from hct_mis_api.apps.household.models import ROLE_NO_ROLE, STATUS_ACTIVE
+from hct_mis_api.apps.household.models import (
+    ROLE_NO_ROLE,
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+)
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -40,10 +44,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
-from hct_mis_api.apps.payment.utils import (
-    get_number_of_samples,
-    get_payment_records_for_dashboard,
-)
+from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
@@ -329,10 +330,20 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_payment_verifications(self, info, **kwargs):
-        return PaymentVerification.objects.filter(
-            Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_ACTIVE)
-            | Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_FINISHED)
-        ).distinct()
+        return (
+            PaymentVerification.objects.filter(
+                Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_ACTIVE)
+                | Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_FINISHED)
+            )
+            .annotate(
+                payment_record__household__status=Case(
+                    When(payment_record__household__withdrawn=True, then=Value(STATUS_INACTIVE)),
+                    default=Value(STATUS_ACTIVE),
+                    output_field=CharField(),
+                ),
+            )
+            .distinct()
+        )
 
     def resolve_sample_size(self, info, input, **kwargs):
         cash_plan_id = decode_id_string(input.get("cash_plan_id"))
