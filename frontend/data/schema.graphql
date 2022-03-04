@@ -693,6 +693,7 @@ scalar GeoJSON
 
 input GetCashplanVerificationSampleSizeInput {
   cashPlanId: ID
+  cashPlanPaymentVerificationId: ID
   sampling: String!
   verificationChannel: String
   businessAreaSlug: String!

@@ -1,7 +1,7 @@
 import abc
 from typing import List, Tuple
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from graphql import GraphQLError
 
@@ -12,20 +12,19 @@ from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 
 class Sampling:
-    def __init__(self, input_data, cash_plan):
+    def __init__(self, input_data, cash_plan, payment_records: QuerySet):
         self.input_data = input_data
         self.cash_plan = cash_plan
+        self.payment_records = payment_records
 
     def process_sampling(
         self, cash_plan_verification: CashPlanPaymentVerification
     ) -> Tuple[CashPlanPaymentVerification, List[PaymentRecord]]:
-        payment_records = self.cash_plan.available_payment_records()
-
-        if not payment_records:
+        if not self.payment_records:
             raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 
         sampling = self._get_sampling()
-        sampling.sampling(payment_records)
+        sampling.sampling(self.payment_records)
 
         cash_plan_verification.sampling = sampling.sampling_type
         cash_plan_verification.sex_filter = sampling.sex
@@ -35,18 +34,17 @@ class Sampling:
         cash_plan_verification.excluded_admin_areas_filter = sampling.excluded_admin_areas
         cash_plan_verification.sample_size = sampling.sample_size
 
-        payment_records = sampling.payment_records
+        self.payment_records = sampling.payment_records
 
         if sampling.sampling_type == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            payment_records = payment_records.order_by("?")[: sampling.sample_size]
+            self.payment_records = self.payment_records.order_by("?")[: sampling.sample_size]
 
-        return cash_plan_verification, payment_records
+        return cash_plan_verification, self.payment_records
 
     def generate_sampling(self) -> Tuple[int, int]:
-        payment_records = self.cash_plan.available_payment_records()
-        payment_record_count = payment_records.count()
+        payment_record_count = self.payment_records.count()
         sampling = self._get_sampling()
-        sampling.sampling(payment_records)
+        sampling.sampling(self.payment_records)
 
         return payment_record_count, sampling.sample_size
 
@@ -79,9 +77,13 @@ class BaseSampling(abc.ABC):
         else:
             return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
+    @abc.abstractmethod
+    def sampling(self, payment_records: QuerySet):
+        pass
+
 
 class RandomSampling(BaseSampling):
-    def sampling(self, payment_records):
+    def sampling(self, payment_records: QuerySet):
         if self.sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=self.sex)
 
@@ -100,7 +102,7 @@ class RandomSampling(BaseSampling):
 
 
 class FullListSampling(BaseSampling):
-    def sampling(self, payment_records):
+    def sampling(self, payment_records: QuerySet):
         self.payment_records = payment_records.filter(
             ~(Q(household__admin_area__id__in=self.excluded_admin_areas_decoded))
         )
