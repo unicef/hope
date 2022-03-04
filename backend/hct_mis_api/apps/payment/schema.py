@@ -349,7 +349,12 @@ class Query(graphene.ObjectType):
         cash_plan_id = decode_id_string(input.get("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
 
-        sampling = Sampling(input, cash_plan)
+        payment_verification_plan = None
+        if payment_verification_plan_id := decode_id_string(input.get("cash_plan_payment_verification_id")):
+            payment_verification_plan = get_object_or_404(CashPlanPaymentVerification, id=payment_verification_plan_id)
+
+        payment_records = cash_plan.available_payment_records(payment_verification_plan)
+        sampling = Sampling(input, cash_plan, payment_records)
         payment_record_count, payment_records_sample_count = sampling.generate_sampling()
 
         return {

@@ -67,7 +67,7 @@ function prepareVariables(
 ) {
   return {
     input: {
-      ...(!cashPlanId && {
+      ...(cashPlanVerificationId && {
         cashPlanPaymentVerificationId: cashPlanVerificationId,
       }),
       ...(cashPlanId && { cashPlanId }),

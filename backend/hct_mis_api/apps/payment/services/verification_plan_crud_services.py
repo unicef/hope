@@ -22,7 +22,8 @@ class VerificationPlanCrudServices:
         cash_plan_verification.cash_plan = cash_plan
         cash_plan_verification.verification_channel = input_data.get("verification_channel")
 
-        sampling = Sampling(input_data, cash_plan)
+        payment_records = cash_plan.available_payment_records()
+        sampling = Sampling(input_data, cash_plan, payment_records)
         cash_plan_verification, payment_records = sampling.process_sampling(cash_plan_verification)
         cash_plan_verification.save()
 
@@ -40,7 +41,8 @@ class VerificationPlanCrudServices:
         if cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
             raise GraphQLError("You can only edit PENDING Cash Plan Verification")
 
-        sampling = Sampling(input_data, cash_plan_verification.cash_plan)
+        payment_records = cash_plan_verification.cash_plan.available_payment_records()
+        sampling = Sampling(input_data, cash_plan_verification.cash_plan, payment_records)
         cash_plan_verification, payment_records = sampling.process_sampling(cash_plan_verification)
         cash_plan_verification.save()
 
