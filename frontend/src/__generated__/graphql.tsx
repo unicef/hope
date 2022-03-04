@@ -8263,7 +8263,7 @@ export type AllPaymentVerificationsQuery = (
             & Pick<HouseholdNode, 'status' | 'unicefId' | 'id'>
             & { headOfHousehold: (
               { __typename?: 'IndividualNode' }
-              & Pick<IndividualNode, 'id' | 'fullName' | 'phoneNo' | 'phoneNoAlternative'>
+              & Pick<IndividualNode, 'id' | 'fullName' | 'familyName' | 'phoneNo' | 'phoneNoAlternative'>
             ) }
           ) }
         )> }
@@ -15057,6 +15057,7 @@ export const AllPaymentVerificationsDocument = gql`
             headOfHousehold {
               id
               fullName
+              familyName
               phoneNo
               phoneNoAlternative
             }

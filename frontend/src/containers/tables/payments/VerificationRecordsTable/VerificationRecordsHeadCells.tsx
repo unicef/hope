@@ -17,7 +17,7 @@ export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Verification Plan Id',
-    id: 'cash_plan_payment_verification__id',
+    id: 'cash_plan_payment_verification__unicef_id',
     numeric: false,
   },
   {
