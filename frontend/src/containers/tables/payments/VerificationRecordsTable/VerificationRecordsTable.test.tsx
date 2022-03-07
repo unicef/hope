@@ -14,7 +14,7 @@ describe('containers/tables/payments/VerificationRecordsTable', () => {
         mocks={fakeApolloAllPaymentVerifications}
       >
         <VerificationRecordsTable
-          cashPlanId='Q2FzaFBsYW5Ob2RlOmNiNzBjYjdmLWY0N2EtNDI5Yy04Y2FjLTk0YzU0MDRiOTFkZA=='
+          cashPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
           filter={{}}
           canViewRecordDetails={true}
           businessArea='afghanistan'
@@ -34,7 +34,7 @@ describe('containers/tables/payments/VerificationRecordsTable', () => {
         mocks={fakeApolloAllPaymentVerifications}
       >
         <VerificationRecordsTable
-          cashPlanId='Q2FzaFBsYW5Ob2RlOmNiNzBjYjdmLWY0N2EtNDI5Yy04Y2FjLTk0YzU0MDRiOTFkZA=='
+          cashPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
           filter={{}}
           canViewRecordDetails={true}
           businessArea='afghanistan'

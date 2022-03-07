@@ -334,7 +334,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               >
                 <a
                   class="sc-bxivhb iRvpKE"
-                  href="/afghanistan/verification-records/UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6NDg4OWMyNjItNWYzMi00NDhkLWE1MmEtNjFiYjlhMDQ5ZDBk"
+                  href="/afghanistan/verification-records/UGF5bWVudFZlcmlmaWNhdGlvbk5vZGU6NjgyNmVmZjctZTU4Zi00N2MxLTliMDEtNjIxOWMyZmMyZTcz"
                 >
                   123-21-PR-00014
                 </a>
@@ -347,7 +347,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                PVP-1
+                PVP-14
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -356,10 +356,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-EHOje gFjtOh"
                 >
                   <div
-                    class="sc-ifAKCX iRZDSK"
+                    class="sc-ifAKCX jzRoPs"
                     data-cy="status-container"
                   >
-                    RECEIVED
+                    PENDING
                   </div>
                 </div>
               </td>
@@ -385,12 +385,12 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                NAD 3,525.00
+                CUC 3,377.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                NAD 3,525.00
+                CUC 0.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -405,7 +405,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
             </tr>
             <tr
               class="MuiTableRow-root"
-              style="height: 54px;"
+              style="height: 162px;"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body"
@@ -463,7 +463,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-4 of 4
+            1-2 of 2
           </p>
           <div
             class="MuiTablePagination-actions"
