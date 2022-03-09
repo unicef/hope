@@ -11,7 +11,7 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { IndividualBioData } from '../../../components/population/IndividualBioData/IndividualBioData';
 import { IndividualPhotoModal } from '../../../components/population/IndividualPhotoModal';
-import { IndividualVulnerabilities } from '../../../components/population/IndividualVunerabilities';
+import { IndividualVulnerabilities } from '../../../components/population/IndividualVulnerabilities/IndividualVunerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -20,6 +20,7 @@ import {
   IndividualNode,
   useHouseholdChoiceDataQuery,
   useIndividualQuery,
+  useAllIndividualsFlexFieldsAttributesQuery,
 } from '../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 
@@ -49,11 +50,18 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  if (loading || choicesLoading) return <LoadingComponent />;
+  const {
+    data: flexFieldsData,
+    loading: flexFieldsDataLoading,
+  } = useAllIndividualsFlexFieldsAttributesQuery();
+
+  if (loading || choicesLoading || flexFieldsDataLoading)
+    return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null) return null;
+  if (!data || !choicesData || !flexFieldsData || permissions === null)
+    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -117,7 +125,10 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
           individual={individual as IndividualNode}
           choicesData={choicesData}
         />
-        <IndividualVulnerabilities individual={individual as IndividualNode} />
+        <IndividualVulnerabilities
+          flexFieldsData={flexFieldsData}
+          individual={individual as IndividualNode}
+        />
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTable objectId={individual.id} />
         )}

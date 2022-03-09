@@ -4,10 +4,10 @@ exports[`components/population/HouseholdVulnerabilities should render 1`] = `
 <div>
   <div>
     <div
-      class="MuiPaper-root sc-htoDjs bshDgT MuiPaper-elevation1 MuiPaper-rounded"
+      class="MuiPaper-root sc-gzVnrw hiftfX MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="sc-htpNat hUqbZq"
+        class="sc-htoDjs cguslC"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"

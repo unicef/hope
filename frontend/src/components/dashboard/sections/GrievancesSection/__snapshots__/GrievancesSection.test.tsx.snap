@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/dashboard/GrievancesSection should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root sc-bdVaJa hInPwd MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="MuiBox-root MuiBox-root-1"
+    >
+      Grievances and Feedback
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+      >
+        <div
+          class="sc-bwzfXH fWOOEW"
+        >
+          TOTAL NUMBER OF GRIEVANCES
+        </div>
+        <span
+          class="MuiTypography-root MuiTypography-caption"
+        >
+          3
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+      >
+        <div
+          class="sc-bwzfXH fWOOEW"
+        >
+          TOTAL NUMBER OF FEEDBACK
+        </div>
+        <span
+          class="MuiTypography-root MuiTypography-caption"
+        >
+          0
+        </span>
+      </div>
+    </div>
+    <div
+      class="MuiBox-root MuiBox-root-2"
+    >
+      <canvas
+        class="chartjs-render-monitor"
+        height="0"
+        style="display: block;"
+        width="0"
+      />
+    </div>
+    <div
+      class="sc-bwzfXH fWOOEW"
+    >
+      NUMBER OF OPEN SENSITIVE GRIEVANCES
+    </div>
+    <span
+      class="MuiTypography-root MuiTypography-caption"
+    >
+      0
+    </span>
+  </div>
+</div>
+`;

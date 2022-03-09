@@ -10,7 +10,6 @@ import {
   AllHouseholdsFlexFieldsAttributesQuery,
 } from '../../../__generated__/graphql';
 import { LabelizedField } from '../../core/LabelizedField';
-import { Title } from '../../core/Title';
 import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
@@ -20,6 +19,11 @@ const Overview = styled(Paper)`
   &:first-child {
     margin-top: 0px;
   }
+`;
+
+const Title = styled.div`
+  width: 100%;
+  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 interface HouseholdVulnerabilitiesProps {
@@ -93,8 +97,9 @@ export function HouseholdVulnerabilities({
           <Typography variant='h6'>{t('Vulnerabilities')}</Typography>
         </Title>
         <Grid container spacing={6}>
-          {fields.map((field) => (
-            <Grid item xs={4}>
+          {fields.map((field, i) => (
+            /* eslint-disable-next-line react/no-array-index-key */
+            <Grid key={i} item xs={4}>
               {field}
             </Grid>
           ))}
