@@ -97,8 +97,9 @@ export function HouseholdVulnerabilities({
           <Typography variant='h6'>{t('Vulnerabilities')}</Typography>
         </Title>
         <Grid container spacing={6}>
-          {fields.map((field) => (
-            <Grid item xs={4}>
+          {fields.map((field, i) => (
+            /* eslint-disable-next-line react/no-array-index-key */
+            <Grid key={i} item xs={4}>
               {field}
             </Grid>
           ))}

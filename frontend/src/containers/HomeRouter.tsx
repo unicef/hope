@@ -8,10 +8,10 @@ import { MiśTheme } from '../theme';
 import { Drawer } from '../components/core/Drawer/Drawer';
 import { AppBar } from '../components/core/AppBar';
 import { useSnackbar } from '../hooks/useSnackBar';
-import { GrievanceDetailsPage } from '../components/grievances/GrievancesDetailsPage/GrievanceDetailsPage';
-import { GrievancesTablePage } from '../components/grievances/GrievancesTablePage';
-import { CreateGrievancePage } from '../components/grievances/CreateGrievancePage';
-import { EditGrievancePage } from '../components/grievances/EditGrievancePage';
+import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
+import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
+import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
+import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ProgramsPage } from './pages/program/ProgramsPage';
 import { ProgramDetailsPage } from './pages/program/ProgramDetailsPage';
@@ -31,7 +31,7 @@ import { RegistrationIndividualDetailsPage } from './pages/rdi/RegistrationIndiv
 import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/payments/PaymentVerificationDetailsPage';
 import { VerificationRecordDetailsPage } from './pages/payments/VerificationRecordDetailsPage';
-import { UsersList } from './pages/core/UsersList';
+import { UsersPage } from './pages/core/UsersPage';
 import { ReportingPage } from './pages/reporting/ReportingPage';
 import { ReportingDetailsPage } from './pages/reporting/ReportingDetailsPage';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
@@ -216,7 +216,7 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/grievance-and-feedback/:id');
               }}
             >
-              <GrievanceDetailsPage />
+              <GrievancesDetailsPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/grievance-and-feedback'>
@@ -330,7 +330,7 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/users-list');
               }}
             >
-              <UsersList />
+              <UsersPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/activity-log'>

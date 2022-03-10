@@ -10,6 +10,7 @@ import {
   useApproveHouseholdDataChangeMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { Title } from '../core/Title';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 
 const StyledBox = styled(Paper)`
@@ -17,10 +18,6 @@ const StyledBox = styled(Paper)`
   flex-direction: column;
   width: 100%;
   padding: 26px 22px;
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 export function RequestedHouseholdDataChange({

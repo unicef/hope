@@ -18,7 +18,7 @@ const StyledBox = styled(Paper)`
   width: 100%;
   padding: 26px 22px;
 `;
-const Title = styled.div`
+const OrangeTitle = styled.div`
   color: ${({ theme }) => theme.hctPalette.oragne};
 `;
 
@@ -55,14 +55,14 @@ export function TicketsAlreadyExist({ values }): React.ReactElement {
   ));
   return edges.length ? (
     <StyledBox>
-      <Title>
+      <OrangeTitle>
         <Typography variant='h6'>
           <WarnIcon />
           {edges.length === 1
             ? 'Ticket already exists'
             : 'Tickets already exist'}
         </Typography>
-      </Title>
+      </OrangeTitle>
       <Typography variant='body2'>
         {t(
           'There is an open ticket(s) in the same category for the related entity. Please review them before proceeding.',

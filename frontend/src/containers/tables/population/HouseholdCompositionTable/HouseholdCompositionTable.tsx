@@ -10,6 +10,7 @@ import {
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { Title } from '../../../../components/core/Title';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 
 const GreyTableCell = styled(TableCell)`
@@ -19,11 +20,6 @@ const OverviewPaper = styled(Paper)`
   margin: 20px 20px 0 20px;
   padding: 20px ${({ theme }) => theme.spacing(11)}px;
 `;
-const Title = styled.div`
-  width: 100%;
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
 export interface HouseholdCompositionTableProps {
   household: HouseholdNode;
 }

@@ -12,6 +12,7 @@ import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder'
 import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
 import { StatusBox } from '../../core/StatusBox';
+import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 
 const StatusContainer = styled.div`
@@ -32,10 +33,6 @@ const NumberOfHouseHoldsValue = styled.div`
   font-size: 36px;
   line-height: 32px;
   margin-top: ${({ theme }) => theme.spacing(2)}px;
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 interface ProgramDetailsProps {

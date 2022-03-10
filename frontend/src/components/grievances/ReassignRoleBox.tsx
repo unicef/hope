@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@material-ui/core';
 import WarningIcon from '@material-ui/icons/Warning';
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import capitalize from 'lodash/capitalize';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +25,7 @@ const StyledBox = styled(Paper)`
   width: 100%;
   padding: 26px 22px;
 `;
-const Title = styled.div`
+const OrangeTitle = styled.div`
   color: ${({ theme }) => theme.hctPalette.oragne};
 `;
 
@@ -77,13 +77,11 @@ export const ReassignRoleBox = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
     ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
   ) {
-    if (
-      _.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)
-    ) {
+    if (isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)) {
       householdsAndRoles = [];
     }
     if (
-      _.isEmpty(
+      isEmpty(
         ticket.individualDataUpdateTicketDetails.individualData.relationship,
       )
     ) {
@@ -131,12 +129,12 @@ export const ReassignRoleBox = ({
 
   return (
     <StyledBox>
-      <Title>
+      <OrangeTitle>
         <Typography variant='h6'>
           <WarnIcon />
           {t('Individual is the HOH or the external collector for a household')}
         </Typography>
-      </Title>
+      </OrangeTitle>
       <Typography variant='body2'>
         {t(
           'Upon removing you will need to select new individual(s) for this role.',

@@ -5,15 +5,13 @@ import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
+import { Title } from '../core/Title';
 
 const StyledBox = styled(Paper)`
   display: flex;
   flex-direction: column;
   width: 100%;
   padding: 26px 22px;
-`;
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
 export const PaymentIds = ({
