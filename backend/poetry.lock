@@ -348,7 +348,7 @@ python-versions = ">=2.7"
 
 [[package]]
 name = "django"
-version = "3.2"
+version = "3.2.12"
 description = "A high-level Python Web framework that encourages rapid development and clean, pragmatic design."
 category = "main"
 optional = false
@@ -725,7 +725,7 @@ full = ["django-adminfilters (>=1.7.1)", "django-admin-extra-urls (>=3.5.1)", "d
 
 [[package]]
 name = "django-sql-explorer"
-version = "2.4"
+version = "2.4.1"
 description = "A pluggable app that allows users (admins) to execute SQL, view, and export the results."
 category = "main"
 optional = false
@@ -1391,16 +1391,17 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "pyjwt"
-version = "1.7.1"
+version = "2.3.0"
 description = "JSON Web Token implementation in Python"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.extras]
-crypto = ["cryptography (>=1.4)"]
-flake8 = ["flake8", "flake8-import-order", "pep8-naming"]
-test = ["pytest (>=4.0.1,<5.0.0)", "pytest-cov (>=2.6.0,<3.0.0)", "pytest-runner (>=4.2,<5.0.0)"]
+crypto = ["cryptography (>=3.3.1)"]
+dev = ["sphinx", "sphinx-rtd-theme", "zope.interface", "cryptography (>=3.3.1)", "pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)", "mypy", "pre-commit"]
+docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
+tests = ["pytest (>=6.0.0,<7.0.0)", "coverage[toml] (==5.0.4)"]
 
 [[package]]
 name = "pyparsing"
@@ -1664,41 +1665,38 @@ test = ["pytest (>=4.6)", "pytest-cov", "nose", "django (>=1.10.6)"]
 
 [[package]]
 name = "social-auth-app-django"
-version = "3.4.0"
+version = "5.0.0"
 description = "Python Social Authentication, Django integration."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.dependencies]
-six = "*"
-social-auth-core = ">=3.3.0"
+social-auth-core = ">=4.1.0"
 
 [[package]]
 name = "social-auth-core"
-version = "3.4.0"
+version = "4.2.0"
 description = "Python social authentication made simple."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.dependencies]
 cryptography = ">=1.4"
-defusedxml = {version = ">=0.5.0rc1", markers = "python_version >= \"3.0\""}
+defusedxml = ">=0.5.0rc1"
 oauthlib = ">=1.0.3"
-PyJWT = ">=1.4.0"
-python3-openid = {version = ">=3.0.10", markers = "python_version >= \"3.0\""}
+PyJWT = ">=2.0.0"
+python3-openid = ">=3.0.10"
 requests = ">=2.9.1"
 requests-oauthlib = ">=0.6.1"
-six = ">=1.10.0"
 
 [package.extras]
-all = ["python-jose (>=3.0.0)", "pyjwt (>=1.7.1)", "python-saml (>=2.2.0)", "cryptography (>=2.1.1)"]
-allpy2 = ["python-jose (>=3.0.0)", "pyjwt (>=1.7.1)", "python-saml (>=2.2.0)", "cryptography (>=2.1.1)", "python-openid (>=2.2.5)"]
-allpy3 = ["python-jose (>=3.0.0)", "pyjwt (>=1.7.1)", "python-saml (>=2.2.0)", "cryptography (>=2.1.1)", "defusedxml (>=0.5.0rc1)", "python3-openid (>=3.0.10)"]
+all = ["python-jose (>=3.0.0)", "python3-saml (>=1.2.1)", "lxml (<4.7)", "cryptography (>=2.1.1)"]
+allpy3 = ["python-jose (>=3.0.0)", "python3-saml (>=1.2.1)", "lxml (<4.7)", "cryptography (>=2.1.1)"]
 azuread = ["cryptography (>=2.1.1)"]
-openidconnect = ["python-jose (>=3.0.0)", "pyjwt (>=1.7.1)"]
-saml = ["python-saml (>=2.2.0)"]
+openidconnect = ["python-jose (>=3.0.0)"]
+saml = ["python3-saml (>=1.2.1)", "lxml (<4.7)"]
 
 [[package]]
 name = "sorl-thumbnail"
@@ -1966,7 +1964,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "2a3cbb1061f37a1751e656ec65fd22a31d4586d15a5a73b8807738ebc3b29b33"
+content-hash = "b85434f0dddb93129a28473c8e04cad5ec870a27b61511835fa60a2ac34f4d3a"
 
 [metadata.files]
 amqp = [
@@ -2147,8 +2145,8 @@ diff-match-patch = [
     {file = "diff_match_patch-20200713-py3-none-any.whl", hash = "sha256:8bf9d9c4e059d917b5c6312bac0c137971a32815ddbda9c682b949f2986b4d34"},
 ]
 django = [
-    {file = "Django-3.2-py3-none-any.whl", hash = "sha256:0604e84c4fb698a5e53e5857b5aea945b2f19a18f25f10b8748dbdf935788927"},
-    {file = "Django-3.2.tar.gz", hash = "sha256:21f0f9643722675976004eb683c55d33c05486f94506672df3d6a141546f389d"},
+    {file = "Django-3.2.12-py3-none-any.whl", hash = "sha256:9b06c289f9ba3a8abea16c9c9505f25107809fb933676f6c891ded270039d965"},
+    {file = "Django-3.2.12.tar.gz", hash = "sha256:9772e6935703e59e993960832d66a614cf0233a1c5123bc6224ecc6ad69e41e2"},
 ]
 django-admin-extra-urls = [
     {file = "django-admin-extra-urls-3.5.1.tar.gz", hash = "sha256:fc68efd40569f2301cb329a0c445dd3517b0aa9c03c1ab7d9fc8a006d22de9b8"},
@@ -2253,8 +2251,8 @@ django-smart-admin = [
     {file = "django-smart-admin-1.6.0.tar.gz", hash = "sha256:cbd9b0543453cdfac9e3da8fa5cdd9d4ddf9ac4db966d814f9dac04bd4ce1847"},
 ]
 django-sql-explorer = [
-    {file = "django-sql-explorer-2.4.tar.gz", hash = "sha256:6f27c8842600f19704ac20bef52d837a25da11c090cd290ee9ff40f79e48da30"},
-    {file = "django_sql_explorer-2.4-py3-none-any.whl", hash = "sha256:2b20499a21e0b1faced83eb63f9962dcaea644429092d645583e2f2ea3983cdb"},
+    {file = "django-sql-explorer-2.4.1.tar.gz", hash = "sha256:fd3b92b5fdbcb4ecda27454eb70510a44f29176ca43c04dee704503e53b90cf3"},
+    {file = "django_sql_explorer-2.4.1-py3-none-any.whl", hash = "sha256:d9a36461c70184fa1f54d038b20d6b08b40bb1709448a827123ecee5cc6dbbab"},
 ]
 django-storages = [
     {file = "django-storages-1.8.tar.gz", hash = "sha256:9322ab74ba6371e2e0fccc350c741686ade829e43085597b26b07ae8955a0a00"},
@@ -2625,8 +2623,8 @@ pygments = [
     {file = "Pygments-2.7.3.tar.gz", hash = "sha256:ccf3acacf3782cbed4a989426012f1c535c9a90d3a7fc3f16d231b9372d2b716"},
 ]
 pyjwt = [
-    {file = "PyJWT-1.7.1-py2.py3-none-any.whl", hash = "sha256:5c6eca3c2940464d106b99ba83b00c6add741c9becaec087fb7ccdefea71350e"},
-    {file = "PyJWT-1.7.1.tar.gz", hash = "sha256:8d59a976fb773f3e6a39c85636357c4f0e242707394cadadd9814f5cbaa20e96"},
+    {file = "PyJWT-2.3.0-py3-none-any.whl", hash = "sha256:e0c4bb8d9f0af0c7f5b1ec4c5036309617d03d56932877f2f7a0beeb5318322f"},
+    {file = "PyJWT-2.3.0.tar.gz", hash = "sha256:b888b4d56f06f6dcd777210c334e69c737be74755d3e5e9ee3fe67dc18a0ee41"},
 ]
 pyparsing = [
     {file = "pyparsing-3.0.7-py3-none-any.whl", hash = "sha256:a6c06a88f252e6c322f65faf8f418b16213b51bdfaece0524c1c1bc30c63c484"},
@@ -2907,14 +2905,12 @@ snapshottest = [
     {file = "snapshottest-1.0.0a0.tar.gz", hash = "sha256:dfcde50b4bc8a9336a40bfae1127e2f1310f6bbab4394ffcd0cc192f4c929ba0"},
 ]
 social-auth-app-django = [
-    {file = "social-auth-app-django-3.4.0.tar.gz", hash = "sha256:09575f5c7dd91465df3a898c58e7c4ae1e78f31edba36b8b7be47ab0aeef2789"},
-    {file = "social_auth_app_django-3.4.0-py2-none-any.whl", hash = "sha256:02b561e175d4a93896e4436b591586b61e647bd8eeef14c99a26344eb3b48d0e"},
-    {file = "social_auth_app_django-3.4.0-py3-none-any.whl", hash = "sha256:47d1720115a9eaad78a67e99987d556abaa01222b9c2b9538182bbdbb10304ba"},
+    {file = "social-auth-app-django-5.0.0.tar.gz", hash = "sha256:b6e3132ce087cdd6e1707aeb1b588be41d318408fcf6395435da0bc6fe9a9795"},
+    {file = "social_auth_app_django-5.0.0-py3-none-any.whl", hash = "sha256:52241a25445a010ab1c108bafff21fc5522d5c8cd0d48a92c39c7371824b065d"},
 ]
 social-auth-core = [
-    {file = "social-auth-core-3.4.0.tar.gz", hash = "sha256:aaec7f1e1a9bb61d0467d05c8cfe8dd55402f39229716b933e3dc29eb5f1e61a"},
-    {file = "social_auth_core-3.4.0-py2-none-any.whl", hash = "sha256:a4b972b6250d7a32940aec2972e33ebc645de91b2153d18dcd3e38fb74271042"},
-    {file = "social_auth_core-3.4.0-py3-none-any.whl", hash = "sha256:b3aa96be236e59842ae45a5a51fe75c97814087ab5ba3092e80b41cb3dcdd8af"},
+    {file = "social-auth-core-4.2.0.tar.gz", hash = "sha256:af6fc7d9ee39f0aa697cd953121add638fc32a49816341a9838a67904c39e034"},
+    {file = "social_auth_core-4.2.0-py3-none-any.whl", hash = "sha256:08fe6645b98950cff9d6970b6704345f821d78729df0164bca0002c624b001e1"},
 ]
 sorl-thumbnail = [
     {file = "sorl-thumbnail-12.5.0.tar.gz", hash = "sha256:8dfe5fda91a5047d1d35a0b9effe7b000764a01d648e15ca076f44e9c34b6dbd"},
