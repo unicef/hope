@@ -53,7 +53,7 @@ stages:
             inputs:
               containerRegistry: '$(Docker.registry)'
               command: 'login'
-          - script: "docker pull $(Docker.registry).azurecr.io/$(Docker.backend.repository):latest"
+          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
             displayName: Pull latest for layer caching
             continueOnError: true # for first build, no cache
           - task: Docker@2
@@ -62,7 +62,7 @@ stages:
               command: build
               dockerfile: $(Docker.backend.filePath)
               repository: $(Docker.backend.repository)
-              arguments: '--cache-from=$(Docker.registry).azurecr.io/$(Docker.backend.repository):latest'
+              arguments: '--cache-from=$(Docker.url)/$(Docker.backend.repository):latest'
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
@@ -100,7 +100,7 @@ stages:
             inputs:
               containerRegistry: '$(Docker.registry)'
               command: 'login'
-          - script: "docker pull $(Docker.registry).azurecr.io/$(Docker.frontend.repository):latest"
+          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository):latest"
             displayName: Pull latest for layer caching
             continueOnError: true # for first build, no cache
           - task: Docker@2
@@ -110,7 +110,7 @@ stages:
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
               arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) 
-              --cache-from=$(Docker.registry).azurecr.io/$(Docker.frontend.repository):latest"
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository):latest"
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
