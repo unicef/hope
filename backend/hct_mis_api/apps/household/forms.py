@@ -21,11 +21,11 @@ class UpdateByXlsxStage1Form(forms.Form):
 
         registration_data_import = self._retrieve_rdi_by_name()
 
-        self._change_rdi_has_correct_business_area(registration_data_import)
+        self._check_rdi_has_correct_business_area(registration_data_import)
 
         return registration_data_import
 
-    def _change_rdi_has_correct_business_area(self, registration_data_import) -> None:
+    def _check_rdi_has_correct_business_area(self, registration_data_import) -> None:
         business_area = self.cleaned_data.get("business_area")
         if registration_data_import.business_area != business_area:
             raise ValidationError("Rdi should belong to selected business area")
