@@ -91,6 +91,8 @@ stages:
                 $(Build.BuildId)
                 $(Build.SourceVersion)
 
+
+
       - job: build_push_frontend
         pool:
           vmImage: ubuntu-latest
@@ -100,9 +102,34 @@ stages:
             inputs:
               containerRegistry: '$(Docker.registry)'
               command: 'login'
-          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository):latest"
+          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository)-stage1:latest"
             displayName: Pull latest for layer caching
             continueOnError: true # for first build, no cache
+          - task: Docker@2
+            displayName: Build Stage 1
+            inputs:
+              command: build
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)-stage1
+              arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) 
+                       --cache-from=$(Docker.url)/$(Docker.frontend.repository)-stage1:latest
+                       --target=dev"
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
+                latest
+          - task: Docker@2
+            displayName: Push Stage 1
+            inputs:
+              command: push
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)-stage1
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
+                latest
           - task: Docker@2
             displayName: Build
             inputs:
@@ -110,7 +137,7 @@ stages:
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
               arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) 
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository):latest"
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-stage1:latest"
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
