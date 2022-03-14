@@ -347,6 +347,14 @@ optional = false
 python-versions = ">=2.7"
 
 [[package]]
+name = "distlib"
+version = "0.3.4"
+description = "Distribution utilities"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "django"
 version = "3.2"
 description = "A high-level Python Web framework that encourages rapid development and clean, pragmatic design."
@@ -725,7 +733,7 @@ full = ["django-adminfilters (>=1.7.1)", "django-admin-extra-urls (>=3.5.1)", "d
 
 [[package]]
 name = "django-sql-explorer"
-version = "2.4"
+version = "2.4.1"
 description = "A pluggable app that allows users (admins) to execute SQL, view, and export the results."
 category = "main"
 optional = false
@@ -882,6 +890,18 @@ python-versions = "*"
 
 [package.dependencies]
 wasmer = {version = ">=0.3.0", markers = "python_version >= \"3.5\" and platform_machine == \"x86_64\" and sys_platform == \"darwin\" or python_version >= \"3.5\" and platform_machine == \"x86_64\" and sys_platform == \"linux\""}
+
+[[package]]
+name = "filelock"
+version = "3.6.0"
+description = "A platform independent file lock."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+docs = ["furo (>=2021.8.17b43)", "sphinx (>=4.1)", "sphinx-autodoc-typehints (>=1.12)"]
+testing = ["covdefaults (>=1.2.0)", "coverage (>=4)", "pytest (>=4)", "pytest-cov", "pytest-timeout (>=1.4.2)"]
 
 [[package]]
 name = "freezegun"
@@ -1303,6 +1323,30 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
+name = "platformdirs"
+version = "2.5.1"
+description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+docs = ["Sphinx (>=4)", "furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx-autodoc-typehints (>=1.12)"]
+test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)"]
+
+[[package]]
+name = "pluggy"
+version = "1.0.0"
+description = "plugin and hook calling mechanisms for python"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.extras]
+dev = ["pre-commit", "tox"]
+testing = ["pytest", "pytest-benchmark"]
+
+[[package]]
 name = "promise"
 version = "2.3"
 description = "Promises/A+ implementation for Python"
@@ -1364,6 +1408,14 @@ python-versions = "*"
 
 [package.extras]
 tests = ["pytest"]
+
+[[package]]
+name = "py"
+version = "1.11.0"
+description = "library with cross-python path, ini-parsing, io, code, log facilities"
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "pycountry"
@@ -1791,6 +1843,28 @@ optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "tox"
+version = "3.24.5"
+description = "tox is a generic virtualenv management and test command line tool"
+category = "dev"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+
+[package.dependencies]
+colorama = {version = ">=0.4.1", markers = "platform_system == \"Windows\""}
+filelock = ">=3.0.0"
+packaging = ">=14"
+pluggy = ">=0.12.0"
+py = ">=1.4.17"
+six = ">=1.14.0"
+toml = ">=0.9.4"
+virtualenv = ">=16.0.0,<20.0.0 || >20.0.0,<20.0.1 || >20.0.1,<20.0.2 || >20.0.2,<20.0.3 || >20.0.3,<20.0.4 || >20.0.4,<20.0.5 || >20.0.5,<20.0.6 || >20.0.6,<20.0.7 || >20.0.7"
+
+[package.extras]
+docs = ["pygments-github-lexers (>=0.0.5)", "sphinx (>=2.0.0)", "sphinxcontrib-autoprogram (>=0.1.5)", "towncrier (>=18.5.0)"]
+testing = ["flaky (>=3.4.0)", "freezegun (>=0.3.11)", "pytest (>=4.0.0)", "pytest-cov (>=2.5.1)", "pytest-mock (>=1.10.0)", "pytest-randomly (>=1.0.0)", "psutil (>=5.6.1)", "pathlib2 (>=2.3.3)"]
+
+[[package]]
 name = "traitlets"
 version = "5.1.1"
 description = "Traitlets Python configuration system"
@@ -1845,6 +1919,24 @@ description = "Promises, promises, promises."
 category = "main"
 optional = false
 python-versions = ">=3.6"
+
+[[package]]
+name = "virtualenv"
+version = "20.13.3"
+description = "Virtual Python Environment builder"
+category = "dev"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+
+[package.dependencies]
+distlib = ">=0.3.1,<1"
+filelock = ">=3.2,<4"
+platformdirs = ">=2,<3"
+six = ">=1.9.0,<2"
+
+[package.extras]
+docs = ["proselint (>=0.10.2)", "sphinx (>=3)", "sphinx-argparse (>=0.2.5)", "sphinx-rtd-theme (>=0.4.3)", "towncrier (>=21.3)"]
+testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", "pytest (>=4)", "pytest-env (>=0.6.2)", "pytest-freezegun (>=0.4.1)", "pytest-mock (>=2)", "pytest-randomly (>=1)", "pytest-timeout (>=1)", "packaging (>=20.0)"]
 
 [[package]]
 name = "waitress"
@@ -1966,7 +2058,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "2a3cbb1061f37a1751e656ec65fd22a31d4586d15a5a73b8807738ebc3b29b33"
+content-hash = "6ee77c3511bdffcdf9f6ae34bfef420f0b4cd3c1e9bb4e9d40f6266b4157f39e"
 
 [metadata.files]
 amqp = [
@@ -2146,6 +2238,10 @@ diff-match-patch = [
     {file = "diff-match-patch-20200713.tar.gz", hash = "sha256:da6f5a01aa586df23dfc89f3827e1cafbb5420be9d87769eeb079ddfd9477a18"},
     {file = "diff_match_patch-20200713-py3-none-any.whl", hash = "sha256:8bf9d9c4e059d917b5c6312bac0c137971a32815ddbda9c682b949f2986b4d34"},
 ]
+distlib = [
+    {file = "distlib-0.3.4-py2.py3-none-any.whl", hash = "sha256:6564fe0a8f51e734df6333d08b8b94d4ea8ee6b99b5ed50613f731fd4089f34b"},
+    {file = "distlib-0.3.4.zip", hash = "sha256:e4b58818180336dc9c529bfb9a0b58728ffc09ad92027a3f30b7cd91e3458579"},
+]
 django = [
     {file = "Django-3.2-py3-none-any.whl", hash = "sha256:0604e84c4fb698a5e53e5857b5aea945b2f19a18f25f10b8748dbdf935788927"},
     {file = "Django-3.2.tar.gz", hash = "sha256:21f0f9643722675976004eb683c55d33c05486f94506672df3d6a141546f389d"},
@@ -2253,8 +2349,8 @@ django-smart-admin = [
     {file = "django-smart-admin-1.6.0.tar.gz", hash = "sha256:cbd9b0543453cdfac9e3da8fa5cdd9d4ddf9ac4db966d814f9dac04bd4ce1847"},
 ]
 django-sql-explorer = [
-    {file = "django-sql-explorer-2.4.tar.gz", hash = "sha256:6f27c8842600f19704ac20bef52d837a25da11c090cd290ee9ff40f79e48da30"},
-    {file = "django_sql_explorer-2.4-py3-none-any.whl", hash = "sha256:2b20499a21e0b1faced83eb63f9962dcaea644429092d645583e2f2ea3983cdb"},
+    {file = "django-sql-explorer-2.4.1.tar.gz", hash = "sha256:fd3b92b5fdbcb4ecda27454eb70510a44f29176ca43c04dee704503e53b90cf3"},
+    {file = "django_sql_explorer-2.4.1-py3-none-any.whl", hash = "sha256:d9a36461c70184fa1f54d038b20d6b08b40bb1709448a827123ecee5cc6dbbab"},
 ]
 django-storages = [
     {file = "django-storages-1.8.tar.gz", hash = "sha256:9322ab74ba6371e2e0fccc350c741686ade829e43085597b26b07ae8955a0a00"},
@@ -2298,6 +2394,10 @@ faker = [
 ]
 fastdiff = [
     {file = "fastdiff-0.2.0.tar.gz", hash = "sha256:623ad3d9055ab78e014d0d10767cb033d98d5d4f66052abf498350c8e42e29aa"},
+]
+filelock = [
+    {file = "filelock-3.6.0-py3-none-any.whl", hash = "sha256:f8314284bfffbdcfa0ff3d7992b023d4c628ced6feb957351d4c48d059f56bc0"},
+    {file = "filelock-3.6.0.tar.gz", hash = "sha256:9cd540a9352e432c7246a48fe4e8712b10acb1df2ad1f30e8c070b82ae1fed85"},
 ]
 freezegun = [
     {file = "freezegun-0.3.14-py2.py3-none-any.whl", hash = "sha256:10336fc80a235847c64033f9727f3847f37db4bd549be1d9f3b5ae0279256c69"},
@@ -2549,6 +2649,14 @@ pillow = [
     {file = "Pillow-7.0.0-pp373-pypy36_pp73-win32.whl", hash = "sha256:8453f914f4e5a3d828281a6628cf517832abfa13ff50679a4848926dac7c0358"},
     {file = "Pillow-7.0.0.tar.gz", hash = "sha256:4d9ed9a64095e031435af120d3c910148067087541131e82b3e8db302f4c8946"},
 ]
+platformdirs = [
+    {file = "platformdirs-2.5.1-py3-none-any.whl", hash = "sha256:bcae7cab893c2d310a711b70b24efb93334febe65f8de776ee320b517471e227"},
+    {file = "platformdirs-2.5.1.tar.gz", hash = "sha256:7535e70dfa32e84d4b34996ea99c5e432fa29a708d0f4e394bbcb2a8faa4f16d"},
+]
+pluggy = [
+    {file = "pluggy-1.0.0-py2.py3-none-any.whl", hash = "sha256:74134bbf457f031a36d68416e1509f34bd5ccc019f0bcc952c7b909d06b37bd3"},
+    {file = "pluggy-1.0.0.tar.gz", hash = "sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159"},
+]
 promise = [
     {file = "promise-2.3.tar.gz", hash = "sha256:dfd18337c523ba4b6a58801c164c1904a9d4d1b1747c7d5dbf45b693a49d93d0"},
 ]
@@ -2612,6 +2720,10 @@ ptyprocess = [
 pure-eval = [
     {file = "pure_eval-0.2.2-py3-none-any.whl", hash = "sha256:01eaab343580944bc56080ebe0a674b39ec44a945e6d09ba7db3cb8cec289350"},
     {file = "pure_eval-0.2.2.tar.gz", hash = "sha256:2b45320af6dfaa1750f543d714b6d1c520a1688dec6fd24d339063ce0aaa9ac3"},
+]
+py = [
+    {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
+    {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
 ]
 pycountry = [
     {file = "pycountry-20.7.3.tar.gz", hash = "sha256:81084a53d3454344c0292deebc20fcd0a1488c136d4900312cbd465cf552cb42"},
@@ -2947,6 +3059,10 @@ toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
 ]
+tox = [
+    {file = "tox-3.24.5-py2.py3-none-any.whl", hash = "sha256:be3362472a33094bce26727f5f771ca0facf6dafa217f65875314e9a6600c95c"},
+    {file = "tox-3.24.5.tar.gz", hash = "sha256:67e0e32c90e278251fea45b696d0fef3879089ccbe979b0c556d35d5a70e2993"},
+]
 traitlets = [
     {file = "traitlets-5.1.1-py3-none-any.whl", hash = "sha256:2d313cc50a42cd6c277e7d7dc8d4d7fedd06a2c215f78766ae7b1a66277e0033"},
     {file = "traitlets-5.1.1.tar.gz", hash = "sha256:059f456c5a7c1c82b98c2e8c799f39c9b8128f6d0d46941ee118daace9eb70c7"},
@@ -2992,6 +3108,10 @@ urllib3 = [
 vine = [
     {file = "vine-5.0.0-py2.py3-none-any.whl", hash = "sha256:4c9dceab6f76ed92105027c49c823800dd33cacce13bdedc5b914e3514b7fb30"},
     {file = "vine-5.0.0.tar.gz", hash = "sha256:7d3b1624a953da82ef63462013bbd271d3eb75751489f9807598e8f340bd637e"},
+]
+virtualenv = [
+    {file = "virtualenv-20.13.3-py2.py3-none-any.whl", hash = "sha256:dd448d1ded9f14d1a4bfa6bfc0c5b96ae3be3f2d6c6c159b23ddcfd701baa021"},
+    {file = "virtualenv-20.13.3.tar.gz", hash = "sha256:e9dd1a1359d70137559034c0f5433b34caf504af2dc756367be86a5a32967134"},
 ]
 waitress = [
     {file = "waitress-2.0.0-py3-none-any.whl", hash = "sha256:29af5a53e9fb4e158f525367678b50053808ca6c21ba585754c77d790008c746"},
