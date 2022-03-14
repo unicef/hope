@@ -19,10 +19,13 @@ from hct_mis_api.apps.sanction_list.models import (
 
 
 class SanctionListIndividualFilter(FilterSet):
-    full_name__startswith = CharFilter(field_name="full_name", lookup_expr="startswith")
 
     class Meta:
-        fields = ("id", "full_name", "full_name__startswith", "reference_number")
+        fields = fields = {
+            "id": ["exact"],
+            "full_name": ["exact", "startswith"],
+            "reference_number": ["exact"],
+        }
         model = SanctionListIndividual
 
     order_by = CustomOrderingFilter(

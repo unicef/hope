@@ -24,7 +24,7 @@ import {
   useHouseholdQuery,
 } from '../../../__generated__/graphql';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
-import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable';
+import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable/HouseholdIndividualsTable';
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordHouseholdTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdDetails } from '../../../components/population/HouseholdDetails';

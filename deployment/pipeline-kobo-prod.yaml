@@ -3,7 +3,7 @@ pr: none
 
 variables:
   # ========================================================================
-  #                          Mandatory variables 
+  #                          Mandatory variables
   # ========================================================================
   Kubernetes.serviceConnection: "ICTD-HOPE-PRD-uni-apps-aks-hope-prd-ictd-kobo-prd-1617968835008"
   Kubernetes.namespace: "ictd-kobo-prd"
@@ -18,21 +18,21 @@ stages:
           - task: HelmDeploy@0
             displayName: "Update Chart dependencies"
             inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
+              connectionType: "Kubernetes Service Connection"
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)
               command: package
               updatedependency: true
-              chartPath: '**/deployment/kobo'
+              chartPath: "**/deployment/kobo"
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
-              connectionType: 'Kubernetes Service Connection'
+              connectionType: "Kubernetes Service Connection"
               kubernetesServiceConnection: $(Kubernetes.serviceConnection)
               namespace: $(Kubernetes.namespace)
-              command: 'upgrade'
-              chartType: 'FilePath'
-              chartPath: '**/deployment/kobo'
-              releaseName: 'kobo'
+              command: "upgrade"
+              chartType: "FilePath"
+              chartPath: "**/deployment/kobo"
+              releaseName: "kobo"
               install: true
               waitForExecution: false
               failOnStderr: false
@@ -48,5 +48,6 @@ stages:
                 smtp.email=kobo@unitst.org,\
                 ingress.host=$(DOMAIN),\
                 ingress.scheme=https,\
-                ingress.tls=true,"
-
+                ingress.tls=true,\
+                kpi.ravenDsn=$(KPI_SENTRY_DSN),\
+                kobocat.ravenDsn=$(KOBOCAT_SENTRY_DSN),"

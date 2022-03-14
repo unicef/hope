@@ -44,11 +44,9 @@ class AdminAreaFilter(FilterSet):
 
     class Meta:
         model = AdminArea
-        fields = [
-            "title",
-            # "business_area": ["exact"],
-        ]
-
+        fields = {
+            "title": ["exact", "istartswith"],
+        }
 
 class ChoiceObject(graphene.ObjectType):
     name = String()

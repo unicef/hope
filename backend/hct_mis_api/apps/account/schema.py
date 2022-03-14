@@ -54,12 +54,12 @@ class UsersFilter(FilterSet):
 
     class Meta:
         model = get_user_model()
-        fields = [
-            "search",
-            "status",
-            "partner",
-            "roles",
-        ]
+        fields = {
+            "search": ["exact", "startswith"],
+            "status": ["exact"],
+            "partner": ["exact"],
+            "roles": ["exact"],
+        }
 
     order_by = CustomOrderingFilter(
         fields=(
