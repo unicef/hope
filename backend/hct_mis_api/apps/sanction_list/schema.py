@@ -19,9 +19,8 @@ from hct_mis_api.apps.sanction_list.models import (
 
 
 class SanctionListIndividualFilter(FilterSet):
-
     class Meta:
-        fields = fields = {
+        fields = {
             "id": ["exact"],
             "full_name": ["exact", "startswith"],
             "reference_number": ["exact"],

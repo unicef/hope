@@ -48,6 +48,7 @@ class AdminAreaFilter(FilterSet):
             "title": ["exact", "istartswith"],
         }
 
+
 class ChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
