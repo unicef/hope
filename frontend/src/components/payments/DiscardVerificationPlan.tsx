@@ -5,14 +5,11 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useDiscardCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
-
-export interface Props {
-  cashPlanVerificationId: string;
-}
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -29,9 +26,16 @@ const DialogContainer = styled.div`
   width: 700px;
 `;
 
+export interface DiscardVerificationPlanProps {
+  cashPlanVerificationId: string;
+  cashPlanId: string;
+}
+
 export function DiscardVerificationPlan({
   cashPlanVerificationId,
-}: Props): React.ReactElement {
+  cashPlanId,
+}: DiscardVerificationPlanProps): React.ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -40,6 +44,7 @@ export function DiscardVerificationPlan({
   const discard = async (): Promise<void> => {
     const { errors } = await mutate({
       variables: { cashPlanVerificationId },
+      refetchQueries,
     });
     if (errors) {
       showMessage(t('Error while submitting'));
@@ -63,6 +68,7 @@ export function DiscardVerificationPlan({
         onClose={() => setFinishDialogOpen(false)}
         scroll='paper'
         aria-labelledby='form-dialog-title'
+        maxWidth='md'
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>

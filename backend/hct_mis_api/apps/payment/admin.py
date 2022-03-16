@@ -59,10 +59,10 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 
 @admin.register(CashPlanPaymentVerification)
 class CashPlanPaymentVerificationAdmin(ExtraUrlMixin, LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("cash_plan", "status", "verification_method")
+    list_display = ("cash_plan", "status", "verification_channel")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        ("verification_method", ChoicesFieldComboFilter),
+        ("verification_channel", ChoicesFieldComboFilter),
         ("cash_plan", AutoCompleteFilter),
         ("cash_plan__business_area", AutoCompleteFilter),
     )
