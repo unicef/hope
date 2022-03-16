@@ -26,7 +26,7 @@ export function GrievancesTablePage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const { id, verificationId } = useParams();
+  const { id, cashPlanId } = useParams();
   const [filter, setFilter] = useState({
     search: '',
     status: '',
@@ -34,7 +34,7 @@ export function GrievancesTablePage(): React.ReactElement {
     createdAtRange: '',
     admin: null,
     registrationDataImport: id,
-    cashPlanPaymentVerification: verificationId,
+    cashPlan: cashPlanId,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const {

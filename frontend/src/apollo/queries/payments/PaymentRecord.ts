@@ -29,16 +29,11 @@ export const PAYMENT_RECORD_QUERY = gql`
           name
         }
       }
-      verifications {
-        totalCount
-        edges {
-          node {
-            id
-            status
-            statusDate
-            receivedAmount
-          }
-        }
+      verification {
+        id
+        status
+        statusDate
+        receivedAmount
       }
       currency
       entitlementQuantity
@@ -87,7 +82,7 @@ export const PAYMENT_RECORD_QUERY = gql`
             node {
               id
               status
-              verificationMethod
+              verificationChannel
             }
           }
         }

@@ -56,7 +56,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
-from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
