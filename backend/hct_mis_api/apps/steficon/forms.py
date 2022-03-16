@@ -28,6 +28,7 @@ try:
     def format_code(code):
         return black.format_file_contents(code, fast=False, mode=mode)
 
+
 except ImportError as ex:
     if config.USE_BLACK:
         logger.warning(f"Steficon is configured to use Black, but was unable to import it: {ex}")
