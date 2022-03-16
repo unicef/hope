@@ -16,6 +16,7 @@ export interface HeadCell<T> {
   numeric: boolean;
   weight?: number;
   dataCy?: string;
+  disableSort?: boolean;
 }
 
 const useStyles = makeStyles(() =>
@@ -102,7 +103,7 @@ export function EnhancedTableHead<T>(
             sortDirection={orderBy === headCell.id ? order : false}
             data-cy={headCell.dataCy}
           >
-            {allowSort ? (
+            {allowSort && !headCell.disableSort ? (
               <TableSortLabelStyled
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}

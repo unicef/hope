@@ -1,41 +1,30 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LabelizedField } from '../../../components/core/LabelizedField';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
-import { ActivateVerificationPlan } from '../../../components/payments/ActivateVerificationPlan';
-import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
-import { DiscardVerificationPlan } from '../../../components/payments/DiscardVerificationPlan';
-import { EditVerificationPlan } from '../../../components/payments/EditVerificationPlan';
-import { FinishVerificationPlan } from '../../../components/payments/FinishVerificationPlan';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
+import { CashPlanDetailsSection } from '../../../components/payments/CashPlanDetailsSection';
+import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
+import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
+import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
 import {
-  choicesToDict,
-  countPercentage,
-  decodeIdString,
-  isPermissionDeniedError,
-  paymentVerificationStatusToColor,
-} from '../../../utils/utils';
-import {
+  CashPlanPaymentVerificationStatus,
   useCashPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
 } from '../../../__generated__/graphql';
-import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
-import { Title } from '../../../components/core/Title';
+import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 
 const Container = styled.div`
   display: flex;
@@ -48,17 +37,6 @@ const Container = styled.div`
   border-color: #b1b1b5;
   border-bottom-width: 1px;
   border-bottom-style: solid;
-`;
-
-const ChartContainer = styled.div`
-  width: 150px;
-  height: 150px;
-`;
-
-const BorderLeftBox = styled.div`
-  padding-left: ${({ theme }) => theme.spacing(6)}px;
-  border-left: 1px solid #e0e0e0;
-  height: 100%;
 `;
 
 const BottomTitle = styled.div`
@@ -76,10 +54,6 @@ const TableWrapper = styled.div`
   padding: 20px;
   padding-bottom: 0;
 `;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -87,6 +61,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
     search: null,
+    status: null,
+    verificationChannel: null,
+    cashPlanPaymentVerification: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const { id } = useParams();
@@ -103,60 +80,39 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || !choicesData || permissions === null) return null;
 
-  const samplingChoicesDict = choicesToDict(
-    choicesData.cashPlanVerificationSamplingChoices,
-  );
   const { cashPlan } = data;
-  const verificationPlan = cashPlan?.verifications?.edges?.length
-    ? cashPlan.verifications.edges[0].node
-    : null;
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
       to: `/${businessArea}/payment-verification`,
     },
   ];
-  const bankReconciliationSuccessPercentage = countPercentage(
-    cashPlan.bankReconciliationSuccess,
-    cashPlan.paymentRecords.totalCount,
+
+  const canCreate = hasPermissions(
+    PERMISSIONS.PAYMENT_VERIFICATION_CREATE,
+    permissions,
   );
 
-  const bankReconciliationErrorPercentage = countPercentage(
-    cashPlan.bankReconciliationError,
-    cashPlan.paymentRecords.totalCount,
-  );
+  const statesArray = cashPlan.verifications?.edges?.map((v) => v.node.status);
 
-  const canCreate =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_CREATE, permissions) &&
-    cashPlan.verificationStatus === 'PENDING' &&
-    cashPlan.verifications &&
-    cashPlan.verifications.edges.length === 0;
+  const canSeeVerificationRecords = (): boolean => {
+    const showTable =
+      statesArray.includes(CashPlanPaymentVerificationStatus.Finished) ||
+      statesArray.includes(CashPlanPaymentVerificationStatus.Active);
 
-  const canEditAndActivate =
-    cashPlan.verificationStatus === 'PENDING' &&
-    cashPlan.verifications &&
-    cashPlan.verifications.edges.length !== 0;
+    return showTable && statesArray.length > 0;
+  };
+  const canSeeCreationMessage = (): boolean => {
+    return statesArray.length === 0;
+  };
 
-  const canEdit =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_UPDATE, permissions) &&
-    canEditAndActivate;
-  const canActivate =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_ACTIVATE, permissions) &&
-    canEditAndActivate;
+  const canSeeActivationMessage = (): boolean => {
+    return !canSeeVerificationRecords() && !canSeeCreationMessage();
+  };
 
-  const canFinishAndDiscard =
-    cashPlan.verificationStatus === 'ACTIVE' &&
-    cashPlan.verifications &&
-    cashPlan.verifications.edges.length !== 0;
-
-  const canFinish =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_FINISH, permissions) &&
-    canFinishAndDiscard;
-  const canDiscard =
-    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_DISCARD, permissions) &&
-    canFinishAndDiscard;
-
-  const isFinished = cashPlan.verificationStatus === 'FINISHED';
+  const isFinished =
+    cashPlan.cashPlanPaymentVerificationSummary.status === 'FINISHED';
 
   const toolbar = (
     <PageHeader
@@ -173,44 +129,22 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     >
       <>
         {canCreate && (
-          <CreateVerificationPlan disabled={false} cashPlanId={cashPlan.id} />
+          <CreateVerificationPlan
+            disabled={false}
+            cashPlanId={cashPlan.id}
+            canCreatePaymentVerificationPlan={
+              cashPlan.canCreatePaymentVerificationPlan
+            }
+          />
         )}
-        {(canEdit || canActivate) && (
-          <Box alignItems='center' display='flex'>
-            {canEdit && (
-              <EditVerificationPlan
-                cashPlanId={cashPlan.id}
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            )}
-            {canActivate && (
-              <ActivateVerificationPlan
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            )}
-          </Box>
-        )}
-        {(canFinish || canDiscard) && (
-          <Box display='flex'>
-            {canFinish && (
-              <FinishVerificationPlan
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            )}
-            {canDiscard && (
-              <DiscardVerificationPlan
-                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-              />
-            )}
-          </Box>
-        )}
+
         {isFinished && (
           <Button
             variant='contained'
             color='primary'
             component={Link}
             to={`/${businessArea}/grievance-and-feedback/payment-verification/${decodeIdString(
-              cashPlan.verifications.edges[0].node.id,
+              cashPlan.id,
             )}`}
           >
             {t('View Tickets')}
@@ -224,261 +158,50 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     <>
       {toolbar}
       <Container>
-        <Grid container>
-          <Grid item xs={9}>
-            <Title>
-              <Typography variant='h6'>{t('Cash Plan Details')}</Typography>
-            </Title>
-            <Grid container>
-              {[
-                { label: t('PROGRAMME NAME'), value: cashPlan.program.name },
-                {
-                  label: t('PROGRAMME ID'),
-                  value: (
-                    <BlackLink
-                      to={`/${businessArea}/programs/${cashPlan.program.id}`}
-                    >
-                      {cashPlan.program?.caId}
-                    </BlackLink>
-                  ),
-                },
-                {
-                  label: t('PAYMENT RECORDS'),
-                  value: cashPlan.paymentRecords.totalCount,
-                },
-                {
-                  label: t('START DATE'),
-                  value: (
-                    <UniversalMoment>{cashPlan.startDate}</UniversalMoment>
-                  ),
-                },
-                {
-                  label: t('END DATE'),
-                  value: <UniversalMoment>{cashPlan.endDate}</UniversalMoment>,
-                },
-              ].map((el) => (
-                <Grid item xs={4} key={el.label}>
-                  <Box pt={2} pb={2}>
-                    <LabelizedField label={el.label}>{el.value}</LabelizedField>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </Grid>
-          <Grid item xs={3}>
-            <BorderLeftBox>
-              <Title>
-                <Typography variant='h6'>{t('Bank reconciliation')}</Typography>
-              </Title>
-              <Grid container>
-                <Grid item xs={6}>
-                  <Grid container direction='column'>
-                    <LabelizedField label={t('SUCCESSFUL')}>
-                      <p>{bankReconciliationSuccessPercentage}%</p>
-                    </LabelizedField>
-                    <LabelizedField label={t('ERRONEUS')}>
-                      <p>{bankReconciliationErrorPercentage}%</p>
-                    </LabelizedField>
-                  </Grid>
-                </Grid>
-                <Grid item xs={6}>
-                  <ChartContainer>
-                    <Doughnut
-                      width={200}
-                      height={200}
-                      options={{
-                        maintainAspectRatio: false,
-                        cutoutPercentage: 80,
-                        legend: {
-                          display: false,
-                        },
-                      }}
-                      data={{
-                        labels: [t('SUCCESSFUL'), t('ERRONEUS')],
-                        datasets: [
-                          {
-                            data: [
-                              bankReconciliationSuccessPercentage,
-                              bankReconciliationErrorPercentage,
-                            ],
-                            backgroundColor: ['#00509F', '#FFAA1F'],
-                            hoverBackgroundColor: ['#00509F', '#FFAA1F'],
-                          },
-                        ],
-                      }}
-                    />
-                  </ChartContainer>
-                </Grid>
-              </Grid>
-            </BorderLeftBox>
-          </Grid>
-        </Grid>
+        <CashPlanDetailsSection cashPlan={cashPlan} />
       </Container>
-      {cashPlan.verifications && cashPlan.verifications.edges.length ? (
-        <Container>
-          <Title>
-            <Typography variant='h6'>
-              {t('Verification Plan Details')}
-            </Typography>
-          </Title>
-          <Grid container>
-            <Grid item xs={11}>
-              <Grid container>
-                <Grid item xs={3}>
-                  <LabelizedField label={t('STATUS')}>
-                    <StatusContainer>
-                      <StatusBox
-                        status={verificationPlan.status}
-                        statusToColor={paymentVerificationStatusToColor}
-                      />
-                    </StatusContainer>
-                  </LabelizedField>
-                </Grid>
-                {[
-                  {
-                    label: t('SAMPLING'),
-                    value: samplingChoicesDict[verificationPlan.sampling],
-                  },
-                  {
-                    label: t('RESPONDED'),
-                    value: verificationPlan.respondedCount,
-                  },
-                  {
-                    label: t('RECEIVED WITH ISSUES'),
-                    value: verificationPlan.receivedWithProblemsCount,
-                  },
-                  {
-                    label: t('VERIFICATION METHOD'),
-                    value: verificationPlan.verificationMethod,
-                  },
-                  {
-                    label: t('SAMPLE SIZE'),
-                    value: verificationPlan.sampleSize,
-                  },
-                  {
-                    label: t('RECEIVED'),
-                    value: verificationPlan.receivedCount,
-                  },
-                  {
-                    label: t('NOT RECEIVED'),
-                    value: verificationPlan.notReceivedCount,
-                  },
-                  {
-                    label: t('ACTIVATION DATE'),
-                    value: (
-                      <UniversalMoment>
-                        {verificationPlan.activationDate}
-                      </UniversalMoment>
-                    ),
-                  },
-                  {
-                    label: t('COMPLETION DATE'),
-                    value: (
-                      <UniversalMoment>
-                        {verificationPlan.completionDate}
-                      </UniversalMoment>
-                    ),
-                  },
-                ].map((el) => (
-                  <Grid item xs={3} key={el.label}>
-                    <Box pt={2} pb={2}>
-                      <LabelizedField label={el.label} value={el.value} />
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Grid>
-            <Grid item xs={1}>
-              <ChartContainer>
-                <Doughnut
-                  width={200}
-                  height={200}
-                  options={{
-                    maintainAspectRatio: false,
-                    cutoutPercentage: 80,
-                    legend: {
-                      display: false,
-                    },
-                  }}
-                  data={{
-                    labels: [
-                      t('RECEIVED'),
-                      t('RECEIVED WITH ISSUES'),
-                      t('NOT RECEIVED'),
-                      t('PENDING'),
-                    ],
-                    datasets: [
-                      {
-                        data: [
-                          verificationPlan.receivedCount,
-                          verificationPlan.receivedWithProblemsCount,
-                          verificationPlan.notReceivedCount,
-                          verificationPlan.sampleSize -
-                            verificationPlan.respondedCount,
-                        ],
-                        backgroundColor: [
-                          '#31D237',
-                          '#F57F1A',
-                          '#FF0100',
-                          '#DCDCDC',
-                        ],
-                        hoverBackgroundColor: [
-                          '#31D237',
-                          '#F57F1A',
-                          '#FF0100',
-                          '#DCDCDC',
-                        ],
-                      },
-                    ],
-                  }}
-                />
-              </ChartContainer>
-            </Grid>
-          </Grid>
-        </Container>
-      ) : null}
-      {cashPlan.verifications &&
-      cashPlan.verifications.edges.length &&
-      cashPlan.verificationStatus !== 'PENDING' ? (
+      <Container>
+        <VerificationPlansSummary cashPlan={cashPlan} />
+      </Container>
+      {cashPlan.verifications?.edges?.length
+        ? cashPlan.verifications.edges.map((edge) => (
+            <VerificationPlanDetails
+              key={edge.node.id}
+              samplingChoicesData={choicesData}
+              verificationPlan={edge.node}
+              cashPlan={cashPlan}
+            />
+          ))
+        : null}
+      {canSeeVerificationRecords() ? (
         <>
           <Container>
             <VerificationRecordsFilters
               filter={filter}
               onFilterChange={setFilter}
+              verifications={cashPlan.verifications}
             />
           </Container>
-          <Container>
+          <TableWrapper>
             <VerificationRecordsTable
-              verificationMethod={verificationPlan.verificationMethod}
               filter={debouncedFilter}
-              id={verificationPlan.id}
+              cashPlanId={cashPlan.id}
               businessArea={businessArea}
-              canImport={hasPermissions(
-                PERMISSIONS.PAYMENT_VERIFICATION_IMPORT,
-                permissions,
-              )}
-              canExport={hasPermissions(
-                PERMISSIONS.PAYMENT_VERIFICATION_EXPORT,
-                permissions,
-              )}
               canViewRecordDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
                 permissions,
               )}
             />
-          </Container>
+          </TableWrapper>
         </>
       ) : null}
-      {cashPlan.verifications &&
-      cashPlan.verifications.edges.length &&
-      cashPlan.verificationStatus !== 'ACTIVE' &&
-      cashPlan.verificationStatus !== 'FINISHED' ? (
+      {canSeeActivationMessage() ? (
         <BottomTitle>
           {t('To see more details please activate Verification Plan')}
         </BottomTitle>
       ) : null}
-      {!cashPlan.verifications.edges.length &&
-      cashPlan.verificationStatus !== 'ACTIVE' ? (
+
+      {canSeeCreationMessage() ? (
         <BottomTitle>
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
@@ -486,8 +209,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       {cashPlan.verifications?.edges[0]?.node?.id &&
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <TableWrapper>
-            <UniversalActivityLogTable
-              objectId={cashPlan.verifications.edges[0].node.id}
+            <UniversalActivityLogTablePaymentVerification
+              objectId={cashPlan.id}
             />
           </TableWrapper>
         )}

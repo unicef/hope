@@ -46,8 +46,8 @@ export function PaymentRecordDetails({
 }: VerificationRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   let paymentVerification: PaymentVerificationNode = null;
-  if (paymentRecord.verifications.totalCount > 0) {
-    paymentVerification = paymentRecord.verifications.edges[0].node;
+  if (paymentRecord.verification) {
+    paymentVerification = paymentRecord.verification;
   }
   return (
     <>

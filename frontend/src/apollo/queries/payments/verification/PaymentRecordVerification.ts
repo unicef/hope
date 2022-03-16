@@ -45,7 +45,7 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
               node {
                 id
                 status
-                verificationMethod
+                verificationChannel
               }
             }
           }
