@@ -34,6 +34,9 @@ from adminfilters.filters import (
     TextFieldFilter,
 )
 from constance import config
+from import_export import fields, resources
+from import_export.admin import ImportExportModelAdmin
+from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
@@ -426,8 +429,31 @@ class AdminLevelFilter(SimpleListFilter):
         return queryset
 
 
+class AdminAreaLevelResource(resources.ModelResource):
+    business_area = fields.Field(widget=ForeignKeyWidget(BusinessArea, field="code"), attribute="business_area")
+    country = fields.Field(widget=ForeignKeyWidget(AdminAreaLevel, field="datamart_id"), attribute="country")
+
+    class Meta:
+        model = AdminAreaLevel
+        fields = (
+            "name",
+            "display_name",
+            "admin_level",
+            "business_area",
+            "area_code",
+            "country_name",
+            "country",
+            "datamart_id",
+        )
+        import_id_fields = (
+            "name",
+            "country_name",
+            "admin_level",
+        )
+
+
 @admin.register(AdminAreaLevel)
-class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class AdminAreaLevelAdmin(ImportExportModelAdmin, ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("name", "country_name", "admin_level", "area_code")
     list_filter = (
         ("admin_level", AllValuesComboFilter),
@@ -435,6 +461,7 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
     )
     search_fields = ("name",)
     ordering = ("country_name", "admin_level")
+    resource_class = AdminAreaLevelResource
 
     @button(permission="load_from_datamart")
     def load_from_datamart(self, request):
