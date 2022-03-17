@@ -1,19 +1,23 @@
-import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
+
+import graphene
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
-from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
 from hct_mis_api.apps.core.scalars import BigInt
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+)
 from hct_mis_api.apps.core.validators import CommonValidator
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.program.validators import (
-    ProgramValidator,
     ProgramDeletionValidator,
+    ProgramValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 

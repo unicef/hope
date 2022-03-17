@@ -5,6 +5,7 @@ from enum import auto
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+
 from constance import config
 
 from hct_mis_api.apps.account.models import User, UserRole

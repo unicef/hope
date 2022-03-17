@@ -1,10 +1,12 @@
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.registration_datahub.fixtures import RegistrationDataImportDatahubFactory
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    RegistrationDataImportDatahubFactory,
+)
 
 
 class TestRegistrationDataImportDatahubQuery(APITestCase):
-    multi_db = True
+    databases = "__all__"
 
     ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY = """
     query AllRegistrationDataImportsDatahub {

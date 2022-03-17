@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import Count, Max, Min, Q, Sum
+from django.db.models import Count, DecimalField, Max, Min, Q, Sum
 from django.template.loader import render_to_string
 
 import openpyxl
@@ -259,6 +259,9 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def format_cash_plan_row(self, cash_plan: CashPlan) -> tuple:
+        import ipdb
+
+        ipdb.set_trace()
         return (
             cash_plan.ca_id,
             cash_plan.name,
@@ -337,8 +340,16 @@ class GenerateReportContentHelpers:
                 )
             )
             .annotate(payment_currency=ArrayAgg("household__payment_records__currency"))
-            .annotate(total_delivered_quantity_local=Sum("household__payment_records__delivered_quantity"))
-            .annotate(total_delivered_quantity_usd=Sum("household__payment_records__delivered_quantity_usd"))
+            .annotate(
+                total_delivered_quantity_local=Sum(
+                    "household__payment_records__delivered_quantity", output_field=DecimalField()
+                )
+            )
+            .annotate(
+                total_delivered_quantity_usd=Sum(
+                    "household__payment_records__delivered_quantity_usd", output_field=DecimalField()
+                )
+            )
             .order_by("household__id")
         )
 

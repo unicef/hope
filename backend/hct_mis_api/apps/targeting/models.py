@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField, IntegerRangeField, JSONField
+from django.contrib.postgres.fields import CICharField, IntegerRangeField
 from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
     RangeMinValueValidator,
@@ -14,9 +14,9 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Case, Count, Q, Value, When
+from django.db.models import Case, Count, JSONField, Q, Value, When
 from django.utils.text import Truncator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from model_utils import Choices
@@ -70,7 +70,10 @@ def get_integer_range(min_range=None, max_range=None):
     return IntegerRangeField(
         default=get_serialized_range,
         blank=True,
-        validators=[RangeMinValueValidator(min_range), RangeMaxValueValidator(max_range)],
+        validators=[
+            RangeMinValueValidator(min_range),
+            RangeMaxValueValidator(max_range),
+        ],
     )
 
 
@@ -81,8 +84,14 @@ class TargetPopulationManager(SoftDeletableManager):
             .get_queryset()
             .annotate(
                 number_of_households=Case(
-                    When(status=TargetPopulation.STATUS_LOCKED, then="candidate_list_total_households"),
-                    When(status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST, then="final_list_total_households"),
+                    When(
+                        status=TargetPopulation.STATUS_LOCKED,
+                        then="candidate_list_total_households",
+                    ),
+                    When(
+                        status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
+                        then="final_list_total_households",
+                    ),
                     default=Value(0),
                 )
             )
@@ -243,14 +252,26 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         db_index=True,
     )
     steficon_rule = models.ForeignKey(
-        RuleCommit, null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
+        RuleCommit,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="target_populations",
+        blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
     vulnerability_score_min = models.DecimalField(
-        null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
     )
     vulnerability_score_max = models.DecimalField(
-        null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
     )
     excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
@@ -361,7 +382,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return None
         tp = (
             TargetPopulation.objects.filter(
-                program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_PROCESSING
+                program=self.program,
+                steficon_rule__isnull=False,
+                status=TargetPopulation.STATUS_PROCESSING,
             )
             .order_by("-created_at")
             .first()
@@ -375,7 +398,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.sent_to_datahub = True
 
     def is_finalized(self):
-        return self.status in [self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST]
+        return self.status in [
+            self.STATUS_PROCESSING,
+            self.STATUS_READY_FOR_CASH_ASSIST,
+        ]
 
     def is_locked(self):
         return self.status == self.STATUS_LOCKED
@@ -589,7 +615,9 @@ class TargetingIndividualRuleFilterBlock(
     TargetingIndividualRuleFilterBlockMixin,
 ):
     targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule", on_delete=models.CASCADE, related_name="individuals_filters_blocks"
+        "TargetingCriteriaRule",
+        on_delete=models.CASCADE,
+        related_name="individuals_filters_blocks",
     )
     target_only_hoh = models.BooleanField(default=False)
 
@@ -602,7 +630,12 @@ class TargetingCriteriaFilterMixin:
             "negative": False,
             "supported_types": ["INTEGER", "SELECT_ONE", "STRING", "BOOL"],
         },
-        "NOT_EQUALS": {"arguments": 1, "lookup": "", "negative": True, "supported_types": ["INTEGER", "SELECT_ONE"]},
+        "NOT_EQUALS": {
+            "arguments": 1,
+            "lookup": "",
+            "negative": True,
+            "supported_types": ["INTEGER", "SELECT_ONE"],
+        },
         "CONTAINS": {
             "min_arguments": 1,
             "arguments": 1,
@@ -610,7 +643,12 @@ class TargetingCriteriaFilterMixin:
             "negative": False,
             "supported_types": ["SELECT_MANY", "STRING"],
         },
-        "NOT_CONTAINS": {"arguments": 1, "lookup": "__icontains", "negative": True, "supported_types": ["STRING"]},
+        "NOT_CONTAINS": {
+            "arguments": 1,
+            "lookup": "__icontains",
+            "negative": True,
+            "supported_types": ["STRING"],
+        },
         "RANGE": {
             "arguments": 2,
             "lookup": "__range",
@@ -629,7 +667,12 @@ class TargetingCriteriaFilterMixin:
             "negative": False,
             "supported_types": ["INTEGER", "DECIMAL"],
         },
-        "LESS_THAN": {"arguments": 1, "lookup": "__lte", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
+        "LESS_THAN": {
+            "arguments": 1,
+            "lookup": "__lte",
+            "negative": False,
+            "supported_types": ["INTEGER", "DECIMAL"],
+        },
     }
 
     COMPARISON_CHOICES = Choices(
