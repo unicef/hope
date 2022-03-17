@@ -22,7 +22,7 @@ class ExportLocations:
     def __init__(self, country):
         self._country = country
         self._file_name = "locations.csv"
-        self._matrix: List[Union[List[str], Dict[str, str]]] = [self.fields]
+        self._matrix: list[Union[list[str], dict[str, str]]] = [self.fields]
 
     def export_to_file(self):
         admin_areas = self._load_admin_areas()

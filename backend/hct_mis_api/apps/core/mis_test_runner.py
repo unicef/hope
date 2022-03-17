@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os
 
 from django.conf import settings
@@ -218,7 +216,12 @@ class PostgresTestRunner(TestRunner):
                 if not created:
                     old_names.extend(
                         _setup_schema_database(
-                            self.verbosity, self.interactive, self.keepdb, self.debug_sql, self.parallel, alias=alias
+                            self.verbosity,
+                            self.interactive,
+                            self.keepdb,
+                            self.debug_sql,
+                            self.parallel,
+                            alias=alias,
                         )
                     )
                     created = True

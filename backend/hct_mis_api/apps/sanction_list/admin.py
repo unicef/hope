@@ -31,4 +31,4 @@ class SanctionListIndividualAdmin(HOPEModelAdminBase):
 class SanctionListIndividualDocumentAdmin(HOPEModelAdminBase):
     list_display = ("document_number", "type_of_document", "date_of_issue", "issuing_country")
     raw_id_fields = ("individual",)
-    list_filter = (TextFieldFilter.factory("issuing_country", "Issuing country"), "type_of_document")
+    list_filter = (("issuing_country", TextFieldFilter.factory(title="Issuing country")), "type_of_document")

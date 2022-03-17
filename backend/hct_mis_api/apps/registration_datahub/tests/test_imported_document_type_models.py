@@ -7,7 +7,7 @@ from hct_mis_api.apps.registration_datahub.models import ImportedDocumentType
 
 
 class TestImportedDocumentTypeModel(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     def test_create_document_type_with_specific_country(self):
         document_type = ImportedDocumentType.objects.create(

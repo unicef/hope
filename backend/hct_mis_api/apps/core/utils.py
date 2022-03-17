@@ -60,7 +60,7 @@ def encode_id_base64(id_string, model_name):
 
     from base64 import b64encode
 
-    return b64encode(f"{model_name}Node:{str(id_string)}".encode("utf-8")).decode()
+    return b64encode(f"{model_name}Node:{str(id_string)}".encode()).decode()
 
 
 def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-"):
@@ -99,11 +99,11 @@ def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_
     next = 2
     while not slug or queryset.filter(**{slug_field_name: slug}):
         slug = original_slug
-        end = "{}{}".format(slug_separator, next)
+        end = f"{slug_separator}{next}"
         if slug_len and len(slug) + len(end) > slug_len:
             slug = slug[: slug_len - len(end)]
             slug = _slug_strip(slug, slug_separator)
-        slug = "{}{}".format(slug, end)
+        slug = f"{slug}{end}"
         next += 1
 
     setattr(instance, slug_field.attname, slug)
@@ -132,6 +132,7 @@ def _slug_strip(value, separator="-"):
     if separator:
         if separator != "-":
             re_sep = re.escape(separator)
+
         value = re.sub(r"^{}+|{}+$".format(re_sep, re_sep), "", value)
     return value
 
@@ -268,7 +269,9 @@ def nested_dict_get(dictionary, path):
     import functools
 
     return functools.reduce(
-        lambda d, key: d.get(key, None) if isinstance(d, dict) else None, path.split("."), dictionary
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None,
+        path.split("."),
+        dictionary,
     )
 
 
@@ -279,7 +282,7 @@ def get_count_and_percentage(input_list, all_items_list):
     return {"count": count, "percentage": percentage}
 
 
-def encode_ids(results: List[dict], model_name: str, key: str) -> List[dict]:
+def encode_ids(results: list[dict], model_name: str, key: str) -> list[dict]:
     if results:
         for result in results:
             result_id = result[key]
@@ -488,7 +491,7 @@ def update_labels_mapping(csv_file):
     }
 
     file_path = f"{settings.PROJECT_ROOT}/apps/core/core_fields_attributes.py"
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         content = f.read()
         new_content = content
         for core_field, labels in labels_mapping.items():
@@ -538,7 +541,11 @@ def chart_map_choices(choices):
 
 
 def chart_get_filtered_qs(
-    obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None, year_filter_path: str = None
+    obj,
+    year,
+    business_area_slug_filter: dict = None,
+    additional_filters: dict = None,
+    year_filter_path: str = None,
 ) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}
