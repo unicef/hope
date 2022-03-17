@@ -11,11 +11,10 @@ variables:
   # ========================================================================
   Docker.backend.filePath: "**/backend/Dockerfile"
   Docker.frontend.filePath: "**/frontend/Dockerfile"
-  Docker.registry: "ICTD-HOPE-PRD-ACR"
-  Docker.repository: "uniappsakshope"
+  Docker.registry: "ICTD-HOPE-DEV-ACR"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
-  Docker.url: "uniappsakshope.azurecr.io"
+  Docker.url: "uniappsakshopedev.azurecr.io"
   Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
   Kubernetes.namespace: "ictd-hope-dev"
 
