@@ -62,12 +62,14 @@ export function PaymentVerificationTableRow({
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
-            status={plan.verificationStatus}
+            status={plan.cashPlanPaymentVerificationSummary.status}
             statusToColor={paymentVerificationStatusToColor}
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{plan.serviceProvider?.fullName}</TableCell>
+      <TableCell align='left'>
+        {plan.serviceProvider?.fullName || '-'}
+      </TableCell>
       <TableCell align='left'>
         {deliveryTypeChoicesDict[plan.deliveryType]}
       </TableCell>

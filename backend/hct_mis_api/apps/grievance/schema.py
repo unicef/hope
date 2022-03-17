@@ -145,9 +145,9 @@ class GrievanceTicketFilter(FilterSet):
         method="admin_filter",
         queryset=AdminArea.objects.filter(admin_area_level__admin_level=2),
     )
-    cash_plan_payment_verification = CharFilter(
+    cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
-        lookup_expr="payment_verifications__cash_plan_payment_verification",
+        lookup_expr="payment_verifications__cash_plan_payment_verification__cash_plan",
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
