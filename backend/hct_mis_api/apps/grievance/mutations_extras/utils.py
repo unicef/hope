@@ -326,7 +326,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
             logger.error(f"{name} is not a correct `flex field")
             raise ValueError(f"{name} is not a correct `flex field")
         field_type = flex_field["type"]
-        field_choices = set(f.get("value") for f in flex_field["choices"])
+        field_choices = {f.get("value") for f in flex_field["choices"]}
         if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
             logger.error(f"invalid value type for a field {name}")
             raise ValueError(f"invalid value type for a field {name}")
@@ -346,9 +346,7 @@ def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove,
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(
-        ticket_details.ticket, individual_to_remove, ticket_details.role_reassign_data, info
-    )
+    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
     withdraw_individual(individual_to_remove, info, old_individual, household)
 
 
@@ -356,9 +354,7 @@ def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_t
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(
-        ticket_details.ticket, individual_to_remove, ticket_details.role_reassign_data, info
-    )
+    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
     mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
 
 
@@ -380,7 +376,7 @@ def get_data_from_role_data(role_data):
     return role_name, old_individual, new_individual, household
 
 
-def reassign_roles_on_disable_individual(ticket, individual_to_remove, role_reassign_data, info=None):
+def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_data, info=None):
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -426,7 +422,7 @@ def reassign_roles_on_disable_individual(ticket, individual_to_remove, role_reas
     primary_roles_count = Counter([role.get("role") for role in role_reassign_data.values()])[ROLE_PRIMARY]
 
     household_to_remove = individual_to_remove.household
-    is_one_individual = household_to_remove.individuals.count() == 1 if household_to_remove else False
+    is_one_individual = household_to_remove.active_individuals.count() == 1 if household_to_remove else False
 
     if primary_roles_count != individual_to_remove.count_primary_roles() and not is_one_individual:
         logger.error("Ticket cannot be closed, not all roles have been reassigned")

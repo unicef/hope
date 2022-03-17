@@ -58,6 +58,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
+    TicketDeleteHouseholdDetails,
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
@@ -114,9 +115,9 @@ class GrievanceTicketFilter(FilterSet):
     admin = ModelMultipleChoiceFilter(
         field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
     )
-    cash_plan_payment_verification = CharFilter(
+    cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
-        lookup_expr="payment_verifications__cash_plan_payment_verification",
+        lookup_expr="payment_verifications__cash_plan_payment_verification__cash_plan",
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
@@ -281,7 +282,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
             queryset = self.filters[name].filter(queryset, value)
             assert isinstance(
                 queryset, models.QuerySet
-            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+            ), "Expected '{}.{}' to return a QuerySet, but got a {} instead.".format(
                 type(self).__name__,
                 name,
                 type(queryset).__name__,
@@ -522,6 +523,16 @@ class TicketDeleteIndividualDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class TicketDeleteHouseholdDetailsNode(DjangoObjectType):
+    household_data = Arg()
+
+    class Meta:
+        model = TicketDeleteHouseholdDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
     household_data = Arg()
 
@@ -664,6 +675,9 @@ class Query(graphene.ObjectType):
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
+
+    def resolve_all_grievance_ticket(self, info, **kwargs):
+        return GrievanceTicket.objects.select_related("assigned_to", "created_by")
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)

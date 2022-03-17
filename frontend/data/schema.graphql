@@ -177,7 +177,7 @@ type BusinessAreaNode implements Node {
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-  logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  logentrySet(before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
 }
 
 type BusinessAreaNodeConnection {
@@ -225,13 +225,15 @@ type CashPlanNode implements Node {
   totalEntitledQuantityRevised: Float
   totalDeliveredQuantity: Float
   totalUndeliveredQuantity: Float
-  verificationStatus: CashPlanVerificationStatus!
   paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   verifications(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
+  cashPlanPaymentVerificationSummary: CashPlanPaymentVerificationSummaryNode
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
   totalNumberOfHouseholds: Int
   currency: String
+  canCreatePaymentVerificationPlan: Boolean
+  availablePaymentRecordsCount: Int
 }
 
 type CashPlanNodeConnection {
@@ -254,7 +256,7 @@ type CashPlanPaymentVerificationNode implements Node {
   status: CashPlanPaymentVerificationStatus!
   cashPlan: CashPlanNode!
   sampling: CashPlanPaymentVerificationSampling!
-  verificationMethod: CashPlanPaymentVerificationVerificationMethod!
+  verificationChannel: CashPlanPaymentVerificationVerificationChannel!
   sampleSize: Int
   respondedCount: Int
   receivedCount: Int
@@ -269,6 +271,7 @@ type CashPlanPaymentVerificationNode implements Node {
   sexFilter: String
   activationDate: DateTime
   completionDate: DateTime
+  unicefId: String!
   paymentRecordVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
@@ -295,7 +298,23 @@ enum CashPlanPaymentVerificationStatus {
   FINISHED
 }
 
-enum CashPlanPaymentVerificationVerificationMethod {
+type CashPlanPaymentVerificationSummaryNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  status: CashPlanPaymentVerificationSummaryStatus!
+  activationDate: DateTime
+  completionDate: DateTime
+  cashPlan: CashPlanNode!
+}
+
+enum CashPlanPaymentVerificationSummaryStatus {
+  PENDING
+  ACTIVE
+  FINISHED
+}
+
+enum CashPlanPaymentVerificationVerificationChannel {
   RAPIDPRO
   XLSX
   MANUAL
@@ -306,12 +325,6 @@ enum CashPlanStatus {
   DISTRIBUTION_COMPLETED_WITH_ERRORS
   TRANSACTION_COMPLETED
   TRANSACTION_COMPLETED_WITH_ERRORS
-}
-
-enum CashPlanVerificationStatus {
-  PENDING
-  ACTIVE
-  FINISHED
 }
 
 input CategoryExtrasInput {
@@ -361,7 +374,7 @@ type ContentTypeObjectType {
   id: ID!
   appLabel: String!
   model: String!
-  logEntries(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  logEntries(before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   name: String
 }
 
@@ -515,6 +528,10 @@ type DeduplicationResultNode {
   age: Int
 }
 
+type DeleteCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
 type DeleteProgram {
   ok: Boolean
 }
@@ -609,9 +626,9 @@ type DocumentTypeNode {
 enum DocumentTypeType {
   BIRTH_CERTIFICATE
   DRIVERS_LICENSE
+  ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
-  ELECTORAL_CARD
   OTHER
 }
 
@@ -676,6 +693,7 @@ scalar GeoJSON
 
 input GetCashplanVerificationSampleSizeInput {
   cashPlanId: ID
+  cashPlanPaymentVerificationId: ID
   sampling: String!
   verificationChannel: String
   businessAreaSlug: String!
@@ -729,6 +747,7 @@ type GrievanceTicketNode implements Node {
   individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNode
   addIndividualTicketDetails: TicketAddIndividualDetailsNode
   deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNode
+  deleteHouseholdTicketDetails: TicketDeleteHouseholdDetailsNode
   systemFlaggingTicketDetails: TicketSystemFlaggingDetailsNode
   needsAdjudicationTicketDetails: TicketNeedsAdjudicationDetailsNode
   paymentVerificationTicketDetails: TicketPaymentVerificationDetailsNode
@@ -775,6 +794,10 @@ type HouseholdDataChangeApproveMutation {
 input HouseholdDataUpdateIssueTypeExtras {
   household: ID!
   householdData: HouseholdUpdateDataObjectType!
+}
+
+input HouseholdDeleteIssueTypeExtras {
+  household: ID!
 }
 
 type HouseholdNode implements Node {
@@ -848,6 +871,7 @@ type HouseholdNode implements Node {
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   householdDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
   addIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
+  deleteHouseholdTicketDetails(before: String, after: String, first: Int, last: Int): TicketDeleteHouseholdDetailsNodeConnection!
   positiveFeedbackTicketDetails(before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
   negativeFeedbackTicketDetails(before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
@@ -866,6 +890,7 @@ type HouseholdNode implements Node {
   admin2: AdminAreaNode
   status: String
   programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
+  activeIndividualsCount: Int
 }
 
 type HouseholdNodeConnection {
@@ -883,14 +908,14 @@ type HouseholdNodeEdge {
 
 enum HouseholdOrgEnumerator {
   A_
-  UNICEF
   PARTNER
+  UNICEF
 }
 
 enum HouseholdRegistrationMethod {
   A_
-  HH_REGISTRATION
   COMMUNITY
+  HH_REGISTRATION
 }
 
 enum HouseholdResidenceStatus {
@@ -968,11 +993,26 @@ type ImportDataNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  file: String!
+  status: ImportDataStatus!
+  businessAreaSlug: String!
+  file: String
   dataType: ImportDataDataType!
-  numberOfHouseholds: Int!
-  numberOfIndividuals: Int!
+  numberOfHouseholds: Int
+  numberOfIndividuals: Int
+  error: String!
+  validationErrors: String!
+  createdById: UUID
   registrationDataImport: RegistrationDataImportDatahubNode
+  koboimportdata: KoboImportDataNode
+  xlsxValidationErrors: [XlsxRowErrorNode]
+}
+
+enum ImportDataStatus {
+  PENDING
+  RUNNING
+  FINISHED
+  ERROR
+  VALIDATION_ERROR
 }
 
 type ImportXlsxCashPlanVerification {
@@ -1269,9 +1309,9 @@ type ImportedDocumentTypeNode {
 enum ImportedDocumentTypeType {
   BIRTH_CERTIFICATE
   DRIVERS_LICENSE
+  ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
-  ELECTORAL_CARD
   OTHER
 }
 
@@ -1283,10 +1323,10 @@ enum ImportedHouseholdCollectIndividualData {
 
 enum ImportedHouseholdConsentSharing {
   A_
-  UNICEF
+  GOVERNMENT_PARTNER
   HUMANITARIAN_PARTNER
   PRIVATE_PARTNER
-  GOVERNMENT_PARTNER
+  UNICEF
 }
 
 enum ImportedHouseholdCurrency {
@@ -1532,14 +1572,14 @@ type ImportedHouseholdNodeEdge {
 
 enum ImportedHouseholdOrgEnumerator {
   A_
-  UNICEF
   PARTNER
+  UNICEF
 }
 
 enum ImportedHouseholdRegistrationMethod {
   A_
-  HH_REGISTRATION
   COMMUNITY
+  HH_REGISTRATION
 }
 
 enum ImportedHouseholdResidenceStatus {
@@ -1559,10 +1599,10 @@ enum ImportedIndividualDeduplicationBatchStatus {
 }
 
 enum ImportedIndividualDeduplicationGoldenRecordStatus {
-  UNIQUE
   DUPLICATE
   NEEDS_ADJUDICATION
   NOT_PROCESSED
+  UNIQUE
 }
 
 enum ImportedIndividualDisability {
@@ -1592,11 +1632,11 @@ type ImportedIndividualIdentityNodeEdge {
 
 enum ImportedIndividualMaritalStatus {
   A_
-  SINGLE
-  MARRIED
-  WIDOWED
   DIVORCED
+  MARRIED
   SEPARATED
+  SINGLE
+  WIDOWED
 }
 
 type ImportedIndividualNode implements Node {
@@ -1673,17 +1713,17 @@ input IndividualDataUpdateIssueTypeExtras {
 }
 
 enum IndividualDeduplicationBatchStatus {
-  SIMILAR_IN_BATCH
   DUPLICATE_IN_BATCH
-  UNIQUE_IN_BATCH
   NOT_PROCESSED
+  SIMILAR_IN_BATCH
+  UNIQUE_IN_BATCH
 }
 
 enum IndividualDeduplicationGoldenRecordStatus {
-  UNIQUE
   DUPLICATE
   NEEDS_ADJUDICATION
   NOT_PROCESSED
+  UNIQUE
 }
 
 input IndividualDeleteIssueTypeExtras {
@@ -1732,11 +1772,11 @@ input IndividualIdentityObjectType {
 
 enum IndividualMaritalStatus {
   A_
-  SINGLE
-  MARRIED
-  WIDOWED
   DIVORCED
+  MARRIED
   SEPARATED
+  SINGLE
+  WIDOWED
 }
 
 type IndividualNode implements Node {
@@ -1831,20 +1871,20 @@ type IndividualNodeEdge {
 
 enum IndividualRelationship {
   UNKNOWN
-  NON_BENEFICIARY
+  AUNT_UNCLE
+  BROTHER_SISTER
+  COUSIN
+  DAUGHTERINLAW_SONINLAW
+  GRANDDAUGHER_GRANDSON
+  GRANDMOTHER_GRANDFATHER
   HEAD
+  MOTHER_FATHER
+  MOTHERINLAW_FATHERINLAW
+  NEPHEW_NIECE
+  NON_BENEFICIARY
+  SISTERINLAW_BROTHERINLAW
   SON_DAUGHTER
   WIFE_HUSBAND
-  BROTHER_SISTER
-  MOTHER_FATHER
-  AUNT_UNCLE
-  GRANDMOTHER_GRANDFATHER
-  MOTHERINLAW_FATHERINLAW
-  DAUGHTERINLAW_SONINLAW
-  SISTERINLAW_BROTHERINLAW
-  GRANDDAUGHER_GRANDSON
-  NEPHEW_NIECE
-  COUSIN
 }
 
 type IndividualRoleInHouseholdNode {
@@ -1858,9 +1898,9 @@ type IndividualRoleInHouseholdNode {
 }
 
 enum IndividualRoleInHouseholdRole {
-  PRIMARY
-  ALTERNATE
   NO_ROLE
+  ALTERNATE
+  PRIMARY
 }
 
 enum IndividualSex {
@@ -1909,6 +1949,7 @@ input IssueTypeExtrasInput {
   householdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras
   individualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras
   individualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras
+  householdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras
   addIndividualIssueTypeExtras: AddIndividualIssueTypeExtras
 }
 
@@ -1946,6 +1987,26 @@ type KoboAssetObjectEdge {
 type KoboErrorNode {
   header: String
   message: String
+}
+
+type KoboImportDataNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  status: ImportDataStatus!
+  businessAreaSlug: String!
+  file: String
+  dataType: ImportDataDataType!
+  numberOfHouseholds: Int
+  numberOfIndividuals: Int
+  error: String!
+  validationErrors: String!
+  createdById: UUID
+  importdataPtr: ImportDataNode!
+  koboAssetId: String!
+  onlyActiveSubmissions: Boolean!
+  koboValidationErrors: [KoboErrorNode]
+  importData: ImportDataNode
 }
 
 type LabelNode {
@@ -1999,6 +2060,7 @@ type Mutations {
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
@@ -2008,6 +2070,7 @@ type Mutations {
   activateCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): ActivateCashPlanVerificationMutation
   finishCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): FinishCashPlanVerificationMutation
   discardCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DiscardCashPlanVerificationMutation
+  deleteCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DeleteCashPlanVerificationMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
@@ -2021,11 +2084,11 @@ type Mutations {
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
-  uploadImportDataXlsxFile(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFile
+  uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
-  saveKoboImportData(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataMutation
+  saveKoboImportDataAsync(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataAsync
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
   refuseRegistrationDataImport(id: ID!, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
@@ -2111,7 +2174,7 @@ type PaymentRecordNode implements Node {
   transactionReferenceId: String
   visionId: String
   registrationCaId: String
-  verifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  verification: PaymentVerificationNode
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
 }
@@ -2129,10 +2192,35 @@ type PaymentRecordNodeEdge {
 }
 
 enum PaymentRecordStatus {
-  TRANSACTION_SUCCESSFUL
-  TRANSACTION_ERRONEOUS
   DISTRIBUTION_SUCCESSFUL
   NOT_DISTRIBUTED
+  TRANSACTION_SUCCESSFUL
+  TRANSACTION_ERRONEOUS
+}
+
+type PaymentVerificationLogEntryNode implements Node {
+  id: ID!
+  contentType: ContentTypeObjectType
+  objectId: UUID
+  action: LogEntryAction!
+  objectRepr: String!
+  changes: Arg
+  user: UserNode
+  businessArea: UserBusinessAreaNode
+  timestamp: DateTime
+  contentObject: CashPlanPaymentVerificationNode
+}
+
+type PaymentVerificationLogEntryNodeConnection {
+  pageInfo: PageInfo!
+  edges: [PaymentVerificationLogEntryNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type PaymentVerificationLogEntryNodeEdge {
+  node: PaymentVerificationLogEntryNode
+  cursor: String!
 }
 
 type PaymentVerificationNode implements Node {
@@ -2141,7 +2229,7 @@ type PaymentVerificationNode implements Node {
   updatedAt: DateTime!
   version: BigInt!
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode!
-  paymentRecord: PaymentRecordNode!
+  paymentRecord: PaymentRecordNode
   status: PaymentVerificationStatus!
   statusDate: DateTime
   receivedAmount: Float
@@ -2181,8 +2269,8 @@ input PositiveFeedbackTicketExtras {
 }
 
 enum ProgramFrequencyOfPayments {
-  REGULAR
   ONE_OFF
+  REGULAR
 }
 
 type ProgramNode implements Node {
@@ -2247,8 +2335,8 @@ enum ProgramSector {
 }
 
 enum ProgramStatus {
-  DRAFT
   ACTIVE
+  DRAFT
   FINISHED
 }
 
@@ -2270,7 +2358,7 @@ type Query {
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlanPaymentVerification: String, createdAtRange: String, permissions: [String], orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
@@ -2285,7 +2373,7 @@ type Query {
   paymentRecordVerification(id: ID!): PaymentVerificationNode
   cashPlanPaymentVerification(id: ID!): CashPlanPaymentVerificationNode
   allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
-  allPaymentVerifications(before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, status: String, search: String, businessArea: String, orderBy: String): PaymentVerificationNodeConnection
+  allPaymentVerifications(before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, cashPlanPaymentVerification_CashPlan: ID, status: String, search: String, businessArea: String, verificationChannel: String, orderBy: String): PaymentVerificationNodeConnection
   allCashPlanPaymentVerification(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection
   chartPaymentVerification(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartPaymentVerification
   chartVolumeByDeliveryMechanism(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
@@ -2298,10 +2386,11 @@ type Query {
   paymentRecordDeliveryTypeChoices: [ChoiceObject]
   cashPlanVerificationStatusChoices: [ChoiceObject]
   cashPlanVerificationSamplingChoices: [ChoiceObject]
-  cashPlanVerificationVerificationMethodChoices: [ChoiceObject]
+  cashPlanVerificationVerificationChannelChoices: [ChoiceObject]
   paymentVerificationStatusChoices: [ChoiceObject]
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
+  allPaymentVerificationLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): PaymentVerificationLogEntryNodeConnection
   adminArea(id: ID!): AdminAreaNode
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Istartswith: String, businessArea: String, level: Int): AdminAreaNodeConnection
@@ -2365,6 +2454,7 @@ type Query {
   importedIndividual(id: ID!): ImportedIndividualNode
   allImportedIndividuals(before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): ImportedIndividualNodeConnection
   importData(id: ID!): ImportDataNode
+  koboImportData(id: ID!): KoboImportDataNode
   deduplicationBatchStatusChoices: [ChoiceObject]
   deduplicationGoldenRecordStatusChoices: [ChoiceObject]
   registrationDataImport(id: ID!): RegistrationDataImportNode
@@ -2505,15 +2595,15 @@ type RegistrationDataImportNodeEdge {
 }
 
 enum RegistrationDataImportStatus {
+  DEDUPLICATION
+  DEDUPLICATION_FAILED
+  IMPORTING
+  IMPORT_ERROR
   IN_REVIEW
   MERGED
   MERGING
-  IMPORTING
-  DEDUPLICATION_FAILED
-  DEDUPLICATION
-  REFUSED
-  IMPORT_ERROR
   MERGE_ERROR
+  REFUSED
 }
 
 type RegistrationDeduplicationMutation {
@@ -2591,7 +2681,6 @@ enum RoleSubsystem {
 
 enum RuleCommitLanguage {
   PYTHON
-  INTERNAL
 }
 
 type RuleCommitNode implements Node {
@@ -2624,7 +2713,6 @@ type RuleCommitNodeEdge {
 
 enum RuleLanguage {
   PYTHON
-  INTERNAL
 }
 
 enum RuleSecurity {
@@ -2775,9 +2863,8 @@ type SanctionListIndividualNodeEdge {
   cursor: String!
 }
 
-type SaveKoboProjectImportDataMutation {
-  importData: ImportDataNode
-  errors: [KoboErrorNode]
+type SaveKoboProjectImportDataAsync {
+  importData: KoboImportDataNode
 }
 
 type SectionTotalNode {
@@ -2854,6 +2941,7 @@ type SteficonRuleNode implements Node {
   updatedBy: UserNode
   createdAt: DateTime!
   updatedAt: DateTime!
+  flags: JSONString!
   history(before: String, after: String, first: Int, last: Int): RuleCommitNodeConnection!
 }
 
@@ -3069,6 +3157,28 @@ type TicketComplaintDetailsNodeConnection {
 
 type TicketComplaintDetailsNodeEdge {
   node: TicketComplaintDetailsNode
+  cursor: String!
+}
+
+type TicketDeleteHouseholdDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode
+  roleReassignData: JSONString!
+  approveStatus: Boolean!
+  householdData: Arg
+}
+
+type TicketDeleteHouseholdDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketDeleteHouseholdDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketDeleteHouseholdDetailsNodeEdge {
+  node: TicketDeleteHouseholdDetailsNode
   cursor: String!
 }
 
@@ -3392,7 +3502,7 @@ type UpdateTargetPopulationMutation {
 
 scalar Upload
 
-type UploadImportDataXLSXFile {
+type UploadImportDataXLSXFileAsync {
   importData: ImportDataNode
   errors: [XlsxRowErrorNode]
 }
@@ -3435,7 +3545,7 @@ type UserBusinessAreaNode implements Node {
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-  logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  logentrySet(before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   permissions: [String]
 }
 
@@ -3480,7 +3590,7 @@ type UserNode implements Node {
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-  logs(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  logs(before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 
@@ -3504,9 +3614,9 @@ type UserRoleNode {
 }
 
 enum UserStatus {
-  INVITED
   ACTIVE
   INACTIVE
+  INVITED
 }
 
 type XlsxErrorNode {

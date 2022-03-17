@@ -168,7 +168,7 @@ class GenerateReportContentHelpers:
             verification.cash_plan.program.name,
             self._format_date(verification.activation_date),
             verification.status,
-            verification.verification_method,
+            verification.verification_channel,
             self._format_date(verification.completion_date),
             verification.sample_size,
             verification.responded_count,

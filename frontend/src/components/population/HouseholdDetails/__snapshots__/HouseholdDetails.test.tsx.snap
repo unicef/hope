@@ -1,0 +1,417 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/population/HouseholdDetails should render 1`] = `
+<div>
+  <div
+    class="sc-jzJRlG ezheHU"
+  >
+    <div
+      class="sc-bxivhb jsIVNl"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        Details
+      </h6>
+    </div>
+    <div
+      class="sc-cSHVUG cvBNnC"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Household Size
+            </span>
+            <div>
+              4
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Residence Status
+            </span>
+            <div>
+              Displaced  |  Refugee / Asylum Seeker
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Head of Household
+            </span>
+            <div>
+              <a
+                class="sc-bdVaJa eeAMoW"
+                href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
+              >
+                Agata Kowalska
+              </a>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              FEMALE CHILD HEADED HOUSEHOLD
+            </span>
+            <div>
+              No
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              CHILD HEADED HOUSEHOLD
+            </span>
+            <div>
+              No
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Country
+            </span>
+            <div>
+              Isle of Man
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Country of Origin
+            </span>
+            <div>
+              San Marino
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Address
+            </span>
+            <div>
+              938 Luna Cliffs Apt. 551
+Jameschester, SC 24934
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Village
+            </span>
+            <div>
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Administrative Level 1
+            </span>
+            <div>
+              Nangarhar
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Administrative Level 2
+            </span>
+            <div>
+              Achin
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Geolocation
+            </span>
+            <div>
+              70.210209, 172.085021
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              UNHCR CASE ID
+            </span>
+            <div>
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              LENGTH OF TIME SINCE ARRIVAL
+            </span>
+            <div>
+              12
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              NUMBER OF TIMES DISPLACED
+            </span>
+            <div>
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              IS THIS A RETURNEE HOUSEHOLD?
+            </span>
+            <div>
+              No
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="MuiPaper-root sc-kAzzGY evDEes MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="sc-bxivhb jsIVNl"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        Benefits
+      </h6>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-container"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          >
+            <span
+              class="sc-chPdSV SJTLX"
+              color="textSecondary"
+            >
+              PrOgRAmmE(S) ENROLLED
+            </span>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          >
+            <span
+              class="sc-chPdSV SJTLX"
+              color="textSecondary"
+            >
+              Cash received
+            </span>
+          </div>
+        </div>
+        <div
+          class="MuiBox-root MuiBox-root-1"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-container"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <a
+                class="sc-bdVaJa eeAMoW"
+                href="/afghanistan/programs/c4d5657d-1a29-46e1-8190-df7f85a0d2ef"
+              >
+                Surface campaign practice actually about about will what.
+              </a>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div
+                class="MuiBox-root MuiBox-root-2"
+              >
+                <div
+                  class="MuiBox-root MuiBox-root-3"
+                >
+                  USD 3,251.00
+                </div>
+                <div
+                  class="MuiBox-root MuiBox-root-4"
+                >
+                  BAM 3,048.00
+                </div>
+                <div
+                  class="MuiBox-root MuiBox-root-5"
+                >
+                  BND 2,959.00
+                </div>
+                <div
+                  class="MuiBox-root MuiBox-root-6"
+                >
+                  ISK 4,904
+                </div>
+                <div
+                  class="MuiBox-root MuiBox-root-7"
+                >
+                  LSL 2,505.00
+                </div>
+                <div
+                  class="MuiBox-root MuiBox-root-8"
+                >
+                  TMT 115.00
+                </div>
+                <div
+                  class="MuiBox-root MuiBox-root-9"
+                >
+                  UAH 484.00
+                </div>
+                <div
+                  class="MuiBox-root MuiBox-root-10"
+                >
+                  UGX 2,073
+                </div>
+                <div
+                  class="MuiBox-root MuiBox-root-11"
+                >
+                  UZS 895.00
+                </div>
+                <div
+                  class="MuiBox-root MuiBox-root-12"
+                >
+                  YER 2,335
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+      >
+        <div
+          class="sc-VigVT ZeWFY"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
+              Total Cash Received
+            </span>
+            <div>
+              <div
+                class="sc-jTzLTM dhULVO"
+              >
+                USD 24,697.00
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

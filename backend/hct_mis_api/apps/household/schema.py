@@ -227,15 +227,17 @@ class IndividualFilter(FilterSet):
             values = value.split(" ")
         q_obj = Q()
         for value in values:
-            inner_query = Q()
-            q_obj |= Q(household__admin_area__title__startswith=value)
-            q_obj |= Q(unicef_id__startswith=value)
-            q_obj |= Q(unicef_id__endswith=value)
-            q_obj |= Q(household__unicef_id__startswith=value)
-            q_obj |= Q(full_name__startswith=value)
-            q_obj |= Q(given_name__startswith=value)
-            q_obj |= Q(middle_name__startswith=value)
-            q_obj |= Q(family_name__startswith=value)
+            inner_query = Q(household__admin_area__title__startswith=value)
+            inner_query |= Q(unicef_id__startswith=value)
+            inner_query |= Q(unicef_id__endswith=value)
+            inner_query |= Q(household__unicef_id__startswith=value)
+            inner_query |= Q(full_name__startswith=value)
+            inner_query |= Q(given_name__startswith=value)
+            inner_query |= Q(middle_name__startswith=value)
+            inner_query |= Q(family_name__startswith=value)
+            inner_query |= Q(documents__document_number__startswith=value)
+            inner_query |= Q(phone_no__startswith=value)
+            inner_query |= Q(phone_no_alternative__startswith=value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
@@ -380,6 +382,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin2 = graphene.Field(AdminAreaNode)
     status = graphene.String()
     programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+    active_individuals_count = graphene.Int()
 
     def resolve_admin_area_title(parent, info):
         if parent.admin_area:
@@ -415,6 +418,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_flex_fields(parent, info):
         return resolve_flex_fields_choices_to_string(parent)
+
+    def resolve_active_individuals_count(parent, info):
+        return parent.active_individuals.count()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):

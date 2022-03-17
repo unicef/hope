@@ -5,37 +5,37 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { Route, Switch, useLocation } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { MiśTheme } from '../theme';
-import { Drawer } from '../components/Drawer/Drawer';
-import { AppBar } from '../components/AppBar';
+import { Drawer } from '../components/core/Drawer/Drawer';
+import { AppBar } from '../components/core/AppBar';
 import { useSnackbar } from '../hooks/useSnackBar';
-import { GrievanceDetailsPage } from '../components/Grievances/GrievancesDetailsPage/GrievanceDetailsPage';
-import { GrievancesTablePage } from '../components/Grievances/GrievancesTablePage';
-import { CreateGrievancePage } from '../components/Grievances/CreateGrievancePage';
-import { EditGrievancePage } from '../components/Grievances/EditGrievancePage';
-import { DashboardPage } from './pages/DashboardPage';
-import { ProgramsPage } from './pages/ProgramsPage';
-import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
-import { CashPlanDetailsPage } from './pages/CashPlanDetailsPage';
-import { PaymentRecordDetailsPage } from './pages/PaymentRecordDetailsPage';
-import { PopulationHouseholdPage } from './pages/PopulationHouseholdPage';
-import { RegistrationDataImportPage } from './registration/list/RegistrationDataImportPage';
-import { PopulationHouseholdDetailsPage } from './pages/PopulationHouseholdDetailsPage';
-import { PopulationIndividualsPage } from './pages/PopulationIndividualsPage';
-import { PopulationIndividualsDetailsPage } from './pages/PopulationIndividualsDetailsPage';
-import { TargetPopulationPage } from './pages/TargetPopulationPage';
-import { TargetPopulationDetailsPage } from './pages/TargetPopulationDetailsPage';
-import { CreateTargetPopulation } from './pages/CreateTargetPopulation';
-import { RegistrationDataImportDetailsPage } from './registration/details/RegistrationDataImportDetailsPage';
-import { RegistrationHouseholdDetailsPage } from './registration/details/households/RegistrationHouseholdDetailsPage';
-import { RegistrationIndividualDetailsPage } from './registration/details/individual/RegistrationIndividualDetailsPage';
-import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
-import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
-import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
-import { UsersList } from './pages/UsersList';
-import { ReportingPage } from './pages/ReportingPage';
-import { ReportingDetailsPage } from './pages/ReportingDetailsPage';
-import { ActivityLogPage } from './pages/MainActivityLogPage';
-import { CashPlanVerificationRedirectPage } from './pages/CashplanVerificationRedirectPage';
+import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
+import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
+import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
+import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { ProgramsPage } from './pages/program/ProgramsPage';
+import { ProgramDetailsPage } from './pages/program/ProgramDetailsPage';
+import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
+import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
+import { PopulationHouseholdPage } from './pages/population/PopulationHouseholdPage';
+import { RegistrationDataImportPage } from './pages/rdi/RegistrationDataImportPage';
+import { PopulationHouseholdDetailsPage } from './pages/population/PopulationHouseholdDetailsPage';
+import { PopulationIndividualsPage } from './pages/population/PopulationIndividualsPage';
+import { PopulationIndividualsDetailsPage } from './pages/population/PopulationIndividualsDetailsPage';
+import { TargetPopulationPage } from './pages/targeting/TargetPopulationPage';
+import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
+import { CreateTargetPopulation } from './pages/targeting/CreateTargetPopulation';
+import { RegistrationDataImportDetailsPage } from './pages/rdi/RegistrationDataImportDetailsPage';
+import { RegistrationHouseholdDetailsPage } from './pages/rdi/RegistrationHouseholdDetailsPage';
+import { RegistrationIndividualDetailsPage } from './pages/rdi/RegistrationIndividualDetailsPage';
+import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
+import { PaymentVerificationDetailsPage } from './pages/payments/PaymentVerificationDetailsPage';
+import { VerificationRecordDetailsPage } from './pages/payments/VerificationRecordDetailsPage';
+import { UsersPage } from './pages/core/UsersPage';
+import { ReportingPage } from './pages/reporting/ReportingPage';
+import { ReportingDetailsPage } from './pages/reporting/ReportingDetailsPage';
+import { ActivityLogPage } from './pages/core/MainActivityLogPage';
+import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
 
 const Root = styled.div`
   display: flex;
@@ -198,7 +198,7 @@ export function HomeRouter(): React.ReactElement {
               <GrievancesTablePage key='rdi' />
             </Sentry.ErrorBoundary>
           </Route>
-          <Route path='/:businessArea/grievance-and-feedback/payment-verification/:verificationId'>
+          <Route path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
                 scope.setTag(
@@ -216,7 +216,7 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/grievance-and-feedback/:id');
               }}
             >
-              <GrievanceDetailsPage />
+              <GrievancesDetailsPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/grievance-and-feedback'>
@@ -330,7 +330,7 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/users-list');
               }}
             >
-              <UsersList />
+              <UsersPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/activity-log'>
