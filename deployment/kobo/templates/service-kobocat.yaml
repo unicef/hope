@@ -18,7 +18,7 @@ spec:
     - name: backend
       protocol: TCP
       port: 8081
-      targetPort: 8000
+      targetPort: 8001
     - name: nginx
       protocol: TCP
       port: 80

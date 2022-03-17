@@ -9,8 +9,8 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
+import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { programCompare } from '../../../utils/utils';

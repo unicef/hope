@@ -298,7 +298,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                                     "country": "USA",
                                     "number": "321-321-UX-321",
-                                    "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 }
                             ],
                             "identities": [
@@ -410,7 +410,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "country": "POL",
                                     "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                                     "number": "111-222-777",
-                                    "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                    "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                 },
                             ],
                             "documentsToRemove": [],

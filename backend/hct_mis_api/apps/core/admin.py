@@ -10,6 +10,7 @@ from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import JSONField
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
@@ -33,6 +34,9 @@ from adminfilters.filters import (
     TextFieldFilter,
 )
 from constance import config
+from import_export import fields, resources
+from import_export.admin import ImportExportModelAdmin
+from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
@@ -55,7 +59,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
-from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
@@ -174,7 +178,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 preserved_filters = self.get_preserved_filters(request)
 
                 redirect_url = reverse(
-                    "admin:%s_%s_change" % (opts.app_label, opts.model_name),
+                    "admin:{}_{}_change".format(opts.app_label, opts.model_name),
                     args=(office.pk,),
                     current_app=self.admin_site.name,
                 )
@@ -190,7 +194,8 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     def _get_doap_matrix(self, obj):
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
-        fields = ["org", "Last Name", "First Name", "Email", "Action"] + list(ca_roles)
+        fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
+        fields += list(ca_roles)
         matrix.append(fields)
         all_user_data = {}
         for member in obj.user_roles.all():
@@ -203,6 +208,8 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 user_data["Last Name"] = member.user.last_name
                 user_data["First Name"] = member.user.first_name
                 user_data["Email"] = member.user.email
+                user_data["Business Unit"] = f"UNICEF - {obj.name}"
+                user_data["Partner Instance ID"] = int(obj.code)
                 user_data["Action"] = ""
                 for role in ca_roles:
                     user_data[role] = {True: "Yes", False: ""}[role in user_roles]
@@ -255,10 +262,19 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
             self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
             buffer.seek(0)
+            environment = Site.objects.first().name
             mail = EmailMessage(
-                f"DOAP updates for {obj.name}", f"Please find in attachment DOAP updates for {obj.name}", to=recipients
+                f"CashAssist - UNICEF - {obj.name} user updates",
+                f"""Dear GSD,
+                
+In CashAssist, please update the users in {environment} UNICEF - {obj.name} business unit as per the attached DOAP.
+
+Many thanks,
+
+UNICEF HOPE""",
+                to=recipients,
             )
-            mail.attach(f"doap_{obj.name}.csv", buffer.read(), "text/csv")
+            mail.attach(f"UNICEF - {obj.name} {environment} DOAP.csv", buffer.read(), "text/csv")
             mail.send()
             for row in matrix[1:]:
                 if row["Action"] == "REMOVE":
@@ -278,8 +294,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     def export_doap(self, request, pk):
         context = self.get_common_context(request, pk, title="DOAP matrix")
         obj = context["original"]
+        environment = Site.objects.first().name
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename=doap_{obj.name}.csv"
+        response["Content-Disposition"] = f"attachment; filename=UNICEF - {obj.name} {environment} DOAP.csv"
         matrix = self._get_doap_matrix(obj)
         writer = csv.DictWriter(response, matrix[0], extrasaction="ignore")
         writer.writeheader()
@@ -412,8 +429,36 @@ class AdminLevelFilter(SimpleListFilter):
         return queryset
 
 
+class AdminAreaLevelResource(resources.ModelResource):
+    business_area = fields.Field(widget=ForeignKeyWidget(BusinessArea, field="code"), attribute="business_area")
+
+    class Meta:
+        model = AdminAreaLevel
+        fields = (
+            "name",
+            "display_name",
+            "admin_level",
+            "business_area",
+            "area_code",
+            "country_name",
+            "datamart_id",
+        )
+        import_id_fields = (
+            "name",
+            "country_name",
+            "admin_level",
+        )
+
+    def after_import(self, *args, **kwargs):
+        super().after_import(*args, **kwargs)
+
+        countries = AdminAreaLevel.objects.get_countries()
+        for country, country_name in countries:
+            AdminAreaLevel.objects.filter(country_name=country_name).update(country=country)
+
+
 @admin.register(AdminAreaLevel)
-class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class AdminAreaLevelAdmin(ImportExportModelAdmin, ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("name", "country_name", "admin_level", "area_code")
     list_filter = (
         ("admin_level", AllValuesComboFilter),
@@ -421,6 +466,7 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
     )
     search_fields = ("name",)
     ordering = ("country_name", "admin_level")
+    resource_class = AdminAreaLevelResource
 
     @button(permission="load_from_datamart")
     def load_from_datamart(self, request):
@@ -470,8 +516,31 @@ class ImportAreaForm(forms.Form):
     file = forms.FileField()
 
 
+class AdminAreaResource(resources.ModelResource):
+    admin_area_level = fields.Field(
+        widget=ForeignKeyWidget(AdminAreaLevel, field="datamart_id"), attribute="admin_area_level"
+    )
+    parent = fields.Field(widget=ForeignKeyWidget(AdminArea, field="p_code"), attribute="parent")
+
+    class Meta:
+        model = AdminArea
+        fields = (
+            "external_id",
+            "title",
+            "admin_area_level",
+            "p_code",
+            "parent",
+            "geom",
+            "point",
+        )
+        import_id_fields = (
+            "title",
+            "p_code",
+        )
+
+
 @admin.register(AdminArea)
-class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
+class AdminAreaAdmin(ImportExportModelAdmin, ExtraUrlMixin, MPTTModelAdmin):
     search_fields = ("p_code", "title")
     list_display = ("title", "country", "parent", "tree_id", "external_id", "admin_area_level", "p_code")
     list_filter = (
@@ -480,6 +549,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
         TextFieldFilter.factory("tree_id"),
         TextFieldFilter.factory("external_id"),
     )
+    resource_class = AdminAreaResource
 
     @button(permission=lambda r, __: r.user.is_superuser)
     def rebuild_tree(self, request):

@@ -1,0 +1,1 @@
+export { GrievancesTable } from './GrievancesTable';

@@ -3,6 +3,7 @@ import { gql } from 'apollo-boost';
 export const householdMinimal = gql`
   fragment householdMinimal on HouseholdNode {
     id
+    status
     createdAt
     residenceStatus
     size
@@ -57,6 +58,7 @@ export const householdMinimal = gql`
 export const householdDetailed = gql`
   fragment householdDetailed on HouseholdNode {
     ...householdMinimal
+    activeIndividualsCount
     countryOrigin
     country
     femaleAgeGroup05Count
