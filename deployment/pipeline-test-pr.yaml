@@ -48,15 +48,39 @@ stages:
         displayName: "[Build]"
         steps:
           - task: Docker@2
-            displayName: Build&Push Backend
             inputs:
-              command: buildAndPush
+              containerRegistry: '$(Docker.registry)'
+              command: 'login'
+          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(Build.SourceBranchName)-latest"
+            displayName: Pull latest for layer caching for this branch
+            continueOnError: true # for first build, no cache
+          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
+            displayName: Pull latest for layer caching
+            continueOnError: true # for first build, no cache
+          - task: Docker@2
+            displayName: Build
+            inputs:
+              command: build
+              arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(Build.SourceBranchName)-latest 
+              --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
               dockerfile: $(Docker.backend.filePath)
               repository: $(Docker.backend.repository)
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
                 dev-latest
+                $(Build.SourceBranchName)-latest
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              command: push
+              dockerfile: $(Docker.backend.filePath)
+              repository: $(Docker.backend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+                $(Build.SourceBranchName)-latest
 
   - stage: test_backend
     displayName: Test-Backend
