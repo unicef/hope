@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.payment.models import PaymentRecord as InternalPaymentRecord
 from hct_mis_api.apps.utils.models import AbstractSession

@@ -617,6 +617,3 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {"header": "size_h_c", "message": "Missing household required field size_h_c"},
         ]
         self.assertEqual(result, expected)
-
-
-

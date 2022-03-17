@@ -1,7 +1,10 @@
 from django.http import HttpResponse
+
 from openpyxl.writer.excel import save_virtual_workbook
 
-from hct_mis_api.apps.registration_datahub.template_generator import TemplateFileGenerator
+from hct_mis_api.apps.registration_datahub.template_generator import (
+    TemplateFileGenerator,
+)
 
 
 def download_template(request):

@@ -1,8 +1,8 @@
 from django.conf import settings
-from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
+from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.validators import ProhibitNullCharactersValidator
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import JSONField, QuerySet
 from django.db.transaction import atomic
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
@@ -30,7 +30,11 @@ class Rule(models.Model):
     name = CICharField(
         max_length=100,
         unique=True,
-        validators=[ProhibitNullCharactersValidator(), StartEndSpaceValidator, DoubleSpaceValidator],
+        validators=[
+            ProhibitNullCharactersValidator(),
+            StartEndSpaceValidator,
+            DoubleSpaceValidator,
+        ],
     )
     definition = models.TextField(blank=True, default="result.value=0")
     description = models.TextField(blank=True, null=True)

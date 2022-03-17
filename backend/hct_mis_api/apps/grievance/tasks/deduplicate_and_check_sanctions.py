@@ -3,7 +3,12 @@ from django.db import transaction
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
-from hct_mis_api.apps.household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, Document
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    NEEDS_ADJUDICATION,
+    Document,
+    Individual,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (

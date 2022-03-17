@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import logging
 import os
 import re
@@ -22,12 +20,12 @@ from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 from .config import env
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
-WWW_ROOT = "http://%s/" % DOMAIN_NAME
+WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
 FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
@@ -49,7 +47,7 @@ DEFAULT_CHARSET = "utf-8"
 ROOT_URLCONF = "hct_mis_api.urls"
 
 DATA_VOLUME = env("DATA_VOLUME")
-
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ALLOWED_EXTENSIONS = (
     "pdf",
     "doc",
@@ -196,7 +194,10 @@ TEMPLATES = [
             os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
-            "loaders": ["django.template.loaders.filesystem.Loader", "django.template.loaders.app_directories.Loader"],
+            "loaders": [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
             "context_processors": [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
@@ -286,12 +287,15 @@ INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12}},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-PASSWORD_RESET_TIMEOUT_DAYS = 31
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
@@ -322,13 +326,25 @@ LOGGING = {
     },
     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
     "handlers": {
-        "default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard"},
-        "file": {"level": LOG_LEVEL, "class": "logging.FileHandler", "filename": "debug.log"},
+        "default": {
+            "level": LOG_LEVEL,
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        "file": {
+            "level": LOG_LEVEL,
+            "class": "logging.FileHandler",
+            "filename": "debug.log",
+        },
     },
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
         "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-        "django.request": {"handlers": ["default"], "level": "ERROR", "propagate": False},
+        "django.request": {
+            "handlers": ["default"],
+            "level": "ERROR",
+            "propagate": False,
+        },
         "django.security.DisallowedHost": {
             # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
             "handlers": ["default"],
@@ -442,15 +458,24 @@ CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0), MaxValueValidator(100)]},
+        {
+            "widget": "django.forms.widgets.NumberInput",
+            "validators": [MinValueValidator(0), MaxValueValidator(100)],
+        },
     ),
     "positive_integers": (
         "django.forms.fields.IntegerField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0)]},
+        {
+            "widget": "django.forms.widgets.NumberInput",
+            "validators": [MinValueValidator(0)],
+        },
     ),
     "positive_floats": (
         "django.forms.fields.FloatField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0)]},
+        {
+            "widget": "django.forms.widgets.NumberInput",
+            "validators": [MinValueValidator(0)],
+        },
     ),
 }
 
@@ -471,7 +496,11 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
-    "CASHASSIST_DOAP_RECIPIENT": ("", "UNHCR email address where to send DOAP updates", str),
+    "CASHASSIST_DOAP_RECIPIENT": (
+        "",
+        "UNHCR email address where to send DOAP updates",
+        str,
+    ),
     "KOBO_ADMIN_CREDENTIALS": (
         "",
         "Kobo superuser credentislas in format user:password",
@@ -503,7 +532,10 @@ CONSTANCE_CONFIG = {
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
     # CASH ASSIST
-    "CASH_ASSIST_URL_PREFIX": ("", "Cash Assist base url used to generate url to cash assist"),
+    "CASH_ASSIST_URL_PREFIX": (
+        "",
+        "Cash Assist base url used to generate url to cash assist",
+    ),
     "SEND_GRIEVANCES_NOTIFICATION": (
         False,
         "Should send grievances notification",
@@ -562,7 +594,8 @@ if SENTRY_DSN:
     from hct_mis_api import get_full_version
 
     sentry_logging = LoggingIntegration(
-        level=logging.INFO, event_level=logging.ERROR  # Capture info and above as breadcrumbs  # Send errors as events
+        level=logging.INFO,
+        event_level=logging.ERROR,  # Capture info and above as breadcrumbs  # Send errors as events
     )
 
     sentry_sdk.init(

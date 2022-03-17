@@ -4,7 +4,7 @@ from enum import Enum, unique
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
+from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
@@ -12,10 +12,11 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
+from django.db.models import JSONField
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 from model_utils.models import UUIDModel
@@ -72,7 +73,9 @@ class User(AbstractUser, UUIDModel):
         default=None, null=True, blank=True, help_text="Timestamp of last sync with CA"
     )
     doap_hash = models.TextField(
-        editable=False, default="", help_text="System field used to check if changes need to be sent to CA"
+        editable=False,
+        default="",
+        help_text="System field used to check if changes need to be sent to CA",
     )
 
     def __str__(self):
@@ -89,9 +92,10 @@ class User(AbstractUser, UUIDModel):
 
     def permissions_in_business_area(self, business_area_slug):
         all_roles_permissions_list = list(
-            Role.objects.filter(user_roles__user=self, user_roles__business_area__slug=business_area_slug).values_list(
-                "permissions", flat=True
-            )
+            Role.objects.filter(
+                user_roles__user=self,
+                user_roles__business_area__slug=business_area_slug,
+            ).values_list("permissions", flat=True)
         )
         return [
             permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions or []
@@ -99,7 +103,9 @@ class User(AbstractUser, UUIDModel):
 
     def has_permission(self, permission, business_area, write=False):
         query = Role.objects.filter(
-            permissions__contains=[permission], user_roles__user=self, user_roles__business_area=business_area
+            permissions__contains=[permission],
+            user_roles__user=self,
+            user_roles__business_area=business_area,
         )
         return query.count() > 0
 
@@ -159,7 +165,9 @@ class Role(TimeStampedUUIDModel):
     )
     subsystem = models.CharField(choices=SUBSYSTEMS, max_length=30, default=HOPE)
     permissions = ChoiceArrayField(
-        models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
+        models.CharField(choices=Permissions.choices(), max_length=255),
+        null=True,
+        blank=True,
     )
 
     def clean(self):
@@ -254,10 +262,15 @@ class IncompatibleRoles(TimeStampedUUIDModel):
             raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
-        for role_pair in [(self.role_one, self.role_two), (self.role_two, self.role_one)]:
+        for role_pair in [
+            (self.role_one, self.role_two),
+            (self.role_two, self.role_one),
+        ]:
             for userrole in UserRole.objects.filter(role=role_pair[0]):
                 if UserRole.objects.filter(
-                    user=userrole.user, business_area=userrole.business_area, role=role_pair[1]
+                    user=userrole.user,
+                    business_area=userrole.business_area,
+                    role=role_pair[1],
                 ).exists():
                     failing_users.add(userrole.user.email)
 

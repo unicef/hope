@@ -1,12 +1,13 @@
 from decimal import Decimal
 
-from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import JSONField
+from django.db.models.signals import post_save
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
 
