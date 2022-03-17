@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.contrib.gis.db import models
-from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.utils.translation import ugettext_lazy as _
+from django.db.models import JSONField
+from django.utils.translation import gettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
@@ -50,11 +50,20 @@ class BusinessArea(TimeStampedUUIDModel):
     custom_fields = JSONField(default=dict, blank=True)
 
     has_data_sharing_agreement = models.BooleanField(default=False)
-    parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
+    parent = models.ForeignKey(
+        "self",
+        related_name="children",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     is_split = models.BooleanField(default=False)
 
     countries = models.ManyToManyField(
-        "AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0}, related_name="business_areas"
+        "AdminAreaLevel",
+        blank=True,
+        limit_choices_to={"admin_level": 0},
+        related_name="business_areas",
     )
     countries_new = models.ManyToManyField("geo.Country", related_name="business_areas")
     deduplication_duplicate_score = models.FloatField(
@@ -69,16 +78,20 @@ class BusinessArea(TimeStampedUUIDModel):
     )
 
     deduplication_batch_duplicates_percentage = models.IntegerField(
-        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+        default=50,
+        help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
     )
     deduplication_batch_duplicates_allowed = models.IntegerField(
-        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
+        default=5,
+        help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
     deduplication_golden_record_duplicates_percentage = models.IntegerField(
-        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+        default=50,
+        help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
     )
     deduplication_golden_record_duplicates_allowed = models.IntegerField(
-        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
+        default=5,
+        help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
     screen_beneficiary = models.BooleanField(default=False)
 
@@ -89,7 +102,7 @@ class BusinessArea(TimeStampedUUIDModel):
             self.parent.save()
         if self.children.count():
             self.is_split = True
-        super(BusinessArea, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ["name"]
@@ -137,12 +150,20 @@ class AdminAreaLevel(TimeStampedUUIDModel):
     display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
     admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"), blank=True, null=True)
     business_area = models.ForeignKey(
-        "BusinessArea", on_delete=models.SET_NULL, related_name="admin_area_level", null=True, blank=True
+        "BusinessArea",
+        on_delete=models.SET_NULL,
+        related_name="admin_area_level",
+        null=True,
+        blank=True,
     )
     area_code = models.CharField(max_length=8, blank=True, null=True)
     country_name = models.CharField(max_length=100, blank=True, null=True)
     country = models.ForeignKey(
-        "self", blank=True, null=True, limit_choices_to={"admin_level": 0}, on_delete=models.CASCADE
+        "self",
+        blank=True,
+        null=True,
+        limit_choices_to={"admin_level": 0},
+        on_delete=models.CASCADE,
     )
     datamart_id = models.CharField(max_length=8, blank=True, null=True, unique=True)
     objects = AdminAreaLevelManager()
@@ -165,7 +186,7 @@ class AdminAreaLevel(TimeStampedUUIDModel):
 
 class AdminAreaManager(TreeManager):
     def get_queryset(self):
-        return super(AdminAreaManager, self).get_queryset().order_by("title").select_related("admin_area_level")
+        return super().get_queryset().order_by("title").select_related("admin_area_level")
 
 
 class AdminArea(MPTTModel, TimeStampedUUIDModel):
@@ -181,7 +202,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     """
 
     external_id = models.CharField(
-        help_text="An ID representing this instance in  datamart", blank=True, null=True, max_length=32
+        help_text="An ID representing this instance in  datamart",
+        blank=True,
+        null=True,
+        max_length=32,
     )
 
     title = models.CharField(max_length=255)
@@ -245,7 +269,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
             queryset.filter(admin_area_level__business_area=business_area)
         queryset = queryset.order_by("title")
         return [
-            {"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code}
+            {
+                "label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"},
+                "value": admin_area.p_code,
+            }
             for admin_area in queryset
         ]
 
@@ -256,7 +283,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
             queryset.filter(admin_area_level__business_area=business_area)
         queryset = queryset.order_by("title")
         return [
-            {"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code}
+            {
+                "label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"},
+                "value": admin_area.p_code,
+            }
             for admin_area in queryset
         ]
 

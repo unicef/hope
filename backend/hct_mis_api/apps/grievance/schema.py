@@ -14,6 +14,7 @@ from django_filters import (
     ModelChoiceFilter,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
+    NumberFilter,
     OrderingFilter,
     TypedMultipleChoiceFilter,
     UUIDFilter,
@@ -84,36 +85,65 @@ logger = logging.getLogger(__name__)
 class GrievanceTicketFilter(FilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
-            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            ),
             "household": ("unicef_id",),
         },
         "sensitive_ticket_details": {
-            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            ),
             "household": ("unicef_id",),
         },
         "individual_data_update_ticket_details": {
-            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            ),
         },
         "add_individual_ticket_details": {"household": ("unicef_id",)},
         "system_flagging_ticket_details": {
-            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+            "golden_records_individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            )
         },
         "needs_adjudication_ticket_details": {
-            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+            "golden_records_individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            )
         },
     }
     TICKET_TYPES_WITH_FSP = (
         ("complaint_ticket_details", "payment_record__service_provider"),
         ("sensitive_ticket_details", "payment_record__service_provider"),
-        ("payment_verification_ticket_details", "payment_verifications__payment_record__service_provider"),
+        (
+            "payment_verification_ticket_details",
+            "payment_verifications__payment_record__service_provider",
+        ),
     )
-
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
     fsp = CharFilter(method="fsp_filter")
     admin = ModelMultipleChoiceFilter(
-        field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
+        field_name="admin",
+        method="admin_filter",
+        queryset=AdminArea.objects.filter(admin_area_level__admin_level=2),
     )
     cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
@@ -828,7 +858,10 @@ class Query(graphene.ObjectType):
         days_30_from_now = datetime.date.today() - datetime.timedelta(days=30)
         days_60_from_now = datetime.date.today() - datetime.timedelta(days=60)
 
-        feedback_categories = [GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK]
+        feedback_categories = [
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+        ]
         all_open_tickets = grievance_tickets.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
         all_closed_tickets = grievance_tickets.filter(status=GrievanceTicket.STATUS_CLOSED)
 

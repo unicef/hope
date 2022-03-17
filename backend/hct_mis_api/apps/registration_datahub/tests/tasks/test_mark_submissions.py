@@ -22,7 +22,7 @@ from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import MarkSub
 
 
 class TestMarkSubmissions(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     def setUp(self) -> None:
         call_command("loadbusinessareas")
