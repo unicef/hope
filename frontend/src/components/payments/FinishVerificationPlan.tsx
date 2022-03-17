@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { getPercentage } from '../../utils/utils';
 import {
@@ -19,9 +20,6 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 
-export interface Props {
-  cashPlanVerificationId: string;
-}
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
@@ -36,10 +34,16 @@ const DialogFooter = styled.div`
 const DialogContainer = styled.div`
   width: 700px;
 `;
+export interface FinishVerificationPlanProps {
+  cashPlanVerificationId: string;
+  cashPlanId: string;
+}
 
 export function FinishVerificationPlan({
   cashPlanVerificationId,
-}: Props): React.ReactElement {
+  cashPlanId,
+}: FinishVerificationPlanProps): React.ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -62,6 +66,7 @@ export function FinishVerificationPlan({
   const finish = async (): Promise<void> => {
     const { errors } = await mutate({
       variables: { cashPlanVerificationId },
+      refetchQueries,
     });
     if (errors) {
       showMessage(t('Error while submitting'));
@@ -80,22 +85,14 @@ export function FinishVerificationPlan({
   };
 
   const grievanceTickets = (): number => {
-    const sampleSize = verificationPlan?.sampleSize;
-    const responded = verificationPlan?.respondedCount || 0;
-
-    if (sampleSize) {
-      const pendingTicketsCount = sampleSize - responded ? 1 : 0;
+    if (verificationPlan?.sampleSize) {
       const notReceivedTicketsCount = verificationPlan?.notReceivedCount
         ? 1
         : 0;
       const receivedWithProblemsTicketsCount = verificationPlan?.receivedWithProblemsCount
         ? 1
         : 0;
-      return (
-        pendingTicketsCount +
-        notReceivedTicketsCount +
-        receivedWithProblemsTicketsCount
-      );
+      return notReceivedTicketsCount + receivedWithProblemsTicketsCount;
     }
     return null;
   };
@@ -117,6 +114,7 @@ export function FinishVerificationPlan({
         onClose={() => setFinishDialogOpen(false)}
         scroll='paper'
         aria-labelledby='form-dialog-title'
+        maxWidth='md'
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>

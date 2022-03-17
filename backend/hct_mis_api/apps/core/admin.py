@@ -34,6 +34,9 @@ from adminfilters.filters import (
     TextFieldFilter,
 )
 from constance import config
+from import_export import fields, resources
+from import_export.admin import ImportExportModelAdmin
+from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
@@ -56,7 +59,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
-from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
@@ -426,8 +429,36 @@ class AdminLevelFilter(SimpleListFilter):
         return queryset
 
 
+class AdminAreaLevelResource(resources.ModelResource):
+    business_area = fields.Field(widget=ForeignKeyWidget(BusinessArea, field="code"), attribute="business_area")
+
+    class Meta:
+        model = AdminAreaLevel
+        fields = (
+            "name",
+            "display_name",
+            "admin_level",
+            "business_area",
+            "area_code",
+            "country_name",
+            "datamart_id",
+        )
+        import_id_fields = (
+            "name",
+            "country_name",
+            "admin_level",
+        )
+
+    def after_import(self, *args, **kwargs):
+        super().after_import(*args, **kwargs)
+
+        countries = AdminAreaLevel.objects.get_countries()
+        for country, country_name in countries:
+            AdminAreaLevel.objects.filter(country_name=country_name).update(country=country)
+
+
 @admin.register(AdminAreaLevel)
-class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class AdminAreaLevelAdmin(ImportExportModelAdmin, ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("name", "country_name", "admin_level", "area_code")
     list_filter = (
         ("admin_level", AllValuesComboFilter),
@@ -435,6 +466,7 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
     )
     search_fields = ("name",)
     ordering = ("country_name", "admin_level")
+    resource_class = AdminAreaLevelResource
 
     @button(permission="load_from_datamart")
     def load_from_datamart(self, request):
@@ -484,8 +516,31 @@ class ImportAreaForm(forms.Form):
     file = forms.FileField()
 
 
+class AdminAreaResource(resources.ModelResource):
+    admin_area_level = fields.Field(
+        widget=ForeignKeyWidget(AdminAreaLevel, field="datamart_id"), attribute="admin_area_level"
+    )
+    parent = fields.Field(widget=ForeignKeyWidget(AdminArea, field="p_code"), attribute="parent")
+
+    class Meta:
+        model = AdminArea
+        fields = (
+            "external_id",
+            "title",
+            "admin_area_level",
+            "p_code",
+            "parent",
+            "geom",
+            "point",
+        )
+        import_id_fields = (
+            "title",
+            "p_code",
+        )
+
+
 @admin.register(AdminArea)
-class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
+class AdminAreaAdmin(ImportExportModelAdmin, ExtraUrlMixin, MPTTModelAdmin):
     search_fields = ("p_code", "title")
     list_display = ("title", "country", "parent", "tree_id", "external_id", "admin_area_level", "p_code")
     list_filter = (
@@ -494,6 +549,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
         TextFieldFilter.factory("tree_id"),
         TextFieldFilter.factory("external_id"),
     )
+    resource_class = AdminAreaResource
 
     @button(permission=lambda r, __: r.user.is_superuser)
     def rebuild_tree(self, request):
