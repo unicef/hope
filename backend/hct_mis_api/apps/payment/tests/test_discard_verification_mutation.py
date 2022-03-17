@@ -31,7 +31,6 @@ class TestDiscardVerificationMutation(APITestCase):
           discardCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
             cashPlan{
                 name
-                verificationStatus
                 verifications {
                     edges {
                         node {
@@ -69,12 +68,11 @@ class TestDiscardVerificationMutation(APITestCase):
             candidate_list_targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
         )
-        cash_plan = CashPlanFactory.build(
+        cash_plan = CashPlanFactory(
+            name="TEST",
             program=program,
             business_area=cls.business_area,
         )
-        cash_plan.name = "TEST"
-        cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
         cash_plan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
         cash_plan_payment_verification.save()

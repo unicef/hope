@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -78,80 +78,85 @@ export function CashPlanDetails({
   };
   return (
     <ContainerWithBorder>
-      <Title>
-        <Typography variant='h6'>{t('Cash Plan Details')}</Typography>
-      </Title>
-      <OverviewContainer>
-        <Grid container spacing={6}>
-          <Grid item xs={4}>
-            <LabelizedField label={t('Status')}>
-              <StatusContainer>
-                <StatusBox
-                  status={cashPlan.status}
-                  statusToColor={cashPlanStatusToColor}
-                />
-              </StatusContainer>
+      <Box display='flex' flexDirection='column'>
+        <Title>
+          <Typography variant='h6'>{t('Cash Plan Details')}</Typography>
+        </Title>
+        <OverviewContainer>
+          <Grid container spacing={6}>
+            <Grid item xs={4}>
+              <LabelizedField label={t('Status')}>
+                <StatusContainer>
+                  <StatusBox
+                    status={cashPlan.status}
+                    statusToColor={cashPlanStatusToColor}
+                  />
+                </StatusContainer>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField
+                label={t('Plan Start Date')}
+                value={<UniversalMoment>{cashPlan?.startDate}</UniversalMoment>}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField
+                label={t('Plan End Date')}
+                value={<UniversalMoment>{cashPlan?.endDate}</UniversalMoment>}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField
+                label={t('cash plan name')}
+                value={cashPlan.name}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField
+                label={t('delivery type')}
+                value={cashPlan.deliveryType}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField
+                label={t('assistance through')}
+                value={cashPlan.serviceProvider?.fullName}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField
+                label={t('dispertion date')}
+                value={
+                  <UniversalMoment>{cashPlan?.dispersionDate}</UniversalMoment>
+                }
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField
+                label={t('fc id')}
+                value={cashPlan.fundsCommitment}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label={t('dp id')} value={cashPlan.downPayment} />
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField
+                label={t('Target population(s)')}
+                value={renderTargetPopulations()}
+              />
+            </Grid>
+          </Grid>
+          <NumberOfHouseHolds>
+            <LabelizedField label={t('Total Number of Households')}>
+              <NumberOfHouseHoldsValue>
+                {cashPlan.totalNumberOfHouseholds}
+              </NumberOfHouseHoldsValue>
             </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t('Plan Start Date')}
-              value={<UniversalMoment>{cashPlan?.startDate}</UniversalMoment>}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t('Plan End Date')}
-              value={<UniversalMoment>{cashPlan?.endDate}</UniversalMoment>}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label={t('cash plan name')} value={cashPlan.name} />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t('delivery type')}
-              value={cashPlan.deliveryType}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t('assistance through')}
-              value={cashPlan.serviceProvider?.fullName}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t('dispertion date')}
-              value={
-                <UniversalMoment>{cashPlan?.dispersionDate}</UniversalMoment>
-              }
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t('fc id')}
-              value={cashPlan.fundsCommitment}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label={t('dp id')} value={cashPlan.downPayment} />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t('Target population(s)')}
-              value={renderTargetPopulations()}
-            />
-          </Grid>
-        </Grid>
-        <NumberOfHouseHolds>
-          <LabelizedField label={t('Total Number of Households')}>
-            <NumberOfHouseHoldsValue>
-              {cashPlan.totalNumberOfHouseholds}
-            </NumberOfHouseHoldsValue>
-          </LabelizedField>
-        </NumberOfHouseHolds>
-      </OverviewContainer>
+          </NumberOfHouseHolds>
+        </OverviewContainer>
+      </Box>
     </ContainerWithBorder>
   );
 }

@@ -305,7 +305,7 @@ export type BusinessAreaNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
-  logentrySet: LogEntryNodeConnection,
+  logentrySet: PaymentVerificationLogEntryNodeConnection,
 };
 
 
@@ -489,13 +489,15 @@ export type CashPlanNode = Node & {
   totalEntitledQuantityRevised?: Maybe<Scalars['Float']>,
   totalDeliveredQuantity?: Maybe<Scalars['Float']>,
   totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
-  verificationStatus: CashPlanVerificationStatus,
   paymentRecords: PaymentRecordNodeConnection,
   verifications: CashPlanPaymentVerificationNodeConnection,
+  cashPlanPaymentVerificationSummary?: Maybe<CashPlanPaymentVerificationSummaryNode>,
   bankReconciliationSuccess?: Maybe<Scalars['Int']>,
   bankReconciliationError?: Maybe<Scalars['Int']>,
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
   currency?: Maybe<Scalars['String']>,
+  canCreatePaymentVerificationPlan?: Maybe<Scalars['Boolean']>,
+  availablePaymentRecordsCount?: Maybe<Scalars['Int']>,
 };
 
 
@@ -537,7 +539,7 @@ export type CashPlanPaymentVerificationNode = Node & {
   status: CashPlanPaymentVerificationStatus,
   cashPlan: CashPlanNode,
   sampling: CashPlanPaymentVerificationSampling,
-  verificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  verificationChannel: CashPlanPaymentVerificationVerificationChannel,
   sampleSize?: Maybe<Scalars['Int']>,
   respondedCount?: Maybe<Scalars['Int']>,
   receivedCount?: Maybe<Scalars['Int']>,
@@ -552,6 +554,7 @@ export type CashPlanPaymentVerificationNode = Node & {
   sexFilter?: Maybe<Scalars['String']>,
   activationDate?: Maybe<Scalars['DateTime']>,
   completionDate?: Maybe<Scalars['DateTime']>,
+  unicefId: Scalars['String'],
   paymentRecordVerifications: PaymentVerificationNodeConnection,
 };
 
@@ -588,7 +591,24 @@ export enum CashPlanPaymentVerificationStatus {
   Finished = 'FINISHED'
 }
 
-export enum CashPlanPaymentVerificationVerificationMethod {
+export type CashPlanPaymentVerificationSummaryNode = Node & {
+   __typename?: 'CashPlanPaymentVerificationSummaryNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  status: CashPlanPaymentVerificationSummaryStatus,
+  activationDate?: Maybe<Scalars['DateTime']>,
+  completionDate?: Maybe<Scalars['DateTime']>,
+  cashPlan: CashPlanNode,
+};
+
+export enum CashPlanPaymentVerificationSummaryStatus {
+  Pending = 'PENDING',
+  Active = 'ACTIVE',
+  Finished = 'FINISHED'
+}
+
+export enum CashPlanPaymentVerificationVerificationChannel {
   Rapidpro = 'RAPIDPRO',
   Xlsx = 'XLSX',
   Manual = 'MANUAL'
@@ -599,12 +619,6 @@ export enum CashPlanStatus {
   DistributionCompletedWithErrors = 'DISTRIBUTION_COMPLETED_WITH_ERRORS',
   TransactionCompleted = 'TRANSACTION_COMPLETED',
   TransactionCompletedWithErrors = 'TRANSACTION_COMPLETED_WITH_ERRORS'
-}
-
-export enum CashPlanVerificationStatus {
-  Pending = 'PENDING',
-  Active = 'ACTIVE',
-  Finished = 'FINISHED'
 }
 
 export type CategoryExtrasInput = {
@@ -661,7 +675,7 @@ export type ContentTypeObjectType = {
   id: Scalars['ID'],
   appLabel: Scalars['String'],
   model: Scalars['String'],
-  logEntries: LogEntryNodeConnection,
+  logEntries: PaymentVerificationLogEntryNodeConnection,
   name?: Maybe<Scalars['String']>,
 };
 
@@ -831,6 +845,11 @@ export type DeduplicationResultNode = {
   age?: Maybe<Scalars['Int']>,
 };
 
+export type DeleteCashPlanVerificationMutation = {
+   __typename?: 'DeleteCashPlanVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
+};
+
 export type DeleteProgram = {
    __typename?: 'DeleteProgram',
   ok?: Maybe<Scalars['Boolean']>,
@@ -944,9 +963,9 @@ export type DocumentTypeNodeDocumentsArgs = {
 export enum DocumentTypeType {
   BirthCertificate = 'BIRTH_CERTIFICATE',
   DriversLicense = 'DRIVERS_LICENSE',
+  ElectoralCard = 'ELECTORAL_CARD',
   NationalId = 'NATIONAL_ID',
   NationalPassport = 'NATIONAL_PASSPORT',
-  ElectoralCard = 'ELECTORAL_CARD',
   Other = 'OTHER'
 }
 
@@ -1013,6 +1032,7 @@ export type FullListArguments = {
 
 export type GetCashplanVerificationSampleSizeInput = {
   cashPlanId?: Maybe<Scalars['ID']>,
+  cashPlanPaymentVerificationId?: Maybe<Scalars['ID']>,
   sampling: Scalars['String'],
   verificationChannel?: Maybe<Scalars['String']>,
   businessAreaSlug: Scalars['String'],
@@ -1390,14 +1410,14 @@ export type HouseholdNodeEdge = {
 
 export enum HouseholdOrgEnumerator {
   A = 'A_',
-  Unicef = 'UNICEF',
-  Partner = 'PARTNER'
+  Partner = 'PARTNER',
+  Unicef = 'UNICEF'
 }
 
 export enum HouseholdRegistrationMethod {
   A = 'A_',
-  HhRegistration = 'HH_REGISTRATION',
-  Community = 'COMMUNITY'
+  Community = 'COMMUNITY',
+  HhRegistration = 'HH_REGISTRATION'
 }
 
 export enum HouseholdResidenceStatus {
@@ -1800,9 +1820,9 @@ export type ImportedDocumentTypeNodeDocumentsArgs = {
 export enum ImportedDocumentTypeType {
   BirthCertificate = 'BIRTH_CERTIFICATE',
   DriversLicense = 'DRIVERS_LICENSE',
+  ElectoralCard = 'ELECTORAL_CARD',
   NationalId = 'NATIONAL_ID',
   NationalPassport = 'NATIONAL_PASSPORT',
-  ElectoralCard = 'ELECTORAL_CARD',
   Other = 'OTHER'
 }
 
@@ -1814,10 +1834,10 @@ export enum ImportedHouseholdCollectIndividualData {
 
 export enum ImportedHouseholdConsentSharing {
   A = 'A_',
-  Unicef = 'UNICEF',
+  GovernmentPartner = 'GOVERNMENT_PARTNER',
   HumanitarianPartner = 'HUMANITARIAN_PARTNER',
   PrivatePartner = 'PRIVATE_PARTNER',
-  GovernmentPartner = 'GOVERNMENT_PARTNER'
+  Unicef = 'UNICEF'
 }
 
 export enum ImportedHouseholdCurrency {
@@ -2074,14 +2094,14 @@ export type ImportedHouseholdNodeEdge = {
 
 export enum ImportedHouseholdOrgEnumerator {
   A = 'A_',
-  Unicef = 'UNICEF',
-  Partner = 'PARTNER'
+  Partner = 'PARTNER',
+  Unicef = 'UNICEF'
 }
 
 export enum ImportedHouseholdRegistrationMethod {
   A = 'A_',
-  HhRegistration = 'HH_REGISTRATION',
-  Community = 'COMMUNITY'
+  Community = 'COMMUNITY',
+  HhRegistration = 'HH_REGISTRATION'
 }
 
 export enum ImportedHouseholdResidenceStatus {
@@ -2101,10 +2121,10 @@ export enum ImportedIndividualDeduplicationBatchStatus {
 }
 
 export enum ImportedIndividualDeduplicationGoldenRecordStatus {
-  Unique = 'UNIQUE',
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
-  NotProcessed = 'NOT_PROCESSED'
+  NotProcessed = 'NOT_PROCESSED',
+  Unique = 'UNIQUE'
 }
 
 export enum ImportedIndividualDisability {
@@ -2137,11 +2157,11 @@ export type ImportedIndividualIdentityNodeEdge = {
 
 export enum ImportedIndividualMaritalStatus {
   A = 'A_',
-  Single = 'SINGLE',
-  Married = 'MARRIED',
-  Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
-  Separated = 'SEPARATED'
+  Married = 'MARRIED',
+  Separated = 'SEPARATED',
+  Single = 'SINGLE',
+  Widowed = 'WIDOWED'
 }
 
 export type ImportedIndividualNode = Node & {
@@ -2244,17 +2264,17 @@ export type IndividualDataUpdateIssueTypeExtras = {
 };
 
 export enum IndividualDeduplicationBatchStatus {
-  SimilarInBatch = 'SIMILAR_IN_BATCH',
   DuplicateInBatch = 'DUPLICATE_IN_BATCH',
-  UniqueInBatch = 'UNIQUE_IN_BATCH',
-  NotProcessed = 'NOT_PROCESSED'
+  NotProcessed = 'NOT_PROCESSED',
+  SimilarInBatch = 'SIMILAR_IN_BATCH',
+  UniqueInBatch = 'UNIQUE_IN_BATCH'
 }
 
 export enum IndividualDeduplicationGoldenRecordStatus {
-  Unique = 'UNIQUE',
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
-  NotProcessed = 'NOT_PROCESSED'
+  NotProcessed = 'NOT_PROCESSED',
+  Unique = 'UNIQUE'
 }
 
 export type IndividualDeleteIssueTypeExtras = {
@@ -2306,11 +2326,11 @@ export type IndividualIdentityObjectType = {
 
 export enum IndividualMaritalStatus {
   A = 'A_',
-  Single = 'SINGLE',
-  Married = 'MARRIED',
-  Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
-  Separated = 'SEPARATED'
+  Married = 'MARRIED',
+  Separated = 'SEPARATED',
+  Single = 'SINGLE',
+  Widowed = 'WIDOWED'
 }
 
 export type IndividualNode = Node & {
@@ -2504,20 +2524,20 @@ export type IndividualNodeEdge = {
 
 export enum IndividualRelationship {
   Unknown = 'UNKNOWN',
-  NonBeneficiary = 'NON_BENEFICIARY',
-  Head = 'HEAD',
-  SonDaughter = 'SON_DAUGHTER',
-  WifeHusband = 'WIFE_HUSBAND',
-  BrotherSister = 'BROTHER_SISTER',
-  MotherFather = 'MOTHER_FATHER',
   AuntUncle = 'AUNT_UNCLE',
-  GrandmotherGrandfather = 'GRANDMOTHER_GRANDFATHER',
-  MotherinlawFatherinlaw = 'MOTHERINLAW_FATHERINLAW',
+  BrotherSister = 'BROTHER_SISTER',
+  Cousin = 'COUSIN',
   DaughterinlawSoninlaw = 'DAUGHTERINLAW_SONINLAW',
-  SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
   GranddaugherGrandson = 'GRANDDAUGHER_GRANDSON',
+  GrandmotherGrandfather = 'GRANDMOTHER_GRANDFATHER',
+  Head = 'HEAD',
+  MotherFather = 'MOTHER_FATHER',
+  MotherinlawFatherinlaw = 'MOTHERINLAW_FATHERINLAW',
   NephewNiece = 'NEPHEW_NIECE',
-  Cousin = 'COUSIN'
+  NonBeneficiary = 'NON_BENEFICIARY',
+  SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
+  SonDaughter = 'SON_DAUGHTER',
+  WifeHusband = 'WIFE_HUSBAND'
 }
 
 export type IndividualRoleInHouseholdNode = {
@@ -2532,9 +2552,9 @@ export type IndividualRoleInHouseholdNode = {
 };
 
 export enum IndividualRoleInHouseholdRole {
-  Primary = 'PRIMARY',
+  NoRole = 'NO_ROLE',
   Alternate = 'ALTERNATE',
-  NoRole = 'NO_ROLE'
+  Primary = 'PRIMARY'
 }
 
 export enum IndividualSex {
@@ -2715,6 +2735,7 @@ export type Mutations = {
   activateCashPlanPaymentVerification?: Maybe<ActivateCashPlanVerificationMutation>,
   finishCashPlanPaymentVerification?: Maybe<FinishCashPlanVerificationMutation>,
   discardCashPlanPaymentVerification?: Maybe<DiscardCashPlanVerificationMutation>,
+  deleteCashPlanPaymentVerification?: Maybe<DeleteCashPlanVerificationMutation>,
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
@@ -2872,6 +2893,12 @@ export type MutationsFinishCashPlanPaymentVerificationArgs = {
 
 
 export type MutationsDiscardCashPlanPaymentVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsDeleteCashPlanPaymentVerificationArgs = {
   cashPlanVerificationId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
@@ -3094,17 +3121,9 @@ export type PaymentRecordNode = Node & {
   transactionReferenceId?: Maybe<Scalars['String']>,
   visionId?: Maybe<Scalars['String']>,
   registrationCaId?: Maybe<Scalars['String']>,
-  verifications: PaymentVerificationNodeConnection,
+  verification?: Maybe<PaymentVerificationNode>,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
-};
-
-
-export type PaymentRecordNodeVerificationsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -3138,11 +3157,39 @@ export type PaymentRecordNodeEdge = {
 };
 
 export enum PaymentRecordStatus {
-  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
-  TransactionErroneous = 'TRANSACTION_ERRONEOUS',
   DistributionSuccessful = 'DISTRIBUTION_SUCCESSFUL',
-  NotDistributed = 'NOT_DISTRIBUTED'
+  NotDistributed = 'NOT_DISTRIBUTED',
+  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
+  TransactionErroneous = 'TRANSACTION_ERRONEOUS'
 }
+
+export type PaymentVerificationLogEntryNode = Node & {
+   __typename?: 'PaymentVerificationLogEntryNode',
+  id: Scalars['ID'],
+  contentType?: Maybe<ContentTypeObjectType>,
+  objectId?: Maybe<Scalars['UUID']>,
+  action: LogEntryAction,
+  objectRepr: Scalars['String'],
+  changes?: Maybe<Scalars['Arg']>,
+  user?: Maybe<UserNode>,
+  businessArea?: Maybe<UserBusinessAreaNode>,
+  timestamp?: Maybe<Scalars['DateTime']>,
+  contentObject?: Maybe<CashPlanPaymentVerificationNode>,
+};
+
+export type PaymentVerificationLogEntryNodeConnection = {
+   __typename?: 'PaymentVerificationLogEntryNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<PaymentVerificationLogEntryNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type PaymentVerificationLogEntryNodeEdge = {
+   __typename?: 'PaymentVerificationLogEntryNodeEdge',
+  node?: Maybe<PaymentVerificationLogEntryNode>,
+  cursor: Scalars['String'],
+};
 
 export type PaymentVerificationNode = Node & {
    __typename?: 'PaymentVerificationNode',
@@ -3151,7 +3198,7 @@ export type PaymentVerificationNode = Node & {
   updatedAt: Scalars['DateTime'],
   version: Scalars['BigInt'],
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode,
-  paymentRecord: PaymentRecordNode,
+  paymentRecord?: Maybe<PaymentRecordNode>,
   status: PaymentVerificationStatus,
   statusDate?: Maybe<Scalars['DateTime']>,
   receivedAmount?: Maybe<Scalars['Float']>,
@@ -3201,8 +3248,8 @@ export type PositiveFeedbackTicketExtras = {
 };
 
 export enum ProgramFrequencyOfPayments {
-  Regular = 'REGULAR',
-  OneOff = 'ONE_OFF'
+  OneOff = 'ONE_OFF',
+  Regular = 'REGULAR'
 }
 
 export type ProgramNode = Node & {
@@ -3330,8 +3377,8 @@ export enum ProgramSector {
 }
 
 export enum ProgramStatus {
-  Draft = 'DRAFT',
   Active = 'ACTIVE',
+  Draft = 'DRAFT',
   Finished = 'FINISHED'
 }
 
@@ -3383,10 +3430,11 @@ export type Query = {
   paymentRecordDeliveryTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   cashPlanVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   cashPlanVerificationSamplingChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  cashPlanVerificationVerificationMethodChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  cashPlanVerificationVerificationChannelChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
   sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>,
+  allPaymentVerificationLogEntries?: Maybe<PaymentVerificationLogEntryNodeConnection>,
   adminArea?: Maybe<AdminAreaNode>,
   businessArea?: Maybe<BusinessAreaNode>,
   allAdminAreas?: Maybe<AdminAreaNodeConnection>,
@@ -3542,7 +3590,7 @@ export type QueryAllGrievanceTicketArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   fsp?: Maybe<Scalars['String']>,
   admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  cashPlanPaymentVerification?: Maybe<Scalars['String']>,
+  cashPlan?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
   orderBy?: Maybe<Scalars['String']>
@@ -3627,9 +3675,11 @@ export type QueryAllPaymentVerificationsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   cashPlanPaymentVerification?: Maybe<Scalars['ID']>,
+  cashPlanPaymentVerification_CashPlan?: Maybe<Scalars['ID']>,
   status?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
+  verificationChannel?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3696,6 +3746,18 @@ export type QueryAllRapidProFlowsArgs = {
 
 export type QuerySampleSizeArgs = {
   input?: Maybe<GetCashplanVerificationSampleSizeInput>
+};
+
+
+export type QueryAllPaymentVerificationLogEntriesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  objectId?: Maybe<Scalars['UUID']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  module?: Maybe<Scalars['String']>
 };
 
 
@@ -4274,15 +4336,15 @@ export type RegistrationDataImportNodeEdge = {
 };
 
 export enum RegistrationDataImportStatus {
+  Deduplication = 'DEDUPLICATION',
+  DeduplicationFailed = 'DEDUPLICATION_FAILED',
+  Importing = 'IMPORTING',
+  ImportError = 'IMPORT_ERROR',
   InReview = 'IN_REVIEW',
   Merged = 'MERGED',
   Merging = 'MERGING',
-  Importing = 'IMPORTING',
-  DeduplicationFailed = 'DEDUPLICATION_FAILED',
-  Deduplication = 'DEDUPLICATION',
-  Refused = 'REFUSED',
-  ImportError = 'IMPORT_ERROR',
-  MergeError = 'MERGE_ERROR'
+  MergeError = 'MERGE_ERROR',
+  Refused = 'REFUSED'
 }
 
 export type RegistrationDeduplicationMutation = {
@@ -5450,7 +5512,7 @@ export type UserBusinessAreaNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
-  logentrySet: LogEntryNodeConnection,
+  logentrySet: PaymentVerificationLogEntryNodeConnection,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 
@@ -5631,7 +5693,7 @@ export type UserNode = Node & {
   finalizedTargetPopulations: TargetPopulationNodeConnection,
   registrationDataImports: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
-  logs: LogEntryNodeConnection,
+  logs: PaymentVerificationLogEntryNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
 };
 
@@ -5796,9 +5858,9 @@ export type UserRoleNode = {
 };
 
 export enum UserStatus {
-  Invited = 'INVITED',
   Active = 'ACTIVE',
-  Inactive = 'INACTIVE'
+  Inactive = 'INACTIVE',
+  Invited = 'INVITED'
 }
 
 
@@ -6512,7 +6574,7 @@ export type ActivateCashPlanPaymentVerificationMutation = (
     & Pick<ActivateCashPlanVerificationMutation, 'validationErrors'>
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verifications: (
         { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
@@ -6522,7 +6584,10 @@ export type ActivateCashPlanPaymentVerificationMutation = (
             & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'activationDate'>
           )> }
         )>> }
-      ) }
+      ), cashPlanPaymentVerificationSummary: Maybe<(
+        { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
+        & Pick<CashPlanPaymentVerificationSummaryNode, 'id' | 'status'>
+      )> }
     )> }
   )> }
 );
@@ -6543,6 +6608,32 @@ export type CreateCashPlanPaymentVerificationMutation = (
   )> }
 );
 
+export type DeleteCashPlanPaymentVerificationMutationVariables = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type DeleteCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { deleteCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'DeleteCashPlanVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
 export type DiscardCashPlanPaymentVerificationMutationVariables = {
   cashPlanVerificationId: Scalars['ID']
 };
@@ -6554,7 +6645,7 @@ export type DiscardCashPlanPaymentVerificationMutation = (
     { __typename?: 'DiscardCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verifications: (
         { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
@@ -6596,7 +6687,7 @@ export type FinishCashPlanPaymentVerificationMutation = (
     { __typename?: 'FinishCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
       & { verifications: (
         { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
@@ -6606,7 +6697,10 @@ export type FinishCashPlanPaymentVerificationMutation = (
             & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'completionDate'>
           )> }
         )>> }
-      ) }
+      ), cashPlanPaymentVerificationSummary: Maybe<(
+        { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
+        & Pick<CashPlanPaymentVerificationSummaryNode, 'id' | 'status'>
+      )> }
     )> }
   )> }
 );
@@ -7446,7 +7540,7 @@ export type AllGrievanceTicketQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
   assignedTo?: Maybe<Scalars['ID']>,
-  cashPlanPaymentVerification?: Maybe<Scalars['String']>
+  cashPlan?: Maybe<Scalars['String']>
 };
 
 
@@ -7650,10 +7744,10 @@ export type GrievanceTicketQuery = (
           & { node: Maybe<(
             { __typename?: 'PaymentVerificationNode' }
             & Pick<PaymentVerificationNode, 'id'>
-            & { paymentRecord: (
+            & { paymentRecord: Maybe<(
               { __typename?: 'PaymentRecordNode' }
               & Pick<PaymentRecordNode, 'id' | 'caId'>
-            ) }
+            )> }
           )> }
         )>> }
       ) }
@@ -7845,14 +7939,17 @@ export type AllCashPlansQuery = (
       & Pick<CashPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
-        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'totalNumberOfHouseholds' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'currency' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
+        & Pick<CashPlanNode, 'id' | 'caId' | 'assistanceThrough' | 'totalNumberOfHouseholds' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'currency' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
         & { serviceProvider: Maybe<(
           { __typename?: 'ServiceProviderNode' }
           & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
         )>, program: (
           { __typename?: 'ProgramNode' }
           & Pick<ProgramNode, 'id' | 'name'>
-        ) }
+        ), cashPlanPaymentVerificationSummary: Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
+          & Pick<CashPlanPaymentVerificationSummaryNode, 'id' | 'status'>
+        )> }
       )> }
     )>> }
   )> }
@@ -7912,24 +8009,28 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
+    & Pick<CashPlanNode, 'id' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
     & { serviceProvider: Maybe<(
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
     )>, verifications: (
       { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+      & Pick<CashPlanPaymentVerificationNodeConnection, 'totalCount'>
       & { edges: Array<Maybe<(
         { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'CashPlanPaymentVerificationNode' }
-          & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationMethod' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter'>
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationChannel' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter'>
           & { ageFilter: Maybe<(
             { __typename?: 'AgeFilterObject' }
             & Pick<AgeFilterObject, 'min' | 'max'>
           )> }
         )> }
       )>> }
-    ), program: (
+    ), cashPlanPaymentVerificationSummary: Maybe<(
+      { __typename?: 'CashPlanPaymentVerificationSummaryNode' }
+      & Pick<CashPlanPaymentVerificationSummaryNode, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'activationDate' | 'completionDate'>
+    )>, program: (
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'caId'>
     ), paymentRecords: (
@@ -8021,16 +8122,10 @@ export type LookUpPaymentRecordsQuery = (
       & { node: Maybe<(
         { __typename?: 'PaymentRecordNode' }
         & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity'>
-        & { verifications: (
-          { __typename?: 'PaymentVerificationNodeConnection' }
-          & { edges: Array<Maybe<(
-            { __typename?: 'PaymentVerificationNodeEdge' }
-            & { node: Maybe<(
-              { __typename?: 'PaymentVerificationNode' }
-              & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
-            )> }
-          )>> }
-        ), cashPlan: Maybe<(
+        & { verification: Maybe<(
+          { __typename?: 'PaymentVerificationNode' }
+          & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
+        )>, cashPlan: Maybe<(
           { __typename?: 'CashPlanNode' }
           & Pick<CashPlanNode, 'id' | 'name'>
         )> }
@@ -8071,25 +8166,62 @@ export type PaymentRecordQuery = (
           { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
           & { node: Maybe<(
             { __typename?: 'CashPlanPaymentVerificationNode' }
-            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationMethod'>
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
           )> }
         )>> }
       ) }
-    )>, verifications: (
-      { __typename?: 'PaymentVerificationNodeConnection' }
-      & Pick<PaymentVerificationNodeConnection, 'totalCount'>
-      & { edges: Array<Maybe<(
-        { __typename?: 'PaymentVerificationNodeEdge' }
-        & { node: Maybe<(
-          { __typename?: 'PaymentVerificationNode' }
-          & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
-        )> }
-      )>> }
-    ), serviceProvider: (
+    )>, verification: Maybe<(
+      { __typename?: 'PaymentVerificationNode' }
+      & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+    )>, serviceProvider: (
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
     ) }
   )> }
+);
+
+export type AllPaymentVerificationLogEntriesQueryVariables = {
+  businessArea: Scalars['String'],
+  objectId?: Maybe<Scalars['UUID']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  search?: Maybe<Scalars['String']>,
+  module?: Maybe<Scalars['String']>
+};
+
+
+export type AllPaymentVerificationLogEntriesQuery = (
+  { __typename?: 'Query' }
+  & { allPaymentVerificationLogEntries: Maybe<(
+    { __typename?: 'PaymentVerificationLogEntryNodeConnection' }
+    & Pick<PaymentVerificationLogEntryNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'PaymentVerificationLogEntryNodeEdge' }
+      & Pick<PaymentVerificationLogEntryNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'PaymentVerificationLogEntryNode' }
+        & Pick<PaymentVerificationLogEntryNode, 'id' | 'action' | 'changes' | 'objectRepr' | 'objectId' | 'timestamp'>
+        & { contentType: Maybe<(
+          { __typename?: 'ContentTypeObjectType' }
+          & Pick<ContentTypeObjectType, 'id' | 'appLabel' | 'model' | 'name'>
+        )>, user: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+        )>, contentObject: Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNode' }
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId'>
+        )> }
+      )> }
+    )>> }
+  )>, logEntryActionChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 export type AllPaymentVerificationsQueryVariables = {
@@ -8101,7 +8233,9 @@ export type AllPaymentVerificationsQueryVariables = {
   cashPlanPaymentVerification?: Maybe<Scalars['ID']>,
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  cashPlanId?: Maybe<Scalars['ID']>,
+  verificationChannel?: Maybe<Scalars['String']>
 };
 
 
@@ -8119,7 +8253,10 @@ export type AllPaymentVerificationsQuery = (
       & { node: Maybe<(
         { __typename?: 'PaymentVerificationNode' }
         & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
-        & { paymentRecord: (
+        & { cashPlanPaymentVerification: (
+          { __typename?: 'CashPlanPaymentVerificationNode' }
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId' | 'verificationChannel'>
+        ), paymentRecord: Maybe<(
           { __typename?: 'PaymentRecordNode' }
           & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity' | 'currency'>
           & { household: (
@@ -8127,10 +8264,10 @@ export type AllPaymentVerificationsQuery = (
             & Pick<HouseholdNode, 'status' | 'unicefId' | 'id'>
             & { headOfHousehold: (
               { __typename?: 'IndividualNode' }
-              & Pick<IndividualNode, 'id' | 'fullName' | 'phoneNo' | 'phoneNoAlternative'>
+              & Pick<IndividualNode, 'id' | 'fullName' | 'familyName' | 'phoneNo' | 'phoneNoAlternative'>
             ) }
           ) }
-        ) }
+        )> }
       )> }
     )>> }
   )> }
@@ -8190,7 +8327,7 @@ export type PaymentRecordVerificationQuery = (
   & { paymentRecordVerification: Maybe<(
     { __typename?: 'PaymentVerificationNode' }
     & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
-    & { paymentRecord: (
+    & { paymentRecord: Maybe<(
       { __typename?: 'PaymentRecordNode' }
       & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
       & { household: (
@@ -8215,7 +8352,7 @@ export type PaymentRecordVerificationQuery = (
             { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
             & { node: Maybe<(
               { __typename?: 'CashPlanPaymentVerificationNode' }
-              & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationMethod'>
+              & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationChannel'>
             )> }
           )>> }
         ) }
@@ -8223,16 +8360,22 @@ export type PaymentRecordVerificationQuery = (
         { __typename?: 'ServiceProviderNode' }
         & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
       ) }
-    ) }
+    )> }
   )> }
 );
 
-export type PaymentVerificationStatusChoicesQueryVariables = {};
+export type PaymentVerificationChoicesQueryVariables = {};
 
 
-export type PaymentVerificationStatusChoicesQuery = (
+export type PaymentVerificationChoicesQuery = (
   { __typename?: 'Query' }
   & { paymentVerificationStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, cashPlanVerificationVerificationChannelChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, paymentRecordDeliveryTypeChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -10668,7 +10811,6 @@ export const ActivateCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
-      verificationStatus
       verifications {
         edges {
           node {
@@ -10677,6 +10819,10 @@ export const ActivateCashPlanPaymentVerificationDocument = gql`
             activationDate
           }
         }
+      }
+      cashPlanPaymentVerificationSummary {
+        id
+        status
       }
     }
     validationErrors
@@ -10776,6 +10922,74 @@ export function useCreateCashPlanPaymentVerificationMutation(baseOptions?: Apoll
 export type CreateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useCreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<CreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>;
+export const DeleteCashPlanPaymentVerificationDocument = gql`
+    mutation DeleteCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
+  deleteCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+    cashPlan {
+      id
+      status
+      statusDate
+      verifications {
+        edges {
+          node {
+            id
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            receivedCount
+            receivedWithProblemsCount
+            activationDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type DeleteCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>;
+export type DeleteCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const DeleteCashPlanPaymentVerificationComponent = (props: DeleteCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables> mutation={DeleteCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type DeleteCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withDeleteCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DeleteCashPlanPaymentVerificationMutation,
+  DeleteCashPlanPaymentVerificationMutationVariables,
+  DeleteCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables, DeleteCashPlanPaymentVerificationProps<TChildProps>>(DeleteCashPlanPaymentVerificationDocument, {
+      alias: 'deleteCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDeleteCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useDeleteCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCashPlanPaymentVerificationMutation, { data, loading, error }] = useDeleteCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *   },
+ * });
+ */
+export function useDeleteCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>(DeleteCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type DeleteCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useDeleteCashPlanPaymentVerificationMutation>;
+export type DeleteCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<DeleteCashPlanPaymentVerificationMutation>;
+export type DeleteCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteCashPlanPaymentVerificationMutation, DeleteCashPlanPaymentVerificationMutationVariables>;
 export const DiscardCashPlanPaymentVerificationDocument = gql`
     mutation DiscardCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
   discardCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
@@ -10783,7 +10997,6 @@ export const DiscardCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
-      verificationStatus
       verifications {
         edges {
           node {
@@ -10903,7 +11116,6 @@ export const FinishCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
-      verificationStatus
       verifications {
         edges {
           node {
@@ -10912,6 +11124,10 @@ export const FinishCashPlanPaymentVerificationDocument = gql`
             completionDate
           }
         }
+      }
+      cashPlanPaymentVerificationSummary {
+        id
+        status
       }
     }
   }
@@ -13348,8 +13564,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlanPaymentVerification: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlanPaymentVerification: $cashPlanPaymentVerification) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan) {
     totalCount
     pageInfo {
       startCursor
@@ -13428,7 +13644,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      orderBy: // value for 'orderBy'
  *      registrationDataImport: // value for 'registrationDataImport'
  *      assignedTo: // value for 'assignedTo'
- *      cashPlanPaymentVerification: // value for 'cashPlanPaymentVerification'
+ *      cashPlan: // value for 'cashPlan'
  *   },
  * });
  */
@@ -14045,7 +14261,6 @@ export const AllCashPlansDocument = gql`
       node {
         id
         caId
-        verificationStatus
         assistanceThrough
         totalNumberOfHouseholds
         serviceProvider {
@@ -14069,6 +14284,10 @@ export const AllCashPlansDocument = gql`
         totalDeliveredQuantity
         totalUndeliveredQuantity
         updatedAt
+        cashPlanPaymentVerificationSummary {
+          id
+          status
+        }
       }
     }
   }
@@ -14231,6 +14450,8 @@ export const CashPlanDocument = gql`
     query CashPlan($id: ID!) {
   cashPlan(id: $id) {
     id
+    canCreatePaymentVerificationPlan
+    availablePaymentRecordsCount
     name
     startDate
     endDate
@@ -14249,20 +14470,21 @@ export const CashPlanDocument = gql`
     caId
     caHashId
     dispersionDate
-    verificationStatus
     bankReconciliationSuccess
     bankReconciliationError
     totalNumberOfHouseholds
     verifications {
+      totalCount
       edges {
         node {
           id
+          unicefId
           status
           sampleSize
           receivedCount
           notReceivedCount
           respondedCount
-          verificationMethod
+          verificationChannel
           sampling
           receivedCount
           receivedWithProblemsCount
@@ -14279,6 +14501,14 @@ export const CashPlanDocument = gql`
           sexFilter
         }
       }
+    }
+    cashPlanPaymentVerificationSummary {
+      id
+      createdAt
+      updatedAt
+      status
+      activationDate
+      completionDate
     }
     program {
       id
@@ -14476,14 +14706,10 @@ export const LookUpPaymentRecordsDocument = gql`
       node {
         id
         caId
-        verifications {
-          edges {
-            node {
-              id
-              status
-              receivedAmount
-            }
-          }
+        verification {
+          id
+          status
+          receivedAmount
         }
         cashPlan {
           id
@@ -14586,21 +14812,16 @@ export const PaymentRecordDocument = gql`
           node {
             id
             status
-            verificationMethod
+            verificationChannel
           }
         }
       }
     }
-    verifications {
-      totalCount
-      edges {
-        node {
-          id
-          status
-          statusDate
-          receivedAmount
-        }
-      }
+    verification {
+      id
+      status
+      statusDate
+      receivedAmount
     }
     currency
     entitlementQuantity
@@ -14647,7 +14868,7 @@ export const PaymentRecordDocument = gql`
           node {
             id
             status
-            verificationMethod
+            verificationChannel
           }
         }
       }
@@ -14713,9 +14934,9 @@ export function usePaymentRecordLazyQuery(baseOptions?: ApolloReactHooks.LazyQue
 export type PaymentRecordQueryHookResult = ReturnType<typeof usePaymentRecordQuery>;
 export type PaymentRecordLazyQueryHookResult = ReturnType<typeof usePaymentRecordLazyQuery>;
 export type PaymentRecordQueryResult = ApolloReactCommon.QueryResult<PaymentRecordQuery, PaymentRecordQueryVariables>;
-export const AllPaymentVerificationsDocument = gql`
-    query AllPaymentVerifications($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $cashPlanPaymentVerification: ID, $search: String, $status: String, $businessArea: String) {
-  allPaymentVerifications(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, cashPlanPaymentVerification: $cashPlanPaymentVerification, search: $search, status: $status, businessArea: $businessArea) {
+export const AllPaymentVerificationLogEntriesDocument = gql`
+    query AllPaymentVerificationLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String) {
+  allPaymentVerificationLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -14727,6 +14948,104 @@ export const AllPaymentVerificationsDocument = gql`
       cursor
       node {
         id
+        action
+        changes
+        objectRepr
+        objectId
+        timestamp
+        contentType {
+          id
+          appLabel
+          model
+          name
+        }
+        user {
+          id
+          firstName
+          lastName
+        }
+        contentObject {
+          id
+          unicefId
+        }
+      }
+    }
+  }
+  logEntryActionChoices {
+    name
+    value
+  }
+}
+    `;
+export type AllPaymentVerificationLogEntriesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>, 'query'> & ({ variables: AllPaymentVerificationLogEntriesQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllPaymentVerificationLogEntriesComponent = (props: AllPaymentVerificationLogEntriesComponentProps) => (
+      <ApolloReactComponents.Query<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables> query={AllPaymentVerificationLogEntriesDocument} {...props} />
+    );
+    
+export type AllPaymentVerificationLogEntriesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables> & TChildProps;
+export function withAllPaymentVerificationLogEntries<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllPaymentVerificationLogEntriesQuery,
+  AllPaymentVerificationLogEntriesQueryVariables,
+  AllPaymentVerificationLogEntriesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables, AllPaymentVerificationLogEntriesProps<TChildProps>>(AllPaymentVerificationLogEntriesDocument, {
+      alias: 'allPaymentVerificationLogEntries',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllPaymentVerificationLogEntriesQuery__
+ *
+ * To run a query within a React component, call `useAllPaymentVerificationLogEntriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllPaymentVerificationLogEntriesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllPaymentVerificationLogEntriesQuery({
+ *   variables: {
+ *      businessArea: // value for 'businessArea'
+ *      objectId: // value for 'objectId'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      search: // value for 'search'
+ *      module: // value for 'module'
+ *   },
+ * });
+ */
+export function useAllPaymentVerificationLogEntriesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>(AllPaymentVerificationLogEntriesDocument, baseOptions);
+      }
+export function useAllPaymentVerificationLogEntriesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>(AllPaymentVerificationLogEntriesDocument, baseOptions);
+        }
+export type AllPaymentVerificationLogEntriesQueryHookResult = ReturnType<typeof useAllPaymentVerificationLogEntriesQuery>;
+export type AllPaymentVerificationLogEntriesLazyQueryHookResult = ReturnType<typeof useAllPaymentVerificationLogEntriesLazyQuery>;
+export type AllPaymentVerificationLogEntriesQueryResult = ApolloReactCommon.QueryResult<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>;
+export const AllPaymentVerificationsDocument = gql`
+    query AllPaymentVerifications($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $cashPlanPaymentVerification: ID, $search: String, $status: String, $businessArea: String, $cashPlanId: ID, $verificationChannel: String) {
+  allPaymentVerifications(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, cashPlanPaymentVerification: $cashPlanPaymentVerification, cashPlanPaymentVerification_CashPlan: $cashPlanId, search: $search, status: $status, businessArea: $businessArea, verificationChannel: $verificationChannel) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        cashPlanPaymentVerification {
+          id
+          unicefId
+          verificationChannel
+        }
         paymentRecord {
           id
           caId
@@ -14739,6 +15058,7 @@ export const AllPaymentVerificationsDocument = gql`
             headOfHousehold {
               id
               fullName
+              familyName
               phoneNo
               phoneNoAlternative
             }
@@ -14790,6 +15110,8 @@ export function withAllPaymentVerifications<TProps, TChildProps = {}>(operationO
  *      search: // value for 'search'
  *      status: // value for 'status'
  *      businessArea: // value for 'businessArea'
+ *      cashPlanId: // value for 'cashPlanId'
+ *      verificationChannel: // value for 'verificationChannel'
  *   },
  * });
  */
@@ -15006,7 +15328,7 @@ export const PaymentRecordVerificationDocument = gql`
             node {
               id
               status
-              verificationMethod
+              verificationChannel
             }
           }
         }
@@ -15072,56 +15394,64 @@ export function usePaymentRecordVerificationLazyQuery(baseOptions?: ApolloReactH
 export type PaymentRecordVerificationQueryHookResult = ReturnType<typeof usePaymentRecordVerificationQuery>;
 export type PaymentRecordVerificationLazyQueryHookResult = ReturnType<typeof usePaymentRecordVerificationLazyQuery>;
 export type PaymentRecordVerificationQueryResult = ApolloReactCommon.QueryResult<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>;
-export const PaymentVerificationStatusChoicesDocument = gql`
-    query paymentVerificationStatusChoices {
+export const PaymentVerificationChoicesDocument = gql`
+    query paymentVerificationChoices {
   paymentVerificationStatusChoices {
+    name
+    value
+  }
+  cashPlanVerificationVerificationChannelChoices {
+    name
+    value
+  }
+  paymentRecordDeliveryTypeChoices {
     name
     value
   }
 }
     `;
-export type PaymentVerificationStatusChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>, 'query'>;
+export type PaymentVerificationChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>, 'query'>;
 
-    export const PaymentVerificationStatusChoicesComponent = (props: PaymentVerificationStatusChoicesComponentProps) => (
-      <ApolloReactComponents.Query<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables> query={PaymentVerificationStatusChoicesDocument} {...props} />
+    export const PaymentVerificationChoicesComponent = (props: PaymentVerificationChoicesComponentProps) => (
+      <ApolloReactComponents.Query<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables> query={PaymentVerificationChoicesDocument} {...props} />
     );
     
-export type PaymentVerificationStatusChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables> & TChildProps;
-export function withPaymentVerificationStatusChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+export type PaymentVerificationChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables> & TChildProps;
+export function withPaymentVerificationChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
   TProps,
-  PaymentVerificationStatusChoicesQuery,
-  PaymentVerificationStatusChoicesQueryVariables,
-  PaymentVerificationStatusChoicesProps<TChildProps>>) {
-    return ApolloReactHoc.withQuery<TProps, PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables, PaymentVerificationStatusChoicesProps<TChildProps>>(PaymentVerificationStatusChoicesDocument, {
-      alias: 'paymentVerificationStatusChoices',
+  PaymentVerificationChoicesQuery,
+  PaymentVerificationChoicesQueryVariables,
+  PaymentVerificationChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables, PaymentVerificationChoicesProps<TChildProps>>(PaymentVerificationChoicesDocument, {
+      alias: 'paymentVerificationChoices',
       ...operationOptions
     });
 };
 
 /**
- * __usePaymentVerificationStatusChoicesQuery__
+ * __usePaymentVerificationChoicesQuery__
  *
- * To run a query within a React component, call `usePaymentVerificationStatusChoicesQuery` and pass it any options that fit your needs.
- * When your component renders, `usePaymentVerificationStatusChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * To run a query within a React component, call `usePaymentVerificationChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentVerificationChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = usePaymentVerificationStatusChoicesQuery({
+ * const { data, loading, error } = usePaymentVerificationChoicesQuery({
  *   variables: {
  *   },
  * });
  */
-export function usePaymentVerificationStatusChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>) {
-        return ApolloReactHooks.useQuery<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>(PaymentVerificationStatusChoicesDocument, baseOptions);
+export function usePaymentVerificationChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, baseOptions);
       }
-export function usePaymentVerificationStatusChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>(PaymentVerificationStatusChoicesDocument, baseOptions);
+export function usePaymentVerificationChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, baseOptions);
         }
-export type PaymentVerificationStatusChoicesQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesQuery>;
-export type PaymentVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesLazyQuery>;
-export type PaymentVerificationStatusChoicesQueryResult = ApolloReactCommon.QueryResult<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>;
+export type PaymentVerificationChoicesQueryHookResult = ReturnType<typeof usePaymentVerificationChoicesQuery>;
+export type PaymentVerificationChoicesLazyQueryHookResult = ReturnType<typeof usePaymentVerificationChoicesLazyQuery>;
+export type PaymentVerificationChoicesQueryResult = ApolloReactCommon.QueryResult<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>;
 export const SampleSizeDocument = gql`
     query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
   sampleSize(input: $input) {
@@ -17744,6 +18074,9 @@ export type ResolversTypes = {
   Node: ResolverTypeWrapper<Node>,
   ID: ResolverTypeWrapper<Scalars['ID']>,
   ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
+  PaymentVerificationLogEntryNodeConnection: ResolverTypeWrapper<PaymentVerificationLogEntryNodeConnection>,
+  PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<PaymentVerificationLogEntryNodeEdge>,
+  PaymentVerificationLogEntryNode: ResolverTypeWrapper<PaymentVerificationLogEntryNode>,
   LogEntryAction: LogEntryAction,
   Arg: ResolverTypeWrapper<Scalars['Arg']>,
   UserNode: ResolverTypeWrapper<UserNode>,
@@ -17828,13 +18161,12 @@ export type ResolversTypes = {
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
   ReportNode: ResolverTypeWrapper<ReportNode>,
   ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
-  CashPlanVerificationStatus: CashPlanVerificationStatus,
   CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
   CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
   CashPlanPaymentVerificationNode: ResolverTypeWrapper<CashPlanPaymentVerificationNode>,
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
-  CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  CashPlanPaymentVerificationVerificationChannel: CashPlanPaymentVerificationVerificationChannel,
   AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>,
   PaymentVerificationNodeConnection: ResolverTypeWrapper<PaymentVerificationNodeConnection>,
   PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>,
@@ -17844,6 +18176,8 @@ export type ResolversTypes = {
   TicketPaymentVerificationDetailsNodeEdge: ResolverTypeWrapper<TicketPaymentVerificationDetailsNodeEdge>,
   TicketPaymentVerificationDetailsNode: ResolverTypeWrapper<TicketPaymentVerificationDetailsNode>,
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+  CashPlanPaymentVerificationSummaryNode: ResolverTypeWrapper<CashPlanPaymentVerificationSummaryNode>,
+  CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   TicketComplaintDetailsNodeConnection: ResolverTypeWrapper<TicketComplaintDetailsNodeConnection>,
@@ -18052,6 +18386,7 @@ export type ResolversTypes = {
   ActivateCashPlanVerificationMutation: ResolverTypeWrapper<ActivateCashPlanVerificationMutation>,
   FinishCashPlanVerificationMutation: ResolverTypeWrapper<FinishCashPlanVerificationMutation>,
   DiscardCashPlanVerificationMutation: ResolverTypeWrapper<DiscardCashPlanVerificationMutation>,
+  DeleteCashPlanVerificationMutation: ResolverTypeWrapper<DeleteCashPlanVerificationMutation>,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>,
@@ -18101,6 +18436,9 @@ export type ResolversParentTypes = {
   Node: Node,
   ID: Scalars['ID'],
   ContentTypeObjectType: ContentTypeObjectType,
+  PaymentVerificationLogEntryNodeConnection: PaymentVerificationLogEntryNodeConnection,
+  PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge,
+  PaymentVerificationLogEntryNode: PaymentVerificationLogEntryNode,
   LogEntryAction: LogEntryAction,
   Arg: Scalars['Arg'],
   UserNode: UserNode,
@@ -18185,13 +18523,12 @@ export type ResolversParentTypes = {
   ReportNodeEdge: ReportNodeEdge,
   ReportNode: ReportNode,
   ServiceProviderNode: ServiceProviderNode,
-  CashPlanVerificationStatus: CashPlanVerificationStatus,
   CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
   CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
   CashPlanPaymentVerificationNode: CashPlanPaymentVerificationNode,
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
-  CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  CashPlanPaymentVerificationVerificationChannel: CashPlanPaymentVerificationVerificationChannel,
   AgeFilterObject: AgeFilterObject,
   PaymentVerificationNodeConnection: PaymentVerificationNodeConnection,
   PaymentVerificationNodeEdge: PaymentVerificationNodeEdge,
@@ -18201,6 +18538,8 @@ export type ResolversParentTypes = {
   TicketPaymentVerificationDetailsNodeEdge: TicketPaymentVerificationDetailsNodeEdge,
   TicketPaymentVerificationDetailsNode: TicketPaymentVerificationDetailsNode,
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+  CashPlanPaymentVerificationSummaryNode: CashPlanPaymentVerificationSummaryNode,
+  CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   TicketComplaintDetailsNodeConnection: TicketComplaintDetailsNodeConnection,
@@ -18409,6 +18748,7 @@ export type ResolversParentTypes = {
   ActivateCashPlanVerificationMutation: ActivateCashPlanVerificationMutation,
   FinishCashPlanVerificationMutation: FinishCashPlanVerificationMutation,
   DiscardCashPlanVerificationMutation: DiscardCashPlanVerificationMutation,
+  DeleteCashPlanVerificationMutation: DeleteCashPlanVerificationMutation,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount,
@@ -18590,7 +18930,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
-  logentrySet?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
+  logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
 };
 
 export type BusinessAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeConnection'] = ResolversParentTypes['BusinessAreaNodeConnection']> = {
@@ -18638,13 +18978,15 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  verificationStatus?: Resolver<ResolversTypes['CashPlanVerificationStatus'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
   verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
+  cashPlanPaymentVerificationSummary?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationSummaryNode']>, ParentType, ContextType>,
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  canCreatePaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  availablePaymentRecordsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
@@ -18667,7 +19009,7 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   status?: Resolver<ResolversTypes['CashPlanPaymentVerificationStatus'], ParentType, ContextType>,
   cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
   sampling?: Resolver<ResolversTypes['CashPlanPaymentVerificationSampling'], ParentType, ContextType>,
-  verificationMethod?: Resolver<ResolversTypes['CashPlanPaymentVerificationVerificationMethod'], ParentType, ContextType>,
+  verificationChannel?: Resolver<ResolversTypes['CashPlanPaymentVerificationVerificationChannel'], ParentType, ContextType>,
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   respondedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   receivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -18682,6 +19024,7 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
 };
 
@@ -18695,6 +19038,16 @@ export type CashPlanPaymentVerificationNodeConnectionResolvers<ContextType = any
 export type CashPlanPaymentVerificationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeEdge'] = ResolversParentTypes['CashPlanPaymentVerificationNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type CashPlanPaymentVerificationSummaryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationSummaryNode'] = ResolversParentTypes['CashPlanPaymentVerificationSummaryNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['CashPlanPaymentVerificationSummaryStatus'], ParentType, ContextType>,
+  activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
 };
 
 export type ChartDatasetNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDatasetNode'] = ResolversParentTypes['ChartDatasetNode']> = {
@@ -18736,7 +19089,7 @@ export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   model?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  logEntries?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
+  logEntries?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -18808,6 +19161,10 @@ export type DeduplicationResultNodeResolvers<ContextType = any, ParentType exten
   proximityToScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type DeleteCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteCashPlanVerificationMutation'] = ResolversParentTypes['DeleteCashPlanVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
@@ -19563,6 +19920,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   activateCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['ActivateCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsActivateCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   finishCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['FinishCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsFinishCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   discardCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DiscardCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDiscardCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
+  deleteCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DeleteCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDeleteCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
@@ -19592,7 +19950,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'LogEntryNode' | 'PaymentVerificationLogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -19641,7 +19999,7 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   registrationCaId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  verifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, PaymentRecordNodeVerificationsArgs>,
+  verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeSensitiveTicketDetailsArgs>,
 };
@@ -19658,13 +20016,38 @@ export type PaymentRecordNodeEdgeResolvers<ContextType = any, ParentType extends
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type PaymentVerificationLogEntryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNode'] = ResolversParentTypes['PaymentVerificationLogEntryNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  contentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
+  objectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>,
+  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  contentObject?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationLogEntryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNodeConnection'] = ResolversParentTypes['PaymentVerificationLogEntryNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationLogEntryNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationLogEntryNodeEdge'] = ResolversParentTypes['PaymentVerificationLogEntryNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type PaymentVerificationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNode'] = ResolversParentTypes['PaymentVerificationNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   cashPlanPaymentVerification?: Resolver<ResolversTypes['CashPlanPaymentVerificationNode'], ParentType, ContextType>,
-  paymentRecord?: Resolver<ResolversTypes['PaymentRecordNode'], ParentType, ContextType>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
   statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   receivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
@@ -19776,10 +20159,11 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   paymentRecordDeliveryTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   cashPlanVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   cashPlanVerificationSamplingChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  cashPlanVerificationVerificationMethodChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  cashPlanVerificationVerificationChannelChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
   sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,
+  allPaymentVerificationLogEntries?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentVerificationLogEntriesArgs, 'businessArea'>>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
@@ -20726,7 +21110,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeRegistrationdataimportSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeReportsArgs>,
-  logentrySet?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
+  logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
   permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
 };
 
@@ -20771,7 +21155,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeFinalizedTargetPopulationsArgs>,
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserNodeReportsArgs>,
-  logs?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
+  logs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserNodeBusinessAreasArgs>,
 };
 
@@ -20835,6 +21219,7 @@ export type Resolvers<ContextType = any> = {
   CashPlanPaymentVerificationNode?: CashPlanPaymentVerificationNodeResolvers<ContextType>,
   CashPlanPaymentVerificationNodeConnection?: CashPlanPaymentVerificationNodeConnectionResolvers<ContextType>,
   CashPlanPaymentVerificationNodeEdge?: CashPlanPaymentVerificationNodeEdgeResolvers<ContextType>,
+  CashPlanPaymentVerificationSummaryNode?: CashPlanPaymentVerificationSummaryNodeResolvers<ContextType>,
   ChartDatasetNode?: ChartDatasetNodeResolvers<ContextType>,
   ChartDetailedDatasetsNode?: ChartDetailedDatasetsNodeResolvers<ContextType>,
   ChartGrievanceTicketsNode?: ChartGrievanceTicketsNodeResolvers<ContextType>,
@@ -20856,6 +21241,7 @@ export type Resolvers<ContextType = any> = {
   DateTime?: GraphQLScalarType,
   Decimal?: GraphQLScalarType,
   DeduplicationResultNode?: DeduplicationResultNodeResolvers<ContextType>,
+  DeleteCashPlanVerificationMutation?: DeleteCashPlanVerificationMutationResolvers<ContextType>,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
@@ -20927,6 +21313,9 @@ export type Resolvers<ContextType = any> = {
   PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
   PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,
   PaymentRecordNodeEdge?: PaymentRecordNodeEdgeResolvers<ContextType>,
+  PaymentVerificationLogEntryNode?: PaymentVerificationLogEntryNodeResolvers<ContextType>,
+  PaymentVerificationLogEntryNodeConnection?: PaymentVerificationLogEntryNodeConnectionResolvers<ContextType>,
+  PaymentVerificationLogEntryNodeEdge?: PaymentVerificationLogEntryNodeEdgeResolvers<ContextType>,
   PaymentVerificationNode?: PaymentVerificationNodeResolvers<ContextType>,
   PaymentVerificationNodeConnection?: PaymentVerificationNodeConnectionResolvers<ContextType>,
   PaymentVerificationNodeEdge?: PaymentVerificationNodeEdgeResolvers<ContextType>,

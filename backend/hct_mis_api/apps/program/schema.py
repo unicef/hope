@@ -1,3 +1,4 @@
+from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models import (
     Case,
     Count,
@@ -124,7 +125,7 @@ class CashPlanFilter(FilterSet):
     search = CharFilter(method="search_filter")
     delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE)
     verification_status = MultipleChoiceFilter(
-        field_name="verification_status", choices=CashPlanPaymentVerification.STATUS_CHOICES
+        field_name="cash_plan_payment_verification_summary__status", choices=CashPlanPaymentVerification.STATUS_CHOICES
     )
     business_area = CharFilter(
         field_name="business_area__slug",
@@ -147,7 +148,7 @@ class CashPlanFilter(FilterSet):
             "status",
             "total_number_of_hh",
             "total_entitled_quantity",
-            "verification_status",
+            "cash_plan_payment_verification_summary__status",
             "total_persons_covered",
             "total_delivered_quantity",
             "total_undelivered_quantity",
@@ -191,6 +192,8 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     total_delivered_quantity = graphene.Float()
     total_entitled_quantity = graphene.Float()
     total_undelivered_quantity = graphene.Float()
+    can_create_payment_verification_plan = graphene.Boolean()
+    available_payment_records_count = graphene.Int()
 
     class Meta:
         model = CashPlan
@@ -199,6 +202,14 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_number_of_households(self, info, **kwargs):
         return self.total_number_of_households
+
+    def resolve_can_create_payment_verification_plan(self, info, **kwargs):
+        return self.can_create_payment_verification_plan
+
+    def resolve_available_payment_records_count(self, info, **kwargs):
+        return self.payment_records.filter(
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+        ).count()
 
 
 class ChartProgramFilter(FilterSet):
@@ -293,9 +304,18 @@ class Query(graphene.ObjectType):
     def resolve_all_cash_plans(self, info, **kwargs):
         return CashPlan.objects.annotate(
             custom_order=Case(
-                When(verification_status=CashPlanPaymentVerification.STATUS_ACTIVE, then=Value(1)),
-                When(verification_status=CashPlanPaymentVerification.STATUS_PENDING, then=Value(2)),
-                When(verification_status=CashPlanPaymentVerification.STATUS_FINISHED, then=Value(3)),
+                When(
+                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_ACTIVE,
+                    then=Value(1),
+                ),
+                When(
+                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_PENDING,
+                    then=Value(2),
+                ),
+                When(
+                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_FINISHED,
+                    then=Value(3),
+                ),
                 output_field=IntegerField(),
             )
         ).order_by("-updated_at", "custom_order")

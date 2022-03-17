@@ -7,7 +7,7 @@ import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
 import { LogEntryNode } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
-import { headCells } from './headCels';
+import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
 
 const ButtonContainer = styled.div`
@@ -34,7 +34,7 @@ interface LogRowProps {
 }
 
 export function LogRow({ logEntry }: LogRowProps): ReactElement {
-  const {changes} = logEntry;
+  const { changes } = logEntry;
   const [expanded, setExpanded] = useState(false);
   const classes = useStyles({});
   const keys = Object.keys(changes);

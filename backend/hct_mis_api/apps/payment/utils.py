@@ -1,9 +1,12 @@
 from decimal import Decimal
 from math import ceil
 
+from django.utils import timezone
+
 from django.db.models import Q
 
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentRecord, CashPlanPaymentVerificationSummary
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 
 
@@ -12,7 +15,7 @@ def get_number_of_samples(payment_records_sample_count, confidence_interval, mar
 
     variable = 0.5
     z_score = NormalDist().inv_cdf(confidence_interval + (1 - confidence_interval) / 2)
-    theoretical_sample = (z_score ** 2) * variable * (1 - variable) / margin_of_error ** 2
+    theoretical_sample = (z_score**2) * variable * (1 - variable) / margin_of_error**2
     actual_sample = ceil(
         (payment_records_sample_count * theoretical_sample / (theoretical_sample + payment_records_sample_count)) * 1.5
     )
@@ -82,3 +85,5 @@ def get_payment_records_for_dashboard(year, business_area_slug, filters, only_wi
         },
         year_filter_path="delivery_date",
     )
+
+

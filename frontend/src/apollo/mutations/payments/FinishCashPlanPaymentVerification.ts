@@ -9,7 +9,6 @@ export const FINISH_CASH_PLAN_PAYMENT_VERIFICATION = gql`
         id
         status
         statusDate
-        verificationStatus
         verifications {
           edges {
             node {
@@ -18,6 +17,10 @@ export const FINISH_CASH_PLAN_PAYMENT_VERIFICATION = gql`
               completionDate
             }
           }
+        }
+        cashPlanPaymentVerificationSummary {
+          id
+          status
         }
       }
     }
