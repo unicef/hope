@@ -29,7 +29,7 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 
 
 class TestBatchDeduplication(BaseElasticSearchTestCase):
-    multi_db = True
+    databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):
@@ -283,7 +283,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
-    multi_db = True
+    databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):

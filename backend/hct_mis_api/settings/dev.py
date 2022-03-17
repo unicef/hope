@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os
 
 from .base import *  # noqa: ignore=F403
@@ -11,7 +9,7 @@ TEMPLATES[0]["OPTIONS"]["debug"] = True
 
 # domains/hosts etc.
 DOMAIN_NAME = os.getenv("DOMAIN", "localhost:8000")
-WWW_ROOT = "http://%s/" % DOMAIN_NAME
+WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2"])
 
 # other

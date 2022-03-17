@@ -2,11 +2,10 @@ import logging
 from itertools import chain
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _
+from django.db.models import JSONField, Q
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
@@ -197,7 +196,10 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "individual": "individual",
             "household": "household",
         },
-        "individual_data_update_ticket_details": {"individual": "individual", "household": "individual__household"},
+        "individual_data_update_ticket_details": {
+            "individual": "individual",
+            "household": "individual__household",
+        },
         "add_individual_ticket_details": {
             "household": "household",
         },
@@ -325,10 +327,15 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     consent = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
     linked_tickets = models.ManyToManyField(
-        to="GrievanceTicket", through="GrievanceTicketThrough", related_name="linked_tickets_related"
+        to="GrievanceTicket",
+        through="GrievanceTicketThrough",
+        related_name="linked_tickets_related",
     )
     registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport", null=True, blank=True, on_delete=models.CASCADE
+        "registration_data.RegistrationDataImport",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
     )
     unicef_id = models.CharField(max_length=250, blank=True, default="")
     extras = JSONField(blank=True, default=dict)
@@ -401,10 +408,14 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):
     main_ticket = models.ForeignKey(
-        "GrievanceTicket", on_delete=models.CASCADE, related_name="grievance_tickets_through_main"
+        "GrievanceTicket",
+        on_delete=models.CASCADE,
+        related_name="grievance_tickets_through_main",
     )
     linked_ticket = models.ForeignKey(
-        "GrievanceTicket", on_delete=models.CASCADE, related_name="grievance_tickets_through_linked"
+        "GrievanceTicket",
+        on_delete=models.CASCADE,
+        related_name="grievance_tickets_through_linked",
     )
 
 
@@ -413,7 +424,11 @@ class TicketNote(TimeStampedUUIDModel):
         verbose_name=_("Description"),
         help_text=_("The content of the customers query."),
     )
-    ticket = models.ForeignKey("grievance.GrievanceTicket", related_name="ticket_notes", on_delete=models.CASCADE)
+    ticket = models.ForeignKey(
+        "grievance.GrievanceTicket",
+        related_name="ticket_notes",
+        on_delete=models.CASCADE,
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -426,7 +441,9 @@ class TicketNote(TimeStampedUUIDModel):
 
 class TicketComplaintDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="complaint_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="complaint_ticket_details",
+        on_delete=models.CASCADE,
     )
     payment_record = models.ForeignKey(
         "payment.PaymentRecord",
@@ -450,7 +467,9 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
 
 class TicketSensitiveDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="sensitive_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="sensitive_ticket_details",
+        on_delete=models.CASCADE,
     )
     payment_record = models.ForeignKey(
         "payment.PaymentRecord",
@@ -474,7 +493,9 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
 
 class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="household_data_update_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="household_data_update_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -487,7 +508,9 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
 
 class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="individual_data_update_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="individual_data_update_ticket_details",
+        on_delete=models.CASCADE,
     )
     individual = models.ForeignKey(
         "household.Individual",
@@ -505,7 +528,9 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
 
 class TicketAddIndividualDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="add_individual_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="add_individual_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -519,7 +544,9 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
 
 class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="delete_individual_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="delete_individual_ticket_details",
+        on_delete=models.CASCADE,
     )
     individual = models.ForeignKey(
         "household.Individual",
@@ -551,11 +578,15 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
 
 class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="system_flagging_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="system_flagging_ticket_details",
+        on_delete=models.CASCADE,
     )
     golden_records_individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
     sanction_list_individual = models.ForeignKey(
-        "sanction_list.SanctionListIndividual", related_name="+", on_delete=models.CASCADE
+        "sanction_list.SanctionListIndividual",
+        related_name="+",
+        on_delete=models.CASCADE,
     )
     approve_status = models.BooleanField(default=False)
     role_reassign_data = JSONField(default=dict)
@@ -563,7 +594,9 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
 
 class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="needs_adjudication_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="needs_adjudication_ticket_details",
+        on_delete=models.CASCADE,
     )
     golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
     possible_duplicate = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
@@ -582,7 +615,9 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="payment_verification_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="payment_verification_ticket_details",
+        on_delete=models.CASCADE,
     )
     payment_verifications = models.ManyToManyField("payment.PaymentVerification", related_name="ticket_details")
     payment_verification_status = models.CharField(
@@ -593,7 +628,9 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="positive_feedback_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="positive_feedback_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -611,7 +648,9 @@ class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
 
 class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="negative_feedback_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="negative_feedback_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -629,7 +668,9 @@ class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
 
 class TicketReferralDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="referral_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="referral_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",

@@ -1,12 +1,13 @@
 import re
 
-from django.db.models import Prefetch, Q, Sum
+from django.db.models import IntegerField, Prefetch, Q, Sum, DecimalField
 from django.db.models.functions import Coalesce, Lower
 
 import graphene
 from django_filters import (
     BooleanFilter,
     CharFilter,
+    DateFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
@@ -107,6 +108,7 @@ class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
+    head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=AdminArea.objects.filter(level=2))
     withdrawn = BooleanFilter(field_name="withdrawn")
@@ -167,7 +169,7 @@ class IndividualFilter(FilterSet):
     business_area = CharFilter(
         field_name="business_area__slug",
     )
-    age = AgeRangeFilter(field_name="birth_date")
+    age = AgeRangeFilter(field_name="birth_date__date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
@@ -650,9 +652,11 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
-        return Household.objects.annotate(total_cash=Coalesce(Sum("payment_records__delivered_quantity"), 0)).order_by(
-            "created_at"
-        )
+        return Household.objects.annotate(
+            total_cash=Coalesce(
+                Sum("payment_records__delivered_quantity", output_field=DecimalField()), 0, output_field=IntegerField()
+            )
+        ).order_by("created_at")
 
     def resolve_residence_status_choices(self, info, **kwargs):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)

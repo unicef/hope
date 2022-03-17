@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-from tomlkit.api import loads
 import json
 
-with open("backend/pyproject.toml", "r") as f:
+from tomlkit.api import loads
+
+with open("backend/pyproject.toml") as f:
     toml_dict = loads(f.read())
-with open("frontend/package.json", "r") as f:
+with open("frontend/package.json") as f:
     json_dict = json.load(f)
 backend_version = toml_dict["tool"]["poetry"]["version"]
 frontend_version = json_dict["version"]

@@ -1,6 +1,6 @@
-from django.utils.translation import ugettext_lazy as _
-from django_countries.data import COUNTRIES
+from django.utils.translation import gettext_lazy as _
 
+from django_countries.data import COUNTRIES
 
 NATIONALITIES = (
     ("AF", _("Afghan")),

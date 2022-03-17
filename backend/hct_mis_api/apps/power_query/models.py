@@ -3,9 +3,9 @@ import pickle
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.db.models import JSONField
 from django.template import Context, Template
 from django.utils import timezone
 
@@ -90,7 +90,12 @@ class Query(models.Model):
                     "debug_info": debug_info,
                 }
                 r, __ = Dataset.objects.update_or_create(
-                    query=self, defaults={"last_run": timezone.now(), "result": pickle.dumps(result), "info": info}
+                    query=self,
+                    defaults={
+                        "last_run": timezone.now(),
+                        "result": pickle.dumps(result),
+                        "info": info,
+                    },
                 )
 
             return result, debug_info

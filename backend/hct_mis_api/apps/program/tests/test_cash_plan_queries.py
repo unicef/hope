@@ -1,13 +1,14 @@
 from datetime import datetime
-from parameterized import parameterized
 
 from django.core.management import call_command
 
+from parameterized import parameterized
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 
 QUERY_SINGLE_CASH_PLAN = """
@@ -138,7 +139,6 @@ class TestCashPlanQueries(APITestCase):
     )
     def test_cash_plans(self, name, permissions, query):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
         variables = {}
         if "single" in name:
             variables["id"] = self.id_to_base64("c7e768f1-5626-413e-a032-5fb18789f985", "CashPlanNode")

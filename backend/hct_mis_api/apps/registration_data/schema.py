@@ -1,18 +1,24 @@
-import graphene
 from django.db.models.functions import Lower
-from django_filters import FilterSet, DateFilter, CharFilter
+
+import graphene
+from django_filters import CharFilter, DateFilter, FilterSet
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
-    DjangoPermissionFilterConnectionField,
-    hopePermissionClass,
-    Permissions,
     BaseNodePermissionMixin,
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopePermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import get_count_and_percentage, CustomOrderingFilter
-from hct_mis_api.apps.household.models import DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, DUPLICATE_IN_BATCH
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, get_count_and_percentage
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
+    NEEDS_ADJUDICATION,
+    UNIQUE,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import UNIQUE_IN_BATCH
 

@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestReportsQuery::test_reports_query_all_0_all_with_permissions 1'] = {
