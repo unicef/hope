@@ -2,5 +2,5 @@
 set -e
 
 echo 'Waiting for container `mongo`.'
-dockerize -timeout=40s -wait tcp://${KPI_MONGO_HOST}:${KPI_MONGO_PORT}
-echo 'Container `mongo` up.'
+wait-for-it -t 40 -h ${KPI_MONGO_HOST} -p ${KPI_MONGO_PORT}
+echo 'Container `mongo` up.'}

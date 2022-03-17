@@ -9,7 +9,7 @@ import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {

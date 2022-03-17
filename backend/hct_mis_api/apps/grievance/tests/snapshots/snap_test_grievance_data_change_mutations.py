@@ -316,3 +316,41 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
         }
     ]
 }
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_household_data_change_0_with_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'addIndividualTicketDetails': None,
+                    'category': 2,
+                    'description': 'Test',
+                    'householdDataUpdateTicketDetails': None,
+                    'individualDataUpdateTicketDetails': None,
+                    'issueType': 17,
+                    'sensitiveTicketDetails': None
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_household_data_change_1_without_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'createGrievanceTicket'
+            ]
+        }
+    ]
+}

@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permission 1'] = {
@@ -120,6 +119,44 @@ snapshots['TestIndividualQuery::test_individual_query_single_1_without_permissio
             'message': 'Permission Denied',
             'path': [
                 'individual'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'birthDate': '1969-11-29',
+                        'familyName': 'Franklin',
+                        'fullName': 'Jenna Franklin',
+                        'givenName': 'Jenna',
+                        'phoneNo': '001-296-358-5428-607'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
             ]
         }
     ]

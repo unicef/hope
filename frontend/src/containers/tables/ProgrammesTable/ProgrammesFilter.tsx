@@ -16,7 +16,7 @@ import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import TextField from '../../../shared/TextField';
-import { FieldLabel } from '../../../components/FieldLabel';
+import { FieldLabel } from '../../../components/core/FieldLabel';
 
 const Container = styled(Paper)`
   display: flex;

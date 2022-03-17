@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.forms.models import modelform_factory
 
 import openpyxl
 
@@ -115,11 +117,21 @@ class IndividualXlsxUpdate:
     def _update_single_individual(self, row, individual):
         old_individual = copy_model_object(individual)
 
+        updated = {}
         for cell in row:
             if cell.col_idx in self.columns_match_indexes:
                 continue
-            attr = self.attr_by_column_index[cell.col_idx]
-            setattr(individual, attr["name"], cell.value)
+            name = self.attr_by_column_index[cell.col_idx]["name"]
+            updated[name] = cell.value
+
+        IndividualForm = modelform_factory(Individual, fields=updated.keys())
+        form = IndividualForm(instance=individual, data=updated)
+
+        for field in form.fields.values():
+            field.required = False
+
+        if not form.is_valid():
+            raise ValidationError(form.errors)
 
         log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", None, old_individual, individual)
 
