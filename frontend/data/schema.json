@@ -716,7 +716,7 @@
                 "defaultValue": null
               },
               {
-                "name": "cashPlanPaymentVerification",
+                "name": "cashPlan",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -1459,6 +1459,16 @@
                 "defaultValue": null
               },
               {
+                "name": "cashPlanPaymentVerification_CashPlan",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "status",
                 "description": null,
                 "type": {
@@ -1480,6 +1490,16 @@
               },
               {
                 "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "verificationChannel",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -1993,7 +2013,7 @@
             "deprecationReason": null
           },
           {
-            "name": "cashPlanVerificationVerificationMethodChoices",
+            "name": "cashPlanVerificationVerificationChannelChoices",
             "description": null,
             "args": [],
             "type": {
@@ -2073,6 +2093,103 @@
             "type": {
               "kind": "OBJECT",
               "name": "GetCashplanVerificationSampleSizeObject",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "allPaymentVerificationLogEntries",
+            "description": null,
+            "args": [
+              {
+                "name": "before",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "after",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "first",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "last",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "objectId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "UUID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "search",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "module",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentVerificationLogEntryNodeConnection",
               "ofType": null
             },
             "isDeprecated": false,
@@ -6021,6 +6138,11 @@
           },
           {
             "kind": "OBJECT",
+            "name": "PaymentVerificationLogEntryNode",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
             "name": "UserNode",
             "ofType": null
           },
@@ -6112,6 +6234,11 @@
           {
             "kind": "OBJECT",
             "name": "TicketPaymentVerificationDetailsNode",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "CashPlanPaymentVerificationSummaryNode",
             "ofType": null
           },
           {
@@ -6374,7 +6501,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "LogEntryNodeConnection",
+                "name": "PaymentVerificationLogEntryNodeConnection",
                 "ofType": null
               }
             },
@@ -6396,6 +6523,265 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PaymentVerificationLogEntryNodeConnection",
+        "description": null,
+        "fields": [
+          {
+            "name": "pageInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "PageInfo",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "edges",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "PaymentVerificationLogEntryNodeEdge",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "edgeCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PaymentVerificationLogEntryNodeEdge",
+        "description": null,
+        "fields": [
+          {
+            "name": "node",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "PaymentVerificationLogEntryNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cursor",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "PaymentVerificationLogEntryNode",
+        "description": null,
+        "fields": [
+          {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "contentType",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "ContentTypeObjectType",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "objectId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "UUID",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "action",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "LogEntryAction",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "objectRepr",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "changes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "UserNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "businessArea",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "UserBusinessAreaNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "timestamp",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "contentObject",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CashPlanPaymentVerificationNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
         "enumValues": null,
         "possibleTypes": null
       },
@@ -7857,7 +8243,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "LogEntryNodeConnection",
+                "name": "PaymentVerificationLogEntryNodeConnection",
                 "ofType": null
               }
             },
@@ -7958,12 +8344,6 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "INVITED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "ACTIVE",
             "description": null,
             "isDeprecated": false,
@@ -7971,6 +8351,12 @@
           },
           {
             "name": "INACTIVE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "INVITED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -9679,7 +10065,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "LogEntryNodeConnection",
+                "name": "PaymentVerificationLogEntryNodeConnection",
                 "ofType": null
               }
             },
@@ -12251,6 +12637,30 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "DEDUPLICATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "DEDUPLICATION_FAILED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "IMPORTING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "IMPORT_ERROR",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "IN_REVIEW",
             "description": null,
             "isDeprecated": false,
@@ -12269,37 +12679,13 @@
             "deprecationReason": null
           },
           {
-            "name": "IMPORTING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DEDUPLICATION_FAILED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DEDUPLICATION",
+            "name": "MERGE_ERROR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "REFUSED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "IMPORT_ERROR",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "MERGE_ERROR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -16320,7 +16706,7 @@
             "deprecationReason": null
           },
           {
-            "name": "SINGLE",
+            "name": "DIVORCED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -16332,19 +16718,19 @@
             "deprecationReason": null
           },
           {
-            "name": "WIDOWED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DIVORCED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "SEPARATED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SINGLE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "WIDOWED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -16367,13 +16753,73 @@
             "deprecationReason": null
           },
           {
-            "name": "NON_BENEFICIARY",
+            "name": "AUNT_UNCLE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "BROTHER_SISTER",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COUSIN",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "DAUGHTERINLAW_SONINLAW",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "GRANDDAUGHER_GRANDSON",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "GRANDMOTHER_GRANDFATHER",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "HEAD",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "MOTHER_FATHER",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "MOTHERINLAW_FATHERINLAW",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "NEPHEW_NIECE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "NON_BENEFICIARY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SISTERINLAW_BROTHERINLAW",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -16386,66 +16832,6 @@
           },
           {
             "name": "WIFE_HUSBAND",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "BROTHER_SISTER",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "MOTHER_FATHER",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "AUNT_UNCLE",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "GRANDMOTHER_GRANDFATHER",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "MOTHERINLAW_FATHERINLAW",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DAUGHTERINLAW_SONINLAW",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "SISTERINLAW_BROTHERINLAW",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "GRANDDAUGHER_GRANDSON",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "NEPHEW_NIECE",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "COUSIN",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -16495,12 +16881,6 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "UNIQUE",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "DUPLICATE",
             "description": null,
             "isDeprecated": false,
@@ -16517,6 +16897,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "UNIQUE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -16530,25 +16916,25 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "SIMILAR_IN_BATCH",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "DUPLICATE_IN_BATCH",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "UNIQUE_IN_BATCH",
+            "name": "NOT_PROCESSED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "NOT_PROCESSED",
+            "name": "SIMILAR_IN_BATCH",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "UNIQUE_IN_BATCH",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -17197,58 +17583,13 @@
             "deprecationReason": null
           },
           {
-            "name": "verifications",
+            "name": "verification",
             "description": null,
-            "args": [
-              {
-                "name": "before",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "after",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "first",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "last",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
+            "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PaymentVerificationNodeConnection",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "PaymentVerificationNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -17388,18 +17729,6 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "TRANSACTION_SUCCESSFUL",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "TRANSACTION_ERRONEOUS",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "DISTRIBUTION_SUCCESSFUL",
             "description": null,
             "isDeprecated": false,
@@ -17407,6 +17736,18 @@
           },
           {
             "name": "NOT_DISTRIBUTED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "TRANSACTION_SUCCESSFUL",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "TRANSACTION_ERRONEOUS",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -17880,22 +18221,6 @@
             "deprecationReason": null
           },
           {
-            "name": "verificationStatus",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "CashPlanVerificationStatus",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "paymentRecords",
             "description": null,
             "args": [
@@ -18010,6 +18335,18 @@
             "deprecationReason": null
           },
           {
+            "name": "cashPlanPaymentVerificationSummary",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CashPlanPaymentVerificationSummaryNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "bankReconciliationSuccess",
             "description": null,
             "args": [],
@@ -18052,6 +18389,30 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "canCreatePaymentVerificationPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "availablePaymentRecordsCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
               "ofType": null
             },
             "isDeprecated": false,
@@ -19003,13 +19364,13 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "DRAFT",
+            "name": "ACTIVE",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "ACTIVE",
+            "name": "DRAFT",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -19042,13 +19403,13 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "REGULAR",
+            "name": "ONE_OFF",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "ONE_OFF",
+            "name": "REGULAR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -22804,35 +23165,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "ENUM",
-        "name": "CashPlanVerificationStatus",
-        "description": null,
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "PENDING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "ACTIVE",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "FINISHED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
         "name": "CashPlanPaymentVerificationNodeConnection",
         "description": null,
@@ -23060,7 +23392,7 @@
             "deprecationReason": null
           },
           {
-            "name": "verificationMethod",
+            "name": "verificationChannel",
             "description": null,
             "args": [],
             "type": {
@@ -23068,7 +23400,7 @@
               "name": null,
               "ofType": {
                 "kind": "ENUM",
-                "name": "CashPlanPaymentVerificationVerificationMethod",
+                "name": "CashPlanPaymentVerificationVerificationChannel",
                 "ofType": null
               }
             },
@@ -23256,6 +23588,22 @@
             "deprecationReason": null
           },
           {
+            "name": "unicefId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "paymentRecordVerifications",
             "description": null,
             "args": [
@@ -23378,7 +23726,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "CashPlanPaymentVerificationVerificationMethod",
+        "name": "CashPlanPaymentVerificationVerificationChannel",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -23640,13 +23988,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "PaymentRecordNode",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "PaymentRecordNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -24083,6 +24427,156 @@
           },
           {
             "name": "RECEIVED_WITH_ISSUES",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "CashPlanPaymentVerificationSummaryNode",
+        "description": null,
+        "fields": [
+          {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "createdAt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedAt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "status",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "CashPlanPaymentVerificationSummaryStatus",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "activationDate",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "completionDate",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "cashPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "CashPlanNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Node",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "CashPlanPaymentVerificationSummaryStatus",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "PENDING",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ACTIVE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "FINISHED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -28047,6 +28541,12 @@
             "deprecationReason": null
           },
           {
+            "name": "ELECTORAL_CARD",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "NATIONAL_ID",
             "description": null,
             "isDeprecated": false,
@@ -28054,12 +28554,6 @@
           },
           {
             "name": "NATIONAL_PASSPORT",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "ELECTORAL_CARD",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -28610,7 +29104,7 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "PRIMARY",
+            "name": "NO_ROLE",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -28622,7 +29116,7 @@
             "deprecationReason": null
           },
           {
-            "name": "NO_ROLE",
+            "name": "PRIMARY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -28765,13 +29259,13 @@
             "deprecationReason": null
           },
           {
-            "name": "UNICEF",
+            "name": "PARTNER",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "PARTNER",
+            "name": "UNICEF",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -28794,13 +29288,13 @@
             "deprecationReason": null
           },
           {
-            "name": "HH_REGISTRATION",
+            "name": "COMMUNITY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "COMMUNITY",
+            "name": "HH_REGISTRATION",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -31361,6 +31855,16 @@
             "defaultValue": null
           },
           {
+            "name": "cashPlanPaymentVerificationId",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
             "name": "sampling",
             "description": null,
             "type": {
@@ -33012,7 +33516,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "LogEntryNodeConnection",
+                "name": "PaymentVerificationLogEntryNodeConnection",
                 "ofType": null
               }
             },
@@ -34521,7 +35025,7 @@
             "deprecationReason": null
           },
           {
-            "name": "UNICEF",
+            "name": "GOVERNMENT_PARTNER",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -34539,7 +35043,7 @@
             "deprecationReason": null
           },
           {
-            "name": "GOVERNMENT_PARTNER",
+            "name": "UNICEF",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -35391,7 +35895,7 @@
             "deprecationReason": null
           },
           {
-            "name": "SINGLE",
+            "name": "DIVORCED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -35403,19 +35907,19 @@
             "deprecationReason": null
           },
           {
-            "name": "WIDOWED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DIVORCED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "SEPARATED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SINGLE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "WIDOWED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -36654,12 +37158,6 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "UNIQUE",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "DUPLICATE",
             "description": null,
             "isDeprecated": false,
@@ -36673,6 +37171,12 @@
           },
           {
             "name": "NOT_PROCESSED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "UNIQUE",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -38623,6 +39127,12 @@
             "deprecationReason": null
           },
           {
+            "name": "ELECTORAL_CARD",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "NATIONAL_ID",
             "description": null,
             "isDeprecated": false,
@@ -38630,12 +39140,6 @@
           },
           {
             "name": "NATIONAL_PASSPORT",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "ELECTORAL_CARD",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -38863,13 +39367,13 @@
             "deprecationReason": null
           },
           {
-            "name": "UNICEF",
+            "name": "PARTNER",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "PARTNER",
+            "name": "UNICEF",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -38892,13 +39396,13 @@
             "deprecationReason": null
           },
           {
-            "name": "HH_REGISTRATION",
+            "name": "COMMUNITY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "COMMUNITY",
+            "name": "HH_REGISTRATION",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -41232,6 +41736,43 @@
             "type": {
               "kind": "OBJECT",
               "name": "DiscardCashPlanVerificationMutation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deleteCashPlanPaymentVerification",
+            "description": null,
+            "args": [
+              {
+                "name": "cashPlanVerificationId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "version",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "BigInt",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "DeleteCashPlanVerificationMutation",
               "ofType": null
             },
             "isDeprecated": false,
@@ -45258,6 +45799,29 @@
       {
         "kind": "OBJECT",
         "name": "DiscardCashPlanVerificationMutation",
+        "description": null,
+        "fields": [
+          {
+            "name": "cashPlan",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "CashPlanNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DeleteCashPlanVerificationMutation",
         "description": null,
         "fields": [
           {
