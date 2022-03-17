@@ -32,6 +32,11 @@ stages:
             inputs:
               versionSpec: "14.x"
             displayName: "Install Node.js"
+          - task: Cache@2
+            inputs:
+              key: $(Build.SourcesDirectory)/frontend/yarn.lock
+              path: $(Build.SourcesDirectory)/frontend/node_modules
+            displayName: Cache Yarn packages
           - script: yarn
             displayName: "Yarn Install"
             workingDirectory: 'frontend'
