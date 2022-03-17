@@ -11,7 +11,6 @@ snapshots['TestDiscardVerificationMutation::test_discard_active_0_with_permissio
         'discardCashPlanPaymentVerification': {
             'cashPlan': {
                 'name': 'TEST',
-                'verificationStatus': 'PENDING',
                 'verifications': {
                     'edges': [
                         {

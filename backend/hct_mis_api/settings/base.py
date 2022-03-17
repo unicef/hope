@@ -183,6 +183,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
+    "author.middlewares.AuthorDefaultBackendMiddleware",
 ]
 
 TEMPLATES = [
@@ -277,6 +278,7 @@ OTHER_APPS = [
     "django_celery_beat",
     "explorer",
     "import_export",
+    "import_export_celery",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -771,3 +773,20 @@ IMPERSONATE = {
 # )
 
 POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
+
+IMPORT_EXPORT_CELERY_INIT_MODULE = "hct_mis_api.apps.core.celery"
+
+
+def resource():  # Optional
+    from hct_mis_api.apps.core.admin import AdminAreaResource
+
+    return AdminAreaResource
+
+
+IMPORT_EXPORT_CELERY_MODELS = {
+    "AdminArea": {
+        "app_label": "core",
+        "model_name": "AdminArea",
+        "resource": resource,  # Optional
+    }
+}

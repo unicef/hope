@@ -1,16 +1,16 @@
-import styled from 'styled-components';
+import { Checkbox } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { Checkbox } from '@material-ui/core';
-import { PaymentRecordNode } from '../../../__generated__/graphql';
+import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
-import { StatusBox } from '../../core/StatusBox';
+import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
+import { StatusBox } from '../../core/StatusBox';
+import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -37,8 +37,7 @@ export function LookUpPaymentRecordTableRow({
   const businessArea = useBusinessArea();
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(paymentRecord.id);
-  const received =
-    paymentRecord?.verifications?.edges?.[0]?.node?.receivedAmount;
+  const received = paymentRecord?.verification?.receivedAmount;
   return (
     <ClickableTableRow
       onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
@@ -60,10 +59,10 @@ export function LookUpPaymentRecordTableRow({
         </BlackLink>
       </TableCell>
       <TableCell align='left'>
-        {paymentRecord.verifications?.edges[0]?.node.status ? (
+        {paymentRecord.verification?.status ? (
           <StatusContainer>
             <StatusBox
-              status={paymentRecord.verifications?.edges[0]?.node.status}
+              status={paymentRecord.verification?.status}
               statusToColor={verificationRecordsStatusToColor}
             />
           </StatusContainer>

@@ -21,6 +21,9 @@
             "name": "LogEntryNode"
           },
           {
+            "name": "PaymentVerificationLogEntryNode"
+          },
+          {
             "name": "UserNode"
           },
           {
@@ -76,6 +79,9 @@
           },
           {
             "name": "TicketPaymentVerificationDetailsNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationSummaryNode"
           },
           {
             "name": "TicketComplaintDetailsNode"

@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Optional
 
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
@@ -254,12 +255,6 @@ class CashPlan(TimeStampedUUIDModel):
         db_index=True,
         null=True,
     )
-    verification_status = models.CharField(
-        max_length=10,
-        default=CashPlanPaymentVerification.STATUS_PENDING,
-        choices=CashPlanPaymentVerification.STATUS_CHOICES,
-        db_index=True,
-    )
 
     def __str__(self):
         return self.name
@@ -285,6 +280,22 @@ class CashPlan(TimeStampedUUIDModel):
     def currency(self):
         payment_record = self.payment_records.first()
         return payment_record.currency if payment_record else None
+
+    @property
+    def can_create_payment_verification_plan(self):
+        return self.available_payment_records().count() > 0
+
+    def available_payment_records(self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None):
+        params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
+
+        if payment_verification_plan:
+            params &= Q(
+                Q(verification__isnull=True) | Q(verification__cash_plan_payment_verification=payment_verification_plan)
+            )
+        else:
+            params &= Q(verification__isnull=True)
+
+        return self.payment_records.filter(params).distinct()
 
     class Meta:
         verbose_name = "Cash Plan"

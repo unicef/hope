@@ -22,14 +22,11 @@ variables:
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.registry_trn: "ICTD-HOPE-DEV-ACR"
-  Docker.repository_trn: "uniappsk8shopedev" 
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-DEV-ACR"
-    Docker.repository: "uniappsk8shopedev"
     Docker.url: "uniappsakshopedev.azurecr.io"
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-PRD-ACR"
-    Docker.repository: "uniappsakshope"
     Docker.url: "uniappsakshope.azurecr.io"
   ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
     Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
@@ -50,15 +47,34 @@ stages:
         displayName: "[BACKEND]"
         steps:
           - task: Docker@2
-            displayName: Build&Push
             inputs:
-              command: buildAndPush
+              containerRegistry: '$(Docker.registry)'
+              command: 'login'
+          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
+            displayName: Pull latest for layer caching
+            continueOnError: true # for first build, no cache
+          - task: Docker@2
+            displayName: Build
+            inputs:
+              command: build
+              dockerfile: $(Docker.backend.filePath)
+              repository: $(Docker.backend.repository)
+              arguments: '--cache-from=$(Docker.url)/$(Docker.backend.repository):latest'
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
+                latest
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              command: push
               dockerfile: $(Docker.backend.filePath)
               repository: $(Docker.backend.repository)
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
+                latest
 
           - task: Docker@2
             displayName: Build&Push
@@ -72,22 +88,58 @@ stages:
                 $(Build.BuildId)
                 $(Build.SourceVersion)
 
+
+
       - job: build_push_frontend
         pool:
           vmImage: ubuntu-latest
         displayName: "[FRONTEND]"
         steps:
           - task: Docker@2
+            inputs:
+              containerRegistry: '$(Docker.registry)'
+              command: 'login'
+          - script: "docker pull $(Docker.url)/$(Docker.frontend.repository)-stage1:latest"
+            displayName: Pull latest for layer caching
+            continueOnError: true # for first build, no cache
+          - task: Docker@2
+            displayName: Build Stage 1
+            inputs:
+              command: build
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)-stage1
+              arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) 
+                       --cache-from=$(Docker.url)/$(Docker.frontend.repository)-stage1:latest
+                       --target=dev"
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
+                latest
+          - task: Docker@2
+            displayName: Push Stage 1
+            inputs:
+              command: push
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)-stage1
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
+                latest
+          - task: Docker@2
             displayName: Build
             inputs:
               command: build
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
-              arguments: --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn)
+              arguments: "--build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn) 
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-stage1:latest"
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
+                latest
 
           - task: Docker@2
             displayName: Push
@@ -99,6 +151,7 @@ stages:
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
+                latest
 
           - task: Docker@2
             displayName: Build frontend for TRN

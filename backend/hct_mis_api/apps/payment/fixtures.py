@@ -16,7 +16,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     ServiceProvider,
 )
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.program.fixtures import (
+    CashPlanFactory,
+    CashPlanPaymentVerificationSummaryFactory,
+)
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
@@ -99,8 +102,8 @@ class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
         CashPlanPaymentVerification.SAMPLING_CHOICES,
         getter=lambda c: c[0],
     )
-    verification_method = fuzzy.FuzzyChoice(
-        CashPlanPaymentVerification.VERIFICATION_METHOD_CHOICES,
+    verification_channel = fuzzy.FuzzyChoice(
+        CashPlanPaymentVerification.VERIFICATION_CHANNEL_CHOICES,
         getter=lambda c: c[0],
     )
     cash_plan = factory.Iterator(CashPlan.objects.all())
@@ -247,6 +250,13 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
 
+    @factory.post_generation
+    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        CashPlanPaymentVerificationSummaryFactory(cash_plan=self)
+
 
 class RealPaymentRecordFactory(factory.DjangoModelFactory):
     class Meta:
@@ -267,6 +277,7 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     ca_id = factory.Iterator(CaIdIterator("PR"))
     ca_hash_id = factory.Faker("uuid4")
     household = factory.LazyAttribute(lambda o: Household.objects.order_by("?").first())
+    head_of_household = factory.LazyAttribute(lambda o: o.household.head_of_household)
     total_persons_covered = factory.fuzzy.FuzzyInteger(1, 7)
     distribution_modality = factory.Faker(
         "sentence",
