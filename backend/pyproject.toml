@@ -113,6 +113,7 @@ urllib3 = "1.26.2"
 xlrd = "1.2.0"
 argh = "^0.26.2"
 django-import-export = "^2.7.0"
+django-import-export-celery = "^1.1.6"
 
 [tool.poetry.dev-dependencies]
 django-webtest = "^1.9.7"
