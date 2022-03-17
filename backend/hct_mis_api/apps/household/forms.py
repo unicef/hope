@@ -43,7 +43,7 @@ class UpdateByXlsxStage2Form(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.xlsx_columns = kwargs.pop("xlsx_columns", [])
-        super(UpdateByXlsxStage2Form, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["xlsx_match_columns"] = forms.MultipleChoiceField(
             widget=forms.CheckboxSelectMultiple,
             choices=[(xlsx_column, xlsx_column) for xlsx_column in self.xlsx_columns],

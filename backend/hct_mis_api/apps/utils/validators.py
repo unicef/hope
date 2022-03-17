@@ -1,7 +1,6 @@
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
-
 DoubleSpaceValidator = RegexValidator(
     r"\s{2,}",
     _("Double spaces characters are not allowed."),

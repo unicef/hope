@@ -105,8 +105,8 @@ class TestBasicRule(TestCase):
         release2 = rule.release()
         release1.refresh_from_db()
         self.assertEqual(release2.version, 2)
-        self.assertNotEquals(release1, release2)
-        self.assertNotEquals(release1, release2)
+        self.assertNotEqual(release1, release2)
+        self.assertNotEqual(release1, release2)
 
     def test_nested_rule(self):
         rule1 = Rule.objects.create(name="Rule1", definition="result.value=101", enabled=True)

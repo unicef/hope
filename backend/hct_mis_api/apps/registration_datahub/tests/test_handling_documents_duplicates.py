@@ -8,15 +8,15 @@ from hct_mis_api.apps.household.models import (
     DUPLICATE,
     FEMALE,
     HEAD,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
     MALE,
     NEEDS_ADJUDICATION,
     SON_DAUGHTER,
     UNIQUE,
     WIFE_HUSBAND,
-    Individual,
-    DocumentType,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
     Document,
+    DocumentType,
+    Individual,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
@@ -33,7 +33,7 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
-    multi_db = True
+    databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):

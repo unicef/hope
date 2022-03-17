@@ -57,7 +57,7 @@ class CellMock:
 
 
 class TestRdiCreateTask(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):
@@ -348,7 +348,7 @@ class TestRdiCreateTask(TestCase):
 
 
 class TestRdiKoboCreateTask(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     @staticmethod
     def _return_test_image(*args, **kwargs):

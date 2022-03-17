@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {

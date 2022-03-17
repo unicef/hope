@@ -60,7 +60,7 @@ def basicauth(view):
             return view(request, *args, **kwargs)
 
         if "HTTP_AUTHORIZATION" in request.META:
-            auth = request.META["HTTP_AUTHORIZATION"].split()
+            auth = request.headers["Authorization"].split()
             if len(auth) == 2:
                 if auth[0].lower() == "basic":
                     uname, passwd = base64.b64decode(auth[1].encode()).decode().split(":")

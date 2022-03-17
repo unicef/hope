@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
