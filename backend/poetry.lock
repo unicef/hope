@@ -432,6 +432,18 @@ python-dateutil = "2.6.0"
 [package.source]
 type = "url"
 url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip"
+
+[[package]]
+name = "django-author"
+version = "1.0.4"
+description = "Add special User ForeignKey fields which update automatically"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+setuptools-git = "*"
+
 [[package]]
 name = "django-celery-beat"
 version = "2.2.1"
@@ -587,6 +599,19 @@ python-versions = ">=3.6"
 diff-match-patch = "*"
 Django = ">=2.2"
 tablib = {version = ">=3.0.0", extras = ["html", "ods", "xls", "xlsx", "yaml"]}
+
+[[package]]
+name = "django-import-export-celery"
+version = "1.1.6"
+description = "Process long running django imports and exports in celery"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Django = "*"
+django-author = "*"
+django-import-export = "*"
 
 [[package]]
 name = "django-js-asset"
@@ -1579,6 +1604,14 @@ sqlalchemy = ["sqlalchemy (>=1.2)"]
 tornado = ["tornado (>=5)"]
 
 [[package]]
+name = "setuptools-git"
+version = "1.2"
+description = "Setuptools revision control system plugin for Git"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "simplejson"
 version = "3.17.6"
 description = "Simple, fast, extensible JSON encoder/decoder for Python"
@@ -1939,7 +1972,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "bf76de93961d2419c81fdff9b3641e10d3d3004ec9695d6728efce380f476ddf"
+content-hash = "e441b80383fe0c14c1ef16b7ca2ffc07b3993235715e3e96505626c8bcea1b95"
 
 [metadata.files]
 amqp = [
@@ -2138,6 +2171,9 @@ django-appconf = [
     {file = "django_appconf-1.0.5-py3-none-any.whl", hash = "sha256:ae9f864ee1958c815a965ed63b3fba4874eec13de10236ba063a788f9a17389d"},
 ]
 django-auditlog = []
+django-author = [
+    {file = "django-author-1.0.4.tar.gz", hash = "sha256:484562e6ad217d215c29cce6d199f875de245b68f9d409fc8f914b9b93a9f45f"},
+]
 django-celery-beat = [
     {file = "django-celery-beat-2.2.1.tar.gz", hash = "sha256:97ae5eb309541551bdb07bf60cc57cadacf42a74287560ced2d2c06298620234"},
     {file = "django_celery_beat-2.2.1-py2.py3-none-any.whl", hash = "sha256:ab43049634fd18dc037927d7c2c7d5f67f95283a20ebbda55f42f8606412e66c"},
@@ -2188,6 +2224,9 @@ django-hijack = [
 django-import-export = [
     {file = "django-import-export-2.7.1.tar.gz", hash = "sha256:4bc65943a5ce66aeaf2b5d0d6f75b1863b63b10323bf235e46500bef5d6dd85b"},
     {file = "django_import_export-2.7.1-py3-none-any.whl", hash = "sha256:254ca359782efca932c398edabc15dd51d31da241e85cc03af5b720173e0b2fe"},
+]
+django-import-export-celery = [
+    {file = "django_import_export_celery-1.1.6-py3-none-any.whl", hash = "sha256:9bfc7331de2043f72b7528137d4f20897371712fc81ca36bcca0fd6029ca4834"},
 ]
 django-js-asset = [
     {file = "django-js-asset-1.2.2.tar.gz", hash = "sha256:c163ae80d2e0b22d8fb598047cd0dcef31f81830e127cfecae278ad574167260"},
@@ -2772,6 +2811,10 @@ rx = [
 sentry-sdk = [
     {file = "sentry-sdk-0.19.5.tar.gz", hash = "sha256:737a094e49a529dd0fdcaafa9e97cf7c3d5eb964bd229821d640bc77f3502b3f"},
     {file = "sentry_sdk-0.19.5-py2.py3-none-any.whl", hash = "sha256:0a711ec952441c2ec89b8f5d226c33bc697914f46e876b44a4edd3e7864cf4d0"},
+]
+setuptools-git = [
+    {file = "setuptools-git-1.2.tar.gz", hash = "sha256:ff64136da01aabba76ae88b050e7197918d8b2139ccbf6144e14d472b9c40445"},
+    {file = "setuptools_git-1.2-py2.py3-none-any.whl", hash = "sha256:e7764dccce7d97b4b5a330d7b966aac6f9ac026385743fd6cedad553f2494cfa"},
 ]
 simplejson = [
     {file = "simplejson-3.17.6-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:a89acae02b2975b1f8e4974cb8cdf9bf9f6c91162fb8dec50c259ce700f2770a"},
