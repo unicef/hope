@@ -87,3 +87,4 @@ except ImportError:
 logging.disable(logging.CRITICAL)
 
 EXCHANGE_RATE_CACHE_EXPIRY = 0
+del DATABASES["read_only"]
