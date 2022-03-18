@@ -266,7 +266,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                     class="sc-ifAKCX iPKgts"
                   >
                     <div
-                      class="sc-bxivhb jfeTEc"
+                      class="sc-bxivhb jNtFAO"
                       data-cy="status-container"
                     >
                       ACTIVE

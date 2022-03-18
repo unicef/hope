@@ -38,7 +38,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                   class="sc-gzVnrw bspsIV"
                 >
                   <div
-                    class="sc-EHOje zcMBJ"
+                    class="sc-EHOje eoikBB"
                     data-cy="status-container"
                   >
                     DISTRIBUTION COMPLETED
