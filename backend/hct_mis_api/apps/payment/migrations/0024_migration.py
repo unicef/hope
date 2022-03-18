@@ -4,16 +4,7 @@ from django.db import migrations, models
 
 
 def fill_in_registration_ca_id(apps, schema_editor):
-    PaymentRecord = apps.get_model("payment", "PaymentRecord")
-    DHPaymentRecord = apps.get_model("cash_assist_datahub", "PaymentRecord")
-    all_payment_records = PaymentRecord.objects.all()
-
-    for payment_record in all_payment_records:
-        dh_payment_record = DHPaymentRecord.objects.filter(ca_id=payment_record.ca_id).first()
-        if dh_payment_record:
-            payment_record.registration_ca_id = dh_payment_record.registration_ca_id
-
-    PaymentRecord.objects.bulk_update(all_payment_records, ["registration_ca_id"])
+    pass
 
 
 def empty_reverse(apps, schema_editor):
