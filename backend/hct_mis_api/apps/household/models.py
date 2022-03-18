@@ -324,7 +324,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
-    residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
+    residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField(blank=True, db_index=True)
     country_origin_new = models.ForeignKey(
         "geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT
