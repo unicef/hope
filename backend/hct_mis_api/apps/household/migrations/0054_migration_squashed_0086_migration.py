@@ -185,21 +185,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='document',
             name='status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('VALID', 'Valid'), ('INVALID', 'Invalid')], default='VALID', max_length=20),
+            field=models.CharField(
+                choices=[('PENDING', 'Pending'), ('VALID', 'Valid'), ('NEED_INVESTIGATION', 'Need Investigation'),
+                         ('INVALID', 'Invalid')], default='PENDING', max_length=20),
         ),
         migrations.AddConstraint(
             model_name='document',
             constraint=models.UniqueConstraint(condition=models.Q(models.Q(('is_removed', False), ('status', 'VALID'))), fields=('document_number', 'type'), name='unique_if_not_removed_and_valid'),
-        ),
-        migrations.AlterField(
-            model_name='document',
-            name='status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('VALID', 'Valid'), ('INVALID', 'Invalid')], default='PENDING', max_length=20),
-        ),
-        migrations.AlterField(
-            model_name='document',
-            name='status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('VALID', 'Valid'), ('NEED_INVESTIGATION', 'Need Investigation'), ('INVALID', 'Invalid')], default='PENDING', max_length=20),
         ),
         migrations.AlterField(
             model_name='agency',
