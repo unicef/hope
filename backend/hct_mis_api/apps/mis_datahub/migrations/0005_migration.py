@@ -25,7 +25,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("mis_datahub", "0004_migration"),
-        ("targeting", "0007_migration"),
     ]
 
     operations = [

@@ -28,7 +28,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("mis_datahub", "0002_migration"),
-        ("program", "0008_migration"),
     ]
 
     operations = [
