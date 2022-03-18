@@ -5,19 +5,7 @@ from django.db.models import F
 from django.db.models.functions import Concat
 
 
-def remove_duplicates(apps, schema_editor):
-    DocumentType = apps.get_model("household", "DocumentType")
 
-    master_qs_types = DocumentType.objects.annotate(
-        concat_country_label=Concat(
-            F("label"), F("country"), output_field=models.CharField(),
-        ),
-    ).distinct("concat_country_label")
-
-    for master in master_qs_types:
-        DocumentType.objects.filter(
-            country=master.country, label=master.label
-        ).exclude(pk=master.pk).delete()
 
 
 class Migration(migrations.Migration):
@@ -26,5 +14,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(remove_duplicates),
     ]

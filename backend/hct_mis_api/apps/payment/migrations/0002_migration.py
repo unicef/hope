@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('household', '0002_migration'),
+        ('household', '0001_migration'),
         ('payment', '0001_migration'),
         ('program', '0001_migration'),
         ('targeting', '0001_migration'),

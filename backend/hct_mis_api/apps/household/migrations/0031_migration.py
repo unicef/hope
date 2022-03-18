@@ -2,14 +2,6 @@
 
 from django.db import migrations
 
-def fix_residence_status(apps, schema_editor):
-    Household = apps.get_model("household", "Household")
-    Household.objects.filter(residence_status="OTHER").update(residence_status="NON_HOST")
-    Household.objects.filter(residence_status="MIGRANT").update(residence_status="REFUGEE")
-    Household.objects.filter(residence_status="CITIZEN").update(residence_status="HOST")
-
-def empty_reverse(apps, schema_editor):
-    pass
 
 class Migration(migrations.Migration):
 
@@ -19,5 +11,4 @@ class Migration(migrations.Migration):
 
 
     operations = [
-        migrations.RunPython(fix_residence_status, empty_reverse),
     ]

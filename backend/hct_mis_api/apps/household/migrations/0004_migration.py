@@ -4,18 +4,7 @@ from django.db import migrations, models
 from django.db.models import Min, Count
 
 
-def set_document_types(apps, schema_editor):
-    choices = {
-        "Driving License": "DRIVERS_LICENSE",
-        "Birth Certificate": "BIRTH_CERTIFICATE",
-        "National ID": "NATIONAL_ID",
-        "National Passport": "NATIONAL_PASSPORT",
-    }
-    DocumentType = apps.get_model("household", "DocumentType")
-    doc_types = DocumentType.objects.all()
-    for obj in doc_types:
-        obj.type = choices.get(obj.label)
-        obj.save()
+
 
 
 class Migration(migrations.Migration):
@@ -43,7 +32,6 @@ class Migration(migrations.Migration):
             ),
             preserve_default=False,
         ),
-        migrations.RunPython(set_document_types),
         migrations.AlterField(
             model_name="documenttype",
             name="type",

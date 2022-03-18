@@ -4,15 +4,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def set_business_area(apps, schema_editor):
-    BusinessArea = apps.get_model("core", "BusinessArea")
-    afghanistan = BusinessArea.objects.filter(slug="afghanistan").first()
-    if afghanistan is None:
-        return
-    Household = apps.get_model("household", "Household")
-    Household.objects.filter(business_area__isnull=True).update(
-        business_area=afghanistan
-    )
 
 
 class Migration(migrations.Migration):
@@ -32,7 +23,6 @@ class Migration(migrations.Migration):
                 to="core.BusinessArea",
             ),
         ),
-        migrations.RunPython(set_business_area),
         migrations.AlterField(
             model_name="household",
             name="business_area",

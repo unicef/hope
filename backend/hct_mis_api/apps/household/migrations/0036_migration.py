@@ -2,12 +2,7 @@
 
 from django.db import migrations
 
-def fix_relationship(apps, schema_editor):
-    Individual = apps.get_model("household", "Individual")
-    Individual.objects.filter(relationship="").update(relationship="UNKNOWN")
 
-def empty_reverse(apps, schema_editor):
-    pass
 
 class Migration(migrations.Migration):
 
@@ -16,5 +11,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(fix_relationship, empty_reverse),
     ]
