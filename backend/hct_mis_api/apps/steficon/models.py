@@ -25,7 +25,6 @@ class RuleManager(models.Manager):
 
 class Rule(models.Model):
     LANGUAGES = [[a.label.lower(), a.label] for a in interpreters]
-    # code = models.AutoField(primary_key=True, editable=False)
     version = AutoIncVersionField()
     name = CICharField(
         max_length=100,
