@@ -281,6 +281,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
+        call_command("loadcountrycodes")
 
     def test_multiple_sessions_same_ba_working(self):
         session1 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
