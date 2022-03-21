@@ -19,6 +19,7 @@ from django.test import TestCase
 from django_countries.fields import Country
 from PIL import Image
 
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
 from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.household.models import (
@@ -348,7 +349,7 @@ class TestRdiCreateTask(TestCase):
         [self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8]) for individual in individuals]
 
 
-class TestRdiKoboCreateTask(TestCase):
+class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
 
     @staticmethod

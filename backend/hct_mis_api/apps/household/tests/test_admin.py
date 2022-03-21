@@ -10,7 +10,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 class BaseTest(WebTest):
     def setUp(self):
-        self.household = HouseholdFactory.build(business_area=BusinessAreaFactory())
+        self.household = HouseholdFactory.build(business_area=BusinessAreaFactory(name="Test"))
         self.individual = IndividualFactory(household=self.household)
         self.household.head_of_household = self.individual
         self.household.registration_data_import = RegistrationDataImportFactory()
@@ -18,6 +18,7 @@ class BaseTest(WebTest):
 
         self.user = UserFactory()
         self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+
 
 
 class HouseholdAdminTest(BaseTest):
