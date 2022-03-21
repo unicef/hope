@@ -1,15 +1,46 @@
 import os
-
-from django.conf import settings
-from django.db import connections
+import unittest
 
 import xmlrunner
-from django.test.runner import DiscoverRunner
+from django.conf import settings
+from django.test.runner import (
+    ParallelTestSuite,
+    partition_suite_by_case,
+)
 from snapshottest.django import TestRunner
+
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+
+
+def elastic_search_partition_suite_by_case(suite):
+    """Ensure to run all elastic search without parallel"""
+    groups = []
+    other_tests = []
+    suite_class = type(suite)
+    es_group = []
+    for test in suite:
+        if not isinstance(test, BaseElasticSearchTestCase):
+            other_tests.append(test)
+            continue
+        if isinstance(test, unittest.TestCase):
+            es_group.append(test)
+
+    groups.append(suite_class(es_group))
+    groups.extend(partition_suite_by_case(suite_class(other_tests)))
+    return groups
+
+
+class MisParallelTestSuite(ParallelTestSuite):
+    def __init__(self, suite, processes, failfast=False):
+        self.processes = processes
+        self.failfast = failfast
+        super().__init__(suite, processes, failfast)
+        self.subsuites = elastic_search_partition_suite_by_case(suite)
 
 
 class PostgresTestRunner(TestRunner):
     test_runner = xmlrunner.XMLTestRunner
+    parallel_test_suite = MisParallelTestSuite
 
     def get_resultclass(self):
         # Django provides `DebugSQLTextTestResult` if `debug_sql` argument is True
@@ -53,14 +84,4 @@ class PostgresTestRunner(TestRunner):
         return results
 
     def setup_databases(self, **kwargs):
-        # for alias in connections:
-        #     connection = connections[alias]
-        #     read_only = connection.settings_dict.get("TEST", {}).get("READ_ONLY", False)
-        #     if read_only:
-        #         if self.verbosity >= 1:
-        #             connection.creation.log("Skipping ReadOnly test database for alias '%s'..." % alias)
-        #         aliases = kwargs.get("aliases")
-        #         aliases.discard(alias)
-        #         continue
-
         return super().setup_databases(**kwargs)

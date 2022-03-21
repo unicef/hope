@@ -10,11 +10,12 @@ from django_webtest import WebTest
 
 from hct_mis_api.apps.account.fixtures import UserFactory, UserRoleFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 
 
 class TestDOAP(WebTest):
     def setUp(self):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.user = UserFactory(is_superuser=True, is_staff=True)
         self.user_role = UserRoleFactory(role__name="Approver", role__subsystem="CA", business_area=self.business_area)

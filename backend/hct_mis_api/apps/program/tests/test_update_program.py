@@ -6,6 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -24,7 +25,7 @@ class TestUpdateProgram(APITestCase):
 
     def setUp(self):
         super().setUp()
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.program = ProgramFactory.create(
             name="initial name", status=Program.DRAFT, business_area=self.business_area

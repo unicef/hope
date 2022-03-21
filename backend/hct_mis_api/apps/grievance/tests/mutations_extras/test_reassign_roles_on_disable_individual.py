@@ -4,6 +4,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     reassign_roles_on_disable_individual,
 )
@@ -20,7 +21,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestReassignRolesOnDisableIndividual(APITestCase):
     def setUp(self) -> None:
         super().setUp()
-        call_command("loadbusinessareas")
+        create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
         program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
 

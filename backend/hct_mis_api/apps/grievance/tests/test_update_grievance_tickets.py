@@ -12,6 +12,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -80,8 +81,7 @@ class TestUpdateGrievanceTickets(APITestCase):
 
     def setUp(self):
         super().setUp()
-        call_command("loadbusinessareas")
-        call_command("loadcountries")
+        create_afghanistan()
         self.generate_document_types_for_all_countries()
         self.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         self.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
@@ -152,7 +152,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         household_one.head_of_household = self.individuals[0]
         household_one.save()
         self.household_one = household_one
-
         self.add_individual_grievance_ticket = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,

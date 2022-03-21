@@ -6,13 +6,14 @@ from hct_mis_api.apps.account.admin import UserRoleAdminForm, UserRoleInlineForm
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 
 
 class UserRolesTest(TestCase):
     def setUp(self):
         self.role_1 = Role.objects.create(name="Role_1")
         self.role_2 = Role.objects.create(name="Role_2")
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.user = UserFactory()
 

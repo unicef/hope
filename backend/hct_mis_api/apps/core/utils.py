@@ -721,3 +721,20 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
     ).values_list("unicef_id", flat=True)
     excluded_household_ids_array.extend(excluded_household_ids_from_individuals_array)
     return excluded_household_ids_array
+
+
+def create_afghanistan():
+    from hct_mis_api.apps.core.models import BusinessArea
+
+    BusinessArea.objects.update_or_create(
+        code="0060",
+        defaults={
+            "code": "0060",
+            "name": "Afghanistan",
+            "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+            "region_code": "64",
+            "region_name": "SAR",
+            "slug": "afghanistan",
+            "has_data_sharing_agreement": True,
+        },
+    )
