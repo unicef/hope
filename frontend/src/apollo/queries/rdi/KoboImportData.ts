@@ -8,9 +8,6 @@ export const KOBO_IMPORT_DATA_QUERY = gql`
       numberOfIndividuals
       numberOfHouseholds
       error
-      importData {
-        id
-      }
       koboValidationErrors {
         header
         message

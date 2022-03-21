@@ -113,6 +113,7 @@ export type AdminAreaNode = Node & {
 
 
 export type AdminAreaNodeChildrenArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -122,6 +123,7 @@ export type AdminAreaNodeChildrenArgs = {
 
 
 export type AdminAreaNodeGrievanceticketSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -130,6 +132,7 @@ export type AdminAreaNodeGrievanceticketSetArgs = {
 
 
 export type AdminAreaNodeHouseholdSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -138,6 +141,7 @@ export type AdminAreaNodeHouseholdSetArgs = {
 
 
 export type AdminAreaNodeProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -147,6 +151,7 @@ export type AdminAreaNodeProgramsArgs = {
 
 
 export type AdminAreaNodeReportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -187,6 +192,7 @@ export type AdminAreaTypeNode = Node & {
 
 
 export type AdminAreaTypeNodeBusinessAreasArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -196,6 +202,7 @@ export type AdminAreaTypeNodeBusinessAreasArgs = {
 
 
 export type AdminAreaTypeNodeAdminarealevelSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -204,6 +211,7 @@ export type AdminAreaTypeNodeAdminarealevelSetArgs = {
 
 
 export type AdminAreaTypeNodeAdminAreasArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -248,6 +256,7 @@ export type AgencyNode = {
 
 
 export type AgencyNodeIndividualIdentitiesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -310,6 +319,7 @@ export type BusinessAreaNode = Node & {
 
 
 export type BusinessAreaNodeCountriesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -318,6 +328,7 @@ export type BusinessAreaNodeCountriesArgs = {
 
 
 export type BusinessAreaNodeChildrenArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -327,6 +338,7 @@ export type BusinessAreaNodeChildrenArgs = {
 
 
 export type BusinessAreaNodeAdminAreaLevelArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -335,6 +347,7 @@ export type BusinessAreaNodeAdminAreaLevelArgs = {
 
 
 export type BusinessAreaNodePaymentrecordSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -343,6 +356,7 @@ export type BusinessAreaNodePaymentrecordSetArgs = {
 
 
 export type BusinessAreaNodeServiceproviderSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -351,6 +365,7 @@ export type BusinessAreaNodeServiceproviderSetArgs = {
 
 
 export type BusinessAreaNodeTicketsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -359,6 +374,7 @@ export type BusinessAreaNodeTicketsArgs = {
 
 
 export type BusinessAreaNodeHouseholdSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -367,6 +383,7 @@ export type BusinessAreaNodeHouseholdSetArgs = {
 
 
 export type BusinessAreaNodeIndividualSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -375,6 +392,7 @@ export type BusinessAreaNodeIndividualSetArgs = {
 
 
 export type BusinessAreaNodeProgramSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -384,6 +402,7 @@ export type BusinessAreaNodeProgramSetArgs = {
 
 
 export type BusinessAreaNodeCashplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -392,6 +411,7 @@ export type BusinessAreaNodeCashplanSetArgs = {
 
 
 export type BusinessAreaNodeTargetpopulationSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -419,6 +439,7 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
 
 
 export type BusinessAreaNodeRegistrationdataimportSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -427,6 +448,7 @@ export type BusinessAreaNodeRegistrationdataimportSetArgs = {
 
 
 export type BusinessAreaNodeReportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -435,6 +457,7 @@ export type BusinessAreaNodeReportsArgs = {
 
 
 export type BusinessAreaNodeLogentrySetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -502,6 +525,7 @@ export type CashPlanNode = Node & {
 
 
 export type CashPlanNodePaymentRecordsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -510,6 +534,7 @@ export type CashPlanNodePaymentRecordsArgs = {
 
 
 export type CashPlanNodeVerificationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -560,6 +585,7 @@ export type CashPlanPaymentVerificationNode = Node & {
 
 
 export type CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -681,6 +707,7 @@ export type ContentTypeObjectType = {
 
 
 export type ContentTypeObjectTypeLogEntriesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -907,10 +934,10 @@ export type DjangoDebugSql = {
 
 export type DocumentNode = Node & {
    __typename?: 'DocumentNode',
+  isRemoved: Scalars['Boolean'],
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  isRemoved: Scalars['Boolean'],
   documentNumber: Scalars['String'],
   photo?: Maybe<Scalars['String']>,
   individual: IndividualNode,
@@ -954,6 +981,7 @@ export type DocumentTypeNode = {
 
 
 export type DocumentTypeNodeDocumentsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1105,6 +1133,7 @@ export type GrievanceTicketNode = Node & {
 
 
 export type GrievanceTicketNodeLinkedTicketsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1113,6 +1142,7 @@ export type GrievanceTicketNodeLinkedTicketsArgs = {
 
 
 export type GrievanceTicketNodeLinkedTicketsRelatedArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1121,6 +1151,7 @@ export type GrievanceTicketNodeLinkedTicketsRelatedArgs = {
 
 
 export type GrievanceTicketNodeTicketNotesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1271,6 +1302,7 @@ export type HouseholdNode = Node & {
 
 
 export type HouseholdNodeRepresentativesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1279,6 +1311,7 @@ export type HouseholdNodeRepresentativesArgs = {
 
 
 export type HouseholdNodeProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1288,6 +1321,7 @@ export type HouseholdNodeProgramsArgs = {
 
 
 export type HouseholdNodePaymentRecordsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1296,6 +1330,7 @@ export type HouseholdNodePaymentRecordsArgs = {
 
 
 export type HouseholdNodeComplaintTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1304,6 +1339,7 @@ export type HouseholdNodeComplaintTicketDetailsArgs = {
 
 
 export type HouseholdNodeSensitiveTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1312,6 +1348,7 @@ export type HouseholdNodeSensitiveTicketDetailsArgs = {
 
 
 export type HouseholdNodeHouseholdDataUpdateTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1320,6 +1357,7 @@ export type HouseholdNodeHouseholdDataUpdateTicketDetailsArgs = {
 
 
 export type HouseholdNodeAddIndividualTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1328,6 +1366,7 @@ export type HouseholdNodeAddIndividualTicketDetailsArgs = {
 
 
 export type HouseholdNodeDeleteHouseholdTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1336,6 +1375,7 @@ export type HouseholdNodeDeleteHouseholdTicketDetailsArgs = {
 
 
 export type HouseholdNodePositiveFeedbackTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1344,6 +1384,7 @@ export type HouseholdNodePositiveFeedbackTicketDetailsArgs = {
 
 
 export type HouseholdNodeNegativeFeedbackTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1352,6 +1393,7 @@ export type HouseholdNodeNegativeFeedbackTicketDetailsArgs = {
 
 
 export type HouseholdNodeReferralTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1360,6 +1402,7 @@ export type HouseholdNodeReferralTicketDetailsArgs = {
 
 
 export type HouseholdNodeIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1368,6 +1411,7 @@ export type HouseholdNodeIndividualsArgs = {
 
 
 export type HouseholdNodeTargetPopulationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1811,6 +1855,7 @@ export type ImportedDocumentTypeNode = {
 
 
 export type ImportedDocumentTypeNodeDocumentsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2072,6 +2117,7 @@ export type ImportedHouseholdNode = Node & {
 
 
 export type ImportedHouseholdNodeIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2214,6 +2260,7 @@ export type ImportedIndividualNode = Node & {
 
 
 export type ImportedIndividualNodeDocumentsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2222,6 +2269,7 @@ export type ImportedIndividualNodeDocumentsArgs = {
 
 
 export type ImportedIndividualNodeIdentitiesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2414,6 +2462,7 @@ export type IndividualNode = Node & {
 
 
 export type IndividualNodePaymentRecordsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2422,6 +2471,7 @@ export type IndividualNodePaymentRecordsArgs = {
 
 
 export type IndividualNodeComplaintTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2430,6 +2480,7 @@ export type IndividualNodeComplaintTicketDetailsArgs = {
 
 
 export type IndividualNodeSensitiveTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2438,6 +2489,7 @@ export type IndividualNodeSensitiveTicketDetailsArgs = {
 
 
 export type IndividualNodeIndividualDataUpdateTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2446,6 +2498,7 @@ export type IndividualNodeIndividualDataUpdateTicketDetailsArgs = {
 
 
 export type IndividualNodeDeleteIndividualTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2454,6 +2507,7 @@ export type IndividualNodeDeleteIndividualTicketDetailsArgs = {
 
 
 export type IndividualNodeTicketsystemflaggingdetailsSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2462,6 +2516,7 @@ export type IndividualNodeTicketsystemflaggingdetailsSetArgs = {
 
 
 export type IndividualNodePositiveFeedbackTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2470,6 +2525,7 @@ export type IndividualNodePositiveFeedbackTicketDetailsArgs = {
 
 
 export type IndividualNodeNegativeFeedbackTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2478,6 +2534,7 @@ export type IndividualNodeNegativeFeedbackTicketDetailsArgs = {
 
 
 export type IndividualNodeReferralTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2486,6 +2543,7 @@ export type IndividualNodeReferralTicketDetailsArgs = {
 
 
 export type IndividualNodeRepresentedHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2494,6 +2552,7 @@ export type IndividualNodeRepresentedHouseholdsArgs = {
 
 
 export type IndividualNodeDocumentsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2502,6 +2561,7 @@ export type IndividualNodeDocumentsArgs = {
 
 
 export type IndividualNodeIdentitiesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2665,7 +2725,6 @@ export type KoboImportDataNode = Node & {
   koboAssetId: Scalars['String'],
   onlyActiveSubmissions: Scalars['Boolean'],
   koboValidationErrors?: Maybe<Array<Maybe<KoboErrorNode>>>,
-  importData?: Maybe<ImportDataNode>,
 };
 
 export type LabelNode = {
@@ -3062,6 +3121,7 @@ export type PartnerType = {
 
 
 export type PartnerTypeUserSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3128,6 +3188,7 @@ export type PaymentRecordNode = Node & {
 
 
 export type PaymentRecordNodeComplaintTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3136,6 +3197,7 @@ export type PaymentRecordNodeComplaintTicketDetailsArgs = {
 
 
 export type PaymentRecordNodeSensitiveTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3208,6 +3270,7 @@ export type PaymentVerificationNode = Node & {
 
 
 export type PaymentVerificationNodeTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3254,10 +3317,10 @@ export enum ProgramFrequencyOfPayments {
 
 export type ProgramNode = Node & {
    __typename?: 'ProgramNode',
+  isRemoved: Scalars['Boolean'],
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  isRemoved: Scalars['Boolean'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
   version: Scalars['BigInt'],
   name: Scalars['String'],
@@ -3289,6 +3352,7 @@ export type ProgramNode = Node & {
 
 
 export type ProgramNodeAdminAreasArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3298,6 +3362,7 @@ export type ProgramNodeAdminAreasArgs = {
 
 
 export type ProgramNodeHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3306,6 +3371,7 @@ export type ProgramNodeHouseholdsArgs = {
 
 
 export type ProgramNodeCashPlansArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3314,6 +3380,7 @@ export type ProgramNodeCashPlansArgs = {
 
 
 export type ProgramNodeTargetpopulationSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3341,6 +3408,7 @@ export type ProgramNodeTargetpopulationSetArgs = {
 
 
 export type ProgramNodeReportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3509,6 +3577,7 @@ export type Query = {
 
 
 export type QueryAllLogEntriesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3526,6 +3595,7 @@ export type QueryReportArgs = {
 
 
 export type QueryAllReportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3556,6 +3626,7 @@ export type QuerySanctionListIndividualArgs = {
 
 
 export type QueryAllSanctionListIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3574,6 +3645,7 @@ export type QueryGrievanceTicketArgs = {
 
 
 export type QueryAllGrievanceTicketArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3598,6 +3670,7 @@ export type QueryAllGrievanceTicketArgs = {
 
 
 export type QueryExistingGrievanceTicketsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3615,6 +3688,7 @@ export type QueryExistingGrievanceTicketsArgs = {
 
 
 export type QueryAllTicketNotesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3632,6 +3706,7 @@ export type QueryChartGrievancesArgs = {
 
 
 export type QueryAllSteficonRulesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3657,6 +3732,7 @@ export type QueryCashPlanPaymentVerificationArgs = {
 
 
 export type QueryAllPaymentRecordsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3670,6 +3746,7 @@ export type QueryAllPaymentRecordsArgs = {
 
 
 export type QueryAllPaymentVerificationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3685,6 +3762,7 @@ export type QueryAllPaymentVerificationsArgs = {
 
 
 export type QueryAllCashPlanPaymentVerificationArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3750,6 +3828,7 @@ export type QuerySampleSizeArgs = {
 
 
 export type QueryAllPaymentVerificationLogEntriesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3772,6 +3851,7 @@ export type QueryBusinessAreaArgs = {
 
 
 export type QueryAllAdminAreasArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3784,6 +3864,7 @@ export type QueryAllAdminAreasArgs = {
 
 
 export type QueryAllBusinessAreasArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3825,6 +3906,7 @@ export type QueryProgramArgs = {
 
 
 export type QueryAllProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3863,6 +3945,7 @@ export type QueryCashPlanArgs = {
 
 
 export type QueryAllCashPlansArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3892,6 +3975,7 @@ export type QueryTargetPopulationArgs = {
 
 
 export type QueryAllTargetPopulationArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3922,6 +4006,7 @@ export type QueryGoldenRecordByTargetingCriteriaArgs = {
   targetingCriteria: TargetingCriteriaObjectType,
   program: Scalars['ID'],
   excludedIds: Scalars['String'],
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3933,6 +4018,7 @@ export type QueryGoldenRecordByTargetingCriteriaArgs = {
 
 export type QueryCandidateHouseholdsListByTargetingCriteriaArgs = {
   targetPopulation: Scalars['ID'],
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3946,6 +4032,7 @@ export type QueryFinalHouseholdsListByTargetingCriteriaArgs = {
   targetPopulation: Scalars['ID'],
   targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
   excludedIds: Scalars['String'],
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3961,6 +4048,7 @@ export type QueryHouseholdArgs = {
 
 
 export type QueryAllHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3972,7 +4060,7 @@ export type QueryAllHouseholdsArgs = {
   address_Startswith?: Maybe<Scalars['String']>,
   headOfHousehold_FullName?: Maybe<Scalars['String']>,
   headOfHousehold_FullName_Startswith?: Maybe<Scalars['String']>,
-  size_Range?: Maybe<Scalars['Int']>,
+  size_Range?: Maybe<Array<Maybe<Scalars['Int']>>>,
   size_Lte?: Maybe<Scalars['Int']>,
   size_Gte?: Maybe<Scalars['Int']>,
   adminArea?: Maybe<Scalars['ID']>,
@@ -3994,6 +4082,7 @@ export type QueryIndividualArgs = {
 
 
 export type QueryAllIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4059,6 +4148,7 @@ export type QueryChartIndividualsWithDisabilityReachedByAgeArgs = {
 
 
 export type QueryAllUsersArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4083,6 +4173,7 @@ export type QueryImportedHouseholdArgs = {
 
 
 export type QueryAllImportedHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4099,6 +4190,7 @@ export type QueryRegistrationDataImportDatahubArgs = {
 
 
 export type QueryAllRegistrationDataImportsDatahubArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4112,6 +4204,7 @@ export type QueryImportedIndividualArgs = {
 
 
 export type QueryAllImportedIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4140,6 +4233,7 @@ export type QueryRegistrationDataImportArgs = {
 
 
 export type QueryAllRegistrationDataImportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4234,6 +4328,7 @@ export type RegistrationDataImportDatahubNode = Node & {
 
 
 export type RegistrationDataImportDatahubNodeHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4242,6 +4337,7 @@ export type RegistrationDataImportDatahubNodeHouseholdsArgs = {
 
 
 export type RegistrationDataImportDatahubNodeIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4299,6 +4395,7 @@ export type RegistrationDataImportNode = Node & {
 
 
 export type RegistrationDataImportNodeGrievanceticketSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4307,6 +4404,7 @@ export type RegistrationDataImportNodeGrievanceticketSetArgs = {
 
 
 export type RegistrationDataImportNodeHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4315,6 +4413,7 @@ export type RegistrationDataImportNodeHouseholdsArgs = {
 
 
 export type RegistrationDataImportNodeIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4399,6 +4498,7 @@ export type ReportNode = Node & {
 
 
 export type ReportNodeAdminAreaArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4426,7 +4526,7 @@ export type RoleNode = {
   updatedAt: Scalars['DateTime'],
   name: Scalars['String'],
   subsystem: RoleSubsystem,
-  permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
+  permissions?: Maybe<Array<Scalars['String']>>,
   userRoles: Array<UserRoleNode>,
 };
 
@@ -4451,7 +4551,7 @@ export type RuleCommitNode = Node & {
   enabled: Scalars['Boolean'],
   deprecated: Scalars['Boolean'],
   language: RuleCommitLanguage,
-  affectedFields: Array<Maybe<Scalars['String']>>,
+  affectedFields: Array<Scalars['String']>,
   before: Scalars['JSONString'],
   after: Scalars['JSONString'],
   targetPopulations: TargetPopulationNodeConnection,
@@ -4459,6 +4559,7 @@ export type RuleCommitNode = Node & {
 
 
 export type RuleCommitNodeTargetPopulationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4656,6 +4757,7 @@ export type SanctionListIndividualNode = Node & {
 
 
 export type SanctionListIndividualNodeDocumentsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4664,6 +4766,7 @@ export type SanctionListIndividualNodeDocumentsArgs = {
 
 
 export type SanctionListIndividualNodeNationalitiesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4672,6 +4775,7 @@ export type SanctionListIndividualNodeNationalitiesArgs = {
 
 
 export type SanctionListIndividualNodeCountriesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4680,6 +4784,7 @@ export type SanctionListIndividualNodeCountriesArgs = {
 
 
 export type SanctionListIndividualNodeAliasNamesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4688,6 +4793,7 @@ export type SanctionListIndividualNodeAliasNamesArgs = {
 
 
 export type SanctionListIndividualNodeDatesOfBirthArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4741,6 +4847,7 @@ export type ServiceProviderNode = Node & {
 
 
 export type ServiceProviderNodePaymentRecordsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4749,6 +4856,7 @@ export type ServiceProviderNodePaymentRecordsArgs = {
 
 
 export type ServiceProviderNodeCashPlansArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4817,6 +4925,7 @@ export type SteficonRuleNode = Node & {
 
 
 export type SteficonRuleNodeHistoryArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4942,10 +5051,10 @@ export type TargetingIndividualRuleFilterBlockObjectType = {
 
 export type TargetPopulationNode = Node & {
    __typename?: 'TargetPopulationNode',
+  isRemoved: Scalars['Boolean'],
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  isRemoved: Scalars['Boolean'],
   version: Scalars['BigInt'],
   name: Scalars['String'],
   caId?: Maybe<Scalars['String']>,
@@ -4984,6 +5093,7 @@ export type TargetPopulationNode = Node & {
 
 
 export type TargetPopulationNodeHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4992,6 +5102,7 @@ export type TargetPopulationNodeHouseholdsArgs = {
 
 
 export type TargetPopulationNodePaymentRecordsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5000,6 +5111,7 @@ export type TargetPopulationNodePaymentRecordsArgs = {
 
 
 export type TargetPopulationNodeFinalListArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5252,6 +5364,7 @@ export type TicketPaymentVerificationDetailsNode = Node & {
 
 
 export type TicketPaymentVerificationDetailsNodePaymentVerificationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5518,6 +5631,7 @@ export type UserBusinessAreaNode = Node & {
 
 
 export type UserBusinessAreaNodeCountriesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5526,6 +5640,7 @@ export type UserBusinessAreaNodeCountriesArgs = {
 
 
 export type UserBusinessAreaNodeChildrenArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5535,6 +5650,7 @@ export type UserBusinessAreaNodeChildrenArgs = {
 
 
 export type UserBusinessAreaNodeAdminAreaLevelArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5543,6 +5659,7 @@ export type UserBusinessAreaNodeAdminAreaLevelArgs = {
 
 
 export type UserBusinessAreaNodePaymentrecordSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5551,6 +5668,7 @@ export type UserBusinessAreaNodePaymentrecordSetArgs = {
 
 
 export type UserBusinessAreaNodeServiceproviderSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5559,6 +5677,7 @@ export type UserBusinessAreaNodeServiceproviderSetArgs = {
 
 
 export type UserBusinessAreaNodeTicketsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5567,6 +5686,7 @@ export type UserBusinessAreaNodeTicketsArgs = {
 
 
 export type UserBusinessAreaNodeHouseholdSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5575,6 +5695,7 @@ export type UserBusinessAreaNodeHouseholdSetArgs = {
 
 
 export type UserBusinessAreaNodeIndividualSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5583,6 +5704,7 @@ export type UserBusinessAreaNodeIndividualSetArgs = {
 
 
 export type UserBusinessAreaNodeProgramSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5592,6 +5714,7 @@ export type UserBusinessAreaNodeProgramSetArgs = {
 
 
 export type UserBusinessAreaNodeCashplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5600,6 +5723,7 @@ export type UserBusinessAreaNodeCashplanSetArgs = {
 
 
 export type UserBusinessAreaNodeTargetpopulationSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5627,6 +5751,7 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
 
 
 export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5635,6 +5760,7 @@ export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
 
 
 export type UserBusinessAreaNodeReportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5643,6 +5769,7 @@ export type UserBusinessAreaNodeReportsArgs = {
 
 
 export type UserBusinessAreaNodeLogentrySetArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5665,7 +5792,6 @@ export type UserBusinessAreaNodeEdge = {
 
 export type UserNode = Node & {
    __typename?: 'UserNode',
-  id: Scalars['ID'],
   lastLogin?: Maybe<Scalars['DateTime']>,
   isSuperuser: Scalars['Boolean'],
   username: Scalars['String'],
@@ -5674,6 +5800,7 @@ export type UserNode = Node & {
   isStaff: Scalars['Boolean'],
   isActive: Scalars['Boolean'],
   dateJoined: Scalars['DateTime'],
+  id: Scalars['ID'],
   status: UserStatus,
   partner?: Maybe<PartnerType>,
   email: Scalars['String'],
@@ -5699,6 +5826,7 @@ export type UserNode = Node & {
 
 
 export type UserNodeCreatedTicketsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5707,6 +5835,7 @@ export type UserNodeCreatedTicketsArgs = {
 
 
 export type UserNodeAssignedTicketsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5715,6 +5844,7 @@ export type UserNodeAssignedTicketsArgs = {
 
 
 export type UserNodeTicketNotesArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5723,6 +5853,7 @@ export type UserNodeTicketNotesArgs = {
 
 
 export type UserNodeTargetPopulationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5750,6 +5881,7 @@ export type UserNodeTargetPopulationsArgs = {
 
 
 export type UserNodeLockedTargetPopulationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5777,6 +5909,7 @@ export type UserNodeLockedTargetPopulationsArgs = {
 
 
 export type UserNodeFinalizedTargetPopulationsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5804,6 +5937,7 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
 
 
 export type UserNodeRegistrationDataImportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5812,6 +5946,7 @@ export type UserNodeRegistrationDataImportsArgs = {
 
 
 export type UserNodeReportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5820,6 +5955,7 @@ export type UserNodeReportsArgs = {
 
 
 export type UserNodeLogsArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5828,6 +5964,7 @@ export type UserNodeLogsArgs = {
 
 
 export type UserNodeBusinessAreasArgs = {
+  offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -8883,10 +9020,7 @@ export type KoboImportDataQuery = (
   & { koboImportData: Maybe<(
     { __typename?: 'KoboImportDataNode' }
     & Pick<KoboImportDataNode, 'id' | 'status' | 'numberOfIndividuals' | 'numberOfHouseholds' | 'error'>
-    & { importData: Maybe<(
-      { __typename?: 'ImportDataNode' }
-      & Pick<ImportDataNode, 'id'>
-    )>, koboValidationErrors: Maybe<Array<Maybe<(
+    & { koboValidationErrors: Maybe<Array<Maybe<(
       { __typename?: 'KoboErrorNode' }
       & Pick<KoboErrorNode, 'header' | 'message'>
     )>>> }
@@ -16773,9 +16907,6 @@ export const KoboImportDataDocument = gql`
     numberOfIndividuals
     numberOfHouseholds
     error
-    importData {
-      id
-    }
     koboValidationErrors {
       header
       message
@@ -18063,8 +18194,8 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>,
-  String: ResolverTypeWrapper<Scalars['String']>,
   Int: ResolverTypeWrapper<Scalars['Int']>,
+  String: ResolverTypeWrapper<Scalars['String']>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   PageInfo: ResolverTypeWrapper<PageInfo>,
@@ -18425,8 +18556,8 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Query: {},
-  String: Scalars['String'],
   Int: Scalars['Int'],
+  String: Scalars['String'],
   UUID: Scalars['UUID'],
   LogEntryNodeConnection: LogEntryNodeConnection,
   PageInfo: PageInfo,
@@ -19211,10 +19342,10 @@ export type DjangoDebugSqlResolvers<ContextType = any, ParentType extends Resolv
 };
 
 export type DocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNode'] = ResolversParentTypes['DocumentNode']> = {
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
@@ -19863,7 +19994,6 @@ export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends Re
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   onlyActiveSubmissions?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   koboValidationErrors?: Resolver<Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>, ParentType, ContextType>,
-  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
 };
 
 export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
@@ -20068,10 +20198,10 @@ export type PaymentVerificationNodeEdgeResolvers<ContextType = any, ParentType e
 };
 
 export type ProgramNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNode'] = ResolversParentTypes['ProgramNode']> = {
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -20387,7 +20517,7 @@ export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversPar
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   subsystem?: Resolver<ResolversTypes['RoleSubsystem'], ParentType, ContextType>,
-  permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  permissions?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
 };
 
@@ -20401,7 +20531,7 @@ export type RuleCommitNodeResolvers<ContextType = any, ParentType extends Resolv
   enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   language?: Resolver<ResolversTypes['RuleCommitLanguage'], ParentType, ContextType>,
-  affectedFields?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>,
+  affectedFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
   before?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   after?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, RuleCommitNodeTargetPopulationsArgs>,
@@ -20698,10 +20828,10 @@ export type TargetingIndividualRuleFilterBlockNodeResolvers<ContextType = any, P
 };
 
 export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNode'] = ResolversParentTypes['TargetPopulationNode']> = {
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -21127,7 +21257,6 @@ export type UserBusinessAreaNodeEdgeResolvers<ContextType = any, ParentType exte
 };
 
 export type UserNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserNode'] = ResolversParentTypes['UserNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   lastLogin?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   isSuperuser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   username?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -21136,6 +21265,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   isStaff?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>,
   partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>,
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
