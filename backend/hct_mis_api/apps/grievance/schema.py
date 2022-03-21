@@ -164,7 +164,7 @@ class GrievanceTicketFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
-            "id",
+            "unicef_id",
             "status",
             "assigned_to__last_name",
             "category",
@@ -175,9 +175,8 @@ class GrievanceTicketFilter(FilterSet):
         )
     )
 
-    @property
-    def qs(self):
-        return super().qs.annotate(
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(
             household_unicef_id=Coalesce(
                 "complaint_ticket_details__household__unicef_id",
                 "sensitive_ticket_details__household__unicef_id",
@@ -190,6 +189,7 @@ class GrievanceTicketFilter(FilterSet):
                 "needs_adjudication_ticket_details__golden_records_individual__household__unicef_id",
             )
         )
+        return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -199,7 +199,7 @@ class GrievanceTicketFilter(FilterSet):
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
-                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__startswith": value})
+                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__istartswith": value})
 
         return qs.filter(q_obj)
 
