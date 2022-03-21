@@ -24,11 +24,12 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 
 
 class UserImportCSVTest(WebTest):
     def setUp(self):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
         self.role = RoleFactory(name="NoAccess")
@@ -117,7 +118,7 @@ class UserImportCSVTest(WebTest):
 
 class UserKoboActionsTest(WebTest):
     def setUp(self):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
         self.role = RoleFactory(name="NoAccess")

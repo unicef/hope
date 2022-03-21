@@ -6,6 +6,7 @@ from django.test import TestCase
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     AUNT_UNCLE,
@@ -24,7 +25,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 class TestRecalculateData(TestCase):
     def setUp(self) -> None:
-        call_command("loadbusinessareas")
+        create_afghanistan()
 
         business_area = BusinessArea.objects.first()
         registration_data_import = RegistrationDataImportFactory(business_area=business_area)

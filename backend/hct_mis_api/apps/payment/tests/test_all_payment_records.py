@@ -6,7 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.core.utils import encode_id_base64, create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
@@ -24,7 +24,7 @@ class TestAllPaymentRecords(APITestCase):
 
     def setUp(self):
         super().setUp()
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.user = UserFactory.create()
         (self.household1, _) = create_household(household_args={"size": 1})
         (self.household2, _) = create_household(household_args={"size": 1})

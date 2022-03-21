@@ -4,13 +4,14 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
 class TestGrievanceModelValidation(TestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         cls.user = UserFactory.create()
         cls.base_model_data = {
             "status": GrievanceTicket.STATUS_NEW,

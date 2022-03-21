@@ -20,6 +20,7 @@ from django_countries.fields import Country
 from PIL import Image
 
 from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -61,7 +62,7 @@ class TestRdiCreateTask(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
             RdiKoboCreateTask,
             RdiXlsxCreateTask,
@@ -358,7 +359,7 @@ class TestRdiKoboCreateTask(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
             RdiKoboCreateTask,
             RdiXlsxCreateTask,

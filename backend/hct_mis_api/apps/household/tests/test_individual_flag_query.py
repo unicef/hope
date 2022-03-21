@@ -6,6 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
@@ -34,7 +35,7 @@ class TestIndividualFlagQuery(APITestCase):
     def setUp(self):
         super().setUp()
         self.maxDiff = None
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.user = UserFactory()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
 

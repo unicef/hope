@@ -5,6 +5,7 @@ from django.test import TestCase
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.household.fixtures import (
     create_household,
     create_household_and_individuals,
@@ -19,7 +20,7 @@ from hct_mis_api.apps.targeting.models import (
 class TargetingCriteriaRuleFilterTestCase(TestCase):
     def setUp(self):
         households = []
-        call_command("loadbusinessareas")
+        create_afghanistan()
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household_and_individuals(
             {"size": 1, "residence_status": "HOST", "business_area": business_area},
@@ -252,7 +253,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
     def setUp(self):
         call_command("loadflexfieldsattributes")
-        call_command("loadbusinessareas")
+        create_afghanistan()
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household(
             {

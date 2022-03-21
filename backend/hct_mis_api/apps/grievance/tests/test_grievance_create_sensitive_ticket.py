@@ -7,6 +7,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -44,7 +45,7 @@ class TestGrievanceCreateSensitiveTicketQuery(APITestCase):
 
     def setUp(self):
         super().setUp()
-        call_command("loadbusinessareas")
+        create_afghanistan()
         call_command("loadcountries")
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")

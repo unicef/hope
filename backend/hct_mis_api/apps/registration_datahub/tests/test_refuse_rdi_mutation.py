@@ -6,6 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -29,7 +30,7 @@ class TestRefuseRdiMutation(APITestCase):
     def setUp(self):
         super().setUp()
         self.user = UserFactory()
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.business_area_slug = "afghanistan"
         self.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
 

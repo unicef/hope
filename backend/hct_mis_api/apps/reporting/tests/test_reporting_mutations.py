@@ -7,7 +7,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.core.utils import encode_id_base64, create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.reporting.models import Report
@@ -32,7 +32,7 @@ class TestReportingMutation(APITestCase):
     def setUp(self):
         super().setUp()
         self.user = UserFactory()
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.business_area_slug = "afghanistan"
         self.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)

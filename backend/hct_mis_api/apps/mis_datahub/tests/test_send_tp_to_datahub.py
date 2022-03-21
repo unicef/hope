@@ -6,6 +6,7 @@ from parameterized import parameterized
 import hct_mis_api.apps.mis_datahub.models as dh_models
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
@@ -36,7 +37,7 @@ class TestSendTpToDatahub(TestCase):
 
     @staticmethod
     def _pre_test_commands():
-        call_command("loadbusinessareas")
+        create_afghanistan()
         call_command("generatedocumenttypes")
         call_command("loadcountrycodes")
         business_area_with_data_sharing = BusinessArea.objects.first()
