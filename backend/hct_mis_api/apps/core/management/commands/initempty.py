@@ -18,7 +18,8 @@ class Command(BaseCommand):
                     continue
                 print(sql)
                 cursor.execute(sql)
-        subprocess.call(["./create_schemas.sh"])
+
+        # subprocess.call(["./create_schemas.sh"])
         call_command("migratealldb")
         call_command("loadbusinessareas")
         # call_command("loadflexfieldsattributes")

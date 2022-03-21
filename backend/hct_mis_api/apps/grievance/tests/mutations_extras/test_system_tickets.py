@@ -2,6 +2,7 @@ from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketSystemFlaggingDetailsFactory,
@@ -18,7 +19,7 @@ from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactor
 class TestSystemTickets(APITestCase):
     def setUp(self):
         super().setUp()
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.user = UserFactory.create()
         _, individuals = create_household({"size": 1})
         self.individual = individuals[0]

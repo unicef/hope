@@ -8,6 +8,7 @@ from django.core.management import call_command
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.individual_xlsx_update import (
     IndividualXlsxUpdate,
@@ -48,7 +49,7 @@ class TestIndividualXlsxUpdate(APITestCase):
     databases = "__all__"
 
     def setUp(self) -> None:
-        call_command("loadbusinessareas")
+        create_afghanistan()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)

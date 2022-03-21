@@ -4,6 +4,7 @@ from unittest import TestCase
 from django.core.management import call_command
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
@@ -356,7 +357,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     ]
 
     def setUp(self) -> None:
-        call_command("loadbusinessareas")
+        create_afghanistan()
 
     def test_image_validator(self):
         # test for valid value

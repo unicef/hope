@@ -7,6 +7,7 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.utils import create_afghanistan
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
@@ -77,7 +78,7 @@ class TestRapidProVerificationTask(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         payment_record_amount = 10
 
         user = UserFactory()
