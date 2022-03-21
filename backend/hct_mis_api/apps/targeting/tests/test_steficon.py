@@ -1,5 +1,6 @@
 from decimal import Decimal
-from unittest import TestCase
+
+from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
