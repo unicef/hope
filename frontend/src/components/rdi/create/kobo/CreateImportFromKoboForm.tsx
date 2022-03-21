@@ -50,7 +50,7 @@ export function CreateImportFromKoboForm({
       const data = await createImport({
         variables: {
           registrationDataImportData: {
-            importDataId: koboImportData.importData.id,
+            importDataId: koboImportData.id,
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
             businessAreaSlug,
