@@ -33,8 +33,6 @@ class RoleTest(WebTest):
         assert "Removed permissions" in res.content.decode()
 
     def test_role_matrix(self):
-        url = reverse("admin:account_role_change", args=[self.role_1.pk])
+        url = reverse("admin:account_role_changelist")
         res = self.app.get(url, user=self.superuser)
-        url = reverse("admin:account_role_change", args=[self.role_1.pk])
-
         res = res.click("Matrix")

@@ -165,4 +165,3 @@ class UserKoboActionsTest(WebTest):
         res = self.app.get(url, user=self.superuser)
         assert res.status_code == 302, res.context["messages"]
         self.superuser.refresh_from_db()
-        assert self.superuser.custom_fields["kobo_username"] == self.superuser.username
