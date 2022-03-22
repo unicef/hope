@@ -229,13 +229,13 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 2
+                                'size': 1
                             }
                         },
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 1
+                                'size': 2
                             }
                         }
                     ],
