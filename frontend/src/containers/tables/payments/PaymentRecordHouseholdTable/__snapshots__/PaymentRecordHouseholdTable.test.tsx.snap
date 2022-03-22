@@ -254,7 +254,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                   class="sc-bZQynM hTcAyj"
                 >
                   <div
-                    class="sc-ifAKCX iRZDSK"
+                    class="sc-ifAKCX PznGL"
                     data-cy="status-container"
                   >
                     DISTRIBUTION SUCCESSFUL
