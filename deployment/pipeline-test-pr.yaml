@@ -44,6 +44,7 @@ stages:
             workingDirectory: 'frontend'
             displayName: "Test"
   - stage: build_and_push
+    dependsOn: []
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
@@ -87,6 +88,7 @@ stages:
                 $(Build.SourceBranchName)-latest
 
   - stage: test_backend
+    dependsOn: build_and_push
     displayName: Test-Backend
     jobs:
       - job: django_tests
