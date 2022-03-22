@@ -1,6 +1,6 @@
 import re
 
-from django.db.models import IntegerField, Prefetch, Q, Sum, DecimalField
+from django.db.models import DecimalField, IntegerField, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce, Lower
 
 import graphene
@@ -155,12 +155,14 @@ class HouseholdFilter(FilterSet):
         q_obj = Q()
         for value in values:
             inner_query = Q()
-            inner_query |= Q(head_of_household__full_name__startswith=value)
-            inner_query |= Q(head_of_household__given_name__startswith=value)
-            inner_query |= Q(head_of_household__middle_name__startswith=value)
-            inner_query |= Q(head_of_household__family_name__startswith=value)
-            inner_query |= Q(unicef_id__startswith=value)
-            inner_query |= Q(unicef_id__endswith=value)
+            inner_query |= Q(head_of_household__full_name__istartswith=value)
+            inner_query |= Q(head_of_household__given_name__istartswith=value)
+            inner_query |= Q(head_of_household__middle_name__istartswith=value)
+            inner_query |= Q(head_of_household__family_name__istartswith=value)
+            inner_query |= Q(residence_status__istartswith=value)
+            inner_query |= Q(admin_area__title__istartswith=value)
+            inner_query |= Q(unicef_id__istartswith=value)
+            inner_query |= Q(unicef_id__iendswith=value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
@@ -169,7 +171,7 @@ class IndividualFilter(FilterSet):
     business_area = CharFilter(
         field_name="business_area__slug",
     )
-    age = AgeRangeFilter(field_name="birth_date__date")
+    age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
@@ -229,17 +231,18 @@ class IndividualFilter(FilterSet):
             values = value.split(" ")
         q_obj = Q()
         for value in values:
-            inner_query = Q(household__admin_area__title__startswith=value)
-            inner_query |= Q(unicef_id__startswith=value)
-            inner_query |= Q(unicef_id__endswith=value)
-            inner_query |= Q(household__unicef_id__startswith=value)
-            inner_query |= Q(full_name__startswith=value)
-            inner_query |= Q(given_name__startswith=value)
-            inner_query |= Q(middle_name__startswith=value)
-            inner_query |= Q(family_name__startswith=value)
-            inner_query |= Q(documents__document_number__startswith=value)
-            inner_query |= Q(phone_no__startswith=value)
-            inner_query |= Q(phone_no_alternative__startswith=value)
+            inner_query = Q(household__admin_area__title__istartswith=value)
+            inner_query |= Q(unicef_id__istartswith=value)
+            inner_query |= Q(unicef_id__iendswith=value)
+            inner_query |= Q(household__unicef_id__istartswith=value)
+            inner_query |= Q(full_name__istartswith=value)
+            inner_query |= Q(given_name__istartswith=value)
+            inner_query |= Q(middle_name__istartswith=value)
+            inner_query |= Q(family_name__istartswith=value)
+            inner_query |= Q(documents__document_number__istartswith=value)
+            inner_query |= Q(phone_no__istartswith=value)
+            inner_query |= Q(phone_no_alternative__istartswith=value)
+            inner_query |= Q(relationship__istartswith=value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
