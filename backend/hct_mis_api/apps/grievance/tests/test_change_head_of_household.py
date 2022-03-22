@@ -26,49 +26,50 @@ class TestChangeHeadOfHousehold(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+    
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
         admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sfds323")
 
-        self.household = HouseholdFactory.build()
-        self.household.registration_data_import.imported_by.save()
-        self.household.registration_data_import.save()
+        cls.household = HouseholdFactory.build()
+        cls.household.registration_data_import.imported_by.save()
+        cls.household.registration_data_import.save()
 
-        self.individual1 = IndividualFactory(household=self.household)
-        self.individual2 = IndividualFactory(household=self.household)
-        self.individual1.relationship = HEAD
-        self.individual2.relationship = BROTHER_SISTER
-        self.individual1.save()
-        self.individual2.save()
+        cls.individual1 = IndividualFactory(household=cls.household)
+        cls.individual2 = IndividualFactory(household=cls.household)
+        cls.individual1.relationship = HEAD
+        cls.individual2.relationship = BROTHER_SISTER
+        cls.individual1.save()
+        cls.individual2.save()
 
-        self.household.head_of_household = self.individual1
-        self.household.save()
+        cls.household.head_of_household = cls.individual1
+        cls.household.save()
 
-        self.grievance_ticket = GrievanceTicketFactory(
+        cls.grievance_ticket = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=admin_area_1,
-            business_area=self.business_area,
+            business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         TicketIndividualDataUpdateDetailsFactory(
-            ticket=self.grievance_ticket,
-            individual=self.individual2,
+            ticket=cls.grievance_ticket,
+            individual=cls.individual2,
             individual_data={
                 "relationship": {"value": "HEAD", "approve_status": True, "previous_value": "BROTHER_SISTER"}
             },
         )
 
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
 
     def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(self):

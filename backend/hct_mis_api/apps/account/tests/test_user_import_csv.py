@@ -28,14 +28,15 @@ from hct_mis_api.apps.core.utils import create_afghanistan
 
 
 class UserImportCSVTest(WebTest):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
-        self.role = RoleFactory(name="NoAccess")
-        self.role_2 = Role.objects.create(name="Role_2")
-        self.partner = PartnerFactory(name="Partner1")
-        IncompatibleRoles.objects.create(role_one=self.role, role_two=self.role_2)
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+        cls.role = RoleFactory(name="NoAccess")
+        cls.role_2 = Role.objects.create(name="Role_2")
+        cls.partner = PartnerFactory(name="Partner1")
+        IncompatibleRoles.objects.create(role_one=cls.role, role_two=cls.role_2)
 
     @responses.activate
     def test_import_csv(self):
@@ -117,11 +118,12 @@ class UserImportCSVTest(WebTest):
 
 
 class UserKoboActionsTest(WebTest):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
-        self.role = RoleFactory(name="NoAccess")
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+        cls.role = RoleFactory(name="NoAccess")
 
     @responses.activate
     def test_sync_user(self):

@@ -14,12 +14,13 @@ from hct_mis_api.apps.core.utils import create_afghanistan
 
 
 class TestDOAP(WebTest):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.user = UserFactory(is_superuser=True, is_staff=True)
-        self.user_role = UserRoleFactory(role__name="Approver", role__subsystem="CA", business_area=self.business_area)
-        self.officer = self.user_role.user
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory(is_superuser=True, is_staff=True)
+        cls.user_role = UserRoleFactory(role__name="Approver", role__subsystem="CA", business_area=cls.business_area)
+        cls.officer = cls.user_role.user
 
     def test_get_matrix(self):
         adm = admin.site._registry[BusinessArea]

@@ -34,7 +34,6 @@ class UserFactory(factory.DjangoModelFactory):
     partner = factory.SubFactory(PartnerFactory)
     email = factory.LazyAttribute(lambda o: f"{o.first_name.lower()}.{o.last_name.lower()}_{time.time_ns()}@unicef.com")
     username = factory.LazyAttribute(lambda o: f"{o.first_name}{o.last_name}_{time.time_ns()}")
-    password = ""
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):

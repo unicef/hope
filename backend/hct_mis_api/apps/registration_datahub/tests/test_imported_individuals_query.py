@@ -75,12 +75,12 @@ class TestImportedIndividualQuery(APITestCase):
     MAX_AGE = 51
     MIN_AGE = 37
 
-    def setUp(self):
-        super().setUp()
-        self.user = UserFactory.create()
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory.create()
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.individuals_to_create = [
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
@@ -128,8 +128,8 @@ class TestImportedIndividualQuery(APITestCase):
             },
         ]
 
-        self.individuals = [ImportedIndividualFactory(**individual) for individual in self.individuals_to_create]
-        for individual in self.individuals:
+        cls.individuals = [ImportedIndividualFactory(**individual) for individual in cls.individuals_to_create]
+        for individual in cls.individuals:
             individual.registration_data_import.business_area_slug = "afghanistan"
             individual.registration_data_import.save()
 

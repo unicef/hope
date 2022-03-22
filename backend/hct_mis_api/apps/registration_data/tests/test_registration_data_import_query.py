@@ -40,16 +40,16 @@ class TestRegistrationDataImportQuery(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.user = UserFactory.create()
-        self.to_create = [
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory.create()
+        cls.to_create = [
             {
                 "name": "Lorem Ipsum",
                 "status": "IN_REVIEW",
-                "imported_by": self.user,
+                "imported_by": cls.user,
                 "data_source": "XLS",
                 "number_of_individuals": 123,
                 "number_of_households": 54,
@@ -57,7 +57,7 @@ class TestRegistrationDataImportQuery(APITestCase):
             {
                 "name": "Lorem Ipsum 2",
                 "status": "IN_REVIEW",
-                "imported_by": self.user,
+                "imported_by": cls.user,
                 "data_source": "XLS",
                 "number_of_individuals": 323,
                 "number_of_households": 154,
@@ -65,14 +65,14 @@ class TestRegistrationDataImportQuery(APITestCase):
             {
                 "name": "Lorem Ipsum 3",
                 "status": "IN_REVIEW",
-                "imported_by": self.user,
+                "imported_by": cls.user,
                 "data_source": "XLS",
                 "number_of_individuals": 423,
                 "number_of_households": 184,
             },
         ]
 
-        self.data = [RegistrationDataImportFactory(**item, business_area=self.business_area) for item in self.to_create]
+        cls.data = [RegistrationDataImportFactory(**item, business_area=cls.business_area) for item in cls.to_create]
 
     @parameterized.expand(
         [

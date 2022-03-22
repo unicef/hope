@@ -79,20 +79,21 @@ class TestUpdateGrievanceTickets(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+   
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.generate_document_types_for_all_countries()
-        self.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
-        self.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.generate_document_types_for_all_countries()
+        cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
+        cls.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123333")
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="2343123")
+        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123333")
+        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="2343123")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -113,7 +114,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
 
-        self.individuals_to_create = [
+        cls.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
@@ -134,35 +135,35 @@ class TestUpdateGrievanceTickets(APITestCase):
             },
         ]
 
-        self.individuals = [
-            IndividualFactory(household=household_one, **individual) for individual in self.individuals_to_create
+        cls.individuals = [
+            IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
         ]
 
-        first_individual = self.individuals[0]
+        first_individual = cls.individuals[0]
         national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
         birth_certificate_type = DocumentType.objects.get(
             country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
-        self.national_id = DocumentFactory(
+        cls.national_id = DocumentFactory(
             type=national_id_type, document_number="789-789-645", individual=first_individual
         )
-        self.birth_certificate = DocumentFactory(
+        cls.birth_certificate = DocumentFactory(
             type=birth_certificate_type, document_number="ITY8456", individual=first_individual
         )
-        household_one.head_of_household = self.individuals[0]
+        household_one.head_of_household = cls.individuals[0]
         household_one.save()
-        self.household_one = household_one
-        self.add_individual_grievance_ticket = GrievanceTicketFactory(
+        cls.household_one = household_one
+        cls.add_individual_grievance_ticket = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-            admin2=self.admin_area_1,
-            business_area=self.business_area,
+            admin2=cls.admin_area_1,
+            business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         TicketAddIndividualDetailsFactory(
-            ticket=self.add_individual_grievance_ticket,
-            household=self.household_one,
+            ticket=cls.add_individual_grievance_ticket,
+            household=cls.household_one,
             individual_data={
                 "given_name": "Test",
                 "full_name": "Test Example",
@@ -178,17 +179,17 @@ class TestUpdateGrievanceTickets(APITestCase):
             approve_status=True,
         )
 
-        self.individual_data_change_grievance_ticket = GrievanceTicketFactory(
+        cls.individual_data_change_grievance_ticket = GrievanceTicketFactory(
             id="acd57aa1-efd8-4c81-ac19-b8cabebe8089",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=self.admin_area_1,
-            business_area=self.business_area,
+            admin2=cls.admin_area_1,
+            business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         TicketIndividualDataUpdateDetailsFactory(
-            ticket=self.individual_data_change_grievance_ticket,
-            individual=self.individuals[0],
+            ticket=cls.individual_data_change_grievance_ticket,
+            individual=cls.individuals[0],
             individual_data={
                 "given_name": {"value": "Test", "approve_status": True},
                 "full_name": {"value": "Test Example", "approve_status": True},
@@ -206,23 +207,23 @@ class TestUpdateGrievanceTickets(APITestCase):
                     },
                 ],
                 "documents_to_remove": [
-                    {"value": self.id_to_base64(self.national_id.id, "DocumentNode"), "approve_status": True},
-                    {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                    {"value": cls.id_to_base64(cls.national_id.id, "DocumentNode"), "approve_status": True},
+                    {"value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"), "approve_status": False},
                 ],
             },
         )
 
-        self.household_data_change_grievance_ticket = GrievanceTicketFactory(
+        cls.household_data_change_grievance_ticket = GrievanceTicketFactory(
             id="72ee7d98-6108-4ef0-85bd-2ef20e1d5410",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            admin2=self.admin_area_1,
-            business_area=self.business_area,
+            admin2=cls.admin_area_1,
+            business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         TicketHouseholdDataUpdateDetailsFactory(
-            ticket=self.household_data_change_grievance_ticket,
-            household=self.household_one,
+            ticket=cls.household_data_change_grievance_ticket,
+            household=cls.household_one,
             household_data={
                 "village": {"value": "Test Village", "approve_status": True},
                 "size": {"value": 19, "approve_status": True},
@@ -230,27 +231,27 @@ class TestUpdateGrievanceTickets(APITestCase):
             },
         )
 
-        self.positive_feedback_grievance_ticket = GrievanceTicketFactory(
+        cls.positive_feedback_grievance_ticket = GrievanceTicketFactory(
             id="a2a15944-f836-4764-8163-30e0c47ce3bb",
             category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
             issue_type=None,
-            business_area=self.business_area,
+            business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
             description="",
             language="Spanish",
         )
-        PositiveFeedbackTicketWithoutExtrasFactory(ticket=self.positive_feedback_grievance_ticket)
+        PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.positive_feedback_grievance_ticket)
 
         unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
-        self.identity_to_update = IndividualIdentity.objects.create(
+        cls.identity_to_update = IndividualIdentity.objects.create(
             agency=unhcr_agency,
-            individual=self.individuals[0],
+            individual=cls.individuals[0],
             number="1111",
         )
 
-        self.identity_to_remove = IndividualIdentity.objects.create(
+        cls.identity_to_remove = IndividualIdentity.objects.create(
             agency=unhcr_agency,
-            individual=self.individuals[0],
+            individual=cls.individuals[0],
             number="3456",
         )
 

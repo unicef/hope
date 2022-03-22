@@ -64,18 +64,18 @@ class TestIndividualQuery(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.user = UserFactory()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         program_one = ProgramFactory(
             name="Test program ONE",
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.program_two = ProgramFactory(
+        cls.program_two = ProgramFactory(
             name="Test program TWO",
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
 
         household_one = HouseholdFactory.build()
@@ -85,9 +85,9 @@ class TestIndividualQuery(APITestCase):
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.save()
         household_one.programs.add(program_one)
-        household_two.programs.add(self.program_two)
+        household_two.programs.add(cls.program_two)
 
-        self.individuals_to_create = [
+        cls.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
@@ -130,12 +130,12 @@ class TestIndividualQuery(APITestCase):
             },
         ]
 
-        self.individuals = [
+        cls.individuals = [
             IndividualFactory(household=household_one if index % 2 else household_two, **individual)
-            for index, individual in enumerate(self.individuals_to_create)
+            for index, individual in enumerate(cls.individuals_to_create)
         ]
-        household_one.head_of_household = self.individuals[0]
-        household_two.head_of_household = self.individuals[1]
+        household_one.head_of_household = cls.individuals[0]
+        household_two.head_of_household = cls.individuals[1]
         household_one.save()
         household_two.save()
 

@@ -59,19 +59,20 @@ REPORT_QUERY = """
 
 
 class TestReportsQuery(APITestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         super().setUp()
         create_afghanistan()
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.report_1 = ReportFactory.create(
-            created_by=self.user,
-            business_area=self.business_area,
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.report_1 = ReportFactory.create(
+            created_by=cls.user,
+            business_area=cls.business_area,
             report_type=Report.INDIVIDUALS,
             status=Report.IN_PROGRESS,
         )
-        self.report_2 = ReportFactory.create(
-            created_by=self.user, business_area=self.business_area, report_type=Report.PAYMENTS, status=Report.COMPLETED
+        cls.report_2 = ReportFactory.create(
+            created_by=cls.user, business_area=cls.business_area, report_type=Report.PAYMENTS, status=Report.COMPLETED
         )
 
     @parameterized.expand(

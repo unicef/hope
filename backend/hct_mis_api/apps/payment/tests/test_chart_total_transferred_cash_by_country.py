@@ -27,10 +27,10 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         call_command("loadbusinessareas")
-        self.user = UserFactory.create()
+        cls.user = UserFactory.create()
         (household, _) = create_household(household_args={"size": 1})
         cash_plan = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
         chosen_business_areas = ("afghanistan", "botswana", "angola")

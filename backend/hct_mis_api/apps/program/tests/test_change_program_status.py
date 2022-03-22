@@ -23,14 +23,14 @@ class TestChangeProgramStatus(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.user = UserFactory.create()
+        cls.user = UserFactory.create()
 
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        state_area_type = AdminAreaLevelFactory(name="State", business_area=self.business_area, admin_level=1)
-        self.admin_area = AdminAreaFactory(admin_area_level=state_area_type)
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        state_area_type = AdminAreaLevelFactory(name="State", business_area=cls.business_area, admin_level=1)
+        cls.admin_area = AdminAreaFactory(admin_area_level=state_area_type)
 
     @parameterized.expand(
         [
