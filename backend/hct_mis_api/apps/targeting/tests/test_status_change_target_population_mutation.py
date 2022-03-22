@@ -105,7 +105,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-    @unittest.skip("needs adjudication")
+
     @parameterized.expand(
         [
             ("with_permission", [Permissions.TARGETING_LOCK]),
@@ -138,7 +138,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
 
 
-@unittest.skip("This test fails randomly because ordering changes, needs to be fixed")
+
 class TestUnapproveTargetPopulationMutation(APITestCase):
     UNAPPROVE_TARGET_MUTATION = """
             mutation UnapproveTargetPopulation($id: ID!) {
