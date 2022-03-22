@@ -253,7 +253,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
 
 
-@unittest.skip("This test fails randomly because ordering changes, needs to be fixed")
+
 class TestFinalizeTargetPopulationMutation(APITestCase):
     FINALIZE_TARGET_MUTATION = """
             mutation FinalizeTargetPopulation($id: ID!) {
@@ -364,7 +364,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             },
         )
 
-    @unittest.skip("needs adjudication")
+
     @parameterized.expand(
         [
             ("with_permission", [Permissions.TARGETING_SEND]),
