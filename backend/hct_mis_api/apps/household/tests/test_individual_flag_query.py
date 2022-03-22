@@ -19,7 +19,7 @@ from hct_mis_api.apps.household.models import (
 class TestIndividualFlagQuery(APITestCase):
     QUERY = """
     query AllIndividuals($flags: [String]) {
-      allIndividuals(flags: $flags, businessArea: "afghanistan") {
+      allIndividuals(flags: $flags, businessArea: "afghanistan", orderBy: "id") {
         edges {
           node {
             givenName
@@ -32,12 +32,12 @@ class TestIndividualFlagQuery(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        self.maxDiff = None
+    @classmethod
+    def setUpTestData(cls):
+        cls.maxDiff = None
         create_afghanistan()
-        self.user = UserFactory()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         individuals_to_create = [
             {
@@ -97,8 +97,8 @@ class TestIndividualFlagQuery(APITestCase):
             },
         ]
         create_household_and_individuals(None, individuals_to_create)
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], cls.business_area
         )
 
     @parameterized.expand(

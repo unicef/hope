@@ -612,45 +612,6 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(birth_certificate, "BIRTH_CERTIFICATE")
         self.assertEqual(national_passport, "NATIONAL_PASSPORT")
 
-    @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
-        _return_test_image,
-    )
-    @unittest.skip("Remove this and run manually only!")
-    def test_performance(self):
-        from hct_mis_api.apps.registration_datahub.validators import (
-            KoboProjectImportDataValidator,
-        )
-
-        self._generate_huge_file()
-        content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/big_json.json"
-        ).read_bytes()
-        file = File(BytesIO(content), name="big_json.json")
-        import_data = ImportData.objects.create(
-            file=file,
-            number_of_households=1,
-            number_of_individuals=2,
-        )
-        registration_data_import = RegistrationDataImportDatahubFactory(import_data=import_data)
-        start = time.process_time()
-        errors = KoboProjectImportDataValidator.validate_fields(
-            json.loads(import_data.file.read().decode()),
-            self.business_area.name,
-        )
-        self.assertEqual(errors, [])
-
-        task = self.RdiKoboCreateTask()
-        task.execute(
-            registration_data_import.id,
-            import_data.id,
-            self.business_area.id,
-        )
-        end = time.process_time() - start
-        execution_time = f"{end:.2f} seconds"
-        print(execution_time)
-        os.remove(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/big_json.json")
-
     def _generate_huge_file(self):
         base_form = {
             "_notes": [],
