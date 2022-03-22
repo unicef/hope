@@ -20,7 +20,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-@unittest.skip("fix ordering")
+
 class TestApproveTargetPopulationMutation(APITestCase):
     APPROVE_TARGET_MUTATION = """
             mutation ApproveTargetPopulation($id: ID!) {
