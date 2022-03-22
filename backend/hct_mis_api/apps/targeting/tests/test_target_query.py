@@ -19,7 +19,6 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-@unittest.skip("fix ordering")
 class TestTargetPopulationQuery(APITestCase):
     ALL_TARGET_POPULATION_QUERY = """
             query AllTargetPopulation($finalListTotalHouseholdsMin: Int) {
@@ -140,7 +139,7 @@ class TestTargetPopulationQuery(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-    @unittest.skip("needs adjudication")
+
     @parameterized.expand(
         [
             (
