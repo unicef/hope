@@ -35,7 +35,7 @@ exports[`components/ProgramDetails should render 1`] = `
                 class="sc-bZQynM hTcAyj"
               >
                 <div
-                  class="sc-ifAKCX jzRoPs"
+                  class="sc-ifAKCX ilSJSk"
                   data-cy="status-container"
                 >
                   FINISHED
