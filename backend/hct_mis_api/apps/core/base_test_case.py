@@ -1,4 +1,5 @@
 import base64
+from time import time
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
@@ -87,7 +88,6 @@ class BaseElasticSearchTestCase(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        rebuild_search_index()
         super().tearDownClass()
 
     @classmethod
