@@ -22,16 +22,16 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestGrievanceTicketRelatedTickets(APITestCase):
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.generate_document_types_for_all_countries()
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.generate_document_types_for_all_countries()
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
         AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="test334")
         program_one = ProgramFactory(
@@ -74,7 +74,7 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         household_one.head_of_household = individual
         household_one.save()
 
-        self.grievance_tickets = GrievanceTicketFactory.create_batch(5)
+        cls.grievance_tickets = GrievanceTicketFactory.create_batch(5)
 
     def test_should_return_distinct_related_tickets(self):
         ticket1 = GrievanceTicketFactory.create()

@@ -10,12 +10,13 @@ from hct_mis_api.apps.core.utils import create_afghanistan
 
 
 class UserRolesTest(TestCase):
-    def setUp(self):
-        self.role_1 = Role.objects.create(name="Role_1")
-        self.role_2 = Role.objects.create(name="Role_2")
+    @classmethod
+    def setUpTestData(cls):
+        cls.role_1 = Role.objects.create(name="Role_1")
+        cls.role_2 = Role.objects.create(name="Role_2")
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.user = UserFactory()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory()
 
     def test_user_can_be_assigned_role(self):
         data = {"role": self.role_1.id, "user": self.user.id, "business_area": self.business_area.id}

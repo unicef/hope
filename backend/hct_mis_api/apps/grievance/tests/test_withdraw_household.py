@@ -30,23 +30,23 @@ class TestWithdrawHousehold(APITestCase):
         }
         """
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
 
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.first()
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.first()
 
-        self.area_type = AdminAreaLevelFactory(
+        cls.area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=self.area_type, p_code="sfds323")
+        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=cls.area_type, p_code="sfds323")
 
-        self.program_one = ProgramFactory(
+        cls.program_one = ProgramFactory(
             name="Test program ONE",
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
 
     def test_withdraw_household_when_withdraw_last_individual_empty(self):

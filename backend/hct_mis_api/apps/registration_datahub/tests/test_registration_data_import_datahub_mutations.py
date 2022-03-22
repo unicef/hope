@@ -85,16 +85,16 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        self.user = UserFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
         create_afghanistan()
-        self.business_area_slug = "afghanistan"
-        self.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
+        cls.business_area_slug = "afghanistan"
+        cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
 
         img = io.BytesIO(Image.new("RGB", (60, 30), color="red").tobytes())
 
-        self.image = InMemoryUploadedFile(
+        cls.image = InMemoryUploadedFile(
             file=img,
             field_name="consent",
             name="consent.jpg",
@@ -108,7 +108,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         )
 
         with open(xlsx_valid_file_path, "rb") as file:
-            self.valid_file = SimpleUploadedFile(file.name, file.read())
+            cls.valid_file = SimpleUploadedFile(file.name, file.read())
 
     @parameterized.expand(
         [

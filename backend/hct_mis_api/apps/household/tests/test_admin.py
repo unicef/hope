@@ -9,15 +9,16 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 
 class BaseTest(WebTest):
-    def setUp(self):
-        self.household = HouseholdFactory.build(business_area=BusinessAreaFactory(name="Test"))
-        self.individual = IndividualFactory(household=self.household)
-        self.household.head_of_household = self.individual
-        self.household.registration_data_import = RegistrationDataImportFactory()
-        self.household.save()
+    @classmethod
+    def setUpTestData(cls):
+        cls.household = HouseholdFactory.build(business_area=BusinessAreaFactory(name="Test"))
+        cls.individual = IndividualFactory(household=cls.household)
+        cls.household.head_of_household = cls.individual
+        cls.household.registration_data_import = RegistrationDataImportFactory()
+        cls.household.save()
 
-        self.user = UserFactory()
-        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+        cls.user = UserFactory()
+        cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
 
 
 

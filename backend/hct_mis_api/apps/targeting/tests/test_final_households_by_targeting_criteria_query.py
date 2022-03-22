@@ -49,12 +49,9 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         ]
     }
 
-    def setUp(self):
-        super().setUp()
-        self.generate_document_types_for_all_countries()
-
     @classmethod
     def setUpTestData(cls):
+        cls.generate_document_types_for_all_countries()
         create_afghanistan()
         cls.households = []
         cls.business_area = BusinessArea.objects.first()

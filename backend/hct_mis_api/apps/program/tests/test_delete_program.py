@@ -20,11 +20,12 @@ class TestDeleteProgram(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.program = ProgramFactory.create(status=Program.DRAFT, business_area=self.business_area)
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
 
     def test_delete_program_not_authenticated(self):
         self.snapshot_graphql_request(

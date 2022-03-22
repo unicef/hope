@@ -23,12 +23,13 @@ class TestUpdateProgram(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.program = ProgramFactory.create(
-            name="initial name", status=Program.DRAFT, business_area=self.business_area
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory.create(
+            name="initial name", status=Program.DRAFT, business_area=cls.business_area
         )
 
     def test_update_program_not_authenticated(self):

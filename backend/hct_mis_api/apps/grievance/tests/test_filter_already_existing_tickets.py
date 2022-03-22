@@ -60,30 +60,29 @@ class TestAlreadyExistingFilterTickets(APITestCase):
       }
     }
     """
-
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=self.business_area)
-        self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type)
-        self.household, self.individuals = create_household(
-            {"size": 1, "business_area": self.business_area},
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=cls.business_area)
+        cls.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type)
+        cls.household, cls.individuals = create_household(
+            {"size": 1, "business_area": cls.business_area},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
-        program = ProgramFactory(business_area=self.business_area)
-        cash_plan = CashPlanFactory(program=program, business_area=self.business_area)
-        self.payment_record = PaymentRecordFactory(
-            household=self.household,
-            full_name=self.individuals[0].full_name,
-            business_area=self.business_area,
+        program = ProgramFactory(business_area=cls.business_area)
+        cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
+        cls.payment_record = PaymentRecordFactory(
+            household=cls.household,
+            full_name=cls.individuals[0].full_name,
+            business_area=cls.business_area,
             cash_plan=cash_plan,
         )
-        self.payment_record2 = PaymentRecordFactory(
-            household=self.household,
-            full_name=self.individuals[0].full_name,
-            business_area=self.business_area,
+        cls.payment_record2 = PaymentRecordFactory(
+            household=cls.household,
+            full_name=cls.individuals[0].full_name,
+            business_area=cls.business_area,
             cash_plan=cash_plan,
         )
         grievance_1 = GrievanceTicketFactory(
@@ -101,32 +100,32 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
         )
-        self.ticket = SensitiveGrievanceTicketWithoutExtrasFactory(
-            household=self.household,
-            individual=self.individuals[0],
-            payment_record=self.payment_record,
+        cls.ticket = SensitiveGrievanceTicketWithoutExtrasFactory(
+            household=cls.household,
+            individual=cls.individuals[0],
+            payment_record=cls.payment_record,
             ticket=grievance_1,
         )
         SensitiveGrievanceTicketWithoutExtrasFactory(
-            household=self.household,
-            individual=self.individuals[0],
+            household=cls.household,
+            individual=cls.individuals[0],
             ticket=grievance_2,
         )
         SensitiveGrievanceTicketWithoutExtrasFactory(
-            household=self.household,
-            individual=self.individuals[0],
-            payment_record=self.payment_record2,
+            household=cls.household,
+            individual=cls.individuals[0],
+            payment_record=cls.payment_record2,
             ticket=grievance_3,
         )
         GrievanceComplaintTicketFactory.create_batch(5)
         SensitiveGrievanceTicketFactory.create_batch(5)
 
-        self.variables = {
+        cls.variables = {
             "businessArea": "afghanistan",
             "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
-            "issueType": str(self.ticket.ticket.issue_type),
-            "household": self.household.id,
-            "individual": self.individuals[0].id,
+            "issueType": str(cls.ticket.ticket.issue_type),
+            "household": cls.household.id,
+            "individual": cls.individuals[0].id,
         }
 
     @parameterized.expand(

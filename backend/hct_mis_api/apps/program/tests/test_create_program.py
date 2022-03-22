@@ -32,12 +32,13 @@ class TestCreateProgram(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+    
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.program_data = {
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program_data = {
             "programData": {
                 "name": "Test",
                 "startDate": "2019-12-20",
@@ -50,7 +51,7 @@ class TestCreateProgram(APITestCase):
                 "cashPlus": True,
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
-                "businessAreaSlug": self.business_area.slug,
+                "businessAreaSlug": cls.business_area.slug,
             }
         }
 
