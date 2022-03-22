@@ -300,7 +300,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
                   class="sc-bZQynM hTcAyj"
                 >
                   <div
-                    class="sc-ifAKCX iRZDSK"
+                    class="sc-ifAKCX PznGL"
                     data-cy="status-container"
                   >
                     DISTRIBUTION SUCCESSFUL
@@ -319,7 +319,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
                   class="sc-bZQynM hTcAyj"
                 >
                   <div
-                    class="sc-ifAKCX iAMwaj"
+                    class="sc-ifAKCX ihPkUY"
                     data-cy="status-container"
                   />
                 </div>
