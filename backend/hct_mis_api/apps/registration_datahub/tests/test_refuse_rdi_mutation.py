@@ -27,14 +27,14 @@ class TestRefuseRdiMutation(APITestCase):
       }
     """
 
-    def setUp(self):
-        super().setUp()
-        self.user = UserFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
         create_afghanistan()
-        self.business_area_slug = "afghanistan"
-        self.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
+        cls.business_area_slug = "afghanistan"
+        cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
 
-        self.rdi = RegistrationDataImportFactory()
+        cls.rdi = RegistrationDataImportFactory()
 
     @parameterized.expand(
         [

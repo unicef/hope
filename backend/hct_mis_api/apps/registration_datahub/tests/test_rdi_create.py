@@ -58,7 +58,7 @@ class CellMock:
         self.coordinate = coordinate
 
 
-class TestRdiCreateTask(TestCase):
+class TestRdiCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
 
     @classmethod
@@ -481,7 +481,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         first_household = households.get(size=3)
         second_household = households.get(size=2)
 
-        first_household_collectors = first_household.individuals_and_roles.values_list("individual__full_name", "role")
+        first_household_collectors = first_household.individuals_and_roles.order_by('individual__full_name').values_list("individual__full_name", "role")
         self.assertEqual(
             list(first_household_collectors),
             [("Tesa Testowski", "ALTERNATE"), ("Test Testowski", "PRIMARY")],

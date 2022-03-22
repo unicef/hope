@@ -356,7 +356,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
         }
     ]
 
-    def setUp(self) -> None:
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
 
     def test_image_validator(self):

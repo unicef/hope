@@ -17,7 +17,8 @@ from hct_mis_api.apps.targeting.models import (
 
 
 class TestIndividualBlockFilter(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         business_area = BusinessArea.objects.first()
@@ -27,14 +28,14 @@ class TestIndividualBlockFilter(TestCase):
             },
             [{"sex": "MALE", "marital_status": "MARRIED"}],
         )
-        self.household_1_indiv = household
+        cls.household_1_indiv = household
         (household, individuals) = create_household_and_individuals(
             {
                 "business_area": business_area,
             },
             [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
         )
-        self.household_2_indiv = household
+        cls.household_2_indiv = household
 
     def test_all_individuals_are_female(self):
         query = Household.objects.all()

@@ -27,18 +27,19 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         }
         """
 
-    def setUp(self):
-        super().setUp()
+    
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         household, _ = create_household({"size": 2, "address": "Lorem Ipsum", "country_origin": "PL"})
-        self.household = household
-        self.program1 = ProgramFactory.create(name="Test program ONE", business_area=self.business_area)
-        self.program2 = ProgramFactory.create(name="Test program TWO", business_area=self.business_area)
+        cls.household = household
+        cls.program1 = ProgramFactory.create(name="Test program ONE", business_area=cls.business_area)
+        cls.program2 = ProgramFactory.create(name="Test program TWO", business_area=cls.business_area)
 
-        cash_plans_program1 = CashPlanFactory.create_batch(2, program=self.program1)
-        cash_plans_program2 = CashPlanFactory.create_batch(2, program=self.program2)
+        cash_plans_program1 = CashPlanFactory.create_batch(2, program=cls.program1)
+        cash_plans_program2 = CashPlanFactory.create_batch(2, program=cls.program2)
 
         PaymentRecordFactory.create_batch(
             3,
@@ -74,8 +75,8 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             household=household,
         )
 
-        self.household.programs.add(self.program1)
-        self.household.programs.add(self.program2)
+        cls.household.programs.add(cls.program1)
+        cls.household.programs.add(cls.program2)
 
     @parameterized.expand(
         [

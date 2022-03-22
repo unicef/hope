@@ -24,16 +24,15 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         }
     """
 
-    def setUp(self):
-        super().setUp()
-
-        self.user = UserFactory.create()
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory.create()
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        self.cash_plan = CashPlanFactory.create(
+        cls.cash_plan = CashPlanFactory.create(
             id="0e2927af-c84d-4852-bb0b-773efe059e05",
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
 
     @parameterized.expand(

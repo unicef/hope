@@ -24,7 +24,8 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 
 class TestRecalculateData(TestCase):
-    def setUp(self) -> None:
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
 
         business_area = BusinessArea.objects.first()
@@ -139,7 +140,7 @@ class TestRecalculateData(TestCase):
             },
         ]
 
-        self.household, self.individuals = create_household_and_individuals(household_data, individuals_data)
+        cls.household, cls.individuals = create_household_and_individuals(household_data, individuals_data)
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_0_5_count(self):

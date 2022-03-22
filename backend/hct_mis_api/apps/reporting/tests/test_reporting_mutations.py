@@ -29,30 +29,31 @@ class TestReportingMutation(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        self.user = UserFactory()
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
         create_afghanistan()
-        self.business_area_slug = "afghanistan"
-        self.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
+        cls.business_area_slug = "afghanistan"
+        cls.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         last_registration_dates = ("2020-01-01", "2021-01-01")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="Adminarea Test", admin_area_level=area_type)
-        self.program_1 = ProgramFactory(business_area=self.business_area, end_date="2020-01-01")
+        cls.admin_area_1 = AdminAreaFactory(title="Adminarea Test", admin_area_level=area_type)
+        cls.program_1 = ProgramFactory(business_area=cls.business_area, end_date="2020-01-01")
 
-        self.households = []
+        cls.households = []
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household_and_individuals(
                 {
                     "size": family_size,
                     "address": "Lorem Ipsum",
                     "country_origin": "PL",
-                    "business_area": self.business_area,
+                    "business_area": cls.business_area,
                     "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
                 },
                 [{"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]}],

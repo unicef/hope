@@ -45,15 +45,16 @@ class TestTicketNotes(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+    
+    @classmethod
+    def setUpTestData(cls):
         create_afghanistan()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=self.business_area)
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=cls.business_area)
         AdminAreaFactory(title="City Test", admin_area_level=area_type)
-        self.user = UserFactory.create(first_name="John", last_name="Doe")
-        self.ticket_1 = GrievanceTicketFactory(id="5d64ef51-5ed5-4891-b1a3-44a24acb7720")
-        self.ticket_2 = GrievanceTicketFactory(id="1dd2dc43-d418-45bd-b9f7-7545dd4c13a5")
+        cls.user = UserFactory.create(first_name="John", last_name="Doe")
+        cls.ticket_1 = GrievanceTicketFactory(id="5d64ef51-5ed5-4891-b1a3-44a24acb7720")
+        cls.ticket_2 = GrievanceTicketFactory(id="1dd2dc43-d418-45bd-b9f7-7545dd4c13a5")
 
     def test_ticket_notes_query_all(self):
         TicketNoteFactory(

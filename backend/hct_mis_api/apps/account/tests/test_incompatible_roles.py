@@ -9,9 +9,10 @@ from hct_mis_api.apps.core.utils import create_afghanistan
 
 
 class IncompatibleRolesTest(TestCase):
-    def setUp(self):
-        self.role_1 = Role.objects.create(name="Role_1")
-        self.role_2 = Role.objects.create(name="Role_2")
+    @classmethod
+    def setUpTestData(cls):
+        cls.role_1 = Role.objects.create(name="Role_1")
+        cls.role_2 = Role.objects.create(name="Role_2")
 
     def test_unique_pair_allowed(self):
         test_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_2)
