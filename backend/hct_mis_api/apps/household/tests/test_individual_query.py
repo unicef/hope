@@ -16,7 +16,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestIndividualQuery(APITestCase):
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String) {
-      allIndividuals(businessArea: "afghanistan", search: $search) {
+      allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
         edges {
           node {
             fullName
@@ -31,7 +31,7 @@ class TestIndividualQuery(APITestCase):
     """
     ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
     query AllIndividuals($programs: [ID]) {
-      allIndividuals(programs: $programs, orderBy: "birth_date", businessArea: "afghanistan") {
+      allIndividuals(programs: $programs, orderBy: "birth_date", businessArea: "afghanistan", orderBy:"id") {
         edges {
           node {
             givenName
@@ -54,7 +54,7 @@ class TestIndividualQuery(APITestCase):
     """
     INDIVIDUAL_QUERY = """
     query Individual($id: ID!) {
-      individual(id: $id) {
+      individual(id: $id, orderBy:"id") {
         fullName
         givenName
         familyName
@@ -145,7 +145,6 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    @unittest.skip("needs adjudication")
     def test_individual_query_all(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
