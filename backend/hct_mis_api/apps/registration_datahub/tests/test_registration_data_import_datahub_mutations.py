@@ -11,6 +11,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.registration_datahub.models import ImportData
 
 
@@ -84,16 +85,16 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        self.user = UserFactory()
-        call_command("loadbusinessareas")
-        self.business_area_slug = "afghanistan"
-        self.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+        create_afghanistan()
+        cls.business_area_slug = "afghanistan"
+        cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
 
         img = io.BytesIO(Image.new("RGB", (60, 30), color="red").tobytes())
 
-        self.image = InMemoryUploadedFile(
+        cls.image = InMemoryUploadedFile(
             file=img,
             field_name="consent",
             name="consent.jpg",
@@ -107,7 +108,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         )
 
         with open(xlsx_valid_file_path, "rb") as file:
-            self.valid_file = SimpleUploadedFile(file.name, file.read())
+            cls.valid_file = SimpleUploadedFile(file.name, file.read())
 
     @parameterized.expand(
         [

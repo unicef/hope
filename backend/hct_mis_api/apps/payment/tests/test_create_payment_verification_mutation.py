@@ -6,6 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.payment.models import PaymentRecord
@@ -23,16 +24,15 @@ class TestCreatePaymentVerificationMutation(APITestCase):
         }
     """
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory.create()
+        create_afghanistan()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        self.user = UserFactory.create()
-        call_command("loadbusinessareas")
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-        self.cash_plan = CashPlanFactory.create(
+        cls.cash_plan = CashPlanFactory.create(
             id="0e2927af-c84d-4852-bb0b-773efe059e05",
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
 
     @parameterized.expand(

@@ -1,5 +1,6 @@
 from decimal import Decimal
-from unittest import TestCase
+
+from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -10,21 +11,21 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestTargetingSteficon(TestCase):
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         rule, __ = Rule.objects.update_or_create(
             name="TestRule1", defaults={"definition": "result.value=Decimal('1.3')"}
         )
         rule.commit(is_release=True, force=True)
         assert rule.latest  # sanity check
-        self.target_population = TargetPopulationFactory(steficon_rule=rule.latest)
-        if not self.target_population.households.exists():
+        cls.target_population = TargetPopulationFactory(steficon_rule=rule.latest)
+        if not cls.target_population.households.exists():
             hoh = IndividualFactory(household=None, business_area=BusinessAreaFactory())
             households = [HouseholdFactory(head_of_household=hoh)]
-            self.target_population.households.add(*households)
+            cls.target_population.households.add(*households)
 
-        assert self.target_population.selections.count() == 1  # sanity check
-        entry = self.target_population.selections.first()
+        assert cls.target_population.selections.count() == 1  # sanity check
+        entry = cls.target_population.selections.first()
         assert entry.vulnerability_score is None
 
     def test_queue(self):

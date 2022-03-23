@@ -2,6 +2,7 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household
 from hct_mis_api.apps.targeting.models import (
@@ -16,9 +17,10 @@ from hct_mis_api.apps.targeting.models import (
 
 
 class TestIndividualBlockFilter(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         call_command("loadflexfieldsattributes")
-        call_command("loadbusinessareas")
+        create_afghanistan()
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household_and_individuals(
             {
@@ -26,14 +28,14 @@ class TestIndividualBlockFilter(TestCase):
             },
             [{"sex": "MALE", "marital_status": "MARRIED"}],
         )
-        self.household_1_indiv = household
+        cls.household_1_indiv = household
         (household, individuals) = create_household_and_individuals(
             {
                 "business_area": business_area,
             },
             [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
         )
-        self.household_2_indiv = household
+        cls.household_2_indiv = household
 
     def test_all_individuals_are_female(self):
         query = Household.objects.all()

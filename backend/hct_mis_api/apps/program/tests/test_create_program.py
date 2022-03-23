@@ -6,6 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 
 
 class TestCreateProgram(APITestCase):
@@ -31,12 +32,13 @@ class TestCreateProgram(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.program_data = {
+    
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program_data = {
             "programData": {
                 "name": "Test",
                 "startDate": "2019-12-20",
@@ -49,7 +51,7 @@ class TestCreateProgram(APITestCase):
                 "cashPlus": True,
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
-                "businessAreaSlug": self.business_area.slug,
+                "businessAreaSlug": cls.business_area.slug,
             }
         }
 

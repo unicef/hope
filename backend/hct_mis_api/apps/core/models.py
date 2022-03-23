@@ -454,7 +454,7 @@ class CountryCodeMapManager(models.Manager):
 
 class CountryCodeMap(models.Model):
     country = CountryField(unique=True)
-    country_new = models.ForeignKey("geo.Country", blank=True, null=True, unique=True, on_delete=models.PROTECT)
+    country_new = models.OneToOneField("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     ca_code = models.CharField(max_length=5, unique=True)
 
     objects = CountryCodeMapManager()
