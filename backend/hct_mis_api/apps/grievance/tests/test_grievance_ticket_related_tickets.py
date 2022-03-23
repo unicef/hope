@@ -6,6 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -21,16 +22,16 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestGrievanceTicketRelatedTickets(APITestCase):
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.generate_document_types_for_all_countries()
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.generate_document_types_for_all_countries()
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
         AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="test334")
         program_one = ProgramFactory(
@@ -73,7 +74,7 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         household_one.head_of_household = individual
         household_one.save()
 
-        self.grievance_tickets = GrievanceTicketFactory.create_batch(5)
+        cls.grievance_tickets = GrievanceTicketFactory.create_batch(5)
 
     def test_should_return_distinct_related_tickets(self):
         ticket1 = GrievanceTicketFactory.create()

@@ -1,5 +1,5 @@
 import operator
-from unittest import TestCase, mock
+from unittest import  mock
 
 from django.conf import settings
 from django.core.management import call_command
@@ -14,7 +14,8 @@ from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceV
 class TestXLSXValidatorsMethods(APITestCase):
     FILES_DIR_PATH = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
 
-    def setUp(self) -> None:
+    @classmethod
+    def setUpTestData(cls):
         call_command("loadflexfieldsattributes")
 
     def test_geolocation_validator(self):

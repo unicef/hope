@@ -4,11 +4,12 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
-snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
+snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_population 1'] = {
     'data': {
-        'unapproveTargetPopulation': None
+        'approveTargetPopulation': None
     },
     'errors': [
         {
@@ -18,9 +19,56 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_pop
                     'line': 3
                 }
             ],
-            'message': "['Only Target Population with status APPROVED can be unapproved']",
+            'message': "['Only Target Population with status DRAFT can be approved']",
             'path': [
-                'unapproveTargetPopulation'
+                'approveTargetPopulation'
+            ]
+        }
+    ]
+}
+
+snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_0_with_permission 1'] = {
+    'data': {
+        'approveTargetPopulation': {
+            'targetPopulation': {
+                'households': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
+                        }
+                    ],
+                    'totalCount': 2
+                },
+                'status': 'LOCKED'
+            }
+        }
+    }
+}
+
+snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_1_without_permission 1'] = {
+    'data': {
+        'approveTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'approveTargetPopulation'
             ]
         }
     ]
@@ -71,19 +119,19 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 2
+                                'size': 1
                             }
                         },
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 1
+                                'size': 2
                             }
                         }
                     ],
                     'totalCount': 2
                 },
-                'status': 'FINALIZED'
+                'status': 'PROCESSING'
             }
         }
     }
@@ -104,53 +152,6 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
                 'finalizeTargetPopulation'
-            ]
-        }
-    ]
-}
-
-snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_population_0_with_permission 1'] = {
-    'data': {
-        'unapproveTargetPopulation': {
-            'targetPopulation': {
-                'households': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        }
-                    ],
-                    'totalCount': 2
-                },
-                'status': 'DRAFT'
-            }
-        }
-    }
-}
-
-snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_population_1_without_permission 1'] = {
-    'data': {
-        'unapproveTargetPopulation': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 15,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'unapproveTargetPopulation'
             ]
         }
     ]
@@ -181,20 +182,87 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 2
+                                'size': 1
                             }
                         },
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 1
+                                'size': 2
                             }
                         }
                     ],
                     'totalCount': 2
                 },
-                'status': 'FINALIZED'
+                'status': 'PROCESSING'
             }
         }
     }
+}
+
+snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
+    'data': {
+        'unapproveTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': "['Only Target Population with status APPROVED can be unapproved']",
+            'path': [
+                'unapproveTargetPopulation'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_population_0_with_permission 1'] = {
+    'data': {
+        'unapproveTargetPopulation': {
+            'targetPopulation': {
+                'households': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
+                        }
+                    ],
+                    'totalCount': 2
+                },
+                'status': 'DRAFT'
+            }
+        }
+    }
+}
+
+snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_population_1_without_permission 1'] = {
+    'data': {
+        'unapproveTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 15,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'unapproveTargetPopulation'
+            ]
+        }
+    ]
 }

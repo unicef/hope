@@ -35,13 +35,13 @@ class TestImportedHouseholdQuery(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         call_command("loadbusinessareas")
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory.create()
         sizes_list = (2, 4, 5, 1, 3, 11, 14)
-        self.households = [
+        cls.households = [
             ImportedHouseholdFactory(
                 size=size,
                 address="Lorem Ipsum",
@@ -49,7 +49,7 @@ class TestImportedHouseholdQuery(APITestCase):
             )
             for size in sizes_list
         ]
-        for household in self.households:
+        for household in cls.households:
             household.registration_data_import.business_area_slug = "afghanistan"
             household.registration_data_import.save()
 

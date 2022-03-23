@@ -1,8 +1,10 @@
+import os
 from decimal import Decimal
 
 from django.core.management import call_command
 from django.test import TestCase
 
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.erp_datahub.fixtures import FundsCommitmentFactory
 from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
     PullFromErpDatahubTask,
@@ -10,6 +12,8 @@ from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
+
+from unittest.mock import patch
 
 
 class TestPullDataFromErpDatahub(TestCase):
@@ -23,7 +27,7 @@ class TestPullDataFromErpDatahub(TestCase):
 
     @staticmethod
     def _pre_test_commands():
-        call_command("loadbusinessareas")
+        create_afghanistan()
 
     @classmethod
     def _setup_in_app_data(cls):
@@ -81,22 +85,24 @@ class TestPullDataFromErpDatahub(TestCase):
         cls._setup_in_app_data()
         cls._setup_datahub_data()
 
+    @patch("hct_mis_api.apps.erp_datahub.utils.get_exchange_rate_for_cash_plan", new=lambda *arg: 2)
+    @patch("hct_mis_api.apps.erp_datahub.utils.get_payment_record_delivered_quantity_in_usd", new=lambda *arg: 2)
     def test_pull_data(self):
         task = PullFromErpDatahubTask()
         task.execute()
         self.cash_plan_1.refresh_from_db()
         self.assertEqual(self.cash_plan_1.exchange_rate, Decimal(2))
         self.cash_plan_2.refresh_from_db()
-        self.assertEqual(self.cash_plan_2.exchange_rate, Decimal("1.33333333"))
+        self.assertEqual(self.cash_plan_2.exchange_rate, Decimal("2"))
         self.cash_plan_3.refresh_from_db()
-        self.assertIsNone(self.cash_plan_3.exchange_rate)
+        self.assertEqual(self.cash_plan_3.exchange_rate, 2)
         self.payment_record_1.refresh_from_db()
-        self.assertEqual(self.payment_record_1.delivered_quantity_usd, Decimal(2000))
+        self.assertEqual(self.payment_record_1.delivered_quantity_usd, Decimal(2.0))
         self.payment_record_2.refresh_from_db()
-        self.assertEqual(self.payment_record_2.delivered_quantity_usd, Decimal("2666.67"))
+        self.assertEqual(self.payment_record_2.delivered_quantity_usd, Decimal("2"))
         self.payment_record_3.refresh_from_db()
-        self.assertIsNone(self.payment_record_3.delivered_quantity_usd)
+        self.assertEqual(self.payment_record_3.delivered_quantity_usd, 2)
         self.cash_plan_4.refresh_from_db()
-        self.assertIsNone(self.cash_plan_4.exchange_rate)
+        self.assertEqual(self.cash_plan_4.exchange_rate, 2)
         self.payment_record_4.refresh_from_db()
-        self.assertIsNone(self.payment_record_4.delivered_quantity_usd)
+        self.assertEqual(self.payment_record_4.delivered_quantity_usd, 2)
