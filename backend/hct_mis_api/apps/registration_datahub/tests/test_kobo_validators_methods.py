@@ -3,7 +3,7 @@ from operator import itemgetter
 from django.test import TestCase
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
