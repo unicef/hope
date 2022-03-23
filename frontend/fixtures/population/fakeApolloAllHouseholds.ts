@@ -7,7 +7,7 @@ export const fakeApolloAllHouseholds = [
       variables: {
         businessArea: 'afghanistan',
         first: 10,
-        orderBy: null,
+        orderBy: '-unicef_id',
       },
     },
     result: {
