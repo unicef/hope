@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import sys
 from pathlib import Path
 from uuid import uuid4
@@ -9,10 +8,8 @@ from uuid import uuid4
 # Change per project
 ####
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.forms import SelectMultiple
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
 
@@ -405,7 +402,7 @@ SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = [
     "last_name",
     "email",
 ]
-SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
 SOCIAL_AUTH_PIPELINE = (
     "hct_mis_api.apps.account.authentication.social_details",

@@ -4,6 +4,8 @@ volumes:
   backend-data:
   db:
   db_ca:
+  db_mis:
+  db_erp:
   db_reg:
   data_es:
   data_es_test:
@@ -51,9 +53,11 @@ services:
     command: "dev"
     depends_on:
       - db
-      - redis
       - cash_assist_datahub_db
+      - mis_datahub_db
+      - erp_datahub_db
       - registration_datahub_db
+      - redis
       - elasticsearch
       - elasticsearch_test
 
@@ -73,9 +77,11 @@ services:
     depends_on:
       - backend
       - db
-      - redis
       - cash_assist_datahub_db
+      - mis_datahub_db
+      - erp_datahub_db
       - registration_datahub_db
+      - redis
       - elasticsearch
       - elasticsearch_test
 
@@ -95,9 +101,11 @@ services:
     depends_on:
       - backend
       - db
-      - redis
       - cash_assist_datahub_db
+      - mis_datahub_db
+      - erp_datahub_db
       - registration_datahub_db
+      - redis
       - elasticsearch
       - elasticsearch_test
 
@@ -127,6 +135,20 @@ services:
     image: mdillon/postgis:11-alpine
     volumes:
       - db_ca:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  mis_datahub_db:
+    image: mdillon/postgis:11-alpine
+    volumes:
+      - db_mis:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  erp_datahub_db:
+    image: mdillon/postgis:11-alpine
+    volumes:
+      - db_erp:/var/lib/postgresql/data
     env_file:
       - .env
 

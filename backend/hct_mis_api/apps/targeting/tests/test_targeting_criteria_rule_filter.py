@@ -5,6 +5,7 @@ from django.test import TestCase
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import (
     create_household,
     create_household_and_individuals,
@@ -17,16 +18,17 @@ from hct_mis_api.apps.targeting.models import (
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         households = []
-        call_command("loadbusinessareas")
+        create_afghanistan()
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household_and_individuals(
             {"size": 1, "residence_status": "HOST", "business_area": business_area},
             [{"birth_date": "1970-09-29"}],
         )
         households.append(household)
-        self.household_50_yo = household
+        cls.household_50_yo = household
         (household, individuals) = create_household_and_individuals(
             {"size": 1, "residence_status": "HOST", "business_area": business_area},
             [{"birth_date": "1991-11-18"}],
@@ -45,10 +47,10 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
 
         households.append(household)
-        self.household_size_2 = household
-        self.household_refugee = household
+        cls.household_size_2 = household
+        cls.household_refugee = household
 
-        self.households = households
+        cls.households = households
 
     def get_households_queryset(self):
         return Household.objects.filter(pk__in=[h.pk for h in self.households])
@@ -250,9 +252,10 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
 
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         call_command("loadflexfieldsattributes")
-        call_command("loadbusinessareas")
+        create_afghanistan()
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household(
             {
@@ -265,8 +268,8 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
                 "business_area": business_area,
             }
         )
-        self.household_total_households_2 = household
-        self.other_treatment_facility = household
+        cls.household_total_households_2 = household
+        cls.other_treatment_facility = household
         (household, individuals) = create_household(
             {
                 "size": 1,
@@ -277,7 +280,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
                 "business_area": business_area,
             }
         )
-        self.household_total_households_4 = household
+        cls.household_total_households_4 = household
         create_household(
             {"size": 1, "flex_fields": {"ddd": 3, "treatment_facility_h_f": []}, "business_area": business_area}
         )

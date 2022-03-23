@@ -390,6 +390,8 @@ class DeduplicateTask:
                 f"Check ES - status: {health.get('status')} timeout: {health.get('timed_out')} "
                 f"number of pending tasks:{health.get('number_of_pending_tasks')}"
             )
+            if ok:
+                break
             sleep(5)
 
     @classmethod

@@ -6,6 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.models import Report
 
@@ -58,19 +59,19 @@ REPORT_QUERY = """
 
 
 class TestReportsQuery(APITestCase):
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.report_1 = ReportFactory.create(
-            created_by=self.user,
-            business_area=self.business_area,
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.report_1 = ReportFactory.create(
+            created_by=cls.user,
+            business_area=cls.business_area,
             report_type=Report.INDIVIDUALS,
             status=Report.IN_PROGRESS,
         )
-        self.report_2 = ReportFactory.create(
-            created_by=self.user, business_area=self.business_area, report_type=Report.PAYMENTS, status=Report.COMPLETED
+        cls.report_2 = ReportFactory.create(
+            created_by=cls.user, business_area=cls.business_area, report_type=Report.PAYMENTS, status=Report.COMPLETED
         )
 
     @parameterized.expand(
