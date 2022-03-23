@@ -6,7 +6,7 @@ from hct_mis_api.apps.account.admin import UserRoleAdminForm, UserRoleInlineForm
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 
 
 class UserRolesTest(TestCase):

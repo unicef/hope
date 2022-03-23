@@ -28,7 +28,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.tests.test_exchange_rates import (
     EXCHANGE_RATES_WITH_HISTORICAL_DATA,
 )
-from hct_mis_api.apps.core.utils import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.program.models import CashPlan, Program
