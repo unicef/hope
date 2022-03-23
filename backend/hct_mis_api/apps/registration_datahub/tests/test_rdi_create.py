@@ -21,7 +21,7 @@ from PIL import Image
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
-from hct_mis_api.apps.core.utils import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,

@@ -6,7 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.models import Report
 
@@ -61,7 +61,6 @@ REPORT_QUERY = """
 class TestReportsQuery(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        super().setUp()
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

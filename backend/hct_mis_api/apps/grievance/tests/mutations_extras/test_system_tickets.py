@@ -2,7 +2,7 @@ from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.utils import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketSystemFlaggingDetailsFactory,

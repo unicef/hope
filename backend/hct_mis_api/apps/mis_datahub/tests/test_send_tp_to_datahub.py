@@ -6,7 +6,7 @@ from parameterized import parameterized
 import hct_mis_api.apps.mis_datahub.models as dh_models
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,

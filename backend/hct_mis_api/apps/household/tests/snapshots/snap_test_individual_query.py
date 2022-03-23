@@ -8,37 +8,87 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permission 1'] = {
-    'errors': [
-        {
-            'locations': [
+    'data': {
+        'allIndividuals': {
+            'edges': [
                 {
-                    'column': 43,
-                    'line': 3
+                    'node': {
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'givenName': 'Benjamin',
+                        'household': {
+                            'programs': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program TWO'
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        'phoneNo': '(953)682-4596'
+                    }
                 },
                 {
-                    'column': 95,
-                    'line': 3
+                    'node': {
+                        'birthDate': '1969-11-29',
+                        'familyName': 'Franklin',
+                        'givenName': 'Jenna',
+                        'household': {
+                            'programs': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program TWO'
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        'phoneNo': '001-296-358-5428-607'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1983-12-21',
+                        'familyName': 'Perry',
+                        'givenName': 'Timothy',
+                        'household': {
+                            'programs': {
+                                'edges': [
+                                    {
+                                        'node': {
+                                            'name': 'Test program TWO'
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        'phoneNo': '(548)313-1700-902'
+                    }
                 }
-            ],
-            'message': 'There can only be one argument named "orderBy".'
+            ]
         }
-    ]
+    }
 }
 
 snapshots['TestIndividualQuery::test_individual_programme_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
     'errors': [
         {
             'locations': [
                 {
-                    'column': 43,
-                    'line': 3
-                },
-                {
-                    'column': 95,
+                    'column': 7,
                     'line': 3
                 }
             ],
-            'message': 'There can only be one argument named "orderBy".'
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
         }
     ]
 }
