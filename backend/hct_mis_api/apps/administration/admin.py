@@ -4,7 +4,7 @@ from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.logs.admin import LogEntryAdmin as SmartLogEntryAdmin
 
 
-class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, SmartLogEntryAdmin):
+class LogEntryAdmin(AdminAdvancedFiltersMixin, SmartLogEntryAdmin):
     list_display = (
         "action_time",
         "user",
