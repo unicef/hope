@@ -14,11 +14,12 @@
     <script type="text/javascript" src="/api/static/admin/js/vendor/xregexp/xregexp.js"></script>
 
     <style>
-        table.messagelist tr.warning td{
+        table.messagelist tr.warning td {
             background: #ffc url({% static 'admin/img/icon-alert.svg' %}) 2px 10px no-repeat;
             background-size: 14px auto;
             padding-left: 20px;
         }
+
         table.messagelist tr.error td {
             background: #ffefef url({% static 'admin/img/icon-no.svg' %}) 2px 10px no-repeat;
             background-size: 14px auto;
@@ -72,22 +73,26 @@
                 <td>{{ info.count }}</td>
                 <td>
                     <a target="{{ model }}"
-                       href="{% url info.meta|admin_urlname:'changelist' %}?session|id={{ original.pk }}">visit</a>
+                       href="{% url info.meta|admin_urlname:'changelist' %}?session__id__exact={{ original.pk }}">visit</a>
                 </td>
                 <td>
-                    <a href="javascript:django.jQuery('table.{{ info.meta.model_name }}').toggle();">{{ info.warnings|length }}/{{ info.errors|length }}</a>
-                    <table width="100%" class="errors messagelist {{ info.meta.model_name }}" style="display: none">
-                        {% for err in info.warnings %}
-                            <tr class="warning">
-                                <td>{{ err }}</td>
-                            </tr>
-                        {% endfor %}
-                        {% for err in info.errors %}
-                            <tr class="error">
-                                <td>{{ err }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
+                    {% if info.warnings or info.errors %}
+                        <a href="javascript:django.jQuery('table.{{ info.meta.model_name }}').toggle();">{{ info.warnings|length }}/{{ info.errors|length }}</a>
+                        <table width="100%" class="errors messagelist {{ info.meta.model_name }}" style="display: none">
+                            {% for err in info.warnings %}
+                                <tr class="warning">
+                                    <td>{{ err }}</td>
+                                </tr>
+                            {% endfor %}
+                            {% for err in info.errors %}
+                                <tr class="error">
+                                    <td>{{ err }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    {% else %}
+                        {{ info.warnings|length }}/{{ info.errors|length }}
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
