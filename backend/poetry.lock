@@ -353,7 +353,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-admin-extra-buttons"
-version = "1.0.0"
+version = "1.1.0"
 description = "Django mixin to easily add buttons to any ModelAdmin"
 category = "main"
 optional = false
@@ -361,7 +361,7 @@ python-versions = "*"
 
 [package.extras]
 dev = ["autopep8", "check-manifest", "django", "pip-tools", "flake8", "pep8", "readme", "sphinx", "wheel", "isort"]
-docs = ["markdown-include", "mdx-gh-links", "mkdocs", "mkdocs-material"]
+docs = ["markdown-include", "mdx-gh-links", "mkdocs", "mkdocs-material", "mkdocs-material"]
 test = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox (>=2.3)", "wheel"]
 
 [[package]]

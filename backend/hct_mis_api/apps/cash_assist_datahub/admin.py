@@ -145,6 +145,7 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         errors = 0
         errors = 0
         has_content = False
+        business_area = BusinessArea.objects.get(code=obj.business_area)
         if settings.SENTRY_URL and obj.sentry_id:
             context["sentry_url"] = f"{settings.SENTRY_URL}?query={obj.sentry_id}"
 
@@ -181,11 +182,22 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             #     errors += 1
             #     context["data"][ServiceProvider]["warnings"].append(f"ServiceProvider {sv.ca_id} not found in HOPE")
 
+        session_cacheplans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
+        hope_cacheplans = program.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(
+            "ca_id", flat=True
+        )
+        known_cacheplans = list(session_cacheplans) + list(hope_cacheplans)
+
         for pr in PaymentRecord.objects.filter(session=pk):
             if pr.service_provider_ca_id not in svs:
                 errors += 1
                 context["data"][PaymentRecord]["errors"].append(
                     f"PaymentRecord uses ServiceProvider {pr.service_provider_ca_id} that is not present in the Session"
+                )
+            if pr.cash_plan_ca_id not in known_cacheplans:
+                errors += 1
+                context["data"][PaymentRecord]["errors"].append(
+                    f"PaymentRecord is part of an  unknown CashPlan {pr.cash_plan_ca_id}"
                 )
 
             if not people.Household.objects.filter(id=pr.household_mis_id).exists():
