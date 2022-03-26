@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Optional
 
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
@@ -12,7 +13,7 @@ from django.db import models
 from django.db.models import Count, Q
 from django.utils.deconstruct import deconstructible
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
 
@@ -123,7 +124,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     admin_areas_new = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     budget = models.DecimalField(
-        decimal_places=2, max_digits=11, validators=[MinValueValidator(Decimal("0.00"))], db_index=True
+        decimal_places=2,
+        max_digits=11,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        db_index=True,
     )
     frequency_of_payments = models.CharField(
         max_length=50,
@@ -203,12 +207,18 @@ class CashPlan(TimeStampedUUIDModel):
     comments = models.CharField(max_length=255, null=True)
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE, related_name="cash_plans")
     delivery_type = models.CharField(
-        choices=PaymentRecord.DELIVERY_TYPE_CHOICE, max_length=24, null=True, db_index=True
+        choices=PaymentRecord.DELIVERY_TYPE_CHOICE,
+        max_length=24,
+        null=True,
+        db_index=True,
     )
     assistance_measurement = models.CharField(max_length=255, db_index=True)
     assistance_through = models.CharField(max_length=255, db_index=True)
     service_provider = models.ForeignKey(
-        "payment.ServiceProvider", null=True, related_name="cash_plans", on_delete=models.CASCADE
+        "payment.ServiceProvider",
+        null=True,
+        related_name="cash_plans",
+        on_delete=models.CASCADE,
     )
     vision_id = models.CharField(max_length=255, null=True)
     funds_commitment = models.CharField(max_length=255, null=True)
@@ -218,22 +228,32 @@ class CashPlan(TimeStampedUUIDModel):
     total_persons_covered = models.IntegerField(db_index=True)
     total_persons_covered_revised = models.IntegerField(db_index=True)
     total_entitled_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        db_index=True,
+        null=True,
     )
     total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        db_index=True,
+        null=True,
     )
     total_delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        db_index=True,
+        null=True,
     )
     total_undelivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
-    )
-    verification_status = models.CharField(
-        max_length=10,
-        default=CashPlanPaymentVerification.STATUS_PENDING,
-        choices=CashPlanPaymentVerification.STATUS_CHOICES,
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
         db_index=True,
+        null=True,
     )
 
     def __str__(self):
@@ -260,6 +280,22 @@ class CashPlan(TimeStampedUUIDModel):
     def currency(self):
         payment_record = self.payment_records.first()
         return payment_record.currency if payment_record else None
+
+    @property
+    def can_create_payment_verification_plan(self):
+        return self.available_payment_records().count() > 0
+
+    def available_payment_records(self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None):
+        params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
+
+        if payment_verification_plan:
+            params &= Q(
+                Q(verification__isnull=True) | Q(verification__cash_plan_payment_verification=payment_verification_plan)
+            )
+        else:
+            params &= Q(verification__isnull=True)
+
+        return self.payment_records.filter(params).distinct()
 
     class Meta:
         verbose_name = "Cash Plan"

@@ -9,7 +9,6 @@ export const DISCARD_CASH_PLAN_PAYMENT_VERIFICATION = gql`
         id
         status
         statusDate
-        verificationStatus
         verifications {
           edges {
             node {

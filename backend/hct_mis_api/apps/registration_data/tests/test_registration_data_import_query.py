@@ -1,15 +1,17 @@
-from parameterized import parameterized
 from django.core.management import call_command
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestRegistrationDataImportQuery(APITestCase):
-    multi_db = True
+    databases = "__all__"
 
     ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY = """
     query AllRegistrationDataImports {
@@ -38,16 +40,16 @@ class TestRegistrationDataImportQuery(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.user = UserFactory.create()
-        self.to_create = [
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory.create()
+        cls.to_create = [
             {
                 "name": "Lorem Ipsum",
                 "status": "IN_REVIEW",
-                "imported_by": self.user,
+                "imported_by": cls.user,
                 "data_source": "XLS",
                 "number_of_individuals": 123,
                 "number_of_households": 54,
@@ -55,7 +57,7 @@ class TestRegistrationDataImportQuery(APITestCase):
             {
                 "name": "Lorem Ipsum 2",
                 "status": "IN_REVIEW",
-                "imported_by": self.user,
+                "imported_by": cls.user,
                 "data_source": "XLS",
                 "number_of_individuals": 323,
                 "number_of_households": 154,
@@ -63,14 +65,14 @@ class TestRegistrationDataImportQuery(APITestCase):
             {
                 "name": "Lorem Ipsum 3",
                 "status": "IN_REVIEW",
-                "imported_by": self.user,
+                "imported_by": cls.user,
                 "data_source": "XLS",
                 "number_of_individuals": 423,
                 "number_of_households": 184,
             },
         ]
 
-        self.data = [RegistrationDataImportFactory(**item, business_area=self.business_area) for item in self.to_create]
+        cls.data = [RegistrationDataImportFactory(**item, business_area=cls.business_area) for item in cls.to_create]
 
     @parameterized.expand(
         [

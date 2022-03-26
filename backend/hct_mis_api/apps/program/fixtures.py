@@ -7,8 +7,11 @@ from pytz import utc
 
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.models import Program, CashPlan
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerificationSummary,
+    PaymentRecord,
+)
+from hct_mis_api.apps.program.models import CashPlan, Program
 
 
 class ProgramFactory(factory.DjangoModelFactory):
@@ -73,6 +76,11 @@ class ProgramFactory(factory.DjangoModelFactory):
                 self.locations.add(location)
 
 
+class CashPlanPaymentVerificationSummaryFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CashPlanPaymentVerificationSummary
+
+
 class CashPlanFactory(factory.DjangoModelFactory):
     class Meta:
         model = CashPlan
@@ -133,3 +141,10 @@ class CashPlanFactory(factory.DjangoModelFactory):
     total_entitled_quantity_revised = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_delivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
     total_undelivered_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
+
+    @factory.post_generation
+    def cash_plan_payment_verification_summary(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        CashPlanPaymentVerificationSummaryFactory(cash_plan=self)

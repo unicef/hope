@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 from fabric.api import local
 from fabric.context_managers import shell_env
 
@@ -21,7 +20,7 @@ def managepy(command=""):
     """
     Run specified manage.py command
     """
-    cmd = "docker-compose exec backend python manage.py {}".format(command)
+    cmd = f"docker-compose exec backend python manage.py {command}"
     local(cmd)
 
 
@@ -49,9 +48,7 @@ def tests(test_path=""):
     """
     local(
         "docker-compose exec backend "
-        "python manage.py test {} --parallel --noinput".format(
-            test_path
-        )
+        "python manage.py test {} --parallel --noinput".format(test_path)
     )
 
 

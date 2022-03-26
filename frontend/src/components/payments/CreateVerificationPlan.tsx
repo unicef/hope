@@ -12,10 +12,10 @@ import { Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CashPlan } from '../../apollo/queries/payments/CashPlan';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
@@ -114,11 +114,14 @@ function prepareVariables(cashPlanId, selectedTab, values, businessArea) {
 export interface Props {
   cashPlanId: string;
   disabled: boolean;
+  canCreatePaymentVerificationPlan: boolean;
 }
 export function CreateVerificationPlan({
   cashPlanId,
   disabled,
+  canCreatePaymentVerificationPlan,
 }: Props): React.ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -146,12 +149,13 @@ export function CreateVerificationPlan({
       formValues,
       businessArea,
     ),
+    fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
     loadSampleSize();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formValues]);
+  }, [formValues, open]);
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
@@ -161,9 +165,7 @@ export function CreateVerificationPlan({
         values,
         businessArea,
       ),
-      refetchQueries: () => [
-        { query: CashPlan, variables: { id: cashPlanId } },
-      ],
+      refetchQueries,
     });
     setOpen(false);
 
@@ -192,6 +194,18 @@ export function CreateVerificationPlan({
     )})`;
   };
 
+  const handleOpen = (): void => {
+    if (canCreatePaymentVerificationPlan) {
+      setOpen(true);
+    } else {
+      showMessage(
+        t(
+          'There are no payment records that could be assigned to a new verification plan.',
+        ),
+      );
+    }
+  };
+
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
@@ -200,20 +214,23 @@ export function CreateVerificationPlan({
             values={values}
             onChange={() => handleFormChange(values)}
           />
-          <ButtonTooltip
-            disabled={disabled}
-            color='primary'
-            variant='contained'
-            onClick={() => setOpen(true)}
-            data-cy='button-new-plan'
-          >
-            {t('CREATE VERIFICATION PLAN')}
-          </ButtonTooltip>
+          <Box mr={2}>
+            <ButtonTooltip
+              disabled={disabled}
+              color='primary'
+              variant='contained'
+              onClick={() => handleOpen()}
+              data-cy='button-new-plan'
+            >
+              {t('CREATE VERIFICATION PLAN')}
+            </ButtonTooltip>
+          </Box>
           <Dialog
             open={open}
             onClose={() => setOpen(false)}
             scroll='paper'
             aria-labelledby='form-dialog-title'
+            maxWidth='md'
           >
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>

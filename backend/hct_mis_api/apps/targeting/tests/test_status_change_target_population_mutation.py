@@ -8,6 +8,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -19,7 +20,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-@unittest.skip("fix ordering")
+
 class TestApproveTargetPopulationMutation(APITestCase):
     APPROVE_TARGET_MUTATION = """
             mutation ApproveTargetPopulation($id: ID!) {
@@ -42,7 +43,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.households = []
@@ -104,7 +105,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-    @unittest.skip("needs adjudication")
+
     @parameterized.expand(
         [
             ("with_permission", [Permissions.TARGETING_LOCK]),
@@ -137,7 +138,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
 
 
-@unittest.skip("This test fails randomly because ordering changes, needs to be fixed")
+
 class TestUnapproveTargetPopulationMutation(APITestCase):
     UNAPPROVE_TARGET_MUTATION = """
             mutation UnapproveTargetPopulation($id: ID!) {
@@ -162,7 +163,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-        call_command("loadbusinessareas")
+        create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         (household, individuals) = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
@@ -252,7 +253,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
 
 
-@unittest.skip("This test fails randomly because ordering changes, needs to be fixed")
+
 class TestFinalizeTargetPopulationMutation(APITestCase):
     FINALIZE_TARGET_MUTATION = """
             mutation FinalizeTargetPopulation($id: ID!) {
@@ -285,7 +286,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
     def setUpTestData(cls):
         cls.user = UserFactory.create()
         cls.households = []
-        call_command("loadbusinessareas")
+        create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         (household, individuals) = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
@@ -363,7 +364,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             },
         )
 
-    @unittest.skip("needs adjudication")
+
     @parameterized.expand(
         [
             ("with_permission", [Permissions.TARGETING_SEND]),

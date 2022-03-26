@@ -13,9 +13,9 @@ class TestCashPlanChoices(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        self.user = UserFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
 
     def test_status_choices_query(self):
         self.snapshot_graphql_request(

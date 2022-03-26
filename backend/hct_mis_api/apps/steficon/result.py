@@ -11,7 +11,7 @@ class Result:
 
 class Score(Result):
     def __init__(self):
-        super(Score, self).__init__()
+        super().__init__()
         self.extra = {}
 
     def __repr__(self):

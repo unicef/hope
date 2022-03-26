@@ -31,7 +31,7 @@ import { RegistrationIndividualDetailsPage } from './pages/rdi/RegistrationIndiv
 import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/payments/PaymentVerificationDetailsPage';
 import { VerificationRecordDetailsPage } from './pages/payments/VerificationRecordDetailsPage';
-import { UsersList } from './pages/core/UsersList';
+import { UsersPage } from './pages/core/UsersPage';
 import { ReportingPage } from './pages/reporting/ReportingPage';
 import { ReportingDetailsPage } from './pages/reporting/ReportingDetailsPage';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
@@ -198,7 +198,7 @@ export function HomeRouter(): React.ReactElement {
               <GrievancesTablePage key='rdi' />
             </Sentry.ErrorBoundary>
           </Route>
-          <Route path='/:businessArea/grievance-and-feedback/payment-verification/:verificationId'>
+          <Route path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
                 scope.setTag(
@@ -330,7 +330,7 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/users-list');
               }}
             >
-              <UsersList />
+              <UsersPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/activity-log'>

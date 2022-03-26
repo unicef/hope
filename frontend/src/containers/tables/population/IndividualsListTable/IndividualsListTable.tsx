@@ -5,6 +5,7 @@ import {
   IndividualNode,
   AllIndividualsQueryVariables,
   useAllIndividualsQuery,
+  HouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
@@ -18,12 +19,14 @@ interface IndividualsListTableProps {
   filter;
   businessArea: string;
   canViewDetails: boolean;
+  choicesData: HouseholdChoiceDataQuery;
 }
 
 export const IndividualsListTable = ({
   businessArea,
   filter,
   canViewDetails,
+  choicesData,
 }: IndividualsListTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const initialVariables = {
@@ -44,11 +47,14 @@ export const IndividualsListTable = ({
         query={useAllIndividualsQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
+        defaultOrderBy='unicef_id'
+        defaultOrderDirection='desc'
         renderRow={(row) => (
           <IndividualsListTableRow
             key={row.id}
             individual={row}
             canViewDetails={canViewDetails}
+            choicesData={choicesData}
           />
         )}
       />

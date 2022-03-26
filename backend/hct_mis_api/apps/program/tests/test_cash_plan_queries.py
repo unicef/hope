@@ -1,13 +1,15 @@
 from datetime import datetime
-from parameterized import parameterized
 
 from django.core.management import call_command
 
+from parameterized import parameterized
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 
 QUERY_SINGLE_CASH_PLAN = """
@@ -62,15 +64,15 @@ query AllCashPlans {
 
 
 class TestCashPlanQueries(APITestCase):
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.user = UserFactory()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        program = ProgramFactory.create(business_area=self.business_area)
-        self.CASH_PLANS_TO_CREATE = [
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.user = UserFactory()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        program = ProgramFactory.create(business_area=cls.business_area)
+        cls.CASH_PLANS_TO_CREATE = [
             {
-                "business_area": self.business_area,
+                "business_area": cls.business_area,
                 "id": "c7e768f1-5626-413e-a032-5fb18789f985",
                 "ca_id": "7ff3542c-8c48-4ed4-8283-41966093995b",
                 "coverage_duration": 21,
@@ -96,7 +98,7 @@ class TestCashPlanQueries(APITestCase):
                 "assistance_through": "Cairo Amman Bank",
             },
             {
-                "business_area": self.business_area,
+                "business_area": cls.business_area,
                 "ca_id": "04b9d44b-67fe-425c-9095-509e31ba7494",
                 "coverage_duration": 19,
                 "coverage_unit": "Week(s)",
@@ -122,7 +124,7 @@ class TestCashPlanQueries(APITestCase):
             },
         ]
 
-        for cash_plan in self.CASH_PLANS_TO_CREATE:
+        for cash_plan in cls.CASH_PLANS_TO_CREATE:
             CashPlanFactory.create(
                 program=program,
                 **cash_plan,
@@ -138,7 +140,6 @@ class TestCashPlanQueries(APITestCase):
     )
     def test_cash_plans(self, name, permissions, query):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
         variables = {}
         if "single" in name:
             variables["id"] = self.id_to_base64("c7e768f1-5626-413e-a032-5fb18789f985", "CashPlanNode")

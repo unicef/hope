@@ -47,11 +47,12 @@ def raise_as_func(exception):
 
 
 class TestKoboTemplateUpload(APITestCase):
-    def setUp(self):
-        self.client = Client()
-        self.factory = RequestFactory()
-        self.site = AdminSite()
-        self.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, self.site)
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.factory = RequestFactory()
+        cls.site = AdminSite()
+        cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)
 
     def prepare_request(self, name):
         with open(

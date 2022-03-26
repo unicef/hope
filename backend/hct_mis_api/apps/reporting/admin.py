@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Report, DashboardReport
+from .models import DashboardReport, Report
 
 
 @admin.register(Report)
