@@ -91,7 +91,8 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         "deduplication_golden_record_status",
     )
     date_hierarchy = "updated_at"
-    raw_id_fields = ("household", "registration_data_import")
+    # raw_id_fields = ("household", "registration_data_import")
+    autocomplete_fields = ("household", "registration_data_import")
     actions = ["enrich_deduplication"]
 
     def score(self, obj):
@@ -140,6 +141,7 @@ class ImportedIndividualIdentityAdmin(HOPEModelAdminBase):
 
 @admin.register(ImportedHousehold)
 class ImportedHouseholdAdmin(HOPEModelAdminBase):
+    search_fields = ("id", "registration_data_import")
     list_display = ("registration_data_import", "registration_method", "name_enumerator", "country", "country_origin")
     raw_id_fields = ("registration_data_import", "head_of_household")
     date_hierarchy = "registration_data_import__import_date"
@@ -168,6 +170,7 @@ class ImportedDocumentTypeAdmin(HOPEModelAdminBase):
 class ImportedDocumentAdmin(HOPEModelAdminBase):
     list_display = ("document_number", "type", "individual")
     raw_id_fields = ("individual", "type")
+    list_filter = (("type", AutoCompleteFilter),)
 
 
 @admin.register(ImportedIndividualRoleInHousehold)

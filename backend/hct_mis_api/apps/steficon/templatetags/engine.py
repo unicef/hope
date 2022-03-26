@@ -14,16 +14,14 @@ register = template.Library()
 class HtmlDiff(difflib.HtmlDiff):
     def _format_line(self, side, flag, linenum, text):
         try:
-            linenum = "%d" % linenum
-            id = ' id="{}{}"'.format(self._prefix[side], linenum)
+            linenum = "{}".format(inenum)
+            id = f' id="{self._prefix[side]}{linenum}"'
         except TypeError:
             id = ""
         text = text.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;")
         text = text.replace(" ", "&nbsp;").rstrip()
 
-        return '<td class="diff_header lineno"{}>{}</td><td class="code" nowrap="nowrap">{}</td>'.format(
-            id, linenum, text
-        )
+        return f'<td class="diff_header lineno"{id}>{linenum}</td><td class="code" nowrap="nowrap">{text}</td>'
 
     def make_table(self, fromlines, tolines, fromdesc="", todesc="", context=False, numlines=5):
         """Returns HTML table of side by side comparison with change highlights

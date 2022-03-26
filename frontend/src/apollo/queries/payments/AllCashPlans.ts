@@ -43,7 +43,6 @@ export const AllCashPlans = gql`
         node {
           id
           caId
-          verificationStatus
           assistanceThrough
           totalNumberOfHouseholds
           serviceProvider {
@@ -67,6 +66,10 @@ export const AllCashPlans = gql`
           totalDeliveredQuantity
           totalUndeliveredQuantity
           updatedAt
+          cashPlanPaymentVerificationSummary {
+            id
+            status
+          }
         }
       }
     }

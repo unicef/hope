@@ -4,6 +4,8 @@ export const CashPlan = gql`
   query CashPlan($id: ID!) {
     cashPlan(id: $id) {
       id
+      canCreatePaymentVerificationPlan
+      availablePaymentRecordsCount
       name
       startDate
       endDate
@@ -22,20 +24,21 @@ export const CashPlan = gql`
       caId
       caHashId
       dispersionDate
-      verificationStatus
       bankReconciliationSuccess
       bankReconciliationError
       totalNumberOfHouseholds
       verifications {
+        totalCount
         edges {
           node {
             id
+            unicefId
             status
             sampleSize
             receivedCount
             notReceivedCount
             respondedCount
-            verificationMethod
+            verificationChannel
             sampling
             receivedCount
             receivedWithProblemsCount
@@ -52,6 +55,14 @@ export const CashPlan = gql`
             sexFilter
           }
         }
+      }
+      cashPlanPaymentVerificationSummary {
+        id
+        createdAt
+        updatedAt
+        status
+        activationDate
+        completionDate
       }
       program {
         id

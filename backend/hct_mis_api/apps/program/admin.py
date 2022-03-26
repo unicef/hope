@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.template.response import TemplateResponse
+from django.utils.translation import ugettext_lazy as _
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin

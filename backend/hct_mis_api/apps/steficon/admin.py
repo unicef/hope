@@ -156,7 +156,7 @@ class TestRuleMixin:
                         else:
                             row["result"] = rule.execute(values)
                     except Exception as e:
-                        row["error"] = "{}: {}".format(e.__class__.__name__, str(e))
+                        row["error"] = f"{e.__class__.__name__}: {str(e)}"
                         row["success"] = False
                     results.append(row)
                 context["results"] = results
@@ -270,9 +270,6 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
     def get_ignored_linked_objects(self):
         return ["history"]
 
-    def get_action_buttons(self, context):
-        return []
-
     def get_form(self, request, obj=None, change=False, **kwargs):
         return super().get_form(request, obj, change, **kwargs)
 
@@ -297,7 +294,7 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
             escapechar=form.cleaned_data["escapechar"],
         )
 
-    @button(visible=lambda btn: "/change/" in btn.request.path)
+    @button(visible=lambda o, r: "/change/" in r.path)
     def process_file(self, request, pk):
         context = self.get_common_context(
             request,
@@ -474,7 +471,7 @@ class RuleCommitAdmin(
     list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
-    readonly_fields = ("updated_by", "rule", "affected_fields", "version", "definition")
+    readonly_fields = ("updated_by", "rule", "affected_fields", "version")
     change_form_template = None
     change_list_template = None
     resource_class = RuleCommitResource

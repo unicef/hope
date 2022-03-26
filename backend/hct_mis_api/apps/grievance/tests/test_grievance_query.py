@@ -9,6 +9,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
@@ -135,19 +136,19 @@ class TestGrievanceQuery(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.user = UserFactory.create()
-        self.user2 = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.user = UserFactory.create()
+        cls.user2 = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
+        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
+        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
 
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
@@ -158,41 +159,41 @@ class TestGrievanceQuery(APITestCase):
         grievances_to_create = (
             GrievanceTicket(
                 **{
-                    "business_area": self.business_area,
-                    "admin2": self.admin_area_1,
+                    "business_area": cls.business_area,
+                    "admin2": cls.admin_area_1,
                     "language": "Polish",
                     "consent": True,
                     "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_NEW,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
+                    "created_by": cls.user,
+                    "assigned_to": cls.user,
                 }
             ),
             GrievanceTicket(
                 **{
-                    "business_area": self.business_area,
-                    "admin2": self.admin_area_2,
+                    "business_area": cls.business_area,
+                    "admin2": cls.admin_area_2,
                     "language": "English",
                     "consent": True,
                     "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_ON_HOLD,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
+                    "created_by": cls.user,
+                    "assigned_to": cls.user,
                 }
             ),
             GrievanceTicket(
                 **{
-                    "business_area": self.business_area,
-                    "admin2": self.admin_area_2,
+                    "business_area": cls.business_area,
+                    "admin2": cls.admin_area_2,
                     "language": "Polish, English",
                     "consent": True,
                     "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
+                    "created_by": cls.user,
+                    "assigned_to": cls.user,
                 }
             ),
         )

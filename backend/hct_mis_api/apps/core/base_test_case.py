@@ -1,7 +1,9 @@
 import base64
+from time import time
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
+
 from django_countries.data import COUNTRIES
 from elasticsearch_dsl import connections
 from graphene.test import Client
@@ -48,7 +50,8 @@ class APITestCase(SnapshotTestTestCase):
         self.__set_context_files(context_value, files)
         return context_value
 
-    def generate_document_types_for_all_countries(self):
+    @classmethod
+    def generate_document_types_for_all_countries(cls):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for alpha2 in COUNTRIES:
@@ -59,7 +62,7 @@ class APITestCase(SnapshotTestTestCase):
 
     @staticmethod
     def id_to_base64(object_id, name):
-        return base64.b64encode(f"{name}:{str(object_id)}".encode("utf-8")).decode()
+        return base64.b64encode(f"{name}:{str(object_id)}".encode()).decode()
 
     @staticmethod
     def __set_context_files(context, files):
@@ -85,7 +88,6 @@ class BaseElasticSearchTestCase(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        rebuild_search_index()
         super().tearDownClass()
 
     @classmethod

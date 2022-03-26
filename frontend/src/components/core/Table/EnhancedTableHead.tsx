@@ -16,6 +16,7 @@ export interface HeadCell<T> {
   numeric: boolean;
   weight?: number;
   dataCy?: string;
+  disableSort?: boolean;
 }
 
 const useStyles = makeStyles(() =>
@@ -40,10 +41,8 @@ const TableSortLabelStyled = styled(TableSortLabel)`
   }
 `;
 
-const TableRowStyled = styled(TableRow)`
-  & {
-    font-size: 12px;
-  }
+const StyledLabel = styled.span`
+  font-size: 12px;
 `;
 
 interface EnhancedTableProps<T> {
@@ -104,7 +103,7 @@ export function EnhancedTableHead<T>(
             sortDirection={orderBy === headCell.id ? order : false}
             data-cy={headCell.dataCy}
           >
-            {allowSort ? (
+            {allowSort && !headCell.disableSort ? (
               <TableSortLabelStyled
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
@@ -120,7 +119,7 @@ export function EnhancedTableHead<T>(
                 )}
               </TableSortLabelStyled>
             ) : (
-              <TableRowStyled>{headCell.label}</TableRowStyled>
+              <StyledLabel>{headCell.label}</StyledLabel>
             )}
           </TableCell>
         ))}

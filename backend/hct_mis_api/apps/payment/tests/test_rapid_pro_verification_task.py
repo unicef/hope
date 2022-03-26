@@ -7,6 +7,7 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
@@ -17,7 +18,7 @@ from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentVerification,
 )
-from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     CheckRapidProVerificationTask,
 )
@@ -77,7 +78,7 @@ class TestRapidProVerificationTask(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         payment_record_amount = 10
 
         user = UserFactory()
@@ -91,14 +92,14 @@ class TestRapidProVerificationTask(TestCase):
             candidate_list_targeting_criteria=targeting_criteria,
             business_area=BusinessArea.objects.first(),
         )
-        cash_plan = CashPlanFactory.build(
+        cash_plan = CashPlanFactory(
             program=program,
             business_area=BusinessArea.objects.first(),
         )
         cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
-            verification_method=CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO,
+            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
             cash_plan=cash_plan,
         )
         for _ in range(payment_record_amount):
@@ -132,7 +133,7 @@ class TestRapidProVerificationTask(TestCase):
         cls.cash_plan = cash_plan
         cls.verification = cash_plan.verifications.first()
 
-    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_filtering_by_start_id(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
@@ -143,7 +144,7 @@ class TestRapidProVerificationTask(TestCase):
             "urn"
         ] = f"tel:{payment_record_verification.payment_record.head_of_household.phone_no}"
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
-        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
             mapped_dict = api.get_mapped_flow_runs(uuid.uuid4())
             self.assertEqual(
@@ -151,7 +152,7 @@ class TestRapidProVerificationTask(TestCase):
                 [],
             )
 
-    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_mapping(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
@@ -162,7 +163,7 @@ class TestRapidProVerificationTask(TestCase):
             "urn"
         ] = f"tel:{payment_record_verification.payment_record.head_of_household.phone_no}"
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
-        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
             mapped_dict = api.get_mapped_flow_runs(TestRapidProVerificationTask.START_UUID)
             self.assertEqual(
@@ -176,7 +177,7 @@ class TestRapidProVerificationTask(TestCase):
                 ],
             )
 
-    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_not_received(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification = (
@@ -197,7 +198,7 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -207,7 +208,7 @@ class TestRapidProVerificationTask(TestCase):
                 PaymentVerification.STATUS_NOT_RECEIVED,
             )
 
-    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_received_with_issues(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification = (
@@ -229,7 +230,7 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -243,7 +244,7 @@ class TestRapidProVerificationTask(TestCase):
                 payment_record_verification.payment_record.delivered_quantity - 1,
             )
 
-    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_received(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification = (
@@ -265,7 +266,7 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()

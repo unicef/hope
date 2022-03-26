@@ -1,6 +1,7 @@
+import { Box } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { IndividualsFilter } from '../../../components/population/IndividualsFilter';
@@ -8,19 +9,20 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import {
+  useHouseholdChoiceDataQuery,
+  useIndividualChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
-import { useIndividualChoiceDataQuery } from '../../../__generated__/graphql';
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-`;
 
 export function PopulationIndividualsPage(): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const {
+    data: householdChoicesData,
+    loading: householdChoicesLoading,
+  } = useHouseholdChoiceDataQuery();
 
   const [filter, setFilter] = useState({
     sex: [],
@@ -28,9 +30,16 @@ export function PopulationIndividualsPage(): React.ReactElement {
     flags: [],
   });
   const debouncedFilter = useDebounce(filter, 500);
-  const { data: choicesData } = useIndividualChoiceDataQuery();
+  const {
+    data: individualChoicesData,
+    loading: individualChoicesLoading,
+  } = useIndividualChoiceDataQuery();
 
-  if (permissions === null) return null;
+  if (householdChoicesLoading || individualChoicesLoading)
+    return <LoadingComponent />;
+
+  if (!individualChoicesData || !householdChoicesData || permissions === null)
+    return null;
 
   if (
     !hasPermissions(PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions)
@@ -43,18 +52,23 @@ export function PopulationIndividualsPage(): React.ReactElement {
       <IndividualsFilter
         filter={filter}
         onFilterChange={setFilter}
-        choicesData={choicesData}
+        choicesData={individualChoicesData}
       />
-      <Container data-cy='page-details-container'>
+      <Box
+        display='flex'
+        flexDirection='column'
+        data-cy='page-details-container'
+      >
         <IndividualsListTable
           filter={debouncedFilter}
           businessArea={businessArea}
+          choicesData={householdChoicesData}
           canViewDetails={hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
             permissions,
           )}
         />
-      </Container>
+      </Box>
     </>
   );
 }

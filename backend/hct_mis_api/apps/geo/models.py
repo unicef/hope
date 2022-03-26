@@ -2,8 +2,9 @@
 # - AreaType
 # - Area
 from django.contrib.gis.db import models
-from django.contrib.postgres.fields import CICharField, JSONField
-from django.utils.translation import ugettext_lazy as _
+from django.contrib.postgres.fields import CICharField
+from django.db.models import JSONField
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
@@ -118,4 +119,10 @@ class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         if business_area is not None:
             queryset.filter(area_type__country__business_areas=business_area)
         queryset = queryset.order_by("name")
-        return [{"label": {"English(EN)": f"{area.name}-{area.p_code}"}, "value": area.p_code} for area in queryset]
+        return [
+            {
+                "label": {"English(EN)": f"{area.name}-{area.p_code}"},
+                "value": area.p_code,
+            }
+            for area in queryset
+        ]
