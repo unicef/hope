@@ -4,12 +4,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+
 from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
+from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import (
+    XlsxVerificationExportService,
+)
 
 logger = logging.getLogger(__name__)
 

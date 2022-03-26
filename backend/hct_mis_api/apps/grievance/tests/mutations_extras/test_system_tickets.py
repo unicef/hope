@@ -2,6 +2,7 @@ from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketSystemFlaggingDetailsFactory,
@@ -16,19 +17,19 @@ from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactor
 
 
 class TestSystemTickets(APITestCase):
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.user = UserFactory.create()
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.user = UserFactory.create()
         _, individuals = create_household({"size": 1})
-        self.individual = individuals[0]
+        cls.individual = individuals[0]
 
-        self.grievance_ticket = GrievanceTicketFactory(
+        cls.grievance_ticket = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
-        self.sanction_list_individual = SanctionListIndividualFactory.create()
+        cls.sanction_list_individual = SanctionListIndividualFactory.create()
 
     def test_close_system_flagging_ticket_with_approve_status(self):
         ticket_details = TicketSystemFlaggingDetailsFactory(

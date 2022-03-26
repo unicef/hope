@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@material-ui/core';
 import WarningIcon from '@material-ui/icons/Warning';
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import capitalize from 'lodash/capitalize';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -77,13 +77,11 @@ export const ReassignRoleBox = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
     ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
   ) {
-    if (
-      _.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)
-    ) {
+    if (isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)) {
       householdsAndRoles = [];
     }
     if (
-      _.isEmpty(
+      isEmpty(
         ticket.individualDataUpdateTicketDetails.individualData.relationship,
       )
     ) {

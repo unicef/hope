@@ -10,10 +10,11 @@ from pathlib import Path
 from typing import List, Union
 from zipfile import BadZipfile
 
+from django.core import validators as django_core_validators
+
 import openpyxl
 import phonenumbers
 from dateutil import parser
-from django.core import validators as django_core_validators
 from openpyxl import load_workbook
 
 from hct_mis_api.apps.core.core_fields_attributes import (
@@ -38,9 +39,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
-from hct_mis_api.apps.registration_datahub.tasks.utils import (
-    collectors_str_ids_to_list,
-)
+from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 logger = logging.getLogger(__name__)
 
@@ -1082,7 +1081,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def image_validator(self, value: str, field: str, attachments: List[dict], *args, **kwargs) -> Union[str, None]:
+    def image_validator(self, value: str, field: str, attachments: list[dict], *args, **kwargs) -> Union[str, None]:
         try:
             allowed_extensions = django_core_validators.get_available_image_extensions()
             file_extension = value.split(".")[-1]

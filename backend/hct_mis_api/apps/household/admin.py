@@ -7,9 +7,8 @@ from django.contrib import admin, messages
 from django.contrib.admin import TabularInline
 from django.contrib.admin.models import LogEntry
 from django.contrib.messages import DEFAULT_TAGS
-from django.contrib.postgres.fields import JSONField
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, JSONField, Q
 from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -150,7 +149,12 @@ class HouseholdAdmin(
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("representatives", "programs")
-    raw_id_fields = ("registration_data_import", "admin_area", "head_of_household", "business_area")
+    raw_id_fields = (
+        "registration_data_import",
+        "admin_area",
+        "head_of_household",
+        "business_area",
+    )
     fieldsets = [
         (None, {"fields": (("unicef_id", "head_of_household"),)}),
         (
@@ -218,7 +222,6 @@ class HouseholdAdmin(
 
                     for ticket in tickets:
                         self.log_change(request, ticket.ticket, ticket_message)
-
                     self.log_change(request, obj, message.format("Household"))
                     return HttpResponseRedirect(request.path)
             except Exception as e:
@@ -281,7 +284,10 @@ class HouseholdAdmin(
 
         if hh.size != total_in_ranges:
             warnings.append(
-                [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"]
+                [
+                    messages.ERROR,
+                    f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match",
+                ]
             )
 
         aaaa = active_individuals.values_list("unicef_id", flat=True)
@@ -438,7 +444,7 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("agency", "individual", "number")
-    list_filter = (("individual__unicef_id", ValueFilter.factory(lookup_name="icontains")),)
+    list_filter = (TextFieldFilter.factory("individual__unicef_id__icontains"),)
     autocomplete_fields = ["agency"]
 
 

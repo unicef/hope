@@ -11,6 +11,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
@@ -37,7 +38,7 @@ class TestXlsxVerificationImport(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         payment_record_amount = 10
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -50,7 +51,7 @@ class TestXlsxVerificationImport(APITestCase):
         target_population = TargetPopulationFactory(
             created_by=cls.user, candidate_list_targeting_criteria=targeting_criteria, business_area=cls.business_area
         )
-        cash_plan = CashPlanFactory.build(program=program, business_area=cls.business_area)
+        cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
         for _ in range(payment_record_amount):

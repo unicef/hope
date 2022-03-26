@@ -14,7 +14,7 @@ import {
   useHouseholdChoiceDataQuery,
   useImportedHouseholdQuery,
 } from '../../../__generated__/graphql';
-import { HouseholdImportedIndividualsTable } from '../../tables/rdi/HouseholdIndividualsTable';
+import { HouseholdImportedIndividualsTable } from '../../tables/rdi/HouseholdImportedIndividualsTable/HouseholdImportedIndividualsTable';
 import { HouseholdDetails } from '../../../components/rdi/details/households/HouseholdDetails/HouseholdDetails';
 import { RegistrationDetails } from '../../../components/rdi/details/households/RegistrationDetails';
 
@@ -75,7 +75,10 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         household={importedHousehold}
       />
       <Container>
-        <HouseholdImportedIndividualsTable household={importedHousehold} />
+        <HouseholdImportedIndividualsTable
+          choicesData={choicesData}
+          household={importedHousehold}
+        />
         <RegistrationDetails
           hctId={importedHousehold.registrationDataImport.hctId}
           registrationDate={importedHousehold.firstRegistrationDate}

@@ -1,4 +1,5 @@
 import logging
+
 from graphql import GraphQLError
 
 logger = logging.getLogger(__name__)

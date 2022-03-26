@@ -1,0 +1,1 @@
+export { IndividualVulnerabilities } from './IndividualVunerabilities';

@@ -2,6 +2,7 @@ import logging
 import os
 import time
 from io import BytesIO
+from urllib.parse import urlparse
 
 from django.conf import settings
 
@@ -22,6 +23,16 @@ class TokenNotProvided(Exception):
 
 class TokenInvalid(Exception):
     pass
+
+
+class KoboRequestsSession(requests.Session):
+    AUTH_DOMAINS = [urlparse(settings.KOBO_KF_URL).hostname, urlparse(settings.KOBO_KC_URL).hostname]
+
+    def should_strip_auth(self, old_url, new_url):
+        new_parsed = urlparse(new_url)
+        if new_parsed.hostname in KoboRequestsSession.AUTH_DOMAINS:
+            return False
+        return super().should_strip_auth(old_url, new_url)
 
 
 class KoboAPI:
@@ -59,7 +70,7 @@ class KoboAPI:
         return f"{self.KPI_URL}/{endpoint}?{query_params}"
 
     def _get_token(self):
-        self._client = requests.session()
+        self._client = KoboRequestsSession()
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=False)
         self._client.mount(self.KPI_URL, HTTPAdapter(max_retries=retries))
 

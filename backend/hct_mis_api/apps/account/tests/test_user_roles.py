@@ -4,17 +4,19 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.admin import UserRoleAdminForm, UserRoleInlineFormSet
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, UserRole, User
+from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 
 
 class UserRolesTest(TestCase):
-    def setUp(self):
-        self.role_1 = Role.objects.create(name="Role_1")
-        self.role_2 = Role.objects.create(name="Role_2")
-        call_command("loadbusinessareas")
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.user = UserFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.role_1 = Role.objects.create(name="Role_1")
+        cls.role_2 = Role.objects.create(name="Role_2")
+        create_afghanistan()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory()
 
     def test_user_can_be_assigned_role(self):
         data = {"role": self.role_1.id, "user": self.user.id, "business_area": self.business_area.id}

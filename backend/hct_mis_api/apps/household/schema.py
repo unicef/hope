@@ -1,12 +1,13 @@
 import re
 
-from django.db.models import Prefetch, Q, Sum
+from django.db.models import DecimalField, IntegerField, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce, Lower
 
 import graphene
 from django_filters import (
     BooleanFilter,
     CharFilter,
+    DateFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
@@ -107,6 +108,7 @@ class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
+    head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=AdminArea.objects.filter(level=2))
     withdrawn = BooleanFilter(field_name="withdrawn")
@@ -153,12 +155,14 @@ class HouseholdFilter(FilterSet):
         q_obj = Q()
         for value in values:
             inner_query = Q()
-            inner_query |= Q(head_of_household__full_name__startswith=value)
-            inner_query |= Q(head_of_household__given_name__startswith=value)
-            inner_query |= Q(head_of_household__middle_name__startswith=value)
-            inner_query |= Q(head_of_household__family_name__startswith=value)
-            inner_query |= Q(unicef_id__startswith=value)
-            inner_query |= Q(unicef_id__endswith=value)
+            inner_query |= Q(head_of_household__full_name__istartswith=value)
+            inner_query |= Q(head_of_household__given_name__istartswith=value)
+            inner_query |= Q(head_of_household__middle_name__istartswith=value)
+            inner_query |= Q(head_of_household__family_name__istartswith=value)
+            inner_query |= Q(residence_status__istartswith=value)
+            inner_query |= Q(admin_area__title__istartswith=value)
+            inner_query |= Q(unicef_id__istartswith=value)
+            inner_query |= Q(unicef_id__iendswith=value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
@@ -227,17 +231,18 @@ class IndividualFilter(FilterSet):
             values = value.split(" ")
         q_obj = Q()
         for value in values:
-            inner_query = Q(household__admin_area__title__startswith=value)
-            inner_query |= Q(unicef_id__startswith=value)
-            inner_query |= Q(unicef_id__endswith=value)
-            inner_query |= Q(household__unicef_id__startswith=value)
-            inner_query |= Q(full_name__startswith=value)
-            inner_query |= Q(given_name__startswith=value)
-            inner_query |= Q(middle_name__startswith=value)
-            inner_query |= Q(family_name__startswith=value)
-            inner_query |= Q(documents__document_number__startswith=value)
-            inner_query |= Q(phone_no__startswith=value)
-            inner_query |= Q(phone_no_alternative__startswith=value)
+            inner_query = Q(household__admin_area__title__istartswith=value)
+            inner_query |= Q(unicef_id__istartswith=value)
+            inner_query |= Q(unicef_id__iendswith=value)
+            inner_query |= Q(household__unicef_id__istartswith=value)
+            inner_query |= Q(full_name__istartswith=value)
+            inner_query |= Q(given_name__istartswith=value)
+            inner_query |= Q(middle_name__istartswith=value)
+            inner_query |= Q(family_name__istartswith=value)
+            inner_query |= Q(documents__document_number__istartswith=value)
+            inner_query |= Q(phone_no__istartswith=value)
+            inner_query |= Q(phone_no_alternative__istartswith=value)
+            inner_query |= Q(relationship__istartswith=value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
@@ -650,9 +655,11 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
-        return Household.objects.annotate(total_cash=Coalesce(Sum("payment_records__delivered_quantity"), 0)).order_by(
-            "created_at"
-        )
+        return Household.objects.annotate(
+            total_cash=Coalesce(
+                Sum("payment_records__delivered_quantity", output_field=DecimalField()), 0, output_field=IntegerField()
+            )
+        ).order_by("created_at")
 
     def resolve_residence_status_choices(self, info, **kwargs):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
