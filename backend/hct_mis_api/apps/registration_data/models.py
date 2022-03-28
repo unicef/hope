@@ -105,3 +105,17 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
 
     def should_check_against_sanction_list(self):
         return self.screen_beneficiary
+
+    @classmethod
+    def get_choices(cls, business_area_slug=None):
+        filters = {}
+        if business_area_slug:
+            filters["business_area__slug"] = business_area_slug
+        queryset = cls.objects.filter(**filters)
+        return [
+            {
+                "label": {"English(EN)": f"{rdi.name}"},
+                "value": rdi.id,
+            }
+            for rdi in queryset
+        ]
