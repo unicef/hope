@@ -11,10 +11,11 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 
 class RoleTest(WebTest):
-    def setUp(self):
-        self.role_1 = Role.objects.create(name="Role_1")
-        self.user = UserFactory()
-        self.superuser: User = UserFactory(is_superuser=True, is_staff=True)
+    @classmethod
+    def setUpTestData(cls):
+        cls.role_1 = Role.objects.create(name="Role_1")
+        cls.user = UserFactory()
+        cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
 
     def test_role_history(self):
         url = reverse("admin:account_role_change", args=[self.role_1.pk])
@@ -33,8 +34,6 @@ class RoleTest(WebTest):
         assert "Removed permissions" in res.content.decode()
 
     def test_role_matrix(self):
-        url = reverse("admin:account_role_change", args=[self.role_1.pk])
+        url = reverse("admin:account_role_changelist")
         res = self.app.get(url, user=self.superuser)
-        url = reverse("admin:account_role_change", args=[self.role_1.pk])
-
         res = res.click("Matrix")

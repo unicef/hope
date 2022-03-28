@@ -11,7 +11,7 @@ from hct_mis_api.apps.mis_datahub import models as mis_models
 
 
 class TestSyncToMisDatahubTask(TestCase):
-    multi_db = True
+    databases = "__all__"
     bosnia_and_herzegovina = None
     bosnia = None
     herzegovina = None

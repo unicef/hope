@@ -6,27 +6,30 @@
 2. Receive .env file from your team member. There are AD secrets there.
 3. Run
 
-Frontend in Docker
 
-```bash
-docker-compose build
-docker-compose up
-docker-compose exec backend bash
-
-# in docker container
-./manage.py init
-```
-
-Frontend on Local Machine \(use node 13\)
+Frontend running on Local Machine (use node 16)
 
 ```bash
 yarn
 yarn start
 # in anthorer terminal
-docker-compose -f docker-compose.yml build
-docker-compose -f docker-compose.yml run backend ./manage.py init
-docker-compose -f docker-compose.yml up
+docker-compose build
+docker-compose run backend ./manage.py initempty
+docker-compose up
 ```
+***
+Frontend app is run inside Docker (a lot slower)
+
+```bash
+docker-compose -f docker-compose.yml  -f docker-compose.frontend.yml build
+docker-compose -f docker-compose.yml  -f docker-compose.frontend.yml up
+docker-compose -f docker-compose.yml  -f docker-compose.frontend.yml exec backend bash
+
+# in docker container
+./manage.py initempty
+```
+
+
 
 Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login)
 

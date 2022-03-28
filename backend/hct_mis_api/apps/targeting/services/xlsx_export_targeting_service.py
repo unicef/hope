@@ -1,11 +1,12 @@
 from functools import cached_property
 
-import openpyxl
 from django.db.models import Q
+
+import openpyxl
 from openpyxl.utils import get_column_letter
 
 from hct_mis_api.apps.core.utils import nested_getattr
-from hct_mis_api.apps.household.models import Individual, Document
+from hct_mis_api.apps.household.models import Document, Individual
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 

@@ -1,4 +1,14 @@
-from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
+from django.db.models import (
+    Case,
+    Count,
+    DecimalField,
+    FloatField,
+    IntegerField,
+    Q,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce, Lower
 
 import graphene
@@ -41,7 +51,7 @@ class ProgramFilter(FilterSet):
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
     sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
-    number_of_households = IntegerRangeFilter(field_name="households_count")
+    number_of_households = IntegerRangeFilter(field_name="total_hh_count")
     budget = DecimalRangeFilter(field_name="budget")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
@@ -63,21 +73,21 @@ class ProgramFilter(FilterSet):
         fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
     )
 
-    @property
-    def qs(self):
-        return super().qs.annotate(
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(
             total_hh_count=Count(
                 "cash_plans__payment_records__household",
                 filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
                 distinct=True,
             )
         )
+        return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(name__startswith=value)
+            q_obj |= Q(name__istartswith=value)
         return qs.filter(q_obj)
 
 
@@ -137,7 +147,7 @@ class CashPlanFilter(FilterSet):
             "status",
             "total_number_of_hh",
             "total_entitled_quantity",
-            "cash_plan_payment_verification_summary__status",
+            ("cash_plan_payment_verification_summary__status", "verification_status"),
             "total_persons_covered",
             "total_delivered_quantity",
             "total_undelivered_quantity",
@@ -154,16 +164,15 @@ class CashPlanFilter(FilterSet):
         )
     )
 
-    @property
-    def qs(self):
-        return super().qs.annotate(total_number_of_hh=Count("payment_records"))
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(total_number_of_hh=Count("payment_records"))
+        return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__startswith=value)
-            q_obj |= Q(ca_id__startswith=value)
+            q_obj |= Q(ca_id__istartswith=value)
         return qs.filter(q_obj)
 
 
@@ -178,6 +187,9 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     delivery_type = graphene.String()
     total_number_of_households = graphene.Int()
     currency = graphene.String(source="currency")
+    total_delivered_quantity = graphene.Float()
+    total_entitled_quantity = graphene.Float()
+    total_undelivered_quantity = graphene.Float()
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
 
@@ -266,7 +278,9 @@ class Query(graphene.ObjectType):
                     output_field=IntegerField(),
                 )
             )
-            .annotate(households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0))
+            .annotate(
+                households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
+            )
             .order_by("custom_order", "start_date")
         )
 
@@ -346,12 +360,16 @@ class Query(graphene.ObjectType):
             .order_by("delivery_date__month")
             .annotate(
                 total_delivered_cash=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
+                    output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_delivered_voucher=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
+                    output_field=DecimalField(),
                 )
             )
         )

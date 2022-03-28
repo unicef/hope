@@ -4,6 +4,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketDeleteIndividualDetailsFactory,
@@ -38,25 +39,26 @@ class TestRoleReassignMutation(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+    
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sadf3223")
+        cls.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sadf3223")
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
-        self.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
-        self.household.registration_data_import.imported_by.save()
-        self.household.registration_data_import.save()
-        self.household.programs.add(program_one)
+        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
+        cls.household.registration_data_import.imported_by.save()
+        cls.household.registration_data_import.save()
+        cls.household.programs.add(program_one)
 
-        self.individual = IndividualFactory(
+        cls.individual = IndividualFactory(
             **{
                 "id": "d4848d8e-4a1c-49e9-b1c0-1e994047164a",
                 "full_name": "Benjamin Butler",
@@ -68,32 +70,32 @@ class TestRoleReassignMutation(APITestCase):
             },
         )
 
-        self.household.head_of_household = self.individual
-        self.household.save()
+        cls.household.head_of_household = cls.individual
+        cls.household.save()
 
-        self.individual.household = self.household
-        self.individual.save()
+        cls.individual.household = cls.household
+        cls.individual.save()
 
-        self.household.refresh_from_db()
-        self.individual.refresh_from_db()
+        cls.household.refresh_from_db()
+        cls.individual.refresh_from_db()
 
-        self.role = IndividualRoleInHousehold.objects.create(
-            household=self.household,
-            individual=self.individual,
+        cls.role = IndividualRoleInHousehold.objects.create(
+            household=cls.household,
+            individual=cls.individual,
             role=ROLE_PRIMARY,
         )
 
-        self.grievance_ticket = GrievanceTicketFactory(
+        cls.grievance_ticket = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
-            admin2=self.admin_area,
-            business_area=self.business_area,
+            admin2=cls.admin_area,
+            business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         TicketDeleteIndividualDetailsFactory(
-            ticket=self.grievance_ticket,
-            individual=self.individual,
+            ticket=cls.grievance_ticket,
+            individual=cls.individual,
             approve_status=True,
         )
 

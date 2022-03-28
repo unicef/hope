@@ -66,7 +66,7 @@ def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> l
     return [reduce_asset(asset) for asset in assets]
 
 
-def count_population(results: list, business_area: BusinessArea) -> Tuple[int, int]:
+def count_population(results: list, business_area: BusinessArea) -> tuple[int, int]:
     from hashlib import sha256
 
     from hct_mis_api.apps.core.utils import rename_dict_keys

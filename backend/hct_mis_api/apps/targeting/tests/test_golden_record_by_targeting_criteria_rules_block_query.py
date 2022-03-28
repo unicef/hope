@@ -4,6 +4,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import MALE
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -34,7 +35,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadflexfieldsattributes")
-        call_command("loadbusinessareas")
+        create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
         cls.program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
         (household, individuals) = create_household_and_individuals(

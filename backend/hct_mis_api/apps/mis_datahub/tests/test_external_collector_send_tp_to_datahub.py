@@ -4,10 +4,8 @@ from django.test import TestCase
 import hct_mis_api.apps.mis_datahub.models as dh_models
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory,
-    IndividualFactory,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
@@ -21,10 +19,11 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 class TestExternalCollectorSendTpToDatahub(TestCase):
     multi_db = True
+    databases = "__all__"
 
     @staticmethod
     def _pre_test_commands():
-        call_command("loadbusinessareas")
+        create_afghanistan()
         call_command("generatedocumenttypes")
         call_command("loadcountrycodes")
         business_area_with_data_sharing = BusinessArea.objects.first()

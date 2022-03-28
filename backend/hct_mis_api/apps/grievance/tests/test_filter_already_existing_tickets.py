@@ -1,21 +1,23 @@
 from django.core.management import call_command
+
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceTicketFactory,
     GrievanceComplaintTicketFactory,
-    SensitiveGrievanceTicketWithoutExtrasFactory,
+    GrievanceTicketFactory,
     SensitiveGrievanceTicketFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory, CashPlanFactory
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 
 
 class TestAlreadyExistingFilterTickets(APITestCase):
@@ -58,30 +60,29 @@ class TestAlreadyExistingFilterTickets(APITestCase):
       }
     }
     """
-
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=self.business_area)
-        self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type)
-        self.household, self.individuals = create_household(
-            {"size": 1, "business_area": self.business_area},
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=cls.business_area)
+        cls.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type)
+        cls.household, cls.individuals = create_household(
+            {"size": 1, "business_area": cls.business_area},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
-        program = ProgramFactory(business_area=self.business_area)
-        cash_plan = CashPlanFactory(program=program, business_area=self.business_area)
-        self.payment_record = PaymentRecordFactory(
-            household=self.household,
-            full_name=self.individuals[0].full_name,
-            business_area=self.business_area,
+        program = ProgramFactory(business_area=cls.business_area)
+        cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
+        cls.payment_record = PaymentRecordFactory(
+            household=cls.household,
+            full_name=cls.individuals[0].full_name,
+            business_area=cls.business_area,
             cash_plan=cash_plan,
         )
-        self.payment_record2 = PaymentRecordFactory(
-            household=self.household,
-            full_name=self.individuals[0].full_name,
-            business_area=self.business_area,
+        cls.payment_record2 = PaymentRecordFactory(
+            household=cls.household,
+            full_name=cls.individuals[0].full_name,
+            business_area=cls.business_area,
             cash_plan=cash_plan,
         )
         grievance_1 = GrievanceTicketFactory(
@@ -99,32 +100,32 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_BREACH,
         )
-        self.ticket = SensitiveGrievanceTicketWithoutExtrasFactory(
-            household=self.household,
-            individual=self.individuals[0],
-            payment_record=self.payment_record,
+        cls.ticket = SensitiveGrievanceTicketWithoutExtrasFactory(
+            household=cls.household,
+            individual=cls.individuals[0],
+            payment_record=cls.payment_record,
             ticket=grievance_1,
         )
         SensitiveGrievanceTicketWithoutExtrasFactory(
-            household=self.household,
-            individual=self.individuals[0],
+            household=cls.household,
+            individual=cls.individuals[0],
             ticket=grievance_2,
         )
         SensitiveGrievanceTicketWithoutExtrasFactory(
-            household=self.household,
-            individual=self.individuals[0],
-            payment_record=self.payment_record2,
+            household=cls.household,
+            individual=cls.individuals[0],
+            payment_record=cls.payment_record2,
             ticket=grievance_3,
         )
         GrievanceComplaintTicketFactory.create_batch(5)
         SensitiveGrievanceTicketFactory.create_batch(5)
 
-        self.variables = {
+        cls.variables = {
             "businessArea": "afghanistan",
             "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
-            "issueType": str(self.ticket.ticket.issue_type),
-            "household": self.household.id,
-            "individual": self.individuals[0].id,
+            "issueType": str(cls.ticket.ticket.issue_type),
+            "household": cls.household.id,
+            "individual": cls.individuals[0].id,
         }
 
     @parameterized.expand(

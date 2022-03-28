@@ -8,29 +8,28 @@ from django.test import TestCase
 import hct_mis_api.apps.mis_datahub.models as dh_models
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory,
-    IndividualFactory,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
+    UNHCR,
     Agency,
     IndividualIdentity,
     IndividualRoleInHousehold,
-    UNHCR,
 )
 from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.models import TargetPopulation, HouseholdSelection
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 
 class TestDataSendTpToDatahub(TestCase):
     multi_db = True
+    databases = "__all__"
 
     @staticmethod
     def _pre_test_commands():
-        call_command("loadbusinessareas")
+        create_afghanistan()
         call_command("generatedocumenttypes")
         call_command("loadcountrycodes")
         business_area_with_data_sharing = BusinessArea.objects.first()
