@@ -16,40 +16,40 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestReassignRolesOnUpdate(APITestCase):
-    def setUp(self) -> None:
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         call_command("loadbusinessareas")
 
         business_area = BusinessArea.objects.get(slug="afghanistan")
         program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
 
-        self.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
-        self.household.registration_data_import.imported_by.save()
-        self.household.registration_data_import.save()
-        self.household.programs.add(program_one)
+        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
+        cls.household.registration_data_import.imported_by.save()
+        cls.household.registration_data_import.save()
+        cls.household.programs.add(program_one)
 
-        self.primary_collector_individual = IndividualFactory(household=None)
-        self.household.head_of_household = self.primary_collector_individual
-        self.household.save()
-        self.primary_collector_individual.household = self.household
-        self.primary_collector_individual.save()
+        cls.primary_collector_individual = IndividualFactory(household=None)
+        cls.household.head_of_household = cls.primary_collector_individual
+        cls.household.save()
+        cls.primary_collector_individual.household = cls.household
+        cls.primary_collector_individual.save()
 
-        self.household.refresh_from_db()
-        self.primary_collector_individual.refresh_from_db()
+        cls.household.refresh_from_db()
+        cls.primary_collector_individual.refresh_from_db()
 
-        self.primary_role = IndividualRoleInHousehold.objects.create(
-            household=self.household,
-            individual=self.primary_collector_individual,
+        cls.primary_role = IndividualRoleInHousehold.objects.create(
+            household=cls.household,
+            individual=cls.primary_collector_individual,
             role=ROLE_PRIMARY,
         )
 
-        self.alternate_collector_individual = IndividualFactory(household=None)
-        self.alternate_collector_individual.household = self.household
-        self.alternate_collector_individual.save()
+        cls.alternate_collector_individual = IndividualFactory(household=None)
+        cls.alternate_collector_individual.household = cls.household
+        cls.alternate_collector_individual.save()
 
-        self.alternate_role = IndividualRoleInHousehold.objects.create(
-            household=self.household,
-            individual=self.alternate_collector_individual,
+        cls.alternate_role = IndividualRoleInHousehold.objects.create(
+            household=cls.household,
+            individual=cls.alternate_collector_individual,
             role=ROLE_ALTERNATE,
         )
 

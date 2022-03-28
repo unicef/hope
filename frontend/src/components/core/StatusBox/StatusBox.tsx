@@ -21,6 +21,7 @@ const StatusBoxContainer = styled.div`
   line-height: 16px;
   padding: ${({ theme }) => theme.spacing(1)}px;
   text-align: center;
+  margin-right: 20px;
 `;
 
 export function StatusBox({

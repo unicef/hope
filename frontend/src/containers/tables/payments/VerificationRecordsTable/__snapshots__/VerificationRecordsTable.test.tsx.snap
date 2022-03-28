@@ -356,7 +356,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-EHOje gFjtOh"
                 >
                   <div
-                    class="sc-ifAKCX jzRoPs"
+                    class="sc-ifAKCX ilSJSk"
                     data-cy="status-container"
                   >
                     PENDING
@@ -375,7 +375,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                   class="sc-EHOje gFjtOh"
                 >
                   <div
-                    class="sc-ifAKCX iRZDSK"
+                    class="sc-ifAKCX PznGL"
                     data-cy="status-container"
                   >
                     ACTIVE

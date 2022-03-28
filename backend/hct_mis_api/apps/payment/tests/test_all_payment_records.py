@@ -1,10 +1,9 @@
 import itertools
 
-from django.core.management import call_command
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import create_household
@@ -22,43 +21,43 @@ class TestAllPaymentRecords(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.user = UserFactory.create()
-        (self.household1, _) = create_household(household_args={"size": 1})
-        (self.household2, _) = create_household(household_args={"size": 1})
-        (self.household3, _) = create_household(household_args={"size": 1})
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.user = UserFactory.create()
+        (cls.household1, _) = create_household(household_args={"size": 1})
+        (cls.household2, _) = create_household(household_args={"size": 1})
+        (cls.household3, _) = create_household(household_args={"size": 1})
         business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.cash_plan1 = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
-        self.cash_plan2 = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
-        self.cash_plan3 = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
+        cls.cash_plan1 = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
+        cls.cash_plan2 = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
+        cls.cash_plan3 = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
         PaymentRecordFactory.create_batch(
             2,
             business_area=business_area,
-            household=self.household1,
-            cash_plan=self.cash_plan1,
+            household=cls.household1,
+            cash_plan=cls.cash_plan1,
         )
         PaymentRecordFactory.create_batch(
             1,
             business_area=business_area,
-            household=self.household1,
-            cash_plan=self.cash_plan2,
+            household=cls.household1,
+            cash_plan=cls.cash_plan2,
         )
         PaymentRecordFactory.create_batch(
             2,
             business_area=business_area,
-            household=self.household2,
-            cash_plan=self.cash_plan1,
+            household=cls.household2,
+            cash_plan=cls.cash_plan1,
         )
         PaymentRecordFactory.create_batch(
             2,
             business_area=business_area,
-            household=self.household2,
-            cash_plan=self.cash_plan3,
+            household=cls.household2,
+            cash_plan=cls.cash_plan3,
         )
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS], BusinessArea.objects.get(slug="afghanistan")
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS], BusinessArea.objects.get(slug="afghanistan")
         )
 
     def test_fetch_payment_records_filter_by_household(self):

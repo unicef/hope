@@ -10,7 +10,9 @@ def get_sync_run_rapid_pro_task():
     logger.info(f"get_sync_run_rapid_pro_task start")
 
     try:
-        from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import CheckRapidProVerificationTask
+        from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+            CheckRapidProVerificationTask,
+        )
 
         CheckRapidProVerificationTask().execute()
     except Exception as e:

@@ -267,7 +267,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                     class="sc-EHOje gFjtOh"
                   >
                     <div
-                      class="sc-ifAKCX jzRoPs"
+                      class="sc-ifAKCX ilSJSk"
                       data-cy="status-container"
                     >
                       Processing

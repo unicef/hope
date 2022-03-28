@@ -10,6 +10,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketNeedsAdjudicationDetailsFactory,
@@ -49,19 +50,19 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.generate_document_types_for_all_countries()
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.generate_document_types_for_all_countries()
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sdfghjuytre2")
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="dfghgf3456")
+        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sdfghjuytre2")
+        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="dfghgf3456")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -74,7 +75,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
 
-        self.individuals_to_create = [
+        cls.individuals_to_create = [
             {
                 "id": "f9e27ca8-11f7-4386-bafb-e077b0bb47f3",
                 "full_name": "Benjamin Butler",
@@ -93,15 +94,15 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             },
         ]
 
-        self.individuals = [
-            IndividualFactory(household=household_one, **individual) for individual in self.individuals_to_create
+        cls.individuals = [
+            IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
         ]
-        first_individual = self.individuals[0]
-        second_individual = self.individuals[1]
+        first_individual = cls.individuals[0]
+        second_individual = cls.individuals[1]
 
         household_one.head_of_household = first_individual
         household_one.save()
-        self.household_one = household_one
+        cls.household_one = household_one
 
         sanction_list_individual_data = {
             "data_id": 112138,
@@ -128,33 +129,33 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             "address_note": "White House, Near Saudi Mosque, Clifton",
             "country_of_birth": Country(code="IN"),
         }
-        self.sanction_list_individual = SanctionListIndividual.objects.create(**sanction_list_individual_data)
+        cls.sanction_list_individual = SanctionListIndividual.objects.create(**sanction_list_individual_data)
 
-        self.system_flagging_grievance_ticket = GrievanceTicketFactory(
+        cls.system_flagging_grievance_ticket = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
             issue_type=None,
-            admin2=self.admin_area_1,
-            business_area=self.business_area,
+            admin2=cls.admin_area_1,
+            business_area=cls.business_area,
         )
 
         TicketSystemFlaggingDetailsFactory(
-            ticket=self.system_flagging_grievance_ticket,
+            ticket=cls.system_flagging_grievance_ticket,
             golden_records_individual=first_individual,
-            sanction_list_individual=self.sanction_list_individual,
+            sanction_list_individual=cls.sanction_list_individual,
             approve_status=True,
         )
 
-        self.needs_adjudication_grievance_ticket = GrievanceTicketFactory(
+        cls.needs_adjudication_grievance_ticket = GrievanceTicketFactory(
             id="2b419ce3-3297-47ee-a47f-43442abac73e",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
             issue_type=None,
-            admin2=self.admin_area_1,
-            business_area=self.business_area,
+            admin2=cls.admin_area_1,
+            business_area=cls.business_area,
         )
 
         TicketNeedsAdjudicationDetailsFactory(
-            ticket=self.needs_adjudication_grievance_ticket,
+            ticket=cls.needs_adjudication_grievance_ticket,
             golden_records_individual=first_individual,
             possible_duplicate=second_individual,
             selected_individual=None,

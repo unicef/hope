@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Dict, Optional
+
 from dateutil.parser import parse
-from typing import Optional, Dict
 
 from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateAPI
 
@@ -85,7 +86,9 @@ class ExchangeRates:
         )
 
     @staticmethod
-    def _convert_response_json_to_exchange_rates(response_json: dict) -> Dict[str, SingleExchangeRate]:
+    def _convert_response_json_to_exchange_rates(
+        response_json: dict,
+    ) -> dict[str, SingleExchangeRate]:
         raw_exchange_rates = response_json.get("ROWSET", {}).get("ROW", [])
 
         return {
