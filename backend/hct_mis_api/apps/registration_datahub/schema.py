@@ -46,8 +46,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
     KoboImportData,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
@@ -268,7 +268,6 @@ class ImportDataNode(DjangoObjectType):
 
 class KoboImportDataNode(DjangoObjectType):
     kobo_validation_errors = graphene.List(KoboErrorNode)
-    import_data = graphene.Field(ImportDataNode)
 
     class Meta:
         model = KoboImportData

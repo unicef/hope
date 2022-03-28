@@ -27,7 +27,7 @@ def fetch(request, pk):
     report: Report = get_object_or_404(Report, pk=pk)
     if request.user.is_superuser or report.available_to.filter(pk=request.user.pk):
         if report.result is None:
-            content_types = request.META.get("HTTP_ACCEPT", "*/*").split(",")
+            content_types = request.headers.get("Accept", "*/*").split(",")
             if "text/html" in content_types:
                 return HttpResponse("This report is not currently available", status=400)
             elif "application/json" in content_types:

@@ -84,9 +84,9 @@ class HouseholdSelectionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         "target_population",
     )
     list_filter = (
-        TextFieldFilter.factory("household__unicef_id", "Household ID"),
+        ("household__unicef_id", TextFieldFilter.factory(title="Household ID")),
         ("target_population", AutoCompleteFilter),
-        TextFieldFilter.factory("target_population__id", "Target Population ID"),
+        ("target_population__id", TextFieldFilter.factory(title="Target Population ID")),
         "final",
         ("vulnerability_score", MaxMinFilter),
     )

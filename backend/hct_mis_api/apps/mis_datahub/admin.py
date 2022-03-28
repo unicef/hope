@@ -80,7 +80,10 @@ class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):
 
 @admin.register(Household)
 class HouseholdAdmin(HUBAdminMixin):
-    list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    list_filter = (
+        ("session__id", TextFieldFilter.factory(title="Session Id")),
+        ("business_area", TextFieldFilter.factory(title="Business Area")),
+    )
     raw_id_fields = ("session",)
 
     @href()
@@ -106,10 +109,10 @@ class IndividualAdmin(HUBAdminMixin):
     list_display = ("session", "unicef_id", "mis_id", "household_mis_id", "family_name", "given_name")
     list_filter = (
         BusinessAreaFilter,
-        TextFieldFilter.factory("session__id"),
-        TextFieldFilter.factory("unicef_id"),
-        TextFieldFilter.factory("mis_id"),
-        TextFieldFilter.factory("household_mis_id"),
+        ("session__id", TextFieldFilter.factory(title="Session Id")),
+        ("unicef_id", TextFieldFilter.factory(title="Unicef Id")),
+        ("mis_id", TextFieldFilter.factory(title="MIS Id")),
+        ("household_mis_id", TextFieldFilter.factory(title="Household MIS Id")),
     )
     raw_id_fields = ("session",)
 
@@ -133,7 +136,7 @@ class FundsCommitmentAdmin(HUBAdminMixin):
 class DownPaymentAdmin(HUBAdminMixin):
     filters = (
         BusinessAreaFilter,
-        TextFieldFilter.factory("rec_serial_number"),
+        ("rec_serial_number", TextFieldFilter.factory(title="Rec Serial number")),
         "create_date",
         "mis_sync_flag",
         "ca_sync_flag",
@@ -142,7 +145,7 @@ class DownPaymentAdmin(HUBAdminMixin):
 
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(HUBAdminMixin):
-    list_filter = (TextFieldFilter.factory("session__id"),)
+    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")),)
 
 
 @admin.register(Session)
@@ -240,14 +243,14 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
 
 @admin.register(TargetPopulationEntry)
 class TargetPopulationEntryAdmin(HUBAdminMixin):
-    list_filter = (TextFieldFilter.factory("session__id"),)
+    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")),)
     raw_id_fields = ("session",)
 
 
 @admin.register(TargetPopulation)
 class TargetPopulationAdmin(HUBAdminMixin):
     # list_display = ('name', )
-    list_filter = (TextFieldFilter.factory("session__id"), BusinessAreaFilter)
+    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")), BusinessAreaFilter)
     raw_id_fields = ("session",)
     search_fields = ("name",)
 
@@ -276,7 +279,7 @@ class TargetPopulationAdmin(HUBAdminMixin):
 
 @admin.register(Program)
 class ProgramAdmin(HUBAdminMixin):
-    list_filter = (TextFieldFilter.factory("session__id"), BusinessAreaFilter)
+    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")), BusinessAreaFilter)
     search_fields = ("name",)
     raw_id_fields = ("session",)
 
@@ -284,5 +287,5 @@ class ProgramAdmin(HUBAdminMixin):
 @admin.register(Document)
 class DocumentAdmin(HUBAdminMixin):
     list_display = ("type", "number")
-    list_filter = (TextFieldFilter.factory("session__id"), BusinessAreaFilter)
+    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")), BusinessAreaFilter)
     raw_id_fields = ("session",)

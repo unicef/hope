@@ -207,8 +207,8 @@ class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("session", "name", "status", "business_area", "cash_plan_id")
     list_filter = (
         "status",
-        TextFieldFilter.factory("cash_plan_id"),
-        TextFieldFilter.factory("session__id"),
+        ("cash_plan_id", TextFieldFilter.factory(title="Cash plan Id")),
+        ("session__id", TextFieldFilter.factory(title="Session Id")),
         BusinessAreaFilter,
     )
     date_hierarchy = "session__timestamp"
@@ -233,9 +233,9 @@ class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
         "status",
         "delivery_type",
         "service_provider_ca_id",
-        TextFieldFilter.factory("ca_id"),
-        TextFieldFilter.factory("cash_plan_ca_id"),
-        TextFieldFilter.factory("session__id"),
+        ("ca_id", TextFieldFilter.factory(title="CA Id")),
+        ("cash_plan_ca_id", TextFieldFilter.factory(title="Cash plan Ca Id")),
+        ("session__id", TextFieldFilter.factory(title="Session Id")),
         BusinessAreaFilter,
     )
 
@@ -280,7 +280,7 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
     search_fields = ("full_name",)
-    list_filter = (TextFieldFilter.factory("session__id"), BusinessAreaFilter)
+    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")), BusinessAreaFilter)
 
 
 @admin.register(Programme)
@@ -289,10 +289,10 @@ class ProgrammeAdmin(HOPEModelAdminBase):
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
     list_filter = (
-        TextFieldFilter.factory("session__id"),
-        TextFieldFilter.factory("ca_hash_id"),
-        TextFieldFilter.factory("mis_id"),
-        TextFieldFilter.factory("ca_id"),
+        ("session__id", TextFieldFilter.factory(title="Session Id")),
+        ("ca_hash_id", TextFieldFilter.factory(title="Ca hash Id")),
+        ("mis_id", TextFieldFilter.factory(title="MIS Id")),
+        ("ca_id", TextFieldFilter.factory(title="CA Id")),
     )
 
 
@@ -302,8 +302,8 @@ class TargetPopulationAdmin(HOPEModelAdminBase):
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
     list_filter = (
-        TextFieldFilter.factory("session__id"),
-        TextFieldFilter.factory("ca_hash_id"),
-        TextFieldFilter.factory("mis_id"),
-        TextFieldFilter.factory("ca_id"),
+        ("session__id", TextFieldFilter.factory(title="Session Id")),
+        ("ca_hash_id", TextFieldFilter.factory(title="Ca hash Id")),
+        ("mis_id", TextFieldFilter.factory(title="MIS Id")),
+        ("ca_id", TextFieldFilter.factory(title="CA Id")),
     )

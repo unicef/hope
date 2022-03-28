@@ -4,13 +4,13 @@ from datetime import date, datetime
 
 from django.conf import settings
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
-from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
+from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import F, Sum
+from django.db.models import DecimalField, F, JSONField, Sum
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
@@ -322,9 +322,9 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     withdrawn = models.BooleanField(default=False, db_index=True)
     withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
-    consent = models.NullBooleanField()
+    consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
-    residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
+    residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField(blank=True, db_index=True)
     country_origin_new = models.ForeignKey(
         "geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT
@@ -376,13 +376,13 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         related_name="households",
         blank=True,
     )
-    returnee = models.NullBooleanField()
+    returnee = models.BooleanField(null=True)
     flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
     head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
-    fchild_hoh = models.NullBooleanField()
-    child_hoh = models.NullBooleanField()
+    fchild_hoh = models.BooleanField(null=True)
+    child_hoh = models.BooleanField(null=True)
     unicef_id = CICharField(max_length=250, blank=True, default=BLANK, db_index=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     start = models.DateTimeField(blank=True, null=True)
@@ -498,13 +498,17 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def total_cash_received(self):
-        return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
+        return (
+            self.payment_records.filter()
+            .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
+            .get("delivered_quantity__sum")
+        )
 
     @property
     def total_cash_received_usd(self):
         return (
             self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity_usd"))
+            .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
             .get("delivered_quantity_usd__sum")
         )
 
@@ -515,8 +519,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             .annotate(program=F("cash_plan__program"))
             .values("program")
             .annotate(
-                total_delivered_quantity=Sum("delivered_quantity"),
-                total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
+                total_delivered_quantity=Sum("delivered_quantity", output_field=DecimalField()),
+                total_delivered_quantity_usd=Sum("delivered_quantity_usd", output_field=DecimalField()),
                 currency=F("currency"),
                 program_name=F("cash_plan__program__name"),
                 program_id=F("cash_plan__program__id"),
@@ -590,37 +594,59 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             male_age_group_18_59_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_18_to_60_years)),
             male_age_group_60_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_60_years)),
             female_age_group_0_5_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & to_6_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & to_6_years),
             ),
             female_age_group_6_11_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_6_to_12_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & from_6_to_12_years),
             ),
             female_age_group_12_17_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_12_to_18_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & from_12_to_18_years),
             ),
             female_age_group_18_59_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_18_to_60_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & from_18_to_60_years),
             ),
             female_age_group_60_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_60_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & from_60_years),
             ),
             male_age_group_0_5_disabled_count=Count(
                 "id", distinct=True, filter=Q(male_disability_beneficiary & to_6_years)
             ),
             male_age_group_6_11_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_6_to_12_years)
+                "id",
+                distinct=True,
+                filter=Q(male_disability_beneficiary & from_6_to_12_years),
             ),
             male_age_group_12_17_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_12_to_18_years)
+                "id",
+                distinct=True,
+                filter=Q(male_disability_beneficiary & from_12_to_18_years),
             ),
             male_age_group_18_59_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_18_to_60_years)
+                "id",
+                distinct=True,
+                filter=Q(male_disability_beneficiary & from_18_to_60_years),
             ),
             male_age_group_60_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_60_years)
+                "id",
+                distinct=True,
+                filter=Q(male_disability_beneficiary & from_60_years),
             ),
             size=Count("id", distinct=True, filter=Q(is_beneficiary & active_beneficiary)),
-            pregnant_count=Count("id", distinct=True, filter=Q(is_beneficiary & active_beneficiary & Q(pregnant=True))),
+            pregnant_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(is_beneficiary & active_beneficiary & Q(pregnant=True)),
+            ),
         )
         updated_fields = ["child_hoh", "fchild_hoh"]
         for key, value in age_groups.items():
@@ -851,8 +877,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict, blank=True)
     user_fields = JSONField(default=dict, blank=True)
-    enrolled_in_nutrition_programme = models.NullBooleanField()
-    administration_of_rutf = models.NullBooleanField()
+    enrolled_in_nutrition_programme = models.BooleanField(null=True)
+    administration_of_rutf = models.BooleanField(null=True)
     unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     deduplication_golden_record_status = models.CharField(
         max_length=50,
@@ -870,7 +896,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     sanction_list_possible_match = models.BooleanField(default=False)
     sanction_list_confirmed_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
-    pregnant = models.NullBooleanField()
+    pregnant = models.BooleanField(null=True)
     observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE, default=NONE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)

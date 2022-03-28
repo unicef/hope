@@ -33,8 +33,7 @@ class DatamartAPI:
         while next_url:
             data = self._handle_get_request(next_url, is_absolute_url=True)
             next_url = data["next"]
-            for entry in data["results"]:
-                yield entry
+            yield from data["results"]
             if max_pages and page >= max_pages:
                 break
             page += 1
@@ -99,7 +98,9 @@ class DatamartAPI:
                 ).first()
             if admin_area_level is None:
                 admin_area_level = AdminAreaLevel(
-                    admin_level=gateway, business_area=business_area, name=f"{business_area.name}-{gateway}"
+                    admin_level=gateway,
+                    business_area=business_area,
+                    name=f"{business_area.name}-{gateway}",
                 )
             admin_area_level_dict[gateway] = admin_area_level
 
@@ -145,7 +146,11 @@ class DatamartAPI:
                 admin_area_level = AreaType.objects.filter(area_level=gateway, country__name=business_area.name).first()
             if admin_area_level is None:
                 country = Country.objects.get(name=business_area.name)
-                admin_area_level = AreaType(area_level=gateway, country=country, name=f"{business_area.name}-{gateway}")
+                admin_area_level = AreaType(
+                    area_level=gateway,
+                    country=country,
+                    name=f"{business_area.name}-{gateway}",
+                )
             admin_area_level_dict[gateway] = admin_area_level
 
             admin_area = Area.objects.filter(area_type=admin_area_level, name=properties.get("name")).first()

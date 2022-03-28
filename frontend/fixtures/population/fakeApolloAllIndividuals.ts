@@ -8,7 +8,7 @@ export const fakeApolloAllIndividuals = [
         businessArea: 'afghanistan',
         sex: [null],
         first: 10,
-        orderBy: null,
+        orderBy: '-unicef_id',
       },
     },
     result: {

@@ -6,6 +6,7 @@ from django.test import TestCase
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     AUNT_UNCLE,
@@ -23,8 +24,9 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 
 class TestRecalculateData(TestCase):
-    def setUp(self) -> None:
-        call_command("loadbusinessareas")
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
 
         business_area = BusinessArea.objects.first()
         registration_data_import = RegistrationDataImportFactory(business_area=business_area)
@@ -138,7 +140,7 @@ class TestRecalculateData(TestCase):
             },
         ]
 
-        self.household, self.individuals = create_household_and_individuals(household_data, individuals_data)
+        cls.household, cls.individuals = create_household_and_individuals(household_data, individuals_data)
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_0_5_count(self):

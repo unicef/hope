@@ -3,14 +3,14 @@ import re
 from datetime import date
 
 from django.contrib.gis.db.models import PointField
-from django.contrib.postgres.fields import JSONField
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
     validate_image_file_extension,
 )
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.db.models import JSONField
+from django.utils.translation import gettext_lazy as _
 
 from django_countries.fields import CountryField
 from multiselectfield import MultiSelectField
@@ -57,7 +57,7 @@ logger = logging.getLogger(__name__)
 
 class ImportedHousehold(TimeStampedUUIDModel):
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
-    consent = models.NullBooleanField()
+    consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField()
@@ -91,8 +91,8 @@ class ImportedHousehold(TimeStampedUUIDModel):
     male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
     head_of_household = models.OneToOneField("ImportedIndividual", on_delete=models.CASCADE, null=True)
-    fchild_hoh = models.NullBooleanField()
-    child_hoh = models.NullBooleanField()
+    fchild_hoh = models.BooleanField(null=True)
+    child_hoh = models.BooleanField(null=True)
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="households",
@@ -100,7 +100,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     )
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
-    returnee = models.NullBooleanField()
+    returnee = models.BooleanField(null=True)
     flex_fields = JSONField(default=dict)
     start = models.DateTimeField(blank=True, null=True)
     deviceid = models.CharField(max_length=250, blank=True)
@@ -188,7 +188,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     deduplication_batch_results = JSONField(default=dict)
     deduplication_golden_record_results = JSONField(default=dict)
     flex_fields = JSONField(default=dict)
-    pregnant = models.NullBooleanField()
+    pregnant = models.BooleanField(null=True)
     observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
@@ -325,8 +325,6 @@ class ImportData(TimeStampedUUIDModel):
 class KoboImportData(ImportData):
     kobo_asset_id = models.CharField(max_length=100)
     only_active_submissions = models.BooleanField(default=True)
-
-
 
 
 class DocumentValidator(TimeStampedUUIDModel):

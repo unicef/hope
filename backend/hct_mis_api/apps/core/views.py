@@ -2,11 +2,12 @@ import logging
 
 from django import forms
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.http import HttpResponse
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
+
 from graphene_django.settings import graphene_settings
 from graphql.utils import schema_printer
 
