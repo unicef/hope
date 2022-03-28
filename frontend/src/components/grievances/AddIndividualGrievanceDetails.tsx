@@ -11,7 +11,7 @@ import {
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { LabelizedField } from '../core/LabelizedField';
 import { Title } from '../core/Title';
 
@@ -32,6 +32,7 @@ export function AddIndividualGrievanceDetails({
   const { t } = useTranslation();
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveAddIndividualDataChangeMutation();
+  const confirm = useConfirmation();
   const { showMessage } = useSnackbar();
   if (loading) {
     return null;
@@ -130,50 +131,49 @@ export function AddIndividualGrievanceDetails({
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>{t('Individual Data')}</Typography>
           {canApproveDataChange && (
-            <ConfirmationDialog title='Warning' content={dialogText}>
-              {(confirm) => (
-                <Button
-                  onClick={confirm(async () => {
-                    try {
-                      await mutate({
-                        variables: {
-                          grievanceTicketId: ticket.id,
-                          approveStatus: !ticket.addIndividualTicketDetails
-                            .approveStatus,
+            <Button
+              onClick={() =>
+                confirm({
+                  title: 'Warning',
+                  content: dialogText,
+                }).then(async () => {
+                  try {
+                    await mutate({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus: !ticket.addIndividualTicketDetails
+                          .approveStatus,
+                      },
+                      refetchQueries: () => [
+                        {
+                          query: GrievanceTicketDocument,
+                          variables: { id: ticket.id },
                         },
-                        refetchQueries: () => [
-                          {
-                            query: GrievanceTicketDocument,
-                            variables: { id: ticket.id },
-                          },
-                        ],
-                      });
-                      if (ticket.addIndividualTicketDetails.approveStatus) {
-                        showMessage(t('Changes Disapproved'));
-                      }
-                      if (!ticket.addIndividualTicketDetails.approveStatus) {
-                        showMessage(t('Changes Approved'));
-                      }
-                    } catch (e) {
-                      e.graphQLErrors.map((x) => showMessage(x.message));
+                      ],
+                    });
+                    if (ticket.addIndividualTicketDetails.approveStatus) {
+                      showMessage(t('Changes Disapproved'));
                     }
-                  })}
-                  variant={
-                    ticket.addIndividualTicketDetails?.approveStatus
-                      ? 'outlined'
-                      : 'contained'
+                    if (!ticket.addIndividualTicketDetails.approveStatus) {
+                      showMessage(t('Changes Approved'));
+                    }
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
                   }
-                  color='primary'
-                  disabled={
-                    ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                  }
-                >
-                  {ticket.addIndividualTicketDetails.approveStatus
-                    ? t('Disapprove')
-                    : t('Approve')}
-                </Button>
-              )}
-            </ConfirmationDialog>
+                })
+              }
+              variant={
+                ticket.addIndividualTicketDetails?.approveStatus
+                  ? 'outlined'
+                  : 'contained'
+              }
+              color='primary'
+              disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+            >
+              {ticket.addIndividualTicketDetails.approveStatus
+                ? t('Disapprove')
+                : t('Approve')}
+            </Button>
           )}
         </Box>
       </Title>

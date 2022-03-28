@@ -17,7 +17,7 @@ import {
   IndividualRoleInHouseholdRole,
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
 
@@ -43,6 +43,7 @@ export function RequestedIndividualDataChange({
 }): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const confirm = useConfirmation();
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
   };
@@ -183,21 +184,21 @@ export function RequestedIndividualDataChange({
       );
     }
     return (
-      <ConfirmationDialog
-        title='Warning'
-        content={getConfirmationText(allSelected)}
+      <Button
+        onClick={() =>
+          confirm({
+            title: 'Warning',
+            content: getConfirmationText(allSelected),
+          }).then(() => {
+            submitForm();
+          })
+        }
+        variant='contained'
+        color='primary'
+        disabled={!approveEnabled}
       >
-        {(confirm) => (
-          <Button
-            onClick={confirm(() => submitForm())}
-            variant='contained'
-            color='primary'
-            disabled={!approveEnabled}
-          >
-            {t('Approve')}
-          </Button>
-        )}
-      </ConfirmationDialog>
+        {t('Approve')}
+      </Button>
     );
   };
 
