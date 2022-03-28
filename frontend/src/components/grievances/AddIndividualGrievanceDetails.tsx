@@ -134,7 +134,7 @@ export function AddIndividualGrievanceDetails({
             <Button
               onClick={() =>
                 confirm({
-                  title: 'Warning',
+                  title: t('Warning'),
                   content: dialogText,
                 }).then(async () => {
                   try {

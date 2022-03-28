@@ -83,7 +83,7 @@ export function RequestedHouseholdDataChange({
       <Button
         onClick={() =>
           confirm({
-            title: 'Warning',
+            title: t('Warning'),
             content: getConfirmationText(values),
           }).then(() => {
             submitForm();
