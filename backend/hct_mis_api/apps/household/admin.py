@@ -206,7 +206,6 @@ class HouseholdAdmin(
         ("admin_area", AutoCompleteFilter),
         "org_enumerator",
         "last_registration_date",
-        MultiValueTextFieldFilter.factory("id", "MIS ID"),
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
@@ -423,11 +422,11 @@ class IndividualAdmin(
     list_filter = (
         ("business_area", AutoCompleteFilter),
         GenericLookupFieldFilter.factory(title="UNICEF ID", lookup="unicef_id__iexact"),
-        MultiValueTextFieldFilter.factory("unhcr_id", "UNHCR ID"),
-        MultiValueTextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
+        ("unhcr_id", MultiValueTextFieldFilter.factory(title="UNHCR ID")),
+        GenericLookupFieldFilter.factory(title="Household ID", lookup="household__unicef_id__iexact"),
+        MultiValueTextFieldFilter.factory(lookup="household__unicef_id__iexact", title="Household ID"),
         ("registration_data_import", AutoCompleteFilter),
         ("flex_fields", FlexFieldFilter),
-        GenericLookupFieldFilter.factory(title="Household ID", lookup="household__unicef_id__iexact"),
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
         "updated_at",

@@ -17,7 +17,8 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
-from admin_extra_urls.api import ExtraUrlMixin, button, url
+from admin_extra_urls.api import ExtraUrlMixin, url
+from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_urls.utils import labelize
 from adminfilters.autocomplete import AutoCompleteFilter
 from import_export import fields
