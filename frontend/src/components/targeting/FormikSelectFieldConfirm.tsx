@@ -13,7 +13,10 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { getFullNodeFromEdgesById } from '../../utils/utils';
-import { DialogFooter, DialogTitleWrapper } from '../core/ConfirmationDialog';
+import {
+  DialogFooter,
+  DialogTitleWrapper,
+} from '../core/ConfirmationDialog/ConfirmationDialog';
 
 export const FormikSelectFieldConfirm = ({
   field,
