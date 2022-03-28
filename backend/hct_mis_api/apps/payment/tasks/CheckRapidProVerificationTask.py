@@ -4,7 +4,7 @@ from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentVerification,
 )
-from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class CheckRapidProVerificationTask:
     def execute(self):
         active_rapidpro_verifications = CashPlanPaymentVerification.objects.filter(
-            verification_method=CashPlanPaymentVerification.VERIFICATION_METHOD_RAPIDPRO,
+            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO,
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
         )
         for cashplan_payment_verification in active_rapidpro_verifications:

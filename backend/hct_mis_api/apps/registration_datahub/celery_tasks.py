@@ -208,6 +208,7 @@ def pull_kobo_submissions_task(import_data_id):
     finally:
         logger.info("pull_kobo_submissions_task end")
 
+
 @app.task
 def validate_xlsx_import_task(import_data_id):
     logger.info("validate_xlsx_import_task start")

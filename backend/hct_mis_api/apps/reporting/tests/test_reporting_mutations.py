@@ -1,16 +1,17 @@
-from parameterized import parameterized
 from django.core.management import call_command
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64, create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.reporting.validators import ReportValidator
-from hct_mis_api.apps.reporting.models import Report
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
-from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.reporting.validators import ReportValidator
 
 
 class TestReportingMutation(APITestCase):
@@ -28,30 +29,31 @@ class TestReportingMutation(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        self.user = UserFactory()
-        call_command("loadbusinessareas")
-        self.business_area_slug = "afghanistan"
-        self.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
+        create_afghanistan()
+        cls.business_area_slug = "afghanistan"
+        cls.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         last_registration_dates = ("2020-01-01", "2021-01-01")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="Adminarea Test", admin_area_level=area_type)
-        self.program_1 = ProgramFactory(business_area=self.business_area, end_date="2020-01-01")
+        cls.admin_area_1 = AdminAreaFactory(title="Adminarea Test", admin_area_level=area_type)
+        cls.program_1 = ProgramFactory(business_area=cls.business_area, end_date="2020-01-01")
 
-        self.households = []
+        cls.households = []
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household_and_individuals(
                 {
                     "size": family_size,
                     "address": "Lorem Ipsum",
                     "country_origin": "PL",
-                    "business_area": self.business_area,
+                    "business_area": cls.business_area,
                     "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
                 },
                 [{"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]}],

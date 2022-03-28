@@ -8,14 +8,15 @@ import {
   Tabs,
   Typography,
 } from '@material-ui/core';
+import EditIcon from '@material-ui/icons/EditRounded';
 import { Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CashPlan } from '../../apollo/queries/payments/CashPlan';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
@@ -66,7 +67,7 @@ function prepareVariables(
 ) {
   return {
     input: {
-      ...(!cashPlanId && {
+      ...(cashPlanVerificationId && {
         cashPlanPaymentVerificationId: cashPlanVerificationId,
       }),
       ...(cashPlanId && { cashPlanId }),
@@ -114,6 +115,7 @@ export function EditVerificationPlan({
   cashPlanVerificationId,
   cashPlanId,
 }: Props): React.ReactElement {
+  const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -142,7 +144,7 @@ export function EditVerificationPlan({
     filterSex: verification.sexFilter || '',
     excludedAdminAreasFull: verification.excludedAdminAreasFilter,
     excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
-    verificationChannel: verification.verificationMethod || null,
+    verificationChannel: verification.verificationChannel || null,
     rapidProFlow: verification.rapidProFlowId || null,
     adminCheckbox: verification.excludedAdminAreasFilter.length !== 0,
     ageCheckbox:
@@ -174,12 +176,13 @@ export function EditVerificationPlan({
       businessArea,
       cashPlanId,
     ),
+    fetchPolicy: 'network-only',
   });
 
   useEffect(() => {
     loadSampleSize();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formValues]);
+  }, [formValues, open]);
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
@@ -189,9 +192,7 @@ export function EditVerificationPlan({
         values,
         businessArea,
       ),
-      refetchQueries: () => [
-        { query: CashPlan, variables: { id: cashPlanId } },
-      ],
+      refetchQueries,
     });
     setOpen(false);
 
@@ -231,17 +232,18 @@ export function EditVerificationPlan({
           />
           <Button
             color='primary'
-            variant='contained'
             onClick={() => setOpen(true)}
+            startIcon={<EditIcon />}
             data-cy='button-new-plan'
           >
-            {t('EDIT VERIFICATION PLAN')}
+            {t('Edit')}
           </Button>
           <Dialog
             open={open}
             onClose={() => setOpen(false)}
             scroll='paper'
             aria-labelledby='form-dialog-title'
+            maxWidth='md'
           >
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>

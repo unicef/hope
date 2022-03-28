@@ -1,9 +1,10 @@
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q, Sum, DecimalField
+from django.db.models import Case, CharField, Count, Q, Sum, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 
 import graphene
-from django_filters import CharFilter, FilterSet, ModelChoiceFilter, OrderingFilter
+from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -13,8 +14,9 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
+from hct_mis_api.apps.activity_log.models import LogEntry
+from hct_mis_api.apps.activity_log.schema import LogEntryFilter, LogEntryNode
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
@@ -28,19 +30,22 @@ from hct_mis_api.apps.core.utils import (
     is_valid_uuid,
     to_choice_object,
 )
-from hct_mis_api.apps.household.models import ROLE_NO_ROLE, Household
+from hct_mis_api.apps.household.models import (
+    ROLE_NO_ROLE,
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+)
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
+    CashPlanPaymentVerificationSummary,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
 )
-from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.payment.utils import (
-    get_number_of_samples,
-    get_payment_records_for_dashboard,
-)
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.sampling import Sampling
+from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
@@ -88,21 +93,25 @@ class PaymentRecordFilter(FilterSet):
 class PaymentVerificationFilter(FilterSet):
     search = CharFilter(method="search_filter")
     business_area = CharFilter(field_name="payment_record__business_area__slug")
+    verification_channel = CharFilter(field_name="cash_plan_payment_verification__verification_channel")
 
     class Meta:
-        fields = ("cash_plan_payment_verification", "status")
+        fields = ("cash_plan_payment_verification", "cash_plan_payment_verification__cash_plan", "status")
         model = PaymentVerification
 
     order_by = OrderingFilter(
         fields=(
-            "payment_record",
+            "payment_record__ca_id",
+            "cash_plan_payment_verification__verification_channel",
+            "cash_plan_payment_verification__unicef_id",
             "status",
-            "payment_record__head_of_household__full_name",
             "payment_record__head_of_household__family_name",
-            "payment_record__household",
             "payment_record__household__unicef_id",
+            "payment_record__household__status",
             "payment_record__delivered_quantity",
             "received_amount",
+            "payment_record__head_of_household__phone_no",
+            "payment_record__head_of_household__phone_no_alternative",
         )
     )
 
@@ -110,13 +119,16 @@ class PaymentVerificationFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__startswith=value)
-            q_obj |= Q(received_amount__startswith=value)
-            q_obj |= Q(payment_record__id__startswith=value)
-            q_obj |= Q(payment_record__head_of_household__full_name__startswith=value)
-            q_obj |= Q(payment_record__head_of_household__given_name__startswith=value)
-            q_obj |= Q(payment_record__head_of_household__middle_name__startswith=value)
-            q_obj |= Q(payment_record__head_of_household__family_name__startswith=value)
+            q_obj |= Q(payment_record__ca_id__istartswith=value)
+            q_obj |= Q(cash_plan_payment_verification__unicef_id__istartswith=value)
+            q_obj |= Q(received_amount__istartswith=value)
+            q_obj |= Q(payment_record__household__unicef_id__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__full_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__given_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__middle_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__family_name__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__phone_no__istartswith=value)
+            q_obj |= Q(payment_record__head_of_household__phone_no_alternative__istartswith=value)
         return qs.filter(q_obj)
 
 
@@ -199,6 +211,13 @@ class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class CashPlanPaymentVerificationSummaryNode(DjangoObjectType):
+    class Meta:
+        model = CashPlanPaymentVerificationSummary
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
     payment_record_count = graphene.Int()
     sample_size = graphene.Int()
@@ -207,6 +226,24 @@ class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
 class ChartPaymentVerification(ChartDetailedDatasetsNode):
     households = graphene.Int()
     average_sample_size = graphene.Float()
+
+
+class PaymentVerificationLogEntryFilter(LogEntryFilter):
+    object_id = UUIDFilter(method="object_id_filter")
+
+    def object_id_filter(self, qs, name, value):
+        cash_plan = CashPlan.objects.get(pk=value)
+        verifications_ids = cash_plan.verifications.all().values_list("pk", flat=True)
+        return qs.filter(object_id__in=verifications_ids)
+
+
+class PaymentVerificationLogEntryNode(LogEntryNode):
+    content_object = graphene.Field(CashPlanPaymentVerificationNode)
+
+    class Meta:
+        model = LogEntry
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):
@@ -275,7 +312,7 @@ class Query(graphene.ObjectType):
     payment_record_delivery_type_choices = graphene.List(ChoiceObject)
     cash_plan_verification_status_choices = graphene.List(ChoiceObject)
     cash_plan_verification_sampling_choices = graphene.List(ChoiceObject)
-    cash_plan_verification_verification_method_choices = graphene.List(ChoiceObject)
+    cash_plan_verification_verification_channel_choices = graphene.List(ChoiceObject)
     payment_verification_status_choices = graphene.List(ChoiceObject)
 
     all_rapid_pro_flows = graphene.List(
@@ -287,46 +324,40 @@ class Query(graphene.ObjectType):
         input=GetCashplanVerificationSampleSizeInput(),
     )
 
-    def resolve_sample_size(self, info, input, **kwargs):
-        arg = lambda name: input.get(name)
-        cash_plan_id = decode_id_string(arg("cash_plan_id"))
-        cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
-        sampling = arg("sampling")
-        excluded_admin_areas = []
-        sex = None
-        age = None
-        confidence_interval = None
-        margin_of_error = None
-        payment_records = cash_plan.payment_records.filter(
-            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+    all_payment_verification_log_entries = DjangoPermissionFilterConnectionField(
+        PaymentVerificationLogEntryNode,
+        filterset_class=PaymentVerificationLogEntryFilter,
+        permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
+    )
+
+    def resolve_all_payment_verifications(self, info, **kwargs):
+        return (
+            PaymentVerification.objects.filter(
+                Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_ACTIVE)
+                | Q(cash_plan_payment_verification__status=CashPlanPaymentVerification.STATUS_FINISHED)
+            )
+            .annotate(
+                payment_record__household__status=Case(
+                    When(payment_record__household__withdrawn=True, then=Value(STATUS_INACTIVE)),
+                    default=Value(STATUS_ACTIVE),
+                    output_field=CharField(),
+                ),
+            )
+            .distinct()
         )
-        payment_record_count = payment_records.count()
-        if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
-            excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
-        elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            random_sampling_arguments = arg("random_sampling_arguments")
-            confidence_interval = random_sampling_arguments.get("confidence_interval")
-            margin_of_error = random_sampling_arguments.get("margin_of_error")
-            sex = random_sampling_arguments.get("sex")
-            age = random_sampling_arguments.get("age")
-        if excluded_admin_areas is not None:
-            payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
-        if sex is not None:
-            payment_records = payment_records.filter(household__head_of_household__sex=sex)
-        if age is not None:
-            payment_records = filter_age(
-                "household__head_of_household__birth_date",
-                payment_records,
-                age.get("min"),
-                age.get("max"),
-            )
-        payment_records_sample_count = payment_records.count()
-        if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
-            payment_records_sample_count = get_number_of_samples(
-                payment_records_sample_count,
-                confidence_interval,
-                margin_of_error,
-            )
+
+    def resolve_sample_size(self, info, input, **kwargs):
+        cash_plan_id = decode_id_string(input.get("cash_plan_id"))
+        cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
+
+        payment_verification_plan = None
+        if payment_verification_plan_id := decode_id_string(input.get("cash_plan_payment_verification_id")):
+            payment_verification_plan = get_object_or_404(CashPlanPaymentVerification, id=payment_verification_plan_id)
+
+        payment_records = cash_plan.available_payment_records(payment_verification_plan)
+        sampling = Sampling(input, cash_plan, payment_records)
+        payment_record_count, payment_records_sample_count = sampling.generate_sampling()
+
         return {
             "payment_record_count": payment_record_count,
             "sample_size": payment_records_sample_count,
@@ -351,8 +382,8 @@ class Query(graphene.ObjectType):
     def resolve_cash_plan_verification_sampling_choices(self, info, **kwargs):
         return to_choice_object(CashPlanPaymentVerification.SAMPLING_CHOICES)
 
-    def resolve_cash_plan_verification_verification_method_choices(self, info, **kwargs):
-        return to_choice_object(CashPlanPaymentVerification.VERIFICATION_METHOD_CHOICES)
+    def resolve_cash_plan_verification_verification_channel_choices(self, info, **kwargs):
+        return to_choice_object(CashPlanPaymentVerification.VERIFICATION_CHANNEL_CHOICES)
 
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)

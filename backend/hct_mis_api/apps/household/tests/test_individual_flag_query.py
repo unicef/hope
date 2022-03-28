@@ -6,6 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
@@ -18,7 +19,7 @@ from hct_mis_api.apps.household.models import (
 class TestIndividualFlagQuery(APITestCase):
     QUERY = """
     query AllIndividuals($flags: [String]) {
-      allIndividuals(flags: $flags, businessArea: "afghanistan") {
+      allIndividuals(flags: $flags, businessArea: "afghanistan", orderBy: "id") {
         edges {
           node {
             givenName
@@ -31,12 +32,12 @@ class TestIndividualFlagQuery(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        self.maxDiff = None
-        call_command("loadbusinessareas")
-        self.user = UserFactory()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+    @classmethod
+    def setUpTestData(cls):
+        cls.maxDiff = None
+        create_afghanistan()
+        cls.user = UserFactory()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         individuals_to_create = [
             {
@@ -96,8 +97,8 @@ class TestIndividualFlagQuery(APITestCase):
             },
         ]
         create_household_and_individuals(None, individuals_to_create)
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], cls.business_area
         )
 
     @parameterized.expand(

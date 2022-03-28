@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -11,7 +9,7 @@ IS_STAGING = True
 
 # domains/hosts etc.
 DOMAIN_NAME = os.getenv("DOMAIN", "dev-hct.unitst.org")
-WWW_ROOT = "http://%s/" % DOMAIN_NAME
+WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 
 # other
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

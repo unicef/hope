@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class Countries:
-
     @classmethod
     @lru_cache(maxsize=None)
     def get_countries(cls):

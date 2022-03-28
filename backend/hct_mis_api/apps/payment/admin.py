@@ -59,10 +59,10 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 
 @admin.register(CashPlanPaymentVerification)
 class CashPlanPaymentVerificationAdmin(ExtraUrlMixin, LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("cash_plan", "status", "verification_method")
+    list_display = ("cash_plan", "status", "verification_channel")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        ("verification_method", ChoicesFieldComboFilter),
+        ("verification_channel", ChoicesFieldComboFilter),
         ("cash_plan", AutoCompleteFilter),
         ("cash_plan__business_area", AutoCompleteFilter),
     )
@@ -109,7 +109,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("cash_plan_payment_verification__cash_plan", AutoCompleteFilter),
         ("cash_plan_payment_verification__cash_plan__business_area", AutoCompleteFilter),
-        TextFieldFilter.factory("payment_record__household__unicef_id", "Household ID"),
+        ("payment_record__household__unicef_id", TextFieldFilter.factory(title="Household ID")),
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_record", "cash_plan_payment_verification")

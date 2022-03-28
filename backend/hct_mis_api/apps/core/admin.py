@@ -9,12 +9,12 @@ from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
+from django.db.models import JSONField
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -34,6 +34,9 @@ from adminfilters.filters import (
     TextFieldFilter,
 )
 from constance import config
+from import_export import fields, resources
+from import_export.admin import ImportExportModelAdmin
+from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
@@ -56,7 +59,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
-from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
 from hct_mis_api.apps.utils.security import is_root
 from mptt.admin import MPTTModelAdmin
@@ -117,8 +120,11 @@ class GroupConcat(Aggregate):
     template = "%(function)s(%(distinct)s%(expressions)s)"
 
     def __init__(self, expression, distinct=False, **extra):
-        super(GroupConcat, self).__init__(
-            expression, distinct="DISTINCT " if distinct else "", output_field=CharField(), **extra
+        super().__init__(
+            expression,
+            distinct="DISTINCT " if distinct else "",
+            output_field=CharField(),
+            **extra,
         )
 
 
@@ -132,7 +138,12 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         "region_code",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
+    list_filter = (
+        "has_data_sharing_agreement",
+        "region_name",
+        BusinessofficeFilter,
+        "is_split",
+    )
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
     # formfield_overrides = {
@@ -175,7 +186,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 preserved_filters = self.get_preserved_filters(request)
 
                 redirect_url = reverse(
-                    "admin:{}_{}_change".format(opts.app_label, opts.model_name),
+                    f"admin:{opts.app_label}_{opts.model_name}_change",
                     args=(office.pk,),
                     current_app=self.admin_site.name,
                 )
@@ -265,9 +276,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 f"""Dear GSD,
                 
 In CashAssist, please update the users in {environment} UNICEF - {obj.name} business unit as per the attached DOAP.
-
 Many thanks,
-
 UNICEF HOPE""",
                 to=recipients,
             )
@@ -317,7 +326,12 @@ UNICEF HOPE""",
         context = self.get_common_context(request, pk, title="Members")
         context["members"] = (
             context["original"]
-            .user_roles.values("user__id", "user__email", "user__username", "user__custom_fields__kobo_username")
+            .user_roles.values(
+                "user__id",
+                "user__email",
+                "user__username",
+                "user__custom_fields__kobo_username",
+            )
             .annotate(roles=ArrayAgg("role__name"))
             .order_by("user__username")
         )
@@ -443,15 +457,44 @@ class AdminLevelFilter(SimpleListFilter):
         return queryset
 
 
+class AdminAreaLevelResource(resources.ModelResource):
+    business_area = fields.Field(widget=ForeignKeyWidget(BusinessArea, field="code"), attribute="business_area")
+
+    class Meta:
+        model = AdminAreaLevel
+        fields = (
+            "name",
+            "display_name",
+            "admin_level",
+            "business_area",
+            "area_code",
+            "country_name",
+            "datamart_id",
+        )
+        import_id_fields = (
+            "name",
+            "country_name",
+            "admin_level",
+        )
+
+    def after_import(self, *args, **kwargs):
+        super().after_import(*args, **kwargs)
+
+        countries = AdminAreaLevel.objects.get_countries()
+        for country, country_name in countries:
+            AdminAreaLevel.objects.filter(country_name=country_name).update(country=country)
+
+
 @admin.register(AdminAreaLevel)
-class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
-    list_display = ("name", "country_name", "country", "business_area", "admin_level", "area_code")
+class AdminAreaLevelAdmin(ImportExportModelAdmin, ExtraUrlMixin, admin.ModelAdmin):
+    list_display = ("name", "country_name", "admin_level", "area_code")
     list_filter = (
         ("admin_level", AllValuesComboFilter),
         ("country_name", AllValuesComboFilter),
     )
     search_fields = ("name",)
     ordering = ("country_name", "admin_level")
+    resource_class = AdminAreaLevelResource
 
     @button(permission="load_from_datamart")
     def load_from_datamart(self, request):
@@ -501,16 +544,48 @@ class ImportAreaForm(forms.Form):
     file = forms.FileField()
 
 
+class AdminAreaResource(resources.ModelResource):
+    admin_area_level = fields.Field(
+        widget=ForeignKeyWidget(AdminAreaLevel, field="datamart_id"), attribute="admin_area_level"
+    )
+    parent = fields.Field(widget=ForeignKeyWidget(AdminArea, field="p_code"), attribute="parent")
+
+    class Meta:
+        model = AdminArea
+        fields = (
+            "external_id",
+            "title",
+            "admin_area_level",
+            "p_code",
+            "parent",
+            "geom",
+            "point",
+        )
+        import_id_fields = (
+            "title",
+            "p_code",
+        )
+
+
 @admin.register(AdminArea)
-class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
+class AdminAreaAdmin(ImportExportModelAdmin, ExtraUrlMixin, MPTTModelAdmin):
     search_fields = ("p_code", "title")
-    list_display = ("title", "country", "parent", "tree_id", "external_id", "admin_area_level", "p_code")
+    list_display = (
+        "title",
+        "country",
+        "parent",
+        "tree_id",
+        "external_id",
+        "admin_area_level",
+        "p_code",
+    )
     list_filter = (
         AdminLevelFilter,
         CountryFilter,
-        TextFieldFilter.factory("tree_id"),
-        TextFieldFilter.factory("external_id"),
+        ("tree_id", TextFieldFilter.factory(title="Tree Id", lookup="exact")),
+        ("external_id", TextFieldFilter.factory(title="External Id", lookup="exact")),
     )
+    resource_class = AdminAreaResource
 
     @button(permission=lambda r, __: r.user.is_superuser)
     def rebuild_tree(self, request):
@@ -537,7 +612,12 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                     data_set = csv_file.read().decode("utf-8-sig").splitlines()
                     reader = csv.DictReader(data_set, quoting=csv.QUOTE_NONE, delimiter=";")
                     provided = set(reader.fieldnames)
-                    minimum_set = {"area_code", "area_level", "parent_area_code", "area_name"}
+                    minimum_set = {
+                        "area_code",
+                        "area_level",
+                        "parent_area_code",
+                        "area_name",
+                    }
                     if not minimum_set.issubset(provided):
                         raise Exception(f"Invalid columns {reader.fieldnames}. {provided.difference(minimum_set)}")
                     lines = []
@@ -553,10 +633,16 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                                 level, __ = AdminAreaLevel.objects.get_or_create(
                                     country=country.admin_area_level,
                                     admin_level=level_number,
-                                    defaults={"name": row.get("level_name", f"{country.title} {level_number}")},
+                                    defaults={
+                                        "name": row.get(
+                                            "level_name",
+                                            f"{country.title} {level_number}",
+                                        )
+                                    },
                                 )
                                 parent = AdminArea.objects.filter(
-                                    tree_id=country.tree_id, p_code=row["parent_area_code"]
+                                    tree_id=country.tree_id,
+                                    p_code=row["parent_area_code"],
                                 ).first()
                                 if parent is None:
                                     assert level_number == 0, f"Cannot find parent area for {row}"
@@ -619,7 +705,11 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                         context["run_in_background"] = True
                     else:
                         results = load_admin_area(
-                            country.id, geom, page_size, max_records, rebuild_mptt=not form.cleaned_data["skip_rebuild"]
+                            country.id,
+                            geom,
+                            page_size,
+                            max_records,
+                            rebuild_mptt=not form.cleaned_data["skip_rebuild"],
                         )
                         context["admin_areas"] = results
                 except Exception as e:
@@ -704,7 +794,13 @@ class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
 
 @admin.register(XLSXKoboTemplate)
 class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelAdmin):
-    list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
+    list_display = (
+        "original_file_name",
+        "uploaded_by",
+        "created_at",
+        "file",
+        "import_status",
+    )
     list_filter = (
         "status",
         ("uploaded_by", AutoCompleteFilter),
@@ -712,7 +808,13 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelA
     search_fields = ("file_name",)
     date_hierarchy = "created_at"
     exclude = ("is_removed", "file_name", "status", "template_id")
-    readonly_fields = ("original_file_name", "uploaded_by", "file", "import_status", "error_description")
+    readonly_fields = (
+        "original_file_name",
+        "uploaded_by",
+        "file",
+        "import_status",
+        "error_description",
+    )
 
     def import_status(self, obj):
         if obj.status == self.model.SUCCESSFUL:
@@ -747,7 +849,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, ExtraUrlMixin, admin.ModelA
             level=ERROR,
         )
 
-    @button(label="Rerun KOBO Import", visible=lambda o: o is not None and o.status != XLSXKoboTemplate.SUCCESSFUL)
+    @button(
+        label="Rerun KOBO Import",
+        visible=lambda o: o is not None and o.status != XLSXKoboTemplate.SUCCESSFUL,
+    )
     def rerun_kobo_import(self, request, pk):
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
         upload_new_kobo_template_and_update_flex_fields_task.run(

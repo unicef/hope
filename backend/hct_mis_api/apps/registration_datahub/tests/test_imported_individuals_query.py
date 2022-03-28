@@ -1,11 +1,13 @@
-from parameterized import parameterized
 from django.core.management import call_command
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory
 
 ALL_IMPORTED_INDIVIDUALS_QUERY = """
 query AllImportedIndividuals {
@@ -66,19 +68,19 @@ query ImportedIndividual($id: ID!) {
 
 
 class TestImportedIndividualQuery(APITestCase):
-    multi_db = True
+    databases = "__all__"
 
     # IMPORTANT!
     # FREEZGUN doesn't work this snapshot have to be updated once a year
     MAX_AGE = 51
     MIN_AGE = 37
 
-    def setUp(self):
-        super().setUp()
-        self.user = UserFactory.create()
-        call_command("loadbusinessareas")
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.individuals_to_create = [
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory.create()
+        create_afghanistan()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
@@ -126,8 +128,8 @@ class TestImportedIndividualQuery(APITestCase):
             },
         ]
 
-        self.individuals = [ImportedIndividualFactory(**individual) for individual in self.individuals_to_create]
-        for individual in self.individuals:
+        cls.individuals = [ImportedIndividualFactory(**individual) for individual in cls.individuals_to_create]
+        for individual in cls.individuals:
             individual.registration_data_import.business_area_slug = "afghanistan"
             individual.registration_data_import.save()
 

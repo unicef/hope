@@ -154,7 +154,7 @@ class TestRuleMixin:
                         else:
                             row["result"] = rule.execute(values)
                     except Exception as e:
-                        row["error"] = "{}: {}".format(e.__class__.__name__, str(e))
+                        row["error"] = f"{e.__class__.__name__}: {str(e)}"
                         row["success"] = False
                     results.append(row)
                 context["results"] = results
@@ -172,11 +172,15 @@ class TestRuleMixin:
 
 class RuleResource(ModelResource):
     created_by = fields.Field(
-        column_name="created_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="created_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     updated_by = fields.Field(
-        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="updated_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     class Meta:
@@ -197,7 +201,16 @@ class RuleResource(ModelResource):
 
 @register(Rule)
 class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
-    list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
+    list_display = (
+        "name",
+        "version",
+        "language",
+        "enabled",
+        "deprecated",
+        "created_by",
+        "updated_by",
+        "stable",
+    )
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
     form = RuleForm
@@ -371,8 +384,11 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
 
-    @url(url="<int:pk>/revert/<int:state>/")
-    def do_revert(self, request, pk, state):
+    @button(
+        urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"],
+        visible=lambda o, r: "/change/" in r.path,
+    )
+    def revert(self, request, pk, state=None):
         try:
             self.get_object(request, pk)
             state = self.object.history.get(pk=state)
@@ -427,18 +443,35 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
 class RuleCommitResource(ModelResource):
     rule = fields.Field(column_name="rule", attribute="rule", widget=ForeignKeyWidget(Rule, "name"))
     updated_by = fields.Field(
-        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="updated_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     class Meta:
         model = RuleCommit
-        fields = ("timestamp", "rule", "version", "updated_by", "affected_fields", "is_release")
+        fields = (
+            "timestamp",
+            "rule",
+            "version",
+            "updated_by",
+            "affected_fields",
+            "is_release",
+        )
         import_id_fields = ("rule", "version")
 
 
 @register(RuleCommit)
 class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin):
-    list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
+    list_display = (
+        "timestamp",
+        "rule",
+        "version",
+        "updated_by",
+        "is_release",
+        "enabled",
+        "deprecated",
+    )
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
     readonly_fields = ("updated_by", "rule", "affected_fields", "version", "definition")

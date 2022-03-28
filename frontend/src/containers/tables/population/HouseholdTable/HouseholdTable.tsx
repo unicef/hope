@@ -49,6 +49,8 @@ export const HouseholdTable = ({
         query={useAllHouseholdsQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
+        defaultOrderBy='unicef_id'
+        defaultOrderDirection='desc'
         renderRow={(row) => (
           <HouseHoldTableRow
             key={row.id}

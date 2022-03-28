@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Collapse,
   FormControl,
   Grid,
   InputAdornment,
@@ -15,7 +16,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { usePaymentVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
+import { usePaymentVerificationChoicesQuery } from '../../../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;
@@ -46,21 +47,30 @@ const SearchTextField = styled(TextField)`
 interface VerificationRecordsFiltersProps {
   onFilterChange;
   filter;
+  verifications;
 }
 export function VerificationRecordsFilters({
   onFilterChange,
   filter,
+  verifications,
 }: VerificationRecordsFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
-  const {
-    data: statusChoicesData,
-  } = usePaymentVerificationStatusChoicesQuery();
-  if (!statusChoicesData) {
+  const { data: choicesData } = usePaymentVerificationChoicesQuery();
+  if (!choicesData) {
     return null;
   }
+
+  const verificationPlanOptions = verifications.edges.map((item) => {
+    return (
+      <MenuItem key={item.node.unicefId} value={item.node.id}>
+        {item.node.unicefId}
+      </MenuItem>
+    );
+  });
+
   return (
     <>
       <Box display='flex' justifyContent='space-between'>
@@ -88,7 +98,7 @@ export function VerificationRecordsFilters({
         )}
       </Box>
       <Container>
-        {show ? (
+        <Collapse in={show}>
           <Grid container spacing={3}>
             <Grid item>
               <SearchTextField
@@ -120,7 +130,31 @@ export function VerificationRecordsFilters({
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
-                  {statusChoicesData.paymentVerificationStatusChoices.map(
+                  {choicesData.paymentVerificationStatusChoices.map((item) => {
+                    return (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.name}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </StyledFormControl>
+            </Grid>
+            <Grid item>
+              <StyledFormControl variant='outlined' margin='dense'>
+                <InputLabel>{t('Verification Channel')}</InputLabel>
+                <Select
+                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                  // @ts-ignore
+                  onChange={(e) => handleFilterChange(e, 'verificationChannel')}
+                  variant='outlined'
+                  label={t('Verification Channel')}
+                  value={filter.verificationChannel || ''}
+                >
+                  <MenuItem value=''>
+                    <em>None</em>
+                  </MenuItem>
+                  {choicesData.cashPlanVerificationVerificationChannelChoices.map(
                     (item) => {
                       return (
                         <MenuItem key={item.value} value={item.value}>
@@ -132,8 +166,28 @@ export function VerificationRecordsFilters({
                 </Select>
               </StyledFormControl>
             </Grid>
+            <Grid item>
+              <StyledFormControl variant='outlined' margin='dense'>
+                <InputLabel>{t('Verification Plan Id')}</InputLabel>
+                <Select
+                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+                  // @ts-ignore
+                  onChange={(e) =>
+                    handleFilterChange(e, 'cashPlanPaymentVerification')
+                  }
+                  variant='outlined'
+                  label={t('Verification Plan Id')}
+                  value={filter.cashPlanPaymentVerification || ''}
+                >
+                  <MenuItem value=''>
+                    <em>None</em>
+                  </MenuItem>
+                  {verificationPlanOptions}
+                </Select>
+              </StyledFormControl>
+            </Grid>
           </Grid>
-        ) : null}
+        </Collapse>
       </Container>
     </>
   );

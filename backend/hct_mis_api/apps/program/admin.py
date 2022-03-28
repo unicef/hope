@@ -16,6 +16,7 @@ from ..utils.admin import (
     SoftDeletableAdminMixin,
 )
 from .models import CashPlan, Program
+from django.utils.translation import ugettext_lazy as _
 
 
 @admin.register(Program)
@@ -33,14 +34,13 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
 
 @admin.register(CashPlan)
 class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("name", "program", "delivery_type", "status", "verification_status")
+    list_display = ("name", "program", "delivery_type", "status")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("delivery_type", ChoicesFieldComboFilter),
-        ("verification_status", ChoicesFieldComboFilter),
-        TextFieldFilter.factory("program__id__contains", "Program ID"),
-        TextFieldFilter.factory("vision_id", "Vision ID"),
+        ("program__id", TextFieldFilter.factory(title="Program ID")),
+        ("vision_id", TextFieldFilter.factory(title="Vision ID")),
     )
     raw_id_fields = ("business_area", "program", "service_provider")
     search_fields = ("name",)

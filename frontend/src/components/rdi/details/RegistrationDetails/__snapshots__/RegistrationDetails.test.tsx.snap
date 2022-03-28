@@ -44,7 +44,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       class="sc-gZMcBi exawVs"
                     >
                       <div
-                        class="sc-ifAKCX jzRoPs"
+                        class="sc-ifAKCX ilSJSk"
                         data-cy="status-container"
                       >
                         MERGED

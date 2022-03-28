@@ -19,7 +19,9 @@ from django.test import TestCase
 from django_countries.fields import Country
 from PIL import Image
 
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -56,12 +58,12 @@ class CellMock:
         self.coordinate = coordinate
 
 
-class TestRdiCreateTask(TestCase):
-    multi_db = True
+class TestRdiCreateTask(BaseElasticSearchTestCase):
+    databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
             RdiKoboCreateTask,
             RdiXlsxCreateTask,
@@ -347,8 +349,8 @@ class TestRdiCreateTask(TestCase):
         [self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8]) for individual in individuals]
 
 
-class TestRdiKoboCreateTask(TestCase):
-    multi_db = True
+class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
+    databases = "__all__"
 
     @staticmethod
     def _return_test_image(*args, **kwargs):
@@ -358,7 +360,7 @@ class TestRdiKoboCreateTask(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
             RdiKoboCreateTask,
             RdiXlsxCreateTask,
@@ -479,7 +481,7 @@ class TestRdiKoboCreateTask(TestCase):
         first_household = households.get(size=3)
         second_household = households.get(size=2)
 
-        first_household_collectors = first_household.individuals_and_roles.values_list("individual__full_name", "role")
+        first_household_collectors = first_household.individuals_and_roles.order_by('individual__full_name').values_list("individual__full_name", "role")
         self.assertEqual(
             list(first_household_collectors),
             [("Tesa Testowski", "ALTERNATE"), ("Test Testowski", "PRIMARY")],
@@ -609,45 +611,6 @@ class TestRdiKoboCreateTask(TestCase):
 
         self.assertEqual(birth_certificate, "BIRTH_CERTIFICATE")
         self.assertEqual(national_passport, "NATIONAL_PASSPORT")
-
-    @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
-        _return_test_image,
-    )
-    @unittest.skip("Remove this and run manually only!")
-    def test_performance(self):
-        from hct_mis_api.apps.registration_datahub.validators import (
-            KoboProjectImportDataValidator,
-        )
-
-        self._generate_huge_file()
-        content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/big_json.json"
-        ).read_bytes()
-        file = File(BytesIO(content), name="big_json.json")
-        import_data = ImportData.objects.create(
-            file=file,
-            number_of_households=1,
-            number_of_individuals=2,
-        )
-        registration_data_import = RegistrationDataImportDatahubFactory(import_data=import_data)
-        start = time.process_time()
-        errors = KoboProjectImportDataValidator.validate_fields(
-            json.loads(import_data.file.read().decode()),
-            self.business_area.name,
-        )
-        self.assertEqual(errors, [])
-
-        task = self.RdiKoboCreateTask()
-        task.execute(
-            registration_data_import.id,
-            import_data.id,
-            self.business_area.id,
-        )
-        end = time.process_time() - start
-        execution_time = f"{end:.2f} seconds"
-        print(execution_time)
-        os.remove(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/big_json.json")
 
     def _generate_huge_file(self):
         base_form = {

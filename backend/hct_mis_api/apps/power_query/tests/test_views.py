@@ -69,7 +69,7 @@ class TestPowerQueryBasicAuth(TestCase):
         cls.USER_PASSWORD = "123"
         cls.formatter_json = FormatterFactory(name="Queryset To JSON")
         cls.user = UserFactory(
-            username="superuser-%s" % random.randint(1, 100),
+            username="superuser-{}".format(random.randint(1, 100)),
             is_superuser=True,
             is_staff=True,
             password=cls.USER_PASSWORD,
@@ -118,7 +118,7 @@ class TestPowerQueryResponses(TestCase):
         cls.USER_PASSWORD = "123"
         cls.formatter_json = FormatterFactory(name="Queryset To JSON")
         cls.user = UserFactory(
-            username="superuser-%s" % random.randint(1, 100),
+            username="superuser-{}".format(random.randint(1, 100)),
             is_superuser=True,
             is_staff=True,
             password=cls.USER_PASSWORD,
