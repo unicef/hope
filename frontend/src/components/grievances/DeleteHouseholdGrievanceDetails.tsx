@@ -71,7 +71,7 @@ export function DeleteHouseholdGrievanceDetails({
             <Button
               onClick={() =>
                 confirm({
-                  title: 'Warning',
+                  title: t('Warning'),
                   content: dialogText,
                 }).then(async () => {
                   try {

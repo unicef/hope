@@ -187,7 +187,7 @@ export function RequestedIndividualDataChange({
       <Button
         onClick={() =>
           confirm({
-            title: 'Warning',
+            title: t('Warning'),
             content: getConfirmationText(allSelected),
           }).then(() => {
             submitForm();
