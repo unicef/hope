@@ -18,9 +18,9 @@ import {
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../core/BreadCrumbs';
-import { ButtonDialog } from '../core/ButtonDialog';
-import { ConfirmationDialog } from '../core/ConfirmationDialog';
 import { PageHeader } from '../core/PageHeader';
+import { useConfirmation } from '../core/ConfirmationDialog';
+import { ButtonDialog } from '../core/ButtonDialog';
 
 const Separator = styled.div`
   width: 1px;
@@ -70,6 +70,7 @@ export const GrievanceDetailsToolbar = ({
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
+  const confirm = useConfirmation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
@@ -231,26 +232,25 @@ export const GrievanceDetailsToolbar = ({
   };
 
   let closeButton = (
-    <ConfirmationDialog
-      title='Close ticket'
-      extraContent={
-        ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
-          ? closingConfirmationText
-          : getClosingConfirmationExtraText()
+    <Button
+      color='primary'
+      variant='contained'
+      onClick={() =>
+        confirm({
+          title: 'Close ticket',
+          extraContent:
+            ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+              ? closingConfirmationText
+              : getClosingConfirmationExtraText(),
+          content: getClosingConfirmationText(),
+          continueText: 'close ticket',
+        }).then(() => {
+          changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+        })
       }
-      content={getClosingConfirmationText()}
-      continueText='close ticket'
     >
-      {(confirm) => (
-        <Button
-          color='primary'
-          variant='contained'
-          onClick={confirm(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))}
-        >
-          {t('Close Ticket')}
-        </Button>
-      )}
-    </ConfirmationDialog>
+      {t('Close Ticket')}
+    </Button>
   );
   if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
@@ -337,24 +337,18 @@ export const GrievanceDetailsToolbar = ({
               </Box>
             )}
             {isFeedbackType && canClose && (
-              <ConfirmationDialog
-                title='Confirmation'
-                extraContent=''
-                content={closingConfirmationText}
-                continueText='close ticket'
+              <Button
+                color='primary'
+                variant='contained'
+                onClick={() =>
+                  confirm({
+                    content: closingConfirmationText,
+                    continueText: 'close ticket',
+                  }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
+                }
               >
-                {(confirm) => (
-                  <Button
-                    color='primary'
-                    variant='contained'
-                    onClick={confirm(() =>
-                      changeState(GRIEVANCE_TICKET_STATES.CLOSED),
-                    )}
-                  >
-                    {t('Close Ticket')}
-                  </Button>
-                )}
-              </ConfirmationDialog>
+                {t('Close Ticket')}
+              </Button>
             )}
           </>
         )}
@@ -387,24 +381,18 @@ export const GrievanceDetailsToolbar = ({
               </Box>
             )}
             {isFeedbackType && canClose && (
-              <ConfirmationDialog
-                title='Confirmation'
-                extraContent=''
-                content={closingConfirmationText}
-                continueText='close ticket'
+              <Button
+                color='primary'
+                variant='contained'
+                onClick={() =>
+                  confirm({
+                    content: closingConfirmationText,
+                    continueText: 'close ticket',
+                  }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
+                }
               >
-                {(confirm) => (
-                  <Button
-                    color='primary'
-                    variant='contained'
-                    onClick={confirm(() =>
-                      changeState(GRIEVANCE_TICKET_STATES.CLOSED),
-                    )}
-                  >
-                    {t('Close Ticket')}
-                  </Button>
-                )}
-              </ConfirmationDialog>
+                {t('Close Ticket')}
+              </Button>
             )}
           </>
         )}
