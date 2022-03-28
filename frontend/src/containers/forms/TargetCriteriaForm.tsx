@@ -20,6 +20,7 @@ import {
   formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
 } from '../../utils/targetingUtils';
+import { useBusinessArea } from "../../hooks/useBusinessArea";
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
 
@@ -135,7 +136,12 @@ export function TargetCriteriaForm({
   title,
   shouldShowWarningForIndividualFilter,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
-  const { data, loading } = useImportedIndividualFieldsQuery();
+  const businessArea = useBusinessArea();
+  const { data, loading } = useImportedIndividualFieldsQuery({
+    variables: {
+      businessAreaSlug: businessArea,
+    },
+  });
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
