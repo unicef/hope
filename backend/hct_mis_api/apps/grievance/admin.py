@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.contrib.admin import TabularInline
 
-from admin_extra_urls.mixins import ExtraUrlMixin
+from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
-    TextFieldFilter,
+    ValueFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
@@ -31,7 +31,7 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "created_at",
@@ -51,8 +51,6 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraUrlMixin, AdminAdvancedFilte
         ("registration_data_import", AutoCompleteFilter),
         ("created_by", AutoCompleteFilter),
         ("assigned_to", AutoCompleteFilter),
-        # ("created_by__username__istartswith", TextFieldFilter.factory(title="Create by")),
-        # ("assigned_to__username__istartswith", TextFieldFilter.factory(title="Assigned to")),
         "updated_at",
     )
     advanced_filter_fields = (
