@@ -10,6 +10,7 @@ from uuid import uuid4
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
 
@@ -265,7 +266,7 @@ OTHER_APPS = [
     "corsheaders",
     "django_elasticsearch_dsl",
     "constance",
-    "admin_extra_urls",
+    "admin_extra_buttons",
     "adminfilters",
     "adminactions",
     "multiselectfield",

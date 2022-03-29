@@ -7,7 +7,7 @@ from django.db import transaction
 from django.db.transaction import atomic
 from django.template.response import TemplateResponse
 
-from admin_extra_urls.decorators import button
+from admin_extra_buttons.decorators import button
 
 from hct_mis_api.apps.steficon.debug import get_error_info
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
