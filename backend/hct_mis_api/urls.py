@@ -17,6 +17,7 @@ import hct_mis_api.apps.targeting.views
 from hct_mis_api.apps.core.views import (
     call_command_view,
     homepage,
+    hope_redirect,
     logout_view,
     schema,
     trigger_error,
@@ -39,6 +40,7 @@ urlpatterns = [
     ),
     path("", homepage),
     path("_health", homepage),
+    path("api/hope-redirect", hope_redirect),
     path("api/_health", homepage),
     path("api/graphql/schema.graphql", schema),
     path("api/graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))),
