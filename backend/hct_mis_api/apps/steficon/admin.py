@@ -17,9 +17,11 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
-from admin_extra_urls.api import ExtraUrlMixin, button
-from admin_extra_urls.utils import labelize
+from admin_extra_buttons.api import ExtraButtonsMixin, button
+from admin_extra_buttons.decorators import view
+from admin_extra_buttons.utils import labelize
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.mixin import AdminFiltersMixin
 from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
@@ -172,15 +174,11 @@ class TestRuleMixin:
 
 class RuleResource(ModelResource):
     created_by = fields.Field(
-        column_name="created_by",
-        attribute="created_by",
-        widget=ForeignKeyWidget(User, "username"),
+        column_name="created_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
     )
 
     updated_by = fields.Field(
-        column_name="updated_by",
-        attribute="created_by",
-        widget=ForeignKeyWidget(User, "username"),
+        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
     )
 
     class Meta:
@@ -200,17 +198,8 @@ class RuleResource(ModelResource):
 
 
 @register(Rule)
-class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
-    list_display = (
-        "name",
-        "version",
-        "language",
-        "enabled",
-        "deprecated",
-        "created_by",
-        "updated_by",
-        "stable",
-    )
+class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
+    list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
     form = RuleForm
@@ -379,16 +368,20 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
 
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
-    @button(visible=lambda o, r: "/changelog/" not in r.path)
+    @button(visible=lambda btn: "/changelog/" not in btn.request.path)
     def changelog(self, request, pk):
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
 
-    @button(
-        urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"],
-        visible=lambda o, r: "/change/" in r.path,
-    )
-    def revert(self, request, pk, state=None):
+    # urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"],
+    # @button(visible=lambda btn: "/change/" in btn.request.path)
+
+    @view(pattern=r"<int:pk>/rule_do_revert/<int:state>/")
+    def do_revert(self, request, pk, state):
+        pass
+
+    @view(pattern=r"<int:pk>/revert/<int:state>/")
+    def revert(self, request, pk, state):
         try:
             context = self.get_common_context(
                 request,
@@ -413,7 +406,7 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    @button(visible=lambda o, r: "/change/" in r.path)
+    @button(visible=lambda btn: "/change/" in btn.request.path)
     def diff(self, request, pk):
         try:
             context = self.get_common_context(request, pk, action="Code history")
@@ -462,35 +455,20 @@ class RuleAdmin(ExtraUrlMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMi
 class RuleCommitResource(ModelResource):
     rule = fields.Field(column_name="rule", attribute="rule", widget=ForeignKeyWidget(Rule, "name"))
     updated_by = fields.Field(
-        column_name="updated_by",
-        attribute="created_by",
-        widget=ForeignKeyWidget(User, "username"),
+        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
     )
 
     class Meta:
         model = RuleCommit
-        fields = (
-            "timestamp",
-            "rule",
-            "version",
-            "updated_by",
-            "affected_fields",
-            "is_release",
-        )
+        fields = ("timestamp", "rule", "version", "updated_by", "affected_fields", "is_release")
         import_id_fields = ("rule", "version")
 
 
 @register(RuleCommit)
-class RuleCommitAdmin(ExtraUrlMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin):
-    list_display = (
-        "timestamp",
-        "rule",
-        "version",
-        "updated_by",
-        "is_release",
-        "enabled",
-        "deprecated",
-    )
+class RuleCommitAdmin(
+    ExtraButtonsMixin, AdminFiltersMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin
+):
+    list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
     readonly_fields = ("updated_by", "rule", "affected_fields", "version")
