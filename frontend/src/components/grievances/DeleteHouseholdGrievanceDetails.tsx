@@ -12,7 +12,7 @@ import {
   useApproveDeleteHouseholdDataChangeMutation,
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
@@ -39,6 +39,7 @@ export function DeleteHouseholdGrievanceDetails({
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
+  const confirm = useConfirmation();
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -67,48 +68,49 @@ export function DeleteHouseholdGrievanceDetails({
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>{t('Household to be withdrawn')}</Typography>
           {canApproveDataChange && (
-            <ConfirmationDialog title={t('Warning')} content={dialogText}>
-              {(confirm) => (
-                <Button
-                  onClick={confirm(async () => {
-                    try {
-                      await mutate({
-                        variables: {
-                          grievanceTicketId: ticket.id,
-                          approveStatus: !ticket.deleteHouseholdTicketDetails
-                            ?.approveStatus,
+            <Button
+              onClick={() =>
+                confirm({
+                  title: t('Warning'),
+                  content: dialogText,
+                }).then(async () => {
+                  try {
+                    await mutate({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus: !ticket.deleteHouseholdTicketDetails
+                          ?.approveStatus,
+                      },
+                      refetchQueries: () => [
+                        {
+                          query: GrievanceTicketDocument,
+                          variables: { id: ticket.id },
                         },
-                        refetchQueries: () => [
-                          {
-                            query: GrievanceTicketDocument,
-                            variables: { id: ticket.id },
-                          },
-                        ],
-                      });
-                      if (ticket.deleteHouseholdTicketDetails.approveStatus) {
-                        showMessage(t('Changes Disapproved'));
-                      }
-                      if (!ticket.deleteHouseholdTicketDetails.approveStatus) {
-                        showMessage(t('Changes Approved'));
-                      }
-                    } catch (e) {
-                      e.graphQLErrors.map((x) => showMessage(x.message));
+                      ],
+                    });
+                    if (ticket.deleteHouseholdTicketDetails.approveStatus) {
+                      showMessage(t('Changes Disapproved'));
                     }
-                  })}
-                  variant={
-                    ticket.deleteHouseholdTicketDetails?.approveStatus
-                      ? 'outlined'
-                      : 'contained'
+                    if (!ticket.deleteHouseholdTicketDetails.approveStatus) {
+                      showMessage(t('Changes Approved'));
+                    }
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
                   }
-                  color='primary'
-                  disabled={!approveEnabled}
-                >
-                  {ticket.deleteHouseholdTicketDetails?.approveStatus
-                    ? t('Disapprove')
-                    : t('Approve')}
-                </Button>
-              )}
-            </ConfirmationDialog>
+                })
+              }
+              variant={
+                ticket.deleteHouseholdTicketDetails?.approveStatus
+                  ? 'outlined'
+                  : 'contained'
+              }
+              color='primary'
+              disabled={!approveEnabled}
+            >
+              {ticket.deleteHouseholdTicketDetails?.approveStatus
+                ? t('Disapprove')
+                : t('Approve')}
+            </Button>
           )}
         </Box>
       </Title>

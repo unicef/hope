@@ -1,8 +1,8 @@
 import { gql } from 'apollo-boost';
 
 export const ImportedIndividualFields = gql`
-  query ImportedIndividualFields {
-    allFieldsAttributes {
+  query ImportedIndividualFields($businessAreaSlug: String) {
+    allFieldsAttributes(businessAreaSlug: $businessAreaSlug) {
       isFlexField
       id
       type
