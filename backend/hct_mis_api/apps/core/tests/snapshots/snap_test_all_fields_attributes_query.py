@@ -37838,6 +37838,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Registration Data Import',
+                'labels': [
+                    {
+                        'label': 'Registration Data Import',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'registration_data_import',
+                'required': False,
+                'type': 'SELECT_MANY'
+            },
+            {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
