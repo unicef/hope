@@ -1,4 +1,5 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
+import useDeepCompareEffect from 'use-deep-compare-effect'
 import { LoadingComponent } from '../../components/core/LoadingComponent';
 import { HeadCell } from '../../components/core/Table/EnhancedTableHead';
 import {
@@ -59,7 +60,7 @@ export function UniversalTable<T, K>({
     fetchPolicy: 'network-only',
   });
 
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     console.log('useEffect1: ', initialVariables, page);
     console.log('useEffect2: ', JSON.parse(JSON.stringify(initialVariables)));
     if (initialVariables) {

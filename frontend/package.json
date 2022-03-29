@@ -100,6 +100,7 @@
     "ts-pnp": "1.1.5",
     "typescript": "^3.7.3",
     "url-loader": "2.3.0",
+    "use-deep-compare-effect": "^1.8.1",
     "webpack": "4.41.2",
     "webpack-dev-server": "3.9.0",
     "webpack-manifest-plugin": "2.2.0",
