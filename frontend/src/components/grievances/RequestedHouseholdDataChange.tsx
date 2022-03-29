@@ -9,7 +9,7 @@ import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 
@@ -29,6 +29,7 @@ export function RequestedHouseholdDataChange({
 }): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const confirm = useConfirmation();
   const getConfirmationText = (values): string => {
     const allSelected =
       values.selected.length + values.selectedFlexFields.length || 0;
@@ -79,18 +80,21 @@ export function RequestedHouseholdDataChange({
       );
     }
     return (
-      <ConfirmationDialog title='Warning' content={getConfirmationText(values)}>
-        {(confirm) => (
-          <Button
-            onClick={confirm(() => submitForm())}
-            variant='contained'
-            color='primary'
-            disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
-          >
-            {t('Approve')}
-          </Button>
-        )}
-      </ConfirmationDialog>
+      <Button
+        onClick={() =>
+          confirm({
+            title: t('Warning'),
+            content: getConfirmationText(values),
+          }).then(() => {
+            submitForm();
+          })
+        }
+        variant='contained'
+        color='primary'
+        disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+      >
+        {t('Approve')}
+      </Button>
     );
   };
   return (
