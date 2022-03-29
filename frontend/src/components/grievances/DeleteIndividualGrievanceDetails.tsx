@@ -14,11 +14,11 @@ import {
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../core/ConfirmationDialog';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
+import { useConfirmation } from '../core/ConfirmationDialog';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -42,6 +42,7 @@ export function DeleteIndividualGrievanceDetails({
 }): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const confirm = useConfirmation();
 
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const isHeadOfHousehold =
@@ -175,48 +176,49 @@ export function DeleteIndividualGrievanceDetails({
             {t('Individual to be withdrawn')}
           </Typography>
           {canApproveDataChange && (
-            <ConfirmationDialog title={t('Warning')} content={dialogText}>
-              {(confirm) => (
-                <Button
-                  onClick={confirm(async () => {
-                    try {
-                      await mutate({
-                        variables: {
-                          grievanceTicketId: ticket.id,
-                          approveStatus: !ticket.deleteIndividualTicketDetails
-                            ?.approveStatus,
+            <Button
+              onClick={() =>
+                confirm({
+                  title: t('Warning'),
+                  content: dialogText,
+                }).then(async () => {
+                  try {
+                    await mutate({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus: !ticket.deleteIndividualTicketDetails
+                          ?.approveStatus,
+                      },
+                      refetchQueries: () => [
+                        {
+                          query: GrievanceTicketDocument,
+                          variables: { id: ticket.id },
                         },
-                        refetchQueries: () => [
-                          {
-                            query: GrievanceTicketDocument,
-                            variables: { id: ticket.id },
-                          },
-                        ],
-                      });
-                      if (ticket.deleteIndividualTicketDetails.approveStatus) {
-                        showMessage(t('Changes Disapproved'));
-                      }
-                      if (!ticket.deleteIndividualTicketDetails.approveStatus) {
-                        showMessage(t('Changes Approved'));
-                      }
-                    } catch (e) {
-                      e.graphQLErrors.map((x) => showMessage(x.message));
+                      ],
+                    });
+                    if (ticket.deleteIndividualTicketDetails.approveStatus) {
+                      showMessage(t('Changes Disapproved'));
                     }
-                  })}
-                  variant={
-                    ticket.deleteIndividualTicketDetails?.approveStatus
-                      ? 'outlined'
-                      : 'contained'
+                    if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+                      showMessage(t('Changes Approved'));
+                    }
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
                   }
-                  color='primary'
-                  disabled={!approveEnabled()}
-                >
-                  {ticket.deleteIndividualTicketDetails?.approveStatus
-                    ? t('Disapprove')
-                    : t('Approve')}
-                </Button>
-              )}
-            </ConfirmationDialog>
+                })
+              }
+              variant={
+                ticket.deleteIndividualTicketDetails?.approveStatus
+                  ? 'outlined'
+                  : 'contained'
+              }
+              color='primary'
+              disabled={!approveEnabled}
+            >
+              {ticket.deleteIndividualTicketDetails?.approveStatus
+                ? t('Disapprove')
+                : t('Approve')}
+            </Button>
           )}
         </Box>
       </Title>
