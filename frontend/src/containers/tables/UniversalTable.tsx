@@ -60,7 +60,7 @@ export function UniversalTable<T, K>({
   });
 
   useEffect(() => {
-    console.log('useEffect1: ', initialVariables);
+    console.log('useEffect1: ', initialVariables, page);
     console.log('useEffect2: ', JSON.parse(JSON.stringify(initialVariables)));
     if (initialVariables) {
       setPage(0);
