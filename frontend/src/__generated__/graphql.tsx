@@ -311,8 +311,8 @@ export type BusinessAreaNode = Node & {
   individualSet: IndividualNodeConnection,
   programSet: ProgramNodeConnection,
   cashplanSet: CashPlanNodeConnection,
-  targetpopulationSet: TargetPopulationNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
+  targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: PaymentVerificationLogEntryNodeConnection,
 };
@@ -410,6 +410,15 @@ export type BusinessAreaNodeCashplanSetArgs = {
 };
 
 
+export type BusinessAreaNodeRegistrationdataimportSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
 export type BusinessAreaNodeTargetpopulationSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
@@ -435,15 +444,6 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type BusinessAreaNodeRegistrationdataimportSetArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -3508,7 +3508,6 @@ export type Query = {
   allAdminAreas?: Maybe<AdminAreaNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
-  allIndividualFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   allGroupsWithFields?: Maybe<Array<Maybe<GroupAttributeNode>>>,
   koboProject?: Maybe<KoboAssetObject>,
   allKoboProjects?: Maybe<KoboAssetObjectConnection>,
@@ -3875,12 +3874,8 @@ export type QueryAllBusinessAreasArgs = {
 
 
 export type QueryAllFieldsAttributesArgs = {
-  flexField?: Maybe<Scalars['Boolean']>
-};
-
-
-export type QueryAllIndividualFieldsAttributesArgs = {
-  flexField?: Maybe<Scalars['Boolean']>
+  flexField?: Maybe<Scalars['Boolean']>,
+  businessAreaSlug?: Maybe<Scalars['String']>
 };
 
 
@@ -5622,8 +5617,8 @@ export type UserBusinessAreaNode = Node & {
   individualSet: IndividualNodeConnection,
   programSet: ProgramNodeConnection,
   cashplanSet: CashPlanNodeConnection,
-  targetpopulationSet: TargetPopulationNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
+  targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: PaymentVerificationLogEntryNodeConnection,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -5722,6 +5717,15 @@ export type UserBusinessAreaNodeCashplanSetArgs = {
 };
 
 
+export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
 export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
@@ -5747,15 +5751,6 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -5815,10 +5810,10 @@ export type UserNode = Node & {
   createdTickets: GrievanceTicketNodeConnection,
   assignedTickets: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
+  registrationDataImports: RegistrationDataImportNodeConnection,
   targetPopulations: TargetPopulationNodeConnection,
   lockedTargetPopulations: TargetPopulationNodeConnection,
   finalizedTargetPopulations: TargetPopulationNodeConnection,
-  registrationDataImports: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
   logs: PaymentVerificationLogEntryNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
@@ -5844,6 +5839,15 @@ export type UserNodeAssignedTicketsArgs = {
 
 
 export type UserNodeTicketNotesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeRegistrationDataImportsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5933,15 +5937,6 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type UserNodeRegistrationDataImportsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -7639,7 +7634,9 @@ export type FlexFieldsQuery = (
   )>>> }
 );
 
-export type ImportedIndividualFieldsQueryVariables = {};
+export type ImportedIndividualFieldsQueryVariables = {
+  businessAreaSlug?: Maybe<Scalars['String']>
+};
 
 
 export type ImportedIndividualFieldsQuery = (
@@ -13629,8 +13626,8 @@ export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
 export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
 export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
 export const ImportedIndividualFieldsDocument = gql`
-    query ImportedIndividualFields {
-  allFieldsAttributes {
+    query ImportedIndividualFields($businessAreaSlug: String) {
+  allFieldsAttributes(businessAreaSlug: $businessAreaSlug) {
     isFlexField
     id
     type
@@ -13685,6 +13682,7 @@ export function withImportedIndividualFields<TProps, TChildProps = {}>(operation
  * @example
  * const { data, loading, error } = useImportedIndividualFieldsQuery({
  *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
  *   },
  * });
  */
@@ -19058,8 +19056,8 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, BusinessAreaNodeIndividualSetArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, BusinessAreaNodeCashplanSetArgs>,
-  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
+  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
 };
@@ -20299,7 +20297,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
-  allIndividualFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllIndividualFieldsAttributesArgs>,
   allGroupsWithFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>, ParentType, ContextType>,
   koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'uid' | 'businessAreaSlug'>>,
   allKoboProjects?: Resolver<Maybe<ResolversTypes['KoboAssetObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllKoboProjectsArgs, 'businessAreaSlug'>>,
@@ -21237,8 +21234,8 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeIndividualSetArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeProgramSetArgs>,
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeCashplanSetArgs>,
-  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeRegistrationdataimportSetArgs>,
+  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeReportsArgs>,
   logentrySet?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
   permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
@@ -21280,10 +21277,10 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeCreatedTicketsArgs>,
   assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeAssignedTicketsArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, UserNodeTicketNotesArgs>,
+  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeTargetPopulationsArgs>,
   lockedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeLockedTargetPopulationsArgs>,
   finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeFinalizedTargetPopulationsArgs>,
-  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserNodeReportsArgs>,
   logs?: Resolver<ResolversTypes['PaymentVerificationLogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserNodeBusinessAreasArgs>,

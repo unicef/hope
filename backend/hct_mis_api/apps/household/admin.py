@@ -16,18 +16,18 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button, href
-from admin_extra_urls.mixins import ExtraUrlMixin
+from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
-    MultiValueTextFieldFilter,
+    MultiValueFilter,
     RelatedFieldComboFilter,
-    TextFieldFilter,
+    ValueFilter,
 )
-from adminfilters.lookup import GenericLookupFieldFilter
+from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
@@ -79,7 +79,10 @@ logger = logging.getLogger(__name__)
 class AgencyTypeAdmin(HOPEModelAdminBase):
     search_fields = ("label", "country")
     list_display = ("label", "type", "country")
-    list_filter = ("type", ("country", TextFieldFilter.factory(title="Country ISO CODE 2")))
+    list_filter = (
+        "type",
+        ("country", ValueFilter.factory(label="Country ISO CODE 2")),
+    )
 
 
 @admin.register(Document)
@@ -98,7 +101,11 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 class DocumentTypeAdmin(HOPEModelAdminBase):
     search_fields = ("label", "country")
     list_display = ("label", "country", "type")
-    list_filter = ("type", "label", ("country", TextFieldFilter.factory(title="Country ISO CODE 2")))
+    list_filter = (
+        "type",
+        "label",
+        ("country", ValueFilter.factory(label="Country ISO CODE 2")),
+    )
 
 
 @admin.register(Household)
@@ -130,9 +137,9 @@ class HouseholdAdmin(
         "size",
     )
     list_filter = (
-        ("unicef_id", MultiValueTextFieldFilter.factory(title="UNICEF ID")),
-        ("unhcr_id", MultiValueTextFieldFilter.factory(title="UNHCR ID")),
-        ("id", MultiValueTextFieldFilter.factory(title="MIS ID")),
+        ("unicef_id", MultiValueFilter),
+        ("unhcr_id", MultiValueFilter),
+        ("id", MultiValueFilter),
         # ("country", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("size", MaxMinFilter),
@@ -183,7 +190,7 @@ class HouseholdAdmin(
     def get_ignored_linked_objects(self):
         return []
 
-    @button(permission="can_withdrawn")
+    @button(permission="household.can_withdrawn")
     def withdrawn(self, request, pk):
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -347,8 +354,7 @@ class IndividualAdmin(
     exclude = ("created_at", "updated_at")
     inlines = [IndividualRoleInHouseholdInline]
     list_filter = (
-        GenericLookupFieldFilter.factory(title="UNICEF ID", lookup="unicef_id__iexact"),
-        GenericLookupFieldFilter.factory(title="Household ID", lookup="household__unicef_id__iexact"),
+        QueryStringFilter,
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
@@ -415,7 +421,7 @@ class IndividualAdmin(
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.household.unicef_id}")
 
-    @button()
+    @button(html_attrs={"class": "aeb-green"})
     def sanity_check(self, request, pk):
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]
@@ -438,32 +444,22 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("agency", "individual", "number")
-    list_filter = (("individual__unicef_id__icontains", TextFieldFilter.factory(title="Individual's UNICEF Id")),)
+    list_filter = (("individual__unicef_id__icontains", ValueFilter.factory(label="Individual's UNICEF Id")),)
     autocomplete_fields = ["agency"]
 
 
 @admin.register(EntitlementCard)
-class EntitlementCardAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class EntitlementCardAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("id", "card_number", "status", "card_type", "service_provider")
     search_fields = ("card_number",)
     date_hierarchy = "created_at"
     raw_id_fields = ("household",)
-    list_filter = (
-        "status",
-        ("card_type", TextFieldFilter.factory(title="Card Type")),
-        ("service_provider", TextFieldFilter.factory(title="Service Provider")),
-    )
+    list_filter = ("status", ("card_type", ValueFilter), ("service_provider", ValueFilter))
 
 
 @admin.register(XlsxUpdateFile)
-class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
-    readonly_fields = (
-        "file",
-        "business_area",
-        "rdi",
-        "xlsx_match_columns",
-        "uploaded_by",
-    )
+class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+    readonly_fields = ("file", "business_area", "rdi", "xlsx_match_columns", "uploaded_by")
     list_filter = (
         ("business_area", AutoCompleteFilter),
         ("uploaded_by", AutoCompleteFilter),
@@ -481,19 +477,14 @@ class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
             updater = IndividualXlsxUpdate(xlsx_update_file)
         except InvalidColumnsError as e:
             self.message_user(request, str(e), messages.ERROR)
-            context = self.get_common_context(
-                request,
-                title="Update Individual by xlsx",
-                form=UpdateByXlsxStage1Form(),
-            )
+            context = self.get_common_context(request, title="Update Individual by xlsx", form=UpdateByXlsxStage1Form())
             return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
 
         context = self.get_common_context(
             request,
             title="Update Individual by xlsx",
             form=UpdateByXlsxStage2Form(
-                xlsx_columns=updater.columns_names,
-                initial={"xlsx_update_file": xlsx_update_file},
+                xlsx_columns=updater.columns_names, initial={"xlsx_update_file": xlsx_update_file}
             ),
         )
         return TemplateResponse(request, "admin/household/individual/xlsx_update_stage2.html", context)
@@ -565,10 +556,6 @@ class XlsxUpdateFileAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                     no_match_report_rows=report[IndividualXlsxUpdate.STATUS_NO_MATCH],
                     xlsx_update_file=xlsx_update_file.id,
                 )
-                return TemplateResponse(
-                    request,
-                    "admin/household/individual/xlsx_update_stage3.html",
-                    context,
-                )
+                return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
         return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
