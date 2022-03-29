@@ -65,6 +65,7 @@ export function UniversalTable<T, K>({
     if (initialVariables) {
       setPage(0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialVariables]);
   if (error) {
     //  eslint-disable-next-line no-console
