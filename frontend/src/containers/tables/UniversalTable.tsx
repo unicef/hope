@@ -61,12 +61,9 @@ export function UniversalTable<T, K>({
   });
 
   useDeepCompareEffect(() => {
-    console.log('useEffect1: ', initialVariables, page);
-    console.log('useEffect2: ', JSON.parse(JSON.stringify(initialVariables)));
     if (initialVariables) {
       setPage(0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialVariables]);
   if (error) {
     //  eslint-disable-next-line no-console
