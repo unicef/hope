@@ -22,7 +22,7 @@ import {
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
-import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 
@@ -48,6 +48,7 @@ export function NeedsAdjudicationDetails({
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const history = useHistory();
+  const confirm = useConfirmation();
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {
@@ -138,29 +139,26 @@ export function NeedsAdjudicationDetails({
               </Button>
             )}
             {isEditable && canApprove && (
-              <ConfirmationDialog
-                title={t('Confirmation')}
-                content={confirmationText}
+              <Button
+                disabled={isApproveDisabled()}
+                onClick={() =>
+                  confirm({
+                    content: confirmationText,
+                  }).then(() => {
+                    approve({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        selectedIndividualId: selectedDuplicate,
+                      },
+                    });
+                    setIsEditMode(false);
+                  })
+                }
+                variant='outlined'
+                color='primary'
               >
-                {(confirm) => (
-                  <Button
-                    disabled={isApproveDisabled()}
-                    onClick={confirm(() => {
-                      approve({
-                        variables: {
-                          grievanceTicketId: ticket.id,
-                          selectedIndividualId: selectedDuplicate,
-                        },
-                      });
-                      setIsEditMode(false);
-                    })}
-                    variant='outlined'
-                    color='primary'
-                  >
-                    {t('Mark Duplicate')}
-                  </Button>
-                )}
-              </ConfirmationDialog>
+                {t('Mark Duplicate')}
+              </Button>
             )}
           </Box>
         </Box>

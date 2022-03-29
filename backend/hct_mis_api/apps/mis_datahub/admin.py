@@ -11,10 +11,10 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button, href
-from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
+from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import TextFieldFilter
+from adminfilters.filters import ValueFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -40,7 +40,7 @@ from hct_mis_api.apps.utils.security import is_root
 logger = logging.getLogger(__name__)
 
 
-class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):
+class HUBAdminMixin(ExtraButtonsMixin, HOPEModelAdminBase):
     @button(label="Truncate", css_class="btn-danger", permission=is_root)
     def truncate(self, request):
         if not request.headers.get("x-root-access") == "XMLHttpRequest":
@@ -62,7 +62,7 @@ class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):
                 cursor = conn.cursor()
                 cursor.execute(f"TRUNCATE TABLE '{self.model._meta.db_table}' RESTART IDENTITY CASCADE")
         else:
-            return _confirm_action(
+            return confirm_action(
                 self,
                 request,
                 self.truncate,
@@ -74,19 +74,16 @@ class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):
                                        """
                 ),
                 "Successfully executed",
-                title="Truncate table",
             )
 
 
 @admin.register(Household)
 class HouseholdAdmin(HUBAdminMixin):
-    list_filter = (
-        ("session__id", TextFieldFilter.factory(title="Session Id")),
-        ("business_area", TextFieldFilter.factory(title="Business Area")),
-    )
+    list_filter = (("session__id", ValueFilter), BusinessAreaFilter)
+
     raw_id_fields = ("session",)
 
-    @href()
+    @link()
     def members_sent_to_the_hub(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -109,14 +106,14 @@ class IndividualAdmin(HUBAdminMixin):
     list_display = ("session", "unicef_id", "mis_id", "household_mis_id", "family_name", "given_name")
     list_filter = (
         BusinessAreaFilter,
-        ("session__id", TextFieldFilter.factory(title="Session Id")),
-        ("unicef_id", TextFieldFilter.factory(title="Unicef Id")),
-        ("mis_id", TextFieldFilter.factory(title="MIS Id")),
-        ("household_mis_id", TextFieldFilter.factory(title="Household MIS Id")),
+        ("session__id", ValueFilter),
+        ("unicef_id", ValueFilter),
+        ("mis_id", ValueFilter),
+        ("household_mis_id", ValueFilter),
     )
     raw_id_fields = ("session",)
 
-    @href()
+    @link()
     def household(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -136,7 +133,7 @@ class FundsCommitmentAdmin(HUBAdminMixin):
 class DownPaymentAdmin(HUBAdminMixin):
     filters = (
         BusinessAreaFilter,
-        ("rec_serial_number", TextFieldFilter.factory(title="Rec Serial number")),
+        ("rec_serial_number", ValueFilter),
         "create_date",
         "mis_sync_flag",
         "ca_sync_flag",
@@ -145,7 +142,7 @@ class DownPaymentAdmin(HUBAdminMixin):
 
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(HUBAdminMixin):
-    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")),)
+    list_filter = (("session__id", ValueFilter),)
 
 
 @admin.register(Session)
@@ -159,7 +156,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
     ordering = ("-timestamp",)
     search_fields = ("id",)
 
-    @href()
+    @link()
     def target_population(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -168,7 +165,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         else:
             button.visible = False
 
-    @href()
+    @link()
     def individuals(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -177,7 +174,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         else:
             button.visible = False
 
-    @href()
+    @link()
     def households(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -186,7 +183,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
         else:
             button.visible = False
 
-    @button(permission="user.can_inspect")
+    @button(permission="account.can_inspect")
     def inspect(self, request, pk):
         context = self.get_common_context(request, pk)
         obj = context["original"]
@@ -232,7 +229,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
             #     hh = hope_models.Household.objects.filter(id__in=Household.)
             #     m.objects(request).update(last_sync_at=None)
         else:
-            return _confirm_action(
+            return confirm_action(
                 self,
                 request,
                 self.reset_sync_date,
@@ -243,14 +240,14 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
 
 @admin.register(TargetPopulationEntry)
 class TargetPopulationEntryAdmin(HUBAdminMixin):
-    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")),)
+    list_filter = (("session__id", ValueFilter),)
     raw_id_fields = ("session",)
 
 
 @admin.register(TargetPopulation)
 class TargetPopulationAdmin(HUBAdminMixin):
     # list_display = ('name', )
-    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")), BusinessAreaFilter)
+    list_filter = (("session__id", ValueFilter), BusinessAreaFilter)
     raw_id_fields = ("session",)
     search_fields = ("name",)
 
@@ -258,7 +255,7 @@ class TargetPopulationAdmin(HUBAdminMixin):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
         return queryset, use_distinct
 
-    @href()
+    @link()
     def individuals(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -267,7 +264,7 @@ class TargetPopulationAdmin(HUBAdminMixin):
         else:
             button.visible = False
 
-    @href()
+    @link()
     def households(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -279,7 +276,7 @@ class TargetPopulationAdmin(HUBAdminMixin):
 
 @admin.register(Program)
 class ProgramAdmin(HUBAdminMixin):
-    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")), BusinessAreaFilter)
+    list_filter = (("session__id", ValueFilter), BusinessAreaFilter)
     search_fields = ("name",)
     raw_id_fields = ("session",)
 
@@ -287,5 +284,5 @@ class ProgramAdmin(HUBAdminMixin):
 @admin.register(Document)
 class DocumentAdmin(HUBAdminMixin):
     list_display = ("type", "number")
-    list_filter = (("session__id", TextFieldFilter.factory(title="Session Id")), BusinessAreaFilter)
+    list_filter = (("session__id", ValueFilter), BusinessAreaFilter)
     raw_id_fields = ("session",)

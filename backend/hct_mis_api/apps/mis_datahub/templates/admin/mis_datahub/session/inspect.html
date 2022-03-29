@@ -1,4 +1,4 @@
-{% extends "admin_extra_urls/action_page.html" %}
+{% extends "admin_extra_buttons/action_page.html" %}
 {% load i18n admin_urls static admin_modify %}
 {% block extrahead %}
     <style>
@@ -49,7 +49,7 @@
                 <th>{{ info.meta.verbose_name_plural|title }}</th>
                 <td>{{ info.count }}</td>
                 <td><a
-                        href="{% url info.meta|admin_urlname:'changelist' %}?session|id={{ original.pk }}">visit</a>
+                        href="{% url info.meta|admin_urlname:'changelist' %}?session__id__exact={{ original.pk }}">visit</a>
                 </td>
             </tr>
         {% endfor %}
