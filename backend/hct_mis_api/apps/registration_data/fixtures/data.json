@@ -1,0 +1,24 @@
+[
+{
+  "model": "registration_data.registrationdataimport",
+  "pk": "04992dce-154b-4938-8e47-74341541ebcf",
+  "fields": {
+    "created_at": "2022-03-30T09:22:14.870",
+    "updated_at": "2022-03-30T09:54:07.851",
+    "version": 1648633101166539,
+    "name": "test",
+    "status": "MERGED",
+    "import_date": "2022-03-30T09:22:14.870",
+    "imported_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+    "data_source": "XLS",
+    "number_of_individuals": 6,
+    "number_of_households": 2,
+    "datahub_id": "c57848bf-a5df-47da-81a3-f30b6b29ae1a",
+    "error_message": "",
+    "sentry_id": "",
+    "pull_pictures": true,
+    "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+    "screen_beneficiary": false
+  }
+}
+]
