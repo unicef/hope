@@ -27,6 +27,8 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
+from hct_mis_api.apps.registration_datahub.models import Record
+
 
 @admin.register(RegistrationDataImportDatahub)
 class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
@@ -203,3 +205,8 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
         "registration_data_import_id",
     )
     raw_id_fields = ("registration_data_import", "imported_household")
+
+
+@admin.register(Record)
+class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+    list_display = ("id", "registration", "timestamp", "ignored")
