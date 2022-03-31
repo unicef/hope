@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.payment.models import PaymentRecord as InternalPaymentRecord
 from hct_mis_api.apps.utils.models import AbstractSession
@@ -166,12 +166,12 @@ class PaymentRecord(SessionModel):
 class ServiceProvider(SessionModel):
     business_area = models.CharField(max_length=20)
     ca_id = models.CharField(max_length=255)
-    full_name = models.CharField(max_length=255)
-    short_name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=255, null=True)
+    short_name = models.CharField(max_length=100, null=True)
     country = models.CharField(
         max_length=3,
     )
-    vision_id = models.CharField(max_length=255)
+    vision_id = models.CharField(max_length=255, null=True)
 
     class Meta:
         unique_together = ("session", "ca_id")

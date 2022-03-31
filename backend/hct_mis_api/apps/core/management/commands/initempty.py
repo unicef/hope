@@ -9,6 +9,8 @@ from hct_mis_api.apps.core.management.sql import sql_drop_tables
 class Command(BaseCommand):
     def handle(self, *args, **options):
         for connection_name in connections:
+            if connection_name == "read_only":
+                continue
             connection = connections[connection_name]
             with connection.cursor() as cursor:
                 sql = sql_drop_tables(connection)
@@ -16,7 +18,8 @@ class Command(BaseCommand):
                     continue
                 print(sql)
                 cursor.execute(sql)
-        subprocess.call(["./create_schemas.sh"])
+
+        # subprocess.call(["./create_schemas.sh"])
         call_command("migratealldb")
         call_command("loadbusinessareas")
         # call_command("loadflexfieldsattributes")

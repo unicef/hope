@@ -12,6 +12,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -69,21 +70,21 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
         call_command("loadcountries")
-        self.generate_document_types_for_all_countries()
+        cls.generate_document_types_for_all_countries()
 
-        self.user = UserFactory.create()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="dffgh565556")
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="fggtyjyj")
+        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="dffgh565556")
+        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="fggtyjyj")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -102,7 +103,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_one.programs.add(program_one)
         household_two.programs.add(program_two)
 
-        self.individuals_to_create = [
+        cls.individuals_to_create = [
             {
                 "id": "b6ffb227-a2dd-4103-be46-0c9ebe9f001a",
                 "full_name": "Benjamin Butler",
@@ -165,29 +166,29 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             },
         ]
 
-        self.individuals = [
+        cls.individuals = [
             IndividualFactory(household=household_one if index % 2 else household_two, **individual)
-            for index, individual in enumerate(self.individuals_to_create)
+            for index, individual in enumerate(cls.individuals_to_create)
         ]
-        household_one.head_of_household = self.individuals[0]
-        household_two.head_of_household = self.individuals[1]
+        household_one.head_of_household = cls.individuals[0]
+        household_two.head_of_household = cls.individuals[1]
         household_one.save()
         household_two.save()
-        self.household_one = household_one
+        cls.household_one = household_one
 
         national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
-        self.national_id = DocumentFactory.create(
+        cls.national_id = DocumentFactory.create(
             id="d367e431-b807-4c1f-a811-ef2e0d217cc4",
             type=national_id_type,
             document_number="789-789-645",
-            individual=self.individuals[0],
+            individual=cls.individuals[0],
         )
 
         unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
-        self.identity = IndividualIdentityFactory.create(
+        cls.identity = IndividualIdentityFactory.create(
             id=1,
             agency=unhcr_agency,
-            individual=self.individuals[0],
+            individual=cls.individuals[0],
             number="1111",
         )
 
@@ -232,7 +233,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                                         "country": "POL",
                                         "number": "123-123-UX-321",
-                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                        "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                     }
                                 ],
                                 "identities": [
@@ -291,7 +292,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "type": IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
                                         "country": "POL",
                                         "number": "321-321-XU-987",
-                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                        "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                     }
                                 ],
                                 "documentsToEdit": [
@@ -300,7 +301,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                                         "country": "POL",
                                         "number": "321-321-XU-123",
-                                        "photo": SimpleUploadedFile(name="test.jpg", content="".encode("utf-8")),
+                                        "photo": SimpleUploadedFile(name="test.jpg", content=b""),
                                     }
                                 ],
                                 "identities": [
@@ -398,6 +399,42 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "country": "AFG",
                                 "size": 4,
                             },
+                        }
+                    }
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_delete_household_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        variables = {
+            "input": {
+                "description": "Test",
+                "businessArea": "afghanistan",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "issueType": 17,
+                "category": 2,
+                "consent": True,
+                "language": "PL",
+                "extras": {
+                    "issueType": {
+                        "householdDeleteIssueTypeExtras": {
+                            "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
                         }
                     }
                 },

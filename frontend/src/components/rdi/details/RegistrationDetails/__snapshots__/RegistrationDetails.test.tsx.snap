@@ -1,0 +1,434 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/rdi/details/RegistrationDetails should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="sc-iwsKbI hbxXQf"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        Import Details
+      </h6>
+    </div>
+    <div
+      class="sc-bxivhb ehCvPb"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div
+                class="MuiBox-root MuiBox-root-1"
+              >
+                <div>
+                  <span
+                    class="sc-bwzfXH eoWrid"
+                    color="textSecondary"
+                  >
+                    status
+                  </span>
+                  <div>
+                    <div
+                      class="sc-gZMcBi exawVs"
+                    >
+                      <div
+                        class="sc-ifAKCX ilSJSk"
+                        data-cy="status-container"
+                      >
+                        MERGED
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div>
+                <span
+                  class="sc-bwzfXH eoWrid"
+                  color="textSecondary"
+                >
+                  Source of Data
+                </span>
+                <div>
+                  <span
+                    class="sc-htpNat cwQQYq"
+                    color="textSecondary"
+                  >
+                    XLS
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div>
+                <span
+                  class="sc-bwzfXH eoWrid"
+                  color="textSecondary"
+                >
+                  Import Date
+                </span>
+                <div>
+                  <span
+                    class="sc-htpNat cwQQYq"
+                    color="textSecondary"
+                  >
+                    <time
+                      datetime="1644234352336"
+                    >
+                      7 Feb 2022 11:45 AM
+                    </time>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div>
+                <span
+                  class="sc-bwzfXH eoWrid"
+                  color="textSecondary"
+                >
+                  Imported by
+                </span>
+                <div>
+                  <span
+                    class="sc-htpNat cwQQYq"
+                    color="textSecondary"
+                  >
+                    Maciej Szewczyk
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-container"
+          >
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div
+                class="sc-gqjmRU hHtKwy"
+              >
+                <div
+                  data-cy="labelized-field-container-households"
+                >
+                  <span
+                    class="sc-bwzfXH eoWrid"
+                    color="textSecondary"
+                  >
+                    Total Number of Households
+                  </span>
+                  <div>
+                    <div
+                      class="sc-VigVT cfztFP"
+                    >
+                      2
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            >
+              <div
+                class="sc-gqjmRU hHtKwy"
+              >
+                <div
+                  data-cy="labelized-field-container-individuals"
+                >
+                  <span
+                    class="sc-bwzfXH eoWrid"
+                    color="textSecondary"
+                  >
+                    Total Number of Individuals
+                  </span>
+                  <div>
+                    <div
+                      class="sc-VigVT cfztFP"
+                    >
+                      6
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column"
+          >
+            <div
+              class="sc-EHOje qyMrM"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-container"
+              >
+                <div
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+                >
+                  <div
+                    class="MuiBox-root MuiBox-root-2"
+                  >
+                    <span
+                      class="sc-dnqmqq glXCpd"
+                      color="textSecondary"
+                    >
+                      Within Batch
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9"
+                >
+                  <div
+                    class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column"
+                  >
+                    <div
+                      class="MuiGrid-root MuiGrid-container"
+                    >
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          <span
+                            class="sc-htoDjs bVWJue"
+                          >
+                            Unique
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-bZQynM ejWhNC"
+                        >
+                          66.67
+                          %
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          4
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      class="MuiGrid-root MuiGrid-container"
+                    >
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          <span
+                            class="sc-htoDjs bVWJue"
+                          >
+                            Duplicates
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-bZQynM ejWhNC"
+                        >
+                          33.33
+                          %
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          2
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="sc-EHOje qyMrM"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-container"
+              >
+                <div
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+                >
+                  <div
+                    class="MuiBox-root MuiBox-root-3"
+                  >
+                    <span
+                      class="sc-dnqmqq glXCpd"
+                      color="textSecondary"
+                    >
+                      In Population
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9"
+                >
+                  <div
+                    class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column"
+                  >
+                    <div
+                      class="MuiGrid-root MuiGrid-container"
+                    >
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          <span
+                            class="sc-htoDjs bVWJue"
+                          >
+                            Unique
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-bZQynM ejWhNC"
+                        >
+                          100.00
+                          %
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          6
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      class="MuiGrid-root MuiGrid-container"
+                    >
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          <span
+                            class="sc-htoDjs bVWJue"
+                          >
+                            Duplicates
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-bZQynM ejWhNC"
+                        >
+                          0.00
+                          %
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          0
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      class="MuiGrid-root MuiGrid-container"
+                    >
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          <span
+                            class="sc-htoDjs bVWJue"
+                          >
+                            Need Adjudication
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-bZQynM ejWhNC"
+                        >
+                          0.00
+                          %
+                        </span>
+                      </div>
+                      <div
+                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+                      >
+                        <span
+                          class="sc-gzVnrw iPGGfu"
+                        >
+                          0
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -1,9 +1,15 @@
+import { TargetPopulationStatus } from '../__generated__/graphql';
+
 export const TARGETING_STATES = {
   NONE: 'None',
-  DRAFT: 'Open',
-  LOCKED: 'Locked',
-  READY_FOR_CASH_ASSIST: 'Ready For Cash Assist',
-  PROCESSING: 'Processing',
+  [TargetPopulationStatus.Draft]: 'Open',
+  [TargetPopulationStatus.Locked]: 'Locked',
+  [TargetPopulationStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
+  [TargetPopulationStatus.Processing]: 'Processing',
+  [TargetPopulationStatus.SteficonWait]: 'Steficon Wait',
+  [TargetPopulationStatus.SteficonRun]: 'Steficon Run',
+  [TargetPopulationStatus.SteficonCompleted]: 'Steficon Completed',
+  [TargetPopulationStatus.SteficonError]: 'Steficon Error',
 };
 
 export const GRIEVANCE_TICKET_STATES = {
@@ -32,6 +38,7 @@ export const GRIEVANCE_ISSUE_TYPES = {
   EDIT_INDIVIDUAL: '14',
   DELETE_INDIVIDUAL: '15',
   ADD_INDIVIDUAL: '16',
+  DELETE_HOUSEHOLD: '17',
 };
 
 export const REPORT_TYPES = {

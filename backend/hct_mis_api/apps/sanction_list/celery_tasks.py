@@ -10,7 +10,9 @@ def sync_sanction_list_task():
     logger.info("sync_sanction_list_task start")
 
     try:
-        from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+        from hct_mis_api.apps.sanction_list.tasks.load_xml import (
+            LoadSanctionListXMLTask,
+        )
 
         LoadSanctionListXMLTask().execute()
     except Exception as e:

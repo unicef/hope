@@ -1,6 +1,17 @@
-import graphene
-from django.db.models import Case, IntegerField, Q, Sum, Value, When, Count
+from django.db.models import (
+    Case,
+    Count,
+    DecimalField,
+    FloatField,
+    IntegerField,
+    Q,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce, Lower
+
+import graphene
 from django_filters import (
     CharFilter,
     DateFilter,
@@ -12,22 +23,22 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
-    hopePermissionClass,
     Permissions,
     hopeOneOfPermissionClass,
-    ALL_GRIEVANCES_CREATE_MODIFY,
+    hopePermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    to_choice_object,
     CustomOrderingFilter,
+    chart_filters_decoder,
     chart_map_choices,
     chart_permission_decorator,
-    chart_filters_decoder,
+    to_choice_object,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
@@ -40,7 +51,7 @@ class ProgramFilter(FilterSet):
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
     sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
-    number_of_households = IntegerRangeFilter(field_name="households_count")
+    number_of_households = IntegerRangeFilter(field_name="total_hh_count")
     budget = DecimalRangeFilter(field_name="budget")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
@@ -62,21 +73,21 @@ class ProgramFilter(FilterSet):
         fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
     )
 
-    @property
-    def qs(self):
-        return super().qs.annotate(
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(
             total_hh_count=Count(
                 "cash_plans__payment_records__household",
                 filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
                 distinct=True,
             )
         )
+        return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(name__startswith=value)
+            q_obj |= Q(name__istartswith=value)
         return qs.filter(q_obj)
 
 
@@ -113,7 +124,7 @@ class CashPlanFilter(FilterSet):
     search = CharFilter(method="search_filter")
     delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE)
     verification_status = MultipleChoiceFilter(
-        field_name="verification_status", choices=CashPlanPaymentVerification.STATUS_CHOICES
+        field_name="cash_plan_payment_verification_summary__status", choices=CashPlanPaymentVerification.STATUS_CHOICES
     )
     business_area = CharFilter(
         field_name="business_area__slug",
@@ -136,7 +147,7 @@ class CashPlanFilter(FilterSet):
             "status",
             "total_number_of_hh",
             "total_entitled_quantity",
-            "verification_status",
+            ("cash_plan_payment_verification_summary__status", "verification_status"),
             "total_persons_covered",
             "total_delivered_quantity",
             "total_undelivered_quantity",
@@ -153,16 +164,15 @@ class CashPlanFilter(FilterSet):
         )
     )
 
-    @property
-    def qs(self):
-        return super().qs.annotate(total_number_of_hh=Count("payment_records"))
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(total_number_of_hh=Count("payment_records"))
+        return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__startswith=value)
-            q_obj |= Q(ca_id__startswith=value)
+            q_obj |= Q(ca_id__istartswith=value)
         return qs.filter(q_obj)
 
 
@@ -177,6 +187,11 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     delivery_type = graphene.String()
     total_number_of_households = graphene.Int()
     currency = graphene.String(source="currency")
+    total_delivered_quantity = graphene.Float()
+    total_entitled_quantity = graphene.Float()
+    total_undelivered_quantity = graphene.Float()
+    can_create_payment_verification_plan = graphene.Boolean()
+    available_payment_records_count = graphene.Int()
 
     class Meta:
         model = CashPlan
@@ -185,6 +200,14 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_number_of_households(self, info, **kwargs):
         return self.total_number_of_households
+
+    def resolve_can_create_payment_verification_plan(self, info, **kwargs):
+        return self.can_create_payment_verification_plan
+
+    def resolve_available_payment_records_count(self, info, **kwargs):
+        return self.payment_records.filter(
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+        ).count()
 
 
 class ChartProgramFilter(FilterSet):
@@ -255,7 +278,9 @@ class Query(graphene.ObjectType):
                     output_field=IntegerField(),
                 )
             )
-            .annotate(households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0))
+            .annotate(
+                households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
+            )
             .order_by("custom_order", "start_date")
         )
 
@@ -277,9 +302,18 @@ class Query(graphene.ObjectType):
     def resolve_all_cash_plans(self, info, **kwargs):
         return CashPlan.objects.annotate(
             custom_order=Case(
-                When(verification_status=CashPlanPaymentVerification.STATUS_ACTIVE, then=Value(1)),
-                When(verification_status=CashPlanPaymentVerification.STATUS_PENDING, then=Value(2)),
-                When(verification_status=CashPlanPaymentVerification.STATUS_FINISHED, then=Value(3)),
+                When(
+                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_ACTIVE,
+                    then=Value(1),
+                ),
+                When(
+                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_PENDING,
+                    then=Value(2),
+                ),
+                When(
+                    cash_plan_payment_verification_summary__status=CashPlanPaymentVerification.STATUS_FINISHED,
+                    then=Value(3),
+                ),
                 output_field=IntegerField(),
             )
         ).order_by("-updated_at", "custom_order")
@@ -326,12 +360,16 @@ class Query(graphene.ObjectType):
             .order_by("delivery_date__month")
             .annotate(
                 total_delivered_cash=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
+                    output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_delivered_voucher=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
+                    output_field=DecimalField(),
                 )
             )
         )

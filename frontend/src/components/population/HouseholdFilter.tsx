@@ -14,9 +14,9 @@ import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
-import { ContainerWithBorder } from '../ContainerWithBorder';
-import { FieldLabel } from '../FieldLabel';
-import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
+import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { FieldLabel } from '../core/FieldLabel';
+import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -141,7 +141,7 @@ export function HouseholdFilters({
           </StyledFormControl>
         </Grid>
         <Grid item>
-          <AdminAreasAutocomplete
+          <AdminAreaAutocomplete
             onFilterChange={onFilterChange}
             name='adminArea'
           />

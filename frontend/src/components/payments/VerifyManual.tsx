@@ -95,6 +95,7 @@ export function VerifyManual({
             onClose={() => setVerifyManualDialogOpen(false)}
             scroll='paper'
             aria-labelledby='form-dialog-title'
+            maxWidth='md'
           >
             <DialogTitleWrapper>
               <DialogTitle id='scroll-dialog-title'>

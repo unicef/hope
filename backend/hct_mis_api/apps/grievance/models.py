@@ -2,11 +2,10 @@ import logging
 from itertools import chain
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _
+from django.db.models import JSONField, Q
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
@@ -19,17 +18,18 @@ logger = logging.getLogger(__name__)
 class GrievanceTicketManager(models.Manager):
     def belong_household(self, household):
         individuals = household.individuals.values_list("id", flat=True)
-        # models = [TicketReferralDetails, TicketNegativeFeedbackDetails, TicketPositiveFeedbackDetails,
-        #           TicketPaymentVerificationDetails, TicketNeedsAdjudicationDetails, TicketSystemFlaggingDetails,
-        #           TicketDeleteIndividualDetails, TicketAddIndividualDetails, TicketIndividualDataUpdateDetails,
-        #           TicketHouseholdDataUpdateDetails, TicketSensitiveDetails, TicketComplaintDetails, TicketNote]
         return chain(
             (TicketReferralDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
             (TicketNegativeFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
             (TicketPositiveFeedbackDetails.objects.filter(Q(individual__in=individuals) | Q(household=household))),
-            (TicketNeedsAdjudicationDetails.objects.filter(selected_individual__in=individuals)),
+            (
+                TicketNeedsAdjudicationDetails.objects.filter(
+                    Q(selected_individual__in=individuals) | Q(golden_records_individual__in=individuals)
+                )
+            ).distinct(),
             (TicketSystemFlaggingDetails.objects.filter(golden_records_individual__in=individuals)),
             (TicketDeleteIndividualDetails.objects.filter(individual__in=individuals)),
+            (TicketDeleteHouseholdDetails.objects.filter(household=household)),
             (TicketAddIndividualDetails.objects.filter(household=household)),
             (TicketIndividualDataUpdateDetails.objects.filter(individual__in=individuals)),
             (TicketHouseholdDataUpdateDetails.objects.filter(household=household)),
@@ -119,56 +119,58 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE = 14
     ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL = 15
     ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL = 16
+    ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD = 17
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
+            ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
             ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: _("Household Data Update"),
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: _("Individual Data Update"),
-            ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
+            ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: _("Withdraw Household"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
-            ISSUE_TYPE_DATA_BREACH: _("Data breach"),
             ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _("Bribery, corruption or kickback"),
+            ISSUE_TYPE_DATA_BREACH: _("Data breach"),
+            ISSUE_TYPE_CONFLICT_OF_INTEREST: _("Conflict of interest"),
             ISSUE_TYPE_FRAUD_FORGERY: _("Fraud and forgery"),
             ISSUE_TYPE_FRAUD_MISUSE: _("Fraud involving misuse of programme funds by third party"),
+            ISSUE_TYPE_GROSS_MISMANAGEMENT: _("Gross mismanagement"),
             ISSUE_TYPE_HARASSMENT: _("Harassment and abuse of authority"),
             ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: _("Inappropriate staff conduct"),
-            ISSUE_TYPE_UNAUTHORIZED_USE: _("Unauthorized use, misuse or waste of UNICEF property or funds"),
-            ISSUE_TYPE_CONFLICT_OF_INTEREST: _("Conflict of interest"),
-            ISSUE_TYPE_GROSS_MISMANAGEMENT: _("Gross mismanagement"),
+            ISSUE_TYPE_MISCELLANEOUS: _("Miscellaneous"),
             ISSUE_TYPE_PERSONAL_DISPUTES: _("Personal disputes"),
             ISSUE_TYPE_SEXUAL_HARASSMENT: _("Sexual harassment and sexual exploitation"),
-            ISSUE_TYPE_MISCELLANEOUS: _("Miscellaneous"),
+            ISSUE_TYPE_UNAUTHORIZED_USE: _("Unauthorized use, misuse or waste of UNICEF property or funds"),
         },
     }
     ALL_ISSUE_TYPES = [choice for choices_group in ISSUE_TYPES_CHOICES.values() for choice in choices_group.items()]
     STATUS_CHOICES = (
         (STATUS_NEW, _("New")),
         (STATUS_ASSIGNED, _("Assigned")),
+        (STATUS_CLOSED, _("Closed")),
+        (STATUS_FOR_APPROVAL, _("For Approval")),
         (STATUS_IN_PROGRESS, _("In Progress")),
         (STATUS_ON_HOLD, _("On Hold")),
-        (STATUS_FOR_APPROVAL, _("For Approval")),
-        (STATUS_CLOSED, _("Closed")),
     )
 
     CATEGORY_CHOICES = (
-        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
         (CATEGORY_DATA_CHANGE, _("Data Change")),
-        (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
         (CATEGORY_GRIEVANCE_COMPLAINT, _("Grievance Complaint")),
-        (CATEGORY_NEGATIVE_FEEDBACK, _("Negative Feedback")),
-        (CATEGORY_REFERRAL, _("Referral")),
-        (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
         (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
+        (CATEGORY_NEGATIVE_FEEDBACK, _("Negative Feedback")),
+        (CATEGORY_PAYMENT_VERIFICATION, _("Payment Verification")),
+        (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
+        (CATEGORY_REFERRAL, _("Referral")),
+        (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
     MANUAL_CATEGORIES = (
         CATEGORY_DATA_CHANGE,
-        CATEGORY_SENSITIVE_GRIEVANCE,
         CATEGORY_GRIEVANCE_COMPLAINT,
         CATEGORY_NEGATIVE_FEEDBACK,
-        CATEGORY_REFERRAL,
         CATEGORY_POSITIVE_FEEDBACK,
+        CATEGORY_REFERRAL,
+        CATEGORY_SENSITIVE_GRIEVANCE,
     )
 
     SEARCH_TICKET_TYPES_LOOKUPS = {
@@ -194,7 +196,10 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "individual": "individual",
             "household": "household",
         },
-        "individual_data_update_ticket_details": {"individual": "individual", "household": "individual__household"},
+        "individual_data_update_ticket_details": {
+            "individual": "individual",
+            "household": "individual__household",
+        },
         "add_individual_ticket_details": {
             "household": "household",
         },
@@ -235,6 +240,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         "add_individual_ticket_details": ("household",),
         "household_data_update_ticket_details": ("household",),
         "delete_individual_ticket_details": ("individual",),
+        "delete_household_ticket_details": ("household",),
         "system_flagging_ticket_details": (
             {"individual": "golden_records_individual"},
             {"household": "golden_records_individual.household"},
@@ -251,6 +257,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: "individual_data_update_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: "add_individual_ticket_details",
             ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: "delete_individual_ticket_details",
+            ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: "delete_household_ticket_details",
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_DATA_BREACH: "sensitive_ticket_details",
@@ -320,10 +327,15 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     consent = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
     linked_tickets = models.ManyToManyField(
-        to="GrievanceTicket", through="GrievanceTicketThrough", related_name="linked_tickets_related"
+        to="GrievanceTicket",
+        through="GrievanceTicketThrough",
+        related_name="linked_tickets_related",
     )
     registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport", null=True, blank=True, on_delete=models.CASCADE
+        "registration_data.RegistrationDataImport",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
     )
     unicef_id = models.CharField(max_length=250, blank=True, default="")
     extras = JSONField(blank=True, default=dict)
@@ -396,10 +408,14 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):
     main_ticket = models.ForeignKey(
-        "GrievanceTicket", on_delete=models.CASCADE, related_name="grievance_tickets_through_main"
+        "GrievanceTicket",
+        on_delete=models.CASCADE,
+        related_name="grievance_tickets_through_main",
     )
     linked_ticket = models.ForeignKey(
-        "GrievanceTicket", on_delete=models.CASCADE, related_name="grievance_tickets_through_linked"
+        "GrievanceTicket",
+        on_delete=models.CASCADE,
+        related_name="grievance_tickets_through_linked",
     )
 
 
@@ -408,7 +424,11 @@ class TicketNote(TimeStampedUUIDModel):
         verbose_name=_("Description"),
         help_text=_("The content of the customers query."),
     )
-    ticket = models.ForeignKey("grievance.GrievanceTicket", related_name="ticket_notes", on_delete=models.CASCADE)
+    ticket = models.ForeignKey(
+        "grievance.GrievanceTicket",
+        related_name="ticket_notes",
+        on_delete=models.CASCADE,
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -421,7 +441,9 @@ class TicketNote(TimeStampedUUIDModel):
 
 class TicketComplaintDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="complaint_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="complaint_ticket_details",
+        on_delete=models.CASCADE,
     )
     payment_record = models.ForeignKey(
         "payment.PaymentRecord",
@@ -445,7 +467,9 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
 
 class TicketSensitiveDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="sensitive_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="sensitive_ticket_details",
+        on_delete=models.CASCADE,
     )
     payment_record = models.ForeignKey(
         "payment.PaymentRecord",
@@ -469,7 +493,9 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
 
 class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="household_data_update_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="household_data_update_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -482,7 +508,9 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
 
 class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="individual_data_update_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="individual_data_update_ticket_details",
+        on_delete=models.CASCADE,
     )
     individual = models.ForeignKey(
         "household.Individual",
@@ -500,7 +528,9 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
 
 class TicketAddIndividualDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="add_individual_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="add_individual_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -514,7 +544,9 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
 
 class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="delete_individual_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="delete_individual_ticket_details",
+        on_delete=models.CASCADE,
     )
     individual = models.ForeignKey(
         "household.Individual",
@@ -530,13 +562,31 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
         return self.individual.household
 
 
+class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="delete_household_ticket_details", on_delete=models.CASCADE
+    )
+    household = models.ForeignKey(
+        "household.Household",
+        related_name="delete_household_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    role_reassign_data = JSONField(default=dict)
+    approve_status = models.BooleanField(default=False)
+
+
 class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="system_flagging_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="system_flagging_ticket_details",
+        on_delete=models.CASCADE,
     )
     golden_records_individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
     sanction_list_individual = models.ForeignKey(
-        "sanction_list.SanctionListIndividual", related_name="+", on_delete=models.CASCADE
+        "sanction_list.SanctionListIndividual",
+        related_name="+",
+        on_delete=models.CASCADE,
     )
     approve_status = models.BooleanField(default=False)
     role_reassign_data = JSONField(default=dict)
@@ -544,7 +594,9 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
 
 class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="needs_adjudication_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="needs_adjudication_ticket_details",
+        on_delete=models.CASCADE,
     )
     golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
     possible_duplicate = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
@@ -563,7 +615,9 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="payment_verification_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="payment_verification_ticket_details",
+        on_delete=models.CASCADE,
     )
     payment_verifications = models.ManyToManyField("payment.PaymentVerification", related_name="ticket_details")
     payment_verification_status = models.CharField(
@@ -574,7 +628,9 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="positive_feedback_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="positive_feedback_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -592,7 +648,9 @@ class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
 
 class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="negative_feedback_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="negative_feedback_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -610,7 +668,9 @@ class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
 
 class TicketReferralDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="referral_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="referral_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",

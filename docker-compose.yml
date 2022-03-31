@@ -4,6 +4,8 @@ volumes:
   backend-data:
   db:
   db_ca:
+  db_mis:
+  db_erp:
   db_reg:
   data_es:
   data_es_test:
@@ -32,7 +34,6 @@ services:
 
   backend:
     stdin_open: true
-    tty: true
     image: unicef/hct-mis-backend
     env_file:
       - .env
@@ -51,9 +52,11 @@ services:
     command: "dev"
     depends_on:
       - db
-      - redis
       - cash_assist_datahub_db
+      - mis_datahub_db
+      - erp_datahub_db
       - registration_datahub_db
+      - redis
       - elasticsearch
       - elasticsearch_test
 
@@ -73,9 +76,11 @@ services:
     depends_on:
       - backend
       - db
-      - redis
       - cash_assist_datahub_db
+      - mis_datahub_db
+      - erp_datahub_db
       - registration_datahub_db
+      - redis
       - elasticsearch
       - elasticsearch_test
 
@@ -95,14 +100,16 @@ services:
     depends_on:
       - backend
       - db
-      - redis
       - cash_assist_datahub_db
+      - mis_datahub_db
+      - erp_datahub_db
       - registration_datahub_db
+      - redis
       - elasticsearch
       - elasticsearch_test
 
   celery-flower:
-    image: saxix/flower:1.6
+    image: johniak/flower:1.6
     command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
     environment:
       - FLOWER_AUTH_PROVIDER=""
@@ -115,23 +122,37 @@ services:
       - redis
 
   db:
-    image: mdillon/postgis:9.5-alpine
+    image: johniak/postgis:11-alpine
     volumes:
       - db:/var/lib/postgresql/data
-    env_file:
-      - .env
-
-  cash_assist_datahub_db:
-    image: mdillon/postgis:9.5-alpine
-    volumes:
-      - db_ca:/var/lib/postgresql/data
     env_file:
       - .env
     ports:
       - "5433:5432"
 
+  cash_assist_datahub_db:
+    image: johniak/postgis:11-alpine
+    volumes:
+      - db_ca:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  mis_datahub_db:
+    image: johniak/postgis:11-alpine
+    volumes:
+      - db_mis:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  erp_datahub_db:
+    image: johniak/postgis:11-alpine
+    volumes:
+      - db_erp:/var/lib/postgresql/data
+    env_file:
+      - .env
+
   registration_datahub_db:
-    image: mdillon/postgis:9.5-alpine
+    image: johniak/postgis:11-alpine
     volumes:
       - db_reg:/var/lib/postgresql/data
     env_file:
@@ -174,5 +195,3 @@ services:
         hard: -1
     volumes:
       - data_es_test:/usr/share/elasticsearch/data
-    ports:
-      - 9201:9200

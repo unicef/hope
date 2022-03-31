@@ -1,15 +1,12 @@
-from difflib import _mdiff
-
 import difflib
 import json
+from difflib import _mdiff
 
 from django import template
 from django.utils.safestring import mark_safe
+
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
-
-# from pygments.lexers.python import PythonLexer
-# from pygments.lexers.data import JsonLexer
 
 register = template.Library()
 
@@ -17,14 +14,14 @@ register = template.Library()
 class HtmlDiff(difflib.HtmlDiff):
     def _format_line(self, side, flag, linenum, text):
         try:
-            linenum = "%d" % linenum
-            id = ' id="%s%s"' % (self._prefix[side], linenum)
+            linenum = "{}".format(inenum)
+            id = f' id="{self._prefix[side]}{linenum}"'
         except TypeError:
             id = ""
         text = text.replace("&", "&amp;").replace(">", "&gt;").replace("<", "&lt;")
         text = text.replace(" ", "&nbsp;").rstrip()
 
-        return '<td class="diff_header lineno"%s>%s</td><td class="code" nowrap="nowrap">%s</td>' % (id, linenum, text)
+        return f'<td class="diff_header lineno"{id}>{linenum}</td><td class="code" nowrap="nowrap">{text}</td>'
 
     def make_table(self, fromlines, tolines, fromdesc="", todesc="", context=False, numlines=5):
         """Returns HTML table of side by side comparison with change highlights
@@ -56,7 +53,13 @@ class HtmlDiff(difflib.HtmlDiff):
             context_lines = numlines
         else:
             context_lines = None
-        diffs = _mdiff(fromlines, tolines, context_lines, linejunk=self._linejunk, charjunk=self._charjunk)
+        diffs = _mdiff(
+            fromlines,
+            tolines,
+            context_lines,
+            linejunk=self._linejunk,
+            charjunk=self._charjunk,
+        )
 
         # set up iterator to wrap lines that exceed desired width
         if self._wrapcolumn:
@@ -71,7 +74,7 @@ class HtmlDiff(difflib.HtmlDiff):
         )
 
         s = []
-        fmt = '            <tr><td class="diff_next"%s>%s</td>%s' + '<td class="diff_next">%s</td>%s</tr>\n'
+        fmt = '<tr><td class="diff_next"%s>%s</td>%s<td class="diff_next">%s</td>%s</tr>\n'
         for i in range(len(flaglist)):
             if flaglist[i] is None:
                 # mdiff yields None on separator lines skip the bogus ones
@@ -81,7 +84,7 @@ class HtmlDiff(difflib.HtmlDiff):
             else:
                 s.append(fmt % (next_id[i], next_href[i], fromlist[i], next_href[i], tolist[i]))
         if fromdesc or todesc:
-            header_row = "<thead><tr>%s%s%s%s</tr></thead>" % (
+            header_row = "<thead><tr>{}{}{}{}</tr></thead>".format(
                 '<th class="diff_next"><br /></th>',
                 '<th colspan="2" class="diff_header">%s</th>' % fromdesc,
                 '<th class="diff_next"><br /></th>',
@@ -137,35 +140,31 @@ def pygmentize(code):
 
 
 @register.filter
-def diff(state, panels="before,after"):
-    abefore, aafter = panels.split(",")
-    if abefore == "current":
-        left = state.rule.definition.split("\n")
-        left_label = f"Current ({state.rule.version})"
+def diff(commit, panels="before,after"):
+    left, right = panels.split(",")
+    rule = commit.rule
+    left_panel, right_panel = [], []
+    right_label = "No data"
+    if panels == "before,after":
+        left_label = f"No Data (First Commit"
+        if "definition" in commit.before:
+            left_label = f"Version before commit ({commit.prev.version})"
+            left_panel = commit.before["definition"].split("\n")
+
+        right_label = f"Version after commit ({commit.version})"
+        right_panel = commit.after["definition"].split("\n")
+    elif panels == "after,current":
+        left_label = f"Version  commit ({commit.version})"
+        left_panel = commit.after["definition"].split("\n")
+
+        right_label = f"Version current ({rule.version})"
+        right_panel = rule.definition.split("\n")
+    elif panels == "before,current":
+        left_label = f"Version  commit ({commit.version})"
+        left_panel = commit.after["definition"].split("\n")
+
+        right_label = f"Version current ({rule.version})"
+        right_panel = rule.definition.split("\n")
     else:
-        left = getattr(state, abefore)["definition"].split("\n")
-        left_label = (f"Version: {state.version} updated by {state.updated_by}",)
-
-    if aafter == "current":
-        right = state.rule.definition.split("\n")
-        right_label = f"Current ({state.rule.version})"
-    else:
-        right = getattr(state, aafter)["definition"].split("\n")
-        right_label = (f"Version: {state.version+1}",)
-
-    return mark_safe(HtmlDiff(wrapcolumn=80).make_table(left, right, left_label, right_label))
-
-
-#
-# @register.filter
-# def diff_to_current(state, headers=None):
-#     right = state.before["definition"].split("\n")
-#     left = state.rule.definition.split("\n")
-#     if not headers:
-#         headers = "Current code: Version {state.rule.version},Version: {state.version} code"
-#
-#     left_header, right_header = headers.split(",")
-#
-#     return mark_safe(
-#         difflib.HtmlDiff().make_table(left, right, left_header.format(state=state), right_header.format(state=state))
-#     )
+        raise Exception(f"Invalid value for panels: `{panels}`")
+    return mark_safe(HtmlDiff(wrapcolumn=80).make_table(left_panel, right_panel, left_label, right_label))

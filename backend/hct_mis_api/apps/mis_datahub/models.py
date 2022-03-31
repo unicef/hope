@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
@@ -81,7 +81,7 @@ class Individual(SessionModel):
         choices=MARITAL_STATUS_CHOICE,
     )
     phone_number = models.CharField(max_length=60, null=True)
-    pregnant = models.NullBooleanField()
+    pregnant = models.BooleanField(null=True)
     sanction_list_confirmed_match = models.BooleanField(default=False)
 
     class Meta:
@@ -157,8 +157,8 @@ class Program(SessionModel):
     business_area = models.CharField(
         max_length=20
     )  # TODO: potentially remove in future since base model has it already
-    ca_id = models.CharField(max_length=255)
-    ca_hash_id = models.CharField(max_length=255)
+    ca_id = models.CharField(max_length=255, null=True)
+    ca_hash_id = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255)
     scope = models.CharField(choices=SCOPE_CHOICE, max_length=50)
     start_date = models.DateTimeField()

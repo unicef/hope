@@ -28,6 +28,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.tests.test_exchange_rates import (
     EXCHANGE_RATES_WITH_HISTORICAL_DATA,
 )
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.program.models import CashPlan, Program
@@ -36,7 +37,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestPullDataFromDatahub(TestCase):
-    multi_db = True
+    databases = "__all__"
     program = None
     target_population = None
     dh_cash_plan1 = None
@@ -45,7 +46,7 @@ class TestPullDataFromDatahub(TestCase):
 
     @staticmethod
     def _pre_test_commands():
-        call_command("loadbusinessareas")
+        create_afghanistan()
         call_command("loadcountrycodes")
 
         # call_command("generatedocumenttypes")
@@ -251,9 +252,7 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.ca_id, self.dh_payment_record.ca_id)
         self.assertEqual(str(payment_record.ca_hash_id), str(self.dh_payment_record.ca_hash_id))
         self.assertEqual(str(payment_record.household_id), str(self.dh_payment_record.household_mis_id))
-        self.assertEqual(
-            str(payment_record.household.head_of_household_id), str(self.dh_payment_record.head_of_household_mis_id)
-        )
+        self.assertEqual(str(payment_record.head_of_household_id), str(self.dh_payment_record.head_of_household_mis_id))
         self.assertEqual(payment_record.full_name, self.dh_payment_record.full_name)
         self.assertEqual(payment_record.total_persons_covered, self.dh_payment_record.total_persons_covered)
         self.assertEqual(payment_record.distribution_modality, self.dh_payment_record.distribution_modality)
@@ -278,11 +277,12 @@ class TestPullDataFromDatahub(TestCase):
 
 
 class TestSessionsPullDataFromDatahub(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
+        call_command("loadcountrycodes")
 
     def test_multiple_sessions_same_ba_working(self):
         session1 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)

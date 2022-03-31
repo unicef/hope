@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function useInterval(callback, delay): void {
   const savedCallback = useRef();
@@ -21,4 +21,15 @@ export function useInterval(callback, delay): void {
       return () => clearInterval(id);
     }
   }, [delay]);
+}
+
+export function useLazyInterval(callback, delay): [(args) => void, () => void] {
+  const [intervalId, setIntervalId] = useState<NodeJS.Timeout>();
+  const startInterval = (args): void => {
+    setIntervalId(setInterval(()=>callback(args), delay));
+  };
+  const cancelInterval = (): void => {
+    clearInterval(intervalId);
+  };
+  return [startInterval, cancelInterval];
 }

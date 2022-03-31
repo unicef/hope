@@ -1,15 +1,16 @@
 from operator import itemgetter
-from unittest import TestCase
 
-from django.core.management import call_command
+from django.test import TestCase
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
 
 
 class TestKoboSaveValidatorsMethods(TestCase):
+    databases = ("default", "registration_datahub")
     VALID_JSON = [
         {
             "_notes": [],
@@ -355,8 +356,9 @@ class TestKoboSaveValidatorsMethods(TestCase):
         }
     ]
 
-    def setUp(self) -> None:
-        call_command("loadbusinessareas")
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
 
     def test_image_validator(self):
         # test for valid value
@@ -616,5 +618,4 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
             {"header": "size_h_c", "message": "Missing household required field size_h_c"},
         ]
-
         self.assertEqual(result, expected)

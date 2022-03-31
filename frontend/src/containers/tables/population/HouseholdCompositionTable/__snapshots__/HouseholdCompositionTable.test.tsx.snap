@@ -1,0 +1,242 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/population/HouseholdCompositionTable should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root sc-htpNat iRuwiV MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="sc-bdVaJa hzmOFI"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        Household Composition
+      </h6>
+    </div>
+    <table
+      class="MuiTable-root"
+    >
+      <thead
+        class="MuiTableHead-root"
+      >
+        <tr
+          class="MuiTableRow-root MuiTableRow-head"
+        >
+          <th
+            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+            scope="col"
+          >
+            Age Group
+          </th>
+          <th
+            class="MuiTableCell-root MuiTableCell-head sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+            scope="col"
+          >
+            Females
+          </th>
+          <th
+            class="MuiTableCell-root MuiTableCell-head sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+            scope="col"
+          >
+            with disability
+          </th>
+          <th
+            class="MuiTableCell-root MuiTableCell-head sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+            scope="col"
+          >
+            Pregnant
+          </th>
+          <th
+            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+            scope="col"
+          />
+          <th
+            class="MuiTableCell-root MuiTableCell-head sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+            scope="col"
+          >
+            Males
+          </th>
+          <th
+            class="MuiTableCell-root MuiTableCell-head sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+            scope="col"
+          >
+            with disability
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="MuiTableBody-root"
+      >
+        <tr
+          class="MuiTableRow-root"
+        >
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          >
+            0 - 5
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            -
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+        </tr>
+        <tr
+          class="MuiTableRow-root"
+        >
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          >
+            6 - 11
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            -
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+        </tr>
+        <tr
+          class="MuiTableRow-root"
+        >
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          >
+            12 - 17
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            -
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            0
+          </td>
+        </tr>
+        <tr
+          class="MuiTableRow-root"
+        >
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          >
+            18 - 59
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          />
+        </tr>
+        <tr
+          class="MuiTableRow-root"
+        >
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          >
+            60 +
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          >
+            -
+          </td>
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
+          />
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;

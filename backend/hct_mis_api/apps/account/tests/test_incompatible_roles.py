@@ -5,12 +5,14 @@ from django.test import TestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 
 
 class IncompatibleRolesTest(TestCase):
-    def setUp(self):
-        self.role_1 = Role.objects.create(name="Role_1")
-        self.role_2 = Role.objects.create(name="Role_2")
+    @classmethod
+    def setUpTestData(cls):
+        cls.role_1 = Role.objects.create(name="Role_1")
+        cls.role_2 = Role.objects.create(name="Role_2")
 
     def test_unique_pair_allowed(self):
         test_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_2)
@@ -33,7 +35,7 @@ class IncompatibleRolesTest(TestCase):
             test_role.full_clean()
 
     def test_any_users_already_with_both_roles(self):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
         user = UserFactory()
         UserRole.objects.create(role=self.role_1, business_area=business_area, user=user)

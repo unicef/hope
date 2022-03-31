@@ -1,13 +1,15 @@
 from datetime import datetime
 
 from django.conf import settings
-from django.test import TestCase
 
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 
 
-class TestLoadXML(TestCase):
+class TestLoadXML(BaseElasticSearchTestCase):
+    databases = ("default", "registration_datahub")
+
     def test_execute(self):
         main_test_files_path = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
 

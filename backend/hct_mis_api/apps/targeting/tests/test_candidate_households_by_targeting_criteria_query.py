@@ -6,6 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
@@ -46,7 +47,7 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
         _ = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},

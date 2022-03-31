@@ -4,19 +4,19 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import {
+  choicesToDict,
   formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
 import { PaymentVerificationNode } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { LabelizedField } from '../LabelizedField';
-import { StatusBox } from '../StatusBox';
-import { UniversalMoment } from '../UniversalMoment';
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
+import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
+import { LabelizedField } from '../core/LabelizedField';
+import { StatusBox } from '../core/StatusBox';
+import { UniversalMoment } from '../core/UniversalMoment';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { BlackLink } from '../core/BlackLink';
+import { Title } from '../core/Title';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -38,13 +38,20 @@ const StatusContainer = styled.div`
 interface VerificationRecordDetailsProps {
   paymentVerification: PaymentVerificationNode;
   canViewActivityLog: boolean;
+  choicesData;
 }
 
 export function VerificationRecordDetails({
   paymentVerification,
   canViewActivityLog,
+  choicesData,
 }: VerificationRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
+  const businessArea = useBusinessArea();
+  const deliveryTypeDict = choicesToDict(
+    choicesData.paymentRecordDeliveryTypeChoices,
+  );
+
   return (
     <>
       <ContainerColumnWithBorder>
@@ -63,10 +70,13 @@ export function VerificationRecordDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField
-              label={t('REGISTRATION GROUP')}
-              value={paymentVerification.paymentRecord.registrationCaId}
-            />
+            <LabelizedField label={t('REGISTRATION GROUP')}>
+              <BlackLink
+                to={`/${businessArea}/population/household/${paymentVerification.paymentRecord.household.id}`}
+              >
+                {paymentVerification.paymentRecord.household.unicefId}
+              </BlackLink>
+            </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
@@ -177,7 +187,9 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={paymentVerification.paymentRecord.deliveryType}
+              value={
+                deliveryTypeDict[paymentVerification.paymentRecord.deliveryType]
+              }
             />
           </Grid>
           <Grid item xs={3}>

@@ -1,8 +1,5 @@
-from __future__ import absolute_import
-
 import logging
 import os
-import re
 import sys
 from pathlib import Path
 from uuid import uuid4
@@ -11,7 +8,6 @@ from uuid import uuid4
 # Change per project
 ####
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.forms import SelectMultiple
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -22,12 +18,12 @@ from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 from .config import env
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
-WWW_ROOT = "http://%s/" % DOMAIN_NAME
+WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
 FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
@@ -49,7 +45,7 @@ DEFAULT_CHARSET = "utf-8"
 ROOT_URLCONF = "hct_mis_api.urls"
 
 DATA_VOLUME = env("DATA_VOLUME")
-
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ALLOWED_EXTENSIONS = (
     "pdf",
     "doc",
@@ -106,7 +102,7 @@ ENV = env("ENV")
 
 # prefix all non-production emails
 if ENV != "prod":
-    EMAIL_SUBJECT_PREFIX = "{}".format(ENV)
+    EMAIL_SUBJECT_PREFIX = f"{ENV}"
 
 # BACKWARD_COMPATIBILITY SNIPPET
 if "DATABASE_URL" not in os.environ:
@@ -147,9 +143,18 @@ if "DATABASE_URL_HUB_REGISTRATION" not in os.environ:
         f'@{os.getenv("POSTGRES_REGISTRATION_DATAHUB_HOST")}:5432/'
         f'{os.getenv("POSTGRES_REGISTRATION_DATAHUB_DB")}'
     )
-
+RO_CONN = dict(**env.db("DATABASE_URL")).copy()
+RO_CONN.update(
+    {
+        "OPTIONS": {"options": "-c default_transaction_read_only=on"},
+        "TEST": {
+            "READ_ONLY": True,  # Do not manage this database during tests
+        },
+    }
+)
 DATABASES = {
     "default": env.db(),
+    "read_only": RO_CONN,
     "cash_assist_datahub_mis": env.db("DATABASE_URL_HUB_MIS"),
     "cash_assist_datahub_ca": env.db("DATABASE_URL_HUB_CA"),
     "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
@@ -176,6 +181,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
+    "author.middlewares.AuthorDefaultBackendMiddleware",
 ]
 
 TEMPLATES = [
@@ -186,7 +192,10 @@ TEMPLATES = [
             os.path.join(PROJECT_ROOT, "apps", "core", "templates"),
         ],
         "OPTIONS": {
-            "loaders": ["django.template.loaders.filesystem.Loader", "django.template.loaders.app_directories.Loader"],
+            "loaders": [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
             "context_processors": [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
@@ -212,6 +221,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.intervention",
     "hct_mis_api.apps.payment",
     "hct_mis_api.apps.program",
+    "hct_mis_api.apps.power_query.apps.Config",
     # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
     "hct_mis_api.apps.utils",
@@ -256,7 +266,7 @@ OTHER_APPS = [
     "corsheaders",
     "django_elasticsearch_dsl",
     "constance",
-    "admin_extra_urls",
+    "admin_extra_buttons",
     "adminfilters",
     "adminactions",
     "multiselectfield",
@@ -266,6 +276,7 @@ OTHER_APPS = [
     "django_celery_beat",
     "explorer",
     "import_export",
+    "import_export_celery",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -274,12 +285,15 @@ INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12}},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-PASSWORD_RESET_TIMEOUT_DAYS = 31
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
@@ -310,13 +324,25 @@ LOGGING = {
     },
     "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
     "handlers": {
-        "default": {"level": LOG_LEVEL, "class": "logging.StreamHandler", "formatter": "standard"},
-        "file": {"level": LOG_LEVEL, "class": "logging.FileHandler", "filename": "debug.log"},
+        "default": {
+            "level": LOG_LEVEL,
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+        "file": {
+            "level": LOG_LEVEL,
+            "class": "logging.FileHandler",
+            "filename": "debug.log",
+        },
     },
     "loggers": {
         "": {"handlers": ["default"], "level": "INFO", "propagate": True},
         "console": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
-        "django.request": {"handlers": ["default"], "level": "ERROR", "propagate": False},
+        "django.request": {
+            "handlers": ["default"],
+            "level": "ERROR",
+            "propagate": False,
+        },
         "django.security.DisallowedHost": {
             # Skip "SuspiciousOperation: Invalid HTTP_HOST" e-mails.
             "handlers": ["default"],
@@ -377,7 +403,7 @@ SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = [
     "last_name",
     "email",
 ]
-SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
 SOCIAL_AUTH_PIPELINE = (
     "hct_mis_api.apps.account.authentication.social_details",
@@ -430,15 +456,24 @@ CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0), MaxValueValidator(100)]},
+        {
+            "widget": "django.forms.widgets.NumberInput",
+            "validators": [MinValueValidator(0), MaxValueValidator(100)],
+        },
     ),
     "positive_integers": (
         "django.forms.fields.IntegerField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0)]},
+        {
+            "widget": "django.forms.widgets.NumberInput",
+            "validators": [MinValueValidator(0)],
+        },
     ),
     "positive_floats": (
         "django.forms.fields.FloatField",
-        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0)]},
+        {
+            "widget": "django.forms.widgets.NumberInput",
+            "validators": [MinValueValidator(0)],
+        },
     ),
 }
 
@@ -459,7 +494,11 @@ CONSTANCE_CONFIG = {
         "If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
         "percentages",
     ),
-    "CASHASSIST_DOAP_RECIPIENT": ("", "UNHCR email address where to send DOAP updates", str),
+    "CASHASSIST_DOAP_RECIPIENT": (
+        "",
+        "UNHCR email address where to send DOAP updates",
+        str,
+    ),
     "KOBO_ADMIN_CREDENTIALS": (
         "",
         "Kobo superuser credentislas in format user:password",
@@ -491,7 +530,10 @@ CONSTANCE_CONFIG = {
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
     # CASH ASSIST
-    "CASH_ASSIST_URL_PREFIX": ("", "Cash Assist base url used to generate url to cash assist"),
+    "CASH_ASSIST_URL_PREFIX": (
+        "",
+        "Cash Assist base url used to generate url to cash assist",
+    ),
     "SEND_GRIEVANCES_NOTIFICATION": (
         False,
         "Should send grievances notification",
@@ -550,7 +592,8 @@ if SENTRY_DSN:
     from hct_mis_api import get_full_version
 
     sentry_logging = LoggingIntegration(
-        level=logging.INFO, event_level=logging.ERROR  # Capture info and above as breadcrumbs  # Send errors as events
+        level=logging.INFO,
+        event_level=logging.ERROR,  # Capture info and above as breadcrumbs  # Send errors as events
     )
 
     sentry_sdk.init(
@@ -597,6 +640,9 @@ SMART_ADMIN_SECTIONS = {
         "core",
         "constance",
         "household.agency",
+    ],
+    "Power Query & Reports": [
+        "power_query",
     ],
     "Rule Engine": [
         "steficon",
@@ -705,7 +751,6 @@ IMPERSONATE = {
     "DISABLE_LOGGING": False,
 }
 
-
 # EXPLORER_SCHEMA_INCLUDE_TABLE_PREFIXES = (
 #     'hct_mis_api',
 # )
@@ -724,3 +769,22 @@ IMPERSONATE = {
 #     'social_auth',
 #     'django_admin',
 # )
+
+POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
+
+IMPORT_EXPORT_CELERY_INIT_MODULE = "hct_mis_api.apps.core.celery"
+
+
+def resource():  # Optional
+    from hct_mis_api.apps.core.admin import AdminAreaResource
+
+    return AdminAreaResource
+
+
+IMPORT_EXPORT_CELERY_MODELS = {
+    "AdminArea": {
+        "app_label": "core",
+        "model_name": "AdminArea",
+        "resource": resource,  # Optional
+    }
+}

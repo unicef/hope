@@ -1,23 +1,22 @@
 import unittest
 
 from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import (
-    IndividualFactory,
-    HouseholdFactory,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestIndividualQuery(APITestCase):
     ALL_INDIVIDUALS_QUERY = """
-    query AllIndividuals {
-      allIndividuals(businessArea: "afghanistan") {
+    query AllIndividuals($search: String) {
+      allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
         edges {
           node {
             fullName
@@ -55,7 +54,7 @@ class TestIndividualQuery(APITestCase):
     """
     INDIVIDUAL_QUERY = """
     query Individual($id: ID!) {
-      individual(id: $id) {
+      individual(id: $id, orderBy:"id") {
         fullName
         givenName
         familyName
@@ -65,18 +64,18 @@ class TestIndividualQuery(APITestCase):
     }
     """
 
-    def setUp(self):
-        super().setUp()
-        call_command("loadbusinessareas")
-        self.user = UserFactory()
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.user = UserFactory()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         program_one = ProgramFactory(
             name="Test program ONE",
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
-        self.program_two = ProgramFactory(
+        cls.program_two = ProgramFactory(
             name="Test program TWO",
-            business_area=self.business_area,
+            business_area=cls.business_area,
         )
 
         household_one = HouseholdFactory.build()
@@ -86,9 +85,9 @@ class TestIndividualQuery(APITestCase):
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.save()
         household_one.programs.add(program_one)
-        household_two.programs.add(self.program_two)
+        household_two.programs.add(cls.program_two)
 
-        self.individuals_to_create = [
+        cls.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
@@ -131,12 +130,12 @@ class TestIndividualQuery(APITestCase):
             },
         ]
 
-        self.individuals = [
+        cls.individuals = [
             IndividualFactory(household=household_one if index % 2 else household_two, **individual)
-            for index, individual in enumerate(self.individuals_to_create)
+            for index, individual in enumerate(cls.individuals_to_create)
         ]
-        household_one.head_of_household = self.individuals[0]
-        household_two.head_of_household = self.individuals[1]
+        household_one.head_of_household = cls.individuals[0]
+        household_two.head_of_household = cls.individuals[1]
         household_one.save()
         household_two.save()
 
@@ -146,7 +145,6 @@ class TestIndividualQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    @unittest.skip("needs adjudication")
     def test_individual_query_all(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -183,4 +181,19 @@ class TestIndividualQuery(APITestCase):
             request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
             context={"user": self.user},
             variables={"programs": [self.program_two.id]},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_query_individuals_by_search_filter(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user},
+            variables={"search": "001-296-358-5428-607"},
         )

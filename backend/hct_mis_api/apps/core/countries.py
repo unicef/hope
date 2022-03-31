@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 
 from django_countries import countries as internal_countries
 from django_countries.fields import Country
@@ -10,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 class Countries:
     @classmethod
+    @lru_cache(maxsize=None)
     def get_countries(cls):
         return [(label, alpha2, Country(alpha2).alpha3) for alpha2, label in internal_countries]
 
@@ -24,6 +26,7 @@ class Countries:
         ]
 
     @classmethod
+    @lru_cache(maxsize=None)
     def is_valid_country_choice(cls, choice: str) -> bool:
         return any(choice in CaseInsensitiveTuple(country_tuple) for country_tuple in cls.get_countries())
 

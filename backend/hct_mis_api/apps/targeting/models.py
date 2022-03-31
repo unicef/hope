@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField, IntegerRangeField, JSONField
+from django.contrib.postgres.fields import CICharField, IntegerRangeField
 from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
     RangeMinValueValidator,
@@ -14,9 +14,9 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import Case, Count, Q, Value, When
+from django.db.models import Case, Count, JSONField, Q, Value, When
 from django.utils.text import Truncator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from model_utils import Choices
@@ -38,7 +38,14 @@ from hct_mis_api.apps.core.utils import (
     get_attr_value,
     map_unicef_ids_to_households_unicef_ids,
 )
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    MALE,
+    Document,
+    Household,
+    Individual,
+)
+from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -63,7 +70,10 @@ def get_integer_range(min_range=None, max_range=None):
     return IntegerRangeField(
         default=get_serialized_range,
         blank=True,
-        validators=[RangeMinValueValidator(min_range), RangeMaxValueValidator(max_range)],
+        validators=[
+            RangeMinValueValidator(min_range),
+            RangeMaxValueValidator(max_range),
+        ],
     )
 
 
@@ -74,8 +84,14 @@ class TargetPopulationManager(SoftDeletableManager):
             .get_queryset()
             .annotate(
                 number_of_households=Case(
-                    When(status=TargetPopulation.STATUS_LOCKED, then="candidate_list_total_households"),
-                    When(status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST, then="final_list_total_households"),
+                    When(
+                        status=TargetPopulation.STATUS_LOCKED,
+                        then="candidate_list_total_households",
+                    ),
+                    When(
+                        status=TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
+                        then="final_list_total_households",
+                    ),
                     default=Value(0),
                 )
             )
@@ -122,11 +138,19 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_DRAFT = "DRAFT"
     STATUS_LOCKED = "LOCKED"
     STATUS_PROCESSING = "PROCESSING"
+    STATUS_STEFICON_WAIT = "STEFICON_WAIT"
+    STATUS_STEFICON_RUN = "STEFICON_RUN"
+    STATUS_STEFICON_COMPLETED = "STEFICON_COMPLETED"
+    STATUS_STEFICON_ERROR = "STEFICON_ERROR"
     STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
 
     STATUS_CHOICES = (
         (STATUS_DRAFT, _("Open")),
         (STATUS_LOCKED, _("Locked")),
+        (STATUS_STEFICON_WAIT, _("Waiting for Rule Engine")),
+        (STATUS_STEFICON_RUN, _("Rule Engine Running")),
+        (STATUS_STEFICON_COMPLETED, _("Rule Engine Completed")),
+        (STATUS_STEFICON_ERROR, _("Rule Engine Errored")),
         (STATUS_PROCESSING, _("Processing")),
         (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
     )
@@ -228,14 +252,26 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         db_index=True,
     )
     steficon_rule = models.ForeignKey(
-        "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
+        RuleCommit,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="target_populations",
+        blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
     vulnerability_score_min = models.DecimalField(
-        null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
     )
     vulnerability_score_max = models.DecimalField(
-        null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
     )
     excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
@@ -257,6 +293,14 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return queryset.distinct()
 
     @property
+    def candidate_list(self):
+        if self.status != TargetPopulation.STATUS_DRAFT:
+            return []
+        return Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).filter(
+            business_area=self.business_area
+        )
+
+    @property
     def final_list(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
             return []
@@ -269,11 +313,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     @property
     def candidate_stats(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
-            households_ids = (
-                Household.objects.filter(self.candidate_list_targeting_criteria.get_query())
-                .filter(business_area=self.business_area)
-                .values_list("id")
-            )
+            households_ids = self.candidate_list.values_list("id")
         else:
             households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
@@ -342,7 +382,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return None
         tp = (
             TargetPopulation.objects.filter(
-                program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_PROCESSING
+                program=self.program,
+                steficon_rule__isnull=False,
+                status=TargetPopulation.STATUS_PROCESSING,
             )
             .order_by("-created_at")
             .first()
@@ -356,10 +398,16 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.sent_to_datahub = True
 
     def is_finalized(self):
-        return self.status in [self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST]
+        return self.status in [
+            self.STATUS_PROCESSING,
+            self.STATUS_READY_FOR_CASH_ASSIST,
+        ]
 
     def is_locked(self):
         return self.status == self.STATUS_LOCKED
+
+    def is_approved(self):
+        return self.status in [self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED]
 
     def __str__(self):
         return self.name
@@ -434,7 +482,12 @@ class TargetingCriteriaQueryingMixin:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self):
-        return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.excluded_household_ids)
+        return (
+            Q(size__gt=0)
+            & Q(withdrawn=False)
+            & ~Q(unicef_id__in=self.excluded_household_ids)
+            & ~Q(individuals__documents__status=Document.STATUS_INVALID)
+        )
 
     def get_query(self):
         query = Q()
@@ -562,7 +615,9 @@ class TargetingIndividualRuleFilterBlock(
     TargetingIndividualRuleFilterBlockMixin,
 ):
     targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule", on_delete=models.CASCADE, related_name="individuals_filters_blocks"
+        "TargetingCriteriaRule",
+        on_delete=models.CASCADE,
+        related_name="individuals_filters_blocks",
     )
     target_only_hoh = models.BooleanField(default=False)
 
@@ -575,7 +630,12 @@ class TargetingCriteriaFilterMixin:
             "negative": False,
             "supported_types": ["INTEGER", "SELECT_ONE", "STRING", "BOOL"],
         },
-        "NOT_EQUALS": {"arguments": 1, "lookup": "", "negative": True, "supported_types": ["INTEGER", "SELECT_ONE"]},
+        "NOT_EQUALS": {
+            "arguments": 1,
+            "lookup": "",
+            "negative": True,
+            "supported_types": ["INTEGER", "SELECT_ONE"],
+        },
         "CONTAINS": {
             "min_arguments": 1,
             "arguments": 1,
@@ -583,7 +643,12 @@ class TargetingCriteriaFilterMixin:
             "negative": False,
             "supported_types": ["SELECT_MANY", "STRING"],
         },
-        "NOT_CONTAINS": {"arguments": 1, "lookup": "__icontains", "negative": True, "supported_types": ["STRING"]},
+        "NOT_CONTAINS": {
+            "arguments": 1,
+            "lookup": "__icontains",
+            "negative": True,
+            "supported_types": ["STRING"],
+        },
         "RANGE": {
             "arguments": 2,
             "lookup": "__range",
@@ -602,7 +667,12 @@ class TargetingCriteriaFilterMixin:
             "negative": False,
             "supported_types": ["INTEGER", "DECIMAL"],
         },
-        "LESS_THAN": {"arguments": 1, "lookup": "__lte", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
+        "LESS_THAN": {
+            "arguments": 1,
+            "lookup": "__lte",
+            "negative": False,
+            "supported_types": ["INTEGER", "DECIMAL"],
+        },
     }
 
     COMPARISON_CHOICES = Choices(

@@ -2,6 +2,7 @@ import io
 import uuid
 
 from django.core.management import call_command
+
 from graphql import GraphQLError
 from openpyxl.writer.excel import save_virtual_workbook
 from parameterized import parameterized
@@ -9,22 +10,27 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
-from hct_mis_api.apps.household.fixtures import (
-    create_household,
-    EntitlementCardFactory,
-)
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
+    PaymentRecordFactory,
     PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
-from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
-from hct_mis_api.apps.program.fixtures import ProgramFactory, CashPlanFactory
+from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import (
+    XlsxVerificationExportService,
+)
+from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
+    XlsxVerificationImportService,
+)
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 
 
 class TestXlsxVerificationImport(APITestCase):
@@ -32,7 +38,7 @@ class TestXlsxVerificationImport(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         payment_record_amount = 10
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -45,7 +51,7 @@ class TestXlsxVerificationImport(APITestCase):
         target_population = TargetPopulationFactory(
             created_by=cls.user, candidate_list_targeting_criteria=targeting_criteria, business_area=cls.business_area
         )
-        cash_plan = CashPlanFactory.build(program=program, business_area=cls.business_area)
+        cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
         for _ in range(payment_record_amount):
@@ -65,6 +71,7 @@ class TestXlsxVerificationImport(APITestCase):
             payment_record = PaymentRecordFactory(
                 cash_plan=cash_plan,
                 household=household,
+                head_of_household=household.head_of_household,
                 target_population=target_population,
             )
 

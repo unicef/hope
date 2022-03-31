@@ -9,6 +9,7 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedHouseholdFactory,
@@ -22,16 +23,17 @@ from hct_mis_api.apps.registration_datahub.tasks.mark_submissions import MarkSub
 
 
 class TestMarkSubmissions(TestCase):
-    multi_db = True
+    databases = "__all__"
 
-    def setUp(self) -> None:
-        call_command("loadbusinessareas")
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
 
-        self.business_area = BusinessArea.objects.first()
+        cls.business_area = BusinessArea.objects.first()
 
-        self._create_submission_with_merged_rdi()
-        self._create_submission_with_merged_rdi()
-        self._create_submission_with_in_review_rdi()
+        cls._create_submission_with_merged_rdi()
+        cls._create_submission_with_merged_rdi()
+        cls._create_submission_with_in_review_rdi()
 
     def test_mark_submissions(self):
         task = MarkSubmissions(self.business_area)

@@ -29,7 +29,11 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
-from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, admin_area1_query
+from hct_mis_api.apps.core.utils import (
+    LazyEvalMethodsDict,
+    admin_area1_query,
+    registration_data_import_query,
+)
 from hct_mis_api.apps.household.models import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -46,6 +50,7 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +105,13 @@ def country_query(comparision_method, args):
 
 def country_origin_query(comparision_method, args):
     return country_generic_query(comparision_method, args, "country_origin")
+
+
+def convert_choices(field, *args, **kwargs):
+    choices = field.get("choices")
+    if callable(choices):
+        field["choices"] = choices(*args, **kwargs)
+    return field
 
 
 CORE_FIELDS_ATTRIBUTES = [
@@ -1469,6 +1481,47 @@ HOUSEHOLD_EDIT_ONLY_FIELDS = [
     ),
 ]
 
+UNICEF_ID_FIELDS_ATTR = [
+    {
+        "id": "df2b2588-68af-4dea-89ab-c5a53a5764be",
+        "type": TYPE_STRING,
+        "name": "unicef_id",
+        "lookup": "unicef_id",
+        "required": False,
+        "label": {"English(EN)": "Household unicef id"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "unicef_id_h_c",
+    },
+    {
+        "id": "bb9bcb76-c9e4-4e83-8b9a-6c8bb35cb84c",
+        "type": TYPE_STRING,
+        "name": "unicef_id",
+        "lookup": "unicef_id",
+        "required": False,
+        "label": {"English(EN)": "Individual unicef id"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "unicef_id_i_c",
+    },
+]
+
+RDI_FILTER = {
+    "id": "a1662e94-5d8b-46a7-8c9a-7c72b280f497",
+    "type": TYPE_SELECT_MANY,
+    "name": "registration_data_import",
+    "lookup": "registration_data_import__pk",
+    "get_query": registration_data_import_query,
+    "required": False,
+    "label": {"English(EN)": "Registration Data Import"},
+    "hint": "",
+    "choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(*args, **kwargs),
+    "associated_with": _HOUSEHOLD,
+    "xlsx_field": "registration_data_import",
+}
+
 
 def _reduce_core_field_attr(old, new):
     old[new.get("name")] = new
@@ -1496,7 +1549,7 @@ def core_fields_to_separated_dict(append_household_id=True, append_xlsx=True):
     return result_dict
 
 
-TARGETING_CORE_FIELDS = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS + [ROLE_FIELD]
+TARGETING_CORE_FIELDS = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS + [ROLE_FIELD, RDI_FILTER]
 FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in CORE_FIELDS_ATTRIBUTES if x.get("type") in FILTERABLE_TYPES]
 
 CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, TARGETING_CORE_FIELDS, {})

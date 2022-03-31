@@ -1,23 +1,29 @@
-{% extends "admin_extra_urls/change_form.html" %}{% load engine static %}
-{% block extrastyle %}
-    {{ block.super }}
-    <style>
-        .object-tools a.btn.extra-link.btn-action.disabled,
-        .object-tools a.btn.extra-link.btn-href.disabled {
-            background: #ece8e8;
-            cursor: not-allowed;
-        }
-    </style>
-{% endblock %}
+{% extends "admin_extra_buttons/change_form.html" %}{% load i18n admin_urls engine static %}
+
 {% block object-tools-items %}
-    {# removes standard django buttons   #}
-    {% include "admin_extra_urls/includes/change_form_buttons.html" %}
+{#     removes standard django buttons   #}
+    {% include "admin_extra_buttons/includes/change_form_buttons.html" %}
+    <li>{{ original.latest.version|default_if_none:"No release" }}</li>
 {% endblock %}
+{% block submit_buttons_bottom %}
+    <div class="submit-row">
+    <input type="submit" value="{% trans 'Save and continue editing' %}" name="_continue">
+    <input type="submit" value="{% trans 'Release' %}" name="_save">
+    {% if not is_popup and has_delete_permission and original %}
+        {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+        <p class="deletelink-box"><a href="{% add_preserved_filters delete_url %}" class="deletelink">{% trans "Delete" %}</a></p>
+    {% endif %}
+    </div>
+{% endblock %}
+
 {% block admin_change_form_document_ready %}{{ block.super }}
     <style>
         a.btn-action.disabled {
             background-color: lightgray;
         }
+        .CodeMirror {
+            font-size: 16px;
+         }
     </style>
     <script>
         window.addEventListener('load', function () {
@@ -30,5 +36,26 @@
             }
         });
     </script>
+    <script type="text/javascript">
+        if ('undefined' !== typeof(django)) {
+            // supplement focus prototype for Django's old jQuery
+            django.jQuery.expr[':'].focus = function( elem ) {
+                return elem === document.activeElement && ( elem.type || elem.href );
+            };
+            django.jQuery(document).keydown(function(e) {
+                // only do J/K nav on result lists and when the search field isn't focused
+                var do_jk_nav = django.jQuery('#result_list').length && django.jQuery('input:focus').length == 0;
+                if ((e.ctrlKey || e.metaKey) && (e.which === 83 || e.which === 115)) { // s or S
+                    e.preventDefault();
+                    django.jQuery("input[name='_continue']").click();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.which === 80)) { // s or S
+                    django.jQuery("#btn-preview").click();
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+    </script>
 {% endblock %}
-

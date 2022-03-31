@@ -71,6 +71,7 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_IMPORT = auto()
     PAYMENT_VERIFICATION_VERIFY = auto()
     PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS = auto()
+    PAYMENT_VERIFICATION_DELETE = auto()
 
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
@@ -235,7 +236,7 @@ class BaseNodePermissionMixin:
     @classmethod
     def check_node_permission(cls, info, object_instance):
         business_area = object_instance.business_area
-        if not any((perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)):
+        if not any(perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes):
             logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
 
@@ -288,7 +289,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         self._extra_filter_meta = extra_filter_meta
         self._base_args = None
         self.permission_classes = permission_classes
-        super(DjangoPermissionFilterConnectionField, self).__init__(type, *args, **kwargs)
+        super().__init__(type, *args, **kwargs)
 
     @property
     def args(self):
@@ -316,16 +317,25 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         return get_filtering_args_from_filterset(self.filterset_class, self.node_type)
 
     @classmethod
-    def resolve_queryset(cls, connection, iterable, info, args, filtering_args, filterset_class, permission_classes):
+    def resolve_queryset(
+        cls,
+        connection,
+        iterable,
+        info,
+        args,
+        filtering_args,
+        filterset_class,
+        permission_classes,
+    ):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
-        if not any((perm.has_permission(info, **filter_kwargs) for perm in permission_classes)):
+        if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
             logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
         if "permissions" in filtering_args:
             filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
                 filter_kwargs.get("business_area")
             )
-        qs = super(DjangoPermissionFilterConnectionField, cls).resolve_queryset(connection, iterable, info, args)
+        qs = super().resolve_queryset(connection, iterable, info, args)
         return filterset_class(data=filter_kwargs, queryset=qs, request=info.context).qs
 
     def get_queryset_resolver(self):

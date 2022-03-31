@@ -12,14 +12,11 @@ import {
   PaymentRecordNode,
   PaymentVerificationNode,
 } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { LabelizedField } from '../LabelizedField';
-import { StatusBox } from '../StatusBox';
-import { UniversalMoment } from '../UniversalMoment';
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
+import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
+import { LabelizedField } from '../core/LabelizedField';
+import { StatusBox } from '../core/StatusBox';
+import { Title } from '../core/Title';
+import { UniversalMoment } from '../core/UniversalMoment';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -49,8 +46,8 @@ export function PaymentRecordDetails({
 }: VerificationRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   let paymentVerification: PaymentVerificationNode = null;
-  if (paymentRecord.verifications.totalCount > 0) {
-    paymentVerification = paymentRecord.verifications.edges[0].node;
+  if (paymentRecord.verification) {
+    paymentVerification = paymentRecord.verification;
   }
   return (
     <>
