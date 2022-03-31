@@ -21,7 +21,7 @@ import {
   GrievanceTicketQuery,
   useApproveSystemFlaggingMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../core/ConfirmationDialog';
+import { useConfirmation } from '../core/ConfirmationDialog';
 import { FlagTooltip } from '../core/FlagTooltip';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
@@ -42,6 +42,7 @@ export function FlagDetails({
   canApproveFlag: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
+  const confirm = useConfirmation();
   const useStyles = makeStyles(() => ({
     table: {
       minWidth: 100,
@@ -72,30 +73,27 @@ export function FlagDetails({
               referenceNumber={details.sanctionListIndividual.referenceNumber}
             />
             {canApproveFlag && (
-              <ConfirmationDialog
-                title='Confirmation'
-                content={isFlagConfirmed ? removalText : confirmationText}
+              <Button
+                disabled={
+                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                }
+                onClick={() =>
+                  confirm({
+                    content: isFlagConfirmed ? removalText : confirmationText,
+                  }).then(() =>
+                    approve({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus: !details.approveStatus,
+                      },
+                    }),
+                  )
+                }
+                variant='outlined'
+                color='primary'
               >
-                {(confirm) => (
-                  <Button
-                    disabled={
-                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                    }
-                    onClick={confirm(() =>
-                      approve({
-                        variables: {
-                          grievanceTicketId: ticket.id,
-                          approveStatus: !details.approveStatus,
-                        },
-                      }),
-                    )}
-                    variant='outlined'
-                    color='primary'
-                  >
-                    {isFlagConfirmed ? t('REMOVE FLAG') : t('CONFIRM FLAG')}
-                  </Button>
-                )}
-              </ConfirmationDialog>
+                {isFlagConfirmed ? t('REMOVE FLAG') : t('CONFIRM FLAG')}
+              </Button>
             )}
           </Box>
         </Box>

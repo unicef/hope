@@ -6,12 +6,11 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button, href
-from admin_extra_urls.mixins import ExtraUrlMixin
+from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, TextFieldFilter
-from adminfilters.lookup import GenericLookupFieldFilter
+from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.registration_datahub.models import (
@@ -28,15 +27,13 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
+from hct_mis_api.apps.registration_datahub.models import Record
+
 
 @admin.register(RegistrationDataImportDatahub)
-class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("name", "import_date", "import_done", "business_area_slug", "hct_id")
-    list_filter = (
-        "created_at",
-        "import_done",
-        ("business_area_slug__istartswith", TextFieldFilter.factory(title="Business area slug")),
-    )
+    list_filter = ("created_at", "import_done", ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")))
     advanced_filter_fields = (
         "created_at",
         "import_done",
@@ -47,7 +44,8 @@ class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixi
     date_hierarchy = "created_at"
     search_fields = ("name",)
 
-    @href(
+    @link(
+        href=None,
         label="RDI",
     )
     def hub(self, button):
@@ -75,82 +73,8 @@ class RegistrationDataImportDatahubAdmin(ExtraUrlMixin, AdminAdvancedFiltersMixi
         return TemplateResponse(request, "registration_datahub/admin/inspect.html", context)
 
 
-# {"duplicates": [ {"dob": "1965-11-05",
-#                  "score": 11.0,
-#                  "hit_id": "266704c0-d13c-4475-9445-52ad1f6d9cb8",
-#                  "location": null,
-#                  "full_name": "Lavone Burnham",
-#                  "proximity_to_score": 5.0}],
-#                  "possible_duplicates": []}
-
-number = r"(\d+(\.(\d+)))*"
-rexx = [
-    re.compile(rf"^(>=|<=|>|<|=)?([-+]?{number})$"),
-    re.compile(rf"{number}"),
-    # re.compile(r'(\d+)'),
-    # re.compile(r'^(<>)?([-+]?[0-9]+)$')
-]
-
-rex = re.compile(r"^(?P<op>>=|<=|>|<|=)?(?P<value>\d+(\.\d+)?)")
-
-
-def math_to_django(clause):
-    mapping = {
-        ">=": "gte",
-        "<=": "lte",
-        ">": "gt",
-        "<": "lt",
-        "=": "exact",
-        "<>": "not",
-    }
-    # for rex in rexx:
-    if match := rex.match(clause):
-        groups = match.groupdict()
-        op = groups.get("op", "=")
-        value = groups.get("value", 0)
-        return mapping[op or "="], value
-    return None, None
-
-
-class ScoreFilter(FieldListFilter):
-    template = "adminfilters/text.html"
-    title = "score"
-    parameter_name = "score"
-
-    def __init__(self, field, request, params, model, model_admin, field_path):
-        super().__init__(field, request, params, model, model_admin, field_path)
-        self.original_title = self.title
-
-    def expected_parameters(self):
-        return [self.parameter_name]
-
-    def value(self):
-        return self.used_parameters.get(self.parameter_name, "")
-
-    def queryset(self, request, queryset):
-        op, value = math_to_django(self.value())
-        if value:
-            self.title = f"{self.original_title} {op} {value}"
-            queryset = queryset.filter(**{f"{self.field_path}__score__max__{op}": float(value)})
-        return queryset
-
-    def choices(self, changelist):
-        yield {
-            "selected": False,
-            "query_string": changelist.get_query_string(
-                {},
-                [
-                    self.parameter_name,
-                ],
-            ),
-            "lookup_kwarg": self.parameter_name,
-            "display": "All",
-            "value": self.value(),
-        }
-
-
 @admin.register(ImportedIndividual)
-class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = (
         "registration_data_import",
         "individual_id",
@@ -161,12 +85,10 @@ class ImportedIndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         "batch_score",
     )
     list_filter = (
-        ("deduplication_batch_results", ScoreFilter),
-        ("deduplication_golden_record_results", ScoreFilter),
-        GenericLookupFieldFilter.factory(
-            "registration_data_import__name__istartswith", title="Registration data import name stat with"
-        ),
-        ("individual_id", TextFieldFilter),
+        ("deduplication_batch_results", NumberFilter),
+        ("deduplication_golden_record_results", NumberFilter),
+        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
+        ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
         "deduplication_batch_status",
         "deduplication_golden_record_status",
     )
@@ -228,10 +150,9 @@ class ImportedHouseholdAdmin(HOPEModelAdminBase):
     list_filter = (
         ("country", ChoicesFieldComboFilter),
         ("country_origin", ChoicesFieldComboFilter),
-        GenericLookupFieldFilter.factory(
-            title="Registration Data Import Name", lookup="registration_data_import__name__istartswith"
-        ),
-        GenericLookupFieldFilter.factory(title="Kobo Submission UUID", lookup="kobo_submission_uuid__istartswith"),
+        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
+        ("kobo_submission_uuid", ValueFilter.factory(lookup_name="istartswith")),
+        ("kobo_submission_uuid", ValueFilter.factory(lookup_name="istartswith")),
     )
 
 
@@ -284,3 +205,8 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
         "registration_data_import_id",
     )
     raw_id_fields = ("registration_data_import", "imported_household")
+
+
+@admin.register(Record)
+class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+    list_display = ("id", "registration", "timestamp", "ignored")

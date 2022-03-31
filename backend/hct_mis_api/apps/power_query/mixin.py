@@ -1,13 +1,13 @@
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import render
 
-from admin_extra_urls.decorators import button
-from admin_extra_urls.mixins import ExtraUrlMixin
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import ExtraButtonsMixin
 
 from hct_mis_api.apps.power_query.models import Query
 
 
-class PowerQueryMixin(ExtraUrlMixin):
+class PowerQueryMixin(ExtraButtonsMixin):
     @button(permission="power_query_query_add")
     def power_query(self, request):
         ct = ContentType.objects.get_for_model(self.model)
