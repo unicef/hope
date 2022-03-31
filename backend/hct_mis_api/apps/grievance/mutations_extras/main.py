@@ -3,6 +3,7 @@ import graphene
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     AddIndividualIssueTypeExtras,
     HouseholdDataUpdateIssueTypeExtras,
+    HouseholdDeleteIssueTypeExtras,
     IndividualDataUpdateIssueTypeExtras,
     IndividualDeleteIssueTypeExtras,
     UpdateAddIndividualIssueTypeExtras,
@@ -26,6 +27,7 @@ class IssueTypeExtrasInput(graphene.InputObjectType):
     household_data_update_issue_type_extras = HouseholdDataUpdateIssueTypeExtras()
     individual_data_update_issue_type_extras = IndividualDataUpdateIssueTypeExtras()
     individual_delete_issue_type_extras = IndividualDeleteIssueTypeExtras()
+    household_delete_issue_type_extras = HouseholdDeleteIssueTypeExtras()
     add_individual_issue_type_extras = AddIndividualIssueTypeExtras()
 
 

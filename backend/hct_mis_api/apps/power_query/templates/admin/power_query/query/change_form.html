@@ -1,0 +1,11 @@
+{% extends "admin_extra_buttons/change_form.html" %}{% load power_query %}
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% if original.error %}
+        <ul class="messagelist">
+            <li class="error"> This query raised and exception:
+                <a target="_sentry" href="{{ original.error|link_to_sentry }}">View on Sentry</a>
+            </li>
+        </ul>
+    {% endif %}
+{% endblock %}

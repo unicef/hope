@@ -64,6 +64,8 @@ data:
   KOBOCAT_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-kobocat"
   ENKETO_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-enketo"
 
+  KPI_RAVEN_DSN: "{{ .Values.kpi.ravenDsn }}"
+
   USE_X_FORWARDED_HOST: "False"
   KPI_PREFIX: "/"
   

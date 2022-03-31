@@ -8,6 +8,7 @@ from django.core.management import call_command
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.individual_xlsx_update import (
     IndividualXlsxUpdate,
@@ -45,34 +46,35 @@ def invalid_file():
 
 
 class TestIndividualXlsxUpdate(APITestCase):
-    multi_db = True
+    databases = "__all__"
 
-    def setUp(self) -> None:
-        call_command("loadbusinessareas")
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+    @classmethod
+    def setUpTestData(cls):
+        create_afghanistan()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        registration_data_import = RegistrationDataImportFactory(business_area=self.business_area)
-        self.xlsx_update_file = XlsxUpdateFile.objects.create(
+        registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+        cls.xlsx_update_file = XlsxUpdateFile.objects.create(
             file=valid_file(),
-            business_area=self.business_area,
+            business_area=cls.business_area,
             xlsx_match_columns=["individual__given_name"],
         )
 
-        self.xlsx_update_invalid_file = XlsxUpdateFile.objects.create(
+        cls.xlsx_update_invalid_file = XlsxUpdateFile.objects.create(
             file=invalid_file(),
-            business_area=self.business_area,
+            business_area=cls.business_area,
             xlsx_match_columns=["individual__given_name"],
         )
 
-        self.xlsx_update_valid_file_complex = XlsxUpdateFile.objects.create(
+        cls.xlsx_update_valid_file_complex = XlsxUpdateFile.objects.create(
             file=valid_file_complex(),
-            business_area=self.business_area,
+            business_area=cls.business_area,
             xlsx_match_columns=["individual__full_name"],
         )
 
         household_data = {
             "registration_data_import": registration_data_import,
-            "business_area": self.business_area,
+            "business_area": cls.business_area,
         }
         individuals_data = [
             {
@@ -124,7 +126,7 @@ class TestIndividualXlsxUpdate(APITestCase):
                 "birth_date": "1985-08-12",
             },
         ]
-        _, self.individuals = create_household_and_individuals(
+        _, cls.individuals = create_household_and_individuals(
             household_data=household_data, individuals_data=individuals_data
         )
 

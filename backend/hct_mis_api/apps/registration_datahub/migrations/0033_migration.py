@@ -13,27 +13,27 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='importedhousehold',
             name='child_hoh',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='importedhousehold',
             name='consent',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='importedhousehold',
             name='fchild_hoh',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='importedhousehold',
             name='returnee',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.AlterField(
             model_name='importedindividual',
             name='pregnant',
-            field=models.NullBooleanField(),
+            field=models.BooleanField(null=True),
         ),
         migrations.DeleteModel(
             name='ImportedHouseholdIdentity',

@@ -1,0 +1,15 @@
+{% extends "admin_extra_buttons/change_form.html" %}
+{% block after_field_sets %}
+    <pre>
+        {{ original.info }}
+    </pre>
+    <div style="padding: 10px;">
+        <form method="post">
+            {% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+            <input type="submit">
+        </form>
+    </div>
+{% endblock %}

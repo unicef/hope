@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_finalized_0_with_permission 1'] = {
@@ -174,6 +173,36 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
 }
 
 snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_2_edit_1_without_permission 1'] = {
+    'data': {
+        'finalHouseholdsListByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'finalHouseholdsListByTargetingCriteria'
+            ]
+        }
+    ]
+}
+
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_without_invalid_documents_0_with_permission 1'] = {
+    'data': {
+        'finalHouseholdsListByTargetingCriteria': {
+            'edges': [
+            ],
+            'totalCount': 0
+        }
+    }
+}
+
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_without_invalid_documents_1_without_permission 1'] = {
     'data': {
         'finalHouseholdsListByTargetingCriteria': None
     },

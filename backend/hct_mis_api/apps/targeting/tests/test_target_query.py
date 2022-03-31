@@ -8,6 +8,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
@@ -18,7 +19,6 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 
-@unittest.skip("fix ordering")
 class TestTargetPopulationQuery(APITestCase):
     ALL_TARGET_POPULATION_QUERY = """
             query AllTargetPopulation($finalListTotalHouseholdsMin: Int) {
@@ -75,7 +75,7 @@ class TestTargetPopulationQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         _ = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
@@ -139,7 +139,7 @@ class TestTargetPopulationQuery(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-    @unittest.skip("needs adjudication")
+
     @parameterized.expand(
         [
             (

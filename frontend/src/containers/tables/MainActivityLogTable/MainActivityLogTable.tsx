@@ -10,7 +10,7 @@ import {
 import {
   ButtonPlaceHolder,
   Row,
-} from '../../../components/ActivityLogTable/TableStyledComponents';
+} from '../../../components/core/ActivityLogTable/TableStyledComponents';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
@@ -47,7 +47,7 @@ interface MainActivityLogTableProps {
   actionChoices: AllLogEntriesQuery['logEntryActionChoices'];
   loading: boolean;
 }
-export function MainActivityLogTable({
+export const MainActivityLogTable = ({
   logEntries,
   totalCount,
   rowsPerPage,
@@ -56,7 +56,7 @@ export function MainActivityLogTable({
   onChangeRowsPerPage,
   actionChoices,
   loading = false,
-}: MainActivityLogTableProps): ReactElement {
+}: MainActivityLogTableProps): ReactElement => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [expanded, setExpanded] = useState(true);
   const choicesDict = useArrayToDict(actionChoices, 'value', 'name');
@@ -98,4 +98,4 @@ export function MainActivityLogTable({
       </Collapse>
     </PaperContainer>
   );
-}
+};

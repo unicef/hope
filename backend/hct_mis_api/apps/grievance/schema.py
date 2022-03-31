@@ -14,6 +14,7 @@ from django_filters import (
     ModelChoiceFilter,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
+    NumberFilter,
     OrderingFilter,
     TypedMultipleChoiceFilter,
     UUIDFilter,
@@ -39,7 +40,12 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
+from hct_mis_api.apps.core.schema import (
+    ChoiceObject,
+    FieldAttributeNode,
+    _custom_dict_or_attr_resolver,
+    sort_by_attr,
+)
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
@@ -53,6 +59,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
+    TicketDeleteHouseholdDetails,
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
@@ -78,40 +85,69 @@ logger = logging.getLogger(__name__)
 class GrievanceTicketFilter(FilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
-            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            ),
             "household": ("unicef_id",),
         },
         "sensitive_ticket_details": {
-            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            ),
             "household": ("unicef_id",),
         },
         "individual_data_update_ticket_details": {
-            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            ),
         },
         "add_individual_ticket_details": {"household": ("unicef_id",)},
         "system_flagging_ticket_details": {
-            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+            "golden_records_individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            )
         },
         "needs_adjudication_ticket_details": {
-            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+            "golden_records_individual": (
+                "full_name",
+                "unicef_id",
+                "phone_no",
+                "phone_no_alternative",
+            )
         },
     }
     TICKET_TYPES_WITH_FSP = (
         ("complaint_ticket_details", "payment_record__service_provider"),
         ("sensitive_ticket_details", "payment_record__service_provider"),
-        ("payment_verification_ticket_details", "payment_verifications__payment_record__service_provider"),
+        (
+            "payment_verification_ticket_details",
+            "payment_verifications__payment_record__service_provider",
+        ),
     )
-
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
     fsp = CharFilter(method="fsp_filter")
     admin = ModelMultipleChoiceFilter(
-        field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
+        field_name="admin",
+        method="admin_filter",
+        queryset=AdminArea.objects.filter(admin_area_level__admin_level=2),
     )
-    cash_plan_payment_verification = CharFilter(
+    cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
-        lookup_expr="payment_verifications__cash_plan_payment_verification",
+        lookup_expr="payment_verifications__cash_plan_payment_verification__cash_plan",
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
@@ -128,7 +164,7 @@ class GrievanceTicketFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
-            "id",
+            "unicef_id",
             "status",
             "assigned_to__last_name",
             "category",
@@ -139,9 +175,8 @@ class GrievanceTicketFilter(FilterSet):
         )
     )
 
-    @property
-    def qs(self):
-        return super().qs.annotate(
+    def filter_queryset(self, queryset):
+        queryset = queryset.annotate(
             household_unicef_id=Coalesce(
                 "complaint_ticket_details__household__unicef_id",
                 "sensitive_ticket_details__household__unicef_id",
@@ -154,6 +189,7 @@ class GrievanceTicketFilter(FilterSet):
                 "needs_adjudication_ticket_details__golden_records_individual__household__unicef_id",
             )
         )
+        return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -163,7 +199,7 @@ class GrievanceTicketFilter(FilterSet):
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
-                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__startswith": value})
+                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__istartswith": value})
 
         return qs.filter(q_obj)
 
@@ -276,7 +312,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
             queryset = self.filters[name].filter(queryset, value)
             assert isinstance(
                 queryset, models.QuerySet
-            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+            ), "Expected '{}.{}' to return a QuerySet, but got a {} instead.".format(
                 type(self).__name__,
                 name,
                 type(queryset).__name__,
@@ -447,11 +483,13 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
             for index, document in enumerate(documents_to_edit):
                 previous_value = document.get("previous_value", {})
                 if previous_value and previous_value.get("photo"):
+                    previous_value["photoraw"] = previous_value["photo"]
                     previous_value["photo"] = default_storage.url(previous_value.get("photo"))
                     documents_to_edit[index]["previous_value"] = previous_value
 
                 current_value = document.get("value", {})
                 if current_value and current_value.get("photo"):
+                    current_value["photoraw"] = current_value["photo"]
                     current_value["photo"] = default_storage.url(current_value.get("photo"))
                     documents_to_edit[index]["value"] = current_value
             individual_data["documents_to_edit"] = documents_to_edit
@@ -461,6 +499,7 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
             for index, document in enumerate(documents):
                 current_value = document.get("value", {})
                 if current_value and current_value.get("photo"):
+                    current_value["photoraw"] = current_value["photo"]
                     current_value["photo"] = default_storage.url(current_value.get("photo"))
                     documents[index]["value"] = current_value
             individual_data["documents"] = documents
@@ -497,6 +536,7 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         if documents:
             for index, document in enumerate(documents):
                 if document and document["photo"]:
+                    document["photoraw"] = document["photo"]
                     document["photo"] = default_storage.url(document["photo"])
                     documents[index] = document
             individual_data["documents"] = documents
@@ -508,6 +548,16 @@ class TicketDeleteIndividualDetailsNode(DjangoObjectType):
 
     class Meta:
         model = TicketDeleteIndividualDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketDeleteHouseholdDetailsNode(DjangoObjectType):
+    household_data = Arg()
+
+    class Meta:
+        model = TicketDeleteHouseholdDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -656,6 +706,9 @@ class Query(graphene.ObjectType):
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
+    def resolve_all_grievance_ticket(self, info, **kwargs):
+        return GrievanceTicket.objects.select_related("assigned_to", "created_by")
+
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
 
@@ -708,15 +761,17 @@ class Query(graphene.ObjectType):
             "who_answers_alt_phone",
         ]
 
-        yield from [
-            x
-            for x in CORE_FIELDS_ATTRIBUTES
-            if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
-        ]
-        yield from KOBO_ONLY_INDIVIDUAL_FIELDS.values()
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-        ).order_by("created_at")
+        all_options = (
+            [
+                x
+                for x in CORE_FIELDS_ATTRIBUTES
+                if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
+            ]
+            + list(KOBO_ONLY_INDIVIDUAL_FIELDS.values())
+            + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL))
+        )
+
+        return sort_by_attr(all_options, "label.English(EN)")
 
     def resolve_all_edit_household_fields_attributes(self, info, **kwargs):
         ACCEPTABLE_FIELDS = [
@@ -766,14 +821,13 @@ class Query(graphene.ObjectType):
         ]
 
         # yield from FlexibleAttribute.objects.order_by("name").all()
-        yield from [
+        all_options = [
             x
             for x in HOUSEHOLD_EDIT_ONLY_FIELDS + CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _HOUSEHOLD and x.get("name") in ACCEPTABLE_FIELDS
-        ]
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-        ).order_by("created_at")
+        ] + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD))
+
+        return sort_by_attr(all_options, "label.English(EN)")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
@@ -804,7 +858,10 @@ class Query(graphene.ObjectType):
         days_30_from_now = datetime.date.today() - datetime.timedelta(days=30)
         days_60_from_now = datetime.date.today() - datetime.timedelta(days=60)
 
-        feedback_categories = [GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK]
+        feedback_categories = [
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+        ]
         all_open_tickets = grievance_tickets.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
         all_closed_tickets = grievance_tickets.filter(status=GrievanceTicket.STATUS_CLOSED)
 

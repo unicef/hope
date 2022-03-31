@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.forms.models import modelform_factory
 
 import openpyxl
 
@@ -8,6 +10,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
     CORE_FIELDS_ATTRIBUTES,
+    UNICEF_ID_FIELDS_ATTR,
 )
 from hct_mis_api.apps.household.models import Individual
 
@@ -23,8 +26,9 @@ class IndividualXlsxUpdate:
     STATUS_MULTIPLE_MATCH = "MULTIPLE_MATCH"
 
     def __init__(self, xlsx_update_file):
+        our_attributes = CORE_FIELDS_ATTRIBUTES + UNICEF_ID_FIELDS_ATTR
         self.xlsx_update_file = xlsx_update_file
-        self.core_attr_by_names = {self._column_name_by_attr(attr): attr for attr in CORE_FIELDS_ATTRIBUTES}
+        self.core_attr_by_names = {self._column_name_by_attr(attr): attr for attr in our_attributes}
         self.updatable_core_columns_names = [
             self._column_name_by_attr(attr) for attr in CORE_FIELDS_ATTRIBUTES if attr["associated_with"] == _INDIVIDUAL
         ]
@@ -113,11 +117,21 @@ class IndividualXlsxUpdate:
     def _update_single_individual(self, row, individual):
         old_individual = copy_model_object(individual)
 
+        updated = {}
         for cell in row:
             if cell.col_idx in self.columns_match_indexes:
                 continue
-            attr = self.attr_by_column_index[cell.col_idx]
-            setattr(individual, attr["name"], cell.value)
+            name = self.attr_by_column_index[cell.col_idx]["name"]
+            updated[name] = cell.value
+
+        IndividualForm = modelform_factory(Individual, fields=updated.keys())
+        form = IndividualForm(instance=individual, data=updated)
+
+        for field in form.fields.values():
+            field.required = False
+
+        if not form.is_valid():
+            raise ValidationError(form.errors)
 
         log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", None, old_individual, individual)
 

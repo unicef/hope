@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestIndividualFlagQuery::test_individual_programme_filter_0 1'] = {
@@ -71,18 +72,18 @@ snapshots['TestIndividualFlagQuery::test_individual_programme_filter_3 1'] = {
             'edges': [
                 {
                     'node': {
-                        'birthDate': '1943-11-03',
-                        'familyName': 'Shan',
-                        'givenName': 'Kailan',
-                        'phoneNo': '+12282715373'
-                    }
-                },
-                {
-                    'node': {
                         'birthDate': '1973-03-23',
                         'familyName': 'Torres',
                         'givenName': 'Eric',
                         'phoneNo': '+12282315473'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1943-11-03',
+                        'familyName': 'Shan',
+                        'givenName': 'Kailan',
+                        'phoneNo': '+12282715373'
                     }
                 }
             ]
@@ -96,14 +97,6 @@ snapshots['TestIndividualFlagQuery::test_individual_programme_filter_4 1'] = {
             'edges': [
                 {
                     'node': {
-                        'birthDate': '1943-11-03',
-                        'familyName': 'Shan',
-                        'givenName': 'Kailan',
-                        'phoneNo': '+12282715373'
-                    }
-                },
-                {
-                    'node': {
                         'birthDate': '1973-03-23',
                         'familyName': 'Torres',
                         'givenName': 'Eric',
@@ -112,18 +105,26 @@ snapshots['TestIndividualFlagQuery::test_individual_programme_filter_4 1'] = {
                 },
                 {
                     'node': {
-                        'birthDate': '1983-12-21',
-                        'familyName': 'Perry',
-                        'givenName': 'Timothy',
-                        'phoneNo': '(548)313-1700-902'
-                    }
-                },
-                {
-                    'node': {
                         'birthDate': '1946-02-15',
                         'familyName': 'Ford',
                         'givenName': 'Robin',
                         'phoneNo': '+18663567905'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1943-11-03',
+                        'familyName': 'Shan',
+                        'givenName': 'Kailan',
+                        'phoneNo': '+12282715373'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1983-12-21',
+                        'familyName': 'Perry',
+                        'givenName': 'Timothy',
+                        'phoneNo': '(548)313-1700-902'
                     }
                 },
                 {
@@ -153,14 +154,6 @@ snapshots['TestIndividualFlagQuery::test_individual_programme_filter_5 1'] = {
                 },
                 {
                     'node': {
-                        'birthDate': '1943-11-03',
-                        'familyName': 'Shan',
-                        'givenName': 'Kailan',
-                        'phoneNo': '+12282715373'
-                    }
-                },
-                {
-                    'node': {
                         'birthDate': '1973-03-23',
                         'familyName': 'Torres',
                         'givenName': 'Eric',
@@ -169,18 +162,26 @@ snapshots['TestIndividualFlagQuery::test_individual_programme_filter_5 1'] = {
                 },
                 {
                     'node': {
-                        'birthDate': '1983-12-21',
-                        'familyName': 'Perry',
-                        'givenName': 'Timothy',
-                        'phoneNo': '(548)313-1700-902'
-                    }
-                },
-                {
-                    'node': {
                         'birthDate': '1946-02-15',
                         'familyName': 'Ford',
                         'givenName': 'Robin',
                         'phoneNo': '+18663567905'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1943-11-03',
+                        'familyName': 'Shan',
+                        'givenName': 'Kailan',
+                        'phoneNo': '+12282715373'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1983-12-21',
+                        'familyName': 'Perry',
+                        'givenName': 'Timothy',
+                        'phoneNo': '(548)313-1700-902'
                     }
                 },
                 {
@@ -210,14 +211,6 @@ snapshots['TestIndividualFlagQuery::test_individual_programme_filter_6 1'] = {
                 },
                 {
                     'node': {
-                        'birthDate': '1943-11-03',
-                        'familyName': 'Shan',
-                        'givenName': 'Kailan',
-                        'phoneNo': '+12282715373'
-                    }
-                },
-                {
-                    'node': {
                         'birthDate': '1973-03-23',
                         'familyName': 'Torres',
                         'givenName': 'Eric',
@@ -226,18 +219,26 @@ snapshots['TestIndividualFlagQuery::test_individual_programme_filter_6 1'] = {
                 },
                 {
                     'node': {
-                        'birthDate': '1983-12-21',
-                        'familyName': 'Perry',
-                        'givenName': 'Timothy',
-                        'phoneNo': '(548)313-1700-902'
-                    }
-                },
-                {
-                    'node': {
                         'birthDate': '1946-02-15',
                         'familyName': 'Ford',
                         'givenName': 'Robin',
                         'phoneNo': '+18663567905'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1943-11-03',
+                        'familyName': 'Shan',
+                        'givenName': 'Kailan',
+                        'phoneNo': '+12282715373'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1983-12-21',
+                        'familyName': 'Perry',
+                        'givenName': 'Timothy',
+                        'phoneNo': '(548)313-1700-902'
                     }
                 },
                 {

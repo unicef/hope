@@ -1,4 +1,4 @@
-{% extends "admin_extra_urls/action_page.html" %}{% load engine static admin_urls %}
+{% extends "admin_extra_buttons/action_page.html" %}{% load engine static admin_urls %}
 {% block extrastyle %}
     <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static "admin/steficon/code.css" %}">
@@ -10,7 +10,8 @@
     &rsaquo; Revert to {{ state.timestamp|date:"d, M Y H:i" }}
 {% endblock %}
 {% block content_title %}<h1>Warning!!</h1>
-<h2>You are reverting rule '{{ original }}' to commit #{{ state.version }} of {{ state.timestamp|date:"d, M Y H:i" }}.</h2>
+<h2>
+    You are reverting rule '{{ original }}' to commit <a href="{% url "admin:steficon_rulecommit_change" state.pk %}">#{{ state.version }}</a> of {{ state.timestamp|date:"d, M Y H:i" }}.</h2>
 {% endblock %}
 {% block object-tools-items %}
 <li><form method="post">{% csrf_token %}
@@ -31,7 +32,7 @@
                     <tr>
                         <th>{{ field }}</th>
                         <td>{{ state.rule.as_dict|get_item:field }}</td>
-                        <td>{{ state.before|get_item:field }}</td>
+                        <td>{{ state.after|get_item:field }}</td>
                         <td></td>
                     </tr>
                 {% endfor %}
@@ -40,12 +41,13 @@
         <fieldset class="module aligned collapse open">
             <h2>Code after Revert/Restore</h2>
             <div class="code d-none" id="tab-diff">
-                {{ state.before.definition|pygmentize }}
+                {{ state.after.definition|pygmentize }}
             </div>
         </fieldset>
         <fieldset class="module aligned collapse">
             <h2>Code Changes</h2>
             <div class="code d-none" id="tab-diff">
+{#                {{ state|diff:"after,current" }}#}
                 {{ state|diff:"before,current" }}
             </div>
         </fieldset>
@@ -65,4 +67,3 @@
         });
     </script>
 {% endblock %}
-

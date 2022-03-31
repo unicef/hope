@@ -16,7 +16,7 @@ from hct_mis_api.apps.erp_datahub.utils import (
     get_exchange_rate_for_cash_plan,
     get_payment_record_delivered_quantity_in_usd,
 )
-from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
+from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider, CashPlanPaymentVerificationSummary
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -159,6 +159,7 @@ class PullFromDatahubTask:
                     exchange_rates_client = ExchangeRates()
                     cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, exchange_rates_client)
                     cash_plan.save(update_fields=["exchange_rate"])
+                    CashPlanPaymentVerificationSummary.objects.create(cash_plan=cash_plan)
             except Exception as e:
                 logger.exception(e)
 

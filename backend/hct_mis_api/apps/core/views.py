@@ -2,15 +2,17 @@ import logging
 
 from django import forms
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
 from django.http import HttpResponse
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
+
 from graphene_django.settings import graphene_settings
 from graphql.utils import schema_printer
 
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.hope_redirect import get_hope_redirect
 from hct_mis_api.apps.reporting.models import DashboardReport
 
 logger = logging.getLogger(__name__)
@@ -61,3 +63,13 @@ def download_dashboard_report(request, report_id):
         logger.error("Permission Denied: You need dashboard export permission to access this file")
         raise PermissionDenied("Permission Denied: You need dashboard export permission to access this file")
     return redirect(report.file.url)
+
+
+@login_required
+def hope_redirect(request):
+    ent = request.GET.get("ent")
+    caid = request.GET.get("caid")
+    sourceid = request.GET.get("sourceid")
+    programid = request.GET.get("programid")
+    hope_redirect = get_hope_redirect(request.user, ent, caid, sourceid, programid)
+    return redirect(hope_redirect.url())

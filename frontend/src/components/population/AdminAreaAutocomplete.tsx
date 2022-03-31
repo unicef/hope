@@ -22,7 +22,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function AdminAreasAutocomplete({
+export function AdminAreaAutocomplete({
   disabled,
   fullWidth,
   onFilterChange,

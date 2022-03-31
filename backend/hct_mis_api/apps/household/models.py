@@ -2,14 +2,15 @@ import logging
 import re
 from datetime import date, datetime
 
+from django.conf import settings
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
-from django.contrib.postgres.fields import ArrayField, CICharField, JSONField
+from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import F, Sum
+from django.db.models import DecimalField, F, JSONField, Sum
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
@@ -59,11 +60,11 @@ DIVORCED = "DIVORCED"
 SEPARATED = "SEPARATED"
 MARITAL_STATUS_CHOICE = (
     (BLANK, _("None")),
-    (SINGLE, _("Single")),
-    (MARRIED, _("Married")),
-    (WIDOWED, _("Widowed")),
     (DIVORCED, _("Divorced")),
+    (MARRIED, _("Married")),
     (SEPARATED, _("Separated")),
+    (SINGLE, _("Single")),
+    (WIDOWED, _("Widowed")),
 )
 
 NONE = "NONE"
@@ -102,23 +103,23 @@ COUSIN = "COUSIN"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_CHOICE = (
     (RELATIONSHIP_UNKNOWN, "Unknown"),
+    (AUNT_UNCLE, "Aunt / Uncle"),
+    (BROTHER_SISTER, "Brother / Sister"),
+    (COUSIN, "Cousin"),
+    (DAUGHTERINLAW_SONINLAW, "Daughter-in-law / Son-in-law"),
+    (GRANDDAUGHER_GRANDSON, "Granddaughter / Grandson"),
+    (GRANDMOTHER_GRANDFATHER, "Grandmother / Grandfather"),
+    (HEAD, "Head of household (self)"),
+    (MOTHER_FATHER, "Mother / Father"),
+    (MOTHERINLAW_FATHERINLAW, "Mother-in-law / Father-in-law"),
+    (NEPHEW_NIECE, "Nephew / Niece"),
     (
         NON_BENEFICIARY,
         "Not a Family Member. Can only act as a recipient.",
     ),
-    (HEAD, "Head of household (self)"),
+    (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
-    (BROTHER_SISTER, "Brother / Sister"),
-    (MOTHER_FATHER, "Mother / Father"),
-    (AUNT_UNCLE, "Aunt / Uncle"),
-    (GRANDMOTHER_GRANDFATHER, "Grandmother / Grandfather"),
-    (MOTHERINLAW_FATHERINLAW, "Mother-in-law / Father-in-law"),
-    (DAUGHTERINLAW_SONINLAW, "Daughter-in-law / Son-in-law"),
-    (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
-    (GRANDDAUGHER_GRANDSON, "Granddaughter / Grandson"),
-    (NEPHEW_NIECE, "Nephew / Niece"),
-    (COUSIN, "Cousin"),
 )
 YES = "1"
 NO = "0"
@@ -137,9 +138,9 @@ ROLE_PRIMARY = "PRIMARY"
 ROLE_ALTERNATE = "ALTERNATE"
 ROLE_NO_ROLE = "NO_ROLE"
 ROLE_CHOICE = (
-    (ROLE_PRIMARY, "Primary collector"),
-    (ROLE_ALTERNATE, "Alternate collector"),
     (ROLE_NO_ROLE, "None"),
+    (ROLE_ALTERNATE, "Alternate collector"),
+    (ROLE_PRIMARY, "Primary collector"),
 )
 IDENTIFICATION_TYPE_BIRTH_CERTIFICATE = "BIRTH_CERTIFICATE"
 IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
@@ -150,17 +151,17 @@ IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
     (IDENTIFICATION_TYPE_DRIVERS_LICENSE, _("Driver's License")),
+    (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
     (IDENTIFICATION_TYPE_NATIONAL_ID, _("National ID")),
     (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
-    (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: "Birth Certificate",
     IDENTIFICATION_TYPE_DRIVERS_LICENSE: "Driver's License",
+    IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_NATIONAL_ID: "National ID",
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "National Passport",
-    IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
 UNHCR = "UNHCR"
@@ -175,8 +176,8 @@ STATUS_WITHDRAWN = "WITHDRAWN"
 STATUS_DUPLICATE = "DUPLICATE"
 INDIVIDUAL_STATUS_CHOICES = (
     (STATUS_ACTIVE, "Active"),
-    (STATUS_WITHDRAWN, "Withdrawn"),
     (STATUS_DUPLICATE, "Duplicate"),
+    (STATUS_WITHDRAWN, "Withdrawn"),
 )
 INDIVIDUAL_HOUSEHOLD_STATUS = ((STATUS_ACTIVE, "Active"), (STATUS_INACTIVE, "Inactive"))
 UNIQUE = "UNIQUE"
@@ -184,53 +185,53 @@ DUPLICATE = "DUPLICATE"
 NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
 NOT_PROCESSED = "NOT_PROCESSED"
 DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE = (
-    (UNIQUE, "Unique"),
     (DUPLICATE, "Duplicate"),
     (NEEDS_ADJUDICATION, "Needs Adjudication"),
     (NOT_PROCESSED, "Not Processed"),
+    (UNIQUE, "Unique"),
 )
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
 UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
 NOT_PROCESSED = "NOT_PROCESSED"
 DEDUPLICATION_BATCH_STATUS_CHOICE = (
-    (SIMILAR_IN_BATCH, "Similar in batch"),
     (DUPLICATE_IN_BATCH, "Duplicate in batch"),
-    (UNIQUE_IN_BATCH, "Unique in batch"),
     (NOT_PROCESSED, "Not Processed"),
+    (SIMILAR_IN_BATCH, "Similar in batch"),
+    (UNIQUE_IN_BATCH, "Unique in batch"),
 )
 SOME_DIFFICULTY = "SOME_DIFFICULTY"
 LOT_DIFFICULTY = "LOT_DIFFICULTY"
 CANNOT_DO = "CANNOT_DO"
 SEVERITY_OF_DISABILITY_CHOICES = (
     (BLANK, _("None")),
-    (SOME_DIFFICULTY, "Some difficulty"),
     (LOT_DIFFICULTY, "A lot of difficulty"),
     (CANNOT_DO, "Cannot do at all"),
+    (SOME_DIFFICULTY, "Some difficulty"),
 )
 UNICEF = "UNICEF"
 PARTNER = "PARTNER"
 ORG_ENUMERATOR_CHOICES = (
     (BLANK, _("None")),
-    (UNICEF, "UNICEF"),
     (PARTNER, "Partner"),
+    (UNICEF, "UNICEF"),
 )
 HUMANITARIAN_PARTNER = "HUMANITARIAN_PARTNER"
 PRIVATE_PARTNER = "PRIVATE_PARTNER"
 GOVERNMENT_PARTNER = "GOVERNMENT_PARTNER"
 DATA_SHARING_CHOICES = (
     (BLANK, _("None")),
-    (UNICEF, "UNICEF"),
+    (GOVERNMENT_PARTNER, "Government partners"),
     (HUMANITARIAN_PARTNER, "Humanitarian partners"),
     (PRIVATE_PARTNER, "Private partners"),
-    (GOVERNMENT_PARTNER, "Government partners"),
+    (UNICEF, "UNICEF"),
 )
 HH_REGISTRATION = "HH_REGISTRATION"
 COMMUNITY = "COMMUNITY"
 REGISTRATION_METHOD_CHOICES = (
     (BLANK, _("None")),
-    (HH_REGISTRATION, "Household Registration"),
     (COMMUNITY, "Community-level Registration"),
+    (HH_REGISTRATION, "Household Registration"),
 )
 
 DISABLED = "disabled"
@@ -248,10 +249,10 @@ DISABILITY_CHOICES = (
 SANCTION_LIST_POSSIBLE_MATCH = "SANCTION_LIST_POSSIBLE_MATCH"
 SANCTION_LIST_CONFIRMED_MATCH = "SANCTION_LIST_CONFIRMED_MATCH"
 INDIVIDUAL_FLAGS_CHOICES = (
-    (NEEDS_ADJUDICATION, "Needs adjudication"),
     (DUPLICATE, "Duplicate"),
-    (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
+    (NEEDS_ADJUDICATION, "Needs adjudication"),
     (SANCTION_LIST_CONFIRMED_MATCH, "Sanction list match"),
+    (SANCTION_LIST_POSSIBLE_MATCH, "Sanction list possible match"),
 )
 
 logger = logging.getLogger(__name__)
@@ -321,9 +322,9 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     withdrawn = models.BooleanField(default=False, db_index=True)
     withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
-    consent = models.NullBooleanField()
+    consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
-    residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
+    residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField(blank=True, db_index=True)
     country_origin_new = models.ForeignKey(
         "geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT
@@ -375,13 +376,13 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         related_name="households",
         blank=True,
     )
-    returnee = models.NullBooleanField()
+    returnee = models.BooleanField(null=True)
     flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
     head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
-    fchild_hoh = models.NullBooleanField()
-    child_hoh = models.NullBooleanField()
+    fchild_hoh = models.BooleanField(null=True)
+    child_hoh = models.BooleanField(null=True)
     unicef_id = CICharField(max_length=250, blank=True, default=BLANK, db_index=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     start = models.DateTimeField(blank=True, null=True)
@@ -497,13 +498,17 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def total_cash_received(self):
-        return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
+        return (
+            self.payment_records.filter()
+            .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
+            .get("delivered_quantity__sum")
+        )
 
     @property
     def total_cash_received_usd(self):
         return (
             self.payment_records.filter()
-            .aggregate(models.Sum("delivered_quantity_usd"))
+            .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
             .get("delivered_quantity_usd__sum")
         )
 
@@ -514,8 +519,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             .annotate(program=F("cash_plan__program"))
             .values("program")
             .annotate(
-                total_delivered_quantity=Sum("delivered_quantity"),
-                total_delivered_quantity_usd=Sum("delivered_quantity_usd"),
+                total_delivered_quantity=Sum("delivered_quantity", output_field=DecimalField()),
+                total_delivered_quantity_usd=Sum("delivered_quantity_usd", output_field=DecimalField()),
                 currency=F("currency"),
                 program_name=F("cash_plan__program__name"),
                 program_id=F("cash_plan__program__id"),
@@ -545,6 +550,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
                     }
                 )
         return programs_dict.values()
+
+    @property
+    def active_individuals(self):
+        return self.individuals.filter(withdrawn=False, duplicate=False)
 
     def __str__(self):
         return f"{self.unicef_id}"
@@ -585,40 +594,63 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             male_age_group_18_59_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_18_to_60_years)),
             male_age_group_60_count=Count("id", distinct=True, filter=Q(male_beneficiary & from_60_years)),
             female_age_group_0_5_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & to_6_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & to_6_years),
             ),
             female_age_group_6_11_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_6_to_12_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & from_6_to_12_years),
             ),
             female_age_group_12_17_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_12_to_18_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & from_12_to_18_years),
             ),
             female_age_group_18_59_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_18_to_60_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & from_18_to_60_years),
             ),
             female_age_group_60_disabled_count=Count(
-                "id", distinct=True, filter=Q(female_disability_beneficiary & from_60_years)
+                "id",
+                distinct=True,
+                filter=Q(female_disability_beneficiary & from_60_years),
             ),
             male_age_group_0_5_disabled_count=Count(
                 "id", distinct=True, filter=Q(male_disability_beneficiary & to_6_years)
             ),
             male_age_group_6_11_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_6_to_12_years)
+                "id",
+                distinct=True,
+                filter=Q(male_disability_beneficiary & from_6_to_12_years),
             ),
             male_age_group_12_17_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_12_to_18_years)
+                "id",
+                distinct=True,
+                filter=Q(male_disability_beneficiary & from_12_to_18_years),
             ),
             male_age_group_18_59_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_18_to_60_years)
+                "id",
+                distinct=True,
+                filter=Q(male_disability_beneficiary & from_18_to_60_years),
             ),
             male_age_group_60_disabled_count=Count(
-                "id", distinct=True, filter=Q(male_disability_beneficiary & from_60_years)
+                "id",
+                distinct=True,
+                filter=Q(male_disability_beneficiary & from_60_years),
             ),
             size=Count("id", distinct=True, filter=Q(is_beneficiary & active_beneficiary)),
-            pregnant_count=Count("id", distinct=True, filter=Q(is_beneficiary & active_beneficiary & Q(pregnant=True))),
+            pregnant_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(is_beneficiary & active_beneficiary & Q(pregnant=True)),
+            ),
         )
-
+        updated_fields = ["child_hoh", "fchild_hoh"]
         for key, value in age_groups.items():
+            updated_fields.append(key)
             setattr(self, key, value)
 
         self.child_hoh = False
@@ -627,7 +659,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             if self.head_of_household.sex == FEMALE:
                 self.fchild_hoh = True
             self.child_hoh = True
-        self.save()
+        self.save(update_fields=updated_fields)
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -643,6 +675,7 @@ class DocumentType(TimeStampedUUIDModel):
 
     class Meta:
         unique_together = ("country", "type")
+        ordering = ["country", "label"]
 
     def __str__(self):
         return f"{self.label} in {self.country}"
@@ -701,7 +734,7 @@ class Agency(models.Model):
         ]
 
     def __str__(self):
-        return self.label
+        return f"{self.label} in {self.country}"
 
 
 class IndividualIdentity(models.Model):
@@ -710,6 +743,9 @@ class IndividualIdentity(models.Model):
     number = models.CharField(
         max_length=255,
     )
+
+    class Meta:
+        verbose_name_plural = "Individual Identities"
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.number}"
@@ -841,8 +877,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict, blank=True)
     user_fields = JSONField(default=dict, blank=True)
-    enrolled_in_nutrition_programme = models.NullBooleanField()
-    administration_of_rutf = models.NullBooleanField()
+    enrolled_in_nutrition_programme = models.BooleanField(null=True)
+    administration_of_rutf = models.BooleanField(null=True)
     unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     deduplication_golden_record_status = models.CharField(
         max_length=50,
@@ -860,7 +896,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     sanction_list_possible_match = models.BooleanField(default=False)
     sanction_list_confirmed_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
-    pregnant = models.NullBooleanField()
+    pregnant = models.BooleanField(null=True)
     observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE, default=NONE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
@@ -966,10 +1002,13 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             value = getattr(self, field, None)
             should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
         self.disability = DISABLED if should_be_disabled else NOT_DISABLED
-        self.save()
+        self.save(update_fields=["disability"])
 
     def count_all_roles(self):
         return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
+
+    def count_primary_roles(self):
+        return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
 
     @cached_property
     def parents(self):
@@ -988,6 +1027,11 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def active_record(self):
         if self.duplicate:
             return Individual.objects.filter(unicef_id=self.unicef_id, duplicate=False, is_removed=False).first()
+
+    def is_head(self):
+        if not self.household:
+            return False
+        return self.household.head_of_household.id == self.id
 
 
 class EntitlementCard(TimeStampedUUIDModel):
@@ -1022,3 +1066,4 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
     xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.PROTECT)
