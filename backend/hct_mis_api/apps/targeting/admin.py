@@ -1,44 +1,41 @@
-from django import forms
-from django.contrib import admin, messages
-from django.core.validators import MinValueValidator
+from django.contrib import admin
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-from admin_extra_urls.api import ExtraUrlMixin, button
+from admin_extra_buttons.api import ExtraButtonsMixin, button
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-    MaxMinFilter,
-    RelatedFieldComboFilter,
-    TextFieldFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 
-
-class RuleTestForm(forms.Form):
-    rule = forms.ModelChoiceField(queryset=Rule.objects.all())
-    number_of_records = forms.IntegerField(validators=[MinValueValidator(1)])
+from .models import HouseholdSelection, TargetPopulation
+from .steficon import SteficonExecutorMixin
 
 
 @admin.register(TargetPopulation)
-class TargetPopulationAdmin(SoftDeletableAdminMixin, LinkedObjectsMixin, ExtraUrlMixin, HOPEModelAdminBase):
+class TargetPopulationAdmin(
+    SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase
+):
     list_display = (
         "name",
         "status",
-        "candidate_list_total_households",
-        "candidate_list_total_individuals",
+        "sent_to_datahub",
+        "business_area",
+        "program",
+        # "candidate_list_total_households",
+        # "candidate_list_total_individuals",
         "final_list_total_households",
-        "final_list_total_individuals",
+        # "final_list_total_individuals",
     )
     search_fields = ("name",)
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
+        ("steficon_rule__rule", AutoCompleteFilter),
+        ("program", AutoCompleteFilter),
         "sent_to_datahub",
     )
     raw_id_fields = (
@@ -70,35 +67,12 @@ class TargetPopulationAdmin(SoftDeletableAdminMixin, LinkedObjectsMixin, ExtraUr
         return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
     @button()
-    def test_steficon(self, request, pk):
-        context = self.get_common_context(request, pk)
-        if request.method == "GET":
-            context["title"] = f"Test Steficon rule"
-            context["form"] = RuleTestForm(initial={"number_of_records": 100, "rule": self.object.steficon_rule})
-        else:
-            form = RuleTestForm(request.POST)
-            if form.is_valid():
-                rule = form.cleaned_data["rule"]
-                records = form.cleaned_data["number_of_records"]
-                context["title"] = f"Test results of `{rule.name}` against `{self.object}`"
-                context["target_population"] = self.object
-                context["rule"] = rule
-                elements = []
-                context["elements"] = elements
-                entries = self.object.selections.all()[:records]
-                if entries:
-                    for tp in entries:
-                        value = context["rule"].execute(hh=tp.household)
-                        tp.vulnerability_score = value
-                        elements.append(tp)
-                    self.message_user(request, "%s scores calculated" % len(elements))
-                else:
-                    self.message_user(request, "No records found", messages.WARNING)
-        return TemplateResponse(request, "admin/targeting/steficon.html", context)
+    def download_xlsx(self, request, pk):
+        return redirect("admin-download-target-population", target_population_id=pk)
 
 
 @admin.register(HouseholdSelection)
-class HouseholdSelectionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class HouseholdSelectionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = (
         "household",
         "target_population",
@@ -110,14 +84,18 @@ class HouseholdSelectionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         "target_population",
     )
     list_filter = (
-        TextFieldFilter.factory("household__unicef_id", "Household ID"),
-        TextFieldFilter.factory("target_population__id", "Target Population ID"),
+        ("household__unicef_id", ValueFilter),
+        ("target_population", AutoCompleteFilter),
+        ("target_population__id", ValueFilter),
         "final",
         ("vulnerability_score", MaxMinFilter),
     )
-    actions = ["reset_sync_date"]
+    actions = ["reset_sync_date", "reset_vulnerability_score"]
 
     def reset_sync_date(self, request, queryset):
         from hct_mis_api.apps.household.models import Household
 
         Household.objects.filter(selections__in=queryset).update(last_sync_at=None)
+
+    def reset_vulnerability_score(self, request, queryset):
+        queryset.update(vulnerability_score=None)

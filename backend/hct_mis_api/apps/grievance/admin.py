@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.contrib.admin import TabularInline
 
-from admin_extra_urls.mixins import ExtraUrlMixin
+from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
-    TextFieldFilter,
+    ValueFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
@@ -15,6 +15,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
+    TicketDeleteHouseholdDetails,
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
@@ -30,7 +31,7 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraUrlMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "created_at",
@@ -46,17 +47,17 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraUrlMixin, AdminAdvancedFilte
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("category", ChoicesFieldComboFilter),
-        ("business_area", RelatedFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
         ("registration_data_import", AutoCompleteFilter),
-        TextFieldFilter.factory("created_by__username__istartswith"),
-        TextFieldFilter.factory("created_by__username__istartswith"),
-        TextFieldFilter.factory("assigned_to__username__istartswith"),
+        ("created_by", AutoCompleteFilter),
+        ("assigned_to", AutoCompleteFilter),
         "updated_at",
     )
     advanced_filter_fields = (
         "created_at",
         "status",
         "category",
+        ("registration_data_import__name", "RDI"),
         ("created_by__username", "created by"),
         ("assigned_to__username", "assigned to"),
         ("business_area__name", "business area"),
@@ -98,6 +99,11 @@ class TicketAddIndividualDetailsAdmin(HOPEModelAdminBase):
 @admin.register(TicketDeleteIndividualDetails)
 class TicketDeleteIndividualDetailsAdmin(HOPEModelAdminBase):
     raw_id_fields = ("ticket", "individual")
+
+
+@admin.register(TicketDeleteHouseholdDetails)
+class TicketDeleteHouseholdDetailsAdmin(HOPEModelAdminBase):
+    raw_id_fields = ("ticket", "household")
 
 
 @admin.register(TicketNeedsAdjudicationDetails)

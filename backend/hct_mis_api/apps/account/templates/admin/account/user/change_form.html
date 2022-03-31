@@ -1,4 +1,4 @@
-{% extends "admin_extra_urls/change_form.html" %}{% load staticfiles accounts i18n %}
+{% extends "admin_extra_buttons/change_form.html" %}{% load staticfiles accounts i18n %}
 {% block object-tools-items %}
     {{ block.super }}
     {% if request|is_root %}
@@ -10,5 +10,5 @@
         </a></li>
     {% endif %}
 
-{#    {% include "admin_extra_urls/includes/change_form_buttons.html" %}#}
+{#    {% include "admin_extra_buttons/includes/change_form_buttons.html" %}#}
 {% endblock %}

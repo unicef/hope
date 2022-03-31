@@ -13,9 +13,9 @@ from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 
-from admin_extra_urls.decorators import button
-from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
-from adminfilters.filters import TextFieldFilter
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from adminfilters.filters import ValueFilter
 
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
@@ -80,7 +80,7 @@ def should_show_assign_business_office(request, obj):
 
 
 class SplitBusinessAreaFilter(SimpleListFilter):
-    template = "adminfilters/fieldcombobox.html"
+    template = "adminfilters/combobox.html"
     title = "Split Business Area"
     parameter_name = "split"
 
@@ -103,13 +103,13 @@ class SplitBusinessAreaFilter(SimpleListFilter):
 
 
 @admin.register(FundsCommitment)
-class FundsCommitmentAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("rec_serial_number", "business_area", "funds_commitment_number", "posting_date")
     list_filter = (
         SplitBusinessAreaFilter,
         "mis_sync_date",
         "ca_sync_date",
-        TextFieldFilter.factory("business_area"),
+        ("business_area", ValueFilter),
     )
     date_hierarchy = "create_date"
     form = FundsCommitmentAddForm
@@ -156,7 +156,7 @@ class FundsCommitmentAdmin(ExtraUrlMixin, HOPEModelAdminBase):
             task.execute()
             self.message_user(request, "Exchange rate synced", messages.SUCCESS)
         else:
-            return _confirm_action(
+            return confirm_action(
                 self,
                 request,
                 self.execute_exchange_rate_sync,
@@ -166,7 +166,7 @@ class FundsCommitmentAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                         """
                 ),
                 "Successfully executed",
-                template="admin_extra_urls/confirm.html",
+                template="admin_extra_buttons/confirm.html",
             )
 
     def get_changeform_initial_data(self, request):
@@ -197,11 +197,11 @@ class DownPaymentAssignBusinessOffice(forms.ModelForm):
 
 
 @admin.register(DownPayment)
-class DownPaymentAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class DownPaymentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_filter = (
         "mis_sync_date",
         "ca_sync_date",
-        TextFieldFilter.factory("business_area"),
+        ("business_area", ValueFilter),
     )
     form = DownPaymentAddForm
     date_hierarchy = "create_date"

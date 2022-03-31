@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.db.models.functions import Lower
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.functional import Promise
 
 import graphene
@@ -62,7 +62,14 @@ class UsersFilter(FilterSet):
         }
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("first_name"), Lower("last_name"), "last_login", "status", "partner", "email")
+        fields=(
+            Lower("first_name"),
+            Lower("last_name"),
+            "last_login",
+            "status",
+            "partner",
+            "email",
+        )
     )
 
     def search_filter(self, qs, name, value):
@@ -87,7 +94,10 @@ class UsersFilter(FilterSet):
         business_area_slug = self.data.get("business_area")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(user_roles__role__id=value, user_roles__business_area__slug=business_area_slug)
+            q_obj |= Q(
+                user_roles__role__id=value,
+                user_roles__business_area__slug=business_area_slug,
+            )
         return qs.filter(q_obj)
 
 
@@ -150,8 +160,8 @@ class UserNode(DjangoObjectType):
 class LazyEncoder(DjangoJSONEncoder):
     def default(self, obj):
         if isinstance(obj, Promise):
-            return force_text(obj)
-        return super(LazyEncoder, self).default(obj)
+            return force_str(obj)
+        return super().default(obj)
 
 
 class JSONLazyString(graphene.Scalar):
@@ -221,6 +231,10 @@ class Query(graphene.ObjectType):
         return (
             get_user_model()
             .objects.prefetch_related("user_roles")
-            .filter(available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug)
+            .filter(
+                available_for_export=True,
+                is_superuser=False,
+                user_roles__business_area__slug=business_area_slug,
+            )
             .exists()
         )

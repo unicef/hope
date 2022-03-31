@@ -26,6 +26,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
+    close_delete_household_ticket,
     close_delete_individual_ticket,
     close_update_household_grievance_ticket,
     close_update_individual_grievance_ticket,
@@ -183,6 +184,13 @@ class CreateGrievanceTicketMutation(PermissionMutation):
                 "individual_delete_issue_type_extras",
             ],
         },
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {
+            "required": ["extras.issue_type.household_delete_issue_type_extras"],
+            "not_allowed": [
+                "household_data_update_issue_type_extras",
+                "individual_data_update_issue_type_extras",
+            ],
+        },
         GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.issue_type.individual_data_update_issue_type_extras"],
             "not_allowed": [
@@ -206,16 +214,37 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {"required": [], "not_allowed": []},
+        GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {
+            "required": [],
+            "not_allowed": [],
+        },
         GrievanceTicket.ISSUE_TYPE_FRAUD_FORGERY: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_FRAUD_MISUSE: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_HARASSMENT: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_GROSS_MISMANAGEMENT: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_PERSONAL_DISPUTES: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: {"required": [], "not_allowed": []},
+        GrievanceTicket.ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_GROSS_MISMANAGEMENT: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_PERSONAL_DISPUTES: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: {
+            "required": [],
+            "not_allowed": [],
+        },
         GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: {"required": [], "not_allowed": []},
     }
 
@@ -248,7 +277,13 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         if save_extra_method:
             grievances = save_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
         for grievance in grievances:
-            log_create(GrievanceTicket.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, grievance)
+            log_create(
+                GrievanceTicket.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                info.context.user,
+                None,
+                grievance,
+            )
         return cls(grievance_tickets=grievances)
 
     @classmethod
@@ -292,28 +327,63 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
     EXTRAS_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.household_data_update_issue_type_extras"],
-            "not_allowed": ["individual_data_update_issue_type_extras", "add_individual_issue_type_extras"],
+            "not_allowed": [
+                "individual_data_update_issue_type_extras",
+                "add_individual_issue_type_extras",
+            ],
         },
         GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.individual_data_update_issue_type_extras"],
-            "not_allowed": ["household_data_update_issue_type_extras", "add_individual_issue_type_extras"],
+            "not_allowed": [
+                "household_data_update_issue_type_extras",
+                "add_individual_issue_type_extras",
+            ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
             "required": ["extras.add_individual_issue_type_extras"],
-            "not_allowed": ["household_data_update_issue_type_extras", "individual_data_update_issue_type_extras"],
+            "not_allowed": [
+                "household_data_update_issue_type_extras",
+                "individual_data_update_issue_type_extras",
+            ],
+        },
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
+            "required": [],
+            "not_allowed": [],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {"required": [], "not_allowed": []},
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {"required": [], "not_allowed": []},
+        GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {
+            "required": [],
+            "not_allowed": [],
+        },
         GrievanceTicket.ISSUE_TYPE_FRAUD_FORGERY: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_FRAUD_MISUSE: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_HARASSMENT: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_GROSS_MISMANAGEMENT: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_PERSONAL_DISPUTES: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: {"required": [], "not_allowed": []},
+        GrievanceTicket.ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_GROSS_MISMANAGEMENT: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_PERSONAL_DISPUTES: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: {
+            "required": [],
+            "not_allowed": [],
+        },
         GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: {"required": [], "not_allowed": []},
     }
 
@@ -429,7 +499,10 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
                 grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
             grievance_ticket.assigned_to = assigned_to
-            if grievance_ticket.status in (GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_FOR_APPROVAL):
+            if grievance_ticket.status in (
+                GrievanceTicket.STATUS_ON_HOLD,
+                GrievanceTicket.STATUS_FOR_APPROVAL,
+            ):
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
         else:
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
@@ -449,7 +522,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             and grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
         ):
             back_to_in_progress_notification = GrievanceNotification(
-                grievance_ticket, GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS, approver=info.context.user
+                grievance_ticket,
+                GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                approver=info.context.user,
             )
             back_to_in_progress_notification.send_email_notification()
         if old_assigned_to != grievance_ticket.assigned_to:
@@ -463,9 +538,18 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 POSSIBLE_STATUS_FLOW = {
     GrievanceTicket.STATUS_NEW: (GrievanceTicket.STATUS_ASSIGNED,),
     GrievanceTicket.STATUS_ASSIGNED: (GrievanceTicket.STATUS_IN_PROGRESS,),
-    GrievanceTicket.STATUS_IN_PROGRESS: (GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_FOR_APPROVAL),
-    GrievanceTicket.STATUS_ON_HOLD: (GrievanceTicket.STATUS_IN_PROGRESS, GrievanceTicket.STATUS_FOR_APPROVAL),
-    GrievanceTicket.STATUS_FOR_APPROVAL: (GrievanceTicket.STATUS_IN_PROGRESS, GrievanceTicket.STATUS_CLOSED),
+    GrievanceTicket.STATUS_IN_PROGRESS: (
+        GrievanceTicket.STATUS_ON_HOLD,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+    ),
+    GrievanceTicket.STATUS_ON_HOLD: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_FOR_APPROVAL,
+    ),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
     GrievanceTicket.STATUS_CLOSED: (),
 }
 POSSIBLE_FEEDBACK_STATUS_FLOW = {
@@ -481,7 +565,10 @@ POSSIBLE_FEEDBACK_STATUS_FLOW = {
         GrievanceTicket.STATUS_FOR_APPROVAL,
         GrievanceTicket.STATUS_CLOSED,
     ),
-    GrievanceTicket.STATUS_FOR_APPROVAL: (GrievanceTicket.STATUS_IN_PROGRESS, GrievanceTicket.STATUS_CLOSED),
+    GrievanceTicket.STATUS_FOR_APPROVAL: (
+        GrievanceTicket.STATUS_IN_PROGRESS,
+        GrievanceTicket.STATUS_CLOSED,
+    ),
     GrievanceTicket.STATUS_CLOSED: (),
 }
 
@@ -495,6 +582,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: close_update_individual_grievance_ticket,
             GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: close_add_individual_grievance_ticket,
             GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: close_delete_individual_ticket,
+            GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: close_delete_household_ticket,
         },
         GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: {
             GrievanceTicket.ISSUE_TYPE_DATA_BREACH: _no_operation_close_method,
@@ -519,7 +607,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: close_system_flagging_ticket,
     }
 
-    MOVE_TO_STATUS_PERMISSION_MAPPING: Dict[str, Dict[Union[str, int], List[Enum]]] = {
+    MOVE_TO_STATUS_PERMISSION_MAPPING: dict[str, dict[Union[str, int], list[Enum]]] = {
         GrievanceTicket.STATUS_ASSIGNED: {
             "any": [
                 Permissions.GRIEVANCES_UPDATE,
@@ -589,7 +677,6 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             return cls(grievance_ticket)
 
         if cls.MOVE_TO_STATUS_PERMISSION_MAPPING.get(status):
-            permissions_to_use = None
             if cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("feedback"):
                 if grievance_ticket.is_feedback:
                     permissions_to_use = cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("feedback")
@@ -619,6 +706,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if status == GrievanceTicket.STATUS_CLOSED:
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket, info)
+            grievance_ticket.refresh_from_db()
         if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
             cls.has_permission(info, Permissions.GRIEVANCE_ASSIGN, grievance_ticket.business_area)
             grievance_ticket.assigned_to = info.context.user
@@ -645,7 +733,9 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             and grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
         ):
             back_to_in_progress_notification = GrievanceNotification(
-                grievance_ticket, GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS, approver=info.context.user
+                grievance_ticket,
+                GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                approver=info.context.user,
             )
             back_to_in_progress_notification.send_email_notification()
         if old_grievance_ticket.assigned_to != grievance_ticket.assigned_to:
@@ -685,7 +775,10 @@ class CreateTicketNoteMutation(PermissionMutation):
 
         ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=created_by)
         notification = GrievanceNotification(
-            grievance_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=created_by, ticket_note=ticket_note
+            grievance_ticket,
+            GrievanceNotification.ACTION_NOTES_ADDED,
+            created_by=created_by,
+            ticket_note=ticket_note,
         )
         notification.send_email_notification()
         return cls(grievance_ticket_note=ticket_note)
@@ -796,7 +889,15 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, PermissionMutation
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, household_approve_data, flex_fields_approve_data, **kwargs):
+    def mutate(
+        cls,
+        root,
+        info,
+        grievance_ticket_id,
+        household_approve_data,
+        flex_fields_approve_data,
+        **kwargs,
+    ):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
@@ -907,7 +1008,12 @@ class ReassignRoleMutation(graphene.Mutation):
                 logger.error("This individual is not a head of provided household")
                 raise GraphQLError("This individual is not a head of provided household")
         else:
-            get_object_or_404(IndividualRoleInHousehold, individual=current_individual, household=household, role=role)
+            get_object_or_404(
+                IndividualRoleInHousehold,
+                individual=current_individual,
+                household=household,
+                role=role,
+            )
 
     @classmethod
     @is_authenticated
@@ -947,7 +1053,10 @@ class ReassignRoleMutation(graphene.Mutation):
             role_data_key = role
         else:
             role_object = get_object_or_404(
-                IndividualRoleInHousehold, individual=ticket_individual, household=household, role=role
+                IndividualRoleInHousehold,
+                individual=ticket_individual,
+                household=household,
+                role=role,
             )
             role_data_key = str(role_object.id)
 
@@ -994,7 +1103,10 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             decoded_selected_individual_id = decode_id_string(selected_individual_id)
             selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
 
-            if selected_individual not in (ticket_details.golden_records_individual, ticket_details.possible_duplicate):
+            if selected_individual not in (
+                ticket_details.golden_records_individual,
+                ticket_details.possible_duplicate,
+            ):
                 logger.error("The selected individual is not valid, must be one of those attached to the ticket")
                 raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
 
@@ -1015,6 +1127,7 @@ class Mutations(graphene.ObjectType):
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
     approve_add_individual = SimpleApproveMutation.Field()
     approve_delete_individual = SimpleApproveMutation.Field()
+    approve_delete_household = SimpleApproveMutation.Field()
     approve_system_flagging = SimpleApproveMutation.Field()
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()

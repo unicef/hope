@@ -6,7 +6,7 @@ import {
   ReportNode,
   AllReportsQueryVariables,
   useAllReportsQuery,
-  useMeQuery,
+  MeQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './ReportingHeadCells';
@@ -19,16 +19,14 @@ interface ReportingTableProps {
   businessArea: string;
   filter;
   choicesData: ReportChoiceDataQuery;
+  meData: MeQuery;
 }
 export const ReportingTable = ({
   businessArea,
   filter,
   choicesData,
+  meData,
 }: ReportingTableProps): React.ReactElement => {
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-first',
-  });
-  if (meLoading) return null;
   const initialVariables = {
     businessArea,
     createdFrom: filter.createdFrom,

@@ -1,7 +1,11 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { HeadCell } from '../../components/table/EnhancedTableHead';
-import { Order, TableComponent } from '../../components/table/TableComponent';
+import React, { ReactElement, useState } from 'react';
+import useDeepCompareEffect from 'use-deep-compare-effect'
+import { LoadingComponent } from '../../components/core/LoadingComponent';
+import { HeadCell } from '../../components/core/Table/EnhancedTableHead';
+import {
+  Order,
+  TableComponent,
+} from '../../components/core/Table/TableComponent';
 import { columnToOrderBy } from '../../utils/utils';
 
 interface UniversalTableProps<T, K> {
@@ -56,16 +60,16 @@ export function UniversalTable<T, K>({
     fetchPolicy: 'network-only',
   });
 
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     if (initialVariables) {
       setPage(0);
     }
   }, [initialVariables]);
   if (error) {
-    // eslint-disable-next-line no-console
+    //  eslint-disable-next-line no-console
     console.error(error);
+    return <div>Unexpected error</div>;
   }
-
   if (!data && loading) return <LoadingComponent />;
 
   let correctTitle = title;

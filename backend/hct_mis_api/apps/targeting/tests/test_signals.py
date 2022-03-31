@@ -3,6 +3,7 @@ from django.core.management import call_command
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
@@ -15,7 +16,7 @@ from hct_mis_api.apps.targeting.models import (
 class TestTargetPopulationQuery(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command("loadbusinessareas")
+        create_afghanistan()
         business_area = BusinessArea.objects.first()
         cls.households = []
         (household, individuals) = create_household(
@@ -64,6 +65,7 @@ class TestTargetPopulationQuery(APITestCase):
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_DRAFT,
+            business_area=BusinessArea.objects.first(),
         )
         tp.save()
 
@@ -82,6 +84,7 @@ class TestTargetPopulationQuery(APITestCase):
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_DRAFT,
+            business_area=BusinessArea.objects.first(),
         )
         tp.save()
 

@@ -1,11 +1,9 @@
-from __future__ import absolute_import
-
 # import defaults
 from importlib import import_module
 
 from .base import *
 
-overrides = import_module("hct_mis_api.settings.{}".format(ENV))
+overrides = import_module(f"hct_mis_api.settings.{ENV}")
 
 # apply imported overrides
 for attr in dir(overrides):

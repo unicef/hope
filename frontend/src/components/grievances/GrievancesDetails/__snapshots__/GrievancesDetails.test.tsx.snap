@@ -1,0 +1,303 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/grievances/GrievancesDetails should render 1`] = `
+<div>
+  <div
+    class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+  >
+    <div
+      class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
+    >
+      <div
+        class="sc-bZQynM ghLfwz"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-h6"
+        >
+          Details
+        </h6>
+      </div>
+      <div
+        class="sc-ifAKCX iZCSws"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                STATUS
+              </span>
+              <div>
+                <div
+                  class="sc-gzVnrw bspsIV"
+                >
+                  <div
+                    class="sc-EHOje eoikBB"
+                    data-cy="status-container"
+                  >
+                    In Progress
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                CATEGORY
+              </span>
+              <div>
+                <span>
+                  Data Change
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Issue Type
+              </span>
+              <div>
+                <span>
+                  Withdraw Individual
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                HOUSEHOLD ID
+              </span>
+              <div>
+                <span>
+                  <a
+                    class="sc-bwzfXH emFVa"
+                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE="
+                  >
+                    HH-20-0000.0001
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                INDIVIDUAL ID
+              </span>
+              <div>
+                <span>
+                  <a
+                    class="sc-bwzfXH emFVa"
+                    href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
+                  >
+                    IND-88-0000.0005
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                PAYMENT ID
+              </span>
+              <div>
+                <span>
+                  -
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                CONSENT
+              </span>
+              <div>
+                <span>
+                  Yes
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                CREATED BY
+              </span>
+              <div>
+                <span>
+                  Maciej Szewczyk
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                DATE CREATED
+              </span>
+              <div>
+                <time
+                  datetime="1644571534682"
+                >
+                  11 Feb 2022
+                </time>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                LAST MODIFIED DATE
+              </span>
+              <div>
+                <time
+                  datetime="1644571964102"
+                >
+                  11 Feb 2022
+                </time>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                DESCRIPTION
+              </span>
+              <div>
+                <span>
+                  dwdw
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                ASSIGNED TO
+              </span>
+              <div>
+                <span>
+                  Maciej Szewczyk
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                ADMINISTRATIVE LEVEL 2
+              </span>
+              <div>
+                <span />
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                AREA / VILLAGE / PAY POINT
+              </span>
+              <div>
+                <span />
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                LANGUAGES SPOKEN
+              </span>
+              <div>
+                <span>
+                  -
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

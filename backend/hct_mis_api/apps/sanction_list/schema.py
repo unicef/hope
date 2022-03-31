@@ -1,6 +1,7 @@
-import graphene
 from django.db.models.functions import Lower
-from django_filters import FilterSet
+
+import graphene
+from django_filters import CharFilter, FilterSet
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -9,11 +10,11 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
+    SanctionListIndividualAliasName,
+    SanctionListIndividualCountries,
+    SanctionListIndividualDateOfBirth,
     SanctionListIndividualDocument,
     SanctionListIndividualNationalities,
-    SanctionListIndividualCountries,
-    SanctionListIndividualAliasName,
-    SanctionListIndividualDateOfBirth,
 )
 
 

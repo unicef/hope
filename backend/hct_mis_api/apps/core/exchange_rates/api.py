@@ -3,6 +3,7 @@ import os
 
 from django.conf import settings
 from django.core.cache import cache
+
 from requests import session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
@@ -45,4 +46,3 @@ class ExchangeRateAPI:
         if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
             cache.set("exchange_rates", response_json, settings.EXCHANGE_RATE_CACHE_EXPIRY)
         return response_json
-

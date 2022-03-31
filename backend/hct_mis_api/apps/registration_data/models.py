@@ -7,7 +7,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
@@ -43,15 +43,15 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     IMPORT_ERROR = "IMPORT_ERROR"
     MERGE_ERROR = "MERGE_ERROR"
     STATUS_CHOICE = (
+        (DEDUPLICATION, _("Deduplication")),
+        (DEDUPLICATION_FAILED, _("Deduplication Failed")),
+        (IMPORTING, _("Importing")),
+        (IMPORT_ERROR, _("Import Error")),
         (IN_REVIEW, _("In Review")),
         (MERGED, _("Merged")),
         (MERGING, _("Merging")),
-        (IMPORTING, _("Importing")),
-        (DEDUPLICATION_FAILED, _("Deduplication Failed")),
-        (DEDUPLICATION, _("Deduplication")),
-        (REFUSED_IMPORT, _("Refused import")),
-        (IMPORT_ERROR, _("Import Error")),
         (MERGE_ERROR, _("Merge Error")),
+        (REFUSED_IMPORT, _("Refused import")),
     )
     XLS = "XLS"
     KOBO = "KOBO"
@@ -105,3 +105,17 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
 
     def should_check_against_sanction_list(self):
         return self.screen_beneficiary
+
+    @classmethod
+    def get_choices(cls, business_area_slug=None):
+        filters = {}
+        if business_area_slug:
+            filters["business_area__slug"] = business_area_slug
+        queryset = cls.objects.filter(**filters)
+        return [
+            {
+                "label": {"English(EN)": f"{rdi.name}"},
+                "value": rdi.id,
+            }
+            for rdi in queryset
+        ]

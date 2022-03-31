@@ -12,8 +12,8 @@ import {
   Select,
 } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
-import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
-import { FieldLabel } from '../../../components/FieldLabel';
+import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
+import { FieldLabel } from '../../../components/core/FieldLabel';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;

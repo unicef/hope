@@ -1,11 +1,12 @@
 import { GraphQLError } from 'graphql';
+import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
   ProgramStatus,
+  TargetPopulationStatus,
 } from '../__generated__/graphql';
-import { ValidationGraphQLError } from '../apollo/client';
 import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
 
 const Gender = new Map([
@@ -166,18 +167,20 @@ export function targetPopulationStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
-  switch (status) {
-    case 'DRAFT':
-      return theme.hctPalette.gray;
-    case 'LOCKED':
-      return theme.hctPalette.oragne;
-    case 'PROCESSING':
-      return theme.hctPalette.green;
-    case 'READY_FOR_CASH_ASSIST':
-      return theme.hctPalette.green;
-    default:
-      return theme.palette.error.main;
+  const colorsMap = {
+    [TargetPopulationStatus.Draft]: theme.hctPalette.gray,
+    [TargetPopulationStatus.Locked]: theme.hctPalette.red,
+    [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
+    [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
+    [TargetPopulationStatus.SteficonWait]: theme.hctPalette.oragne,
+    [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
+    [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
+    [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
   }
+  return theme.palette.error.main;
 }
 
 export function userStatusToColor(
@@ -195,6 +198,21 @@ export function userStatusToColor(
       return theme.palette.error.main;
   }
 }
+
+export function householdStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'ACTIVE':
+      return theme.hctPalette.green;
+    case 'INACTIVE':
+      return theme.palette.error.main;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
 export function grievanceTicketStatusToColor(
   theme: typeof themeObj,
   status: string,

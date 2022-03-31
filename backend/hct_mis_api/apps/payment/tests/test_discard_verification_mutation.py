@@ -1,23 +1,28 @@
 from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
-from hct_mis_api.apps.household.fixtures import (
-    create_household,
-    EntitlementCardFactory,
-)
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
+    PaymentRecordFactory,
     PaymentVerificationFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
-from hct_mis_api.apps.program.fixtures import ProgramFactory, CashPlanFactory
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    PaymentVerification,
+)
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 
 
 class TestDiscardVerificationMutation(APITestCase):
@@ -27,7 +32,6 @@ class TestDiscardVerificationMutation(APITestCase):
           discardCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
             cashPlan{
                 name
-                verificationStatus
                 verifications {
                     edges {
                         node {
@@ -52,7 +56,7 @@ class TestDiscardVerificationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
-        call_command("loadbusinessareas")
+        create_afghanistan()
         payment_record_amount = 10
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -65,12 +69,11 @@ class TestDiscardVerificationMutation(APITestCase):
             candidate_list_targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
         )
-        cash_plan = CashPlanFactory.build(
+        cash_plan = CashPlanFactory(
+            name="TEST",
             program=program,
             business_area=cls.business_area,
         )
-        cash_plan.name = "TEST"
-        cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
         cash_plan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
         cash_plan_payment_verification.save()

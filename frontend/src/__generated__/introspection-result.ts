@@ -21,6 +21,9 @@
             "name": "LogEntryNode"
           },
           {
+            "name": "PaymentVerificationLogEntryNode"
+          },
+          {
             "name": "UserNode"
           },
           {
@@ -57,6 +60,9 @@
             "name": "TargetPopulationNode"
           },
           {
+            "name": "RuleCommitNode"
+          },
+          {
             "name": "SteficonRuleNode"
           },
           {
@@ -73,6 +79,9 @@
           },
           {
             "name": "TicketPaymentVerificationDetailsNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationSummaryNode"
           },
           {
             "name": "TicketComplaintDetailsNode"
@@ -129,6 +138,9 @@
             "name": "TicketAddIndividualDetailsNode"
           },
           {
+            "name": "TicketDeleteHouseholdDetailsNode"
+          },
+          {
             "name": "TicketNoteNode"
           },
           {
@@ -148,6 +160,9 @@
           },
           {
             "name": "ImportDataNode"
+          },
+          {
+            "name": "KoboImportDataNode"
           },
           {
             "name": "ImportedDocumentNode"

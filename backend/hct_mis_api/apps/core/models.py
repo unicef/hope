@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.contrib.gis.db import models
-from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.utils.translation import ugettext_lazy as _
+from django.db.models import JSONField
+from django.utils.translation import gettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
@@ -50,11 +50,20 @@ class BusinessArea(TimeStampedUUIDModel):
     custom_fields = JSONField(default=dict, blank=True)
 
     has_data_sharing_agreement = models.BooleanField(default=False)
-    parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
+    parent = models.ForeignKey(
+        "self",
+        related_name="children",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     is_split = models.BooleanField(default=False)
 
     countries = models.ManyToManyField(
-        "AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0}, related_name="business_areas"
+        "AdminAreaLevel",
+        blank=True,
+        limit_choices_to={"admin_level": 0},
+        related_name="business_areas",
     )
     countries_new = models.ManyToManyField("geo.Country", related_name="business_areas")
     deduplication_duplicate_score = models.FloatField(
@@ -69,16 +78,20 @@ class BusinessArea(TimeStampedUUIDModel):
     )
 
     deduplication_batch_duplicates_percentage = models.IntegerField(
-        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+        default=50,
+        help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
     )
     deduplication_batch_duplicates_allowed = models.IntegerField(
-        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
+        default=5,
+        help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
     deduplication_golden_record_duplicates_percentage = models.IntegerField(
-        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+        default=50,
+        help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted",
     )
     deduplication_golden_record_duplicates_allowed = models.IntegerField(
-        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
+        default=5,
+        help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
     screen_beneficiary = models.BooleanField(default=False)
 
@@ -89,7 +102,7 @@ class BusinessArea(TimeStampedUUIDModel):
             self.parent.save()
         if self.children.count():
             self.is_split = True
-        super(BusinessArea, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ["name"]
@@ -137,12 +150,20 @@ class AdminAreaLevel(TimeStampedUUIDModel):
     display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
     admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"), blank=True, null=True)
     business_area = models.ForeignKey(
-        "BusinessArea", on_delete=models.SET_NULL, related_name="admin_area_level", null=True, blank=True
+        "BusinessArea",
+        on_delete=models.SET_NULL,
+        related_name="admin_area_level",
+        null=True,
+        blank=True,
     )
     area_code = models.CharField(max_length=8, blank=True, null=True)
     country_name = models.CharField(max_length=100, blank=True, null=True)
     country = models.ForeignKey(
-        "self", blank=True, null=True, limit_choices_to={"admin_level": 0}, on_delete=models.CASCADE
+        "self",
+        blank=True,
+        null=True,
+        limit_choices_to={"admin_level": 0},
+        on_delete=models.CASCADE,
     )
     datamart_id = models.CharField(max_length=8, blank=True, null=True, unique=True)
     objects = AdminAreaLevelManager()
@@ -160,12 +181,12 @@ class AdminAreaLevel(TimeStampedUUIDModel):
     def __str__(self):
         if self.admin_level == 0:
             return self.country_name or ""
-        return "{} - {}".format(self.area_code, self.name)
+        return f"{self.area_code} - {self.name}"
 
 
 class AdminAreaManager(TreeManager):
     def get_queryset(self):
-        return super(AdminAreaManager, self).get_queryset().order_by("title").select_related("admin_area_level")
+        return super().get_queryset().order_by("title").select_related("admin_area_level")
 
 
 class AdminArea(MPTTModel, TimeStampedUUIDModel):
@@ -181,7 +202,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     """
 
     external_id = models.CharField(
-        help_text="An ID representing this instance in  datamart", blank=True, null=True, max_length=32
+        help_text="An ID representing this instance in  datamart",
+        blank=True,
+        null=True,
+        max_length=32,
     )
 
     title = models.CharField(max_length=255)
@@ -219,12 +243,9 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     def __str__(self):
         level_name = self.admin_area_level.name if self.admin_area_level else ""
         if self.p_code:
-            return "{} ({} {})".format(
-                self.title,
-                level_name,
-                "{}: {}".format("CERD" if level_name == "School" else "PCode", self.p_code or ""),
-            )
-
+            code_type = "CERD" if level_name == "School" else "PCode"
+            pcode_string = f"{code_type}: {self.p_code or ''}"
+            return f"{self.title} ({level_name} {pcode_string})"
         return self.title
 
     def country(self):
@@ -239,7 +260,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
 
     @property
     def point_lat_long(self):
-        return "Lat: {}, Long: {}".format(self.point.y, self.point.x)
+        return f"Lat: {self.point.y}, Long: {self.point.x}"
 
     @classmethod
     def get_admin_areas_as_choices(cls, admin_level, business_area=None):
@@ -248,7 +269,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
             queryset.filter(admin_area_level__business_area=business_area)
         queryset = queryset.order_by("title")
         return [
-            {"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code}
+            {
+                "label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"},
+                "value": admin_area.p_code,
+            }
             for admin_area in queryset
         ]
 
@@ -259,7 +283,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
             queryset.filter(admin_area_level__business_area=business_area)
         queryset = queryset.order_by("title")
         return [
-            {"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code}
+            {
+                "label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"},
+                "value": admin_area.p_code,
+            }
             for admin_area in queryset
         ]
 
@@ -276,14 +303,14 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     DATE = "DATE"
     GEOPOINT = "GEOPOINT"
     TYPE_CHOICE = Choices(
-        (STRING, _("String")),
+        (DATE, _("Date")),
+        (DECIMAL, _("Decimal")),
         (IMAGE, _("Image")),
         (INTEGER, _("Integer")),
-        (DECIMAL, _("Decimal")),
+        (GEOPOINT, _("Geopoint")),
         (SELECT_ONE, _("Select One")),
         (SELECT_MANY, _("Select Many")),
-        (DATE, _("Date")),
-        (GEOPOINT, _("Geopoint")),
+        (STRING, _("String")),
     )
     ASSOCIATED_WITH_CHOICES = (
         (0, _("Household")),
@@ -366,11 +393,11 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     PROCESSING = "PROCESSING"
     CONNECTION_FAILED = "CONNECTION_FAILED"
     KOBO_FORM_UPLOAD_STATUS_CHOICES = (
-        (SUCCESSFUL, _("Successful")),
-        (UPLOADED, _("Successful")),
-        (UNSUCCESSFUL, _("Unsuccessful")),
-        (PROCESSING, _("Processing")),
         (CONNECTION_FAILED, _("Connection failed")),
+        (PROCESSING, _("Processing")),
+        (SUCCESSFUL, _("Successful")),
+        (UNSUCCESSFUL, _("Unsuccessful")),
+        (UPLOADED, _("Uploaded")),
     )
 
     class Meta:
@@ -427,7 +454,7 @@ class CountryCodeMapManager(models.Manager):
 
 class CountryCodeMap(models.Model):
     country = CountryField(unique=True)
-    country_new = models.ForeignKey("geo.Country", blank=True, null=True, unique=True, on_delete=models.PROTECT)
+    country_new = models.OneToOneField("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     ca_code = models.CharField(max_length=5, unique=True)
 
     objects = CountryCodeMapManager()
