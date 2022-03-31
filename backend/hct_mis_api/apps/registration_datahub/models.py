@@ -414,3 +414,10 @@ class KoboImportedSubmission(models.Model):
         blank=True,
         on_delete=models.CASCADE,
     )
+
+
+class Record(models.Model):
+    registration = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    storage = models.BinaryField(null=True, blank=True)
+    ignored = models.BooleanField(default=False, blank=True)
