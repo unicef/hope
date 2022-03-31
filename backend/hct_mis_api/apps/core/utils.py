@@ -618,6 +618,12 @@ def admin_area1_query(comparision_method, args):
     )
 
 
+def registration_data_import_query(comparison_method, args):
+    from django.db.models import Q
+
+    return Q(registration_data_import__pk__in=args)
+
+
 class CaIdIterator:
     def __init__(self, name):
         self.name = name
@@ -721,6 +727,3 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
     ).values_list("unicef_id", flat=True)
     excluded_household_ids_array.extend(excluded_household_ids_from_individuals_array)
     return excluded_household_ids_array
-
-
-

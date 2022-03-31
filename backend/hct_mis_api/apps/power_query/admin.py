@@ -11,9 +11,10 @@ from django.shortcuts import render
 from django.urls import reverse
 
 import tablib
-from admin_extra_urls.decorators import button
-from admin_extra_urls.mixins import ExtraUrlMixin
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.mixin import AdminFiltersMixin
 from import_export import fields, resources
 from import_export.admin import ImportExportMixin
 from import_export.widgets import ForeignKeyWidget
@@ -47,7 +48,7 @@ class QueryResource(resources.ModelResource):
 
 
 @register(Query)
-class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
+class QueryAdmin(ImportExportMixin, AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
     list_display = ("name", "target", "description", "owner", "status", "is_ready")
     search_fields = ("name",)
     list_filter = (
@@ -126,7 +127,7 @@ class QueryAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
 
 
 @register(Dataset)
-class DatasetAdmin(ExtraUrlMixin, ModelAdmin):
+class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
     search_fields = ("query__name",)
     list_display = ("query", "dataset_type", "target_type")
     list_filter = (("query__target", AutoCompleteFilter),)
@@ -186,7 +187,7 @@ class FormatterResource(resources.ModelResource):
 
 
 @register(Formatter)
-class FormatterAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
+class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
     list_display = ("name", "content_type")
     search_fields = ("name",)
     list_filter = ("content_type",)
@@ -231,7 +232,7 @@ class ReportResource(resources.ModelResource):
 
 
 @register(Report)
-class ReportAdmin(ImportExportMixin, ExtraUrlMixin, ModelAdmin):
+class ReportAdmin(ImportExportMixin, ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
     list_display = ("name", "query", "formatter", "is_ready", "last_run")
     autocomplete_fields = ("query", "formatter")
     filter_horizontal = ("available_to",)

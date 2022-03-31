@@ -3,13 +3,14 @@ from django.contrib.admin import ChoicesFieldListFilter, RelatedFieldListFilter
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import RelatedFieldComboFilter
+from adminfilters.mixin import AdminFiltersMixin
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.activity_log.models import LogEntry
 
 
 @admin.register(LogEntry)
-class LogEntryAdmin(AdminAdvancedFiltersMixin, admin.ModelAdmin):
+class LogEntryAdmin(AdminAdvancedFiltersMixin, AdminFiltersMixin, admin.ModelAdmin):
     list_display = (
         "timestamp",
         "user",

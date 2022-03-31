@@ -33,10 +33,11 @@ from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
 import requests
-from admin_extra_urls.api import ExtraUrlMixin, button
+from admin_extra_buttons.api import ExtraButtonsMixin, button
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import AllValuesComboFilter
+from adminfilters.mixin import AdminFiltersMixin
 from constance import config
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
@@ -318,7 +319,7 @@ class BusinessAreaFilter(SimpleListFilter):
 
 
 @admin.register(account_models.Partner)
-class PartnerAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class PartnerAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_filter = ("is_un",)
     search_fields = ("name",)
 
@@ -332,7 +333,7 @@ class HopeUserCreationForm(UserCreationForm):
 
 
 @admin.register(account_models.User)
-class UserAdmin(ExtraUrlMixin, LinkedObjectsMixin, AdminActionPermMixin, BaseUserAdmin):
+class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminActionPermMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
@@ -926,7 +927,7 @@ class RoleResource(resources.ModelResource):
 
 
 @admin.register(account_models.Role)
-class RoleAdmin(ImportExportModelAdmin, ExtraUrlMixin, HOPEModelAdminBase):
+class RoleAdmin(ImportExportModelAdmin, ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("name", "subsystem")
     search_fields = ("name",)
     form = RoleAdminForm
@@ -1004,7 +1005,7 @@ class UserRoleAdmin(HOPEModelAdminBase):
 
 
 class IncompatibleRoleFilter(SimpleListFilter):
-    template = "adminfilters/fieldcombobox.html"
+    template = "adminfilters/combobox.html"
     title = "Role"
     parameter_name = "role"
 
@@ -1040,7 +1041,7 @@ class GroupResource(resources.ModelResource):
 
 
 @smart_register(Group)
-class GroupAdmin(ImportExportModelAdmin, ExtraUrlMixin, _GroupAdmin):
+class GroupAdmin(ImportExportModelAdmin, ExtraButtonsMixin, _GroupAdmin):
     resource_class = GroupResource
     change_list_template = "admin/account/group/change_list.html"
 
