@@ -29,12 +29,13 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     LazyEvalMethodsDict,
     admin_area1_query,
     registration_data_import_query,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -223,12 +224,12 @@ CORE_FIELDS_ATTRIBUTES = [
             "id": "c53ea58b-e7cf-4bf3-82d0-dec41f66ef3a",
             "type": TYPE_SELECT_ONE,
             "name": "admin1",
-            "lookup": "admin_area__p_code",
+            "lookup": "admin_area_new__p_code",
             "get_query": admin_area1_query,
             "required": False,
             "label": {"English(EN)": "Household resides in which ${admin1_h_c}?"},
             "hint": "",
-            "choices": lambda: AdminArea.get_admin_areas_as_choices(1),
+            "choices": lambda: Area.get_admin_areas_as_choices(1),
             "associated_with": _HOUSEHOLD,
             "xlsx_field": "admin1_h_c",
         },
@@ -239,11 +240,11 @@ CORE_FIELDS_ATTRIBUTES = [
             "id": "e4eb6632-8204-44ed-b39c-fe791ded9246",
             "type": TYPE_SELECT_ONE,
             "name": "admin2",
-            "lookup": "admin_area__p_code",
+            "lookup": "admin_area_new__p_code",
             "required": False,
             "label": {"English(EN)": "Household resides in which ${admin2_h_c}?"},
             "hint": "",
-            "choices": lambda: AdminArea.get_admin_areas_as_choices(2),
+            "choices": lambda: Area.get_admin_areas_as_choices(2),
             "associated_with": _HOUSEHOLD,
             "xlsx_field": "admin2_h_c",
         }
@@ -1487,7 +1488,7 @@ HOUSEHOLD_EDIT_ONLY_FIELDS = [
             "required": False,
             "label": {"English(EN)": "Household resides in which admin area?"},
             "hint": "",
-            "choices": lambda: AdminArea.get_admin_areas(),
+            "choices": lambda: Area.get_admin_areas(),
             "associated_with": _HOUSEHOLD,
             "xlsx_field": "admin_area_h_c",
         },

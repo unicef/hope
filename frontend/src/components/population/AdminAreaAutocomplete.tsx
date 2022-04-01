@@ -44,7 +44,7 @@ export function AdminAreaAutocomplete({
   const [loadAdminAreas, { data, loading }] = useAllAdminAreasLazyQuery({
     variables: {
       first: 50,
-      title: debouncedInputText,
+      name: debouncedInputText,
       businessArea,
       level: 2,
     },
@@ -82,7 +82,7 @@ export function AdminAreaAutocomplete({
         if (!option.node) {
           return '';
         }
-        return `${option.node.title}`;
+        return `${option.node.name}`;
       }}
       disabled={disabled}
       options={get(data, 'allAdminAreas.edges', [])}
