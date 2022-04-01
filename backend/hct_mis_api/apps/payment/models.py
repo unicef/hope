@@ -3,7 +3,6 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField
-from django.db.models.signals import post_save
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -358,7 +357,9 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, verbose_name="Verification status", db_index=True
+    )
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     cash_plan = models.OneToOneField(
