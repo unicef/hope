@@ -1,0 +1,63 @@
+[
+{
+  "model": "grievance.grievanceticket",
+  "pk": "bb62b92a-7cf0-4b40-a358-5a880d82862f",
+  "fields": {
+    "created_at": "2022-03-30T09:54:07.827",
+    "updated_at": "2022-03-30T09:54:07.827",
+    "version": 1648633101142787,
+    "user_modified": null,
+    "last_notification_sent": null,
+    "created_by": null,
+    "assigned_to": null,
+    "status": 1,
+    "category": 8,
+    "issue_type": null,
+    "description": "",
+    "admin2": "4e76f0b2-ce78-4cb9-ba89-f3f5e94cdfa2",
+    "admin2_new": "5f06eb31-3b5d-4bd5-b293-a89ba7981bfc",
+    "area": "",
+    "language": "",
+    "consent": true,
+    "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+    "registration_data_import": "04992dce-154b-4938-8e47-74341541ebcf",
+    "unicef_id": "GRV-000001",
+    "extras": {}
+  }
+},
+{
+  "model": "grievance.ticketneedsadjudicationdetails",
+  "pk": "f1e1a58a-dba8-4311-b03f-8ea4b83d2f83",
+  "fields": {
+    "created_at": "2022-03-30T09:54:07.830",
+    "updated_at": "2022-03-30T09:54:07.830",
+    "ticket": "bb62b92a-7cf0-4b40-a358-5a880d82862f",
+    "golden_records_individual": "cedd4b49-54e0-4408-8fd2-1030f05a7a6a",
+    "possible_duplicate": "a94e76d8-ecc2-479e-ae14-db8f49017546",
+    "selected_individual": null,
+    "role_reassign_data": {},
+    "extra_data": {
+      "golden_records": [
+        {
+          "dob": "1901-01-10",
+          "score": 9.0,
+          "hit_id": "a94e76d8-ecc2-479e-ae14-db8f49017546",
+          "location": null,
+          "full_name": "Jan Romaniak",
+          "proximity_to_score": 3.0
+        }
+      ],
+      "possible_duplicate": [
+        {
+          "dob": "1991-11-18",
+          "score": 9.0,
+          "hit_id": "cedd4b49-54e0-4408-8fd2-1030f05a7a6a",
+          "location": null,
+          "full_name": "Jan Romaniak",
+          "proximity_to_score": 3.0
+        }
+      ]
+    }
+  }
+}
+]
