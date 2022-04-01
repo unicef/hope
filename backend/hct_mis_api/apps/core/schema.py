@@ -275,13 +275,11 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
 
 
 class Query(graphene.ObjectType):
-    admin_area = relay.Node.Field(AdminAreaNode)
     business_area = graphene.Field(
         BusinessAreaNode,
         business_area_slug=graphene.String(required=True, description="The business area slug"),
         description="Single business area",
     )
-    all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
     all_fields_attributes = graphene.List(
         FieldAttributeNode,

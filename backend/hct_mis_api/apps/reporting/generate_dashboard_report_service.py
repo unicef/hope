@@ -19,6 +19,7 @@ from openpyxl.writer.excel import save_virtual_workbook
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
@@ -372,8 +373,8 @@ class GenerateDashboardReportContentHelpers:
         # only for country dashboard
         valid_payment_records = cls._get_payment_records_for_report(report)
         admin_areas = (
-            AdminArea.objects.filter(
-                level=2,
+            Area.objects.filter(
+                area_type__area_level=2,
                 household__payment_records__in=valid_payment_records,
             )
             .distinct()
