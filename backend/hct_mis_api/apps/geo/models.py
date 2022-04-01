@@ -115,9 +115,23 @@ class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
 
     @classmethod
     def get_admin_areas_as_choices(cls, admin_level, business_area=None):
-        queryset = cls.objects.filter(area_type__level=admin_level)
+        queryset = cls.objects.filter(area_type__area_level=admin_level)
         if business_area is not None:
             queryset.filter(area_type__country__business_areas=business_area)
+        queryset = queryset.order_by("name")
+        return [
+            {
+                "label": {"English(EN)": f"{area.name}-{area.p_code}"},
+                "value": area.p_code,
+            }
+            for area in queryset
+        ]
+
+    @classmethod
+    def get_admin_areas(cls, business_area=None):
+        queryset = cls.objects.all()
+        if business_area is not None:
+            queryset.filter(admin_area_level__business_area=business_area)
         queryset = queryset.order_by("name")
         return [
             {

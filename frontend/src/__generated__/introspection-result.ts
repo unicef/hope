@@ -18,10 +18,13 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "LogEntryNode"
+            "name": "AreaNode"
           },
           {
-            "name": "PaymentVerificationLogEntryNode"
+            "name": "AreaTypeNode"
+          },
+          {
+            "name": "GrievanceTicketNode"
           },
           {
             "name": "UserNode"
@@ -36,16 +39,13 @@
             "name": "AdminAreaNode"
           },
           {
-            "name": "GrievanceTicketNode"
-          },
-          {
-            "name": "RegistrationDataImportNode"
-          },
-          {
             "name": "HouseholdNode"
           },
           {
             "name": "IndividualNode"
+          },
+          {
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "PaymentRecordNode"
@@ -141,10 +141,16 @@
             "name": "TicketDeleteHouseholdDetailsNode"
           },
           {
+            "name": "PaymentVerificationLogEntryNode"
+          },
+          {
             "name": "TicketNoteNode"
           },
           {
             "name": "TicketNeedsAdjudicationDetailsNode"
+          },
+          {
+            "name": "LogEntryNode"
           },
           {
             "name": "BusinessAreaNode"

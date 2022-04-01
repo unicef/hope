@@ -15,14 +15,14 @@ export type Scalars = {
   Boolean: boolean,
   Int: number,
   Float: number,
-  UUID: any,
-  Arg: any,
   DateTime: any,
+  UUID: any,
   JSONString: any,
   BigInt: any,
   Date: any,
   FlexFieldsScalar: any,
   Decimal: any,
+  Arg: any,
   GeoJSON: any,
   Upload: any,
 };
@@ -271,6 +271,144 @@ export enum AgencyType {
 export type ApproveTargetPopulationMutation = {
    __typename?: 'ApproveTargetPopulationMutation',
   targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+export type AreaNode = Node & {
+   __typename?: 'AreaNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  originalId?: Maybe<Scalars['UUID']>,
+  name: Scalars['String'],
+  parent?: Maybe<AreaNode>,
+  pCode?: Maybe<Scalars['String']>,
+  areaType: AreaTypeNode,
+  validFrom?: Maybe<Scalars['DateTime']>,
+  validUntil?: Maybe<Scalars['DateTime']>,
+  extras: Scalars['JSONString'],
+  lft: Scalars['Int'],
+  rght: Scalars['Int'],
+  treeId: Scalars['Int'],
+  level: Scalars['Int'],
+  areaSet: AreaNodeConnection,
+  grievanceticketSet: GrievanceTicketNodeConnection,
+  householdSet: HouseholdNodeConnection,
+  programs: ProgramNodeConnection,
+  reports: ReportNodeConnection,
+};
+
+
+export type AreaNodeAreaSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type AreaNodeGrievanceticketSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type AreaNodeHouseholdSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type AreaNodeProgramsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type AreaNodeReportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type AreaNodeConnection = {
+   __typename?: 'AreaNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<AreaNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type AreaNodeEdge = {
+   __typename?: 'AreaNodeEdge',
+  node?: Maybe<AreaNode>,
+  cursor: Scalars['String'],
+};
+
+export type AreaTypeNode = Node & {
+   __typename?: 'AreaTypeNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  originalId?: Maybe<Scalars['UUID']>,
+  name: Scalars['String'],
+  areaLevel: Scalars['Int'],
+  parent?: Maybe<AreaTypeNode>,
+  validFrom?: Maybe<Scalars['DateTime']>,
+  validUntil?: Maybe<Scalars['DateTime']>,
+  extras: Scalars['JSONString'],
+  lft: Scalars['Int'],
+  rght: Scalars['Int'],
+  treeId: Scalars['Int'],
+  level: Scalars['Int'],
+  areatypeSet: AreaTypeNodeConnection,
+  areaSet: AreaNodeConnection,
+};
+
+
+export type AreaTypeNodeAreatypeSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type AreaTypeNodeAreaSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+export type AreaTypeNodeConnection = {
+   __typename?: 'AreaTypeNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<AreaTypeNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type AreaTypeNodeEdge = {
+   __typename?: 'AreaTypeNodeEdge',
+  node?: Maybe<AreaTypeNode>,
+  cursor: Scalars['String'],
 };
 
 
@@ -1108,7 +1246,8 @@ export type GrievanceTicketNode = Node & {
   category: Scalars['Int'],
   issueType?: Maybe<Scalars['Int']>,
   description: Scalars['String'],
-  admin2?: Maybe<AdminAreaNode>,
+  admin2?: Maybe<AreaNode>,
+  admin2New?: Maybe<AreaNode>,
   area: Scalars['String'],
   language: Scalars['String'],
   consent: Scalars['Boolean'],
@@ -1233,7 +1372,8 @@ export type HouseholdNode = Node & {
   country?: Maybe<Scalars['String']>,
   size: Scalars['Int'],
   address: Scalars['String'],
-  adminArea?: Maybe<AdminAreaNode>,
+  adminArea?: Maybe<AreaNode>,
+  adminAreaNew?: Maybe<AreaNode>,
   representatives: IndividualNodeConnection,
   geopoint?: Maybe<Scalars['GeoJSON']>,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
@@ -1301,8 +1441,8 @@ export type HouseholdNode = Node & {
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
   sanctionListConfirmedMatch?: Maybe<Scalars['Boolean']>,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
-  admin1?: Maybe<AdminAreaNode>,
-  admin2?: Maybe<AdminAreaNode>,
+  admin1?: Maybe<AreaNode>,
+  admin2?: Maybe<AreaNode>,
   status?: Maybe<Scalars['String']>,
   programsWithDeliveredQuantity?: Maybe<Array<Maybe<ProgramsWithDeliveredQuantityNode>>>,
   activeIndividualsCount?: Maybe<Scalars['Int']>,
@@ -3373,6 +3513,7 @@ export type ProgramNode = Node & {
   caId?: Maybe<Scalars['String']>,
   caHashId?: Maybe<Scalars['String']>,
   adminAreas: AdminAreaNodeConnection,
+  adminAreasNew: AreaNodeConnection,
   businessArea: UserBusinessAreaNode,
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments: ProgramFrequencyOfPayments,
@@ -3400,6 +3541,16 @@ export type ProgramNodeAdminAreasArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   title?: Maybe<Scalars['String']>
+};
+
+
+export type ProgramNodeAdminAreasNewArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 
@@ -3501,6 +3652,8 @@ export type ProgramsWithDeliveredQuantityNode = {
 
 export type Query = {
    __typename?: 'Query',
+  adminArea?: Maybe<AreaNode>,
+  allAdminAreas?: Maybe<AreaNodeConnection>,
   allLogEntries?: Maybe<LogEntryNodeConnection>,
   logEntryActionChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   report?: Maybe<ReportNode>,
@@ -3545,9 +3698,7 @@ export type Query = {
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
   sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>,
   allPaymentVerificationLogEntries?: Maybe<PaymentVerificationLogEntryNodeConnection>,
-  adminArea?: Maybe<AdminAreaNode>,
   businessArea?: Maybe<BusinessAreaNode>,
-  allAdminAreas?: Maybe<AdminAreaNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   allGroupsWithFields?: Maybe<Array<Maybe<GroupAttributeNode>>>,
@@ -3614,6 +3765,24 @@ export type Query = {
   allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>,
   registrationDataStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   _debug?: Maybe<DjangoDebug>,
+};
+
+
+export type QueryAdminAreaArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllAdminAreasArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  name_Istartswith?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  level?: Maybe<Scalars['Int']>
 };
 
 
@@ -3881,26 +4050,8 @@ export type QueryAllPaymentVerificationLogEntriesArgs = {
 };
 
 
-export type QueryAdminAreaArgs = {
-  id: Scalars['ID']
-};
-
-
 export type QueryBusinessAreaArgs = {
   businessAreaSlug: Scalars['String']
-};
-
-
-export type QueryAllAdminAreasArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  title?: Maybe<Scalars['String']>,
-  title_Istartswith?: Maybe<Scalars['String']>,
-  businessArea?: Maybe<Scalars['String']>,
-  level?: Maybe<Scalars['Int']>
 };
 
 
@@ -4100,7 +4251,7 @@ export type QueryAllHouseholdsArgs = {
   size_Range?: Maybe<Array<Maybe<Scalars['Int']>>>,
   size_Lte?: Maybe<Scalars['Int']>,
   size_Gte?: Maybe<Scalars['Int']>,
-  adminArea?: Maybe<Scalars['ID']>,
+  adminAreaNew?: Maybe<Scalars['ID']>,
   targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   residenceStatus?: Maybe<Scalars['String']>,
@@ -4132,6 +4283,7 @@ export type QueryAllIndividualsArgs = {
   fullName_Endswith?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['String']>>>,
   household_AdminArea?: Maybe<Scalars['ID']>,
+  household_AdminAreaNew?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
   age?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
@@ -4530,7 +4682,8 @@ export type ReportNode = Node & {
   dateTo: Scalars['Date'],
   numberOfRecords?: Maybe<Scalars['Int']>,
   program?: Maybe<ProgramNode>,
-  adminArea: AdminAreaNodeConnection,
+  adminArea?: Maybe<AreaNodeConnection>,
+  adminAreaNew: AreaNodeConnection,
   fileUrl?: Maybe<Scalars['String']>,
 };
 
@@ -4541,7 +4694,17 @@ export type ReportNodeAdminAreaArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  title?: Maybe<Scalars['String']>
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type ReportNodeAdminAreaNewArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
 };
 
 export type ReportNodeConnection = {
@@ -6075,11 +6238,11 @@ export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
   & Pick<HouseholdNode, 'id' | 'status' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'adminAreaTitle' | 'address'>
   & { admin1: Maybe<(
-    { __typename?: 'AdminAreaNode' }
-    & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+    { __typename?: 'AreaNode' }
+    & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
   )>, admin2: Maybe<(
-    { __typename?: 'AdminAreaNode' }
-    & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+    { __typename?: 'AreaNode' }
+    & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
   )>, headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName' | 'givenName' | 'familyName'>
@@ -6199,11 +6362,11 @@ export type IndividualMinimalFragment = (
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id' | 'unicefId' | 'status'>
     & { admin1: Maybe<(
-      { __typename?: 'AdminAreaNode' }
-      & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+      { __typename?: 'AreaNode' }
+      & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
     )>, admin2: Maybe<(
-      { __typename?: 'AdminAreaNode' }
-      & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+      { __typename?: 'AreaNode' }
+      & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
     )>, programs: (
       { __typename?: 'ProgramNodeConnection' }
       & { edges: Array<Maybe<(
@@ -6250,8 +6413,8 @@ export type IndividualDetailedFragment = (
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
     & { adminArea: Maybe<(
-      { __typename?: 'AdminAreaNode' }
-      & Pick<AdminAreaNode, 'id' | 'title' | 'level'>
+      { __typename?: 'AreaNode' }
+      & Pick<AreaNode, 'id' | 'name' | 'level'>
     )> }
   )>, headingHousehold: Maybe<(
     { __typename?: 'HouseholdNode' }
@@ -7197,16 +7360,16 @@ export type CreateReportMutation = (
       & { createdBy: (
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'firstName' | 'lastName'>
-      ), adminArea: (
-        { __typename?: 'AdminAreaNodeConnection' }
+      ), adminArea: Maybe<(
+        { __typename?: 'AreaNodeConnection' }
         & { edges: Array<Maybe<(
-          { __typename?: 'AdminAreaNodeEdge' }
+          { __typename?: 'AreaNodeEdge' }
           & { node: Maybe<(
-            { __typename?: 'AdminAreaNode' }
-            & Pick<AdminAreaNode, 'title'>
+            { __typename?: 'AreaNode' }
+            & Pick<AreaNode, 'name'>
           )> }
         )>> }
-      ), program: Maybe<(
+      )>, program: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'name'>
       )> }
@@ -7327,7 +7490,7 @@ export type UpdateTpMutation = (
 );
 
 export type AllAdminAreasQueryVariables = {
-  title?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   level?: Maybe<Scalars['Int']>,
   first?: Maybe<Scalars['Int']>
@@ -7337,15 +7500,15 @@ export type AllAdminAreasQueryVariables = {
 export type AllAdminAreasQuery = (
   { __typename?: 'Query' }
   & { allAdminAreas: Maybe<(
-    { __typename?: 'AdminAreaNodeConnection' }
+    { __typename?: 'AreaNodeConnection' }
     & { pageInfo: (
       { __typename?: 'PageInfo' }
       & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
     ), edges: Array<Maybe<(
-      { __typename?: 'AdminAreaNodeEdge' }
+      { __typename?: 'AreaNodeEdge' }
       & { node: Maybe<(
-        { __typename?: 'AdminAreaNode' }
-        & Pick<AdminAreaNode, 'id' | 'title' | 'pCode'>
+        { __typename?: 'AreaNode' }
+        & Pick<AreaNode, 'id' | 'name' | 'pCode'>
       )> }
     )>> }
   )> }
@@ -7851,8 +8014,8 @@ export type GrievanceTicketQuery = (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     )>, admin2: Maybe<(
-      { __typename?: 'AdminAreaNode' }
-      & Pick<AdminAreaNode, 'id' | 'title' | 'pCode'>
+      { __typename?: 'AreaNode' }
+      & Pick<AreaNode, 'id' | 'name' | 'pCode'>
     )>, assignedTo: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -8009,8 +8172,8 @@ export type GrievanceTicketQuery = (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId' | 'village'>
           & { admin2: Maybe<(
-            { __typename?: 'AdminAreaNode' }
-            & Pick<AdminAreaNode, 'id' | 'title'>
+            { __typename?: 'AreaNode' }
+            & Pick<AreaNode, 'id' | 'name'>
           )> }
         )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
           { __typename?: 'DeduplicationResultNode' }
@@ -8036,8 +8199,8 @@ export type GrievanceTicketQuery = (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id' | 'village'>
           & { admin2: Maybe<(
-            { __typename?: 'AdminAreaNode' }
-            & Pick<AdminAreaNode, 'id' | 'title'>
+            { __typename?: 'AreaNode' }
+            & Pick<AreaNode, 'id' | 'name'>
           )> }
         )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
           { __typename?: 'DeduplicationResultNode' }
@@ -8668,8 +8831,8 @@ export type AllHouseholdsQuery = (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'fullName'>
         ), admin2: Maybe<(
-          { __typename?: 'AdminAreaNode' }
-          & Pick<AdminAreaNode, 'id' | 'title'>
+          { __typename?: 'AreaNode' }
+          & Pick<AreaNode, 'id' | 'name'>
         )>, programs: (
           { __typename?: 'ProgramNodeConnection' }
           & { edges: Array<Maybe<(
@@ -8726,8 +8889,8 @@ export type AllIndividualsQuery = (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
           & { admin2: Maybe<(
-            { __typename?: 'AdminAreaNode' }
-            & Pick<AdminAreaNode, 'id' | 'title'>
+            { __typename?: 'AreaNode' }
+            & Pick<AreaNode, 'id' | 'name'>
           )>, programs: (
             { __typename?: 'ProgramNodeConnection' }
             & { edges: Array<Maybe<(
@@ -9208,16 +9371,16 @@ export type ReportQuery = (
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
-    ), adminArea: (
-      { __typename?: 'AdminAreaNodeConnection' }
+    ), adminArea: Maybe<(
+      { __typename?: 'AreaNodeConnection' }
       & { edges: Array<Maybe<(
-        { __typename?: 'AdminAreaNodeEdge' }
+        { __typename?: 'AreaNodeEdge' }
         & { node: Maybe<(
-          { __typename?: 'AdminAreaNode' }
-          & Pick<AdminAreaNode, 'title'>
+          { __typename?: 'AreaNode' }
+          & Pick<AreaNode, 'name'>
         )> }
       )>> }
-    ), program: Maybe<(
+    )>, program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'name'>
     )> }
@@ -9468,8 +9631,8 @@ export type CandidateHouseholdsListByTargetingCriteriaQuery = (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName' | 'fullName'>
         ), adminArea: Maybe<(
-          { __typename?: 'AdminAreaNode' }
-          & Pick<AdminAreaNode, 'id' | 'title'>
+          { __typename?: 'AreaNode' }
+          & Pick<AreaNode, 'id' | 'name'>
         )>, selection: Maybe<(
           { __typename?: 'HouseholdSelection' }
           & Pick<HouseholdSelection, 'vulnerabilityScore'>
@@ -9507,8 +9670,8 @@ export type FinalHouseholdsListByTargetingCriteriaQuery = (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
-          { __typename?: 'AdminAreaNode' }
-          & Pick<AdminAreaNode, 'id' | 'title'>
+          { __typename?: 'AreaNode' }
+          & Pick<AreaNode, 'id' | 'name'>
         )>, selection: Maybe<(
           { __typename?: 'HouseholdSelection' }
           & Pick<HouseholdSelection, 'vulnerabilityScore'>
@@ -9546,8 +9709,8 @@ export type GoldenRecordByTargetingCriteriaQuery = (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
         ), adminArea: Maybe<(
-          { __typename?: 'AdminAreaNode' }
-          & Pick<AdminAreaNode, 'id' | 'title'>
+          { __typename?: 'AreaNode' }
+          & Pick<AreaNode, 'id' | 'name'>
         )> }
       )> }
     )>> }
@@ -9591,13 +9754,13 @@ export const HouseholdMinimalFragmentDoc = gql`
   adminAreaTitle
   admin1 {
     id
-    title
+    name
     level
     pCode
   }
   admin2 {
     id
-    title
+    name
     level
     pCode
   }
@@ -9676,13 +9839,13 @@ export const IndividualMinimalFragmentDoc = gql`
     status
     admin1 {
       id
-      title
+      name
       level
       pCode
     }
     admin2 {
       id
-      title
+      name
       level
       pCode
     }
@@ -9880,7 +10043,7 @@ export const IndividualDetailedFragmentDoc = gql`
     countryOrigin
     adminArea {
       id
-      title
+      name
       level
     }
   }
@@ -12321,7 +12484,7 @@ export const CreateReportDocument = gql`
       adminArea {
         edges {
           node {
-            title
+            name
           }
         }
       }
@@ -12739,8 +12902,8 @@ export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
 export const AllAdminAreasDocument = gql`
-    query AllAdminAreas($title: String, $businessArea: String, $level: Int, $first: Int) {
-  allAdminAreas(title_Istartswith: $title, businessArea: $businessArea, first: $first, level: $level) {
+    query AllAdminAreas($name: String, $businessArea: String, $level: Int, $first: Int) {
+  allAdminAreas(name_Istartswith: $name, businessArea: $businessArea, first: $first, level: $level) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -12750,7 +12913,7 @@ export const AllAdminAreasDocument = gql`
     edges {
       node {
         id
-        title
+        name
         pCode
       }
     }
@@ -12787,7 +12950,7 @@ export function withAllAdminAreas<TProps, TChildProps = {}>(operationOptions?: A
  * @example
  * const { data, loading, error } = useAllAdminAreasQuery({
  *   variables: {
- *      title: // value for 'title'
+ *      name: // value for 'name'
  *      businessArea: // value for 'businessArea'
  *      level: // value for 'level'
  *      first: // value for 'first'
@@ -14058,7 +14221,7 @@ export const GrievanceTicketDocument = gql`
     admin
     admin2 {
       id
-      title
+      name
       pCode
     }
     area
@@ -14240,7 +14403,7 @@ export const GrievanceTicketDocument = gql`
           village
           admin2 {
             id
-            title
+            name
           }
         }
         fullName
@@ -14277,7 +14440,7 @@ export const GrievanceTicketDocument = gql`
           village
           admin2 {
             id
-            title
+            name
           }
         }
         fullName
@@ -15857,7 +16020,7 @@ export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<
 export type CashPlanVerificationSamplingChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
 export const AllHouseholdsDocument = gql`
     query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID], $withdrawn: Boolean) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminAreaNew: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -15881,7 +16044,7 @@ export const AllHouseholdsDocument = gql`
         size
         admin2 {
           id
-          title
+          name
         }
         residenceStatus
         totalCashReceived
@@ -15959,7 +16122,7 @@ export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHousehold
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
     query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID], $flags: [String]) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminAreaNew: $adminArea, withdrawn: $withdrawn, admin2: $admin2, flags: $flags) {
     totalCount
     pageInfo {
       startCursor
@@ -15980,7 +16143,7 @@ export const AllIndividualsDocument = gql`
           unicefId
           admin2 {
             id
-            title
+            name
           }
           programs {
             edges {
@@ -17386,7 +17549,7 @@ export const ReportDocument = gql`
     adminArea {
       edges {
         node {
-          title
+          name
         }
       }
     }
@@ -18017,7 +18180,7 @@ export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
         size
         adminArea {
           id
-          title
+          name
         }
         updatedAt
         address
@@ -18096,7 +18259,7 @@ export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
         size
         adminArea {
           id
-          title
+          name
         }
         updatedAt
         address
@@ -18177,7 +18340,7 @@ export const GoldenRecordByTargetingCriteriaDocument = gql`
         size
         adminArea {
           id
-          title
+          name
         }
         updatedAt
         address
@@ -18362,29 +18525,30 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>,
-  Int: ResolverTypeWrapper<Scalars['Int']>,
-  String: ResolverTypeWrapper<Scalars['String']>,
+  ID: ResolverTypeWrapper<Scalars['ID']>,
+  AreaNode: ResolverTypeWrapper<AreaNode>,
+  Node: ResolverTypeWrapper<Node>,
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
   UUID: ResolverTypeWrapper<Scalars['UUID']>,
-  LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
+  String: ResolverTypeWrapper<Scalars['String']>,
+  AreaTypeNode: ResolverTypeWrapper<AreaTypeNode>,
+  Int: ResolverTypeWrapper<Scalars['Int']>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
+  AreaTypeNodeConnection: ResolverTypeWrapper<AreaTypeNodeConnection>,
   PageInfo: ResolverTypeWrapper<PageInfo>,
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
-  LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
-  LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
-  Node: ResolverTypeWrapper<Node>,
-  ID: ResolverTypeWrapper<Scalars['ID']>,
-  ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
-  PaymentVerificationLogEntryNodeConnection: ResolverTypeWrapper<PaymentVerificationLogEntryNodeConnection>,
-  PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<PaymentVerificationLogEntryNodeEdge>,
-  PaymentVerificationLogEntryNode: ResolverTypeWrapper<PaymentVerificationLogEntryNode>,
-  LogEntryAction: LogEntryAction,
-  Arg: ResolverTypeWrapper<Scalars['Arg']>,
+  AreaTypeNodeEdge: ResolverTypeWrapper<AreaTypeNodeEdge>,
+  AreaNodeConnection: ResolverTypeWrapper<AreaNodeConnection>,
+  AreaNodeEdge: ResolverTypeWrapper<AreaNodeEdge>,
+  GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>,
+  GrievanceTicketNodeEdge: ResolverTypeWrapper<GrievanceTicketNodeEdge>,
+  GrievanceTicketNode: ResolverTypeWrapper<GrievanceTicketNode>,
+  BigInt: ResolverTypeWrapper<Scalars['BigInt']>,
   UserNode: ResolverTypeWrapper<UserNode>,
-  DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
   UserStatus: UserStatus,
   PartnerType: ResolverTypeWrapper<PartnerType>,
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
   UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
   UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
   AdminAreaTypeNodeConnection: ResolverTypeWrapper<AdminAreaTypeNodeConnection>,
@@ -18395,13 +18559,6 @@ export type ResolversTypes = {
   AdminAreaNodeConnection: ResolverTypeWrapper<AdminAreaNodeConnection>,
   AdminAreaNodeEdge: ResolverTypeWrapper<AdminAreaNodeEdge>,
   AdminAreaNode: ResolverTypeWrapper<AdminAreaNode>,
-  GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>,
-  GrievanceTicketNodeEdge: ResolverTypeWrapper<GrievanceTicketNodeEdge>,
-  GrievanceTicketNode: ResolverTypeWrapper<GrievanceTicketNode>,
-  BigInt: ResolverTypeWrapper<Scalars['BigInt']>,
-  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
   HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
@@ -18413,12 +18570,16 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']>,
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
+  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
+  Float: ResolverTypeWrapper<Scalars['Float']>,
   IndividualDisability: IndividualDisability,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
-  Float: ResolverTypeWrapper<Scalars['Float']>,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
@@ -18442,6 +18603,7 @@ export type ResolversTypes = {
   TargetingIndividualRuleFilterBlockNode: ResolverTypeWrapper<TargetingIndividualRuleFilterBlockNode>,
   TargetingIndividualBlockRuleFilterNode: ResolverTypeWrapper<TargetingIndividualBlockRuleFilterNode>,
   TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
+  Arg: ResolverTypeWrapper<Scalars['Arg']>,
   FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>,
   LabelNode: ResolverTypeWrapper<LabelNode>,
   CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
@@ -18551,18 +18713,25 @@ export type ResolversTypes = {
   TicketDeleteHouseholdDetailsNode: ResolverTypeWrapper<TicketDeleteHouseholdDetailsNode>,
   ProgramsWithDeliveredQuantityNode: ResolverTypeWrapper<ProgramsWithDeliveredQuantityNode>,
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>,
-  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
+  ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
+  ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
+  PaymentVerificationLogEntryNodeConnection: ResolverTypeWrapper<PaymentVerificationLogEntryNodeConnection>,
+  PaymentVerificationLogEntryNodeEdge: ResolverTypeWrapper<PaymentVerificationLogEntryNodeEdge>,
+  PaymentVerificationLogEntryNode: ResolverTypeWrapper<PaymentVerificationLogEntryNode>,
+  ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
+  LogEntryAction: LogEntryAction,
+  RoleNode: ResolverTypeWrapper<RoleNode>,
+  RoleSubsystem: RoleSubsystem,
   TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>,
   TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
   TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
   TicketNeedsAdjudicationDetailsNode: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNode>,
   TicketNeedsAdjudicationDetailsExtraDataNode: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsExtraDataNode>,
-  ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
-  ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
-  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
-  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
-  RoleNode: ResolverTypeWrapper<RoleNode>,
-  RoleSubsystem: RoleSubsystem,
+  LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
+  LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
+  LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   SanctionListIndividualNodeConnection: ResolverTypeWrapper<SanctionListIndividualNodeConnection>,
   SanctionListIndividualNodeEdge: ResolverTypeWrapper<SanctionListIndividualNodeEdge>,
@@ -18728,29 +18897,30 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Query: {},
-  Int: Scalars['Int'],
-  String: Scalars['String'],
+  ID: Scalars['ID'],
+  AreaNode: AreaNode,
+  Node: Node,
+  DateTime: Scalars['DateTime'],
   UUID: Scalars['UUID'],
-  LogEntryNodeConnection: LogEntryNodeConnection,
+  String: Scalars['String'],
+  AreaTypeNode: AreaTypeNode,
+  Int: Scalars['Int'],
+  JSONString: Scalars['JSONString'],
+  AreaTypeNodeConnection: AreaTypeNodeConnection,
   PageInfo: PageInfo,
   Boolean: Scalars['Boolean'],
-  LogEntryNodeEdge: LogEntryNodeEdge,
-  LogEntryNode: LogEntryNode,
-  Node: Node,
-  ID: Scalars['ID'],
-  ContentTypeObjectType: ContentTypeObjectType,
-  PaymentVerificationLogEntryNodeConnection: PaymentVerificationLogEntryNodeConnection,
-  PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge,
-  PaymentVerificationLogEntryNode: PaymentVerificationLogEntryNode,
-  LogEntryAction: LogEntryAction,
-  Arg: Scalars['Arg'],
+  AreaTypeNodeEdge: AreaTypeNodeEdge,
+  AreaNodeConnection: AreaNodeConnection,
+  AreaNodeEdge: AreaNodeEdge,
+  GrievanceTicketNodeConnection: GrievanceTicketNodeConnection,
+  GrievanceTicketNodeEdge: GrievanceTicketNodeEdge,
+  GrievanceTicketNode: GrievanceTicketNode,
+  BigInt: Scalars['BigInt'],
   UserNode: UserNode,
-  DateTime: Scalars['DateTime'],
   UserStatus: UserStatus,
   PartnerType: PartnerType,
   UserNodeConnection: UserNodeConnection,
   UserNodeEdge: UserNodeEdge,
-  JSONString: Scalars['JSONString'],
   UserRoleNode: UserRoleNode,
   UserBusinessAreaNode: UserBusinessAreaNode,
   AdminAreaTypeNodeConnection: AdminAreaTypeNodeConnection,
@@ -18761,13 +18931,6 @@ export type ResolversParentTypes = {
   AdminAreaNodeConnection: AdminAreaNodeConnection,
   AdminAreaNodeEdge: AdminAreaNodeEdge,
   AdminAreaNode: AdminAreaNode,
-  GrievanceTicketNodeConnection: GrievanceTicketNodeConnection,
-  GrievanceTicketNodeEdge: GrievanceTicketNodeEdge,
-  GrievanceTicketNode: GrievanceTicketNode,
-  BigInt: Scalars['BigInt'],
-  RegistrationDataImportNode: RegistrationDataImportNode,
-  RegistrationDataImportStatus: RegistrationDataImportStatus,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   HouseholdNodeConnection: HouseholdNodeConnection,
   HouseholdNodeEdge: HouseholdNodeEdge,
   HouseholdNode: HouseholdNode,
@@ -18779,12 +18942,16 @@ export type ResolversParentTypes = {
   Date: Scalars['Date'],
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
+  RegistrationDataImportNode: RegistrationDataImportNode,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: CountAndPercentageNode,
+  Float: Scalars['Float'],
   IndividualDisability: IndividualDisability,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: DeduplicationResultNode,
-  Float: Scalars['Float'],
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   PaymentRecordNode: PaymentRecordNode,
@@ -18808,6 +18975,7 @@ export type ResolversParentTypes = {
   TargetingIndividualRuleFilterBlockNode: TargetingIndividualRuleFilterBlockNode,
   TargetingIndividualBlockRuleFilterNode: TargetingIndividualBlockRuleFilterNode,
   TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
+  Arg: Scalars['Arg'],
   FieldAttributeNode: FieldAttributeNode,
   LabelNode: LabelNode,
   CoreFieldChoiceObject: CoreFieldChoiceObject,
@@ -18917,18 +19085,25 @@ export type ResolversParentTypes = {
   TicketDeleteHouseholdDetailsNode: TicketDeleteHouseholdDetailsNode,
   ProgramsWithDeliveredQuantityNode: ProgramsWithDeliveredQuantityNode,
   DeliveredQuantityNode: DeliveredQuantityNode,
-  CountAndPercentageNode: CountAndPercentageNode,
+  ServiceProviderNodeConnection: ServiceProviderNodeConnection,
+  ServiceProviderNodeEdge: ServiceProviderNodeEdge,
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
+  PaymentVerificationLogEntryNodeConnection: PaymentVerificationLogEntryNodeConnection,
+  PaymentVerificationLogEntryNodeEdge: PaymentVerificationLogEntryNodeEdge,
+  PaymentVerificationLogEntryNode: PaymentVerificationLogEntryNode,
+  ContentTypeObjectType: ContentTypeObjectType,
+  LogEntryAction: LogEntryAction,
+  RoleNode: RoleNode,
+  RoleSubsystem: RoleSubsystem,
   TicketNoteNodeConnection: TicketNoteNodeConnection,
   TicketNoteNodeEdge: TicketNoteNodeEdge,
   TicketNoteNode: TicketNoteNode,
   TicketNeedsAdjudicationDetailsNode: TicketNeedsAdjudicationDetailsNode,
   TicketNeedsAdjudicationDetailsExtraDataNode: TicketNeedsAdjudicationDetailsExtraDataNode,
-  ServiceProviderNodeConnection: ServiceProviderNodeConnection,
-  ServiceProviderNodeEdge: ServiceProviderNodeEdge,
-  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
-  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
-  RoleNode: RoleNode,
-  RoleSubsystem: RoleSubsystem,
+  LogEntryNodeConnection: LogEntryNodeConnection,
+  LogEntryNodeEdge: LogEntryNodeEdge,
+  LogEntryNode: LogEntryNode,
   ChoiceObject: ChoiceObject,
   SanctionListIndividualNodeConnection: SanctionListIndividualNodeConnection,
   SanctionListIndividualNodeEdge: SanctionListIndividualNodeEdge,
@@ -19189,6 +19364,72 @@ export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversP
 
 export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export type AreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaNode'] = ResolversParentTypes['AreaNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  originalId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  parent?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  pCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  areaType?: Resolver<ResolversTypes['AreaTypeNode'], ParentType, ContextType>,
+  validFrom?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  validUntil?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  areaSet?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, AreaNodeAreaSetArgs>,
+  grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, AreaNodeGrievanceticketSetArgs>,
+  householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, AreaNodeHouseholdSetArgs>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, AreaNodeProgramsArgs>,
+  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, AreaNodeReportsArgs>,
+};
+
+export type AreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaNodeConnection'] = ResolversParentTypes['AreaNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['AreaNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type AreaNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaNodeEdge'] = ResolversParentTypes['AreaNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type AreaTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaTypeNode'] = ResolversParentTypes['AreaTypeNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  originalId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  areaLevel?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  parent?: Resolver<Maybe<ResolversTypes['AreaTypeNode']>, ParentType, ContextType>,
+  validFrom?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  validUntil?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  areatypeSet?: Resolver<ResolversTypes['AreaTypeNodeConnection'], ParentType, ContextType, AreaTypeNodeAreatypeSetArgs>,
+  areaSet?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, AreaTypeNodeAreaSetArgs>,
+};
+
+export type AreaTypeNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaTypeNodeConnection'] = ResolversParentTypes['AreaTypeNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['AreaTypeNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type AreaTypeNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaTypeNodeEdge'] = ResolversParentTypes['AreaTypeNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['AreaTypeNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Arg'], any> {
@@ -19613,7 +19854,8 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   category?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   issueType?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  admin2?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  admin2New?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   area?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   language?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -19686,7 +19928,8 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  adminAreaNew?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -19754,8 +19997,8 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  admin1?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
-  admin2?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  admin1?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
+  admin2?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>,
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   programsWithDeliveredQuantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProgramsWithDeliveredQuantityNode']>>>, ParentType, ContextType>,
   activeIndividualsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -20269,7 +20512,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'LogEntryNode' | 'PaymentVerificationLogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'RegistrationDataImportNode' | 'HouseholdNode' | 'IndividualNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'PaymentVerificationLogEntryNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -20406,6 +20649,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   adminAreas?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, ProgramNodeAdminAreasArgs>,
+  adminAreasNew?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, ProgramNodeAdminAreasNewArgs>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   frequencyOfPayments?: Resolver<ResolversTypes['ProgramFrequencyOfPayments'], ParentType, ContextType>,
@@ -20444,6 +20688,8 @@ export type ProgramsWithDeliveredQuantityNodeResolvers<ContextType = any, Parent
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  adminArea?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
+  allAdminAreas?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
   logEntryActionChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType, RequireFields<QueryReportArgs, 'id'>>,
@@ -20488,9 +20734,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
   sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,
   allPaymentVerificationLogEntries?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentVerificationLogEntriesArgs, 'businessArea'>>,
-  adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
-  allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
   allGroupsWithFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>, ParentType, ContextType>,
@@ -20689,7 +20933,8 @@ export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversP
   dateTo?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   numberOfRecords?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-  adminArea?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, ReportNodeAdminAreaArgs>,
+  adminArea?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, ReportNodeAdminAreaArgs>,
+  adminAreaNew?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, ReportNodeAdminAreaNewArgs>,
   fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -21536,6 +21781,12 @@ export type Resolvers<ContextType = any> = {
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
   AgencyNode?: AgencyNodeResolvers<ContextType>,
   ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
+  AreaNode?: AreaNodeResolvers<ContextType>,
+  AreaNodeConnection?: AreaNodeConnectionResolvers<ContextType>,
+  AreaNodeEdge?: AreaNodeEdgeResolvers<ContextType>,
+  AreaTypeNode?: AreaTypeNodeResolvers<ContextType>,
+  AreaTypeNodeConnection?: AreaTypeNodeConnectionResolvers<ContextType>,
+  AreaTypeNodeEdge?: AreaTypeNodeEdgeResolvers<ContextType>,
   Arg?: GraphQLScalarType,
   BankAccountInfoNode?: BankAccountInfoNodeResolvers<ContextType>,
   BigInt?: GraphQLScalarType,
