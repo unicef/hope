@@ -39,12 +39,15 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("delivery_type", ChoicesFieldComboFilter),
-        ("verification_status", ChoicesFieldComboFilter),
+        ("cash_plan_payment_verification_summary__status", ChoicesFieldComboFilter),
         ("program__id", ValueFilter),
         ("vision_id", ValueFilter),
     )
     raw_id_fields = ("business_area", "program", "service_provider")
     search_fields = ("name",)
+
+    def verification_status(self, obj):
+        return obj.cash_plan_payment_verification_summary.status
 
     @button()
     def payments(self, request, pk):
