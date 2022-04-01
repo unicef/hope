@@ -1,5 +1,6 @@
 import logging
 from itertools import chain
+from time import time
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -342,10 +343,17 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
     objects = GrievanceTicketManager()
 
+    def flatten(self, t):
+        return [item for sublist in t for item in sublist]
+
     @property
     def related_tickets(self):
-        combined_related_tickets = (self.linked_tickets.all() | self.linked_tickets_related.all()).distinct()
-        yield from combined_related_tickets
+        all_through_objects = GrievanceTicketThrough.objects.filter(Q(linked_ticket=self) | Q(main_ticket=self)).values_list(
+            "main_ticket", "linked_ticket"
+        )
+        ids = set(self.flatten(all_through_objects))
+        ids.discard(self.id)
+        return GrievanceTicket.objects.filter(id__in=ids)
 
     @property
     def is_feedback(self):
