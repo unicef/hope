@@ -24,7 +24,7 @@ def fix_exchange_rates(all=None):
         )
 
         if exchange_rate is None:
-            logger.error(f"exchange_rate not found for {payment_record.ca_id}")
+            logger.log(f"exchange_rate not found for {payment_record.ca_id}")
             continue
         else:
             exchange_rate = Decimal(exchange_rate)
