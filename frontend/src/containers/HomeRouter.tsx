@@ -24,7 +24,7 @@ import { PopulationIndividualsPage } from './pages/population/PopulationIndividu
 import { PopulationIndividualsDetailsPage } from './pages/population/PopulationIndividualsDetailsPage';
 import { TargetPopulationPage } from './pages/targeting/TargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
-import { CreateTargetPopulation } from './pages/targeting/CreateTargetPopulation';
+import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopulationPage';
 import { RegistrationDataImportDetailsPage } from './pages/rdi/RegistrationDataImportDetailsPage';
 import { RegistrationHouseholdDetailsPage } from './pages/rdi/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from './pages/rdi/RegistrationIndividualDetailsPage';
@@ -116,7 +116,7 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/target-population/create');
               }}
             >
-              <CreateTargetPopulation />
+              <CreateTargetPopulationPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/target-population/:id'>
