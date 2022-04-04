@@ -1,33 +1,17 @@
-import {
-  Box,
-  Button,
-  Collapse,
-  Grid,
-  Paper,
-  Typography,
-} from '@material-ui/core';
+import { Box, Button, Collapse, Grid, Typography } from '@material-ui/core';
 import { Label } from '@material-ui/icons';
 import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUp from '@material-ui/icons/KeyboardArrowUp';
 import { Field, FieldArray } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { TargetPopulationHouseholdTable } from '../../../containers/tables/targeting/TargetPopulationHouseholdTable';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import { useGoldenRecordByTargetingCriteriaQuery } from '../../../__generated__/graphql';
+import { PaperContainer } from '../PaperContainer';
 import { Results } from '../Results';
 import { TargetingCriteria } from '../TargetingCriteria';
-
-const PaperContainer = styled(Paper)`
-  display: flex;
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
-  margin: ${({ theme }) => theme.spacing(5)}px;
-  flex-direction: column;
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
-`;
 
 export function CandidateListTab({
   values,
