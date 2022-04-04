@@ -34,7 +34,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
 
 @admin.register(CashPlan)
 class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    list_display = ("name", "program", "delivery_type", "status", "verification_status")
+    list_display = ("name", "program", "delivery_type", "status", "verification_status","ca_id")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
