@@ -1,9 +1,12 @@
+import logging
 from decimal import Decimal
 
 from django.db.models import Q
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.payment.models import PaymentRecord
+
+logger = logging.getLogger(__name__)
 
 
 def fix_exchange_rates(all=None):
@@ -21,7 +24,8 @@ def fix_exchange_rates(all=None):
         )
 
         if exchange_rate is None:
-            exchange_rate = Decimal(1)
+            logger.error(f"exchange_rate not found for {payment_record.ca_id}")
+            continue
         else:
             exchange_rate = Decimal(exchange_rate)
         payment_record.delivered_quantity_usd = Decimal(payment_record.delivered_quantity / exchange_rate).quantize(
