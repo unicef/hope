@@ -10,30 +10,30 @@
 Frontend running on Local Machine (use node 16)
 
 ```bash
+cd frontend
 yarn
 yarn start
 # in anthorer terminal
+cd ..
 docker-compose build
-docker-compose run backend ./manage.py initempty
+docker-compose run --rm backend ./manage.py initdemo
 docker-compose up
 ```
 ***
 Frontend app is run inside Docker (a lot slower)
 
 ```bash
-docker-compose -f docker-compose.yml  -f docker-compose.frontend.yml build
-docker-compose -f docker-compose.yml  -f docker-compose.frontend.yml up
-docker-compose -f docker-compose.yml  -f docker-compose.frontend.yml exec backend bash
+docker-compose -f docker-compose.yml -f docker-compose.frontend.yml build
+docker-compose -f docker-compose.yml -f docker-compose.frontend.yml up
+docker-compose -f docker-compose.yml -f docker-compose.frontend.yml run --rm backend bash
 
 # in docker container
-./manage.py initempty
+./manage.py initdemo
 ```
-
-
 
 Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login)
 
-Backend can be accessed at `/api/` i.e. [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/)
+Backend can be accessed at `/api/` i.e. [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/)
 
 ### **Commands**
 
@@ -59,6 +59,8 @@ accepts the arguments:
 **generateroles** - creates all default roles with correct permission sets
 
 **init** - resets all databases, run migrations on all databases, load business areas and fake data with default values, creates a set of default roles
+
+**initdemo** - initialize project with a simple demo data
 
 ### Writing and running tests:
 
