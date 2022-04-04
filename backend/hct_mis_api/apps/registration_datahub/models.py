@@ -421,3 +421,4 @@ class Record(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     storage = models.BinaryField(null=True, blank=True)
     ignored = models.BooleanField(default=False, blank=True)
+    source_id = models.IntegerField()
