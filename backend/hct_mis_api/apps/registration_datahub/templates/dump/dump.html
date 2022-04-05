@@ -1,0 +1,10 @@
+{% load smart_register %}
+{% if value|islist %}
+    {% for el in value %}
+        {% dump_list el %}
+    {% endfor %}
+{% elif value|isdict %}
+    {% dump_dict value %}
+{% else %}
+    {{ value }}
+{% endif %}

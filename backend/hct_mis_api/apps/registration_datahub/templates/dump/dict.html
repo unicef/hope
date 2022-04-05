@@ -1,0 +1,30 @@
+{% load smart_register %}<table>{% for k,v in value.items %}
+    <tr class="{% cycle 'row1' 'row2' %}">
+        <th>{{ k }}</th>
+        <td>
+            {% if v|is_image %}
+            <div class="base64">
+                <a href="#">Show image</a>
+                <img class="preview"
+                     style="position:relative; display: none; max-height: 300px"
+                     src="data:image/jpeg;base64, {{ v }}">
+            </div>
+            {% elif v|is_base64 %}
+                <div class="base64">
+                    {{ v|truncatechars:"50" }}
+                    <a href="#">img</a>
+                    <img class="preview"
+                         style="position:relative; display: none; max-height: 300px"
+                         src="data:image/jpeg;base64, {{ v }}">
+                </div>
+            {% elif v|islist %}
+                <table>{% include "dump/list.html" %}</table>
+            {% elif v|isstring %}
+                {{ v|truncatechars:"150" }}
+            {% else %}
+                {{ v }}
+            {% endif %}
+        </td>
+    </tr>
+{% endfor %}
+</table>
