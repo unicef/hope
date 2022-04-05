@@ -116,6 +116,12 @@ class ImportedHousehold(TimeStampedUUIDModel):
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    flex_registrations_record = models.ForeignKey(
+        "registration_datahub.Record",
+        related_name="imported_households",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
 
     @property
     def business_area(self):
@@ -294,9 +300,11 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
 class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
     JSON = "JSON"
+    FLEX_REGISTRATION = "FLEX_REGISTRATION"
     DATA_TYPE_CHOICES = (
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
+        (FLEX_REGISTRATION, _("FLEX REGISTRATION")),
     )
     STATUS_PENDING = "PENDING"
     STATUS_RUNNING = "RUNNING"
@@ -422,3 +430,9 @@ class Record(models.Model):
     storage = models.BinaryField(null=True, blank=True)
     ignored = models.BooleanField(default=False, blank=True)
     source_id = models.IntegerField()
+    registration_data_import = models.ForeignKey(
+        "registration_datahub.RegistrationDataImportDatahub",
+        related_name="records",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
