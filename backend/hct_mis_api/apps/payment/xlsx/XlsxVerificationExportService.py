@@ -11,6 +11,10 @@ class XlsxVerificationExportService:
         "payment_record_ca_id",
         "received",
         "head_of_household",
+        "admin1",
+        "admin2",
+        "village",
+        "address",
         "household_id",
         "household_unicef_id",
         "delivered_amount",
@@ -68,6 +72,10 @@ class XlsxVerificationExportService:
             str(payment_record_verification.payment_record.ca_id),
             self._to_received_column(payment_record_verification),
             str(payment_record_verification.payment_record.head_of_household.full_name),
+            str(payment_record_verification.payment_record.household.admin1.title),
+            str(payment_record_verification.payment_record.household.admin2.title),
+            str(payment_record_verification.payment_record.household.village),
+            str(payment_record_verification.payment_record.household.address),
             str(payment_record_verification.payment_record.household_id),
             str(payment_record_verification.payment_record.household.unicef_id),
             payment_record_verification.payment_record.delivered_quantity,
@@ -91,7 +99,7 @@ class XlsxVerificationExportService:
         self._add_headers()
         self._add_payment_record_verifications()
         self._add_data_validation()
-        self._adjust_column_width_from_col(self.ws_verifications, 0, 1, 5)
+        self._adjust_column_width_from_col(self.ws_verifications, 0, 1, 8)
         return self.wb
 
     def generate_file(self, filename):
