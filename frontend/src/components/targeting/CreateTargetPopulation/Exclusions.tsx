@@ -7,8 +7,12 @@ import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { PaperContainer } from '../PaperContainer';
 
-export function Exclusions(): React.ReactElement {
-  const [isExclusionsOpen, setExclusionsOpen] = useState(false);
+export function Exclusions({
+  initialOpen,
+}: {
+  initialOpen?: boolean;
+}): React.ReactElement {
+  const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen || false);
   const { t } = useTranslation();
 
   return (
@@ -30,14 +34,16 @@ export function Exclusions(): React.ReactElement {
       </Box>
       <Collapse in={isExclusionsOpen}>
         <Box mt={2}>
-          <Grid item xs={6}>
-            <Field
-              name='excludedIds'
-              fullWidth
-              variant='outlined'
-              label={t('Household or Individual IDs to exclude')}
-              component={FormikTextField}
-            />
+          <Grid container>
+            <Grid item xs={6}>
+              <Field
+                name='excludedIds'
+                fullWidth
+                variant='outlined'
+                label={t('Household or Individual IDs to exclude')}
+                component={FormikTextField}
+              />
+            </Grid>
           </Grid>
         </Box>
         <Box mt={2}>

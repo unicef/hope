@@ -178,7 +178,9 @@ export function TargetingCriteria({
             </AddCriteria>
           )}
         </ContentWrapper>
-        {targetPopulation && <VulnerabilityScoreComponent targetPopulation={targetPopulation} />}
+        {targetPopulation && (
+          <VulnerabilityScoreComponent targetPopulation={targetPopulation} />
+        )}
       </PaperContainer>
     </div>
   );

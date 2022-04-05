@@ -22,7 +22,6 @@ import { RegistrationDataImportPage } from './pages/rdi/RegistrationDataImportPa
 import { PopulationHouseholdDetailsPage } from './pages/population/PopulationHouseholdDetailsPage';
 import { PopulationIndividualsPage } from './pages/population/PopulationIndividualsPage';
 import { PopulationIndividualsDetailsPage } from './pages/population/PopulationIndividualsDetailsPage';
-import { TargetPopulationPage } from './pages/targeting/TargetPopulationPage';
 import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopulationPage';
 import { RegistrationDataImportDetailsPage } from './pages/rdi/RegistrationDataImportDetailsPage';
@@ -36,6 +35,7 @@ import { ReportingPage } from './pages/reporting/ReportingPage';
 import { ReportingDetailsPage } from './pages/reporting/ReportingDetailsPage';
 import { ActivityLogPage } from './pages/core/MainActivityLogPage';
 import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
+import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 
 const Root = styled.div`
   display: flex;
@@ -107,7 +107,7 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/target-population');
               }}
             >
-              <TargetPopulationPage />
+              <TargetPopulationsPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/target-population/create'>
