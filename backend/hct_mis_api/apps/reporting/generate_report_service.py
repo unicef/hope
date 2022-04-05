@@ -259,9 +259,6 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def format_cash_plan_row(self, cash_plan: CashPlan) -> tuple:
-        import ipdb
-
-        ipdb.set_trace()
         return (
             cash_plan.ca_id,
             cash_plan.name,
