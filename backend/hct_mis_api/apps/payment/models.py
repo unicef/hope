@@ -353,9 +353,9 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
     STATUS_CHOICES = (
-        (STATUS_PENDING, "Pending"),
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
+        (STATUS_PENDING, "Pending"),
     )
     status = models.CharField(
         max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, verbose_name="Verification status", db_index=True
