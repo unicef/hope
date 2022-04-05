@@ -547,7 +547,7 @@ class AdminAreaResource(resources.ModelResource):
 
 
 @admin.register(AdminArea)
-class AdminAreaAdmin(ImportExportModelAdmin, ExtraButtonsMixin, MPTTModelAdmin):
+class AdminAreaAdmin(ImportExportModelAdmin, ExtraButtonsMixin, AdminFiltersMixin, MPTTModelAdmin):
     search_fields = ("p_code", "title")
     list_display = (
         "title",
