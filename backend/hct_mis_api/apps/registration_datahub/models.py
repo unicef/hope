@@ -394,6 +394,9 @@ class ImportedIndividualIdentity(models.Model):
         max_length=255,
     )
 
+    class Meta:
+        verbose_name_plural = 'Imported Individual Identities'
+
     def __str__(self):
         return f"{self.agency} {self.individual} {self.document_number}"
 

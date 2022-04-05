@@ -141,6 +141,7 @@ class TargetPopulationEntry(SessionModel):
             "household_mis_id",
             "target_population_mis_id",
         )
+        verbose_name_plural = 'Target Population Entries'
 
 
 class Program(SessionModel):
