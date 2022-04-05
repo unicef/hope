@@ -123,11 +123,11 @@ def _slug_strip(value, separator="-"):
     if separator == "-" or not separator:
         re_sep = "-"
     else:
-        re_sep = "(?:-|%s)" % re.escape(separator)
+        re_sep = "(?:-|{})".format(re.escape(separator))
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("%s+" % re_sep, separator, value)
+        value = re.sub("{}+".format(re_sep, separator, value))
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
