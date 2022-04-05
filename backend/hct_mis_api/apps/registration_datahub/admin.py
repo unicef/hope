@@ -1,3 +1,4 @@
+import json
 import re
 
 from django.contrib import admin
@@ -9,8 +10,11 @@ from django.utils.safestring import mark_safe
 from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.helpers import AdminActionPermMixin
+from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
+from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.registration_datahub.models import (
@@ -22,12 +26,11 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
+    Record,
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
-
-from hct_mis_api.apps.registration_datahub.models import Record
 
 
 @admin.register(RegistrationDataImportDatahub)
@@ -209,4 +212,28 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
 
 @admin.register(Record)
 class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    list_display = ("id", "registration", "timestamp", "ignored")
+    readonly_fields = list_display = ("id", "registration", "timestamp", "source_id", "ignored")
+    date_hierarchy = "timestamp"
+    list_filter = (
+        DepotManager,
+        ("source_id", NumberFilter),
+        "timestamp",
+        QueryStringFilter,
+    )
+    change_form_template = "registration_datahub/admin/record/change_form.html"
+    actions = [mass_update]
+
+    def has_add_permission(self, request):
+        from django.utils import timezone
+
+        # Record.objects.create(
+        #     timestamp=timezone.now(),
+        #     source_id=10,
+        #     registration=2,
+        #     ignored=None,
+        #     storage=json.dumps({"aaaa": 2222}).encode()
+        # )
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
