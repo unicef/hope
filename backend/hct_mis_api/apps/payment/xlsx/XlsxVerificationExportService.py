@@ -24,8 +24,8 @@ class XlsxVerificationExportService:
     PAYMENT_RECORD_ID_LETTER = "A"
     RECEIVED_COLUMN_INDEX = 2
     RECEIVED_COLUMN_LETTER = "C"
-    RECEIVED_AMOUNT_COLUMN_INDEX = 7
-    RECEIVED_AMOUNT_COLUMN_LETTER = "H"
+    RECEIVED_AMOUNT_COLUMN_INDEX = 11
+    RECEIVED_AMOUNT_COLUMN_LETTER = "L"
     VERIFICATION_SHEET = "Payment Verifications"
     META_SHEET = "Meta"
     VERSION_CELL_NAME_COORDINATES = "A1"
@@ -66,18 +66,19 @@ class XlsxVerificationExportService:
         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
     def _add_payment_record_verification_row(self, payment_record_verification):
+        household = payment_record_verification.payment_record.household
 
         payment_record_verification_row = (
             str(payment_record_verification.payment_record_id),
             str(payment_record_verification.payment_record.ca_id),
             self._to_received_column(payment_record_verification),
             str(payment_record_verification.payment_record.head_of_household.full_name),
-            str(payment_record_verification.payment_record.household.admin1.title),
-            str(payment_record_verification.payment_record.household.admin2.title),
-            str(payment_record_verification.payment_record.household.village),
-            str(payment_record_verification.payment_record.household.address),
+            str(household.admin1.title) if household.admin1 else "",
+            str(household.admin2.title) if household.admin2 else "",
+            str(household.village),
+            str(household.address),
             str(payment_record_verification.payment_record.household_id),
-            str(payment_record_verification.payment_record.household.unicef_id),
+            str(household.unicef_id),
             payment_record_verification.payment_record.delivered_quantity,
             payment_record_verification.received_amount,
         )
