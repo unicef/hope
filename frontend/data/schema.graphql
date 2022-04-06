@@ -2062,6 +2062,7 @@ type Mutations {
   approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
+  approvePaymentDetails(approve: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
@@ -2119,6 +2120,10 @@ type PartnerType {
   name: String!
   isUn: Boolean!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+}
+
+type PaymentDetailsApproveMutation {
+  grievanceTicket: GrievanceTicketNode
 }
 
 enum PaymentRecordDeliveryType {
@@ -2233,6 +2238,7 @@ type PaymentVerificationNode implements Node {
   statusDate: DateTime
   receivedAmount: Float
   ticketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
+  ticketDetail(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   isManuallyEditable: Boolean
 }
 
@@ -3300,12 +3306,29 @@ type TicketNoteNodeEdge {
   cursor: String!
 }
 
+input TicketPaymentVerificationDetailsExtras {
+  newReceivedAmount: Float
+  newStatus: String
+}
+
+enum TicketPaymentVerificationDetailsNewStatus {
+  PENDING
+  RECEIVED
+  NOT_RECEIVED
+  RECEIVED_WITH_ISSUES
+}
+
 type TicketPaymentVerificationDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   paymentVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus!
+  paymentVerification: PaymentVerificationNode
+  newStatus: TicketPaymentVerificationDetailsNewStatus
+  newReceivedAmount: Float
+  approved: Boolean!
+  isMultiplePaymentVerifications: Boolean
 }
 
 type TicketPaymentVerificationDetailsNodeConnection {
@@ -3425,6 +3448,7 @@ input UpdateGrievanceTicketExtrasInput {
   individualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras
   addIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras
   category: CategoryExtrasInput
+  ticketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras
 }
 
 input UpdateGrievanceTicketInput {
