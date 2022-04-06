@@ -268,6 +268,7 @@ OTHER_APPS = [
     "constance",
     "admin_extra_buttons",
     "adminfilters",
+    "adminfilters.depot",
     "adminactions",
     "multiselectfield",
     "mptt",
