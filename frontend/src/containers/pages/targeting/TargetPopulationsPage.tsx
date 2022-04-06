@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import get from 'lodash/get';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, IconButton } from '@material-ui/core';
 import { Info } from '@material-ui/icons';
@@ -11,23 +10,17 @@ import { TargetPopulationFilters } from '../../../components/targeting/TargetPop
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
-import { ProgramNode, useAllProgramsQuery } from '../../../__generated__/graphql';
+import {
+  ProgramNode,
+  useAllProgramsQuery,
+} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 
-const Container = styled.div`
-  && {
-    display: flex;
-    flex-direction: column;
-    min-width: 100%;
-  }
-`;
-
-export function TargetPopulationPage(): React.ReactElement {
+export function TargetPopulationsPage(): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const [filter, setFilter] = useState({
@@ -38,7 +31,7 @@ export function TargetPopulationPage(): React.ReactElement {
     name: '',
     status: '',
   });
-  const [isInfoOpen, toggleInfo] = useState(false);
+  const [isInfoOpen, setToggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
@@ -55,28 +48,24 @@ export function TargetPopulationPage(): React.ReactElement {
   const allPrograms = get(data, 'allPrograms.edges', []);
   const programs = allPrograms.map((edge) => edge.node);
 
-  const redirectToCreate = (): void => {
-    const path = `/${businessArea}/target-population/create`;
-    return history.push(path);
-  };
-
   return (
-    <div>
+    <>
       <PageHeader title={t('Targeting')}>
         <>
           <IconButton
-            onClick={() => toggleInfo(true)}
+            onClick={() => setToggleInfo(true)}
             color='primary'
             aria-label='Targeting Information'
           >
             <Info />
           </IconButton>
-          <TargetingInfoDialog open={isInfoOpen} setOpen={toggleInfo} />
+          <TargetingInfoDialog open={isInfoOpen} setOpen={setToggleInfo} />
           {canCreate && (
             <Button
               variant='contained'
               color='primary'
-              onClick={() => redirectToCreate()}
+              component={Link}
+              to={`/${businessArea}/target-population/create`}
               data-cy='button-target-population-create-new'
             >
               Create new
@@ -85,20 +74,17 @@ export function TargetPopulationPage(): React.ReactElement {
         </>
       </PageHeader>
       <TargetPopulationFilters
-        //targetPopulations={targetPopulations as TargetPopulationNode[]}
         filter={filter}
         programs={programs as ProgramNode[]}
         onFilterChange={setFilter}
       />
-      <Container>
-        <TargetPopulationTable
-          filter={debouncedFilter}
-          canViewDetails={hasPermissions(
-            PERMISSIONS.TARGETING_VIEW_DETAILS,
-            permissions,
-          )}
-        />
-      </Container>
-    </div>
+      <TargetPopulationTable
+        filter={debouncedFilter}
+        canViewDetails={hasPermissions(
+          PERMISSIONS.TARGETING_VIEW_DETAILS,
+          permissions,
+        )}
+      />
+    </>
   );
 }
