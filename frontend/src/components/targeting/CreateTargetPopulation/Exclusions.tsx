@@ -8,11 +8,11 @@ import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { PaperContainer } from '../PaperContainer';
 
 export function Exclusions({
-  initialOpen,
+  initialOpen = false,
 }: {
   initialOpen?: boolean;
 }): React.ReactElement {
-  const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen || false);
+  const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const { t } = useTranslation();
 
   return (
