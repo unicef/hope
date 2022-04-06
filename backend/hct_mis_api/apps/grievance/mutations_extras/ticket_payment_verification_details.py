@@ -1,30 +1,40 @@
+import logging
 import graphene
 
+from graphql import GraphQLError
+
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.models import PaymentVerification
+
+
+logger = logging.getLogger(__name__)
 
 
 class TicketPaymentVerificationDetailsExtras(graphene.InputObjectType):
     new_received_amount = graphene.Float()
-    approved_new_received_amount = graphene.Boolean()
+    new_status = graphene.String()
 
 
 def update_ticket_payment_verification_details_extras(root, info, input, grievance_ticket, extras, **kwargs):
+    if grievance_ticket.status != GrievanceTicket.STATUS_IN_PROGRESS:
+        logger.error("Payment Details is editable only for Grievance Ticket on status In Progress")
+        raise GraphQLError("Payment Details is editable only for Grievance Ticket on status In Progress")
+
     data = extras.get("ticket_payment_verification_details_extras", {})
     new_received_amount = data.get("new_received_amount")
-    approved_new_received_amount = data.get("approved_new_received_amount")
+    new_status = data.get("new_status")
 
-    ticket_details = grievance_ticket.payment_verification_ticket_details
-    if not ticket_details.is_multiple_payment_verifications:
+    payment_details = grievance_ticket.payment_verification_ticket_details
+    if not payment_details.is_multiple_payment_verifications:
         if new_received_amount:
-            ticket_details.new_received_amount = new_received_amount
+            payment_details.new_received_amount = new_received_amount
             # update status if payment_verification not null
-            if ticket_details.payment_verification and ticket_details.payment_verification.payment_record:
-                if new_received_amount >= ticket_details.payment_verification.payment_record.delivered_quantity:
-                    ticket_details.new_status = PaymentVerification.STATUS_RECEIVED
+            if payment_details.payment_verification and payment_details.payment_verification.payment_record:
+                if new_received_amount >= payment_details.payment_verification.payment_record.delivered_quantity:
+                    payment_details.new_status = PaymentVerification.STATUS_RECEIVED
                 else:
-                    ticket_details.new_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+                    payment_details.new_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        elif new_status:
+            payment_details.new_status = new_status
 
-        if approved_new_received_amount:
-            ticket_details.approved = True
-
-        ticket_details.save()
+        payment_details.save()
