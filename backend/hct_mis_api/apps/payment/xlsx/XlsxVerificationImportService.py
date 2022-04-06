@@ -23,7 +23,7 @@ class XlsxVerificationImportService:
         "e": "error",
         "str": "text",
     }
-    COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "n", "n")
+    COLUMNS_TYPES = ("s", "s", "s", "s", "s", "s", "s", "s", "s", "s", "n", "n")
 
     def __init__(self, cashplan_payment_verification, file):
         self.file = file
