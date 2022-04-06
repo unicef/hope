@@ -67,12 +67,13 @@ class XlsxVerificationExportService:
 
     def _add_payment_record_verification_row(self, payment_record_verification):
         household = payment_record_verification.payment_record.household
+        head_of_household = payment_record_verification.payment_record.head_of_household
 
         payment_record_verification_row = (
             str(payment_record_verification.payment_record_id),
             str(payment_record_verification.payment_record.ca_id),
             self._to_received_column(payment_record_verification),
-            str(payment_record_verification.payment_record.head_of_household.full_name),
+            str(head_of_household.full_name) if head_of_household else "",
             str(household.admin1.title) if household.admin1 else "",
             str(household.admin2.title) if household.admin2 else "",
             str(household.village),
