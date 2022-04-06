@@ -4,7 +4,7 @@ import {
   useTargetPopulationQuery,
   TargetPopulationNode,
 } from '../../../__generated__/graphql';
-import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation';
+import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { TargetPopulationCore } from '../../../components/targeting/TargetPopulationCore';
 import { TargetPopulationDetails } from '../../../components/targeting/TargetPopulationDetails';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -32,7 +32,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
   const { status } = targetPopulation;
 
   return (
-    <div>
+    <>
       {isEdit ? (
         <EditTargetPopulation
           targetPopulation={targetPopulation}
@@ -62,7 +62,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
             )}
             canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
           />
-          {(status !== 'DRAFT') && (
+          {status !== 'DRAFT' && (
             <TargetPopulationDetails targetPopulation={targetPopulation} />
           )}
           <TargetPopulationCore
@@ -77,6 +77,6 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
           />
         </>
       )}
-    </div>
+    </>
   );
 }

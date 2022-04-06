@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import { Field } from 'formik';
 import get from 'lodash/get';
 import React from 'react';
@@ -9,6 +9,7 @@ import { AllProgramsQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { OverviewContainer } from '../core/OverviewContainer';
 import { FormikSelectFieldConfirm } from './FormikSelectFieldConfirm';
+import { PaperContainer } from './PaperContainer';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(3)}px;
@@ -16,12 +17,6 @@ const Title = styled.div`
 const GreyText = styled.p`
   color: #9e9e9e;
   font-size: 16px;
-`;
-const PaperContainer = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
-  margin: ${({ theme }) => theme.spacing(5)}px;
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
 export function TargetPopulationProgramme({
