@@ -81,20 +81,22 @@ class VerificationPlanStatusChangeServices:
         verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
         if verifications.count() == 0:
             return
-        grievance_ticket = GrievanceTicket.objects.create(
-            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-            business_area=cashplan_payment_verification.cash_plan.business_area,
-        )
+        for verification in verifications:
+            grievance_ticket = GrievanceTicket.objects.create(
+                category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                business_area=cashplan_payment_verification.cash_plan.business_area,
+            )
 
-        GrievanceNotification.send_all_notifications(
-            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
-        )
-        details = TicketPaymentVerificationDetails(
-            ticket=grievance_ticket,
-            payment_verification_status=status,
-        )
-        details.payment_verifications.set(verifications)
-        details.save()
+            GrievanceNotification.send_all_notifications(
+                GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+            )
+            TicketPaymentVerificationDetails.objects.create(
+                ticket=grievance_ticket,
+                payment_verification_status=status,
+                payment_verification=verification,
+                new_received_amount=verification.received_amount,  # ??
+                new_status=verification.status  # ??
+            )
 
     def _create_grievance_tickets(self, cashplan_payment_verification):
         self._create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)
