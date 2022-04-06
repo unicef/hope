@@ -224,15 +224,6 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
     actions = [mass_update]
 
     def has_add_permission(self, request):
-        from django.utils import timezone
-
-        # Record.objects.create(
-        #     timestamp=timezone.now(),
-        #     source_id=10,
-        #     registration=2,
-        #     ignored=None,
-        #     storage=json.dumps({"aaaa": 2222}).encode()
-        # )
         return False
 
     def has_delete_permission(self, request, obj=None):
