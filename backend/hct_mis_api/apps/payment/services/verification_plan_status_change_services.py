@@ -93,9 +93,7 @@ class VerificationPlanStatusChangeServices:
             TicketPaymentVerificationDetails.objects.create(
                 ticket=grievance_ticket,
                 payment_verification_status=status,
-                payment_verification=verification,
-                new_received_amount=verification.received_amount,  # ??
-                new_status=verification.status  # ??
+                payment_verification=verification
             )
 
     def _create_grievance_tickets(self, cashplan_payment_verification):
