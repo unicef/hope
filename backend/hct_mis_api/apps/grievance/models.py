@@ -1,9 +1,11 @@
 import logging
+
+from decimal import Decimal
 from itertools import chain
-from time import time
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField, Q
 from django.utils.translation import gettext_lazy as _
@@ -627,11 +629,36 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         related_name="payment_verification_ticket_details",
         on_delete=models.CASCADE,
     )
+    # deprecated for future use fk payment_verification
     payment_verifications = models.ManyToManyField("payment.PaymentVerification", related_name="ticket_details")
     payment_verification_status = models.CharField(
         max_length=50,
         choices=PaymentVerification.STATUS_CHOICES,
     )
+    payment_verification = models.ForeignKey(
+        "payment.PaymentVerification",
+        related_name="ticket_detail",
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    new_status = models.CharField(
+        max_length=50,
+        choices=PaymentVerification.STATUS_CHOICES,
+        default=PaymentVerification.STATUS_PENDING,
+    )
+    new_received_amount = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
+    )
+    approved = models.BooleanField(default=False)
+
+    @property
+    def is_multiple_payment_verifications(self):
+        if self.payment_verifications:
+            return True
+        return False
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):

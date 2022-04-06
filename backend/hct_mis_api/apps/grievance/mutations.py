@@ -1,13 +1,13 @@
 import logging
+import graphene
+
 from enum import Enum
-from typing import Dict, List, Union
+from typing import Union
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -61,6 +61,8 @@ from hct_mis_api.apps.grievance.mutations_extras.system_tickets import (
     close_needs_adjudication_ticket,
     close_system_flagging_ticket,
 )
+from hct_mis_api.apps.grievance.mutations_extras.ticket_payment_verification_details import \
+    update_ticket_payment_verification_details_extras
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     remove_parsed_data_fields,
     verify_required_arguments,
@@ -448,6 +450,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_REFERRAL: update_referral_extras,
             GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK: update_positive_feedback_extras,
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: update_negative_feedback_extras,
+            GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: update_ticket_payment_verification_details_extras
         }
         update_extra_method = update_extra_methods.get(grievance_ticket.category)
         if update_extra_method:
@@ -598,7 +601,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: _no_operation_close_method,
             GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: _no_operation_close_method,
         },
-        GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: _no_operation_close_method,
+        GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: save_payment_verification_extras,
         GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: _no_operation_close_method,
         GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: _no_operation_close_method,
         GrievanceTicket.CATEGORY_REFERRAL: _no_operation_close_method,
