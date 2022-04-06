@@ -644,7 +644,8 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     new_status = models.CharField(
         max_length=50,
         choices=PaymentVerification.STATUS_CHOICES,
-        default=PaymentVerification.STATUS_PENDING,
+        default=None,
+        null=True
     )
     new_received_amount = models.DecimalField(
         decimal_places=2,
