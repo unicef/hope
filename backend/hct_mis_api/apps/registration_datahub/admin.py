@@ -1,3 +1,5 @@
+import json
+import logging
 import re
 
 from django.contrib import admin
@@ -9,8 +11,11 @@ from django.utils.safestring import mark_safe
 from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.helpers import AdminActionPermMixin
+from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
+from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.registration_datahub.models import (
@@ -22,12 +27,14 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
+    Record,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
-from hct_mis_api.apps.registration_datahub.models import Record
+logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImportDatahub)
@@ -209,4 +216,50 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
 
 @admin.register(Record)
 class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    list_display = ("id", "registration", "timestamp", "ignored")
+    readonly_fields = list_display = ("id", "registration", "timestamp", "source_id", "ignored")
+    date_hierarchy = "timestamp"
+    list_filter = (
+        DepotManager,
+        ("source_id", NumberFilter),
+        "timestamp",
+        QueryStringFilter,
+    )
+    change_form_template = "registration_datahub/admin/record/change_form.html"
+    actions = [mass_update, "extract"]
+    mass_update_fields = [
+        "fields",
+    ]
+    mass_update_hints = []
+
+    def extract(self, request, queryset):
+        def _filter(d):
+            if isinstance(d, list):
+                return [_filter(v) for v in d]
+            elif isinstance(d, dict):
+                return {k: _filter(v) for k, v in d.items()}
+            elif is_image(d):
+                return "::image::"
+            else:
+                return d
+
+        for r in queryset.all():
+            try:
+                extracted = json.loads(self.storage.tobytes().decode())
+                r.data = _filter(extracted)
+                r.save()
+            except Exception as e:
+                logger.exception(e)
+
+    @button()
+    def extract_all(self, request):
+        self.extract(request, Record.objects.filter(data__isnull=True))
+
+    @button(label="Extract")
+    def extract_single(self, request, pk):
+        self.extract(request, Record.objects.filter(pk=pk))
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
