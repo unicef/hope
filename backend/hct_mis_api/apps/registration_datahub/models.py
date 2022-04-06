@@ -424,6 +424,8 @@ class Record(models.Model):
     ignored = models.BooleanField(default=False, blank=True, null=True)
     source_id = models.IntegerField(db_index=True)
 
-    @property
-    def data(self):
-        return json.loads(self.storage.tobytes().decode())
+    data = models.JSONField(default=dict, blank=True, null=True)
+    #
+    # @property
+    # def data(self):
+    #     return json.loads(self.storage.tobytes().decode())
