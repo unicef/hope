@@ -1,20 +1,12 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { PaperContainer } from './PaperContainer';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
-
-const PaperContainer = styled(Paper)`
-  display: flex;
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
-  margin: ${({ theme }) => theme.spacing(5)}px;
-  flex-direction: column;
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
-`;
 
 const TableWrapper = styled.div`
   display: flex;
