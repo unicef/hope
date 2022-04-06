@@ -1121,6 +1121,52 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
+class PaymentDetailsApproveMutation(PermissionMutation):
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
+        approve = graphene.Boolean(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, grievance_ticket_id, **kwargs):
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
+        # TODO: this perms okey??
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+        )
+
+        if grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
+            logger.error("Payment Details changes can approve only for Grievance Ticket on status For Approval")
+            raise GraphQLError("Payment Details changes can approve only for Grievance Ticket on status For Approval")
+
+        old_payment_verification_ticket_details = grievance_ticket.payment_verification_ticket_details
+        grievance_ticket.payment_verification_ticket_details.approved = kwargs.get("approve", False)
+        grievance_ticket.payment_verification_ticket_details.save()
+
+        # TODO: is that correct? business_area?
+        log_create(
+            GrievanceTicket.ACTIVITY_LOG_MAPPING,
+            "ticket__business_area",
+            info.context.user,
+            old_payment_verification_ticket_details,
+            grievance_ticket.payment_verification_ticket_details,
+        )
+
+        return cls(grievance_ticket=grievance_ticket)
+
+
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     update_grievance_ticket = UpdateGrievanceTicketMutation.Field()
@@ -1133,4 +1179,5 @@ class Mutations(graphene.ObjectType):
     approve_delete_household = SimpleApproveMutation.Field()
     approve_system_flagging = SimpleApproveMutation.Field()
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
+    approve_payment_details = PaymentDetailsApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()
