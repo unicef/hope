@@ -35,14 +35,7 @@ export function EditTargetPopulationHeader({
     },
   ];
 
-  const isTitleEditable = (): boolean => {
-    switch (targetPopulation.status) {
-      case 'LOCKED':
-        return false;
-      default:
-        return true;
-    }
-  };
+  const isTitleEditable = (): boolean => targetPopulation.status !== 'LOCKED';
 
   return (
     <PageHeader
