@@ -1488,7 +1488,7 @@ HOUSEHOLD_EDIT_ONLY_FIELDS = [
             "required": False,
             "label": {"English(EN)": "Household resides in which admin area?"},
             "hint": "",
-            "choices": lambda: Area.get_admin_areas(),
+            "choices": lambda: Area.get_admin_areas_as_choices(),
             "associated_with": _HOUSEHOLD,
             "xlsx_field": "admin_area_h_c",
         },
