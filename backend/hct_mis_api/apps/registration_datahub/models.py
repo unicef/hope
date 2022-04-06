@@ -300,11 +300,11 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
 class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
     JSON = "JSON"
-    FLEX_REGISTRATION = "FLEX_REGISTRATION"
+    FLEX_REGISTRATION = "FLEX"
     DATA_TYPE_CHOICES = (
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
-        (FLEX_REGISTRATION, _("FLEX REGISTRATION")),
+        (FLEX_REGISTRATION, _("Flex Registration")),
     )
     STATUS_PENDING = "PENDING"
     STATUS_RUNNING = "RUNNING"
