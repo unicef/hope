@@ -37,6 +37,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 
@@ -221,11 +222,11 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
 class FetchForm(forms.Form):
     host = forms.URLField()
     username = forms.CharField()
-    password = forms.CharField()
-    # password = forms.CharField(widget=forms.PasswordInput)
-    remember = forms.BooleanField(label="Remember me", required=False)
+    password = forms.CharField(widget=forms.PasswordInput)
+    registration = forms.IntegerField()
     start = forms.IntegerField()
     end = forms.IntegerField()
+    remember = forms.BooleanField(label="Remember me", required=False)
 
 
 @admin.register(Record)
@@ -273,14 +274,14 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             except Exception as e:
                 logger.exception(e)
 
-    @button()
+    @button(permission=is_root)
     def fetch(self, request):
         ctx = self.get_common_context(request)
         if request.method == "POST":
             form = FetchForm(request.POST)
             if form.is_valid():
                 auth = HTTPBasicAuth(form.cleaned_data["username"], form.cleaned_data["password"])
-                url = "{host}api/data/2/{start}/{end}/".format(**form.cleaned_data)
+                url = "{host}api/data/{registration}/{start}/{end}/".format(**form.cleaned_data)
                 with requests.get(url, stream=True, auth=auth) as res:
                     if res.status_code != 200:
                         raise Exception(str(res))
