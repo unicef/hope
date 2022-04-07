@@ -1,6 +1,6 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-
+from django.conf import settings
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 
 from .elasticsearch_utils import DEFAULT_SCRIPT
@@ -103,7 +103,7 @@ class IndividualDocument(Document):
         return instance.business_area.slug
 
     class Index:
-        name = "individuals"
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}individuals"
         settings = {
             "number_of_shards": 1,
             "number_of_replicas": 0,

@@ -99,9 +99,9 @@ services:
       - erp_datahub_db
       - registration_datahub_db
       - redis
-      - elasticsearch_test
+      - elasticsearch
 
-  elasticsearch_test:
+  elasticsearch:
     build:
       context: elasticsearch
       dockerfile: Dockerfile
@@ -117,5 +117,3 @@ services:
         hard: -1
     volumes:
       - data_es_test:/usr/share/elasticsearch/data
-    ports:
-      - 9201:9200
