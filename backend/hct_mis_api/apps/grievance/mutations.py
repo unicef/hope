@@ -1126,7 +1126,7 @@ class PaymentDetailsApproveMutation(PermissionMutation):
 
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
-        approveStatus = graphene.Boolean(required=True)
+        approve_status = graphene.Boolean(required=True)
         version = BigInt(required=False)
 
     @classmethod
