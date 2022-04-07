@@ -114,7 +114,7 @@ export function GrievancesApproveSection({
   };
 
   return (
-    <Grid item xs={12}>
+    <Grid item xs={9}>
       <Box p={3}>{matchDetailsComponent()}</Box>
     </Grid>
   );

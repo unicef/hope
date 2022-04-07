@@ -10,8 +10,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import { Formik } from 'formik';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useSnackbar } from '../../../hooks/useSnackBar';
@@ -22,6 +21,7 @@ import {
   useApprovePaymentDetailsMutation,
 } from '../../../__generated__/graphql';
 import { useConfirmation } from '../../core/ConfirmationDialog';
+import { Missing } from '../../core/Missing';
 import { Title } from '../../core/Title';
 import { VerifyPaymentGrievance } from './VerifyPaymentGrievance';
 
@@ -57,87 +57,84 @@ export function PaymentGrievanceDetails({
   }
 
   return (
-    <Formik
-      initialValues={{}}
-      onSubmit={(values) => {
-        console.log(values);
-      }}
-    >
-      {({ submitForm, setFieldValue, values }) => (
-        <StyledBox>
-          <Title>
-            <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>{t('Payment Details')}</Typography>
-              <VerifyPaymentGrievance ticket={ticket} />
-              {canApprovePaymentVerification && (
-                <Button
-                  onClick={() =>
-                    confirm({
-                      title: t('Approve'),
-                      content: dialogText,
-                    }).then(async () => {
-                      try {
-                        await mutate({
-                          variables: {
-                            grievanceTicketId: ticket.id,
-                            approveStatus: !approveStatus,
-                          },
-                          refetchQueries: () => [
-                            {
-                              query: GrievanceTicketDocument,
-                              variables: { id: ticket.id },
-                            },
-                          ],
-                        });
-                        if (approveStatus) {
-                          showMessage(t('Changes Disapproved'));
-                        }
-                        if (!approveStatus) {
-                          showMessage(t('Changes Approved'));
-                        }
-                      } catch (e) {
-                        e.graphQLErrors.map((x) => showMessage(x.message));
-                      }
-                    })
+    <StyledBox>
+      <Title>
+        <Box display='flex' justifyContent='space-between'>
+          <Typography variant='h6'>{t('Payment Details')}</Typography>
+          {ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS ? (
+            <VerifyPaymentGrievance ticket={ticket} />
+          ) : null}
+          {canApprovePaymentVerification &&
+          ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ? (
+            <Button
+              onClick={() =>
+                confirm({
+                  title: t('Approve'),
+                  content: dialogText,
+                }).then(async () => {
+                  try {
+                    await mutate({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus: !approveStatus,
+                      },
+                      refetchQueries: () => [
+                        {
+                          query: GrievanceTicketDocument,
+                          variables: { id: ticket.id },
+                        },
+                      ],
+                    });
+                    if (approveStatus) {
+                      showMessage(t('Changes Disapproved'));
+                    }
+                    if (!approveStatus) {
+                      showMessage(t('Changes Approved'));
+                    }
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
                   }
-                  variant={approveStatus ? 'outlined' : 'contained'}
-                  color='primary'
-                  disabled={
-                    ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                  }
-                >
-                  {approveStatus ? t('Disapprove') : t('Approve')}
-                </Button>
-              )}
-            </Box>
-          </Title>
-          <StyledTable>
-            <TableHead>
-              <TableRow>
-                <TableCell align='left'>{t('Entitlement Value')} ($)</TableCell>
-                <TableCell align='left'>{t('Received Value')} ($)</TableCell>
-                <TableCell align='left'>{t('Verified Value')} ($)</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                <TableCell>
-                  {approveStatus ? (
-                    <GreenIcon>
-                      <CheckCircleIcon />
-                    </GreenIcon>
-                  ) : null}
-                </TableCell>
-                <TableCell scope='row' align='left'>
-                  100
-                </TableCell>
-                <TableCell align='left'>80</TableCell>
-                <TableCell align='left'>-</TableCell>
-              </TableRow>
-            </TableBody>
-          </StyledTable>
-        </StyledBox>
-      )}
-    </Formik>
+                })
+              }
+              variant={approveStatus ? 'outlined' : 'contained'}
+              color='primary'
+              disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+            >
+              {approveStatus ? t('Disapprove') : t('Approve')}
+            </Button>
+          ) : null}
+        </Box>
+      </Title>
+      <StyledTable>
+        <TableHead>
+          <TableRow>
+            <TableCell align='right' />
+            <TableCell align='right'>{t('Entitlement Value')} ($)</TableCell>
+            <TableCell align='right'>{t('Received Value')} ($)</TableCell>
+            <TableCell align='right'>{t('Verified Value')} ($)</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell>
+              {approveStatus ? (
+                <GreenIcon>
+                  <CheckCircleIcon />
+                </GreenIcon>
+              ) : null}
+            </TableCell>
+            <TableCell align='right'>
+              <Missing />
+            </TableCell>
+            <TableCell align='right'>
+              <Missing />
+            </TableCell>
+            <TableCell align='right'>
+              <Missing />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </StyledTable>
+    </StyledBox>
   );
 }

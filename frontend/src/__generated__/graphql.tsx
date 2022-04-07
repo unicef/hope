@@ -6622,7 +6622,7 @@ export type ApprovePaymentDetailsMutation = (
       & Pick<GrievanceTicketNode, 'id' | 'status'>
       & { paymentVerificationTicketDetails: Maybe<(
         { __typename?: 'TicketPaymentVerificationDetailsNode' }
-        & Pick<TicketPaymentVerificationDetailsNode, 'approveStatus'>
+        & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'approveStatus'>
       )> }
     )> }
   )> }
@@ -10618,6 +10618,7 @@ export const ApprovePaymentDetailsDocument = gql`
       id
       status
       paymentVerificationTicketDetails {
+        id
         approveStatus
       }
     }

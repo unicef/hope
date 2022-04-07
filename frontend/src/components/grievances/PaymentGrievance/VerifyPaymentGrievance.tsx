@@ -16,7 +16,7 @@ import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import {
   GrievanceTicketQuery,
-  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation,
+  useUpdateGrievanceMutation,
 } from '../../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
@@ -43,21 +43,21 @@ export function VerifyPaymentGrievance({
   const { t } = useTranslation();
   const [VerifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [
-    mutate,
-    { error },
-  ] = useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
+  const [mutate, { error }] = useUpdateGrievanceMutation();
 
   const submit = async (values): Promise<void> => {
     try {
       await mutate({
         variables: {
-          ticket.id,
-          received: values.status === 'RECEIVED',
-          receivedAmount:
-            values.status === 'RECEIVED'
-              ? parseFloat(values.receivedAmount).toFixed(2)
-              : 0,
+          input: {
+            ticketId: ticket.id,
+            extras: {
+              ticketPaymentVerificationDetailsExtras: {
+                newReceivedAmount: values.newReceivedAmount,
+                newStatus: values.newStatus,
+              },
+            },
+          },
         },
       });
     } catch (e) {
@@ -72,8 +72,8 @@ export function VerifyPaymentGrievance({
 
   const initialValues = {
     ticketId: ticket.id,
-    status: 'RECEIVED',
-    receivedAmount: 0,
+    newReceivedAmount: 0,
+    newStatus: 'RECEIVED',
   };
 
   return (
@@ -106,7 +106,7 @@ export function VerifyPaymentGrievance({
                 <Grid container>
                   <Grid item xs={12}>
                     <Field
-                      name='status'
+                      name='newStatus'
                       label='Status'
                       style={{ flexDirection: 'row' }}
                       choices={[
@@ -117,9 +117,9 @@ export function VerifyPaymentGrievance({
                     />
                   </Grid>
                   <Grid item xs={6}>
-                    {values.status === 'RECEIVED' && (
+                    {values.newStatus === 'RECEIVED' && (
                       <Field
-                        name='receivedAmount'
+                        name='newReceivedAmount'
                         type='number'
                         label={t('Amount Received')}
                         color='primary'
