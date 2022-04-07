@@ -6607,6 +6607,23 @@ export type ApproveNeedsAdjudicationMutation = (
   )> }
 );
 
+export type ApprovePaymentDetailsMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  approve: Scalars['Boolean']
+};
+
+
+export type ApprovePaymentDetailsMutation = (
+  { __typename?: 'Mutations' }
+  & { approvePaymentDetails: Maybe<(
+    { __typename?: 'PaymentDetailsApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
 export type ApproveSystemFlaggingMutationVariables = {
   grievanceTicketId: Scalars['ID'],
   approveStatus: Scalars['Boolean']
@@ -7911,7 +7928,7 @@ export type GrievanceTicketQuery = (
       ) }
     )>, paymentVerificationTicketDetails: Maybe<(
       { __typename?: 'TicketPaymentVerificationDetailsNode' }
-      & Pick<TicketPaymentVerificationDetailsNode, 'paymentVerificationStatus'>
+      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'newReceivedAmount' | 'approved' | 'paymentVerificationStatus' | 'isMultiplePaymentVerifications'>
       & { paymentVerifications: (
         { __typename?: 'PaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
@@ -10590,6 +10607,59 @@ export function useApproveNeedsAdjudicationMutation(baseOptions?: ApolloReactHoo
 export type ApproveNeedsAdjudicationMutationHookResult = ReturnType<typeof useApproveNeedsAdjudicationMutation>;
 export type ApproveNeedsAdjudicationMutationResult = ApolloReactCommon.MutationResult<ApproveNeedsAdjudicationMutation>;
 export type ApproveNeedsAdjudicationMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>;
+export const ApprovePaymentDetailsDocument = gql`
+    mutation ApprovePaymentDetails($grievanceTicketId: ID!, $approve: Boolean!) {
+  approvePaymentDetails(grievanceTicketId: $grievanceTicketId, approve: $approve) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApprovePaymentDetailsMutationFn = ApolloReactCommon.MutationFunction<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>;
+export type ApprovePaymentDetailsComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>, 'mutation'>;
+
+    export const ApprovePaymentDetailsComponent = (props: ApprovePaymentDetailsComponentProps) => (
+      <ApolloReactComponents.Mutation<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables> mutation={ApprovePaymentDetailsDocument} {...props} />
+    );
+    
+export type ApprovePaymentDetailsProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables> & TChildProps;
+export function withApprovePaymentDetails<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApprovePaymentDetailsMutation,
+  ApprovePaymentDetailsMutationVariables,
+  ApprovePaymentDetailsProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables, ApprovePaymentDetailsProps<TChildProps>>(ApprovePaymentDetailsDocument, {
+      alias: 'approvePaymentDetails',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApprovePaymentDetailsMutation__
+ *
+ * To run a mutation, you first call `useApprovePaymentDetailsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApprovePaymentDetailsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approvePaymentDetailsMutation, { data, loading, error }] = useApprovePaymentDetailsMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      approve: // value for 'approve'
+ *   },
+ * });
+ */
+export function useApprovePaymentDetailsMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>(ApprovePaymentDetailsDocument, baseOptions);
+      }
+export type ApprovePaymentDetailsMutationHookResult = ReturnType<typeof useApprovePaymentDetailsMutation>;
+export type ApprovePaymentDetailsMutationResult = ApolloReactCommon.MutationResult<ApprovePaymentDetailsMutation>;
+export type ApprovePaymentDetailsMutationOptions = ApolloReactCommon.BaseMutationOptions<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>;
 export const ApproveSystemFlaggingDocument = gql`
     mutation ApproveSystemFlagging($grievanceTicketId: ID!, $approveStatus: Boolean!) {
   approveSystemFlagging(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
@@ -14060,7 +14130,12 @@ export const GrievanceTicketDocument = gql`
       }
     }
     paymentVerificationTicketDetails {
+      id
+      newStatus
+      newReceivedAmount
+      approved
       paymentVerificationStatus
+      isMultiplePaymentVerifications
       paymentVerifications {
         edges {
           node {
