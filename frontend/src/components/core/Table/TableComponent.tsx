@@ -101,7 +101,6 @@ export function TableComponent<T>({
     ? rowsPerPage - Math.min(rowsPerPage, itemsCount - page * rowsPerPage)
     : rowsPerPage;
   let body;
-  console.log('page',page)
   if (loading) {
     body = (
       <TableRow style={{ height: 54 * rowsPerPage, minHeight: 54 }}>

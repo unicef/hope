@@ -31,7 +31,7 @@ class SoftDeletableModelWithDate(models.Model):
     Default manager returns only not-removed entries.
     """
 
-    is_removed = models.BooleanField(default=False)
+    is_removed = models.BooleanField(default=False, db_index=True)
     removed_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:

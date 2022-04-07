@@ -1,11 +1,12 @@
+import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
-import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { Typography, Paper, Grid } from '@material-ui/core';
 import { Pie } from 'react-chartjs-2';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
-import { LabelizedField } from '../core/LabelizedField';
 import { TargetPopulationQuery } from '../../__generated__/graphql';
+import { LabelizedField } from '../core/LabelizedField';
+import { PaperContainer } from './PaperContainer';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -13,13 +14,6 @@ const colors = {
   femaleAdult: '#DFCCF5',
   maleAdult: '#B1E3E0',
 };
-
-const PaperContainer = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
-  margin: ${({ theme }) => theme.spacing(5)}px;
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
-`;
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)}px;
