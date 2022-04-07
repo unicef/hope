@@ -13,6 +13,7 @@ export const ApprovePaymentDetails = gql`
         id
         status
         paymentVerificationTicketDetails {
+          id
           approveStatus
         }
       }
