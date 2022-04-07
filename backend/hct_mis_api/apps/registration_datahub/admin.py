@@ -215,7 +215,7 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
 
 
 @admin.register(Record)
-class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class RecordDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     readonly_fields = list_display = ("id", "registration", "timestamp", "source_id", "ignored")
     date_hierarchy = "timestamp"
     list_filter = (

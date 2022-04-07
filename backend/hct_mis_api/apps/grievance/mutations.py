@@ -1126,7 +1126,7 @@ class PaymentDetailsApproveMutation(PermissionMutation):
 
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
-        approve = graphene.Boolean(required=True)
+        approveStatus = graphene.Boolean(required=True)
         version = BigInt(required=False)
 
     @classmethod
@@ -1152,7 +1152,7 @@ class PaymentDetailsApproveMutation(PermissionMutation):
             raise GraphQLError("Payment Details changes can approve only for Grievance Ticket on status For Approval")
 
         old_payment_verification_ticket_details = grievance_ticket.payment_verification_ticket_details
-        grievance_ticket.payment_verification_ticket_details.approved = kwargs.get("approve", False)
+        grievance_ticket.payment_verification_ticket_details.approve_status = kwargs.get("approve_status", False)
         grievance_ticket.payment_verification_ticket_details.save()
 
         # TODO: is that correct?
