@@ -426,13 +426,19 @@ class KoboImportedSubmission(models.Model):
 
 class Record(models.Model):
     registration = models.IntegerField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(db_index=True)
     storage = models.BinaryField(null=True, blank=True)
-    ignored = models.BooleanField(default=False, blank=True)
-    source_id = models.IntegerField()
     registration_data_import = models.ForeignKey(
         "registration_datahub.RegistrationDataImportDatahub",
         related_name="records",
         on_delete=models.SET_NULL,
         null=True,
     )
+    ignored = models.BooleanField(default=False, blank=True, null=True)
+    source_id = models.IntegerField(db_index=True)
+
+    data = models.JSONField(default=dict, blank=True, null=True)
+    #
+    # @property
+    # def data(self):
+    #     return json.loads(self.storage.tobytes().decode())
