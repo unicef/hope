@@ -244,7 +244,7 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
 
         for r in queryset.all():
             try:
-                extracted = json.loads(self.storage.tobytes().decode())
+                extracted = json.loads(r.storage.tobytes().decode())
                 r.data = _filter(extracted)
                 r.save()
             except Exception as e:
