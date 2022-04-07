@@ -9,9 +9,12 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -78,7 +81,6 @@ class TestUpdateGrievanceTickets(APITestCase):
     }
     """
 
-   
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
@@ -86,6 +88,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         cls.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
@@ -100,8 +103,8 @@ class TestUpdateGrievanceTickets(APITestCase):
             country=country,
             area_level=2,
         )
-        AreaFactory(name="City Test", area_type=area_type, p_code="123333")
-        AreaFactory(name="City Example", area_type=area_type, p_code="2343123")
+        cls.admin_area_1_new = AreaFactory(name="City Test", area_type=area_type, p_code="123333")
+        cls.admin_area_2_new = AreaFactory(name="City Example", area_type=area_type, p_code="2343123")
 
         program_one = ProgramFactory(
             name="Test program ONE",
@@ -157,6 +160,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
             admin2=cls.admin_area_1,
+            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -183,6 +187,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
+            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -217,6 +222,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
+            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -238,6 +244,8 @@ class TestUpdateGrievanceTickets(APITestCase):
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
             description="",
             language="Spanish",
+            admin2=cls.admin_area_2,
+            admin2_new=cls.admin_area_2_new,
         )
         PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.positive_feedback_grievance_ticket)
 
@@ -609,7 +617,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "New Description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.admin_area_1.p_code,
+                "admin": self.admin_area_1_new.p_code,
                 "language": "Polish, English",
                 "area": "Example Town",
                 "ticketId": self.id_to_base64(self.positive_feedback_grievance_ticket.id, "GrievanceTicketNode"),
@@ -626,12 +634,14 @@ class TestUpdateGrievanceTickets(APITestCase):
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
             self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
             self.assertEqual(self.positive_feedback_grievance_ticket.admin2.title, self.admin_area_1.title)
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin2_new.name, self.admin_area_1_new.name)
             self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
         else:
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "")
             self.assertNotEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
             self.assertEqual(self.positive_feedback_grievance_ticket.admin2, self.admin_area_2)
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin2_new, self.admin_area_2_new)
             self.assertEqual(self.positive_feedback_grievance_ticket.language, "Spanish")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
 
@@ -764,7 +774,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "New Description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.admin_area_1.p_code,
+                "admin": self.admin_area_1_new.p_code,
                 "language": "Polish, English",
                 "area": "Example Town",
                 "ticketId": ticket_id,

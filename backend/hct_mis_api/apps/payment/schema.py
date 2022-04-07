@@ -1,4 +1,4 @@
-from django.db.models import Case, CharField, Count, DecimalField, Q, Sum, Value, When
+from django.db.models import Case, CharField, Count, Q, Sum, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 
@@ -16,7 +16,6 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter, LogEntryNode
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
@@ -400,7 +399,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="payment_record__cash_plan__program__id",
-                    administrative_area_path="payment_record__household__admin_area",
+                    administrative_area_path="payment_record__household__admin_area_new",
                 )
             },
             year_filter_path="payment_record__delivery_date",

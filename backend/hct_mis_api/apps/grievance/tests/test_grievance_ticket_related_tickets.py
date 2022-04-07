@@ -1,12 +1,15 @@
-from django.core.management import call_command
-
 from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -28,12 +31,22 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
             business_area=cls.business_area,
         )
         AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="test334")
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
+            name="Admin type one",
+            country=country,
+            area_level=2,
+        )
+        AreaFactory(name="City Test", area_type=area_type, p_code="test334")
+
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
