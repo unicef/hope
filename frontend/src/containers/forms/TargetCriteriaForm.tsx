@@ -20,7 +20,7 @@ import {
   formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
 } from '../../utils/targetingUtils';
-import { useBusinessArea } from "../../hooks/useBusinessArea";
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
 
@@ -232,7 +232,6 @@ export function TargetCriteriaForm({
                   </ul>
                 </DialogError>
               )}
-
               <DialogDescription>
                 All rules defined below have to be true for the entire
                 household.
