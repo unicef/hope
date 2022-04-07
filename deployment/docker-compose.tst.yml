@@ -38,7 +38,7 @@ services:
       - erp_datahub_db
       - registration_datahub_db
       - redis
-      - elasticsearch_test
+      - elasticsearch
   db:
     image: mdillon/postgis:11-alpine
     volumes:
