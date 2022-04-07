@@ -231,6 +231,11 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
     ]
     mass_update_hints = []
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.defer("storage", "data")
+        return qs
+
     def extract(self, request, queryset):
         def _filter(d):
             if isinstance(d, list):
@@ -244,7 +249,7 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
 
         for r in queryset.all():
             try:
-                extracted = json.loads(self.storage.tobytes().decode())
+                extracted = json.loads(r.storage.tobytes().decode())
                 r.data = _filter(extracted)
                 r.save()
             except Exception as e:
