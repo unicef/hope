@@ -231,6 +231,11 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
     ]
     mass_update_hints = []
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.defer("storage", "data")
+        return qs
+
     def extract(self, request, queryset):
         def _filter(d):
             if isinstance(d, list):
