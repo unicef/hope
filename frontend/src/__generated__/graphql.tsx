@@ -2913,7 +2913,7 @@ export type MutationsApproveNeedsAdjudicationArgs = {
 
 
 export type MutationsApprovePaymentDetailsArgs = {
-  approve: Scalars['Boolean'],
+  approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
@@ -5393,7 +5393,7 @@ export type TicketPaymentVerificationDetailsNode = Node & {
   paymentVerification?: Maybe<PaymentVerificationNode>,
   newStatus?: Maybe<TicketPaymentVerificationDetailsNewStatus>,
   newReceivedAmount?: Maybe<Scalars['Float']>,
-  approved: Scalars['Boolean'],
+  approveStatus: Scalars['Boolean'],
   isMultiplePaymentVerifications?: Maybe<Scalars['Boolean']>,
 };
 
@@ -6609,7 +6609,7 @@ export type ApproveNeedsAdjudicationMutation = (
 
 export type ApprovePaymentDetailsMutationVariables = {
   grievanceTicketId: Scalars['ID'],
-  approve: Scalars['Boolean']
+  approveStatus: Scalars['Boolean']
 };
 
 
@@ -6620,6 +6620,10 @@ export type ApprovePaymentDetailsMutation = (
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { paymentVerificationTicketDetails: Maybe<(
+        { __typename?: 'TicketPaymentVerificationDetailsNode' }
+        & Pick<TicketPaymentVerificationDetailsNode, 'approveStatus'>
+      )> }
     )> }
   )> }
 );
@@ -7928,7 +7932,7 @@ export type GrievanceTicketQuery = (
       ) }
     )>, paymentVerificationTicketDetails: Maybe<(
       { __typename?: 'TicketPaymentVerificationDetailsNode' }
-      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'newReceivedAmount' | 'approved' | 'paymentVerificationStatus' | 'isMultiplePaymentVerifications'>
+      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'isMultiplePaymentVerifications'>
       & { paymentVerifications: (
         { __typename?: 'PaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
@@ -10608,11 +10612,14 @@ export type ApproveNeedsAdjudicationMutationHookResult = ReturnType<typeof useAp
 export type ApproveNeedsAdjudicationMutationResult = ApolloReactCommon.MutationResult<ApproveNeedsAdjudicationMutation>;
 export type ApproveNeedsAdjudicationMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>;
 export const ApprovePaymentDetailsDocument = gql`
-    mutation ApprovePaymentDetails($grievanceTicketId: ID!, $approve: Boolean!) {
-  approvePaymentDetails(grievanceTicketId: $grievanceTicketId, approve: $approve) {
+    mutation ApprovePaymentDetails($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approvePaymentDetails(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
     grievanceTicket {
       id
       status
+      paymentVerificationTicketDetails {
+        approveStatus
+      }
     }
   }
 }
@@ -10650,7 +10657,7 @@ export function withApprovePaymentDetails<TProps, TChildProps = {}>(operationOpt
  * const [approvePaymentDetailsMutation, { data, loading, error }] = useApprovePaymentDetailsMutation({
  *   variables: {
  *      grievanceTicketId: // value for 'grievanceTicketId'
- *      approve: // value for 'approve'
+ *      approveStatus: // value for 'approveStatus'
  *   },
  * });
  */
@@ -14133,7 +14140,7 @@ export const GrievanceTicketDocument = gql`
       id
       newStatus
       newReceivedAmount
-      approved
+      approveStatus
       paymentVerificationStatus
       isMultiplePaymentVerifications
       paymentVerifications {
@@ -20163,7 +20170,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveDeleteHousehold?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteHouseholdArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>,
-  approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approve' | 'grievanceTicketId'>>,
+  approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
@@ -21198,7 +21205,7 @@ export type TicketPaymentVerificationDetailsNodeResolvers<ContextType = any, Par
   paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   newStatus?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNewStatus']>, ParentType, ContextType>,
   newReceivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  approved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMultiplePaymentVerifications?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
