@@ -25592,7 +25592,7 @@
             "deprecationReason": null
           },
           {
-            "name": "approved",
+            "name": "approveStatus",
             "description": null,
             "args": [],
             "type": {
@@ -42960,7 +42960,7 @@
             "description": null,
             "args": [
               {
-                "name": "approve",
+                "name": "approveStatus",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",

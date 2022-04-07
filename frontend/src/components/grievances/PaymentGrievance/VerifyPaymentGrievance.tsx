@@ -36,11 +36,9 @@ const DialogContainer = styled.div`
 
 export interface VerifyPaymentGrievanceProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-  enabled: boolean;
 }
 export function VerifyPaymentGrievance({
   ticket,
-  enabled,
 }: VerifyPaymentGrievanceProps): React.ReactElement {
   const { t } = useTranslation();
   const [VerifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
@@ -51,25 +49,25 @@ export function VerifyPaymentGrievance({
   ] = useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
 
   const submit = async (values): Promise<void> => {
-    // try {
-    //   await mutate({
-    //     variables: {
-    //       ticket.id,
-    //       received: values.status === 'RECEIVED',
-    //       receivedAmount:
-    //         values.status === 'RECEIVED'
-    //           ? parseFloat(values.receivedAmount).toFixed(2)
-    //           : 0,
-    //     },
-    //   });
-    // } catch (e) {
-    //   e.graphQLErrors.map((x) => showMessage(x.message));
-    //   return;
-    // }
-    // if (!error) {
-    //   setVerifyManualDialogOpen(false);
-    //   showMessage(t('Payment has been verified.'));
-    // }
+    try {
+      await mutate({
+        variables: {
+          ticket.id,
+          received: values.status === 'RECEIVED',
+          receivedAmount:
+            values.status === 'RECEIVED'
+              ? parseFloat(values.receivedAmount).toFixed(2)
+              : 0,
+        },
+      });
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+      return;
+    }
+    if (!error) {
+      setVerifyManualDialogOpen(false);
+      showMessage(t('Payment has been verified.'));
+    }
   };
 
   const initialValues = {
@@ -87,8 +85,6 @@ export function VerifyPaymentGrievance({
               color='primary'
               variant='contained'
               onClick={() => setVerifyManualDialogOpen(true)}
-              data-cy='button-ed-plan'
-              disabled={!enabled}
             >
               {t('Verify')}
             </Button>

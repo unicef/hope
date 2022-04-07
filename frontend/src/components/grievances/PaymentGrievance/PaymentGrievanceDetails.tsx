@@ -68,7 +68,7 @@ export function PaymentGrievanceDetails({
           <Title>
             <Box display='flex' justifyContent='space-between'>
               <Typography variant='h6'>{t('Payment Details')}</Typography>
-              <VerifyPaymentGrievance ticket={ticket} enabled />
+              <VerifyPaymentGrievance ticket={ticket} />
               {canApprovePaymentVerification && (
                 <Button
                   onClick={() =>
