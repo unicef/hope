@@ -140,7 +140,12 @@ export const GrievanceTicket = gql`
         }
       }
       paymentVerificationTicketDetails {
+        id
+        newStatus
+        newReceivedAmount
+        approveStatus
         paymentVerificationStatus
+        isMultiplePaymentVerifications
         paymentVerifications {
           edges {
             node {
