@@ -66,15 +66,18 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
     )
       return (
         <Box display='flex' flexDirection='column'>
-          <Box mt={6}>
-            <PaymentIds
-              verifications={
-                ticket.paymentVerificationTicketDetails?.paymentVerifications
-                  ?.edges
-              }
-            />
+          <Box mt={3}>
+            {ticket.paymentVerificationTicketDetails
+              ?.isMultiplePaymentVerifications ? (
+              <PaymentIds
+                verifications={
+                  ticket.paymentVerificationTicketDetails?.paymentVerifications
+                    ?.edges
+                }
+              />
+            ) : null}
           </Box>
-          <Box mt={6}>
+          <Box mt={3}>
             <OtherRelatedTickets
               ticket={ticket}
               linkedTickets={ticket.relatedTickets}
