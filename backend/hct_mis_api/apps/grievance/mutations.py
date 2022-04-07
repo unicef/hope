@@ -1140,11 +1140,11 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         cls.has_creator_or_owner_permission(
             info,
             grievance_ticket.business_area,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
             grievance_ticket.created_by == info.context.user,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
             grievance_ticket.assigned_to == info.context.user,
-            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
         )
 
         if grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
@@ -1155,10 +1155,10 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         grievance_ticket.payment_verification_ticket_details.approved = kwargs.get("approve", False)
         grievance_ticket.payment_verification_ticket_details.save()
 
-        # TODO: is that correct? business_area?
+        # TODO: is that correct?
         log_create(
             GrievanceTicket.ACTIVITY_LOG_MAPPING,
-            "ticket__business_area",
+            "ticket.business_area",
             info.context.user,
             old_payment_verification_ticket_details,
             grievance_ticket.payment_verification_ticket_details,
