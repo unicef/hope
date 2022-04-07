@@ -653,7 +653,7 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
-    approved = models.BooleanField(default=False)
+    approve_status = models.BooleanField(default=False)
 
     @property
     def is_multiple_payment_verifications(self):
