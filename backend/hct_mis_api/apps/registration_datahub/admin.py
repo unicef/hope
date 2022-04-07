@@ -1,13 +1,16 @@
+import base64
 import json
 import logging
 import re
 
+from django import forms
 from django.contrib import admin
 from django.contrib.admin import FieldListFilter, SimpleListFilter
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
+import requests
 from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.helpers import AdminActionPermMixin
@@ -17,6 +20,7 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
 from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from requests.auth import HTTPBasicAuth
 
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -214,9 +218,21 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
     raw_id_fields = ("registration_data_import", "imported_household")
 
 
+class FetchForm(forms.Form):
+    host = forms.URLField()
+    username = forms.CharField()
+    password = forms.CharField()
+    # password = forms.CharField(widget=forms.PasswordInput)
+    remember = forms.BooleanField(label="Remember me", required=False)
+    start = forms.IntegerField()
+    end = forms.IntegerField()
+
+
 @admin.register(Record)
-class RecordDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    readonly_fields = list_display = ("id", "registration", "timestamp", "source_id", "ignored")
+class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+    list_display = ("id", "registration", "timestamp", "source_id", "ignored")
+    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored")
+    exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
@@ -225,6 +241,8 @@ class RecordDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModel
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
+    change_list_template = "registration_datahub/admin/record/change_list.html"
+
     actions = [mass_update, "extract"]
     mass_update_fields = [
         "fields",
@@ -242,8 +260,8 @@ class RecordDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModel
                 return [_filter(v) for v in d]
             elif isinstance(d, dict):
                 return {k: _filter(v) for k, v in d.items()}
-            elif is_image(d):
-                return "::image::"
+            # elif is_image(d):
+            #     return "::image::"
             else:
                 return d
 
@@ -254,6 +272,29 @@ class RecordDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModel
                 r.save()
             except Exception as e:
                 logger.exception(e)
+
+    @button()
+    def fetch(self, request):
+        ctx = self.get_common_context(request)
+        if request.method == "POST":
+            form = FetchForm(request.POST)
+            if form.is_valid():
+                auth = HTTPBasicAuth(form.cleaned_data["username"], form.cleaned_data["password"])
+                url = "{host}api/data/2/{start}/{end}/".format(**form.cleaned_data)
+                with requests.get(url, stream=True, auth=auth) as res:
+                    if res.status_code != 200:
+                        raise Exception(str(res))
+                    payload = res.json()
+                    for record in payload["data"]:
+                        Record.objects.update_or_create(
+                            source_id=record["id"],
+                            registration=2,
+                            defaults={"timestamp": record["timestamp"], "storage": base64.b64decode(record["storage"])},
+                        )
+        else:
+            form = FetchForm()
+        ctx["form"] = form
+        return TemplateResponse(request, "registration_datahub/admin/record/fetch.html", ctx)
 
     @button()
     def extract_all(self, request):
