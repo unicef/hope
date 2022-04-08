@@ -7933,7 +7933,14 @@ export type GrievanceTicketQuery = (
     )>, paymentVerificationTicketDetails: Maybe<(
       { __typename?: 'TicketPaymentVerificationDetailsNode' }
       & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'isMultiplePaymentVerifications'>
-      & { paymentVerifications: (
+      & { paymentVerification: Maybe<(
+        { __typename?: 'PaymentVerificationNode' }
+        & Pick<PaymentVerificationNode, 'id' | 'receivedAmount'>
+        & { paymentRecord: Maybe<(
+          { __typename?: 'PaymentRecordNode' }
+          & Pick<PaymentRecordNode, 'id' | 'deliveredQuantity'>
+        )> }
+      )>, paymentVerifications: (
         { __typename?: 'PaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'PaymentVerificationNodeEdge' }
@@ -14144,6 +14151,14 @@ export const GrievanceTicketDocument = gql`
       approveStatus
       paymentVerificationStatus
       isMultiplePaymentVerifications
+      paymentVerification {
+        id
+        receivedAmount
+        paymentRecord {
+          id
+          deliveredQuantity
+        }
+      }
       paymentVerifications {
         edges {
           node {
