@@ -49,7 +49,14 @@ export function PaymentGrievanceDetails({
   const { showMessage } = useSnackbar();
   const [mutate] = useApprovePaymentDetailsMutation();
   const confirm = useConfirmation();
-  const { approveStatus } = ticket.paymentVerificationTicketDetails;
+  const {
+    approveStatus,
+    newReceivedAmount,
+    paymentVerification: {
+      receivedAmount,
+      paymentRecord: { deliveredQuantity },
+    },
+  } = ticket.paymentVerificationTicketDetails;
 
   let dialogText = t('Are you sure you want to disapprove this payment?');
   if (!approveStatus) {
@@ -123,15 +130,9 @@ export function PaymentGrievanceDetails({
                 </GreenIcon>
               ) : null}
             </TableCell>
-            <TableCell align='right'>
-              <Missing />
-            </TableCell>
-            <TableCell align='right'>
-              <Missing />
-            </TableCell>
-            <TableCell align='right'>
-              <Missing />
-            </TableCell>
+            <TableCell align='right'>{deliveredQuantity}</TableCell>
+            <TableCell align='right'>{receivedAmount}</TableCell>
+            <TableCell align='right'>{newReceivedAmount}</TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>

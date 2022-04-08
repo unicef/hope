@@ -146,6 +146,14 @@ export const GrievanceTicket = gql`
         approveStatus
         paymentVerificationStatus
         isMultiplePaymentVerifications
+        paymentVerification {
+          id
+          receivedAmount
+          paymentRecord {
+            id
+            deliveredQuantity
+          }
+        }
         paymentVerifications {
           edges {
             node {
