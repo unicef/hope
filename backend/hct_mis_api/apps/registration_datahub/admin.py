@@ -256,13 +256,14 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_filter = (
         DepotManager,
         ("source_id", NumberFilter),
+        ("id", NumberFilter),
         "timestamp",
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
     change_list_template = "registration_datahub/admin/record/change_list.html"
 
-    actions = [mass_update, "extract", "twoja_stara"]
+    actions = [mass_update, "extract", "create_rdi"]
     mass_update_fields = [
         "fields",
     ]
@@ -273,8 +274,8 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         qs = qs.defer("storage", "data")
         return qs
 
-    @admin.action(description="Twoja stara")
-    def twoja_stara(self, request, queryset):
+    @admin.action(description="Create RDI")
+    def create_rdi(self, request, queryset):
         service = UkrainianRegistrationService(Record.objects.filter(id__in=queryset.values_list("id", flat=True)))
         service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
 
