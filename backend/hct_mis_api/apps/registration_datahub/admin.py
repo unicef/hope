@@ -1,4 +1,5 @@
 import base64
+import datetime
 import json
 import logging
 import re
@@ -275,7 +276,7 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     @admin.action(description="Twoja stara")
     def twoja_stara(self, request, queryset):
         service = UkrainianRegistrationService(Record.objects.filter(id__in=queryset.values_list("id", flat=True)))
-        service.create_rdi(request.user, "ukraine rdi")
+        service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
 
     def extract(self, request, queryset):
         def _filter(d):

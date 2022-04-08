@@ -1,7 +1,11 @@
+import base64
 import json
+import uuid
+
 from typing import List
 
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import modelform_factory
@@ -20,6 +24,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     BankAccountInfo,
     ROLE_ALTERNATE,
+    HEAD,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -31,6 +36,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
     RegistrationDataImportDatahub,
     ImportedIndividualRoleInHousehold,
+    ImportedBankAccountInfo,
 )
 
 
@@ -43,8 +49,8 @@ class UkrainianRegistrationService:
         "sex": "gender_i_c",
         "relationship": "relationship_i_c",
         "disability": "disability_i_c",
-        "disability_recognize": "disabiliyt_recognize_i_c",
-        "disability_certificate_picture": "disability_certificate_picture",
+        # "disability_recognize": "disabiliyt_recognize_i_c",
+        # "disability_certificate_picture": "disability_certificate_picture",
         "phone_no": "phone_no_i_c",
         "role": "role_i_c",
     }
@@ -53,23 +59,22 @@ class UkrainianRegistrationService:
         "residence_status": "residence_status_h_c",
         "admin1": "admin1_h_c",
         "admin2": "admin2_h_c",
-        "admin3": "admin3_h_c",
         "size": "size_h_c",
         # "where_are_you_now": "",
     }
     DOCUMENT_MAPPING_TYPE_DICT = {
-        "national_id_no_i_c_1": IDENTIFICATION_TYPE_NATIONAL_ID,
-        "international_passport_i_c": IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
-        "drivers_license_no_i_c": IDENTIFICATION_TYPE_DRIVERS_LICENSE,
-        "birth_certificate_no_i_c": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-        "residence_permit_no_i_c": IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO,
-        "tax_id_no_i_c": IDENTIFICATION_TYPE_TAX_ID,
-        # "national_id_picture": "photo",
-        # "international_passport_picture": "photo",
-        # "drivers_license_picture": "photo",
-        # "birth_certificate_picture": "photo",
-        # "residence_permit_picture": "photo",
-        # "tax_id_picture": "photo",
+        IDENTIFICATION_TYPE_NATIONAL_ID: "national_id_no_i_c_1",
+        IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "international_passport_i_c",
+        IDENTIFICATION_TYPE_DRIVERS_LICENSE: "drivers_license_no_i_c",
+        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: "birth_certificate_no_i_c",
+        IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO: "residence_permit_no_i_c",
+        IDENTIFICATION_TYPE_TAX_ID: "tax_id_no_i_c",
+        # "photo": "national_id_picture",
+        # "photo": "international_passport_picture",
+        # "photo": "drivers_license_picture",
+        # "photo": "birth_certificate_picture",
+        # "photo": "residence_permit_picture",
+        # "photo": "tax_id_picture",
     }
 
     def __init__(self, records: QuerySet[Record]):
@@ -136,10 +141,14 @@ class UkrainianRegistrationService:
             role = individual_data.pop("role")
             individual = self._create_object_and_validate(individual_data, ImportedIndividual)
             bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
-            individual = self._create_object_and_validate(bank_account_data, BankAccountInfo)
+            if bank_account_data:
+                self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
             self._create_role(role, individual, household)
             individuals.append(individual)
 
+            if individual.relationship == HEAD:
+                household.head_of_household = individual
+                household.save(update_fields=("head_of_household",))
             documents.extend(self._prepare_documents(individual_dict, individual))
 
         record.registration_data_import = registration_data_import
@@ -167,11 +176,18 @@ class UkrainianRegistrationService:
         return form.save()
 
     def _prepare_household_data(self, household_dict, record, registration_data_import) -> dict:
-        return dict(
+        household_data = dict(
             **build_arg_dict_from_dict(household_dict, UkrainianRegistrationService.HOUSEHOLD_MAPPING_DICT),
             flex_registrations_record=record,
             registration_data_import=registration_data_import,
+            first_registration_date=record.timestamp,
+            last_registration_date=record.timestamp,
         )
+
+        if residence_status := household_data.get("residence_status"):
+            household_data["residence_status"] = residence_status.upper()
+
+        return household_data
 
     def _prepare_individual_data(
         self,
@@ -180,31 +196,66 @@ class UkrainianRegistrationService:
         registration_data_import: RegistrationDataImportDatahub,
     ) -> dict:
         individual_data = dict(
-            **build_arg_dict_from_dict(individual_dict, UkrainianRegistrationService.HOUSEHOLD_MAPPING_DICT),
+            **build_arg_dict_from_dict(individual_dict, UkrainianRegistrationService.INDIVIDUAL_MAPPING_DICT),
             household=household,
             registration_data_import=registration_data_import,
+            first_registration_date=household.first_registration_date,
+            last_registration_date=household.last_registration_date,
         )
-        if disability := individual_data.get("disability"):
-            if disability == "y":
-                individual_data["disability"] = DISABLED
-            else:
-                individual_data["disability"] = NOT_DISABLED
+        disability = individual_data.get("disability", "n")
+        if disability == "y":
+            individual_data["disability"] = DISABLED
+        else:
+            individual_data["disability"] = NOT_DISABLED
 
         if relationship := individual_data.get("relationship"):
             individual_data["relationship"] = relationship.upper()
+        if sex := individual_data.get("sex"):
+            individual_data["sex"] = sex.upper()
+
+        if phone_no := individual_data.get("phone_no"):
+            if phone_no.startswith("0") and not phone_no.startswith("00"):
+                phone_no = phone_no[1:]
+            if not phone_no.startswith("+380"):
+                individual_data["phone_no"] = f"+380{phone_no}"
+
+        given_name = individual_data.get("given_name")
+        middle_name = individual_data.get("middle_name")
+        family_name = individual_data.get("family_name")
+
+        individual_data["full_name"] = " ".join(filter(None, [given_name, middle_name, family_name]))
 
         return individual_data
 
     def _prepare_documents(self, individual_dict: dict, individual: ImportedIndividual) -> List[ImportedDocument]:
         documents = []
-        for field_name, document_type_string in UkrainianRegistrationService.DOCUMENT_MAPPING_TYPE_DICT:
+        birth_certificate = None
+        for document_type_string, field_name in UkrainianRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
             document_number = individual_dict.get(field_name)
             if not document_number:
                 continue
             document_type = ImportedDocumentType.objects.get(type=document_type_string, country="UA")
-            documents.append(
-                ImportedDocument(document_type=document_type, document_number=document_number, individual=individual)
+            document = ImportedDocument(type=document_type, document_number=document_number, individual=individual)
+            if document_type_string == IDENTIFICATION_TYPE_BIRTH_CERTIFICATE:
+                birth_certificate = document
+            documents.append(document)
+        birth_certificate_picture = individual_dict.get("birth_certificate_picture")
+        if birth_certificate_picture:
+            if not birth_certificate:
+                birth_certificate = ImportedDocument(
+                    type=ImportedDocumentType.objects.get(
+                        type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                        country="UA",
+                    ),
+                    document_number=f"NOT_VALID_NUMBER_{uuid.uuid4()}",
+                    individual=individual,
+                )
+                documents.append(birth_certificate)
+            format_image = "jpg"
+            birth_certificate.photo = ContentFile(
+                base64.b64decode(birth_certificate_picture), name=f"{birth_certificate.document_number}.{format_image}"
             )
+
         return documents
 
     def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):
