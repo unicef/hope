@@ -656,10 +656,8 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     approve_status = models.BooleanField(default=False)
 
     @property
-    def is_multiple_payment_verifications(self):
-        if self.payment_verifications:
-            return True
-        return False
+    def has_multiple_payment_verifications(self):
+        return bool(self.payment_verifications.count())
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
