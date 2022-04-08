@@ -115,9 +115,9 @@ export function PaymentGrievanceDetails({
         <TableHead>
           <TableRow>
             <TableCell align='right' />
-            <TableCell align='right'>{t('Entitlement Value')} ($)</TableCell>
+            <TableCell align='right'>{t('Delivered Value')} ($)</TableCell>
             <TableCell align='right'>{t('Received Value')} ($)</TableCell>
-            <TableCell align='right'>{t('Verified Value')} ($)</TableCell>
+            <TableCell align='right'>{t('New Verified Value')} ($)</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
