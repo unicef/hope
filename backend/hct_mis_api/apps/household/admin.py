@@ -444,7 +444,7 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("agency", "individual", "number")
-    list_filter = (("individual__unicef_id__icontains", ValueFilter.factory(label="Individual's UNICEF Id")),)
+    list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
     autocomplete_fields = ["agency"]
 
 

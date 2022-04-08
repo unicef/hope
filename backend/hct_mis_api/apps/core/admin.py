@@ -465,7 +465,7 @@ class AdminAreaLevelResource(resources.ModelResource):
 
 
 @admin.register(AdminAreaLevel)
-class AdminAreaLevelAdmin(ImportExportModelAdmin, ExtraButtonsMixin, admin.ModelAdmin):
+class AdminAreaLevelAdmin(ImportExportModelAdmin, AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ("name", "country_name", "admin_level", "area_code")
     list_filter = (
         ("admin_level", AllValuesComboFilter),
@@ -547,7 +547,7 @@ class AdminAreaResource(resources.ModelResource):
 
 
 @admin.register(AdminArea)
-class AdminAreaAdmin(ImportExportModelAdmin, ExtraButtonsMixin, MPTTModelAdmin):
+class AdminAreaAdmin(ImportExportModelAdmin, AdminFiltersMixin, ExtraButtonsMixin, MPTTModelAdmin):
     search_fields = ("p_code", "title")
     list_display = (
         "title",
