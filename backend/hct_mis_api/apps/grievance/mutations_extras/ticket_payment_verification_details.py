@@ -25,7 +25,7 @@ def update_ticket_payment_verification_details_extras(root, info, input, grievan
     new_status = data.get("new_status")
 
     payment_details = grievance_ticket.payment_verification_ticket_details
-    if not payment_details.is_multiple_payment_verifications:
+    if not payment_details.has_multiple_payment_verifications:
         if new_received_amount:
             payment_details.new_received_amount = new_received_amount
             # update status if payment_verification not null
