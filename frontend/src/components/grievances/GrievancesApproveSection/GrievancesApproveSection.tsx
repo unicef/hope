@@ -100,7 +100,7 @@ export function GrievancesApproveSection({
     ) {
       if (
         ticket.paymentVerificationTicketDetails
-          .isMultiplePaymentVerifications === false
+          .hasMultiplePaymentVerifications === false
       ) {
         return (
           <PaymentGrievanceDetails

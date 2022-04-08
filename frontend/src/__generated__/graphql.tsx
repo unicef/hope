@@ -5394,7 +5394,7 @@ export type TicketPaymentVerificationDetailsNode = Node & {
   newStatus?: Maybe<TicketPaymentVerificationDetailsNewStatus>,
   newReceivedAmount?: Maybe<Scalars['Float']>,
   approveStatus: Scalars['Boolean'],
-  isMultiplePaymentVerifications?: Maybe<Scalars['Boolean']>,
+  hasMultiplePaymentVerifications?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -7932,7 +7932,7 @@ export type GrievanceTicketQuery = (
       ) }
     )>, paymentVerificationTicketDetails: Maybe<(
       { __typename?: 'TicketPaymentVerificationDetailsNode' }
-      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'isMultiplePaymentVerifications'>
+      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'hasMultiplePaymentVerifications'>
       & { paymentVerification: Maybe<(
         { __typename?: 'PaymentVerificationNode' }
         & Pick<PaymentVerificationNode, 'id' | 'receivedAmount'>
@@ -14150,7 +14150,7 @@ export const GrievanceTicketDocument = gql`
       newReceivedAmount
       approveStatus
       paymentVerificationStatus
-      isMultiplePaymentVerifications
+      hasMultiplePaymentVerifications
       paymentVerification {
         id
         receivedAmount
@@ -21222,7 +21222,7 @@ export type TicketPaymentVerificationDetailsNodeResolvers<ContextType = any, Par
   newStatus?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNewStatus']>, ParentType, ContextType>,
   newReceivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  isMultiplePaymentVerifications?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasMultiplePaymentVerifications?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type TicketPaymentVerificationDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection'] = ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection']> = {
