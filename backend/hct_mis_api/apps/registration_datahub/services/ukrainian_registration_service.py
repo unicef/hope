@@ -15,6 +15,11 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO,
     IDENTIFICATION_TYPE_TAX_ID,
+    DISABLED,
+    NOT_DISABLED,
+    ROLE_PRIMARY,
+    BankAccountInfo,
+    ROLE_ALTERNATE,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -25,6 +30,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     Record,
     RegistrationDataImportDatahub,
+    ImportedIndividualRoleInHousehold,
 )
 
 
@@ -32,9 +38,9 @@ class UkrainianRegistrationService:
     INDIVIDUAL_MAPPING_DICT = {
         "given_name_i_c": "given_name",
         "family_name_i_c": "family_name",
-        "middle_name_i_c": "middle_name",
+        "patronymic": "middle_name",
         "birth_date": "birth_date",
-        "gender_i_c": "gender",
+        "gender_i_c": "sex",
         "relationship_i_c": "relationship",
         "disability_i_c": "disability",
         # "disabiliyt_recognize_i_c": "disability_recognize",
@@ -43,22 +49,12 @@ class UkrainianRegistrationService:
         "role_i_c": "role",
     }
 
-    BANK_MAPPING_DICT = {
-        "bank_account_h_f": "bank_account",
-        "bank_name_h_f": "bank_name",
-        "other_bank_name": "other_bank_name",
-        "bank_account": "bank_account",
-        "bank_account_number": "bank_account_number",
-        "debit_card_number_h_f": "debit_card_number",
-        "debit_card_number": "debit_card_number",
-    }
-
     HOUSEHOLD_MAPPING_DICT = {
-        "residence_status_h_c": "residence_status",
+        "residence_status": "residence_status_h_c",
         "admin1_h_c": "admin1",
         "admin2_h_c": "admin2",
         "admin3_h_c": "admin3",
-        "size_h_c": "size",
+        "size": "size_h_c",
         # "where_are_you_now": "",
     }
     DOCUMENT_MAPPING_TYPE_DICT = {
@@ -102,7 +98,7 @@ class UkrainianRegistrationService:
             data_type=ImportData.FLEX_REGISTRATION,
             number_of_individuals=number_of_individuals,
             number_of_households=number_of_households,
-            created_by_id=imported_by,
+            created_by_id=imported_by.id,
         )
         rdi_datahub = RegistrationDataImportDatahub.objects.create(
             name=rdi_name,
@@ -133,11 +129,15 @@ class UkrainianRegistrationService:
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
-        household = self._create_household(household_data)
+        household = self._create_object_and_validate(household_data, ImportedHousehold)
 
         for individual_dict in individuals_array:
             individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
-            individual = self._create_individual(individual_data)
+            role = individual_data.pop("role")
+            individual = self._create_object_and_validate(individual_data, ImportedIndividual)
+            bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
+            individual = self._create_object_and_validate(bank_account_data, BankAccountInfo)
+            self._create_role(role, individual, household)
             individuals.append(individual)
 
             documents.extend(self._prepare_documents(individual_dict, individual))
@@ -147,16 +147,21 @@ class UkrainianRegistrationService:
         ImportedDocument.objects.bulk_create(documents)
         return len(individuals)
 
-    def _create_individual(self, individual_data) -> ImportedIndividual:
-        IndividualForm = modelform_factory(ImportedIndividual, fields=individual_data.keys())
-        form = IndividualForm(individual_data)
-        if not form.is_valid():
-            raise ValidationError(form.errors)
-        return form.save()
+    def _create_role(self, role, individual, household):
+        if role == "y":
+            defaults = dict(individual=individual, household=household)
+            if ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_PRIMARY).count() == 0:
+                ImportedIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_PRIMARY)
+            elif (
+                ImportedIndividualRoleInHousehold.objects.filter(household=household, role=ROLE_ALTERNATE).count() == 0
+            ):
+                ImportedIndividualRoleInHousehold.objects.create(**defaults, role=ROLE_ALTERNATE)
+            else:
+                raise ValidationError("There should be only two collectors!")
 
-    def _create_household(self, household_data) -> ImportedHousehold:
-        HouseholdForm = modelform_factory(ImportedHousehold, fields=household_data.keys())
-        form = HouseholdForm(household_data)
+    def _create_object_and_validate(self, data, model_class):
+        ModelClassForm = modelform_factory(model_class, fields=data.keys())
+        form = ModelClassForm(data)
         if not form.is_valid():
             raise ValidationError(form.errors)
         return form.save()
@@ -165,7 +170,7 @@ class UkrainianRegistrationService:
         return dict(
             **build_arg_dict_from_dict(household_dict, UkrainianRegistrationService.HOUSEHOLD_MAPPING_DICT),
             flex_registrations_record=record,
-            registration_data_import=registration_data_import
+            registration_data_import=registration_data_import,
         )
 
     def _prepare_individual_data(
@@ -174,11 +179,21 @@ class UkrainianRegistrationService:
         household: ImportedHousehold,
         registration_data_import: RegistrationDataImportDatahub,
     ) -> dict:
-        return dict(
+        individual_data = dict(
             **build_arg_dict_from_dict(individual_dict, UkrainianRegistrationService.HOUSEHOLD_MAPPING_DICT),
             household=household,
-            registration_data_import=registration_data_import
+            registration_data_import=registration_data_import,
         )
+        if disability := individual_data.get("disability"):
+            if disability == "y":
+                individual_data["disability"] = DISABLED
+            else:
+                individual_data["disability"] = NOT_DISABLED
+
+        if relationship := individual_data.get("relationship"):
+            individual_data["relationship"] = relationship.upper()
+
+        return individual_data
 
     def _prepare_documents(self, individual_dict: dict, individual: ImportedIndividual) -> List[ImportedDocument]:
         documents = []
@@ -191,6 +206,21 @@ class UkrainianRegistrationService:
                 ImportedDocument(document_type=document_type, document_number=document_number, individual=individual)
             )
         return documents
+
+    def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):
+        if individual_dict.get("bank_account_h_f", "n") != "y":
+            return
+        bank_name = individual_dict.get("bank_name_h_f", "")
+        other_bank_name = individual_dict.get("other_bank_name", "")
+        if not bank_name:
+            bank_name = other_bank_name
+        bank_account_info_data = {
+            "bank_account_number": individual_dict.get("bank_account_number", ""),
+            "bank_name": bank_name,
+            "debit_card_number": individual_dict.get("bank_account_number", ""),
+            "individual": individual,
+        }
+        return bank_account_info_data
 
     def validate_household(self, individuals_array):
         if not individuals_array:
