@@ -25608,7 +25608,7 @@
             "deprecationReason": null
           },
           {
-            "name": "isMultiplePaymentVerifications",
+            "name": "hasMultiplePaymentVerifications",
             "description": null,
             "args": [],
             "type": {
