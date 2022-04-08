@@ -30,6 +30,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.services.ukrainian_registration_service import UkrainianRegistrationService
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -225,7 +226,7 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
-    actions = [mass_update, "extract"]
+    actions = [mass_update, "extract", "twoja_stara"]
     mass_update_fields = [
         "fields",
     ]
@@ -235,6 +236,11 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
         qs = super().get_queryset(request)
         qs = qs.defer("storage", "data")
         return qs
+
+    @admin.action(description="Twoja stara")
+    def twoja_stara(self, request, queryset):
+        service = UkrainianRegistrationService(Record.objects.filter(id__in=queryset.values_list("id", flat=True)))
+        service.create_rdi(request.user, "ukraine rdi")
 
     def extract(self, request, queryset):
         def _filter(d):
