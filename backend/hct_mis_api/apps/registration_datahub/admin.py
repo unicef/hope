@@ -6,6 +6,7 @@ import re
 from django import forms
 from django.contrib import admin
 from django.contrib.admin import FieldListFilter, SimpleListFilter
+from django.core.signing import BadSignature, Signer
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -220,6 +221,8 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
 
 
 class FetchForm(forms.Form):
+    SYNC_COOKIE = "fetch"
+
     host = forms.URLField()
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
@@ -227,6 +230,19 @@ class FetchForm(forms.Form):
     start = forms.IntegerField()
     end = forms.IntegerField()
     remember = forms.BooleanField(label="Remember me", required=False)
+
+    def get_signed_cookie(self, request):
+        signer = Signer(request.user.password)
+        return signer.sign_object(self.cleaned_data)
+
+    @classmethod
+    def get_saved_config(cls, request):
+        try:
+            signer = Signer(request.user.password)
+            obj: dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
+            return obj
+        except BadSignature:
+            return {}
 
 
 @admin.register(Record)
@@ -261,8 +277,6 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 return [_filter(v) for v in d]
             elif isinstance(d, dict):
                 return {k: _filter(v) for k, v in d.items()}
-            # elif is_image(d):
-            #     return "::image::"
             else:
                 return d
 
@@ -277,9 +291,13 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     @button(permission=is_root)
     def fetch(self, request):
         ctx = self.get_common_context(request)
+        cookies = {}
         if request.method == "POST":
             form = FetchForm(request.POST)
             if form.is_valid():
+                if form.cleaned_data["remember"]:
+                    cookies = {form.SYNC_COOKIE: form.get_signed_cookie(request)}
+
                 auth = HTTPBasicAuth(form.cleaned_data["username"], form.cleaned_data["password"])
                 url = "{host}api/data/{registration}/{start}/{end}/".format(**form.cleaned_data)
                 with requests.get(url, stream=True, auth=auth) as res:
@@ -293,9 +311,14 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                             defaults={"timestamp": record["timestamp"], "storage": base64.b64decode(record["storage"])},
                         )
         else:
-            form = FetchForm()
+            form = FetchForm(initial=FetchForm.get_saved_config(request))
+
         ctx["form"] = form
-        return TemplateResponse(request, "registration_datahub/admin/record/fetch.html", ctx)
+        response = TemplateResponse(request, "registration_datahub/admin/record/fetch.html", ctx)
+        if cookies:
+            for k, v in cookies.items():
+                response.set_cookie(k, v)
+        return response
 
     @button()
     def extract_all(self, request):
