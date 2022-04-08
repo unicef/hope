@@ -81,7 +81,7 @@ class AgencyTypeAdmin(HOPEModelAdminBase):
     list_display = ("label", "type", "country")
     list_filter = (
         "type",
-        ("country", ValueFilter.factory(title="Country ISO CODE 2")),
+        ("country", ValueFilter.factory(label="Country ISO CODE 2")),
     )
 
 
@@ -104,7 +104,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
     list_filter = (
         "type",
         "label",
-        ("country", ValueFilter.factory(title="Country ISO CODE 2")),
+        ("country", ValueFilter.factory(label="Country ISO CODE 2")),
     )
 
 
@@ -444,7 +444,7 @@ class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase)
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase):
     list_display = ("agency", "individual", "number")
-    list_filter = (("individual__unicef_id", ValueFilter.factory(title="Individual's UNICEF Id",  lookup_name='icontains')),)
+    list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
     autocomplete_fields = ["agency"]
 
 
@@ -461,7 +461,7 @@ class EntitlementCardAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     readonly_fields = ("file", "business_area", "rdi", "xlsx_match_columns", "uploaded_by")
     list_filter = (
-        ("business_area", ValueFilter),
+        ("business_area", AutoCompleteFilter),
         ("uploaded_by", AutoCompleteFilter),
     )
 
