@@ -21,7 +21,6 @@ import {
   useApprovePaymentDetailsMutation,
 } from '../../../__generated__/graphql';
 import { useConfirmation } from '../../core/ConfirmationDialog';
-import { Missing } from '../../core/Missing';
 import { Title } from '../../core/Title';
 import { VerifyPaymentGrievance } from './VerifyPaymentGrievance';
 
