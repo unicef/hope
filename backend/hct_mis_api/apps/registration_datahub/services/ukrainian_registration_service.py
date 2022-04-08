@@ -36,24 +36,24 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 class UkrainianRegistrationService:
     INDIVIDUAL_MAPPING_DICT = {
-        "given_name_i_c": "given_name",
-        "family_name_i_c": "family_name",
-        "patronymic": "middle_name",
+        "given_name": "given_name_i_c",
+        "family_name": "family_name_i_c",
+        "middle_name": "patronymic",
         "birth_date": "birth_date",
-        "gender_i_c": "sex",
-        "relationship_i_c": "relationship",
-        "disability_i_c": "disability",
-        # "disabiliyt_recognize_i_c": "disability_recognize",
-        # "disability_certificate_picture": "disability_certificate_picture",
-        "phone_no_i_c": "phone_no",
-        "role_i_c": "role",
+        "sex": "gender_i_c",
+        "relationship": "relationship_i_c",
+        "disability": "disability_i_c",
+        "disability_recognize": "disabiliyt_recognize_i_c",
+        "disability_certificate_picture": "disability_certificate_picture",
+        "phone_no": "phone_no_i_c",
+        "role": "role_i_c",
     }
 
     HOUSEHOLD_MAPPING_DICT = {
         "residence_status": "residence_status_h_c",
-        "admin1_h_c": "admin1",
-        "admin2_h_c": "admin2",
-        "admin3_h_c": "admin3",
+        "admin1": "admin1_h_c",
+        "admin2": "admin2_h_c",
+        "admin3": "admin3_h_c",
         "size": "size_h_c",
         # "where_are_you_now": "",
     }
