@@ -1073,3 +1073,10 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
     xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.PROTECT)
+
+
+class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
+    individual = models.ForeignKey("household.Individual", related_name="bank_account_info", on_delete=models.CASCADE)
+    bank_name = models.CharField(max_length=255)
+    bank_number = models.CharField(max_length=64)
+    debit_card_number = models.CharField(max_length=30, blank=True, default="")
