@@ -8,7 +8,7 @@ from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CaIdIterator
-from hct_mis_api.apps.household.fixtures import HouseholdFactory
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -55,7 +55,6 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     ca_id = factory.Iterator(CaIdIterator("PR"))
     ca_hash_id = factory.Faker("uuid4")
     cash_plan = factory.SubFactory(CashPlanFactory)
-    household = factory.SubFactory(HouseholdFactory)
     total_persons_covered = factory.fuzzy.FuzzyInteger(1, 7)
     distribution_modality = factory.Faker(
         "sentence",
