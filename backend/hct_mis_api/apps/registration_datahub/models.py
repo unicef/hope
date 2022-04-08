@@ -442,3 +442,10 @@ class Record(models.Model):
     # @property
     # def data(self):
     #     return json.loads(self.storage.tobytes().decode())
+
+
+class ImportedBankAccountInfo(TimeStampedUUIDModel):
+    individual = models.ForeignKey("registration_datahub.ImportedIndividual", related_name="bank_account_info", on_delete=models.CASCADE)
+    bank_name = models.CharField(max_length=255)
+    bank_account_number = models.CharField(max_length=64)
+    debit_card_number = models.CharField(max_length=30, blank=True, default="")
