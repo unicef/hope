@@ -1078,5 +1078,5 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
 class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey("household.Individual", related_name="bank_account_info", on_delete=models.CASCADE)
     bank_name = models.CharField(max_length=255)
-    bank_number = models.CharField(max_length=64)
+    bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=30, blank=True, default="")
