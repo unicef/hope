@@ -145,7 +145,7 @@ export const GrievanceTicket = gql`
         newReceivedAmount
         approveStatus
         paymentVerificationStatus
-        isMultiplePaymentVerifications
+        hasMultiplePaymentVerifications
         paymentVerification {
           id
           receivedAmount
