@@ -68,7 +68,7 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
         <Box display='flex' flexDirection='column'>
           <Box mt={3}>
             {ticket.paymentVerificationTicketDetails
-              ?.isMultiplePaymentVerifications ? (
+              ?.hasMultiplePaymentVerifications ? (
               <PaymentIds
                 verifications={
                   ticket.paymentVerificationTicketDetails?.paymentVerifications

@@ -3328,7 +3328,7 @@ type TicketPaymentVerificationDetailsNode implements Node {
   newStatus: TicketPaymentVerificationDetailsNewStatus
   newReceivedAmount: Float
   approveStatus: Boolean!
-  isMultiplePaymentVerifications: Boolean
+  hasMultiplePaymentVerifications: Boolean
 }
 
 type TicketPaymentVerificationDetailsNodeConnection {
