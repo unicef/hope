@@ -1,13 +1,19 @@
+import base64
+import datetime
 import json
 import logging
 import re
 
-from django.contrib import admin
+from django import forms
+from django.contrib import admin, messages
 from django.contrib.admin import FieldListFilter, SimpleListFilter
+from django.core.exceptions import ValidationError
+from django.core.signing import BadSignature, Signer
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
+import requests
 from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.helpers import AdminActionPermMixin
@@ -17,6 +23,7 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
 from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from requests.auth import HTTPBasicAuth
 
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -29,10 +36,13 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     Record,
     RegistrationDataImportDatahub,
+    ImportedBankAccountInfo,
 )
+from hct_mis_api.apps.registration_datahub.services.ukrainian_registration_service import UkrainianRegistrationService
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 
@@ -214,18 +224,48 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
     raw_id_fields = ("registration_data_import", "imported_household")
 
 
+class FetchForm(forms.Form):
+    SYNC_COOKIE = "fetch"
+
+    host = forms.URLField()
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    registration = forms.IntegerField()
+    start = forms.IntegerField()
+    end = forms.IntegerField()
+    remember = forms.BooleanField(label="Remember me", required=False)
+
+    def get_signed_cookie(self, request):
+        signer = Signer(request.user.password)
+        return signer.sign_object(self.cleaned_data)
+
+    @classmethod
+    def get_saved_config(cls, request):
+        try:
+            signer = Signer(request.user.password)
+            obj: dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
+            return obj
+        except BadSignature:
+            return {}
+
+
 @admin.register(Record)
-class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    readonly_fields = list_display = ("id", "registration", "timestamp", "source_id", "ignored")
+class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+    list_display = ("id", "registration", "timestamp", "source_id", "ignored")
+    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored")
+    exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
         ("source_id", NumberFilter),
+        ("id", NumberFilter),
         "timestamp",
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
-    actions = [mass_update, "extract"]
+    change_list_template = "registration_datahub/admin/record/change_list.html"
+
+    actions = [mass_update, "extract", "create_rdi"]
     mass_update_fields = [
         "fields",
     ]
@@ -236,14 +276,22 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
         qs = qs.defer("storage", "data")
         return qs
 
+    @admin.action(description="Create RDI")
+    def create_rdi(self, request, queryset):
+        service = UkrainianRegistrationService(Record.objects.filter(id__in=queryset.values_list("id", flat=True)))
+        try:
+            rdi = service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
+            self.message_user(request, f"RDI created with name {rdi.name}", messages.SUCCESS)
+        except ValidationError as e:
+            self.message_user(request, str(e), messages.ERROR)
+            print(e)
+
     def extract(self, request, queryset):
         def _filter(d):
             if isinstance(d, list):
                 return [_filter(v) for v in d]
             elif isinstance(d, dict):
                 return {k: _filter(v) for k, v in d.items()}
-            elif is_image(d):
-                return "::image::"
             else:
                 return d
 
@@ -254,6 +302,38 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
                 r.save()
             except Exception as e:
                 logger.exception(e)
+
+    @button(permission=is_root)
+    def fetch(self, request):
+        ctx = self.get_common_context(request)
+        cookies = {}
+        if request.method == "POST":
+            form = FetchForm(request.POST)
+            if form.is_valid():
+                if form.cleaned_data["remember"]:
+                    cookies = {form.SYNC_COOKIE: form.get_signed_cookie(request)}
+
+                auth = HTTPBasicAuth(form.cleaned_data["username"], form.cleaned_data["password"])
+                url = "{host}api/data/{registration}/{start}/{end}/".format(**form.cleaned_data)
+                with requests.get(url, stream=True, auth=auth) as res:
+                    if res.status_code != 200:
+                        raise Exception(str(res))
+                    payload = res.json()
+                    for record in payload["data"]:
+                        Record.objects.update_or_create(
+                            source_id=record["id"],
+                            registration=2,
+                            defaults={"timestamp": record["timestamp"], "storage": base64.b64decode(record["storage"])},
+                        )
+        else:
+            form = FetchForm(initial=FetchForm.get_saved_config(request))
+
+        ctx["form"] = form
+        response = TemplateResponse(request, "registration_datahub/admin/record/fetch.html", ctx)
+        if cookies:
+            for k, v in cookies.items():
+                response.set_cookie(k, v)
+        return response
 
     @button()
     def extract_all(self, request):
@@ -268,3 +348,8 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+# @admin.register(ImportedBankAccountInfo)
+# class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+#     pass
