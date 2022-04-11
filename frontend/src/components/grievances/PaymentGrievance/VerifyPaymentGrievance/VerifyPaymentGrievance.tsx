@@ -9,15 +9,16 @@ import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../containers/dialogs/DialogActions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { Dialog } from '../../../../containers/dialogs/Dialog';
+import { DialogActions } from '../../../../containers/dialogs/DialogActions';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { FormikRadioGroup } from '../../../../shared/Formik/FormikRadioGroup';
+import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import {
   GrievanceTicketQuery,
+  GrievanceTicketDocument,
   useUpdateGrievanceMutation,
-} from '../../../__generated__/graphql';
+} from '../../../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -59,6 +60,12 @@ export function VerifyPaymentGrievance({
             },
           },
         },
+        refetchQueries: () => [
+          {
+            query: GrievanceTicketDocument,
+            variables: { id: ticket.id },
+          },
+        ],
       });
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
