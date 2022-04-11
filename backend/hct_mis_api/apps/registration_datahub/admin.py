@@ -5,8 +5,9 @@ import logging
 import re
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin import FieldListFilter, SimpleListFilter
+from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -35,6 +36,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     Record,
     RegistrationDataImportDatahub,
+    ImportedBankAccountInfo,
 )
 from hct_mis_api.apps.registration_datahub.services.ukrainian_registration_service import UkrainianRegistrationService
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
@@ -277,7 +279,12 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     @admin.action(description="Create RDI")
     def create_rdi(self, request, queryset):
         service = UkrainianRegistrationService(Record.objects.filter(id__in=queryset.values_list("id", flat=True)))
-        service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
+        try:
+            rdi = service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
+            self.message_user(request, f"RDI created with name {rdi.name}", messages.SUCCESS)
+        except ValidationError as e:
+            self.message_user(request, str(e), messages.ERROR)
+            print(e)
 
     def extract(self, request, queryset):
         def _filter(d):
@@ -341,3 +348,8 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+# @admin.register(ImportedBankAccountInfo)
+# class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+#     pass

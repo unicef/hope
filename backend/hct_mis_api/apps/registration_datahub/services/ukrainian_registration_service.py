@@ -38,6 +38,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualRoleInHousehold,
     ImportedBankAccountInfo,
 )
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
 class UkrainianRegistrationService:
@@ -114,13 +115,18 @@ class UkrainianRegistrationService:
         )
 
         for record in self.records:
-            number_of_individuals += self.create_household_for_rdi_household(record, rdi_datahub)
+            try:
+                number_of_individuals += self.create_household_for_rdi_household(record, rdi_datahub)
+            except ValidationError as e:
+                raise ValidationError({f"Record id: {record.id}": [str(e)]})
 
         rdi.number_of_individuals = number_of_individuals
         import_data.number_of_individuals = number_of_individuals
-
-        rdi.save(update_fields=("number_of_individuals",))
+        rdi.status = RegistrationDataImport.IN_REVIEW
+        rdi.save()
+        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi)
         import_data.save(update_fields=("number_of_individuals",))
+        return rdi
 
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
@@ -136,20 +142,23 @@ class UkrainianRegistrationService:
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
         household = self._create_object_and_validate(household_data, ImportedHousehold)
 
-        for individual_dict in individuals_array:
-            individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
-            role = individual_data.pop("role")
-            individual = self._create_object_and_validate(individual_data, ImportedIndividual)
-            bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
-            if bank_account_data:
-                self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
-            self._create_role(role, individual, household)
-            individuals.append(individual)
+        for index, individual_dict in enumerate(individuals_array):
+            try:
+                individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
+                role = individual_data.pop("role")
+                individual = self._create_object_and_validate(individual_data, ImportedIndividual)
+                bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
+                if bank_account_data:
+                    self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
+                self._create_role(role, individual, household)
+                individuals.append(individual)
 
-            if individual.relationship == HEAD:
-                household.head_of_household = individual
-                household.save(update_fields=("head_of_household",))
-            documents.extend(self._prepare_documents(individual_dict, individual))
+                if individual.relationship == HEAD:
+                    household.head_of_household = individual
+                    household.save(update_fields=("head_of_household",))
+                documents.extend(self._prepare_documents(individual_dict, individual))
+            except ValidationError as e:
+                raise ValidationError({f"individual nr {index+1}": [str(e)]})
 
         record.registration_data_import = registration_data_import
         record.save(update_fields=("registration_data_import",))
