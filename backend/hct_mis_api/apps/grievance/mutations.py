@@ -492,7 +492,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "assigned_to"))
-        assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
+        assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id) if assigned_to_id else None
         for field, value in input.items():
             current_value = getattr(grievance_ticket, field, None)
             if not current_value:
@@ -1136,7 +1136,6 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
-        # TODO: this perms okey??
         cls.has_creator_or_owner_permission(
             info,
             grievance_ticket.business_area,
@@ -1154,15 +1153,6 @@ class PaymentDetailsApproveMutation(PermissionMutation):
         old_payment_verification_ticket_details = grievance_ticket.payment_verification_ticket_details
         grievance_ticket.payment_verification_ticket_details.approve_status = kwargs.get("approve_status", False)
         grievance_ticket.payment_verification_ticket_details.save()
-
-        # TODO: is that correct?
-        log_create(
-            GrievanceTicket.ACTIVITY_LOG_MAPPING,
-            "ticket.business_area",
-            info.context.user,
-            old_payment_verification_ticket_details,
-            grievance_ticket.payment_verification_ticket_details,
-        )
 
         return cls(grievance_ticket=grievance_ticket)
 

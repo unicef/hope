@@ -4,7 +4,6 @@ import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.payment.models import PaymentVerification
 
 
 logger = logging.getLogger(__name__)
@@ -28,13 +27,8 @@ def update_ticket_payment_verification_details_extras(root, info, input, grievan
     if not payment_details.has_multiple_payment_verifications:
         if new_received_amount:
             payment_details.new_received_amount = new_received_amount
-            # update status if payment_verification not null
-            if payment_details.payment_verification and payment_details.payment_verification.payment_record:
-                if new_received_amount >= payment_details.payment_verification.payment_record.delivered_quantity:
-                    payment_details.new_status = PaymentVerification.STATUS_RECEIVED
-                else:
-                    payment_details.new_status = PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
         elif new_status:
             payment_details.new_status = new_status
 
         payment_details.save()
+    return grievance_ticket
