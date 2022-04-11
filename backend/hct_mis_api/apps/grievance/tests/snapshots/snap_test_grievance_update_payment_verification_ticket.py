@@ -43,7 +43,6 @@ snapshots['TestGrievanceUpdatePaymentVerificationTicketQuery::test_update_paymen
     'data': {
         'updateGrievanceTicket': {
             'grievanceTicket': {
-                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTo4NDk4NGViZi1iMzk3LTRlYTQtYjg0Ny0yNTVkOTBmOTNmNDM=',
                 'paymentVerificationTicketDetails': {
                     'newReceivedAmount': 1234.99,
                     'newStatus': 'RECEIVED'
