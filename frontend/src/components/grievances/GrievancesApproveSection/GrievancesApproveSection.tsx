@@ -10,7 +10,7 @@ import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDeta
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
 import { FlagDetails } from '../FlagDetails';
 import { NeedsAdjudicationDetails } from '../NeedsAdjudicationDetails';
-import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDetails';
+import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDetails/PaymentGrievanceDetails';
 import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
 
