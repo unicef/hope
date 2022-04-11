@@ -27,7 +27,7 @@ def update_ticket_payment_verification_details_extras(root, info, input, grievan
     if not payment_details.has_multiple_payment_verifications:
         if new_received_amount:
             payment_details.new_received_amount = new_received_amount
-        elif new_status:
+        if new_status:
             payment_details.new_status = new_status
 
         payment_details.save()
