@@ -917,6 +917,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     child_hoh = models.BooleanField(default=False)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    disability_certificate_picture = models.ImageField(blank=True, null=True)
 
     @property
     def age(self):
