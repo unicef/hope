@@ -1,7 +1,6 @@
 import base64
 import json
 import uuid
-
 from typing import List
 
 from django.core.exceptions import ValidationError
@@ -13,30 +12,30 @@ from django.forms import modelform_factory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.household.models import (
+    DISABLED,
+    HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO,
     IDENTIFICATION_TYPE_TAX_ID,
-    DISABLED,
     NOT_DISABLED,
+    ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BankAccountInfo,
-    ROLE_ALTERNATE,
-    HEAD,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    ImportedIndividualRoleInHousehold,
     Record,
     RegistrationDataImportDatahub,
-    ImportedIndividualRoleInHousehold,
-    ImportedBankAccountInfo,
 )
 
 
@@ -63,18 +62,12 @@ class UkrainianRegistrationService:
         # "where_are_you_now": "",
     }
     DOCUMENT_MAPPING_TYPE_DICT = {
-        IDENTIFICATION_TYPE_NATIONAL_ID: "national_id_no_i_c_1",
-        IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "international_passport_i_c",
-        IDENTIFICATION_TYPE_DRIVERS_LICENSE: "drivers_license_no_i_c",
-        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: "birth_certificate_no_i_c",
-        IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO: "residence_permit_no_i_c",
-        IDENTIFICATION_TYPE_TAX_ID: "tax_id_no_i_c",
-        # "photo": "national_id_picture",
-        # "photo": "international_passport_picture",
-        # "photo": "drivers_license_picture",
-        # "photo": "birth_certificate_picture",
-        # "photo": "residence_permit_picture",
-        # "photo": "tax_id_picture",
+        IDENTIFICATION_TYPE_NATIONAL_ID: ("national_id_no_i_c_1", "national_id_picture"),
+        IDENTIFICATION_TYPE_NATIONAL_PASSPORT: ("international_passport_i_c", "international_passport_picture"),
+        IDENTIFICATION_TYPE_DRIVERS_LICENSE: ("drivers_license_no_i_c", "drivers_license_picture"),
+        IDENTIFICATION_TYPE_BIRTH_CERTIFICATE: ("birth_certificate_no_i_c", "birth_certificate_picture"),
+        IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO: ("residence_permit_no_i_c", "residence_permit_picture"),
+        IDENTIFICATION_TYPE_TAX_ID: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
     def __init__(self, records: QuerySet[Record]):
@@ -229,32 +222,25 @@ class UkrainianRegistrationService:
 
     def _prepare_documents(self, individual_dict: dict, individual: ImportedIndividual) -> List[ImportedDocument]:
         documents = []
-        birth_certificate = None
-        for document_type_string, field_name in UkrainianRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
-            document_number = individual_dict.get(field_name)
-            if not document_number:
-                continue
-            document_type = ImportedDocumentType.objects.get(type=document_type_string, country="UA")
-            document = ImportedDocument(type=document_type, document_number=document_number, individual=individual)
-            if document_type_string == IDENTIFICATION_TYPE_BIRTH_CERTIFICATE:
-                birth_certificate = document
-            documents.append(document)
-        birth_certificate_picture = individual_dict.get("birth_certificate_picture")
-        if birth_certificate_picture:
-            if not birth_certificate:
-                birth_certificate = ImportedDocument(
-                    type=ImportedDocumentType.objects.get(
-                        type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-                        country="UA",
-                    ),
-                    document_number=f"NOT_VALID_NUMBER_{uuid.uuid4()}",
-                    individual=individual,
+
+        for document_type_string, fields in UkrainianRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
+            document_number = individual_dict.get(fields[0], f"NOT_VALID_NUMBER_{uuid.uuid4()}")
+            certificate_picture = individual_dict.get(fields[1], "")
+
+            if certificate_picture:
+                format_image = "jpg"
+                certificate_picture = ContentFile(
+                    base64.b64decode(certificate_picture), name=f"{document_number}.{format_image}"
                 )
-                documents.append(birth_certificate)
-            format_image = "jpg"
-            birth_certificate.photo = ContentFile(
-                base64.b64decode(birth_certificate_picture), name=f"{birth_certificate.document_number}.{format_image}"
+
+            document_type = ImportedDocumentType.objects.get(type=document_type_string, country="UA")
+            document = ImportedDocument(
+                type=document_type,
+                document_number=document_number,
+                photo=certificate_picture,
+                individual=individual,
             )
+            documents.append(document)
 
         return documents
 
