@@ -10,6 +10,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import FieldListFilter, SimpleListFilter
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
+from django.db.models import F
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -266,6 +267,60 @@ class ValidateForm(RemeberDataForm):
     number_field = forms.CharField()
 
 
+from django.contrib.admin import ListFilter, SimpleListFilter
+
+
+class AlexisFilter(SimpleListFilter):
+    template = "adminfilters/alexis.html"
+    title = "Alexis"
+    parameter_name = "alexis"
+
+    def __init__(self, request, params, model, model_admin):
+        super().__init__(request, params, model, model_admin)
+        self.lookup_kwarg = self.parameter_name
+        self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])
+
+    def queryset(self, request, queryset):
+        if "1" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__individuals_num=F("data__household__0__size_h_c"))
+        if "2" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__collectors_num=1)
+        if "3" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__head=1)
+        if "4" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__valid_phone=True)
+        if "5" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__valid_taxid=True)
+        if "6" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__birth_certificate__gt=0)
+        if "7" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__disability_certificate__gt=0)
+        return queryset
+
+    def lookups(self, request, model_admin):
+        return (
+            ["1", "Household size match"],
+            ["2", "Only one collector"],
+            ["3", "One and only one head"],
+            ["4", "phone number"],
+            ["5", "tax number id"],
+            ["6", "birth certificate picture"],
+            ["7", "disability certificate"],
+        )
+
+    def choices(self, changelist):
+        for lookup, title in self.lookup_choices:
+            qs = changelist.get_query_string(remove=[self.parameter_name])
+            qs += "&".join([f"{self.parameter_name}={v}" for v in self.lookup_val if v != lookup])
+            if str(lookup) not in self.lookup_val:
+                qs += f"&{self.parameter_name}={lookup}"
+            yield {
+                "selected": str(lookup) in self.lookup_val,
+                "query_string": qs,
+                "display": title,
+            }
+
+
 @admin.register(Record)
 class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "ignored")
@@ -274,6 +329,7 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
+        AlexisFilter,
         ("registration_data_import", AutoCompleteFilter),
         ("source_id", NumberFilter),
         ("id", NumberFilter),
@@ -320,6 +376,21 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             try:
                 extracted = json.loads(r.storage.tobytes().decode())
                 r.data = _filter(extracted)
+                cc = [i for i in r.data["individuals"] if i["role_i_c"] == "y"]
+
+                r.data["w_counters"] = {
+                    "individuals_num": len(r.data["individuals"]),
+                    "collectors_num": len(cc),
+                    "head": len([i for i in r.data["individuals"] if i["relationship_i_c"] == "head"]),
+                    "valid_phone": bool(len(cc) >= 1 and cc[0]["phone_no_i_c"]),
+                    "valid_taxid": bool(len(cc) >= 1 and cc[0]["tax_id_no_i_c"]),
+                    "birth_certificate": len(
+                        [i for i in r.data["individuals"] if i["birth_certificate_picture"] == "::image::"]
+                    ),
+                    "disability_certificate": len(
+                        [i for i in r.data["individuals"] if i["disability_certificate_picture"] == "::image::"]
+                    ),
+                }
                 r.save()
             except Exception as e:
                 logger.exception(e)
