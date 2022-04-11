@@ -1,11 +1,13 @@
 import base64
+import datetime
 import json
 import logging
 import re
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin import FieldListFilter, SimpleListFilter
+from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -34,7 +36,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     Record,
     RegistrationDataImportDatahub,
+    ImportedBankAccountInfo,
 )
+from hct_mis_api.apps.registration_datahub.services.ukrainian_registration_service import UkrainianRegistrationService
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -254,13 +258,14 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_filter = (
         DepotManager,
         ("source_id", NumberFilter),
+        ("id", NumberFilter),
         "timestamp",
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
     change_list_template = "registration_datahub/admin/record/change_list.html"
 
-    actions = [mass_update, "extract"]
+    actions = [mass_update, "extract", "create_rdi"]
     mass_update_fields = [
         "fields",
     ]
@@ -270,6 +275,16 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         qs = super().get_queryset(request)
         qs = qs.defer("storage", "data")
         return qs
+
+    @admin.action(description="Create RDI")
+    def create_rdi(self, request, queryset):
+        service = UkrainianRegistrationService(Record.objects.filter(id__in=queryset.values_list("id", flat=True)))
+        try:
+            rdi = service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
+            self.message_user(request, f"RDI created with name {rdi.name}", messages.SUCCESS)
+        except ValidationError as e:
+            self.message_user(request, str(e), messages.ERROR)
+            print(e)
 
     def extract(self, request, queryset):
         def _filter(d):
@@ -333,3 +348,8 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+# @admin.register(ImportedBankAccountInfo)
+# class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+#     pass

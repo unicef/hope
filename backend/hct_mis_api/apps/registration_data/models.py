@@ -55,9 +55,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     )
     XLS = "XLS"
     KOBO = "KOBO"
+    FLEX_REGISTRATION = "FLEX_REGISTRATION"
     DATA_SOURCE_CHOICE = (
         (XLS, "Excel"),
         (KOBO, "KoBo"),
+        (FLEX_REGISTRATION, "Flex Registration"),
     )
     name = CICharField(
         max_length=255,

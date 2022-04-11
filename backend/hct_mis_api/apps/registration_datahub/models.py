@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 from datetime import date
@@ -117,6 +116,12 @@ class ImportedHousehold(TimeStampedUUIDModel):
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    flex_registrations_record = models.ForeignKey(
+        "registration_datahub.Record",
+        related_name="imported_households",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
 
     @property
     def business_area(self):
@@ -201,6 +206,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    disability_certificate_picture = models.ImageField(blank=True, null=True)
 
     @property
     def age(self):
@@ -295,9 +301,11 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
 class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
     JSON = "JSON"
+    FLEX_REGISTRATION = "FLEX"
     DATA_TYPE_CHOICES = (
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
+        (FLEX_REGISTRATION, _("Flex Registration")),
     )
     STATUS_PENDING = "PENDING"
     STATUS_RUNNING = "RUNNING"
@@ -421,6 +429,12 @@ class Record(models.Model):
     registration = models.IntegerField()
     timestamp = models.DateTimeField(db_index=True)
     storage = models.BinaryField(null=True, blank=True)
+    registration_data_import = models.ForeignKey(
+        "registration_datahub.RegistrationDataImportDatahub",
+        related_name="records",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
     ignored = models.BooleanField(default=False, blank=True, null=True)
     source_id = models.IntegerField(db_index=True)
 
@@ -429,3 +443,10 @@ class Record(models.Model):
     # @property
     # def data(self):
     #     return json.loads(self.storage.tobytes().decode())
+
+
+class ImportedBankAccountInfo(TimeStampedUUIDModel):
+    individual = models.ForeignKey("registration_datahub.ImportedIndividual", related_name="bank_account_info", on_delete=models.CASCADE)
+    bank_name = models.CharField(max_length=255)
+    bank_account_number = models.CharField(max_length=64)
+    debit_card_number = models.CharField(max_length=30, blank=True, default="")
