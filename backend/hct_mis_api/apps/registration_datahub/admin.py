@@ -1,5 +1,6 @@
 import base64
 import datetime
+import io
 import json
 import logging
 import re
@@ -14,19 +15,21 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 import requests
-from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.decorators import button, link, view
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from adminactions.helpers import AdminActionPermMixin
 from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
+from adminfilters.json import JsonFieldFilter
 from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from requests.auth import HTTPBasicAuth
 
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -36,9 +39,10 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     Record,
     RegistrationDataImportDatahub,
-    ImportedBankAccountInfo,
 )
-from hct_mis_api.apps.registration_datahub.services.ukrainian_registration_service import UkrainianRegistrationService
+from hct_mis_api.apps.registration_datahub.services.ukrainian_registration_service import (
+    UkrainianRegistrationService,
+)
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -224,15 +228,8 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
     raw_id_fields = ("registration_data_import", "imported_household")
 
 
-class FetchForm(forms.Form):
+class RemeberDataForm(forms.Form):
     SYNC_COOKIE = "fetch"
-
-    host = forms.URLField()
-    username = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput)
-    registration = forms.IntegerField()
-    start = forms.IntegerField()
-    end = forms.IntegerField()
     remember = forms.BooleanField(label="Remember me", required=False)
 
     def get_signed_cookie(self, request):
@@ -249,17 +246,39 @@ class FetchForm(forms.Form):
             return {}
 
 
+class FetchForm(RemeberDataForm):
+    SYNC_COOKIE = "fetch"
+
+    host = forms.URLField()
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    registration = forms.IntegerField()
+    start = forms.IntegerField()
+    end = forms.IntegerField()
+
+    def clean(self):
+        return super().clean()
+
+
+class ValidateForm(RemeberDataForm):
+    SYNC_COOKIE = "ocr"
+    picture_field = forms.CharField()
+    number_field = forms.CharField()
+
+
 @admin.register(Record)
 class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "ignored")
-    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored")
+    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored", "registration_data_import")
     exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
+        ("registration_data_import", AutoCompleteFilter),
         ("source_id", NumberFilter),
         ("id", NumberFilter),
         "timestamp",
+        ("data", JsonFieldFilter),
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
@@ -292,6 +311,8 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 return [_filter(v) for v in d]
             elif isinstance(d, dict):
                 return {k: _filter(v) for k, v in d.items()}
+            elif is_image(d):
+                return "::image::"
             else:
                 return d
 
@@ -334,6 +355,45 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             for k, v in cookies.items():
                 response.set_cookie(k, v)
         return response
+
+    # @view()
+    # def validate_document(self, request, pk, target, fieldname):
+    #     ctx = self.get_common_context(request, pk)
+    #     cookies = {}
+    #     if request.method == "POST":
+    #         form = ValidateForm(request.POST)
+    #         if form.is_valid():
+    #             if form.cleaned_data["remember"]:
+    #                 cookies = {form.SYNC_COOKIE: form.get_signed_cookie(request)}
+    #             from PIL import Image
+    #             import pytesseract
+    #             try:
+    #                 childs, offset = target.split(":")
+    #                 record = self.object.data[childs][int(offset)-1]
+    #                 img = record[fieldname]
+    #                 imgdata = base64.b64decode(str(img))
+    #                 im = Image.open(io.BytesIO(imgdata))
+    #                 content = pytesseract.image_to_string(im)
+    #                 ctx['content'] = content
+    #                 self.message_user(request, "Done")
+    #             except Exception as e:
+    #                 logger.exception(e)
+    #                 self.message_error_to_user(request, e)
+    #     else:
+    #         initial = FetchForm.get_saved_config(request)
+    #         initial['picture_field'] = fieldname
+    #         childs, offset = target.split(":")
+    #         record = self.object.data[childs][int(offset)-1]
+    #         img = record[fieldname]
+    #         ctx['img'] = img
+    #         form = ValidateForm(initial=initial)
+    #
+    #     ctx["form"] = form
+    #     response = TemplateResponse(request, "registration_datahub/admin/record/validate_document.html", ctx)
+    #     if cookies:
+    #         for k, v in cookies.items():
+    #             response.set_cookie(k, v)
+    #     return response
 
     @button()
     def extract_all(self, request):
