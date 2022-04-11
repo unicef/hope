@@ -117,7 +117,7 @@ class UkrainianRegistrationService:
         import_data.number_of_individuals = number_of_individuals
         rdi.status = RegistrationDataImport.DEDUPLICATION
         rdi.save()
-        rdi_deduplication_task.delay(rdi_datahub)
+        rdi_deduplication_task.delay(rdi_datahub.id)
         import_data.save(update_fields=("number_of_individuals",))
         return rdi
 
