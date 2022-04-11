@@ -292,3 +292,11 @@ class UkrainianRegistrationService:
     def validate_household(self, individuals_array):
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
+
+        has_head = False
+        for individual_data in individuals_array:
+            if individual_data.get("relationship_i_c") == "head":
+                has_head = True
+                break
+        if not has_head:
+            raise ValidationError("Household should has at least one Head of Household")
