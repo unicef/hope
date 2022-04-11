@@ -9,7 +9,7 @@ from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -134,7 +134,13 @@ class UkrainianRegistrationService:
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
         household = self._create_object_and_validate(household_data, ImportedHousehold)
-
+        admin_area1 = AdminArea.objects.filter(p_code=household.admin1).first()
+        admin_area2 = AdminArea.objects.filter(p_code=household.admin2).first()
+        if admin_area1:
+            household.admin1_title = admin_area1.title
+        if admin_area2:
+            household.admin2_title = admin_area2.title
+        household.save()
         for index, individual_dict in enumerate(individuals_array):
             try:
                 individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
