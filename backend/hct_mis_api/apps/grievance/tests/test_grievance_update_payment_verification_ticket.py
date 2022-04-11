@@ -25,22 +25,26 @@ from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, Target
 
 class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
     QUERY = """
-        mutation UpdateGrievanceTicket(
-          $input: UpdateGrievanceTicketInput!
-        ) {
-          updateGrievanceTicket(input: $input) {
+        mutation UpdateGrievanceTicketMutation($input: UpdateGrievanceTicketInput!) {
+          updateGrievanceTicket(input: $input){
             grievanceTicket {
+              id
+              paymentVerificationTicketDetails{
+                newStatus
+                newReceivedAmount
+              }
             }
           }
         }
     """
 
     APPROVE_QUERY = """
-        mutation ApprovePaymentDetails(
-          $input: ApprovePaymentDetailsInput!
-        ) {
-          approvePaymentDetails(input: $input) {
+        mutation ApprovePaymentDetails($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+          approvePaymentDetails(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
             grievanceTicket {
+              paymentVerificationTicketDetails{
+                approveStatus
+              }
             }
           }
         }
@@ -122,7 +126,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )
         cls.ticket = TicketPaymentVerificationDetailsFactory(payment_verification=payment_verification)
-        cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
+        cls.ticket.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
         cls.ticket.ticket.save()
 
     @parameterized.expand(
@@ -139,7 +143,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
 
         extras = {
             "newReceivedAmount": 1234.99,
-            "newStatus": PaymentVerification.STATUS_NOT_RECEIVED
+            "newStatus": PaymentVerification.STATUS_RECEIVED
         }
         input_data = self._prepare_input(extras)
 
@@ -160,14 +164,15 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         ]
     )
     def test_payment_verification_ticket_approve_payment_details(self, _, permissions):
+        # update status for approval
+        self.ticket.ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+        self.ticket.ticket.save()
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         input_data = {
-            "input": {
                 "grievanceTicketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
                 "approveStatus": True
             }
-        }
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_QUERY,
