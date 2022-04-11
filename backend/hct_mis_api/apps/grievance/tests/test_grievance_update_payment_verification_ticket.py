@@ -28,7 +28,6 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         mutation UpdateGrievanceTicketMutation($input: UpdateGrievanceTicketInput!) {
           updateGrievanceTicket(input: $input){
             grievanceTicket {
-              id
               paymentVerificationTicketDetails{
                 newStatus
                 newReceivedAmount
