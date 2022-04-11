@@ -23,9 +23,11 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    BankAccountInfo,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    rdi_deduplication_task,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedBankAccountInfo,
@@ -37,7 +39,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
 class UkrainianRegistrationService:
@@ -49,8 +50,7 @@ class UkrainianRegistrationService:
         "sex": "gender_i_c",
         "relationship": "relationship_i_c",
         "disability": "disability_i_c",
-        # "disability_recognize": "disabiliyt_recognize_i_c",
-        # "disability_certificate_picture": "disability_certificate_picture",
+        "disability_certificate_picture": "disability_certificate_picture",
         "phone_no": "phone_no_i_c",
         "role": "role_i_c",
     }
@@ -115,9 +115,9 @@ class UkrainianRegistrationService:
 
         rdi.number_of_individuals = number_of_individuals
         import_data.number_of_individuals = number_of_individuals
-        rdi.status = RegistrationDataImport.IN_REVIEW
+        rdi.status = RegistrationDataImport.DEDUPLICATION
         rdi.save()
-        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi)
+        rdi_deduplication_task.delay(rdi_datahub)
         import_data.save(update_fields=("number_of_individuals",))
         return rdi
 
@@ -140,6 +140,8 @@ class UkrainianRegistrationService:
                 individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
                 role = individual_data.pop("role")
                 individual = self._create_object_and_validate(individual_data, ImportedIndividual)
+                individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
+                individual.save()
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
                     self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
@@ -221,6 +223,13 @@ class UkrainianRegistrationService:
             if not phone_no.startswith("+380"):
                 individual_data["phone_no"] = f"+380{phone_no}"
 
+        if disability_certificate_picture := individual_data.get("disability_certificate_picture"):
+            certificate_picture = f"CERTIFICATE_PICTURE_{uuid.uuid4()}"
+            disability_certificate_picture = self._prepare_picture_from_base64(
+                disability_certificate_picture, certificate_picture
+            )
+            individual_data["disability_certificate_picture"] = disability_certificate_picture
+
         given_name = individual_data.get("given_name")
         middle_name = individual_data.get("middle_name")
         family_name = individual_data.get("family_name")
@@ -232,15 +241,19 @@ class UkrainianRegistrationService:
     def _prepare_documents(self, individual_dict: dict, individual: ImportedIndividual) -> List[ImportedDocument]:
         documents = []
 
-        for document_type_string, fields in UkrainianRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
-            document_number = individual_dict.get(fields[0], f"NOT_VALID_NUMBER_{uuid.uuid4()}")
-            certificate_picture = individual_dict.get(fields[1], "")
+        for document_type_string, (
+            document_number_field_name,
+            picture_field_name,
+        ) in UkrainianRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
+            document_number = individual_dict.get(document_number_field_name)
+            certificate_picture = individual_dict.get(picture_field_name, "")
 
-            if certificate_picture:
-                format_image = "jpg"
-                certificate_picture = ContentFile(
-                    base64.b64decode(certificate_picture), name=f"{document_number}.{format_image}"
-                )
+            if not document_number and not certificate_picture:
+                continue
+
+            document_number = document_number or f"NOT_VALID_NUMBER_{uuid.uuid4()}"
+
+            certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
             document_type = ImportedDocumentType.objects.get(type=document_type_string, country="UA")
             document = ImportedDocument(
@@ -252,6 +265,14 @@ class UkrainianRegistrationService:
             documents.append(document)
 
         return documents
+
+    def _prepare_picture_from_base64(self, certificate_picture, document_number):
+        if certificate_picture:
+            format_image = "jpg"
+            certificate_picture = ContentFile(
+                base64.b64decode(certificate_picture), name=f"{document_number}.{format_image}"
+            )
+        return certificate_picture
 
     def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):
         if individual_dict.get("bank_account_h_f", "n") != "y":

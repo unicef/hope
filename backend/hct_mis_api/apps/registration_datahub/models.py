@@ -206,6 +206,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    disability_certificate_picture = models.ImageField(blank=True, null=True)
 
     @property
     def age(self):
