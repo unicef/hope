@@ -1,6 +1,8 @@
+import json
 import logging
 import re
 from datetime import date
+from typing import List
 
 from django.contrib.gis.db.models import PointField
 from django.core.validators import (
@@ -39,6 +41,7 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
 )
+from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
@@ -439,6 +442,53 @@ class Record(models.Model):
     source_id = models.IntegerField(db_index=True)
 
     data = models.JSONField(default=dict, blank=True, null=True)
+
+    @classmethod
+    def extract(cls, records_ids: List[int]):
+        def _filter(d):
+            if isinstance(d, list):
+                return [_filter(v) for v in d]
+            elif isinstance(d, dict):
+                return {k: _filter(v) for k, v in d.items()}
+            elif is_image(d):
+                return "::image::"
+            else:
+                return d
+
+        for record_id in records_ids:
+            record = cls.objects.get(pk=record_id)
+            try:
+                extracted = json.loads(record.storage.tobytes().decode())
+                record.data = _filter(extracted)
+                cc = [i for i in record.data["individuals"] if i["role_i_c"] == "y"]
+                heads = [i for i in record.data["individuals"] if i["relationship_i_c"] == "head"]
+
+                record.data["w_counters"] = {
+                    "individuals_num": len(record.data["individuals"]),
+                    "collectors_num": len(cc),
+                    "head": len(heads),
+                    "valid_phones": len([i for i in record.data["individuals"] if i["phone_no_i_c"]]),
+                    "valid_taxid": len([h for h in heads if h["tax_id_no_i_c"] and h["bank_account"]]),
+                    "valid_payment": len(
+                        [i for i in record.data["individuals"] if i["tax_id_no_i_c"] and i["bank_account"]]
+                    ),
+                    "birth_certificate": len(
+                        [i for i in record.data["individuals"] if i["birth_certificate_picture"] == "::image::"]
+                    ),
+                    "disability_certificate_match": (
+                        len(
+                            [
+                                i
+                                for i in record.data["individuals"]
+                                if i["disability_certificate_picture"] == "::image::"
+                            ]
+                        )
+                        == len([i for i in record.data["individuals"] if i["disability_i_c"] == "y"])
+                    ),
+                }
+                record.save()
+            except Exception as e:
+                logger.exception(e)
 
 
 class ImportedBankAccountInfo(TimeStampedUUIDModel):

@@ -365,46 +365,6 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             self.message_user(request, str(e), messages.ERROR)
             print(e)
 
-    def extract(self, request, queryset):
-        def _filter(d):
-            if isinstance(d, list):
-                return [_filter(v) for v in d]
-            elif isinstance(d, dict):
-                return {k: _filter(v) for k, v in d.items()}
-            elif is_image(d):
-                return "::image::"
-            else:
-                return d
-
-        for r in queryset.all():
-            try:
-                extracted = json.loads(r.storage.tobytes().decode())
-                r.data = _filter(extracted)
-                cc = [i for i in r.data["individuals"] if i["role_i_c"] == "y"]
-                heads = [i for i in r.data["individuals"] if i["relationship_i_c"] == "head"]
-
-                r.data["w_counters"] = {
-                    "individuals_num": len(r.data["individuals"]),
-                    "collectors_num": len(cc),
-                    "head": len(heads),
-                    "valid_phones": len([i for i in r.data["individuals"] if i["phone_no_i_c"]]),
-                    "valid_taxid": len([h for h in heads if h["tax_id_no_i_c"] and h["bank_account"]]),
-                    "valid_payment": len(
-                        [i for i in r.data["individuals"] if i["tax_id_no_i_c"] and i["bank_account"]]
-                    ),
-                    "birth_certificate": len(
-                        [i for i in r.data["individuals"] if i["birth_certificate_picture"] == "::image::"]
-                    ),
-                    "disability_certificate_match": (
-                        len([i for i in r.data["individuals"] if i["disability_certificate_picture"] == "::image::"])
-                        == len([i for i in r.data["individuals"] if i["disability_i_c"] == "y"])
-                    ),
-                    "collector_bank_account": len([i["bank_account"] for i in cc]) > 0,
-                }
-                r.save()
-            except Exception as e:
-                logger.exception(e)
-
     @button(permission=is_root)
     def fetch(self, request):
         ctx = self.get_common_context(request)
@@ -478,11 +438,13 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     @button()
     def extract_all(self, request):
-        self.extract(request, Record.objects.filter(data__isnull=True))
+        records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)
+        Record.extract(records_ids)
 
     @button(label="Extract")
     def extract_single(self, request, pk):
-        self.extract(request, Record.objects.filter(pk=pk))
+        records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
+        Record.extract(records_ids)
 
     def has_add_permission(self, request):
         return False
