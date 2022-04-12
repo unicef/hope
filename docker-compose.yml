@@ -9,6 +9,7 @@ volumes:
   db_reg:
   data_es:
   data_es_test:
+  ipython_data_local:
 
 services:
   proxy:
@@ -49,6 +50,7 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
+      - ipython_data_local:/root/.ipython
     command: "dev"
     depends_on:
       - db

@@ -4,10 +4,12 @@
         <td>
             {% if v|is_image %}
             <div class="base64">
-                <a href="#">Show image</a>
+                <a class="preview" href="#">Show image</a>
                 <img class="preview"
                      style="position:relative; display: none; max-height: 300px"
                      src="data:image/jpeg;base64, {{ v }}">
+                {% url "admin:registration_datahub_record_validate_document" original.pk key k as validate %}
+                <a href="{{ validate  }}">validate</a>
             </div>
             {% elif v|is_base64 %}
                 <div class="base64">
@@ -18,11 +20,11 @@
                          src="data:image/jpeg;base64, {{ v }}">
                 </div>
             {% elif v|islist %}
-                <table>{% include "dump/list.html" %}</table>
-            {% elif v|isstring %}
-                {{ v|truncatechars:"150" }}
+                {% dump v key|concat:k original %}
+{#            {% elif v|isstring %}#}
+{#                {{ v|truncatechars:"150" }}#}
             {% else %}
-                {{ v }}
+                {% dump v key|concat:k original %}
             {% endif %}
         </td>
     </tr>
