@@ -270,11 +270,13 @@ def extract_records_task():
         else:
             return d
 
-    for r in Record.objects.filter(data={}):
+    records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)[:5000]
+    for record_id in records_ids:
+        record = Record.objects.get(pk=record_id)
         try:
-            extracted = json.loads(r.storage.tobytes().decode())
-            r.data = _filter(extracted)
-            r.save()
+            extracted = json.loads(record.storage.tobytes().decode())
+            record.data = _filter(extracted)
+            record.save()
         except Exception as e:
             logger.exception(e)
             raise
