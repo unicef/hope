@@ -288,13 +288,15 @@ class AlexisFilter(SimpleListFilter):
         if "3" in self.lookup_val:
             queryset = queryset.filter(data__w_counters__head=1)
         if "4" in self.lookup_val:
-            queryset = queryset.filter(data__w_counters__valid_phone=True)
+            queryset = queryset.filter(data__w_counters__valid_phones__gt=0)
         if "5" in self.lookup_val:
-            queryset = queryset.filter(data__w_counters__valid_taxid=True)
+            queryset = queryset.filter(data__w_counters__valid_taxid__gt=0)
         if "6" in self.lookup_val:
             queryset = queryset.filter(data__w_counters__birth_certificate__gt=0)
         if "7" in self.lookup_val:
-            queryset = queryset.filter(data__w_counters__disability_certificate__gt=0)
+            queryset = queryset.filter(data__w_counters__disability_certificate=True)
+        if "8" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__valid_payment__gt=0)
         return queryset
 
     def lookups(self, request, model_admin):
@@ -302,10 +304,11 @@ class AlexisFilter(SimpleListFilter):
             ["1", "Household size match"],
             ["2", "Only one collector"],
             ["3", "One and only one head"],
-            ["4", "phone number"],
-            ["5", "tax number id"],
-            ["6", "birth certificate picture"],
-            ["7", "disability certificate"],
+            ["4", "More than 1 phone number"],
+            ["5", "At least 1 HoH has TaxId ans BankAccount"],
+            ["6", "at least one birth certificate picture"],
+            ["7", "disability certificate for each disabled"],
+            ["8", "At least 1 member has TaxId ans BankAccount"],
         )
 
     def choices(self, changelist):
@@ -377,18 +380,23 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 extracted = json.loads(r.storage.tobytes().decode())
                 r.data = _filter(extracted)
                 cc = [i for i in r.data["individuals"] if i["role_i_c"] == "y"]
+                heads = [i for i in r.data["individuals"] if i["relationship_i_c"] == "head"]
 
                 r.data["w_counters"] = {
                     "individuals_num": len(r.data["individuals"]),
                     "collectors_num": len(cc),
-                    "head": len([i for i in r.data["individuals"] if i["relationship_i_c"] == "head"]),
-                    "valid_phone": bool(len(cc) >= 1 and cc[0]["phone_no_i_c"]),
-                    "valid_taxid": bool(len(cc) >= 1 and cc[0]["tax_id_no_i_c"]),
+                    "head": len(heads),
+                    "valid_phones": len([i for i in r.data["individuals"] if i["phone_no_i_c"]]),
+                    "valid_taxid": len([h for h in heads if h["tax_id_no_i_c"] and h["bank_account"]]),
+                    "valid_payment": len(
+                        [i for i in r.data["individuals"] if i["tax_id_no_i_c"] and i["bank_account"]]
+                    ),
                     "birth_certificate": len(
                         [i for i in r.data["individuals"] if i["birth_certificate_picture"] == "::image::"]
                     ),
-                    "disability_certificate": len(
-                        [i for i in r.data["individuals"] if i["disability_certificate_picture"] == "::image::"]
+                    "disability_certificate_match": (
+                        len([i for i in r.data["individuals"] if i["disability_certificate_picture"] == "::image::"])
+                        == len([i for i in r.data["individuals"] if i["disability_i_c"] == "y"])
                     ),
                 }
                 r.save()
