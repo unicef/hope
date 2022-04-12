@@ -1,6 +1,8 @@
+import json
 import logging
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.registration_datahub.models import Record
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +199,9 @@ def pull_kobo_submissions_task(import_data_id):
     from hct_mis_api.apps.registration_datahub.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
-    from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import PullKoboSubmissions
+    from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
+        PullKoboSubmissions,
+    )
 
     try:
         return PullKoboSubmissions().execute(kobo_import_data)
@@ -219,7 +223,9 @@ def validate_xlsx_import_task(import_data_id):
     from hct_mis_api.apps.registration_datahub.models import ImportData
 
     import_data = ImportData.objects.get(id=import_data_id)
-    from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import ValidateXlsxImport
+    from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import (
+        ValidateXlsxImport,
+    )
 
     try:
         return ValidateXlsxImport().execute(import_data)
@@ -241,5 +247,36 @@ def process_flex_records_task(rdi_id, records_ids):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
+
     FlexRegistrationService().process_records(rdi_id, records_ids)
     logger.info("process_flex_records end")
+
+
+@app.task
+def extract_records_task():
+    logger.info("extract_records_task start")
+
+    def _filter(d):
+        if isinstance(d, list):
+            return [_filter(v) for v in d]
+        elif isinstance(d, dict):
+            out = {}
+
+            for k, v in d.items():
+                if k.endswith("_picture"):
+                    v = ""
+                out[k] = _filter(v)
+            return out
+        else:
+            return d
+
+    for r in Record.objects.filter(data={}):
+        try:
+            extracted = json.loads(r.storage.tobytes().decode())
+            r.data = _filter(extracted)
+            r.save()
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+    logger.info("extract_records_task end")
