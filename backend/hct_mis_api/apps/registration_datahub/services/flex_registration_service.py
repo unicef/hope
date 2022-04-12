@@ -110,8 +110,6 @@ class FlexRegistrationService:
         rdi.save()
         return rdi
 
-    @atomic("default")
-    @atomic("registration_datahub")
     def process_records(
         self,
         rdi_id,
@@ -123,19 +121,21 @@ class FlexRegistrationService:
         number_of_individuals = 0
 
         try:
-            for record_id in records_ids:
-                try:
-                    record = Record.objects.defer("data").get(id=record_id)
-                    number_of_individuals += self.create_household_for_rdi_household(record, rdi_datahub)
-                except ValidationError as e:
-                    raise ValidationError({f"Record id: {record_id}": [str(e)]})
+            with atomic("default"):
+                with atomic("registration_datahub"):
+                    for record_id in records_ids:
+                        try:
+                            record = Record.objects.defer("data").get(id=record_id)
+                            number_of_individuals += self.create_household_for_rdi_household(record, rdi_datahub)
+                        except ValidationError as e:
+                            raise ValidationError({f"Record id: {record_id}": [str(e)]})
 
-            rdi.number_of_individuals = number_of_individuals
-            import_data.number_of_individuals = number_of_individuals
-            rdi.status = RegistrationDataImport.DEDUPLICATION
-            rdi.save()
-            rdi_deduplication_task.delay(rdi_datahub.id)
-            import_data.save(update_fields=("number_of_individuals",))
+                    rdi.number_of_individuals = number_of_individuals
+                    import_data.number_of_individuals = number_of_individuals
+                    rdi.status = RegistrationDataImport.DEDUPLICATION
+                    rdi.save()
+                    rdi_deduplication_task.delay(rdi_datahub.id)
+                    import_data.save(update_fields=("number_of_individuals",))
         except ValidationError as e:
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
