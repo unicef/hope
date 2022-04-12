@@ -1,36 +1,29 @@
 import base64
 import datetime
-import io
 import json
 import logging
-import re
 
+import requests
+from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.mixins import ExtraButtonsMixin
+from adminactions.mass_update import mass_update
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
+from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
+from adminfilters.querystring import QueryStringFilter
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import FieldListFilter, SimpleListFilter
-from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature, Signer
 from django.db.models import F
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-
-import requests
-from admin_extra_buttons.decorators import button, link, view
-from admin_extra_buttons.mixins import ExtraButtonsMixin
-from adminactions.helpers import AdminActionPermMixin
-from adminactions.mass_update import mass_update
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.depot.widget import DepotManager
-from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
-from adminfilters.json import JsonFieldFilter
-from adminfilters.querystring import QueryStringFilter
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 from requests.auth import HTTPBasicAuth
 
+from hct_mis_api.apps.registration_datahub.celery_tasks import process_flex_records_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
-    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -41,9 +34,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.services.ukrainian_registration_service import (
-    UkrainianRegistrationService,
-)
+from hct_mis_api.apps.registration_datahub.services.flex_registration_service import FlexRegistrationService
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -267,7 +258,7 @@ class ValidateForm(RemeberDataForm):
     number_field = forms.CharField()
 
 
-from django.contrib.admin import ListFilter, SimpleListFilter
+from django.contrib.admin import SimpleListFilter
 
 
 class AlexisFilter(SimpleListFilter):
@@ -327,17 +318,14 @@ class AlexisFilter(SimpleListFilter):
 @admin.register(Record)
 class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "ignored")
-    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored", "registration_data_import")
+    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored")
     exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
-        AlexisFilter,
-        ("registration_data_import", AutoCompleteFilter),
         ("source_id", NumberFilter),
         ("id", NumberFilter),
         "timestamp",
-        ("data", JsonFieldFilter),
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
@@ -356,11 +344,15 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     @admin.action(description="Create RDI")
     def create_rdi(self, request, queryset):
-        service = UkrainianRegistrationService(Record.objects.filter(id__in=queryset.values_list("id", flat=True)))
+        service = FlexRegistrationService()
         try:
-            rdi = service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
-            self.message_user(request, f"RDI created with name {rdi.name}", messages.SUCCESS)
-        except ValidationError as e:
+            records_ids = queryset.values_list("id", flat=True)
+            rdi = service.create_rdi(request.user, records_ids, f"ukraine rdi {datetime.datetime.now()}")
+
+            process_flex_records_task.delay(rdi.id, list(records_ids))
+            self.message_user(request, f"RDI Import with name: {rdi.name} started", messages.SUCCESS)
+        except Exception as e:
+            raise
             self.message_user(request, str(e), messages.ERROR)
             print(e)
 
