@@ -5,11 +5,10 @@ from typing import List
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -25,9 +24,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    rdi_deduplication_task,
-)
+from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedBankAccountInfo,
@@ -155,6 +152,9 @@ class FlexRegistrationService:
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
 
+        if not self._has_head(individuals_array):
+            self._set_default_head_of_household(individuals_array)
+
         self.validate_household(individuals_array)
 
         household_data = self._prepare_household_data(household_dict, record, registration_data_import)
@@ -190,6 +190,12 @@ class FlexRegistrationService:
         record.save(update_fields=("registration_data_import",))
         ImportedDocument.objects.bulk_create(documents)
         return len(individuals)
+
+    def _set_default_head_of_household(self, individuals_array):
+        for individual_data in individuals_array:
+            if individual_data.get("role_i_c") == "y":
+                individual_data["relationship_i_c"] = "head"
+                break
 
     def _create_role(self, role, individual, household):
         if role == "y":
@@ -324,10 +330,9 @@ class FlexRegistrationService:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
-        has_head = False
-        for individual_data in individuals_array:
-            if individual_data.get("relationship_i_c") == "head":
-                has_head = True
-                break
+        has_head = self._has_head(individuals_array)
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
+
+    def _has_head(self, individuals_array):
+        return any(individual_data.get("relationship_i_c") == "head" for individual_data in individuals_array)
