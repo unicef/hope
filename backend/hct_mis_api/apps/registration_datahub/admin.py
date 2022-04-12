@@ -274,12 +274,13 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     def create_rdi(self, request, queryset):
         service = FlexRegistrationService()
         try:
-            rdi = service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
+            records_ids = queryset.values_list("id", flat=True)
+            rdi = service.create_rdi(request.user, records_ids, f"ukraine rdi {datetime.datetime.now()}")
 
-            records_ids = Record.objects.filter(id__in=queryset.values_list("id", flat=True))
-            process_flex_records_task.delay(rdi.id, records_ids)
+            process_flex_records_task.delay(rdi.id, list(records_ids))
             self.message_user(request, f"RDI Import with name: {rdi.name} started", messages.SUCCESS)
         except Exception as e:
+            raise
             self.message_user(request, str(e), messages.ERROR)
             print(e)
 
