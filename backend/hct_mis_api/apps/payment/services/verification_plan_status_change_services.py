@@ -82,11 +82,13 @@ class VerificationPlanStatusChangeServices:
         if verifications.count() == 0:
             return
 
-        grievance_ticket = GrievanceTicket(
-            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-            business_area=cashplan_payment_verification.cash_plan.business_area,
-        )
-        grievance_ticket_objs = GrievanceTicket.objects.bulk_create([grievance_ticket], batch_size=verifications.count())
+        grievance_ticket_list = [
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                business_area=cashplan_payment_verification.cash_plan.business_area,
+            ) for _ in list(range(0, verifications.count()))
+        ]
+        grievance_ticket_objs = GrievanceTicket.objects.bulk_create(grievance_ticket_list)
 
         ticket_payment_verification_details_list = []
         for verification, grievance_ticket in zip(verifications, grievance_ticket_objs):
