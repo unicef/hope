@@ -1,4 +1,7 @@
 {% load smart_register %}
-{% for el in v %}
-    <tr><td>{% dump el %}</td></tr>
+{% for el in value %}
+    {% with key|concat:":"|concat:forloop.counter as parent %}
+        <tr><th>{{ parent }}</th></tr>
+        <tr><td>{% dump el parent %}</td></tr>
+    {% endwith %}
 {% endfor %}
