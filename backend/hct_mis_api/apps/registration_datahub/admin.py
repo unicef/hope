@@ -323,6 +323,7 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
+        AlexisFilter,
         ("source_id", NumberFilter),
         ("id", NumberFilter),
         "timestamp",
