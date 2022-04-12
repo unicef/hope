@@ -1,10 +1,15 @@
 {% load smart_register %}
 {% if value|islist %}
+    <table>
     {% for el in value %}
-        {% dump_list el %}
+        {% with key|concat:":"|concat:forloop.counter as parent %}
+            <tr><td>{{ parent }}</td></tr>
+            <tr><td>{% dump el parent original %}</td></tr>
+        {% endwith %}
     {% endfor %}
+    </table>
 {% elif value|isdict %}
-    {% dump_dict value %}
+    {% dump_dict value key original %}
 {% else %}
     {{ value }}
 {% endif %}
