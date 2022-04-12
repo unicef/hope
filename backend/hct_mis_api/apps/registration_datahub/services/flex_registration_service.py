@@ -5,11 +5,10 @@ from typing import List
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -25,9 +24,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    rdi_deduplication_task,
-)
+from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedBankAccountInfo,
@@ -41,7 +38,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 
 
-class UkrainianRegistrationService:
+class FlexRegistrationService:
     INDIVIDUAL_MAPPING_DICT = {
         "given_name": "given_name_i_c",
         "family_name": "family_name_i_c",
@@ -71,15 +68,15 @@ class UkrainianRegistrationService:
         IDENTIFICATION_TYPE_TAX_ID: ("tax_id_no_i_c", "tax_id_picture"),
     }
 
-    def __init__(self, records: QuerySet[Record]):
-        self.records = records
+    def __init__(self):
+        pass
 
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by, rdi_name="rdi_name"):
+    def create_rdi(self, imported_by, records_ids, rdi_name="rdi_name"):
         business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
-        number_of_households = self.records.count()
+        number_of_households = len(records_ids)
 
         rdi = RegistrationDataImport.objects.create(
             name=rdi_name,
@@ -106,20 +103,45 @@ class UkrainianRegistrationService:
             import_done=RegistrationDataImportDatahub.NOT_STARTED,
             business_area_slug=business_area.slug,
         )
-
-        for record in self.records:
-            try:
-                number_of_individuals += self.create_household_for_rdi_household(record, rdi_datahub)
-            except ValidationError as e:
-                raise ValidationError({f"Record id: {record.id}": [str(e)]})
-
-        rdi.number_of_individuals = number_of_individuals
-        import_data.number_of_individuals = number_of_individuals
-        rdi.status = RegistrationDataImport.DEDUPLICATION
+        rdi.datahub_id = rdi_datahub.id
         rdi.save()
-        rdi_deduplication_task.delay(rdi_datahub.id)
-        import_data.save(update_fields=("number_of_individuals",))
         return rdi
+
+    def process_records(
+        self,
+        rdi_id,
+        records_ids,
+    ):
+        rdi = RegistrationDataImport.objects.get(id=rdi_id)
+        rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
+        import_data = rdi_datahub.import_data
+        number_of_individuals = 0
+
+        try:
+            with atomic("default"):
+                with atomic("registration_datahub"):
+                    for record_id in records_ids:
+                        try:
+                            record = Record.objects.defer("data").get(id=record_id)
+                            number_of_individuals += self.create_household_for_rdi_household(record, rdi_datahub)
+                        except ValidationError as e:
+                            raise ValidationError({f"Record id: {record_id}": [str(e)]})
+
+                    rdi.number_of_individuals = number_of_individuals
+                    import_data.number_of_individuals = number_of_individuals
+                    rdi.status = RegistrationDataImport.DEDUPLICATION
+                    rdi.save()
+                    rdi_deduplication_task.delay(rdi_datahub.id)
+                    import_data.save(update_fields=("number_of_individuals",))
+        except ValidationError as e:
+            rdi.status = RegistrationDataImport.IMPORT_ERROR
+            rdi.error_message = str(e)
+            rdi.save()
+            raise
+        except Exception:
+            rdi.status = RegistrationDataImport.IMPORT_ERROR
+            rdi.save()
+            raise
 
     def create_household_for_rdi_household(
         self, record: Record, registration_data_import: RegistrationDataImportDatahub
@@ -129,6 +151,9 @@ class UkrainianRegistrationService:
         record_data_dict = json.loads(record.storage.tobytes().decode("utf-8"))
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
+
+        if not self._has_head(individuals_array):
+            self._set_default_head_of_household(individuals_array)
 
         self.validate_household(individuals_array)
 
@@ -166,6 +191,12 @@ class UkrainianRegistrationService:
         ImportedDocument.objects.bulk_create(documents)
         return len(individuals)
 
+    def _set_default_head_of_household(self, individuals_array):
+        for individual_data in individuals_array:
+            if individual_data.get("role_i_c") == "y":
+                individual_data["relationship_i_c"] = "head"
+                break
+
     def _create_role(self, role, individual, household):
         if role == "y":
             defaults = dict(individual=individual, household=household)
@@ -187,7 +218,7 @@ class UkrainianRegistrationService:
 
     def _prepare_household_data(self, household_dict, record, registration_data_import) -> dict:
         household_data = dict(
-            **build_arg_dict_from_dict(household_dict, UkrainianRegistrationService.HOUSEHOLD_MAPPING_DICT),
+            **build_arg_dict_from_dict(household_dict, FlexRegistrationService.HOUSEHOLD_MAPPING_DICT),
             flex_registrations_record=record,
             registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
@@ -206,7 +237,7 @@ class UkrainianRegistrationService:
         registration_data_import: RegistrationDataImportDatahub,
     ) -> dict:
         individual_data = dict(
-            **build_arg_dict_from_dict(individual_dict, UkrainianRegistrationService.INDIVIDUAL_MAPPING_DICT),
+            **build_arg_dict_from_dict(individual_dict, FlexRegistrationService.INDIVIDUAL_MAPPING_DICT),
             household=household,
             registration_data_import=registration_data_import,
             first_registration_date=household.first_registration_date,
@@ -250,7 +281,7 @@ class UkrainianRegistrationService:
         for document_type_string, (
             document_number_field_name,
             picture_field_name,
-        ) in UkrainianRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
+        ) in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
             document_number = individual_dict.get(document_number_field_name)
             certificate_picture = individual_dict.get(picture_field_name, "")
 
@@ -299,10 +330,9 @@ class UkrainianRegistrationService:
         if not individuals_array:
             raise ValidationError("Household should has at least one individual")
 
-        has_head = False
-        for individual_data in individuals_array:
-            if individual_data.get("relationship_i_c") == "head":
-                has_head = True
-                break
+        has_head = self._has_head(individuals_array)
         if not has_head:
             raise ValidationError("Household should has at least one Head of Household")
+
+    def _has_head(self, individuals_array):
+        return any(individual_data.get("relationship_i_c") == "head" for individual_data in individuals_array)
