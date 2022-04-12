@@ -18,7 +18,7 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         .exists()
     )
 
-    if details_already_exists is True:
+    if details_already_exists:
         return None, None
 
     household = main_individual.household
@@ -45,7 +45,13 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         selected_individual=None,
         extra_data=extra_data,
     )
-    GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
+    possible_duplicates = kwargs.get("possible_duplicates")
+    if possible_duplicates:
+        ticket_details.possible_duplicates.add(*possible_duplicates)
+
+    GrievanceNotification.send_all_notifications(
+        GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
+    )
 
     return ticket, ticket_details
 
@@ -53,24 +59,33 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
 def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area, **kwargs):
     from hct_mis_api.apps.household.models import Individual
 
+    if not individuals_queryset:
+        return
+
     registration_data_import = kwargs.pop("registration_data_import", None)
     ticket_details_to_create = []
     for possible_duplicate in individuals_queryset:
         linked_tickets = []
+        possible_duplicates = []
+
         for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
             duplicate = Individual.objects.filter(id=individual.get("hit_id")).first()
+
             if not duplicate:
                 continue
-            ticket, ticket_details = create_grievance_ticket_with_details(
-                main_individual=duplicate,
-                possible_duplicate=possible_duplicate,
-                business_area=business_area,
-                registration_data_import=registration_data_import,
-            )
+            possible_duplicates.append(duplicate)
 
-            if ticket is not None and ticket_details is not None:
-                linked_tickets.append(ticket)
-                ticket_details_to_create.append(ticket_details)
+        ticket, ticket_details = create_grievance_ticket_with_details(
+            main_individual=possible_duplicate,
+            possible_duplicate=possible_duplicate,
+            business_area=business_area,
+            registration_data_import=registration_data_import,
+            possible_duplicates=possible_duplicates
+        )
+
+        if ticket and ticket_details:
+            linked_tickets.append(ticket)
+            ticket_details_to_create.append(ticket_details)
 
         for ticket in linked_tickets:
             ticket.linked_tickets.set([t for t in linked_tickets if t != ticket])
