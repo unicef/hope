@@ -79,7 +79,7 @@ export function RequestedIndividualDataChangeTable({
 
   return (
     <div>
-      {entries?.length ? (
+      {entries?.length || entriesFlexFields?.length ? (
         <EntriesTable
           values={values}
           isEdit={isEdit}
