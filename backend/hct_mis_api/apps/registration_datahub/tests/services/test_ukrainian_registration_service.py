@@ -4,7 +4,7 @@ import json
 from django.test import TestCase
 
 from hct_mis_api.apps.registration_datahub.models import Record
-from hct_mis_api.apps.registration_datahub.services.ukrainian_registration_service import UkrainianRegistrationService
+from hct_mis_api.apps.registration_datahub.services.flex_registration_service import FlexRegistrationService
 
 
 class TestUkrainianRegistrationService(TestCase):
@@ -66,4 +66,4 @@ class TestUkrainianRegistrationService(TestCase):
         cls.records = Record.objects.bulk_create(records)
 
     def test_import_data_to_datahub(self):
-        service = UkrainianRegistrationService(self.records)
+        service = FlexRegistrationService(self.records)

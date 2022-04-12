@@ -233,3 +233,13 @@ def validate_xlsx_import_task(import_data_id):
         raise
     finally:
         logger.info("validate_xlsx_import_task end")
+
+
+@app.task
+def process_flex_records_task(rdi_id, records_ids):
+    logger.info("process_flex_records start")
+    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+        FlexRegistrationService,
+    )
+    FlexRegistrationService().process_records(rdi_id, records_ids)
+    logger.info("process_flex_records end")
