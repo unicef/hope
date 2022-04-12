@@ -29,6 +29,10 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task",
         "schedule": crontab(hour="*/24"),
     },
+    "extract_records_task": {
+        "task": "hct_mis_api.apps.registration_datahub.celery_tasks.extract_records_task",
+        "schedule": crontab(hour="*/24"),
+    },
     # "registration_kobo_import_hourly_task": {
     #     "task": "hct_mis_api.apps.registration_datahub.celery_tasks.registration_kobo_import_hourly_task",
     #     "schedule": crontab(minute=0, hour="*/1"),
