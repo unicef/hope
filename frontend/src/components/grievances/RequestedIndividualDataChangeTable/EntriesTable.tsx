@@ -65,7 +65,7 @@ export const EntriesTable = ({
           <TableCell align='left'>
             {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
               ? t('Previous')
-              : t('Current')}
+              : t('Current')}{' '}
             {t('Value')}
           </TableCell>
           <TableCell align='left'>{t('New Value')}</TableCell>
