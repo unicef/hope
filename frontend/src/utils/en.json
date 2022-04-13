@@ -585,5 +585,9 @@
   "Household to be withdrawn": "Household to be withdrawn",
   "Alternate Collector Issue": "Alternate Collector Issue",
   "One of the Household members is an alternate collector. This household cannot be withdrawn.": "One of the Household members is an alternate collector. This household cannot be withdrawn.",
-  "Are you sure you would like to delete this verification plan?": "Are you sure you would like to delete this verification plan?"
+  "Are you sure you would like to delete this verification plan?": "Are you sure you would like to delete this verification plan?",
+  "Payment Module": "Payment Module",
+  "Payment Plans": "Payment Plans",
+  "Dispersion Date": "Dispersion Date",
+  "Entitled Quantity": "Entitled Quantity"
 }
