@@ -94,6 +94,13 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
         return TemplateResponse(request, "registration_datahub/admin/inspect.html", context)
 
 
+class ImportedBankAccountInfoStackedInline(admin.StackedInline):
+    model = ImportedBankAccountInfo
+
+    exclude = ("debit_card_number",)
+    extra = 0
+
+
 @admin.register(ImportedIndividual)
 class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = (
@@ -117,6 +124,7 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     # raw_id_fields = ("household", "registration_data_import")
     autocomplete_fields = ("household", "registration_data_import")
     actions = ["enrich_deduplication"]
+    inlines = (ImportedBankAccountInfoStackedInline,)
 
     def score(self, obj):
         try:
@@ -456,32 +464,6 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     def extract_single(self, request, pk):
         records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
         Record.extract(records_ids)
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-
-@admin.register(ImportedBankAccountInfo)
-class ImportedBankAccountInfoAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    list_display = (
-        "individual",
-        "bank_name",
-        "bank_account_number",
-        "created_at",
-        "updated_at",
-    )
-    readonly_fields = (
-        "individual",
-        "bank_name",
-        "bank_account_number",
-        "debit_card_number",
-        "created_at",
-        "updated_at",
-    )
-    exclude = ("debit_card_number",)
 
     def has_add_permission(self, request):
         return False
