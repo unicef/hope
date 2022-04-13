@@ -226,8 +226,8 @@ class FlexRegistrationService:
             registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
-            country_origin=Country("URK"),
-            country=Country("URK"),
+            country_origin=Country(code="UA"),
+            country=Country(code="UA"),
             consent=True,
             collect_individual_data=YES,
         )
