@@ -263,10 +263,11 @@ def extract_records_task():
 
 
 @app.task
-def fresh_extract_records_task():
+def fresh_extract_records_task(records_ids=None):
     logger.info("fresh_extract_records_task start")
 
-    records_ids = Record.objects.all().values_list("pk", flat=True)[:5000]
+    if not records_ids:
+        records_ids = Record.objects.all().values_list("pk", flat=True)[:5000]
     Record.extract(records_ids)
 
     logger.info("fresh_extract_records_task end")

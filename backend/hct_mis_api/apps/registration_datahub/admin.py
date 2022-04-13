@@ -23,7 +23,10 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from requests.auth import HTTPBasicAuth
 
-from hct_mis_api.apps.registration_datahub.celery_tasks import process_flex_records_task
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    fresh_extract_records_task,
+    process_flex_records_task,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedDocument,
@@ -340,7 +343,7 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     change_form_template = "registration_datahub/admin/record/change_form.html"
     change_list_template = "registration_datahub/admin/record/change_list.html"
 
-    actions = [mass_update, "extract", "create_rdi"]
+    actions = [mass_update, "extract", "async_extract", "create_rdi"]
     mass_update_fields = [
         "fields",
     ]
@@ -361,9 +364,16 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             process_flex_records_task.delay(rdi.id, list(records_ids))
             self.message_user(request, f"RDI Import with name: {rdi.name} started", messages.SUCCESS)
         except Exception as e:
-            raise
             self.message_user(request, str(e), messages.ERROR)
-            print(e)
+
+    @admin.action(description="Async extract")
+    def async_extract(self, request, queryset):
+        try:
+            records_ids = queryset.values_list("id", flat=True)
+            fresh_extract_records_task.delay(list(records_ids))
+            self.message_user(request, f"Extracting data for {len(records_ids)} records", messages.SUCCESS)
+        except Exception as e:
+            self.message_user(request, str(e), messages.ERROR)
 
     @button(permission=is_root)
     def fetch(self, request):
