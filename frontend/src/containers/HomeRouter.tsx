@@ -37,6 +37,7 @@ import { ActivityLogPage } from './pages/core/MainActivityLogPage';
 import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
+import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
 
 const Root = styled.div`
   display: flex;
@@ -136,6 +137,15 @@ export function HomeRouter(): React.ReactElement {
               }}
             >
               <PaymentModulePage />
+            </Sentry.ErrorBoundary>
+          </Route>
+          <Route path='/:businessArea/payment-module/new-plan'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag('location', '/payment-module/new-plan');
+              }}
+            >
+              <CreatePaymentPlanPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route exact path='/:businessArea/payment-verification'>
