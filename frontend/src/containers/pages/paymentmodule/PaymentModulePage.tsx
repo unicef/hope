@@ -1,3 +1,5 @@
+import { Button } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -34,12 +36,23 @@ export function PaymentModulePage(): React.ReactElement {
   const debouncedFilter = useDebounce(filter, 500);
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions))
+  if (!hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
   return (
-    <div>
-      <PageHeader title={t('Payment Module')} />
+    <>
+      <PageHeader title={t('Payment Module')}>
+        {hasPermissions(PERMISSIONS.PAYMENT_MODULE_CREATE, permissions) && (
+          <Button
+            variant='contained'
+            color='primary'
+            component={Link}
+            to={`/${businessArea}/payment-module/new-plan`}
+          >
+            {t('NEW PAYMENT PLAN')}
+          </Button>
+        )}
+      </PageHeader>
       <PaymentPlansFilters filter={filter} onFilterChange={setFilter} />
       <Container data-cy='page-details-container'>
         <TableWrapper>
@@ -47,12 +60,12 @@ export function PaymentModulePage(): React.ReactElement {
             filter={debouncedFilter}
             businessArea={businessArea}
             canViewDetails={hasPermissions(
-              PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
+              PERMISSIONS.PAYMENT_MODULE_VIEW_DETAILS,
               permissions,
             )}
           />
         </TableWrapper>
       </Container>
-    </div>
+    </>
   );
 }
