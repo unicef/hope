@@ -77,6 +77,7 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: size_h_c - Field must be required",
                 "Field: fchild_hoh_i_c - Field is missing",
                 "Field: child_hoh_i_c - Field is missing",
+                "Field: relationship_i_c - Choice: OTHER is not present in the file",
                 "Field: marital_status_i_c - Choice: MARRIED is not present in the file",
                 "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE",
                 "Field: currency_h_c - Choice: BOV is not present in the file",
