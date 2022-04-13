@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from concurrency.api import disable_concurrency
 
@@ -8,13 +9,18 @@ logger = logging.getLogger(__name__)
 
 
 @app.task()
-def recalculate_population_fields_task():
+def recalculate_population_fields_task(household_ids: list[UUID] = None):
     logger.info("recalculate_population_fields")
     try:
-        from hct_mis_api.apps.household.models import Household, Individual, YES
+        from hct_mis_api.apps.household.models import YES, Household, Individual
+
+        params = {"collect_individual_data": YES}
+
+        if household_ids:
+            params["pk__in"] = household_ids
 
         for hh in (
-            Household.objects.filter(collect_individual_data=YES)
+            Household.objects.filter(**params)
             .only("id", "collect_individual_data")
             .prefetch_related("individuals")
             .iterator(chunk_size=10000)
