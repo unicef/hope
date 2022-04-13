@@ -2,9 +2,9 @@ import { Box, Button } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { BreadCrumbsItem } from '../../core/BreadCrumbs';
-import { PageHeader } from '../../core/PageHeader';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
+import { PageHeader } from '../../../core/PageHeader';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
