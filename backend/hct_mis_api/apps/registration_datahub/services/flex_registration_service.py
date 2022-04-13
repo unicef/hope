@@ -288,7 +288,7 @@ class FlexRegistrationService:
             if not document_number and not certificate_picture:
                 continue
 
-            document_number = document_number or f"NOT_VALID_NUMBER_{uuid.uuid4()}"
+            document_number = document_number or f"ONLY_PICTURE_{uuid.uuid4()}"
 
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
