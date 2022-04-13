@@ -13359,6 +13359,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "FLEX_REGISTRATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -16662,6 +16668,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "disabilityCertificatePicture",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -29720,6 +29738,18 @@
             "deprecationReason": null
           },
           {
+            "name": "TAX_ID",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "RESIDENCE_PERMIT_NO",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "OTHER",
             "description": null,
             "isDeprecated": false,
@@ -37021,6 +37051,18 @@
             "deprecationReason": null
           },
           {
+            "name": "disabilityCertificatePicture",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "importedhousehold",
             "description": null,
             "args": [],
@@ -37849,6 +37891,12 @@
           },
           {
             "name": "JSON",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "FLEX",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -40503,6 +40551,18 @@
           },
           {
             "name": "NATIONAL_PASSPORT",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "TAX_ID",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "RESIDENCE_PERMIT_NO",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
