@@ -37968,6 +37968,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'NON_BENEFICIARY'
                     },
                     {
+                        'labelEn': 'Other',
+                        'labels': [
+                            {
+                                'label': 'Other',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'OTHER'
+                    },
+                    {
                         'labelEn': 'Sister-in-law / Brother-in-law',
                         'labels': [
                             {
