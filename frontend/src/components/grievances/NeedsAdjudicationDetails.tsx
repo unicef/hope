@@ -110,7 +110,7 @@ export function NeedsAdjudicationDetails({
     possibleDuplicate,
   ): React.ReactElement => {
     return (
-      <TableRow>
+      <TableRow key={possibleDuplicate?.id}>
         <TableCell align='left'>
           <Checkbox
             color='primary'
