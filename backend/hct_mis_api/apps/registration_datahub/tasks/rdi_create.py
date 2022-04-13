@@ -895,7 +895,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         individuals_to_create_list.append(individual_obj)
                         current_individuals.append(individual_obj)
                         documents_and_identities_to_create.append(current_individual_docs_and_identities)
-
+                        self._handle_documents_and_identities([current_individual_docs_and_identities])
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                             role_obj = ImportedIndividualRoleInHousehold(
                                 individual=individual_obj,
@@ -932,7 +932,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create_list)
         self._handle_collectors(collectors_to_create, individuals_to_create)
-        self._handle_documents_and_identities(documents_and_identities_to_create)
 
         households_to_update = []
         for household, individual in head_of_households_mapping.items():
