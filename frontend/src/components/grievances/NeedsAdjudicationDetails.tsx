@@ -106,6 +106,65 @@ export function NeedsAdjudicationDetails({
     );
   };
 
+  const renderPossibleDuplicateRow = (
+    possibleDuplicate,
+  ): React.ReactElement => {
+    return (
+      <TableRow>
+        <TableCell align='left'>
+          <Checkbox
+            color='primary'
+            disabled={
+              !isEditable ||
+              ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+            }
+            checked={selectedDuplicate === possibleDuplicate?.id}
+            onChange={(event, checked) =>
+              setSelectedDuplicate(checked ? possibleDuplicate?.id : null)
+            }
+          />
+        </TableCell>
+        <TableCell align='left'>
+          <BlackLink
+            to={`/${businessArea}/population/individuals/${possibleDuplicate?.id}`}
+          >
+            {possibleDuplicate?.unicefId}
+          </BlackLink>
+        </TableCell>
+        <TableCell align='left'>
+          <BlackLink
+            to={`/${businessArea}/population/household/${possibleDuplicate?.household?.id}`}
+          >
+            {possibleDuplicate?.household?.unicefId || '-'}
+          </BlackLink>
+        </TableCell>
+        <TableCell align='left'>{possibleDuplicate?.fullName}</TableCell>
+        <TableCell align='left'>{possibleDuplicate?.sex}</TableCell>
+        <TableCell align='left'>
+          <UniversalMoment>{possibleDuplicate?.birthDate}</UniversalMoment>
+        </TableCell>
+        <TableCell align='left'>{getPossibleDuplicateSimilarity()}</TableCell>
+        <TableCell align='left'>
+          <UniversalMoment>
+            {possibleDuplicate?.lastRegistrationDate}
+          </UniversalMoment>
+        </TableCell>
+        <TableCell align='left'>
+          {possibleDuplicate?.documents?.edges[0]?.node.type.label}
+        </TableCell>
+        <TableCell align='left'>
+          {possibleDuplicate?.documents?.edges[0]?.node.documentNumber}
+        </TableCell>
+        <TableCell align='left'>
+          {possibleDuplicate?.household?.admin2?.title}
+        </TableCell>
+        <TableCell align='left'>
+          {possibleDuplicate?.household?.village}
+        </TableCell>
+      </TableRow>
+    );
+  };
+
   return (
     <StyledBox>
       <Title>
@@ -250,69 +309,11 @@ export function NeedsAdjudicationDetails({
               {details.goldenRecordsIndividual?.household?.village}
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell align='left'>
-              <Checkbox
-                color='primary'
-                disabled={
-                  !isEditable ||
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                }
-                checked={selectedDuplicate === details.possibleDuplicate?.id}
-                onChange={(event, checked) =>
-                  setSelectedDuplicate(
-                    checked ? details.possibleDuplicate?.id : null,
-                  )
-                }
-              />
-            </TableCell>
-            <TableCell align='left'>
-              <BlackLink
-                to={`/${businessArea}/population/individuals/${details.possibleDuplicate?.id}`}
-              >
-                {details.possibleDuplicate?.unicefId}
-              </BlackLink>
-            </TableCell>
-            <TableCell align='left'>
-              <BlackLink
-                to={`/${businessArea}/population/household/${details.possibleDuplicate?.household?.id}`}
-              >
-                {details.possibleDuplicate?.household?.unicefId || '-'}
-              </BlackLink>
-            </TableCell>
-            <TableCell align='left'>
-              {details.possibleDuplicate?.fullName}
-            </TableCell>
-            <TableCell align='left'>{details.possibleDuplicate?.sex}</TableCell>
-            <TableCell align='left'>
-              <UniversalMoment>
-                {details.possibleDuplicate?.birthDate}
-              </UniversalMoment>
-            </TableCell>
-            <TableCell align='left'>
-              {getPossibleDuplicateSimilarity()}
-            </TableCell>
-            <TableCell align='left'>
-              <UniversalMoment>
-                {details.possibleDuplicate?.lastRegistrationDate}
-              </UniversalMoment>
-            </TableCell>
-            <TableCell align='left'>
-              {details.possibleDuplicate?.documents?.edges[0]?.node.type.label}
-            </TableCell>
-            <TableCell align='left'>
-              {
-                details.possibleDuplicate?.documents?.edges[0]?.node
-                  .documentNumber
-              }
-            </TableCell>
-            <TableCell align='left'>
-              {details.possibleDuplicate?.household?.admin2?.title}
-            </TableCell>
-            <TableCell align='left'>
-              {details.possibleDuplicate?.household?.village}
-            </TableCell>
-          </TableRow>
+          {details.isMultipleDuplicatesVersion
+            ? details.possibleDuplicates.map((el) =>
+                renderPossibleDuplicateRow(el),
+              )
+            : renderPossibleDuplicateRow(details.possibleDuplicate)}
         </TableBody>
       </StyledTable>
     </StyledBox>

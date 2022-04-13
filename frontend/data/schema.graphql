@@ -629,6 +629,8 @@ enum DocumentTypeType {
   ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
+  TAX_ID
+  RESIDENCE_PERMIT_NO
   OTHER
 }
 
@@ -987,6 +989,7 @@ input HouseholdUpdateDataObjectType {
 enum ImportDataDataType {
   XLSX
   JSON
+  FLEX
 }
 
 type ImportDataNode implements Node {
@@ -1312,6 +1315,8 @@ enum ImportedDocumentTypeType {
   ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
+  TAX_ID
+  RESIDENCE_PERMIT_NO
   OTHER
 }
 
@@ -1679,6 +1684,7 @@ type ImportedIndividualNode implements Node {
   whoAnswersAltPhone: String!
   koboAssetId: String!
   rowId: Int
+  disabilityCertificatePicture: String
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
@@ -1838,12 +1844,14 @@ type IndividualNode implements Node {
   childHoh: Boolean!
   koboAssetId: String!
   rowId: Int
+  disabilityCertificatePicture: String
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
   deleteIndividualTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketDeleteIndividualDetailsNodeConnection!
   ticketsystemflaggingdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketSystemFlaggingDetailsNodeConnection!
+  ticketDuplicates(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   positiveFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
   negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
@@ -2517,6 +2525,7 @@ type RefuseRegistrationDataImportMutation {
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
+  FLEX_REGISTRATION
 }
 
 enum RegistrationDataImportDatahubImportDone {
@@ -3254,10 +3263,24 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   updatedAt: DateTime!
   goldenRecordsIndividual: IndividualNode!
   possibleDuplicate: IndividualNode!
+  possibleDuplicates: [IndividualNode]
+  isMultipleDuplicatesVersion: Boolean!
   selectedIndividual: IndividualNode
   roleReassignData: JSONString!
   extraData: TicketNeedsAdjudicationDetailsExtraDataNode
   hasDuplicatedDocument: Boolean
+}
+
+type TicketNeedsAdjudicationDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketNeedsAdjudicationDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketNeedsAdjudicationDetailsNodeEdge {
+  node: TicketNeedsAdjudicationDetailsNode
+  cursor: String!
 }
 
 type TicketNegativeFeedbackDetailsNode implements Node {

@@ -117,6 +117,9 @@
             "name": "SanctionListIndividualDateOfBirthNode"
           },
           {
+            "name": "TicketNeedsAdjudicationDetailsNode"
+          },
+          {
             "name": "TicketPositiveFeedbackDetailsNode"
           },
           {
@@ -142,9 +145,6 @@
           },
           {
             "name": "TicketNoteNode"
-          },
-          {
-            "name": "TicketNeedsAdjudicationDetailsNode"
           },
           {
             "name": "BusinessAreaNode"
