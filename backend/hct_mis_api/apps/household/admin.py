@@ -323,6 +323,13 @@ class IndividualRoleInHouseholdInline(TabularInline):
         return False
 
 
+class BankAccountInfoStackedInline(admin.StackedInline):
+    model = BankAccountInfo
+
+    exclude = ("debit_card_number",)
+    extra = 0
+
+
 @admin.register(Individual)
 class IndividualAdmin(
     SoftDeletableAdminMixin,
@@ -353,7 +360,7 @@ class IndividualAdmin(
     search_fields = ("family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     exclude = ("created_at", "updated_at")
-    inlines = [IndividualRoleInHouseholdInline]
+    inlines = [IndividualRoleInHouseholdInline, BankAccountInfoStackedInline]
     list_filter = (
         QueryStringFilter,
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
@@ -560,23 +567,3 @@ class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 return TemplateResponse(request, "admin/household/individual/xlsx_update_stage3.html", context)
 
         return TemplateResponse(request, "admin/household/individual/xlsx_update.html", context)
-
-
-@admin.register(BankAccountInfo)
-class BankAccountInfoAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    list_display = (
-        "individual",
-        "bank_name",
-        "bank_account_number",
-        "created_at",
-        "updated_at",
-    )
-    readonly_fields = (
-        "individual",
-        "bank_name",
-        "bank_account_number",
-        "debit_card_number",
-        "created_at",
-        "updated_at",
-    )
-    exclude = ("debit_card_number",)
