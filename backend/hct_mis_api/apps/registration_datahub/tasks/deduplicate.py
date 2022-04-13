@@ -672,6 +672,13 @@ class DeduplicateTask:
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
         cls.set_thresholds(registration_data_import_datahub)
 
+        cls.thresholds.DEDUPLICATION_DUPLICATE_SCORE = 60.0
+        cls.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE = 60.0
+        cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE = 100
+        cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED = 50
+        cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE = 100
+        cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED = 50
+
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )

@@ -613,6 +613,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE
     )  # this field will be deprecated
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
+    is_multiple_duplicates_version = models.BooleanField(default=False)
     selected_individual = models.ForeignKey(
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
     )

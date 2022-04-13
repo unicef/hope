@@ -42,9 +42,11 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         ticket=ticket,
         golden_records_individual=main_individual,
         possible_duplicate=possible_duplicate,
+        is_multiple_duplicates_version=kwargs.get("is_multiple_duplicates_version", False),
         selected_individual=None,
         extra_data=extra_data,
     )
+
     possible_duplicates = kwargs.get("possible_duplicates")
     if possible_duplicates:
         ticket_details.possible_duplicates.add(*possible_duplicates)
@@ -77,10 +79,11 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=possible_duplicate,
-            possible_duplicate=possible_duplicate,
+            possible_duplicate=possible_duplicate,  # for backward compatibility
             business_area=business_area,
             registration_data_import=registration_data_import,
-            possible_duplicates=possible_duplicates
+            possible_duplicates=possible_duplicates,
+            is_multiple_duplicates_version=True
         )
 
         if ticket and ticket_details:

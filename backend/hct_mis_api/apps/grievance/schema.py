@@ -587,6 +587,7 @@ class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
 class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     has_duplicated_document = graphene.Boolean()
     extra_data = graphene.Field(TicketNeedsAdjudicationDetailsExtraDataNode)
+    possible_duplicates = graphene.List(IndividualNode)
 
     class Meta:
         model = TicketNeedsAdjudicationDetails
@@ -598,6 +599,9 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
         golden_records = parent.extra_data.get("golden_records")
         possible_duplicate = parent.extra_data.get("possible_duplicate")
         return TicketNeedsAdjudicationDetailsExtraDataNode(golden_records, possible_duplicate)
+
+    def resolve_possible_duplicates(self, info):
+        return self.possible_duplicates.all()
 
 
 class TicketSystemFlaggingDetailsNode(DjangoObjectType):
