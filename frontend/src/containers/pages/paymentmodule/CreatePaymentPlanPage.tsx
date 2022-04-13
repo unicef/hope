@@ -1,42 +1,34 @@
-import { FieldArray, Form, Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import moment from 'moment';
 import * as Yup from 'yup';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { CreatePaymentPlanHeader } from '../../../components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader';
-import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting';
-import { CreateTargetPopulationHeader } from '../../../components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
-import { EmptyTargetingCriteria } from '../../../components/targeting/CreateTargetPopulation/EmptyTargetingCriteria';
-import { Exclusions } from '../../../components/targeting/CreateTargetPopulation/Exclusions';
-import { Results } from '../../../components/targeting/Results';
-import { TargetingCriteria } from '../../../components/targeting/TargetingCriteria';
-import { TargetingCriteriaDisabled } from '../../../components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
-import { TargetPopulationProgramme } from '../../../components/targeting/TargetPopulationProgramme';
+import { CreatePaymentPlanHeader } from '../../../components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader/CreatePaymentPlanHeader';
+import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
+import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
+import { handleValidationErrors } from '../../../utils/utils';
 import {
-  getFullNodeFromEdgesById,
-  handleValidationErrors,
-} from '../../../utils/utils';
-import {
-  useAllProgramsQuery,
   useAllTargetPopulationsQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
-import { CreateTable } from '../../tables/targeting/TargetPopulation/Create';
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 
 export function CreatePaymentPlanPage(): React.ReactElement {
   const { t } = useTranslation();
   const initialValues = {
-    name: '',
-    criterias: [],
-    program: null,
-    excludedIds: '',
-    exclusionReason: '',
+    targetPopulation: '',
+    startDate: '',
+    endDate: '',
+    currency: null,
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -57,6 +49,22 @@ export function CreatePaymentPlanPage(): React.ReactElement {
 
   const validationSchema = Yup.object().shape({
     targetPopulation: Yup.string().required(t('Target Population is required')),
+    startDate: Yup.date().required(t('Start Date is required')),
+    endDate: Yup.date()
+      .required(t('End Date is required'))
+      .min(today, t('End Date cannot be in the past'))
+      .when(
+        'startDate',
+        (startDate, schema) =>
+          startDate &&
+          schema.min(
+            startDate,
+            `${t('End date have to be greater than')} ${moment(
+              startDate,
+            ).format('YYYY-MM-DD')}`,
+          ),
+        '',
+      ),
   });
 
   const handleSubmit = async (values, { setFieldError }): Promise<void> => {
@@ -96,7 +104,7 @@ export function CreatePaymentPlanPage(): React.ReactElement {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ submitForm }) => (
+      {({ submitForm, values }) => (
         <Form>
           <CreatePaymentPlanHeader
             handleSubmit={submitForm}
@@ -107,6 +115,7 @@ export function CreatePaymentPlanPage(): React.ReactElement {
             allTargetPopulations={allTargetPopulationsData}
             loading={loadingTargetPopulations}
           />
+          <PaymentPlanParameters values={values} />
         </Form>
       )}
     </Formik>

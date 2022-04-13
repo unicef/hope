@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/payments/PaymentVerificationTable should render loading 1`] = `
+exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] = `
 <div>
   <div
     class="sc-bdVaJa iMXEqU"
@@ -29,7 +29,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
 </div>
 `;
 
-exports[`containers/tables/payments/PaymentVerificationTable should render with data 1`] = `
+exports[`containers/tables/payments/PaymentPlansTable should render with data 1`] = `
 <div>
   <div
     class="makeStyles-root-1"
@@ -49,7 +49,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
             <h6
               class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
             >
-              List of Cash Plans
+              Payment Plans
             </h6>
           </div>
           <div
@@ -77,7 +77,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
                   role="button"
                   tabindex="0"
                 >
-                  Cash Plan ID
+                  Payment Plan ID
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -100,7 +100,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
                   role="button"
                   tabindex="0"
                 >
-                  Verification Status
+                  Status
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -123,7 +123,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
                   role="button"
                   tabindex="0"
                 >
-                  FSP
+                  No. of Households
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -146,7 +146,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
                   role="button"
                   tabindex="0"
                 >
-                  Modality
+                  Currency
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -169,7 +169,53 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
                   role="button"
                   tabindex="0"
                 >
-                  Cash Amount
+                  Total Entitled Quantity
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Total Deliverd Quantity
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                  role="button"
+                  tabindex="0"
+                >
+                  Total Undelivered Quantity
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -192,53 +238,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
                   role="button"
                   tabindex="0"
                 >
-                  Timeframe
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                    />
-                  </svg>
-                </span>
-              </th>
-              <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-                scope="col"
-              >
-                <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                  role="button"
-                  tabindex="0"
-                >
-                  Programme
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                    />
-                  </svg>
-                </span>
-              </th>
-              <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-                scope="col"
-              >
-                <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
-                  role="button"
-                  tabindex="0"
-                >
-                  Last Modified Date
+                  Dispersion Date
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"

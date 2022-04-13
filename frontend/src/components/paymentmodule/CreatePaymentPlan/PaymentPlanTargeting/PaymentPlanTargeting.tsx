@@ -4,11 +4,11 @@ import get from 'lodash/get';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { AllTargetPopulationsQuery } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
-import { OverviewContainer } from '../../core/OverviewContainer';
-import { PaperContainer } from '../../targeting/PaperContainer';
+import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
+import { AllTargetPopulationsQuery } from '../../../../__generated__/graphql';
+import { LoadingComponent } from '../../../core/LoadingComponent';
+import { OverviewContainer } from '../../../core/OverviewContainer';
+import { PaperContainer } from '../../../targeting/PaperContainer';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(3)}px;
@@ -31,14 +31,11 @@ export const PaymentPlanTargeting = ({
   const { t } = useTranslation();
   if (loading) return <LoadingComponent />;
 
-  console.log('allTargetPopulations', allTargetPopulations);
-
   const allTargetPopulationsEdges = get(
     allTargetPopulations,
     'allTargetPopulation.edges',
     [],
   );
-  console.log('allTargetPopulationsEdges', allTargetPopulationsEdges);
   const mappedTargetPopulations = allTargetPopulationsEdges.map((edge) => ({
     name: edge.node.name,
     value: edge.node.id,

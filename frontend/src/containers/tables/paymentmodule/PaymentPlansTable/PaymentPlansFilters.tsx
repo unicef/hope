@@ -57,7 +57,7 @@ export function PaymentPlansFilters({
 
   return (
     <ContainerWithBorder>
-      <Grid container spacing={3}>
+      <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
             label={t('Search')}
