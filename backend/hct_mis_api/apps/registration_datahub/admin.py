@@ -29,6 +29,7 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -93,6 +94,13 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
         return TemplateResponse(request, "registration_datahub/admin/inspect.html", context)
 
 
+class ImportedBankAccountInfoStackedInline(admin.StackedInline):
+    model = ImportedBankAccountInfo
+
+    exclude = ("debit_card_number",)
+    extra = 0
+
+
 @admin.register(ImportedIndividual)
 class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = (
@@ -116,6 +124,7 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     # raw_id_fields = ("household", "registration_data_import")
     autocomplete_fields = ("household", "registration_data_import")
     actions = ["enrich_deduplication"]
+    inlines = (ImportedBankAccountInfoStackedInline,)
 
     def score(self, obj):
         try:
@@ -461,8 +470,3 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     def has_delete_permission(self, request, obj=None):
         return False
-
-
-# @admin.register(ImportedBankAccountInfo)
-# class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-#     pass
