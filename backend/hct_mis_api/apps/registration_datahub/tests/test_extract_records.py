@@ -13,7 +13,8 @@ from hct_mis_api.apps.registration_datahub.models import Record
 class TestExtractRecords(TestCase):
     databases = ("default", "registration_datahub")
 
-    def test_extract_without_image(self):
+    @classmethod
+    def setUpTestData(cls):
         content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
 
         storage = {
@@ -62,10 +63,16 @@ class TestExtractRecords(TestCase):
             registration=1, timestamp=datetime.datetime.now(), source_id=1, storage=bytes(json.dumps(storage), "utf-8")
         )
 
+    def test_extract_to_data_field(self):
         extract_records_task()
 
         record = Record.objects.first()
         self.assertTrue(record.data)
+
+    def test_extract_without_image(self):
+        extract_records_task()
+
+        record = Record.objects.first()
         self.assertEqual(
             record.data["individuals"],
             [
@@ -98,4 +105,23 @@ class TestExtractRecords(TestCase):
                     "disability_certificate_picture": "::image::",
                 }
             ],
+        )
+
+    def test_extract_counters(self):
+        extract_records_task()
+
+        record = Record.objects.first()
+        self.assertEqual(
+            record.data["w_counters"],
+            {
+                "head": 1,
+                "valid_taxid": 1,
+                "valid_phones": 1,
+                "valid_payment": 1,
+                "collectors_num": 1,
+                "individuals_num": 1,
+                "birth_certificate": 1,
+                "collector_bank_account": True,
+                "disability_certificate_match": True,
+            },
         )
