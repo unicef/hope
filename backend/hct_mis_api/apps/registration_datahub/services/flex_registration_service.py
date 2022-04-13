@@ -8,6 +8,8 @@ from django.core.files.base import ContentFile
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
+from django_countries.fields import Country
+
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.household.models import (
@@ -22,6 +24,7 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    YES,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
@@ -223,6 +226,10 @@ class FlexRegistrationService:
             registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
+            country_origin=Country(code="UA"),
+            country=Country(code="UA"),
+            consent=True,
+            collect_individual_data=YES,
         )
 
         if residence_status := household_data.get("residence_status"):
@@ -288,7 +295,7 @@ class FlexRegistrationService:
             if not document_number and not certificate_picture:
                 continue
 
-            document_number = document_number or f"NOT_VALID_NUMBER_{uuid.uuid4()}"
+            document_number = document_number or f"ONLY_PICTURE_{uuid.uuid4()}"
 
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
