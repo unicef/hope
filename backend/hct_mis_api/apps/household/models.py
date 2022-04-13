@@ -101,6 +101,8 @@ GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
+RELATIONSHIP_OTHER = "OTHER"
+
 RELATIONSHIP_CHOICE = (
     (RELATIONSHIP_UNKNOWN, "Unknown"),
     (AUNT_UNCLE, "Aunt / Uncle"),
@@ -117,6 +119,7 @@ RELATIONSHIP_CHOICE = (
         NON_BENEFICIARY,
         "Not a Family Member. Can only act as a recipient.",
     ),
+    (RELATIONSHIP_OTHER, "Other"),
     (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
