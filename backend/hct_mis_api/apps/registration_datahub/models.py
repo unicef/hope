@@ -460,31 +460,42 @@ class Record(models.Model):
             try:
                 extracted = json.loads(record.storage.tobytes().decode())
                 record.data = _filter(extracted)
-                cc = [i for i in record.data["individuals"] if i["role_i_c"] == "y"]
-                heads = [i for i in record.data["individuals"] if i["relationship_i_c"] == "head"]
+
+                individuals = record.data.get("individuals", {})
+                cc = [individual for individual in individuals if individual["role_i_c"] == "y"]
+                heads = [individual for individual in individuals if individual["relationship_i_c"] == "head"]
 
                 record.data["w_counters"] = {
-                    "individuals_num": len(record.data["individuals"]),
+                    "individuals_num": len(individuals),
                     "collectors_num": len(cc),
                     "head": len(heads),
-                    "valid_phones": len([i for i in record.data["individuals"] if i["phone_no_i_c"]]),
-                    "valid_taxid": len([h for h in heads if h["tax_id_no_i_c"] and h["bank_account"]]),
+                    "valid_phones": len([individual for individual in individuals if individual["phone_no_i_c"]]),
+                    "valid_taxid": len([head for head in heads if head["tax_id_no_i_c"] and head["bank_account"]]),
                     "valid_payment": len(
-                        [i for i in record.data["individuals"] if i["tax_id_no_i_c"] and i["bank_account"]]
+                        [
+                            individual
+                            for individual in individuals
+                            if individual["tax_id_no_i_c"] and individual["bank_account"]
+                        ]
                     ),
                     "birth_certificate": len(
-                        [i for i in record.data["individuals"] if i["birth_certificate_picture"] == "::image::"]
+                        [
+                            individual
+                            for individual in individuals
+                            if individual["birth_certificate_picture"] == "::image::"
+                        ]
                     ),
                     "disability_certificate_match": (
                         len(
                             [
-                                i
-                                for i in record.data["individuals"]
-                                if i["disability_certificate_picture"] == "::image::"
+                                individual
+                                for individual in individuals
+                                if individual["disability_certificate_picture"] == "::image::"
                             ]
                         )
-                        == len([i for i in record.data["individuals"] if i["disability_i_c"] == "y"])
+                        == len([individual for individual in individuals if individual["disability_i_c"] == "y"])
                     ),
+                    "collector_bank_account": len([i["bank_account"] for i in cc]) > 0,
                 }
                 record.save()
             except Exception as e:
