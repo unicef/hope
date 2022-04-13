@@ -260,3 +260,13 @@ def extract_records_task():
     Record.extract(records_ids)
 
     logger.info("extract_records_task end")
+
+
+@app.task
+def fresh_extract_records_task():
+    logger.info("fresh_extract_records_task start")
+
+    records_ids = Record.objects.all().values_list("pk", flat=True)[:5000]
+    Record.extract(records_ids)
+
+    logger.info("fresh_extract_records_task end")
