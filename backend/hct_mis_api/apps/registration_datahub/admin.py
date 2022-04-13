@@ -3,15 +3,6 @@ import datetime
 import json
 import logging
 
-import requests
-from admin_extra_buttons.decorators import button, link
-from admin_extra_buttons.mixins import ExtraButtonsMixin
-from adminactions.mass_update import mass_update
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.depot.widget import DepotManager
-from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
-from adminfilters.querystring import QueryStringFilter
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django import forms
 from django.contrib import admin, messages
 from django.core.signing import BadSignature, Signer
@@ -19,6 +10,17 @@ from django.db.models import F
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+
+import requests
+from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.mixins import ExtraButtonsMixin
+from adminactions.mass_update import mass_update
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
+from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
+from adminfilters.json import JsonFieldFilter
+from adminfilters.querystring import QueryStringFilter
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from requests.auth import HTTPBasicAuth
 
 from hct_mis_api.apps.registration_datahub.celery_tasks import process_flex_records_task
@@ -34,7 +36,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.services.flex_registration_service import FlexRegistrationService
+from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+    FlexRegistrationService,
+)
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -288,6 +292,8 @@ class AlexisFilter(SimpleListFilter):
             queryset = queryset.filter(data__w_counters__disability_certificate=True)
         if "8" in self.lookup_val:
             queryset = queryset.filter(data__w_counters__valid_payment__gt=0)
+        if "9" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__collector_bank_account=True)
         return queryset
 
     def lookups(self, request, model_admin):
@@ -300,11 +306,12 @@ class AlexisFilter(SimpleListFilter):
             ["6", "at least one birth certificate picture"],
             ["7", "disability certificate for each disabled"],
             ["8", "At least 1 member has TaxId ans BankAccount"],
+            ["9", "Collector has BankAccount"],
         )
 
     def choices(self, changelist):
         for lookup, title in self.lookup_choices:
-            qs = changelist.get_query_string(remove=[self.parameter_name])
+            qs = changelist.get_query_string(remove=[self.parameter_name]) + "&"
             qs += "&".join([f"{self.parameter_name}={v}" for v in self.lookup_val if v != lookup])
             if str(lookup) not in self.lookup_val:
                 qs += f"&{self.parameter_name}={lookup}"
@@ -318,15 +325,16 @@ class AlexisFilter(SimpleListFilter):
 @admin.register(Record)
 class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "ignored")
-    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored")
+    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored", "registration_data_import")
     exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
         AlexisFilter,
+        ("registration_data_import", AutoCompleteFilter),
         ("source_id", NumberFilter),
         ("id", NumberFilter),
-        "timestamp",
+        ("data", JsonFieldFilter),
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
@@ -391,6 +399,7 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                         len([i for i in r.data["individuals"] if i["disability_certificate_picture"] == "::image::"])
                         == len([i for i in r.data["individuals"] if i["disability_i_c"] == "y"])
                     ),
+                    "collector_bank_account": len([i["bank_account"] for i in cc]) > 0,
                 }
                 r.save()
             except Exception as e:
