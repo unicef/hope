@@ -53,6 +53,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Agency,
+    BankAccountInfo,
     Document,
     DocumentType,
     EntitlementCard,
@@ -322,6 +323,13 @@ class IndividualRoleInHouseholdInline(TabularInline):
         return False
 
 
+class BankAccountInfoStackedInline(admin.StackedInline):
+    model = BankAccountInfo
+
+    exclude = ("debit_card_number",)
+    extra = 0
+
+
 @admin.register(Individual)
 class IndividualAdmin(
     SoftDeletableAdminMixin,
@@ -352,7 +360,7 @@ class IndividualAdmin(
     search_fields = ("family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     exclude = ("created_at", "updated_at")
-    inlines = [IndividualRoleInHouseholdInline]
+    inlines = [IndividualRoleInHouseholdInline, BankAccountInfoStackedInline]
     list_filter = (
         QueryStringFilter,
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
