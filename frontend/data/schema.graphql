@@ -629,6 +629,8 @@ enum DocumentTypeType {
   ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
+  TAX_ID
+  RESIDENCE_PERMIT_NO
   OTHER
 }
 
@@ -987,6 +989,7 @@ input HouseholdUpdateDataObjectType {
 enum ImportDataDataType {
   XLSX
   JSON
+  FLEX
 }
 
 type ImportDataNode implements Node {
@@ -1312,6 +1315,8 @@ enum ImportedDocumentTypeType {
   ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
+  TAX_ID
+  RESIDENCE_PERMIT_NO
   OTHER
 }
 
@@ -1679,6 +1684,7 @@ type ImportedIndividualNode implements Node {
   whoAnswersAltPhone: String!
   koboAssetId: String!
   rowId: Int
+  disabilityCertificatePicture: String
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
@@ -1838,6 +1844,7 @@ type IndividualNode implements Node {
   childHoh: Boolean!
   koboAssetId: String!
   rowId: Int
+  disabilityCertificatePicture: String
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -2517,6 +2524,7 @@ type RefuseRegistrationDataImportMutation {
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
+  FLEX_REGISTRATION
 }
 
 enum RegistrationDataImportDatahubImportDone {
