@@ -1083,4 +1083,4 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     individual = models.ForeignKey("household.Individual", related_name="bank_account_info", on_delete=models.CASCADE)
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
-    debit_card_number = models.CharField(max_length=30, blank=True, default="")
+    debit_card_number = models.CharField(max_length=255, blank=True, default="")
