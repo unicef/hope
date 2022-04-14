@@ -508,4 +508,4 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     )
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
-    debit_card_number = models.CharField(max_length=30, blank=True, default="")
+    debit_card_number = models.CharField(max_length=255, blank=True, default="")
