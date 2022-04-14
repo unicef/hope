@@ -214,6 +214,11 @@ export function RegistrationIndividualBioData({
             {severityOfDisabilityChoicesDict[individual.commsDisability]}
           </LabelizedField>
         </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Disability')}>
+            {individual.disability === 'DISABLED' ? 'Disabled' : 'Not Disabled'}
+          </LabelizedField>
+        </Grid>
         {!mappedIndividualDocuments.length &&
         !mappedIdentities.length ? null : (
           <Grid item xs={12}>
