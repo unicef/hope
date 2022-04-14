@@ -994,6 +994,8 @@ export enum DocumentTypeType {
   ElectoralCard = 'ELECTORAL_CARD',
   NationalId = 'NATIONAL_ID',
   NationalPassport = 'NATIONAL_PASSPORT',
+  TaxId = 'TAX_ID',
+  ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   Other = 'OTHER'
 }
 
@@ -1533,7 +1535,8 @@ export type HouseholdUpdateDataObjectType = {
 
 export enum ImportDataDataType {
   Xlsx = 'XLSX',
-  Json = 'JSON'
+  Json = 'JSON',
+  Flex = 'FLEX'
 }
 
 export type ImportDataNode = Node & {
@@ -1868,6 +1871,8 @@ export enum ImportedDocumentTypeType {
   ElectoralCard = 'ELECTORAL_CARD',
   NationalId = 'NATIONAL_ID',
   NationalPassport = 'NATIONAL_PASSPORT',
+  TaxId = 'TAX_ID',
+  ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   Other = 'OTHER'
 }
 
@@ -2251,6 +2256,7 @@ export type ImportedIndividualNode = Node & {
   whoAnswersAltPhone: Scalars['String'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  disabilityCertificatePicture?: Maybe<Scalars['String']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
@@ -2441,6 +2447,7 @@ export type IndividualNode = Node & {
   childHoh: Scalars['Boolean'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  disabilityCertificatePicture?: Maybe<Scalars['String']>,
   paymentRecords: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
@@ -4355,7 +4362,8 @@ export type RegistrationDataImportDatahubNodeEdge = {
 
 export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
-  Kobo = 'KOBO'
+  Kobo = 'KOBO',
+  FlexRegistration = 'FLEX_REGISTRATION'
 }
 
 export type RegistrationDataImportNode = Node & {
@@ -9738,6 +9746,7 @@ export const IndividualDetailedFragmentDoc = gql`
   seeingDisability
   physicalDisability
   selfcareDisability
+  disability
   photo
   workStatus
   documents {
@@ -19788,6 +19797,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
@@ -19896,6 +19906,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentRecordsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, IndividualNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, IndividualNodeSensitiveTicketDetailsArgs>,
