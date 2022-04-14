@@ -1,6 +1,8 @@
+import json
 import logging
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.registration_datahub.models import Record
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +199,9 @@ def pull_kobo_submissions_task(import_data_id):
     from hct_mis_api.apps.registration_datahub.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
-    from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import PullKoboSubmissions
+    from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
+        PullKoboSubmissions,
+    )
 
     try:
         return PullKoboSubmissions().execute(kobo_import_data)
@@ -219,7 +223,9 @@ def validate_xlsx_import_task(import_data_id):
     from hct_mis_api.apps.registration_datahub.models import ImportData
 
     import_data = ImportData.objects.get(id=import_data_id)
-    from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import ValidateXlsxImport
+    from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import (
+        ValidateXlsxImport,
+    )
 
     try:
         return ValidateXlsxImport().execute(import_data)
@@ -233,3 +239,35 @@ def validate_xlsx_import_task(import_data_id):
         raise
     finally:
         logger.info("validate_xlsx_import_task end")
+
+
+@app.task
+def process_flex_records_task(rdi_id, records_ids):
+    logger.info("process_flex_records start")
+    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+        FlexRegistrationService,
+    )
+
+    FlexRegistrationService().process_records(rdi_id, records_ids)
+    logger.info("process_flex_records end")
+
+
+@app.task
+def extract_records_task():
+    logger.info("extract_records_task start")
+
+    records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)[:5000]
+    Record.extract(records_ids)
+
+    logger.info("extract_records_task end")
+
+
+@app.task
+def fresh_extract_records_task(records_ids=None):
+    logger.info("fresh_extract_records_task start")
+
+    if not records_ids:
+        records_ids = Record.objects.all().values_list("pk", flat=True)[:5000]
+    Record.extract(records_ids)
+
+    logger.info("fresh_extract_records_task end")
