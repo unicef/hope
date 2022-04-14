@@ -13359,6 +13359,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "FLEX_REGISTRATION",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -16668,6 +16674,18 @@
             "deprecationReason": null
           },
           {
+            "name": "disabilityCertificatePicture",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "paymentRecords",
             "description": null,
             "args": [
@@ -17711,6 +17729,12 @@
           },
           {
             "name": "NON_BENEFICIARY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "OTHER",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -29720,6 +29744,18 @@
             "deprecationReason": null
           },
           {
+            "name": "TAX_ID",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "RESIDENCE_PERMIT_NO",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "OTHER",
             "description": null,
             "isDeprecated": false,
@@ -36245,6 +36281,18 @@
             "deprecationReason": null
           },
           {
+            "name": "misUnicefId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "individuals",
             "description": null,
             "args": [
@@ -37015,6 +37063,30 @@
             "type": {
               "kind": "SCALAR",
               "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "disabilityCertificatePicture",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "misUnicefId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -37849,6 +37921,12 @@
           },
           {
             "name": "JSON",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "FLEX",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -40503,6 +40581,18 @@
           },
           {
             "name": "NATIONAL_PASSPORT",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "TAX_ID",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "RESIDENCE_PERMIT_NO",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
