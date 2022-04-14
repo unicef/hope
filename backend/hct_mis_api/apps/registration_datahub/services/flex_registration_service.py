@@ -321,6 +321,8 @@ class FlexRegistrationService:
     def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):
         if individual_dict.get("bank_account_h_f", "n") != "y":
             return
+        if not individual_dict.get("bank_account_number"):
+            return
         bank_name = individual_dict.get("bank_name_h_f", "")
         other_bank_name = individual_dict.get("other_bank_name", "")
         if not bank_name:
