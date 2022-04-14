@@ -32,7 +32,7 @@ export function UsersAutocomplete({
   const [newValue, setNewValue] = useState();
   const { data, loading } = useAllUsersQuery({
     variables: {
-      first: 100,
+      first: 1000,
       search: debouncedInputText,
       businessArea,
     },
