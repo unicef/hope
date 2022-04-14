@@ -14,7 +14,7 @@ register = template.Library()
 class HtmlDiff(difflib.HtmlDiff):
     def _format_line(self, side, flag, linenum, text):
         try:
-            linenum = "{}".format(inenum)
+            linenum = "{}".format(linenum)
             id = f' id="{self._prefix[side]}{linenum}"'
         except TypeError:
             id = ""
