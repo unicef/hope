@@ -47,18 +47,18 @@ def isdict(value):
 
 
 @register.inclusion_tag("dump/dump.html")
-def dump(value):
-    return {"value": value}
+def dump(value, key=None, original=None):
+    return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/list.html")
-def dump_list(value):
-    return {"value": value}
+def dump_list(value, key=None, original=None):
+    return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/dict.html")
-def dump_dict(value):
-    return {"value": value}
+def dump_dict(value, key=None, original=None):
+    return {"value": value, "key": key, "original": original}
 
 
 @register.filter(name="smart")
@@ -94,3 +94,9 @@ def is_base64(element):
     except Exception as e:
         logger.exception(e)
     return False
+
+
+@register.filter
+def concat(a, b):
+    """concatenate arg1 & arg2"""
+    return "".join(map(str, (a, b)))

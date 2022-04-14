@@ -101,6 +101,8 @@ GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
+RELATIONSHIP_OTHER = "OTHER"
+
 RELATIONSHIP_CHOICE = (
     (RELATIONSHIP_UNKNOWN, "Unknown"),
     (AUNT_UNCLE, "Aunt / Uncle"),
@@ -117,6 +119,7 @@ RELATIONSHIP_CHOICE = (
         NON_BENEFICIARY,
         "Not a Family Member. Can only act as a recipient.",
     ),
+    (RELATIONSHIP_OTHER, "Other"),
     (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
@@ -147,6 +150,8 @@ IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
 IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"
 IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
 IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
+IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
+IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
 IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
@@ -154,6 +159,8 @@ IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
     (IDENTIFICATION_TYPE_NATIONAL_ID, _("National ID")),
     (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
+    (IDENTIFICATION_TYPE_TAX_ID, _("Tax Number Identification")),
+    (IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, _("Foreigner's Residence Permit")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
@@ -162,6 +169,8 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_NATIONAL_ID: "National ID",
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "National Passport",
+    IDENTIFICATION_TYPE_TAX_ID: "Tax Number Identification",
+    IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO: "Foreigner's Residence Permit",
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
 UNHCR = "UNHCR"
@@ -911,6 +920,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     child_hoh = models.BooleanField(default=False)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    disability_certificate_picture = models.ImageField(blank=True, null=True)
 
     @property
     def age(self):
@@ -1067,3 +1077,10 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
     xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.PROTECT)
+
+
+class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
+    individual = models.ForeignKey("household.Individual", related_name="bank_account_info", on_delete=models.CASCADE)
+    bank_name = models.CharField(max_length=255)
+    bank_account_number = models.CharField(max_length=64)
+    debit_card_number = models.CharField(max_length=30, blank=True, default="")
