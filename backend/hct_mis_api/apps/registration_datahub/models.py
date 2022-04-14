@@ -122,6 +122,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
+    mis_unicef_id = models.CharField(max_length=255, null=True)
 
     @property
     def business_area(self):
@@ -207,6 +208,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
+    mis_unicef_id = models.CharField(max_length=255, null=True)
 
     @property
     def age(self):

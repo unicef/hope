@@ -277,6 +277,19 @@ class RdiMergeTask:
 
         return roles_to_create
 
+    def _update_individuals_and_households(self, individuals_objs):
+        # update mis_unicef_id for ImportedIndividual
+        for individual in individuals_objs:
+            imported_individual = ImportedIndividual.objects.get(id=individual.imported_individual_id)
+            imported_individual.mis_unicef_id = individual.unicef_id
+            imported_individual.save()
+
+            # update mis_unicef_id for ImportedHousehold
+            if individual.household and imported_individual.household:
+                imported_household = ImportedHousehold.objects.get(id=imported_individual.household.id)
+                imported_household.mis_unicef_id = individual.household.unicef_id
+                imported_household.save()
+
     def execute(self, registration_data_import_id):
         individual_ids = []
         try:
@@ -313,11 +326,13 @@ class RdiMergeTask:
                     roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
                     bank_account_infos_to_create = self._prepare_bank_account_info(imported_bank_account_infos, individuals_dict)
                     Household.objects.bulk_create(households_dict.values())
-                    Individual.objects.bulk_create(individuals_dict.values())
+                    individuals_objs = Individual.objects.bulk_create(individuals_dict.values())
                     Document.objects.bulk_create(documents_to_create)
                     IndividualIdentity.objects.bulk_create(identities_to_create)
                     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
                     BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
+
+                    self._update_individuals_and_households(individuals_objs)
 
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
 

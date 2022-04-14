@@ -80,6 +80,7 @@ class ImportedHouseholdFilter(FilterSet):
 
     order_by = CustomOrderingFilter(
         fields=(
+            "mis_unicef_id",
             "id",
             Lower("head_of_household__full_name"),
             "size",
@@ -103,6 +104,7 @@ class ImportedIndividualFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
+            "mis_unicef_id",
             "id",
             "full_name",
             "birth_date",
