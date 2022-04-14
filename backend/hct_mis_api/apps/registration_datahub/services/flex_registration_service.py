@@ -173,9 +173,13 @@ class FlexRegistrationService:
             try:
                 individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
                 role = individual_data.pop("role")
+                phone_no = individual_data.pop("phone_no", "")
+
                 individual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
+                individual.phone_no = phone_no
                 individual.save()
+
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
                     self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
