@@ -103,6 +103,7 @@ export const individualDetailed = gql`
     seeingDisability
     physicalDisability
     selfcareDisability
+    disability
     photo
     workStatus
     documents {
