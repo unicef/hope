@@ -299,4 +299,4 @@ class CashPlan(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name = "Cash Plan"
-        ordering = ['-created_at']
+        ordering = ['created_at']
