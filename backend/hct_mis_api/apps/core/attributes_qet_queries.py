@@ -1,9 +1,8 @@
 import datetime as dt
 import logging
 
-from django.db.models import Q
-
 from dateutil.relativedelta import relativedelta
+from django.db.models import Q
 from prompt_toolkit.validation import ValidationError
 
 from hct_mis_api.apps.core.countries import Countries
@@ -19,6 +18,18 @@ from hct_mis_api.apps.household.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def number_of_children_query(comparision_method, args):
+    if comparision_method == "LESS_THAN":
+        return Q(number_of_children__lte=args[0])
+    if comparision_method == "GREATER_THAN":
+        return Q(number_of_children__gte=args[0])
+    if comparision_method == "RANGE":
+        return Q(number_of_children__gte=args[0]) & Q(number_of_children__lte=args[1])
+
+    number_of_children_min, number_of_children_max = args
+    return Q(number_of_children__gte=number_of_children_min, number_of_children__lte=number_of_children_max)
 
 
 def age_to_birth_date_range_query(field_name, age_min, age_max):

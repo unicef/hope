@@ -35,6 +35,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.utils import has_children_filter_in_criteria, get_annotate_for_children_count
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -350,8 +351,11 @@ class Query(graphene.ObjectType):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
         if target_population_model.status == target_models.TargetPopulation.STATUS_DRAFT:
+            household_queryset = Household.objects
+            if target_population_model.has_children_filter:
+                household_queryset = get_annotate_for_children_count(household_queryset)
             return prefetch_selections(
-                Household.objects.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
+                household_queryset.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
             ).distinct()
         return (
             prefetch_selections(
@@ -413,6 +417,11 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
+        household_queryset = Household.objects
+        if has_children_filter_in_criteria(targeting_criteria):
+            household_queryset = get_annotate_for_children_count(household_queryset)
         return prefetch_selections(
-            Household.objects.filter(targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids))
+            household_queryset.filter(
+                targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids)
+            )
         ).distinct()
