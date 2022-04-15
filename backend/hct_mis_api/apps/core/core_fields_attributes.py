@@ -24,7 +24,8 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_scope_id_issuer,
     get_scope_id_number,
     get_unhcr_id_issuer,
-    get_unhcr_id_number, number_of_children_query,
+    get_unhcr_id_number,
+    number_of_children_query,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
