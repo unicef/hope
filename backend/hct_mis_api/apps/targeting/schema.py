@@ -1,10 +1,9 @@
 from typing import Union
 
-from django.db.models import Prefetch, Q
-from django.db.models.functions import Lower
-
 import django_filters
 import graphene
+from django.db.models import Prefetch, Q
+from django.db.models.functions import Lower
 from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter
 from graphene import relay
 from graphene_django import DjangoConnectionField, DjangoObjectType

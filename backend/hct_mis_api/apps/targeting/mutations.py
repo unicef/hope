@@ -1,12 +1,11 @@
 import logging
 
+import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
@@ -26,8 +25,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.steficon.interpreters import mapping
-from hct_mis_api.apps.steficon.models import Rule, RuleCommit
+from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
@@ -51,7 +49,6 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
-
 from .celery_tasks import target_population_apply_steficon
 from .utils import get_annotate_for_children_count
 
