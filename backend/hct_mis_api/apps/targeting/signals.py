@@ -1,4 +1,4 @@
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Sum
 from django.db.models.signals import m2m_changed, post_save, pre_save
 from django.dispatch import receiver
 

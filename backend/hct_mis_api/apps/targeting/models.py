@@ -293,12 +293,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         queryset = queryset.filter(~Q(unicef_id__in=self.excluded_household_ids))
         return queryset.distinct()
 
-
     @property
     def has_children_filter(self):
         return (
             TargetingCriteriaRuleFilter.objects.filter(
-                field_name="number_of_children", targeting_criteria_rule__targeting_criteria=self.candidate_list_targeting_criteria
+                field_name="number_of_children",
+                targeting_criteria_rule__targeting_criteria=self.candidate_list_targeting_criteria,
             ).count()
             != 0
         )
