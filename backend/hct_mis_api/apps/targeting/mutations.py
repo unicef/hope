@@ -53,6 +53,7 @@ from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
 
 from .celery_tasks import target_population_apply_steficon
+from .utils import get_annotate_for_children_count
 
 logger = logging.getLogger(__name__)
 
@@ -282,7 +283,10 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
         target_population.status = TargetPopulation.STATUS_LOCKED
         target_population.changed_by = user
         target_population.change_date = timezone.now()
-        households = Household.objects.filter(business_area=target_population.business_area).filter(
+        household_queryset = Household.objects
+        if target_population.has_children_filter:
+            household_queryset = get_annotate_for_children_count(household_queryset)
+        households = household_queryset.filter(business_area=target_population.business_area).filter(
             target_population.candidate_list_targeting_criteria.get_query()
         )
         target_population.households.set(households)
