@@ -1,12 +1,11 @@
 import logging
 
+import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
@@ -26,8 +25,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.steficon.interpreters import mapping
-from hct_mis_api.apps.steficon.models import Rule, RuleCommit
+from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
@@ -51,8 +49,8 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
-
 from .celery_tasks import target_population_apply_steficon
+from .utils import get_annotate_for_children_count
 
 logger = logging.getLogger(__name__)
 
@@ -282,7 +280,10 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
         target_population.status = TargetPopulation.STATUS_LOCKED
         target_population.changed_by = user
         target_population.change_date = timezone.now()
-        households = Household.objects.filter(business_area=target_population.business_area).filter(
+        household_queryset = Household.objects
+        if target_population.has_children_filter:
+            household_queryset = get_annotate_for_children_count(household_queryset)
+        households = household_queryset.filter(business_area=target_population.business_area).filter(
             target_population.candidate_list_targeting_criteria.get_query()
         )
         target_population.households.set(households)
