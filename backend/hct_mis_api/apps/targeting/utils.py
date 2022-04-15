@@ -5,12 +5,11 @@ from django.db.models import Count, Q
 
 
 def has_children_filter_in_criteria(targeting_criteria_dict):
-    for rule in targeting_criteria_dict.get("rules", []):
-        for filter_dict in rule.get("filters", []):
-            if filter_dict["field_name"] == "number_of_children":
-                return True
-    return False
+    return any(has(rule) for rule in targeting_criteria_dict.get("rules", []))
 
+
+def has(rule):
+    return any(filter_dict["field_name"] == "number_of_children" for filter_dict in rule.get("filters", []))
 
 def get_annotate_for_children_count(household_queryset):
     date_18_years_ago = (dt.datetime.now() - relativedelta(years=+18)).date()
