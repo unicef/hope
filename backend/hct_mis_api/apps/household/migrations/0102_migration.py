@@ -6,12 +6,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('registration_datahub', '0058_migration'),
+        ('household', '0101_migration'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='importedbankaccountinfo',
+            model_name='bankaccountinfo',
             name='debit_card_number',
             field=models.CharField(blank=True, default='', max_length=255),
         ),
