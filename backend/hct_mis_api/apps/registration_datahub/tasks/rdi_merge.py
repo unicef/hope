@@ -284,11 +284,9 @@ class RdiMergeTask:
             imported_individual.mis_unicef_id = individual.unicef_id
             imported_individual.save()
 
-            # update mis_unicef_id for ImportedHousehold
             if individual.household and imported_individual.household:
-                imported_household = ImportedHousehold.objects.get(id=imported_individual.household.id)
-                imported_household.mis_unicef_id = individual.household.unicef_id
-                imported_household.save()
+                imported_individual.household.mis_unicef_id = individual.household.unicef_id
+                imported_individual.household.save()
 
     def execute(self, registration_data_import_id):
         individual_ids = []
