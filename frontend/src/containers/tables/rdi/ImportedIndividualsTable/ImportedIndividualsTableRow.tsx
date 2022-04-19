@@ -52,7 +52,7 @@ export function ImportedIndividualsTableRow({
     >
       <TableCell align='left'>
         <BlackLink to={individualPath}>
-          {decodeIdString(individual.id)}
+          {individual?.misUnicefId || decodeIdString(individual.id)}
         </BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
