@@ -895,7 +895,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         individuals_to_create_list.append(individual_obj)
                         current_individuals.append(individual_obj)
                         documents_and_identities_to_create.append(current_individual_docs_and_identities)
-
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                             role_obj = ImportedIndividualRoleInHousehold(
                                 individual=individual_obj,

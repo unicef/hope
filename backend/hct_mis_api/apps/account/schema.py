@@ -194,6 +194,7 @@ class Query(graphene.ObjectType):
         permission_classes=(
             hopeOneOfPermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
+        max_limit=1000
     )
     # all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
     user_roles_choices = graphene.List(ChoiceObject)
