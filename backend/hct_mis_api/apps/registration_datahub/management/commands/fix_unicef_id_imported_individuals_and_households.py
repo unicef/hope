@@ -1,21 +1,21 @@
 from django.core.management import BaseCommand
+from django.db.models import Q
 
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual, ImportedHousehold
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 
 
 def update_mis_unicef_id_individual_and_household():
 
-    for imported_individual in ImportedIndividual.objects.exclude(mis_unicef_id__null=False):
+    for imported_individual in ImportedIndividual.objects.filter(Q(mis_unicef_id__isnull=True) | Q(mis_unicef_id="")):
         individual = Individual.objects.filter(imported_individual_id=imported_individual.id).first()
         if individual:
-            imported_individual.mis_unicef_id = individual.pk
+            imported_individual.mis_unicef_id = individual.unicef_id
             imported_individual.save()
 
             if individual.household and imported_individual.household:
-                imported_household = ImportedHousehold.objects.get(id=imported_individual.household.id)
-                imported_household.mis_unicef_id = individual.household.unicef_id
-                imported_household.save()
+                imported_individual.household.mis_unicef_id = individual.household.unicef_id
+                imported_individual.household.save()
 
 
 class Command(BaseCommand):
