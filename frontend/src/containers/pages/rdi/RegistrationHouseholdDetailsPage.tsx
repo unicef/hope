@@ -66,7 +66,8 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`${'Household ID'}: ${decodeIdString(id)}`}
+        title={`${'Household ID'}: ${importedHousehold.misUnicefId ||
+          decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
       />
       <HouseholdDetails

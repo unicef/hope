@@ -74,9 +74,8 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
 
   if (importedIndividual?.household?.id) {
     breadCrumbsItems.push({
-      title: `${t('HOUSEHOLD ID')}: ${decodeIdString(
-        importedIndividual?.household?.id,
-      )}`,
+      title: `${t('HOUSEHOLD ID')}: ${importedIndividual?.household
+        ?.misUnicefId || decodeIdString(importedIndividual?.household?.id)}`,
       to: `/${businessArea}/registration-data-import/household/${importedIndividual?.household?.id}`,
     });
   }
@@ -84,7 +83,8 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`${t('Individual ID')}: ${decodeIdString(id)}`}
+        title={`${t('Individual ID')}: ${importedIndividual?.misUnicefId ||
+          decodeIdString(id)}`}
         breadCrumbs={breadCrumbsItems}
       >
         {importedIndividual.photo ? (
