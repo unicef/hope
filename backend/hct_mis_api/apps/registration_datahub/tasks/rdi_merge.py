@@ -2,6 +2,7 @@ import logging
 
 from django.db import transaction
 from django.forms import model_to_dict
+from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -278,10 +279,11 @@ class RdiMergeTask:
 
         return roles_to_create
 
-    def _update_individuals_and_households(self, individuals_objs):
+    def _update_individuals_and_households(self, individual_ids):
         # update mis_unicef_id for ImportedIndividual
-        for individual in individuals_objs:
-            imported_individual = ImportedIndividual.objects.get(id=individual.imported_individual_id)
+        individual_qs = Individual.objects.filter(id__in=individual_ids)
+        for individual in individual_qs:
+            imported_individual = get_object_or_404(ImportedIndividual, id=individual.imported_individual_id)
             imported_individual.mis_unicef_id = individual.unicef_id
             imported_individual.save()
 
@@ -327,13 +329,11 @@ class RdiMergeTask:
                         imported_bank_account_infos, individuals_dict
                     )
                     Household.objects.bulk_create(households_dict.values())
-                    individuals_objs = Individual.objects.bulk_create(individuals_dict.values())
+                    Individual.objects.bulk_create(individuals_dict.values())
                     Document.objects.bulk_create(documents_to_create)
                     IndividualIdentity.objects.bulk_create(identities_to_create)
                     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
                     BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
-
-                    self._update_individuals_and_households(individuals_objs)
 
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
                     household_ids = [str(household.id) for household in households_dict.values()]
@@ -390,6 +390,9 @@ class RdiMergeTask:
                     obj_hct.save()
                     DeduplicateTask.hard_deduplicate_documents(documents_to_create, registration_data_import=obj_hct)
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
+
+            self._update_individuals_and_households(individual_ids)
+
         except:
             remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise

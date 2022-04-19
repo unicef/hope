@@ -155,7 +155,8 @@ export function RegistrationIndividualBioData({
               <ContentLink
                 href={`/${businessArea}/registration-data-import/household/${individual?.household?.id}`}
               >
-                {decodeIdString(individual?.household?.id)}
+                {individual?.household?.misUnicefId ||
+                  decodeIdString(individual?.household?.id)}
               </ContentLink>
             ) : (
               '-'
