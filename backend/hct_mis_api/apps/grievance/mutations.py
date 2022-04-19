@@ -77,7 +77,6 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.grievance.utils import remove_individual_from_multiple_duplicated_ticket
 
 logger = logging.getLogger(__name__)
 
@@ -1105,10 +1104,16 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
                 Individual, id=decoded_selected_individual_id
             )
 
-            if ticket_details.is_multiple_duplicates_version:  # Allow backward compatibility
-                remove_individual_from_multiple_duplicated_ticket(
-                    selected_individual, grievance_ticket.registration_data_import_id
+            if ticket_details.is_multiple_duplicates_version:
+                siblings_tickets = GrievanceTicket.objects.filter(
+                    registration_data_import_id=grievance_ticket.registration_data_import_id
                 )
+
+                for ticket in siblings_tickets:
+                    possible_duplicates = ticket.ticket_details.possible_duplicates.all()
+                    if selected_individual in possible_duplicates:
+                        ticket.ticket_details.possible_duplicates.remove(selected_individual)
+                        logger.info("Individual with id: %s removed", selected_individual.id)
 
             else:
                 if selected_individual not in (
@@ -1124,8 +1129,8 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
                 ticket_details.selected_individual = selected_individual
                 ticket_details.role_reassign_data = {}
-                ticket_details.save()
 
+        ticket_details.save()
         grievance_ticket.refresh_from_db()
 
         return cls(grievance_ticket=grievance_ticket)
