@@ -9749,6 +9749,7 @@ export const IndividualDetailedFragmentDoc = gql`
   seeingDisability
   physicalDisability
   selfcareDisability
+  disability
   photo
   workStatus
   documents {
