@@ -1562,6 +1562,7 @@ type ImportedHouseholdNode implements Node {
   misUnicefId: String
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
+  importId: String
 }
 
 type ImportedHouseholdNodeConnection {
@@ -1692,6 +1693,7 @@ type ImportedIndividualNode implements Node {
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
   role: String
   age: Int
+  importId: String
 }
 
 type ImportedIndividualNodeConnection {
