@@ -31,7 +31,7 @@ export const fakeApolloAllImportedIndividuals = [
                 id:
                   'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozYjcwYzY4MC0xZWI2LTQ0ODAtOWExNS0yMDMwNDFhZTI4NzY=',
                 age: 30,
-                misUnicefId: null,
+                importId: null,
                 fullName: 'Selena Hart',
                 birthDate: '1991-03-31',
                 sex: 'MALE',

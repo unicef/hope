@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   choicesToDict,
-  decodeIdString,
   formatAge,
   renderBoolean,
   sexToCapitalize,
@@ -155,8 +154,7 @@ export function RegistrationIndividualBioData({
               <ContentLink
                 href={`/${businessArea}/registration-data-import/household/${individual?.household?.id}`}
               >
-                {individual?.household?.misUnicefId ||
-                  decodeIdString(individual?.household?.id)}
+                {individual?.household.importId}
               </ContentLink>
             ) : (
               '-'

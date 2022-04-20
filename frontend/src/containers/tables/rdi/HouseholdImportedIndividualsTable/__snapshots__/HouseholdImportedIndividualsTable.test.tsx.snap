@@ -124,7 +124,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-dnqmqq bPwZQa MuiTableRow-hover"
+              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
               role="checkbox"
             >
               <td
@@ -133,9 +133,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 <a
                   class="sc-bxivhb iRvpKE"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
-                >
-                  4bf76a8d-92ac-40f0-916a-8d7002071bbb
-                </a>
+                />
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -173,7 +171,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-dnqmqq bPwZQa MuiTableRow-hover"
+              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
               role="checkbox"
             >
               <td
@@ -182,9 +180,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 <a
                   class="sc-bxivhb iRvpKE"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
-                >
-                  c26b6d61-f17c-446f-b450-01b46c2ba8b9
-                </a>
+                />
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -222,7 +218,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-dnqmqq bPwZQa MuiTableRow-hover"
+              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
               role="checkbox"
             >
               <td
@@ -231,9 +227,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 <a
                   class="sc-bxivhb iRvpKE"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
-                >
-                  3e148edc-0167-44e6-99bb-6d072c8f065b
-                </a>
+                />
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -468,7 +462,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-dnqmqq bPwZQa MuiTableRow-hover"
+              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
               role="checkbox"
             >
               <td
@@ -477,9 +471,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 <a
                   class="sc-bxivhb iRvpKE"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
-                >
-                  4bf76a8d-92ac-40f0-916a-8d7002071bbb
-                </a>
+                />
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -522,7 +514,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-dnqmqq bPwZQa MuiTableRow-hover"
+              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
               role="checkbox"
             >
               <td
@@ -531,9 +523,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 <a
                   class="sc-bxivhb iRvpKE"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
-                >
-                  c26b6d61-f17c-446f-b450-01b46c2ba8b9
-                </a>
+                />
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -576,7 +566,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-dnqmqq bPwZQa MuiTableRow-hover"
+              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
               role="checkbox"
             >
               <td
@@ -585,9 +575,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 <a
                   class="sc-bxivhb iRvpKE"
                   href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
-                >
-                  3e148edc-0167-44e6-99bb-6d072c8f065b
-                </a>
+                />
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
