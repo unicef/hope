@@ -2119,6 +2119,7 @@ export type ImportedHouseholdNode = Node & {
   misUnicefId?: Maybe<Scalars['String']>,
   individuals: ImportedIndividualNodeConnection,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
+  importId?: Maybe<Scalars['String']>,
 };
 
 
@@ -2264,6 +2265,7 @@ export type ImportedIndividualNode = Node & {
   identities: ImportedIndividualIdentityNodeConnection,
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
+  importId?: Maybe<Scalars['String']>,
 };
 
 
@@ -6257,7 +6259,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'misUnicefId' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh'>
+  & Pick<ImportedHouseholdNode, 'id' | 'importId' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -6285,7 +6287,7 @@ export type ImportedHouseholdDetailedFragment = (
 
 export type ImportedIndividualMinimalFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'id' | 'misUnicefId' | 'age' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
+  & Pick<ImportedIndividualNode, 'id' | 'importId' | 'age' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
   & { deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
     { __typename?: 'DeduplicationResultNode' }
     & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
@@ -6325,7 +6327,7 @@ export type ImportedIndividualDetailedFragment = (
     )>> }
   ), household: Maybe<(
     { __typename?: 'ImportedHouseholdNode' }
-    & Pick<ImportedHouseholdNode, 'id' | 'misUnicefId' | 'admin1' | 'admin2' | 'address'>
+    & Pick<ImportedHouseholdNode, 'id' | 'importId' | 'admin1' | 'admin2' | 'address'>
   )>, registrationDataImport: (
     { __typename?: 'RegistrationDataImportDatahubNode' }
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
@@ -9878,7 +9880,7 @@ export const RegistrationDetailedFragmentDoc = gql`
 export const ImportedHouseholdMinimalFragmentDoc = gql`
     fragment importedHouseholdMinimal on ImportedHouseholdNode {
   id
-  misUnicefId
+  importId
   headOfHousehold {
     id
     fullName
@@ -9901,7 +9903,7 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
 export const ImportedIndividualMinimalFragmentDoc = gql`
     fragment importedIndividualMinimal on ImportedIndividualNode {
   id
-  misUnicefId
+  importId
   age
   fullName
   birthDate
@@ -10001,7 +10003,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   relationship
   household {
     id
-    misUnicefId
+    importId
     admin1
     admin2
     address
@@ -19730,6 +19732,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedHouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNodeConnection'] = ResolversParentTypes['ImportedHouseholdNodeConnection']> = {
@@ -19811,6 +19814,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']> = {
