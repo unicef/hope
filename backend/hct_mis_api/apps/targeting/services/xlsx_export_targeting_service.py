@@ -9,10 +9,6 @@ from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import Document, Individual
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 
 class XlsxExportTargetingService:
     INDIVIDUALS_SHEET = "Individuals"
@@ -76,8 +72,6 @@ class XlsxExportTargetingService:
 
     def _add_standard_columns_headers(self):
         standard_columns_names = list(self.COLUMNS_MAPPING_DICT.keys())
-        logger.info("*"*10)
-        logger.info(standard_columns_names)
         self.ws_individuals.append(standard_columns_names)
         self.current_header_column_index += len(standard_columns_names)
 
