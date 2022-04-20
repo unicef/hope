@@ -73,10 +73,25 @@ export function NeedsAdjudicationDetails({
     setSelectedDuplicates(newSelected);
   };
 
+  const allSelected = (): boolean => {
+    let tableItemsCount = details.possibleDuplicates.length;
+    if (details.goldenRecordsIndividual?.id) {
+      tableItemsCount += 1;
+    }
+    return tableItemsCount === selectedDuplicates.length;
+  };
+
   console.log('SELECTED DUPLICATES', selectedDuplicates);
-  const confirmationText = t(
-    'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.',
-  );
+
+  const getConfirmationText = (): string => {
+    let confirmationText = t(
+      'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.',
+    );
+    if (allSelected()) {
+      confirmationText = t('You cannot mark all individuals as duplicates');
+    }
+    return confirmationText;
+  };
   const isApproved = !!details.selectedIndividual;
   const isEditable = isEditMode || !isApproved;
 
@@ -212,7 +227,8 @@ export function NeedsAdjudicationDetails({
                 disabled={isApproveDisabled()}
                 onClick={() =>
                   confirm({
-                    content: confirmationText,
+                    content: getConfirmationText(),
+                    disabled: allSelected(),
                   }).then(() => {
                     approve({
                       variables: {
