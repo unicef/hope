@@ -1084,3 +1084,6 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
+
+    def __str__(self):
+        return f"{self.bank_account_number} ({self.bank_name})"
