@@ -58,10 +58,22 @@ export function NeedsAdjudicationDetails({
     ],
   });
   const details = ticket.needsAdjudicationTicketDetails;
-  const [selectedDuplicate, setSelectedDuplicate] = useState(
-    details?.selectedIndividual?.id,
-  );
+
+  //TODO: Add initial state
+  const [selectedDuplicates, setSelectedDuplicates] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  const handleChecked = (id: string): void => {
+    let newSelected = [...selectedDuplicates];
+    if (selectedDuplicates.includes(id)) {
+      newSelected = newSelected.filter((el) => el !== id);
+    } else {
+      newSelected.push(id);
+    }
+    setSelectedDuplicates(newSelected);
+  };
+
+  console.log('SELECTED DUPLICATES', selectedDuplicates);
   const confirmationText = t(
     'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.',
   );
@@ -118,10 +130,8 @@ export function NeedsAdjudicationDetails({
               !isEditable ||
               ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
             }
-            checked={selectedDuplicate === possibleDuplicate?.id}
-            onChange={(event, checked) =>
-              setSelectedDuplicate(checked ? possibleDuplicate?.id : null)
-            }
+            checked={selectedDuplicates.includes(possibleDuplicate?.id)}
+            onChange={() => handleChecked(possibleDuplicate?.id)}
           />
         </TableCell>
         <TableCell align='left'>
@@ -207,7 +217,7 @@ export function NeedsAdjudicationDetails({
                     approve({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        selectedIndividualId: selectedDuplicate,
+                        selectedIndividualId: '',
                       },
                     });
                     setIsEditMode(false);
@@ -248,13 +258,11 @@ export function NeedsAdjudicationDetails({
                   !isEditable ||
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                 }
-                checked={
-                  selectedDuplicate === details.goldenRecordsIndividual?.id
-                }
-                onChange={(event, checked) =>
-                  setSelectedDuplicate(
-                    checked ? details.goldenRecordsIndividual?.id : null,
-                  )
+                checked={selectedDuplicates.includes(
+                  details.goldenRecordsIndividual?.id,
+                )}
+                onChange={() =>
+                  handleChecked(details.goldenRecordsIndividual?.id)
                 }
               />
             </TableCell>
