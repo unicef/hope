@@ -29,6 +29,7 @@ export const fakeApolloAllImportedHouseholds = [
               node: {
                 id:
                   'SW1wb3J0ZWRIb3VzZWhvbGROb2RlOjNlYjE5Y2RiLTBjZTYtNDgwZS1iZTI5LTczYjY0ZWI1ZjI3Mg==',
+                misUnicefId: null,
                 headOfHousehold: {
                   id:
                     'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0NTM0MzY3MS1hOTFiLTQyYTUtOTNmZC00MmUwMGQxZmE2NDg=',
