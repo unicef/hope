@@ -178,7 +178,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         if parent.kobo_asset_id:
             row = f" (Kobo {parent.kobo_asset_id})"
         if parent.row_id:
-            row = f" (Xls row {parent.row_id})"
+            row = f" (XLS row {parent.row_id})"
 
         return resp + row
 
@@ -235,7 +235,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         if parent.kobo_asset_id:
             row = f" (Kobo {parent.kobo_asset_id})"
         if parent.row_id:
-            row = f" (Xls row {parent.row_id})"
+            row = f" (XLS row {parent.row_id})"
 
         return resp + row
 
