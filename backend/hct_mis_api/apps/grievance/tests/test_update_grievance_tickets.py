@@ -2,7 +2,6 @@ from datetime import date
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
 
 from django_countries.fields import Country
 from parameterized import parameterized

@@ -20,10 +20,11 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails,
+    TicketSystemFlaggingDetails, TicketPaymentVerificationDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, PaymentVerificationFactory
+from hct_mis_api.apps.payment.models import PaymentVerification
 
 
 class GrievanceTicketFactory(factory.DjangoModelFactory):
@@ -269,3 +270,14 @@ class ReferralTicketWithoutExtrasFactory(factory.DjangoModelFactory):
     ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_REFERRAL)
     household = None
     individual = None
+
+
+class TicketPaymentVerificationDetailsFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketPaymentVerificationDetails
+
+    ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION)
+    payment_verification = factory.SubFactory(
+        PaymentVerificationFactory,
+        status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+    )

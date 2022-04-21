@@ -81,20 +81,30 @@ class VerificationPlanStatusChangeServices:
         verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
         if verifications.count() == 0:
             return
-        grievance_ticket = GrievanceTicket.objects.create(
-            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-            business_area=cashplan_payment_verification.cash_plan.business_area,
-        )
 
-        GrievanceNotification.send_all_notifications(
-            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
-        )
-        details = TicketPaymentVerificationDetails(
-            ticket=grievance_ticket,
-            payment_verification_status=status,
-        )
-        details.payment_verifications.set(verifications)
-        details.save()
+        grievance_ticket_list = [
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                business_area=cashplan_payment_verification.cash_plan.business_area,
+            ) for _ in list(range(0, verifications.count()))
+        ]
+        grievance_ticket_objs = GrievanceTicket.objects.bulk_create(grievance_ticket_list)
+
+        ticket_payment_verification_details_list = []
+        for verification, grievance_ticket in zip(verifications, grievance_ticket_objs):
+
+            GrievanceNotification.send_all_notifications(
+                GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+            )
+
+            ticket_payment_verification_details = TicketPaymentVerificationDetails(
+                ticket=grievance_ticket,
+                payment_verification_status=status,
+                payment_verification=verification
+            )
+            ticket_payment_verification_details_list.append(ticket_payment_verification_details)
+
+        TicketPaymentVerificationDetails.objects.bulk_create(ticket_payment_verification_details_list)
 
     def _create_grievance_tickets(self, cashplan_payment_verification):
         self._create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)
