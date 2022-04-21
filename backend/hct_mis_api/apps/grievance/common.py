@@ -1,5 +1,8 @@
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
     from hct_mis_api.apps.grievance.models import (
@@ -64,8 +67,9 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
     if not individuals_queryset:
         return
 
-    registration_data_import = kwargs.pop("registration_data_import", None)
     ticket_details_to_create = []
+    unique_individual_sets = []  # checks combination of individuals
+
     for possible_duplicate in individuals_queryset:
         linked_tickets = []
         possible_duplicates = []
@@ -77,11 +81,19 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
                 continue
             possible_duplicates.append(duplicate)
 
+        individuals_set = {possible_duplicate, *possible_duplicates}
+
+        # don't create ticket with one individual or the same individuals' combination
+        if not possible_duplicates or individuals_set in unique_individual_sets:
+            continue
+
+        unique_individual_sets.append(individuals_set)
+
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=possible_duplicate,
             possible_duplicate=possible_duplicate,  # for backward compatibility
             business_area=business_area,
-            registration_data_import=registration_data_import,
+            registration_data_import=kwargs.pop("registration_data_import", None),
             possible_duplicates=possible_duplicates,
             is_multiple_duplicates_version=True
         )
