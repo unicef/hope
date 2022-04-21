@@ -13,14 +13,9 @@ class Command(BaseCommand):
             disability_certificate_picture__isnull=True
         ).exclude(
             disability_certificate_picture=''
-        )
+        ).update(disability=DISABLED)
 
-        for individual in qs:
-            individual.disability = DISABLED
-
-        Individual.objects.bulk_update(qs, ['disability'])
-
-        print(f"Fixed {qs.count()} object(s).")
+        print(f"Fixed {qs} object(s).")
 
     def handle(self, *args, **options):
         print("Starting Fix Population Disability")
