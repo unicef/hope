@@ -46,67 +46,6 @@ input AddIndividualIssueTypeExtras {
   individualData: AddIndividualDataObjectType!
 }
 
-type AdminAreaNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  externalId: String
-  title: String!
-  adminAreaLevel: AdminAreaTypeNode!
-  pCode: String
-  parent: AdminAreaNode
-  lft: Int!
-  rght: Int!
-  treeId: Int!
-  level: Int!
-  children(offset: Int, before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
-  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-}
-
-type AdminAreaNodeConnection {
-  pageInfo: PageInfo!
-  edges: [AdminAreaNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type AdminAreaNodeEdge {
-  node: AdminAreaNode
-  cursor: String!
-}
-
-type AdminAreaTypeNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  name: String!
-  displayName: String
-  adminLevel: Int
-  businessArea: UserBusinessAreaNode
-  areaCode: String
-  countryName: String
-  country: AdminAreaTypeNode
-  datamartId: String
-  businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
-  adminarealevelSet(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
-  adminAreas(offset: Int, before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
-}
-
-type AdminAreaTypeNodeConnection {
-  pageInfo: PageInfo!
-  edges: [AdminAreaTypeNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type AdminAreaTypeNodeEdge {
-  node: AdminAreaTypeNode
-  cursor: String!
-}
-
 type AgeFilterObject {
   min: Int
   max: Int
@@ -227,7 +166,6 @@ type BusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   parent: UserBusinessAreaNode
   isSplit: Boolean!
-  countries(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   deduplicationDuplicateScore: Float!
   deduplicationPossibleDuplicateScore: Float!
   deduplicationBatchDuplicatesPercentage: Int!
@@ -236,7 +174,6 @@ type BusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
-  adminAreaLevel(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
@@ -1905,7 +1842,6 @@ type IndividualNode implements Node {
   importedIndividualId: UUID
   sanctionListPossibleMatch: Boolean!
   sanctionListConfirmedMatch: Boolean!
-  sanctionListLastCheck: DateTime
   pregnant: Boolean
   observedDisability: [String]
   seeingDisability: String!
@@ -1940,6 +1876,7 @@ type IndividualNode implements Node {
   status: String
   role: String
   age: Int
+  sanctionListLastCheck: DateTime
 }
 
 type IndividualNodeConnection {
@@ -2378,7 +2315,6 @@ type ProgramNode implements Node {
   description: String!
   caId: String
   caHashId: String
-  adminAreas(offset: Int, before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
   adminAreasNew(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   businessArea: UserBusinessAreaNode!
   budget: Decimal
@@ -3635,7 +3571,6 @@ type UserBusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   parent: UserBusinessAreaNode
   isSplit: Boolean!
-  countries(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   deduplicationDuplicateScore: Float!
   deduplicationPossibleDuplicateScore: Float!
   deduplicationBatchDuplicatesPercentage: Int!
@@ -3644,7 +3579,6 @@ type UserBusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
-  adminAreaLevel(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
