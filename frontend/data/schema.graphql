@@ -1559,8 +1559,10 @@ type ImportedHouseholdNode implements Node {
   koboAssetId: String!
   koboSubmissionTime: DateTime
   rowId: Int
+  misUnicefId: String
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
+  importId: String
 }
 
 type ImportedHouseholdNodeConnection {
@@ -1685,11 +1687,13 @@ type ImportedIndividualNode implements Node {
   koboAssetId: String!
   rowId: Int
   disabilityCertificatePicture: String
+  misUnicefId: String
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
   role: String
   age: Int
+  importId: String
 }
 
 type ImportedIndividualNodeConnection {
@@ -1889,6 +1893,7 @@ enum IndividualRelationship {
   MOTHERINLAW_FATHERINLAW
   NEPHEW_NIECE
   NON_BENEFICIARY
+  OTHER
   SISTERINLAW_BROTHERINLAW
   SON_DAUGHTER
   WIFE_HUSBAND
