@@ -21,6 +21,9 @@ from hct_mis_api.apps.grievance.mutations_extras.referral import ReferralTicketE
 from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import (
     SensitiveGrievanceTicketExtras,
 )
+from hct_mis_api.apps.grievance.mutations_extras.ticket_payment_verification_details import (
+    TicketPaymentVerificationDetailsExtras
+)
 
 
 class IssueTypeExtrasInput(graphene.InputObjectType):
@@ -49,6 +52,7 @@ class UpdateGrievanceTicketExtrasInput(graphene.InputObjectType):
     individual_data_update_issue_type_extras = UpdateIndividualDataUpdateIssueTypeExtras()
     add_individual_issue_type_extras = UpdateAddIndividualIssueTypeExtras()
     category = CategoryExtrasInput()
+    ticket_payment_verification_details_extras = TicketPaymentVerificationDetailsExtras()
 
 
 def _no_operation_close_method(*args, **kwargs):

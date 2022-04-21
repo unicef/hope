@@ -10,6 +10,7 @@ import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDeta
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
 import { FlagDetails } from '../FlagDetails';
 import { NeedsAdjudicationDetails } from '../NeedsAdjudicationDetails';
+import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDetails/PaymentGrievanceDetails';
 import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
 
@@ -18,12 +19,14 @@ interface GrievancesApproveSectionProps {
   businessArea: string;
   canApproveFlagAndAdjudication: boolean;
   canApproveDataChange: boolean;
+  canApprovePaymentVerification: boolean;
 }
 
 export function GrievancesApproveSection({
   ticket,
   canApproveFlagAndAdjudication,
   canApproveDataChange,
+  canApprovePaymentVerification,
 }: GrievancesApproveSectionProps): React.ReactElement {
   const matchDetailsComponent = (): React.ReactElement => {
     if (ticket?.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
@@ -92,11 +95,26 @@ export function GrievancesApproveSection({
         />
       );
     }
+    if (
+      ticket?.category?.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
+    ) {
+      if (
+        ticket.paymentVerificationTicketDetails
+          .hasMultiplePaymentVerifications === false
+      ) {
+        return (
+          <PaymentGrievanceDetails
+            ticket={ticket}
+            canApprovePaymentVerification={canApprovePaymentVerification}
+          />
+        );
+      }
+    }
     return null;
   };
 
   return (
-    <Grid item xs={12}>
+    <Grid item xs={9}>
       <Box p={3}>{matchDetailsComponent()}</Box>
     </Grid>
   );

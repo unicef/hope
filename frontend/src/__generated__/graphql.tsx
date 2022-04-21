@@ -994,6 +994,8 @@ export enum DocumentTypeType {
   ElectoralCard = 'ELECTORAL_CARD',
   NationalId = 'NATIONAL_ID',
   NationalPassport = 'NATIONAL_PASSPORT',
+  TaxId = 'TAX_ID',
+  ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   Other = 'OTHER'
 }
 
@@ -1533,7 +1535,8 @@ export type HouseholdUpdateDataObjectType = {
 
 export enum ImportDataDataType {
   Xlsx = 'XLSX',
-  Json = 'JSON'
+  Json = 'JSON',
+  Flex = 'FLEX'
 }
 
 export type ImportDataNode = Node & {
@@ -1868,6 +1871,8 @@ export enum ImportedDocumentTypeType {
   ElectoralCard = 'ELECTORAL_CARD',
   NationalId = 'NATIONAL_ID',
   NationalPassport = 'NATIONAL_PASSPORT',
+  TaxId = 'TAX_ID',
+  ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   Other = 'OTHER'
 }
 
@@ -2111,8 +2116,10 @@ export type ImportedHouseholdNode = Node & {
   koboAssetId: Scalars['String'],
   koboSubmissionTime?: Maybe<Scalars['DateTime']>,
   rowId?: Maybe<Scalars['Int']>,
+  misUnicefId?: Maybe<Scalars['String']>,
   individuals: ImportedIndividualNodeConnection,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
+  importId?: Maybe<Scalars['String']>,
 };
 
 
@@ -2251,11 +2258,14 @@ export type ImportedIndividualNode = Node & {
   whoAnswersAltPhone: Scalars['String'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  disabilityCertificatePicture?: Maybe<Scalars['String']>,
+  misUnicefId?: Maybe<Scalars['String']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
+  importId?: Maybe<Scalars['String']>,
 };
 
 
@@ -2441,6 +2451,7 @@ export type IndividualNode = Node & {
   childHoh: Scalars['Boolean'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  disabilityCertificatePicture?: Maybe<Scalars['String']>,
   paymentRecords: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
@@ -2595,6 +2606,7 @@ export enum IndividualRelationship {
   MotherinlawFatherinlaw = 'MOTHERINLAW_FATHERINLAW',
   NephewNiece = 'NEPHEW_NIECE',
   NonBeneficiary = 'NON_BENEFICIARY',
+  Other = 'OTHER',
   SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
   SonDaughter = 'SON_DAUGHTER',
   WifeHusband = 'WIFE_HUSBAND'
@@ -2787,6 +2799,7 @@ export type Mutations = {
   approveDeleteHousehold?: Maybe<SimpleApproveMutation>,
   approveSystemFlagging?: Maybe<SimpleApproveMutation>,
   approveNeedsAdjudication?: Maybe<NeedsAdjudicationApproveMutation>,
+  approvePaymentDetails?: Maybe<PaymentDetailsApproveMutation>,
   reassignRole?: Maybe<ReassignRoleMutation>,
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
@@ -2907,6 +2920,13 @@ export type MutationsApproveSystemFlaggingArgs = {
 export type MutationsApproveNeedsAdjudicationArgs = {
   grievanceTicketId: Scalars['ID'],
   selectedIndividualId?: Maybe<Scalars['ID']>,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsApprovePaymentDetailsArgs = {
+  approveStatus: Scalars['Boolean'],
+  grievanceTicketId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -3128,6 +3148,11 @@ export type PartnerTypeUserSetArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
+export type PaymentDetailsApproveMutation = {
+   __typename?: 'PaymentDetailsApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
 export enum PaymentRecordDeliveryType {
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
@@ -3265,11 +3290,21 @@ export type PaymentVerificationNode = Node & {
   statusDate?: Maybe<Scalars['DateTime']>,
   receivedAmount?: Maybe<Scalars['Float']>,
   ticketDetails: TicketPaymentVerificationDetailsNodeConnection,
+  ticketDetail: TicketPaymentVerificationDetailsNodeConnection,
   isManuallyEditable?: Maybe<Scalars['Boolean']>,
 };
 
 
 export type PaymentVerificationNodeTicketDetailsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type PaymentVerificationNodeTicketDetailArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -4355,7 +4390,8 @@ export type RegistrationDataImportDatahubNodeEdge = {
 
 export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
-  Kobo = 'KOBO'
+  Kobo = 'KOBO',
+  FlexRegistration = 'FLEX_REGISTRATION'
 }
 
 export type RegistrationDataImportNode = Node & {
@@ -5348,6 +5384,18 @@ export type TicketNoteNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type TicketPaymentVerificationDetailsExtras = {
+  newReceivedAmount?: Maybe<Scalars['Float']>,
+  newStatus?: Maybe<Scalars['String']>,
+};
+
+export enum TicketPaymentVerificationDetailsNewStatus {
+  Pending = 'PENDING',
+  Received = 'RECEIVED',
+  NotReceived = 'NOT_RECEIVED',
+  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
+}
+
 export type TicketPaymentVerificationDetailsNode = Node & {
    __typename?: 'TicketPaymentVerificationDetailsNode',
   id: Scalars['ID'],
@@ -5355,6 +5403,11 @@ export type TicketPaymentVerificationDetailsNode = Node & {
   updatedAt: Scalars['DateTime'],
   paymentVerifications: PaymentVerificationNodeConnection,
   paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+  paymentVerification?: Maybe<PaymentVerificationNode>,
+  newStatus?: Maybe<TicketPaymentVerificationDetailsNewStatus>,
+  newReceivedAmount?: Maybe<Scalars['Float']>,
+  approveStatus: Scalars['Boolean'],
+  hasMultiplePaymentVerifications?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -5496,6 +5549,7 @@ export type UpdateGrievanceTicketExtrasInput = {
   individualDataUpdateIssueTypeExtras?: Maybe<UpdateIndividualDataUpdateIssueTypeExtras>,
   addIndividualIssueTypeExtras?: Maybe<UpdateAddIndividualIssueTypeExtras>,
   category?: Maybe<CategoryExtrasInput>,
+  ticketPaymentVerificationDetailsExtras?: Maybe<TicketPaymentVerificationDetailsExtras>,
 };
 
 export type UpdateGrievanceTicketInput = {
@@ -6246,7 +6300,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh'>
+  & Pick<ImportedHouseholdNode, 'id' | 'importId' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -6274,7 +6328,7 @@ export type ImportedHouseholdDetailedFragment = (
 
 export type ImportedIndividualMinimalFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'id' | 'age' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
+  & Pick<ImportedIndividualNode, 'id' | 'importId' | 'age' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
   & { deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
     { __typename?: 'DeduplicationResultNode' }
     & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
@@ -6314,7 +6368,7 @@ export type ImportedIndividualDetailedFragment = (
     )>> }
   ), household: Maybe<(
     { __typename?: 'ImportedHouseholdNode' }
-    & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
+    & Pick<ImportedHouseholdNode, 'id' | 'importId' | 'admin1' | 'admin2' | 'address'>
   )>, registrationDataImport: (
     { __typename?: 'RegistrationDataImportDatahubNode' }
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
@@ -6562,6 +6616,27 @@ export type ApproveNeedsAdjudicationMutation = (
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
+export type ApprovePaymentDetailsMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  approveStatus: Scalars['Boolean']
+};
+
+
+export type ApprovePaymentDetailsMutation = (
+  { __typename?: 'Mutations' }
+  & { approvePaymentDetails: Maybe<(
+    { __typename?: 'PaymentDetailsApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { paymentVerificationTicketDetails: Maybe<(
+        { __typename?: 'TicketPaymentVerificationDetailsNode' }
+        & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'approveStatus'>
+      )> }
     )> }
   )> }
 );
@@ -7870,8 +7945,15 @@ export type GrievanceTicketQuery = (
       ) }
     )>, paymentVerificationTicketDetails: Maybe<(
       { __typename?: 'TicketPaymentVerificationDetailsNode' }
-      & Pick<TicketPaymentVerificationDetailsNode, 'paymentVerificationStatus'>
-      & { paymentVerifications: (
+      & Pick<TicketPaymentVerificationDetailsNode, 'id' | 'newStatus' | 'newReceivedAmount' | 'approveStatus' | 'paymentVerificationStatus' | 'hasMultiplePaymentVerifications'>
+      & { paymentVerification: Maybe<(
+        { __typename?: 'PaymentVerificationNode' }
+        & Pick<PaymentVerificationNode, 'id' | 'receivedAmount'>
+        & { paymentRecord: Maybe<(
+          { __typename?: 'PaymentRecordNode' }
+          & Pick<PaymentRecordNode, 'id' | 'deliveredQuantity'>
+        )> }
+      )>, paymentVerifications: (
         { __typename?: 'PaymentVerificationNodeConnection' }
         & { edges: Array<Maybe<(
           { __typename?: 'PaymentVerificationNodeEdge' }
@@ -9738,6 +9820,7 @@ export const IndividualDetailedFragmentDoc = gql`
   seeingDisability
   physicalDisability
   selfcareDisability
+  disability
   photo
   workStatus
   documents {
@@ -9866,6 +9949,7 @@ export const RegistrationDetailedFragmentDoc = gql`
 export const ImportedHouseholdMinimalFragmentDoc = gql`
     fragment importedHouseholdMinimal on ImportedHouseholdNode {
   id
+  importId
   headOfHousehold {
     id
     fullName
@@ -9888,6 +9972,7 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
 export const ImportedIndividualMinimalFragmentDoc = gql`
     fragment importedIndividualMinimal on ImportedIndividualNode {
   id
+  importId
   age
   fullName
   birthDate
@@ -9987,6 +10072,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   relationship
   household {
     id
+    importId
     admin1
     admin2
     address
@@ -10549,6 +10635,63 @@ export function useApproveNeedsAdjudicationMutation(baseOptions?: ApolloReactHoo
 export type ApproveNeedsAdjudicationMutationHookResult = ReturnType<typeof useApproveNeedsAdjudicationMutation>;
 export type ApproveNeedsAdjudicationMutationResult = ApolloReactCommon.MutationResult<ApproveNeedsAdjudicationMutation>;
 export type ApproveNeedsAdjudicationMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>;
+export const ApprovePaymentDetailsDocument = gql`
+    mutation ApprovePaymentDetails($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approvePaymentDetails(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    grievanceTicket {
+      id
+      status
+      paymentVerificationTicketDetails {
+        id
+        approveStatus
+      }
+    }
+  }
+}
+    `;
+export type ApprovePaymentDetailsMutationFn = ApolloReactCommon.MutationFunction<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>;
+export type ApprovePaymentDetailsComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>, 'mutation'>;
+
+    export const ApprovePaymentDetailsComponent = (props: ApprovePaymentDetailsComponentProps) => (
+      <ApolloReactComponents.Mutation<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables> mutation={ApprovePaymentDetailsDocument} {...props} />
+    );
+    
+export type ApprovePaymentDetailsProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables> & TChildProps;
+export function withApprovePaymentDetails<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApprovePaymentDetailsMutation,
+  ApprovePaymentDetailsMutationVariables,
+  ApprovePaymentDetailsProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables, ApprovePaymentDetailsProps<TChildProps>>(ApprovePaymentDetailsDocument, {
+      alias: 'approvePaymentDetails',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApprovePaymentDetailsMutation__
+ *
+ * To run a mutation, you first call `useApprovePaymentDetailsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApprovePaymentDetailsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approvePaymentDetailsMutation, { data, loading, error }] = useApprovePaymentDetailsMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      approveStatus: // value for 'approveStatus'
+ *   },
+ * });
+ */
+export function useApprovePaymentDetailsMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>(ApprovePaymentDetailsDocument, baseOptions);
+      }
+export type ApprovePaymentDetailsMutationHookResult = ReturnType<typeof useApprovePaymentDetailsMutation>;
+export type ApprovePaymentDetailsMutationResult = ApolloReactCommon.MutationResult<ApprovePaymentDetailsMutation>;
+export type ApprovePaymentDetailsMutationOptions = ApolloReactCommon.BaseMutationOptions<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>;
 export const ApproveSystemFlaggingDocument = gql`
     mutation ApproveSystemFlagging($grievanceTicketId: ID!, $approveStatus: Boolean!) {
   approveSystemFlagging(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
@@ -14019,7 +14162,20 @@ export const GrievanceTicketDocument = gql`
       }
     }
     paymentVerificationTicketDetails {
+      id
+      newStatus
+      newReceivedAmount
+      approveStatus
       paymentVerificationStatus
+      hasMultiplePaymentVerifications
+      paymentVerification {
+        id
+        receivedAmount
+        paymentRecord {
+          id
+          deliveredQuantity
+        }
+      }
       paymentVerifications {
         edges {
           node {
@@ -18305,6 +18461,7 @@ export type ResolversTypes = {
   TicketPaymentVerificationDetailsNodeEdge: ResolverTypeWrapper<TicketPaymentVerificationDetailsNodeEdge>,
   TicketPaymentVerificationDetailsNode: ResolverTypeWrapper<TicketPaymentVerificationDetailsNode>,
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+  TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
   CashPlanPaymentVerificationSummaryNode: ResolverTypeWrapper<CashPlanPaymentVerificationSummaryNode>,
   CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
@@ -18496,6 +18653,7 @@ export type ResolversTypes = {
   UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
   UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
   UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
+  TicketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras,
   UpdateGrievanceTicketMutation: ResolverTypeWrapper<UpdateGrievanceTicketMutation>,
   GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
   CreateTicketNoteInput: CreateTicketNoteInput,
@@ -18504,6 +18662,7 @@ export type ResolversTypes = {
   HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>,
   SimpleApproveMutation: ResolverTypeWrapper<SimpleApproveMutation>,
   NeedsAdjudicationApproveMutation: ResolverTypeWrapper<NeedsAdjudicationApproveMutation>,
+  PaymentDetailsApproveMutation: ResolverTypeWrapper<PaymentDetailsApproveMutation>,
   ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
@@ -18667,6 +18826,7 @@ export type ResolversParentTypes = {
   TicketPaymentVerificationDetailsNodeEdge: TicketPaymentVerificationDetailsNodeEdge,
   TicketPaymentVerificationDetailsNode: TicketPaymentVerificationDetailsNode,
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+  TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
   CashPlanPaymentVerificationSummaryNode: CashPlanPaymentVerificationSummaryNode,
   CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
@@ -18858,6 +19018,7 @@ export type ResolversParentTypes = {
   UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
   UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
   UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
+  TicketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras,
   UpdateGrievanceTicketMutation: UpdateGrievanceTicketMutation,
   GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
   CreateTicketNoteInput: CreateTicketNoteInput,
@@ -18866,6 +19027,7 @@ export type ResolversParentTypes = {
   HouseholdDataChangeApproveMutation: HouseholdDataChangeApproveMutation,
   SimpleApproveMutation: SimpleApproveMutation,
   NeedsAdjudicationApproveMutation: NeedsAdjudicationApproveMutation,
+  PaymentDetailsApproveMutation: PaymentDetailsApproveMutation,
   ReassignRoleMutation: ReassignRoleMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
@@ -19712,8 +19874,10 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedHouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNodeConnection'] = ResolversParentTypes['ImportedHouseholdNodeConnection']> = {
@@ -19788,11 +19952,14 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']> = {
@@ -19896,6 +20063,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentRecordsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, IndividualNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, IndividualNodeSensitiveTicketDetailsArgs>,
@@ -20041,6 +20209,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveDeleteHousehold?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteHouseholdArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>,
+  approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
@@ -20094,6 +20263,10 @@ export type PartnerTypeResolvers<ContextType = any, ParentType extends Resolvers
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerTypeUserSetArgs>,
+};
+
+export type PaymentDetailsApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentDetailsApproveMutation'] = ResolversParentTypes['PaymentDetailsApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
 
 export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNode'] = ResolversParentTypes['PaymentRecordNode']> = {
@@ -20180,6 +20353,7 @@ export type PaymentVerificationNodeResolvers<ContextType = any, ParentType exten
   statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   receivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   ticketDetails?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailsArgs>,
+  ticketDetail?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailArgs>,
   isManuallyEditable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
@@ -21067,6 +21241,11 @@ export type TicketPaymentVerificationDetailsNodeResolvers<ContextType = any, Par
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   paymentVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, TicketPaymentVerificationDetailsNodePaymentVerificationsArgs>,
   paymentVerificationStatus?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsPaymentVerificationStatus'], ParentType, ContextType>,
+  paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
+  newStatus?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNewStatus']>, ParentType, ContextType>,
+  newReceivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  hasMultiplePaymentVerifications?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type TicketPaymentVerificationDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection'] = ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection']> = {
@@ -21437,6 +21616,7 @@ export type Resolvers<ContextType = any> = {
   Node?: NodeResolvers,
   PageInfo?: PageInfoResolvers<ContextType>,
   PartnerType?: PartnerTypeResolvers<ContextType>,
+  PaymentDetailsApproveMutation?: PaymentDetailsApproveMutationResolvers<ContextType>,
   PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
   PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,
   PaymentRecordNodeEdge?: PaymentRecordNodeEdgeResolvers<ContextType>,
