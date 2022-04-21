@@ -80,6 +80,7 @@ class ImportedHouseholdFilter(FilterSet):
 
     order_by = CustomOrderingFilter(
         fields=(
+            "mis_unicef_id",
             "id",
             Lower("head_of_household__full_name"),
             "size",
@@ -103,6 +104,7 @@ class ImportedIndividualFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
+            "mis_unicef_id",
             "id",
             "full_name",
             "birth_date",
@@ -136,6 +138,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         description="Mark household if any of individuals contains one of these statuses "
         "‘Needs adjudication’, ‘Duplicate in batch’ and ‘Duplicate’"
     )
+    import_id = graphene.String()
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -168,6 +171,17 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             )
         )
 
+    def resolve_import_id(parent, info):
+        row = ''
+        resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
+
+        if parent.kobo_asset_id:
+            row = f" (Kobo {parent.kobo_asset_id})"
+        if parent.row_id:
+            row = f" (XLS row {parent.row_id})"
+
+        return resp + row
+
     class Meta:
         model = ImportedHousehold
         filter_fields = []
@@ -189,6 +203,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
     observed_disability = graphene.List(graphene.String)
     age = graphene.Int()
+    import_id = graphene.String()
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -212,6 +227,17 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_age(parent, info):
         return parent.age
+
+    def resolve_import_id(parent, info):
+        row = ''
+        resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
+
+        if parent.kobo_asset_id:
+            row = f" (Kobo {parent.kobo_asset_id})"
+        if parent.row_id:
+            row = f" (XLS row {parent.row_id})"
+
+        return resp + row
 
     class Meta:
         model = ImportedIndividual
