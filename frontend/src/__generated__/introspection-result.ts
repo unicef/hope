@@ -33,21 +33,6 @@
             "name": "UserBusinessAreaNode"
           },
           {
-            "name": "AdminAreaTypeNode"
-          },
-          {
-            "name": "AdminAreaNode"
-          },
-          {
-            "name": "HouseholdNode"
-          },
-          {
-            "name": "IndividualNode"
-          },
-          {
-            "name": "RegistrationDataImportNode"
-          },
-          {
             "name": "PaymentRecordNode"
           },
           {
@@ -57,31 +42,13 @@
             "name": "ProgramNode"
           },
           {
-            "name": "TargetPopulationNode"
+            "name": "HouseholdNode"
           },
           {
-            "name": "RuleCommitNode"
+            "name": "IndividualNode"
           },
           {
-            "name": "SteficonRuleNode"
-          },
-          {
-            "name": "ReportNode"
-          },
-          {
-            "name": "ServiceProviderNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
-          },
-          {
-            "name": "PaymentVerificationNode"
-          },
-          {
-            "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationSummaryNode"
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "TicketComplaintDetailsNode"
@@ -139,6 +106,33 @@
           },
           {
             "name": "TicketDeleteHouseholdDetailsNode"
+          },
+          {
+            "name": "TargetPopulationNode"
+          },
+          {
+            "name": "RuleCommitNode"
+          },
+          {
+            "name": "SteficonRuleNode"
+          },
+          {
+            "name": "ReportNode"
+          },
+          {
+            "name": "ServiceProviderNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationNode"
+          },
+          {
+            "name": "PaymentVerificationNode"
+          },
+          {
+            "name": "TicketPaymentVerificationDetailsNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationSummaryNode"
           },
           {
             "name": "PaymentVerificationLogEntryNode"
