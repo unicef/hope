@@ -55,6 +55,7 @@ export const registrationDetailed = gql`
 export const importedHouseholdMinimal = gql`
   fragment importedHouseholdMinimal on ImportedHouseholdNode {
     id
+    importId
     headOfHousehold {
       id
       fullName
@@ -99,6 +100,7 @@ export const importedHouseholdDetailed = gql`
 export const importedIndividualMinimal = gql`
   fragment importedIndividualMinimal on ImportedIndividualNode {
     id
+    importId
     age
     fullName
     birthDate
@@ -178,6 +180,7 @@ export const importedIndividualDetailed = gql`
     relationship
     household {
       id
+      importId
       admin1
       admin2
       address

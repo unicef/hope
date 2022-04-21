@@ -1,4 +1,4 @@
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Sum
 from django.db.models.signals import m2m_changed, post_save, pre_save
 from django.dispatch import receiver
 
@@ -10,13 +10,18 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
+from hct_mis_api.apps.targeting.utils import get_annotate_for_children_count
 
 
 def calculate_candidate_counts(target_population):
     if target_population.status == TargetPopulation.STATUS_DRAFT:
         if target_population.candidate_list_targeting_criteria is None:
             return
-        households = Household.objects.filter(
+
+        household_queryset = Household.objects
+        if target_population.has_children_filter:
+            household_queryset = get_annotate_for_children_count(household_queryset)
+        households = household_queryset.filter(
             target_population.candidate_list_targeting_criteria.get_query(),
             business_area=target_population.business_area,
         ).distinct()

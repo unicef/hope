@@ -629,6 +629,8 @@ enum DocumentTypeType {
   ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
+  TAX_ID
+  RESIDENCE_PERMIT_NO
   OTHER
 }
 
@@ -987,6 +989,7 @@ input HouseholdUpdateDataObjectType {
 enum ImportDataDataType {
   XLSX
   JSON
+  FLEX
 }
 
 type ImportDataNode implements Node {
@@ -1312,6 +1315,8 @@ enum ImportedDocumentTypeType {
   ELECTORAL_CARD
   NATIONAL_ID
   NATIONAL_PASSPORT
+  TAX_ID
+  RESIDENCE_PERMIT_NO
   OTHER
 }
 
@@ -1554,8 +1559,10 @@ type ImportedHouseholdNode implements Node {
   koboAssetId: String!
   koboSubmissionTime: DateTime
   rowId: Int
+  misUnicefId: String
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
+  importId: String
 }
 
 type ImportedHouseholdNodeConnection {
@@ -1679,11 +1686,14 @@ type ImportedIndividualNode implements Node {
   whoAnswersAltPhone: String!
   koboAssetId: String!
   rowId: Int
+  disabilityCertificatePicture: String
+  misUnicefId: String
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
   role: String
   age: Int
+  importId: String
 }
 
 type ImportedIndividualNodeConnection {
@@ -1838,6 +1848,7 @@ type IndividualNode implements Node {
   childHoh: Boolean!
   koboAssetId: String!
   rowId: Int
+  disabilityCertificatePicture: String
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -1882,6 +1893,7 @@ enum IndividualRelationship {
   MOTHERINLAW_FATHERINLAW
   NEPHEW_NIECE
   NON_BENEFICIARY
+  OTHER
   SISTERINLAW_BROTHERINLAW
   SON_DAUGHTER
   WIFE_HUSBAND
@@ -2062,6 +2074,7 @@ type Mutations {
   approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
+  approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
@@ -2119,6 +2132,10 @@ type PartnerType {
   name: String!
   isUn: Boolean!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+}
+
+type PaymentDetailsApproveMutation {
+  grievanceTicket: GrievanceTicketNode
 }
 
 enum PaymentRecordDeliveryType {
@@ -2233,6 +2250,7 @@ type PaymentVerificationNode implements Node {
   statusDate: DateTime
   receivedAmount: Float
   ticketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
+  ticketDetail(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   isManuallyEditable: Boolean
 }
 
@@ -2517,6 +2535,7 @@ type RefuseRegistrationDataImportMutation {
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
+  FLEX_REGISTRATION
 }
 
 enum RegistrationDataImportDatahubImportDone {
@@ -3300,12 +3319,29 @@ type TicketNoteNodeEdge {
   cursor: String!
 }
 
+input TicketPaymentVerificationDetailsExtras {
+  newReceivedAmount: Float
+  newStatus: String
+}
+
+enum TicketPaymentVerificationDetailsNewStatus {
+  PENDING
+  RECEIVED
+  NOT_RECEIVED
+  RECEIVED_WITH_ISSUES
+}
+
 type TicketPaymentVerificationDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   paymentVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus!
+  paymentVerification: PaymentVerificationNode
+  newStatus: TicketPaymentVerificationDetailsNewStatus
+  newReceivedAmount: Float
+  approveStatus: Boolean!
+  hasMultiplePaymentVerifications: Boolean
 }
 
 type TicketPaymentVerificationDetailsNodeConnection {
@@ -3425,6 +3461,7 @@ input UpdateGrievanceTicketExtrasInput {
   individualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras
   addIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras
   category: CategoryExtrasInput
+  ticketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras
 }
 
 input UpdateGrievanceTicketInput {

@@ -469,7 +469,7 @@
   "PAYMENT RECORDS": "PAYMENT RECORDS",
   "Bank reconciliation": "Bank reconciliation",
   "SUCCESSFUL": "SUCCESSFUL",
-  "ERRONEUS": "ERRONEUS",
+  "ERRONEOUS": "ERRONEOUS",
   "Verification Plan Details": "Verification Plan Details",
   "SAMPLING": "SAMPLING",
   "RESPONDED": "RESPONDED",
@@ -585,5 +585,9 @@
   "Household to be withdrawn": "Household to be withdrawn",
   "Alternate Collector Issue": "Alternate Collector Issue",
   "One of the Household members is an alternate collector. This household cannot be withdrawn.": "One of the Household members is an alternate collector. This household cannot be withdrawn.",
-  "Are you sure you would like to delete this verification plan?": "Are you sure you would like to delete this verification plan?"
+  "Are you sure you would like to delete this verification plan?": "Are you sure you would like to delete this verification plan?",
+  "Payment Details": "Payment Details",
+  "Delivered Value": "Delivered Value",
+  "Received Value": "Received Value",
+  "New Verified Value": "New Verified Value"
 }

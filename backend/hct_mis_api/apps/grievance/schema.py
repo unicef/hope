@@ -609,6 +609,8 @@ class TicketSystemFlaggingDetailsNode(DjangoObjectType):
 
 
 class TicketPaymentVerificationDetailsNode(DjangoObjectType):
+    has_multiple_payment_verifications = graphene.Boolean(source='has_multiple_payment_verifications')
+
     class Meta:
         model = TicketPaymentVerificationDetails
         exclude = ("ticket",)

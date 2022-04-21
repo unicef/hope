@@ -98,7 +98,7 @@ export function CreateGrievancePage(): React.ReactElement {
     issueType: null,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
-    variables: { businessArea },
+    variables: { businessArea, first: 1000 },
   });
 
   const {
