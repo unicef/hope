@@ -10,8 +10,6 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         TicketNeedsAdjudicationDetails,
     )
 
-    registration_data_import = kwargs.pop("registration_data_import", None)
-
     details_already_exists = (
         TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
         .filter(
@@ -35,19 +33,18 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         admin2=admin_level_2,
         admin2_new=admin_level_2_new,
         area=area,
-        registration_data_import=registration_data_import,
+        registration_data_import=kwargs.pop("registration_data_import", None),
     )
-    extra_data = {
-        "golden_records": main_individual.get_deduplication_golden_record(),
-        "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
-    }
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
         golden_records_individual=main_individual,
         possible_duplicate=possible_duplicate,
         is_multiple_duplicates_version=kwargs.get("is_multiple_duplicates_version", False),
         selected_individual=None,
-        extra_data=extra_data,
+        extra_data={
+            "golden_records": main_individual.get_deduplication_golden_record(),
+            "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
+        }
     )
 
     possible_duplicates = kwargs.get("possible_duplicates")
@@ -57,7 +54,6 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
     GrievanceNotification.send_all_notifications(
         GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
     )
-
     return ticket, ticket_details
 
 
@@ -82,8 +78,6 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
             possible_duplicates.append(duplicate)
 
         individuals_set = {possible_duplicate, *possible_duplicates}
-
-        # don't create ticket with one individual or the same individuals' combination
         if not possible_duplicates or individuals_set in unique_individual_sets:
             continue
 
@@ -91,7 +85,7 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=possible_duplicate,
-            possible_duplicate=possible_duplicate,  # for backward compatibility
+            possible_duplicate=None,  # for backward compatibility
             business_area=business_area,
             registration_data_import=kwargs.pop("registration_data_import", None),
             possible_duplicates=possible_duplicates,

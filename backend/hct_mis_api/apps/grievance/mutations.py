@@ -1076,6 +1076,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         selected_individual_id = graphene.Argument(graphene.ID, required=False)
+        selected_individual_ids = graphene.List(graphene.ID, required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -1095,16 +1096,36 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
         )
 
-        selected_individual_id = kwargs.get("selected_individual_id")
+        selected_individual_id = kwargs.get("selected_individual_id", None)
+        selected_individual_ids = kwargs.get("selected_individual_ids", None)
+
+        if selected_individual_id and selected_individual_ids:
+            logger.error("Only one option for selected individuals is available")
+            raise GraphQLError("Only one option for selected individuals is available")
+
         ticket_details = grievance_ticket.ticket_details
 
         if selected_individual_id:
             decoded_selected_individual_id = decode_id_string(selected_individual_id)
-            selected_individual = get_object_or_404(
-                Individual, id=decoded_selected_individual_id
-            )
+            selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
 
-            if ticket_details.is_multiple_duplicates_version:
+            if selected_individual not in (
+                    ticket_details.golden_records_individual,
+                    ticket_details.possible_duplicate,
+            ):
+                logger.error("The selected individual is not valid, must be one of those attached to the ticket")
+                raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
+
+            ticket_details.selected_individual = selected_individual
+            ticket_details.role_reassign_data = {}
+
+        if selected_individual_ids:  # Allow choosing multiple individuals
+            for selected_individual_id in selected_individual_ids:
+                decoded_selected_individual_id = decode_id_string(selected_individual_id)
+                selected_individual = get_object_or_404(
+                    Individual, id=decoded_selected_individual_id
+                )
+
                 siblings_tickets = GrievanceTicket.objects.filter(
                     registration_data_import_id=grievance_ticket.registration_data_import_id
                 )
@@ -1112,23 +1133,10 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
                 for ticket in siblings_tickets:
                     possible_duplicates = ticket.ticket_details.possible_duplicates.all()
                     if selected_individual in possible_duplicates:
-                        ticket.ticket_details.possible_duplicates.remove(selected_individual)
-                        logger.info("Individual with id: %s removed", selected_individual.id)
-
-            else:
-                if selected_individual not in (
-                        ticket_details.golden_records_individual,
-                        ticket_details.possible_duplicate,
-                ):
-                    logger.error(
-                        "The selected individual is not valid, must be one of those attached to the ticket"
-                    )
-                    raise GraphQLError(
-                        "The selected individual is not valid, must be one of those attached to the ticket"
-                    )
-
-                ticket_details.selected_individual = selected_individual
-                ticket_details.role_reassign_data = {}
+                        ticket.ticket_details.selected_individuals.add(selected_individual)
+                        logger.info(
+                            "Individual with id: %s added to ticket %s", (selected_individual.id, ticket.id)
+                        )
 
         ticket_details.save()
         grievance_ticket.refresh_from_db()
