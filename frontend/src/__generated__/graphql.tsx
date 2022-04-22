@@ -2455,6 +2455,7 @@ export type IndividualNode = Node & {
   deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNodeConnection,
   ticketsystemflaggingdetailsSet: TicketSystemFlaggingDetailsNodeConnection,
   ticketDuplicates: TicketNeedsAdjudicationDetailsNodeConnection,
+  ticketSelected: TicketNeedsAdjudicationDetailsNodeConnection,
   positiveFeedbackTicketDetails: TicketPositiveFeedbackDetailsNodeConnection,
   negativeFeedbackTicketDetails: TicketNegativeFeedbackDetailsNodeConnection,
   referralTicketDetails: TicketReferralDetailsNodeConnection,
@@ -2524,6 +2525,15 @@ export type IndividualNodeTicketsystemflaggingdetailsSetArgs = {
 
 
 export type IndividualNodeTicketDuplicatesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeTicketSelectedArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -2924,6 +2934,7 @@ export type MutationsApproveSystemFlaggingArgs = {
 export type MutationsApproveNeedsAdjudicationArgs = {
   grievanceTicketId: Scalars['ID'],
   selectedIndividualId?: Maybe<Scalars['ID']>,
+  selectedIndividualIds?: Maybe<Array<Maybe<Scalars['ID']>>>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -5313,13 +5324,23 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   goldenRecordsIndividual: IndividualNode,
+  isMultipleDuplicatesVersion: Scalars['Boolean'],
   possibleDuplicate: IndividualNode,
   possibleDuplicates?: Maybe<Array<Maybe<IndividualNode>>>,
-  isMultipleDuplicatesVersion: Scalars['Boolean'],
   selectedIndividual?: Maybe<IndividualNode>,
+  selectedIndividuals: IndividualNodeConnection,
   roleReassignData: Scalars['JSONString'],
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>,
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
+};
+
+
+export type TicketNeedsAdjudicationDetailsNodeSelectedIndividualsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 export type TicketNeedsAdjudicationDetailsNodeConnection = {
@@ -6585,7 +6606,8 @@ export type ApproveIndividualDataChangeMutation = (
 
 export type ApproveNeedsAdjudicationMutationVariables = {
   grievanceTicketId: Scalars['ID'],
-  selectedIndividualId?: Maybe<Scalars['ID']>
+  selectedIndividualId?: Maybe<Scalars['ID']>,
+  selectedIndividualIds?: Maybe<Array<Maybe<Scalars['ID']>>>
 };
 
 
@@ -10558,8 +10580,8 @@ export type ApproveIndividualDataChangeMutationHookResult = ReturnType<typeof us
 export type ApproveIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveIndividualDataChangeMutation>;
 export type ApproveIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
 export const ApproveNeedsAdjudicationDocument = gql`
-    mutation ApproveNeedsAdjudication($grievanceTicketId: ID!, $selectedIndividualId: ID) {
-  approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId) {
+    mutation ApproveNeedsAdjudication($grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]) {
+  approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId, selectedIndividualIds: $selectedIndividualIds) {
     grievanceTicket {
       id
       status
@@ -10601,6 +10623,7 @@ export function withApproveNeedsAdjudication<TProps, TChildProps = {}>(operation
  *   variables: {
  *      grievanceTicketId: // value for 'grievanceTicketId'
  *      selectedIndividualId: // value for 'selectedIndividualId'
+ *      selectedIndividualIds: // value for 'selectedIndividualIds'
  *   },
  * });
  */
@@ -20007,6 +20030,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   deleteIndividualTicketDetails?: Resolver<ResolversTypes['TicketDeleteIndividualDetailsNodeConnection'], ParentType, ContextType, IndividualNodeDeleteIndividualTicketDetailsArgs>,
   ticketsystemflaggingdetailsSet?: Resolver<ResolversTypes['TicketSystemFlaggingDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketsystemflaggingdetailsSetArgs>,
   ticketDuplicates?: Resolver<ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketDuplicatesArgs>,
+  ticketSelected?: Resolver<ResolversTypes['TicketNeedsAdjudicationDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketSelectedArgs>,
   positiveFeedbackTicketDetails?: Resolver<ResolversTypes['TicketPositiveFeedbackDetailsNodeConnection'], ParentType, ContextType, IndividualNodePositiveFeedbackTicketDetailsArgs>,
   negativeFeedbackTicketDetails?: Resolver<ResolversTypes['TicketNegativeFeedbackDetailsNodeConnection'], ParentType, ContextType, IndividualNodeNegativeFeedbackTicketDetailsArgs>,
   referralTicketDetails?: Resolver<ResolversTypes['TicketReferralDetailsNodeConnection'], ParentType, ContextType, IndividualNodeReferralTicketDetailsArgs>,
@@ -21119,10 +21143,11 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  isMultipleDuplicatesVersion?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   possibleDuplicates?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>,
-  isMultipleDuplicatesVersion?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  selectedIndividuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, TicketNeedsAdjudicationDetailsNodeSelectedIndividualsArgs>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>,
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,

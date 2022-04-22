@@ -158,6 +158,7 @@
   "Send Back": "Send Back",
   "NEW TICKET": "NEW TICKET",
   "Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.": "Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.",
+  "Are you sure you want to mark these records as duplicates? They will be removed from Golden Records upon ticket closure.": "Are you sure you want to mark these records as duplicates? They will be removed from Golden Records upon ticket closure.",
   "Needs Adjudication Details": "Needs Adjudication Details",
   "Create Linked Ticket": "Create Linked Ticket",
   "Confirmation": "Confirmation",
