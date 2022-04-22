@@ -85,7 +85,7 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=possible_duplicate,
-            possible_duplicate=None,  # for backward compatibility
+            possible_duplicate=possible_duplicate,  # for backward compatibility
             business_area=business_area,
             registration_data_import=kwargs.pop("registration_data_import", None),
             possible_duplicates=possible_duplicates,
