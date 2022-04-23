@@ -4,7 +4,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography,
 } from '@material-ui/core';
 import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';
 import React, { useState } from 'react';
@@ -72,7 +71,7 @@ export function MergeRegistrationDataImportDialog({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>{t('Merge Import')}</Typography>
+            {t('Merge Import')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
