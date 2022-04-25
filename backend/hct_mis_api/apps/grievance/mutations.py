@@ -1120,23 +1120,38 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             ticket_details.role_reassign_data = {}
 
         if selected_individual_ids:  # Allow choosing multiple individuals
-            for selected_individual_id in selected_individual_ids:
-                decoded_selected_individual_id = decode_id_string(selected_individual_id)
-                selected_individual = get_object_or_404(
-                    Individual, id=decoded_selected_individual_id
-                )
+            selected_individuals = [
+                get_object_or_404(Individual, id=decode_id_string(selected_individual_id))
+                for selected_individual_id in selected_individual_ids
+            ]
 
-                siblings_tickets = GrievanceTicket.objects.filter(
+            for selected_individual in selected_individuals:
+                sibling_tickets = GrievanceTicket.objects.filter(
                     registration_data_import_id=grievance_ticket.registration_data_import_id
                 )
 
-                for ticket in siblings_tickets:
-                    possible_duplicates = ticket.ticket_details.possible_duplicates.all()
-                    if selected_individual in possible_duplicates:
+                for ticket in sibling_tickets:
+                    ticket_possible_duplicates = ticket.ticket_details.possible_duplicates.all()
+                    ticket_selected_individuals = ticket.ticket_details.selected_individuals.all()
+
+                    if selected_individual in ticket_possible_duplicates \
+                            and selected_individual not in ticket_selected_individuals:
                         ticket.ticket_details.selected_individuals.add(selected_individual)
                         logger.info(
-                            "Individual with id: %s added to ticket %s", (selected_individual.id, ticket.id)
+                            "Individual with id: %s added to ticket %s", str(selected_individual.id), str(ticket.id)
                         )
+
+                    individuals_to_unselect = [
+                        individual for individual in ticket.ticket_details.selected_individuals.all()
+                        if individual not in selected_individuals
+                    ]
+
+                    if individuals_to_unselect:
+                        for individual in individuals_to_unselect:
+                            ticket.ticket_details.selected_individuals.remove(individual)
+                            logger.info(
+                                "Individual with id: %s removed from ticket %s", str(individual.id), str(ticket.id)
+                            )
 
         ticket_details.save()
         grievance_ticket.refresh_from_db()
