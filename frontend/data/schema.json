@@ -17526,6 +17526,18 @@
             "deprecationReason": null
           },
           {
+            "name": "bankAccountInfo",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "BankAccountInfoNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "status",
             "description": null,
             "args": [],
@@ -24786,12 +24798,6 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "PENDING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "ACTIVE",
             "description": null,
             "isDeprecated": false,
@@ -24799,6 +24805,12 @@
           },
           {
             "name": "FINISHED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PENDING",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -24838,6 +24850,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "MANUAL",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "RAPIDPRO",
             "description": null,
             "isDeprecated": false,
@@ -24845,12 +24863,6 @@
           },
           {
             "name": "XLSX",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "MANUAL",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -25307,6 +25319,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "NOT_RECEIVED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "PENDING",
             "description": null,
             "isDeprecated": false,
@@ -25314,12 +25332,6 @@
           },
           {
             "name": "RECEIVED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "NOT_RECEIVED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -25664,6 +25676,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "NOT_RECEIVED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "PENDING",
             "description": null,
             "isDeprecated": false,
@@ -25671,12 +25689,6 @@
           },
           {
             "name": "RECEIVED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "NOT_RECEIVED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -25699,6 +25711,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "NOT_RECEIVED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "PENDING",
             "description": null,
             "isDeprecated": false,
@@ -25706,12 +25724,6 @@
           },
           {
             "name": "RECEIVED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "NOT_RECEIVED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -25855,12 +25867,6 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "PENDING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "ACTIVE",
             "description": null,
             "isDeprecated": false,
@@ -25868,6 +25874,12 @@
           },
           {
             "name": "FINISHED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PENDING",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -30495,6 +30507,49 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "BankAccountInfoNode",
+        "description": null,
+        "fields": [
+          {
+            "name": "bankName",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "bankAccountNumber",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -47609,6 +47664,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "NOT_RECEIVED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "PENDING",
             "description": null,
             "isDeprecated": false,
@@ -47616,12 +47677,6 @@
           },
           {
             "name": "RECEIVED",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "NOT_RECEIVED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
