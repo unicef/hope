@@ -58,7 +58,7 @@ export function NeedsAdjudicationDetailsNew({
     ],
   });
   const details = ticket.needsAdjudicationTicketDetails;
-  const initialIds = details.possibleDuplicates.map((el) => el.id);
+  const initialIds = details.selectedIndividuals.map((el) => el.id);
 
   const [selectedDuplicates, setSelectedDuplicates] = useState(initialIds);
   const [isEditMode, setIsEditMode] = useState(false);

@@ -3267,7 +3267,7 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   possibleDuplicate: IndividualNode!
   possibleDuplicates: [IndividualNode]
   selectedIndividual: IndividualNode
-  selectedIndividuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  selectedIndividuals: [IndividualNode]
   roleReassignData: JSONString!
   extraData: TicketNeedsAdjudicationDetailsExtraDataNode
   hasDuplicatedDocument: Boolean

@@ -295,6 +295,24 @@ export const GrievanceTicket = gql`
             role
           }
         }
+        selectedIndividuals {
+          ...individualDetailed
+          household {
+            ...householdDetailed
+          }
+          householdsAndRoles {
+            individual {
+              id
+              unicefId
+            }
+            household {
+              id
+              unicefId
+            }
+            id
+            role
+          }
+        }
         roleReassignData
       }
       issueType

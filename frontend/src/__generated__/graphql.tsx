@@ -5328,19 +5328,10 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   possibleDuplicate: IndividualNode,
   possibleDuplicates?: Maybe<Array<Maybe<IndividualNode>>>,
   selectedIndividual?: Maybe<IndividualNode>,
-  selectedIndividuals: IndividualNodeConnection,
+  selectedIndividuals?: Maybe<Array<Maybe<IndividualNode>>>,
   roleReassignData: Scalars['JSONString'],
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>,
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
-};
-
-
-export type TicketNeedsAdjudicationDetailsNodeSelectedIndividualsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 export type TicketNeedsAdjudicationDetailsNodeConnection = {
@@ -8051,7 +8042,24 @@ export type GrievanceTicketQuery = (
           ) }
         )> }
         & IndividualDetailedFragment
-      )> }
+      )>, selectedIndividuals: Maybe<Array<Maybe<(
+        { __typename?: 'IndividualNode' }
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & HouseholdDetailedFragment
+        )>, householdsAndRoles: Array<(
+          { __typename?: 'IndividualRoleInHouseholdNode' }
+          & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
+          & { individual: (
+            { __typename?: 'IndividualNode' }
+            & Pick<IndividualNode, 'id' | 'unicefId'>
+          ), household: (
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'id' | 'unicefId'>
+          ) }
+        )> }
+        & IndividualDetailedFragment
+      )>>> }
     )>, ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
       & { edges: Array<Maybe<(
@@ -14241,6 +14249,24 @@ export const GrievanceTicketDocument = gql`
         }
       }
       selectedIndividual {
+        ...individualDetailed
+        household {
+          ...householdDetailed
+        }
+        householdsAndRoles {
+          individual {
+            id
+            unicefId
+          }
+          household {
+            id
+            unicefId
+          }
+          id
+          role
+        }
+      }
+      selectedIndividuals {
         ...individualDetailed
         household {
           ...householdDetailed
@@ -21147,7 +21173,7 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   possibleDuplicates?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>,
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
-  selectedIndividuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, TicketNeedsAdjudicationDetailsNodeSelectedIndividualsArgs>,
+  selectedIndividuals?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>,
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
