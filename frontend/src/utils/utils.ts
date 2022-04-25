@@ -548,8 +548,5 @@ export const formatAge = (age): string | number => {
 };
 
 export const renderIndividualName = (individual): string => {
-  if (individual?.givenName && individual?.familyName) {
-    return `${individual.givenName} ${individual.familyName}`;
-  }
   return individual?.fullName;
 };
