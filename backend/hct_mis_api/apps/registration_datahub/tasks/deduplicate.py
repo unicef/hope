@@ -836,10 +836,12 @@ class DeduplicateTask:
             documents_count = documents_queryset.count()
             if documents_count > 0:
                 create_grievance_ticket_with_details(
-                    documents_queryset.first().individual,
-                    document.individual,
-                    document.individual.business_area,
+                    main_individual=documents_queryset.first().individual,
+                    possible_duplicate=document.individual,
+                    business_area=document.individual.business_area,
                     registration_data_import=registration_data_import,
+                    is_multiple_duplicates_version=True,
+                    possible_duplicates=[document.individual]
                 )
                 document.status = Document.STATUS_NEED_INVESTIGATION
             else:

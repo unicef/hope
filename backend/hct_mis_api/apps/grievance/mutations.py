@@ -1130,9 +1130,18 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
                     registration_data_import_id=grievance_ticket.registration_data_import_id
                 )
 
+                logger.info("*"*20)
+
                 for ticket in sibling_tickets:
-                    ticket_possible_duplicates = ticket.ticket_details.possible_duplicates.all()
+                    ticket_possible_duplicates = [
+                        ticket.ticket_details.golden_records_individual,
+                        *ticket.ticket_details.possible_duplicates.all()
+                    ]
                     ticket_selected_individuals = ticket.ticket_details.selected_individuals.all()
+
+                    logger.info(ticket)
+                    logger.info(ticket_possible_duplicates)
+                    logger.info(ticket_selected_individuals)
 
                     if selected_individual in ticket_possible_duplicates \
                             and selected_individual not in ticket_selected_individuals:
