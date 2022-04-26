@@ -5,6 +5,7 @@ from datetime import date, datetime
 from django.conf import settings
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
+from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.db.models import DecimalField, F, JSONField, Sum
@@ -902,9 +903,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     deduplication_golden_record_results = JSONField(default=dict, blank=True)
     deduplication_batch_results = JSONField(default=dict, blank=True)
     imported_individual_id = models.UUIDField(null=True, blank=True)
-    sanction_list_possible_match = models.BooleanField(default=False)
-    sanction_list_confirmed_match = models.BooleanField(default=False)
-    sanction_list_last_check = models.DateTimeField(null=True, blank=True)
+    sanction_list_possible_match = models.BooleanField(default=False, db_index=True)
+    sanction_list_confirmed_match = models.BooleanField(default=False, db_index=True)
     pregnant = models.BooleanField(null=True)
     observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE, default=NONE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
@@ -968,6 +968,10 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         if self.duplicate:
             return STATUS_INACTIVE
         return STATUS_ACTIVE
+
+    @property
+    def sanction_list_last_check(self):
+        return cache.get("sanction_list_last_check")
 
     def withdraw(self):
         self.withdrawn = True
