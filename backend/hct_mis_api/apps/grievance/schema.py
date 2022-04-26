@@ -151,6 +151,7 @@ class GrievanceTicketFilter(FilterSet):
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
+    issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
 
     class Meta:
         fields = {
@@ -196,6 +197,7 @@ class GrievanceTicketFilter(FilterSet):
         q_obj = Q()
         for value in values:
             q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$")
+            # TODO: add filtering by 'linked_tickets__unicef_id'
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
