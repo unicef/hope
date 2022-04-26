@@ -1,3 +1,4 @@
+import datetime
 import re
 
 from django.db.models import DecimalField, IntegerField, Prefetch, Q, Sum
@@ -499,6 +500,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     photo = graphene.String()
     age = graphene.Int()
     bank_account_info = graphene.Field(BankAccountInfoNode, required=False)
+    sanction_list_last_check = graphene.DateTime()
 
     def resolve_bank_account_info(parent, info):
         bank_account_info = parent.bank_account_info.first()
@@ -536,9 +538,12 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_flex_fields(parent, info):
         return resolve_flex_fields_choices_to_string(parent)
 
-    @staticmethod
     def resolve_age(parent, info):
         return parent.age
+
+    def resolve_sanction_list_last_check(parent, info):
+        return parent.sanction_list_last_check
+
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
