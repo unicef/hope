@@ -69,7 +69,10 @@ export function NeedsAdjudicationDetailsOld({
   const isEditable = isEditMode || !isApproved;
 
   const isApproveDisabled = (): boolean => {
-    return ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+    return (
+      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+      !selectedDuplicate
+    );
   };
 
   const findRecord = (itemId) => (record) => record.hitId === itemId;
