@@ -129,8 +129,10 @@ export function NeedsAdjudicationDetailsNew({
     );
   };
 
-  const getPossibleDuplicateSimilarity = (): number | string => {
-    const { extraData, goldenRecordsIndividual, possibleDuplicate } = details;
+  const getPossibleDuplicateSimilarity = (
+    possibleDuplicate,
+  ): number | string => {
+    const { extraData, goldenRecordsIndividual } = details;
     const individualId = goldenRecordsIndividual?.id;
     const extraDataPossibleDuplicate1 = extraData?.possibleDuplicate;
     const deduplicationGoldenRecordResults =
@@ -178,7 +180,9 @@ export function NeedsAdjudicationDetailsNew({
         <TableCell align='left'>
           <UniversalMoment>{possibleDuplicate?.birthDate}</UniversalMoment>
         </TableCell>
-        <TableCell align='left'>{getPossibleDuplicateSimilarity()}</TableCell>
+        <TableCell align='left'>
+          {getPossibleDuplicateSimilarity(possibleDuplicate)}
+        </TableCell>
         <TableCell align='left'>
           <UniversalMoment>
             {possibleDuplicate?.lastRegistrationDate}
