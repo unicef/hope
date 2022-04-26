@@ -137,6 +137,11 @@ type ApproveTargetPopulationMutation {
 
 scalar Arg
 
+type BankAccountInfoNode {
+  bankName: String!
+  bankAccountNumber: String!
+}
+
 scalar BigInt
 
 type BusinessAreaNode implements Node {
@@ -293,9 +298,9 @@ enum CashPlanPaymentVerificationSampling {
 }
 
 enum CashPlanPaymentVerificationStatus {
-  PENDING
   ACTIVE
   FINISHED
+  PENDING
 }
 
 type CashPlanPaymentVerificationSummaryNode implements Node {
@@ -309,15 +314,15 @@ type CashPlanPaymentVerificationSummaryNode implements Node {
 }
 
 enum CashPlanPaymentVerificationSummaryStatus {
-  PENDING
   ACTIVE
   FINISHED
+  PENDING
 }
 
 enum CashPlanPaymentVerificationVerificationChannel {
+  MANUAL
   RAPIDPRO
   XLSX
-  MANUAL
 }
 
 enum CashPlanStatus {
@@ -1863,6 +1868,7 @@ type IndividualNode implements Node {
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
+  bankAccountInfo: BankAccountInfoNode
   status: String
   role: String
   age: Int
@@ -2267,16 +2273,16 @@ type PaymentVerificationNodeEdge {
 }
 
 enum PaymentVerificationStatus {
+  NOT_RECEIVED
   PENDING
   RECEIVED
-  NOT_RECEIVED
   RECEIVED_WITH_ISSUES
 }
 
 enum PaymentVerificationStatusForUpdate {
+  NOT_RECEIVED
   PENDING
   RECEIVED
-  NOT_RECEIVED
   RECEIVED_WITH_ISSUES
 }
 
@@ -3325,9 +3331,9 @@ input TicketPaymentVerificationDetailsExtras {
 }
 
 enum TicketPaymentVerificationDetailsNewStatus {
+  NOT_RECEIVED
   PENDING
   RECEIVED
-  NOT_RECEIVED
   RECEIVED_WITH_ISSUES
 }
 
@@ -3357,9 +3363,9 @@ type TicketPaymentVerificationDetailsNodeEdge {
 }
 
 enum TicketPaymentVerificationDetailsPaymentVerificationStatus {
+  NOT_RECEIVED
   PENDING
   RECEIVED
-  NOT_RECEIVED
   RECEIVED_WITH_ISSUES
 }
 
