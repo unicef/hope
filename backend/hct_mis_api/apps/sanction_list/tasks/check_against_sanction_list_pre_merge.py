@@ -1,7 +1,7 @@
 import logging
 
 from django.utils import timezone
-
+from django.core.cache import cache
 from constance import config
 
 from hct_mis_api.apps.grievance.models import (
@@ -131,12 +131,12 @@ class CheckAgainstSanctionListPreMergeTask:
                 f" Scores: ",
             )
             log.debug([(r.full_name, r.meta.score) for r in results])
-
-        Individual.objects.filter(id__in=possible_matches).update(
-            sanction_list_possible_match=True, sanction_list_last_check=timezone.now()
+        cache.set("sanction_list_last_check", timezone.now(), None)
+        Individual.objects.filter(id__in=possible_matches, sanction_list_possible_match=False).update(
+            sanction_list_possible_match=True
         )
-        Individual.objects.exclude(id__in=possible_matches).update(
-            sanction_list_possible_match=False, sanction_list_last_check=timezone.now()
+        Individual.objects.exclude(id__in=possible_matches).filter(sanction_list_possible_match=True).update(
+            sanction_list_possible_match=False
         )
 
         GrievanceTicket.objects.bulk_create(tickets_to_create)
