@@ -15,6 +15,7 @@ from openpyxl.utils import get_column_letter
 
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
     NONE,
     WORK_STATUS_CHOICE,
@@ -390,6 +391,43 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
+    def get_grievance_tickets(report: Report):
+        filter_vars = {
+            "business_area": report.business_area,
+            "created_at__gte": report.date_from,
+            "created_at__lte": report.date_to,
+        }
+
+        return GrievanceTicket.objects.filter(**filter_vars).select_related("admin2_new", "created_by", "assigned_to")
+
+    @classmethod
+    def format_grievance_tickets_row(cls, grievance_ticket: GrievanceTicket) -> tuple:
+        def get_full_name(user):
+            if not user:
+                return ""
+            return " ".join(filter(None, [user.first_name, user.last_name]))
+
+        def get_username(user):
+            if not user:
+                return ""
+            return user.username
+
+        return (
+            grievance_ticket.unicef_id,
+            grievance_ticket.created_at,
+            grievance_ticket.updated_at,
+            grievance_ticket.get_status_display(),
+            grievance_ticket.get_category_display(),
+            grievance_ticket.get_issue_type(),
+            grievance_ticket.admin2_new.name,
+            grievance_ticket.admin2_new.p_code,
+            get_username(grievance_ticket.created_by),
+            get_full_name(grievance_ticket.created_by),
+            get_username(grievance_ticket.assigned_to),
+            get_full_name(grievance_ticket.assigned_to),
+        )
+
+    @staticmethod
     def _to_values_list(instances, field_name: str) -> str:
         values_list = list(instances.values_list(field_name, flat=True))
         return ", ".join([str(value) for value in values_list])
@@ -582,6 +620,20 @@ class GenerateReportService:
             "dedupe in Pop.duplicates",
             "dedupe in Pop. possible duplicates",
         ),
+        Report.GRIEVANCES: (
+            "ticket number",
+            "date created",
+            "date updated",
+            "status",
+            "category",
+            "issue type",
+            "district",
+            "admin2 p-code",
+            "created by (username)",
+            "created by (name)",
+            "assigned to (username)",
+            "assigned to (name)",
+        ),
     }
     OPTIONAL_HEADERS = {Report.HOUSEHOLD_DEMOGRAPHICS: "programme enrolled"}
     TIMEFRAME_CELL_LABELS = {
@@ -593,6 +645,7 @@ class GenerateReportService:
         Report.INDIVIDUALS_AND_PAYMENT: ("Delivery Date From", "Delivery Date To"),
         Report.CASH_PLAN: ("End Date From", "End Date To"),
         Report.PROGRAM: ("End Date From", "End Date To"),
+        Report.GRIEVANCES: ("End Date From", "End Date To"),
     }
     ROW_CONTENT_METHODS = {
         Report.INDIVIDUALS: (
@@ -620,6 +673,10 @@ class GenerateReportService:
         Report.INDIVIDUALS_AND_PAYMENT: (
             GenerateReportContentHelpers.get_payments_for_individuals,
             GenerateReportContentHelpers.format_payments_for_individuals_row,
+        ),
+        Report.GRIEVANCES: (
+            GenerateReportContentHelpers.get_grievance_tickets,
+            GenerateReportContentHelpers.format_grievance_tickets_row,
         ),
     }
     FILTERS_SHEET = "Meta"
@@ -738,16 +795,13 @@ class GenerateReportService:
             ws[f"{col_letter}1"] = label
 
     def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
-
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
-
             for cell in col:
                 value = cell.value
 
                 if value is not None:
-
                     if isinstance(value, str) is False:
                         value = str(value)
 
