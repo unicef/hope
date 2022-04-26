@@ -196,8 +196,7 @@ class GrievanceTicketFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$")
-            # TODO: add filtering by 'linked_tickets__unicef_id'
+            q_obj |= Q(Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$") | Q(linked_tickets__unicef_id__regex=rf"^(GRV-(0)+)?{value}$"))
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
