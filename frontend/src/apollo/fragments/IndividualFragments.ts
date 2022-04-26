@@ -175,5 +175,9 @@ export const individualDetailed = gql`
         unicefId
       }
     }
+    bankAccountInfo {
+      bankName
+      bankAccountNumber
+    }
   }
 `;
