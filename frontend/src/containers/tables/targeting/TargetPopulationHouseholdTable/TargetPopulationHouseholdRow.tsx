@@ -40,7 +40,7 @@ export function TargetPopulationHouseholdTableRow({
       </TableCell>
       <AnonTableCell>{household.headOfHousehold?.fullName}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
+      <TableCell align='left'>{household.adminArea?.name || '-'}</TableCell>
       <TableCell align='left'>
         {household.selection?.vulnerabilityScore ||
         household.selection?.vulnerabilityScore === 0

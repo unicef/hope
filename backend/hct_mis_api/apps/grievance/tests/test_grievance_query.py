@@ -1,15 +1,18 @@
 from datetime import datetime
 
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
@@ -150,6 +153,20 @@ class TestGrievanceQuery(APITestCase):
         cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
         cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
 
+        country = Country.objects.first()
+        area_type_new = AreaTypeFactory(
+            name="Admin type one",
+            area_level=2,
+            country=country,
+            original_id=area_type.id,
+        )
+        cls.admin_area_1_new = AreaFactory(
+            name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
+        )
+        cls.admin_area_2_new = AreaFactory(
+            name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
+        )
+
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
             GrievanceTicket.STATUS_ON_HOLD: datetime(year=2020, month=7, day=12),
@@ -161,6 +178,7 @@ class TestGrievanceQuery(APITestCase):
                 **{
                     "business_area": cls.business_area,
                     "admin2": cls.admin_area_1,
+                    "admin2_new": cls.admin_area_1_new,
                     "language": "Polish",
                     "consent": True,
                     "description": "Just random description",
@@ -174,6 +192,7 @@ class TestGrievanceQuery(APITestCase):
                 **{
                     "business_area": cls.business_area,
                     "admin2": cls.admin_area_2,
+                    "admin2_new": cls.admin_area_2_new,
                     "language": "English",
                     "consent": True,
                     "description": "Just random description",
@@ -187,6 +206,7 @@ class TestGrievanceQuery(APITestCase):
                 **{
                     "business_area": cls.business_area,
                     "admin2": cls.admin_area_2,
+                    "admin2_new": cls.admin_area_2_new,
                     "language": "Polish, English",
                     "consent": True,
                     "description": "Just random description",
@@ -247,7 +267,7 @@ class TestGrievanceQuery(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ADMIN_AREA,
             context={"user": self.user},
-            variables={"admin": self.admin_area_1.id},
+            variables={"admin": self.admin_area_1_new.id},
         )
 
     def test_grievance_list_filtered_by_created_at(self):
