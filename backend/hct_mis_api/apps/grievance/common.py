@@ -1,8 +1,5 @@
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
-import logging
-logger = logging.getLogger(__name__)
-
 
 def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
     from hct_mis_api.apps.grievance.models import (

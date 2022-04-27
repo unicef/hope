@@ -115,30 +115,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
             },
-            {
-                "id": "73422fa1-f0b7-455d-b5d2-745a45bee6ab",
-                "full_name": "Jane Doe",
-                "given_name": "Jane",
-                "family_name": "Doe",
-                "phone_no": "+19774677906",
-                "birth_date": "1966-05-12",
-            },
-            {
-                "id": "19c27cfb-dfc1-4210-b9d4-f8c29d665f5e",
-                "full_name": "Callie Curry",
-                "given_name": "Callie",
-                "family_name": "Curry",
-                "phone_no": "+11223677906",
-                "birth_date": "1981-12-02",
-            },
-            {
-                "id": "a8b44602-2480-45ec-ab80-8de0b73fa944",
-                "full_name": "Raven Lowe",
-                "given_name": "Raven",
-                "family_name": "Lowe",
-                "phone_no": "+22334677666",
-                "birth_date": "1991-03-04",
-            },
         ]
 
         cls.individuals = [
