@@ -79,18 +79,18 @@ export const fakeGrievanceTicket = {
       admin1: {
         id:
           'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-        title: 'Nangarhar',
+        name: 'Nangarhar',
         level: 1,
         pCode: 'AF06',
-        __typename: 'AdminAreaNode',
+        __typename: 'AreaNode',
       },
       admin2: {
         id:
           'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-        title: 'Achin',
+        name: 'Achin',
         level: 2,
         pCode: 'AF0617',
-        __typename: 'AdminAreaNode',
+        __typename: 'AreaNode',
       },
       programs: {
         edges: [
@@ -112,9 +112,9 @@ export const fakeGrievanceTicket = {
       adminArea: {
         id:
           'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-        title: 'Achin',
+        name: 'Achin',
         level: 2,
-        __typename: 'AdminAreaNode',
+        __typename: 'AreaNode',
       },
     },
     __typename: 'IndividualNode',
@@ -204,18 +204,18 @@ export const fakeGrievanceTicket = {
     admin1: {
       id:
         'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-      title: 'Nangarhar',
+      name: 'Nangarhar',
       level: 1,
       pCode: 'AF06',
-      __typename: 'AdminAreaNode',
+      __typename: 'AreaNode',
     },
     admin2: {
       id:
         'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-      title: 'Achin',
+      name: 'Achin',
       level: 2,
       pCode: 'AF0617',
-      __typename: 'AdminAreaNode',
+      __typename: 'AreaNode',
     },
     headOfHousehold: {
       id:
@@ -339,18 +339,18 @@ export const fakeGrievanceTicket = {
               admin1: {
                 id:
                   'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-                title: 'Nangarhar',
+                name: 'Nangarhar',
                 level: 1,
                 pCode: 'AF06',
-                __typename: 'AdminAreaNode',
+                __typename: 'AreaNode',
               },
               admin2: {
                 id:
                   'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-                title: 'Achin',
+                name: 'Achin',
                 level: 2,
                 pCode: 'AF0617',
-                __typename: 'AdminAreaNode',
+                __typename: 'AreaNode',
               },
               programs: {
                 edges: [
@@ -429,18 +429,18 @@ export const fakeGrievanceTicket = {
               admin1: {
                 id:
                   'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-                title: 'Nangarhar',
+                name: 'Nangarhar',
                 level: 1,
                 pCode: 'AF06',
-                __typename: 'AdminAreaNode',
+                __typename: 'AreaNode',
               },
               admin2: {
                 id:
                   'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-                title: 'Achin',
+                name: 'Achin',
                 level: 2,
                 pCode: 'AF0617',
-                __typename: 'AdminAreaNode',
+                __typename: 'AreaNode',
               },
               programs: {
                 edges: [

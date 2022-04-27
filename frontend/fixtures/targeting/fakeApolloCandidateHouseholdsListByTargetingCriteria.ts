@@ -32,8 +32,8 @@ export const fakeApolloCandidateHouseholdsListByTargetingCriteria = [
                 adminArea: {
                   id:
                     'QWRtaW5BcmVhTm9kZTpkMGQ1YmNmNS1hZDU1LTQ4YWMtODcyZS1mM2FkZGY0NDdjNDE=',
-                  title: 'North Kordofan',
-                  __typename: 'AdminAreaNode',
+                  name: 'North Kordofan',
+                  __typename: 'AreaNode',
                 },
                 updatedAt: '2021-12-16T10:16:45.282245',
                 address: '',
@@ -60,8 +60,8 @@ export const fakeApolloCandidateHouseholdsListByTargetingCriteria = [
                 adminArea: {
                   id:
                     'QWRtaW5BcmVhTm9kZTpkMGRkNDRkZC1iNzRiLTQ1MjYtOTAyNC0xOTg2MWI1ZDNkOWQ=',
-                  title: 'River Nile',
-                  __typename: 'AdminAreaNode',
+                  name: 'River Nile',
+                  __typename: 'AreaNode',
                 },
                 updatedAt: '2021-12-16T10:16:45.281644',
                 address: '',
