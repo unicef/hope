@@ -137,6 +137,11 @@ type ApproveTargetPopulationMutation {
 
 scalar Arg
 
+type BankAccountInfoNode {
+  bankName: String!
+  bankAccountNumber: String!
+}
+
 scalar BigInt
 
 type BusinessAreaNode implements Node {
@@ -1863,6 +1868,7 @@ type IndividualNode implements Node {
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
+  bankAccountInfo: BankAccountInfoNode
   status: String
   role: String
   age: Int
