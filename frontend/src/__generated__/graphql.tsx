@@ -274,6 +274,12 @@ export type ApproveTargetPopulationMutation = {
 };
 
 
+export type BankAccountInfoNode = {
+   __typename?: 'BankAccountInfoNode',
+  bankName: Scalars['String'],
+  bankAccountNumber: Scalars['String'],
+};
+
 
 export type BusinessAreaNode = Node & {
    __typename?: 'BusinessAreaNode',
@@ -2466,6 +2472,7 @@ export type IndividualNode = Node & {
   documents: DocumentNodeConnection,
   identities: IndividualIdentityNodeConnection,
   householdsAndRoles: Array<IndividualRoleInHouseholdNode>,
+  bankAccountInfo?: Maybe<BankAccountInfoNode>,
   status?: Maybe<Scalars['String']>,
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
@@ -6261,6 +6268,9 @@ export type IndividualDetailedFragment = (
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'unicefId'>
     ) }
+  )>, bankAccountInfo: Maybe<(
+    { __typename?: 'BankAccountInfoNode' }
+    & Pick<BankAccountInfoNode, 'bankName' | 'bankAccountNumber'>
   )> }
   & IndividualMinimalFragment
 );
@@ -9895,6 +9905,10 @@ export const IndividualDetailedFragmentDoc = gql`
       id
       unicefId
     }
+  }
+  bankAccountInfo {
+    bankName
+    bankAccountNumber
   }
 }
     ${IndividualMinimalFragmentDoc}`;
@@ -18522,6 +18536,7 @@ export type ResolversTypes = {
   AgencyType: AgencyType,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
+  BankAccountInfoNode: ResolverTypeWrapper<BankAccountInfoNode>,
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
@@ -18887,6 +18902,7 @@ export type ResolversParentTypes = {
   AgencyType: AgencyType,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
+  BankAccountInfoNode: BankAccountInfoNode,
   GeoJSON: Scalars['GeoJSON'],
   ProgramNodeConnection: ProgramNodeConnection,
   ProgramNodeEdge: ProgramNodeEdge,
@@ -19181,6 +19197,11 @@ export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentTy
 export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Arg'], any> {
   name: 'Arg'
 }
+
+export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BankAccountInfoNode'] = ResolversParentTypes['BankAccountInfoNode']> = {
+  bankName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  bankAccountNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
 
 export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
   name: 'BigInt'
@@ -20081,6 +20102,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, IndividualNodeIdentitiesArgs>,
   householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
+  bankAccountInfo?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>,
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -21518,6 +21540,7 @@ export type Resolvers<ContextType = any> = {
   AgencyNode?: AgencyNodeResolvers<ContextType>,
   ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
   Arg?: GraphQLScalarType,
+  BankAccountInfoNode?: BankAccountInfoNodeResolvers<ContextType>,
   BigInt?: GraphQLScalarType,
   BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
   BusinessAreaNodeConnection?: BusinessAreaNodeConnectionResolvers<ContextType>,
