@@ -60,15 +60,16 @@ class CreateReport(ReportValidator, PermissionMutation):
 
         if admin_area_ids:
             admin_areas = [
-                get_object_or_404(
-                    AdminArea, id=decode_id_string(admin_area_id), admin_area_level__business_area=business_area
-                )
+                get_object_or_404(Area, id=decode_id_string(admin_area_id), area_type__business_area=business_area)
                 for admin_area_id in admin_area_ids
             ]
 
         report = Report.objects.create(**report_vars)
         if admin_areas:
-            report.admin_area.set(admin_areas)
+            report.admin_area_new.set(admin_areas)
+            admin_areas_original_id = [area.original_id for area in admin_areas]
+            admin_areas_old = AdminArea.objects.filter(pk__in=admin_areas_original_id)
+            report.admin_area.set(admin_areas_old)
 
         report_export_task.delay(report_id=str(report.id))
 
@@ -110,10 +111,11 @@ class CreateDashboardReport(PermissionMutation):
             report_vars["program"] = program
 
         if admin_area_id and business_area.slug != "global":
-            admin_area = get_object_or_404(AdminArea, id=decode_id_string(admin_area_id))
-            report_vars["admin_area"] = admin_area
-            admin_area_new = get_object_or_404(Area, original_id=decode_id_string(admin_area_id))
+            admin_area_new = get_object_or_404(Area, id=decode_id_string(admin_area_id))
             report_vars["admin_area_new"] = admin_area_new
+
+            admin_area = get_object_or_404(AdminArea, id=admin_area_new.original_id)
+            report_vars["admin_area"] = admin_area
 
         report = DashboardReport.objects.create(**report_vars)
 
