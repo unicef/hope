@@ -34,3 +34,35 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
         raise
 
     logger.info("recalculate_population_fields end")
+
+@app.task()
+def calculate_children_fields_for_not_collected_individual_data():
+    from hct_mis_api.apps.household.models import Household
+    from django.db.models import F
+
+    Household.objects.update(
+        children_count=F("female_age_group_0_5_count")
+        + F("female_age_group_6_11_count")
+        + F("female_age_group_12_17_count")
+        + F("male_age_group_0_5_count")
+        + F("male_age_group_6_11_count")
+        + F("male_age_group_12_17_count"),
+        female_children_count=F("female_age_group_0_5_count")
+        + F("female_age_group_6_11_count")
+        + F("female_age_group_12_17_count"),
+        male_children_count=F("male_age_group_0_5_count")
+        + F("male_age_group_6_11_count")
+        + F("male_age_group_12_17_count"),
+        children_disabled_count=F("female_age_group_0_5_disabled_count")
+        + F("female_age_group_6_11_disabled_count")
+        + F("female_age_group_12_17_disabled_count")
+        + F("male_age_group_0_5_disabled_count")
+        + F("male_age_group_6_11_disabled_count")
+        + F("male_age_group_12_17_disabled_count"),
+        female_children_disabled_count=F("female_age_group_0_5_disabled_count")
+        + F("female_age_group_6_11_disabled_count")
+        + F("female_age_group_12_17_disabled_count"),
+        male_children_disabled_count=F("male_age_group_0_5_disabled_count")
+        + F("male_age_group_6_11_disabled_count")
+        + F("male_age_group_12_17_disabled_count"),
+    )

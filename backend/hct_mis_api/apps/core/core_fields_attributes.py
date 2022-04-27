@@ -25,7 +25,6 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_scope_id_number,
     get_unhcr_id_issuer,
     get_unhcr_id_number,
-    number_of_children_query,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -120,10 +119,10 @@ CORE_FIELDS_ATTRIBUTES = [
         "id": "c8da2910-4348-47ab-a82e-725b4cebc332",
         "type": TYPE_INTEGER,
         "name": "number_of_children",
+        "lookup": "children_count",
         "label": {"English(EN)": "What is the number of children in the household?"},
         "hint": "",
         "required": False,
-        "get_query": number_of_children_query,
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "number_of_children",
