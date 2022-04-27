@@ -160,6 +160,7 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(head_of_household__given_name__istartswith=value)
             inner_query |= Q(head_of_household__middle_name__istartswith=value)
             inner_query |= Q(head_of_household__family_name__istartswith=value)
+            inner_query |= Q(residence_status__istartswith=value)
             inner_query |= Q(admin_area__title__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
@@ -239,9 +240,10 @@ class IndividualFilter(FilterSet):
             inner_query |= Q(given_name__istartswith=value)
             inner_query |= Q(middle_name__istartswith=value)
             inner_query |= Q(family_name__istartswith=value)
-            inner_query |= Q(documents__document_number__startswith=value)
+            inner_query |= Q(documents__document_number__istartswith=value)
             inner_query |= Q(phone_no__istartswith=value)
             inner_query |= Q(phone_no_alternative__istartswith=value)
+            inner_query |= Q(relationship__istartswith=value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
