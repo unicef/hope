@@ -32,9 +32,13 @@ export function GrievancesTablePage(): React.ReactElement {
     status: '',
     fsp: '',
     createdAtRange: '',
+    category: '',
+    issueType: '',
+    assignedTo: '',
     admin: null,
     registrationDataImport: id,
     cashPlan: cashPlanId,
+    score: '',
   });
   const debouncedFilter = useDebounce(filter, 500);
   const {

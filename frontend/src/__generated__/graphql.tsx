@@ -612,9 +612,9 @@ export enum CashPlanPaymentVerificationSampling {
 }
 
 export enum CashPlanPaymentVerificationStatus {
-  Pending = 'PENDING',
   Active = 'ACTIVE',
-  Finished = 'FINISHED'
+  Finished = 'FINISHED',
+  Pending = 'PENDING'
 }
 
 export type CashPlanPaymentVerificationSummaryNode = Node & {
@@ -629,15 +629,15 @@ export type CashPlanPaymentVerificationSummaryNode = Node & {
 };
 
 export enum CashPlanPaymentVerificationSummaryStatus {
-  Pending = 'PENDING',
   Active = 'ACTIVE',
-  Finished = 'FINISHED'
+  Finished = 'FINISHED',
+  Pending = 'PENDING'
 }
 
 export enum CashPlanPaymentVerificationVerificationChannel {
+  Manual = 'MANUAL',
   Rapidpro = 'RAPIDPRO',
-  Xlsx = 'XLSX',
-  Manual = 'MANUAL'
+  Xlsx = 'XLSX'
 }
 
 export enum CashPlanStatus {
@@ -3327,16 +3327,16 @@ export type PaymentVerificationNodeEdge = {
 };
 
 export enum PaymentVerificationStatus {
+  NotReceived = 'NOT_RECEIVED',
   Pending = 'PENDING',
   Received = 'RECEIVED',
-  NotReceived = 'NOT_RECEIVED',
   ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
 }
 
 export enum PaymentVerificationStatusForUpdate {
+  NotReceived = 'NOT_RECEIVED',
   Pending = 'PENDING',
   Received = 'RECEIVED',
-  NotReceived = 'NOT_RECEIVED',
   ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
 }
 
@@ -3699,6 +3699,7 @@ export type QueryAllGrievanceTicketArgs = {
   cashPlan?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
+  issueType?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5390,9 +5391,9 @@ export type TicketPaymentVerificationDetailsExtras = {
 };
 
 export enum TicketPaymentVerificationDetailsNewStatus {
+  NotReceived = 'NOT_RECEIVED',
   Pending = 'PENDING',
   Received = 'RECEIVED',
-  NotReceived = 'NOT_RECEIVED',
   ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
 }
 
@@ -5434,9 +5435,9 @@ export type TicketPaymentVerificationDetailsNodeEdge = {
 };
 
 export enum TicketPaymentVerificationDetailsPaymentVerificationStatus {
+  NotReceived = 'NOT_RECEIVED',
   Pending = 'PENDING',
   Received = 'RECEIVED',
-  NotReceived = 'NOT_RECEIVED',
   ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
 }
 
@@ -7740,6 +7741,7 @@ export type AllGrievanceTicketQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>,
   category?: Maybe<Scalars['String']>,
+  issueType?: Maybe<Scalars['String']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -13839,8 +13841,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan) {
     totalCount
     pageInfo {
       startCursor
@@ -13910,6 +13912,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      last: // value for 'last'
  *      id: // value for 'id'
  *      category: // value for 'category'
+ *      issueType: // value for 'issueType'
  *      businessArea: // value for 'businessArea'
  *      search: // value for 'search'
  *      status: // value for 'status'
