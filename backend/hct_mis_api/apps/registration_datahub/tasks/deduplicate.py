@@ -837,7 +837,7 @@ class DeduplicateTask:
             if documents_count > 0:
                 create_grievance_ticket_with_details(
                     main_individual=documents_queryset.first().individual,
-                    possible_duplicate=document.individual,
+                    possible_duplicate=document.individual,  # backward compatibility
                     business_area=document.individual.business_area,
                     registration_data_import=registration_data_import,
                     is_multiple_duplicates_version=True,

@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from django.core.management import call_command
-
 from django_countries.fields import Country
 from parameterized import parameterized
 
@@ -17,7 +15,12 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketSystemFlaggingDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    DocumentFactory,
+    DocumentType
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
@@ -49,6 +52,26 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
       }
     }
     """
+    APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION = """
+        mutation ApproveNeedsAdjudicationTicket(
+        $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
+        ) {
+          approveNeedsAdjudication(
+          grievanceTicketId: $grievanceTicketId, 
+          selectedIndividualId: $selectedIndividualId, 
+          selectedIndividualIds: $selectedIndividualIds
+          ) {
+            grievanceTicket {
+              id
+              needsAdjudicationTicketDetails {
+                selectedIndividuals {
+                  id
+                }
+              }
+            }
+          }
+        }
+        """
 
     @classmethod
     def setUpTestData(cls):
@@ -91,6 +114,30 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "family_name": "Ford",
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
+            },
+            {
+                "id": "73422fa1-f0b7-455d-b5d2-745a45bee6ab",
+                "full_name": "Jane Doe",
+                "given_name": "Jane",
+                "family_name": "Doe",
+                "phone_no": "+19774677906",
+                "birth_date": "1966-05-12",
+            },
+            {
+                "id": "19c27cfb-dfc1-4210-b9d4-f8c29d665f5e",
+                "full_name": "Callie Curry",
+                "given_name": "Callie",
+                "family_name": "Curry",
+                "phone_no": "+11223677906",
+                "birth_date": "1981-12-02",
+            },
+            {
+                "id": "a8b44602-2480-45ec-ab80-8de0b73fa944",
+                "full_name": "Raven Lowe",
+                "given_name": "Raven",
+                "family_name": "Lowe",
+                "phone_no": "+22334677666",
+                "birth_date": "1991-03-04",
             },
         ]
 
@@ -225,5 +272,31 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                     self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
                 ),
                 "selectedIndividualId": None,
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                    "with_permission",
+                    [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_approve_needs_adjudication_allows_multiple_selected_individuals(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "selectedIndividualIds":  [
+                    self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                    self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+                ],
             },
         )

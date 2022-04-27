@@ -1,3 +1,5 @@
+from typing import List
+
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
@@ -13,9 +15,9 @@ def get_individual(individual_id: str) -> Individual:
 
 def select_individual(
         ticket_details: TicketNeedsAdjudicationDetails,
-        selected_individual: list(Individual),
-        ticket_duplicates: list(Individual),
-        ticket_individuals: list(Individual)
+        selected_individual: List[Individual],
+        ticket_duplicates: List[Individual],
+        ticket_individuals: List[Individual]
 ):
     if selected_individual in ticket_duplicates and selected_individual not in ticket_individuals:
         ticket_details.selected_individuals.add(selected_individual)
@@ -27,8 +29,8 @@ def select_individual(
 
 def unselect_individual(
         ticket_details: TicketNeedsAdjudicationDetails,
-        selected_individuals: list(Individual),
-        ticket_individuals: list(Individual)
+        selected_individuals: List[Individual],
+        ticket_individuals: List[Individual]
 ):
     individuals_to_unselect = [
         individual for individual in ticket_individuals if individual not in selected_individuals
@@ -45,8 +47,8 @@ def unselect_individual(
 
 def traverse_sibling_tickets(
         grievance_ticket: GrievanceTicket,
-        selected_individual: list(Individual),
-        selected_individuals: list(Individual)
+        selected_individual: List[Individual],
+        selected_individuals: List[Individual]
 ):
     sibling_tickets = GrievanceTicket.objects.filter(
         registration_data_import_id=grievance_ticket.registration_data_import_id

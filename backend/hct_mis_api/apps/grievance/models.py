@@ -623,9 +623,27 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
 
     @property
     def has_duplicated_document(self):
-        documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
-        documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
-        return bool(set(documents1) & set(documents2))
+        if not self.is_multiple_duplicates_version:
+            documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
+            documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
+            return bool(set(documents1) & set(documents2))
+        else:
+            possible_duplicates = [self.golden_records_individual, *self.possible_duplicates.all()]
+            selected_individuals = self.selected_individuals.all()
+
+            unselected_individuals = [
+                individual for individual in possible_duplicates
+                if individual not in selected_individuals
+            ]
+
+            if unselected_individuals:
+                documents = []
+                for individual in unselected_individuals:
+                    documents.append(set([
+                        f"{x.document_number}--{x.type_id}" for x in individual.documents.all()
+                    ]))
+                return bool(set.intersection(*documents))
+            return False
 
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
