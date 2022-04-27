@@ -18,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -159,6 +160,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             self.cash_plans.filter(payment_records__delivered_quantity__gt=0)
             .distinct("payment_records__household__unicef_id")
             .values_list("payment_records__household__unicef_id", flat=True)
+            .order_by("payment_records__household__unicef_id")
             .count()
         )
 
@@ -299,4 +301,4 @@ class CashPlan(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name = "Cash Plan"
-        ordering = ['created_at']
+        ordering = ["created_at"]
