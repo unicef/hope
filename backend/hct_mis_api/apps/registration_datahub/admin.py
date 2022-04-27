@@ -120,8 +120,7 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
         "deduplication_batch_status",
         "deduplication_golden_record_status",
-        QueryStringFilter
-
+        QueryStringFilter,
     )
     date_hierarchy = "updated_at"
     # raw_id_fields = ("household", "registration_data_import")
@@ -199,28 +198,21 @@ class ImportDataAdmin(HOPEModelAdminBase):
 @admin.register(ImportedDocumentType)
 class ImportedDocumentTypeAdmin(HOPEModelAdminBase):
     list_display = ("label", "country")
-    list_filter = (("country", ChoicesFieldComboFilter),
-        "label",
-        QueryStringFilter
-        )
+    list_filter = (("country", ChoicesFieldComboFilter), "label", QueryStringFilter)
 
 
 @admin.register(ImportedDocument)
 class ImportedDocumentAdmin(HOPEModelAdminBase):
     list_display = ("document_number", "type", "individual")
     raw_id_fields = ("individual", "type")
-    list_filter = (("type", AutoCompleteFilter), 
-        QueryStringFilter
-        )
+    list_filter = (("type", AutoCompleteFilter), QueryStringFilter)
     date_hierarchy = "created_at"
 
 
 @admin.register(ImportedIndividualRoleInHousehold)
 class ImportedIndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
     raw_id_fields = ("individual", "household")
-    list_filter = ("role",
-        QueryStringFilter
-        )
+    list_filter = ("role", QueryStringFilter)
 
 
 @admin.register(KoboImportedSubmission)
@@ -238,7 +230,7 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
         "amended",
         ("registration_data_import", AutoCompleteFilter),
         ("imported_household", AutoCompleteFilter),
-        QueryStringFilter
+        QueryStringFilter,
     )
     advanced_filter_fields = (
         # "created_at",
