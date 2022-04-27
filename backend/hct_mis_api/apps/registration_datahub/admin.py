@@ -357,9 +357,8 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     change_list_template = "registration_datahub/admin/record/change_list.html"
 
     actions = [mass_update, "extract", "async_extract", "create_rdi"]
-    mass_update_fields = [
-        "fields",
-    ]
+
+    mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
 
     def get_queryset(self, request):
@@ -476,4 +475,4 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return is_root(request)
