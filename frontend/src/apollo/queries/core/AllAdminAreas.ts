@@ -2,13 +2,13 @@ import { gql } from 'apollo-boost';
 
 export const ALL_ADMIN_AREAS_QUERY = gql`
   query AllAdminAreas(
-    $title: String
+    $name: String
     $businessArea: String
     $level: Int
     $first: Int
   ) {
     allAdminAreas(
-      title_Istartswith: $title
+      name_Istartswith: $name
       businessArea: $businessArea
       first: $first
       level: $level
@@ -22,7 +22,7 @@ export const ALL_ADMIN_AREAS_QUERY = gql`
       edges {
         node {
           id
-          title
+          name
           pCode
         }
       }

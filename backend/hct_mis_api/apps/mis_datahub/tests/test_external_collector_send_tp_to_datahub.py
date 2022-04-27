@@ -2,9 +2,12 @@ from django.core.management import call_command
 from django.test import TestCase
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,

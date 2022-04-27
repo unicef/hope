@@ -1,4 +1,3 @@
-from django.db.models import Count, Q, Sum, DecimalField
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
@@ -17,7 +16,6 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter, LogEntryNode
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
@@ -30,6 +28,7 @@ from hct_mis_api.apps.core.utils import (
     is_valid_uuid,
     to_choice_object,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     STATUS_ACTIVE,
@@ -400,7 +399,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="payment_record__cash_plan__program__id",
-                    administrative_area_path="payment_record__household__admin_area",
+                    administrative_area_path="payment_record__household__admin_area_new",
                 )
             },
             year_filter_path="payment_record__delivery_date",
@@ -490,8 +489,8 @@ class Query(graphene.ObjectType):
         )
 
         admin_areas = (
-            AdminArea.objects.filter(
-                level=2,
+            Area.objects.filter(
+                area_level=2,
                 household__payment_records__in=payment_records,
             )
             .distinct()
@@ -502,7 +501,7 @@ class Query(graphene.ObjectType):
         if order_by:
             order_by_arg = None
             if order_by == "admin2":
-                order_by_arg = "title"
+                order_by_arg = "name"
             elif order_by == "totalCashTransferred":
                 order_by_arg = "total_transferred"
             elif order_by == "totalHouseholds":
@@ -513,7 +512,7 @@ class Query(graphene.ObjectType):
         data = [
             {
                 "id": item.id,
-                "admin2": item.title,
+                "admin2": item.name,
                 "total_cash_transferred": item.total_transferred,
                 "total_households": item.num_households,
             }

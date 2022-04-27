@@ -39,6 +39,7 @@ from hct_mis_api.apps.core.utils import (
     rename_dict_keys,
     serialize_flex_attributes,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_DICT,
@@ -80,17 +81,11 @@ class RdiBaseCreateTask:
     @staticmethod
     def _assign_admin_areas_titles(household_obj):
         if household_obj.admin1:
-            admin_area_level_1 = AdminArea.objects.filter(p_code=household_obj.admin1).first()
-            # TODO part of the new structure
-            if False:
-                admin_area_level_1 = Area.objects.filter(p_code=household_obj.admin1).first()
-            household_obj.admin1_title = admin_area_level_1.title if admin_area_level_1 else ""
+            admin_area_level_1 = Area.objects.filter(p_code=household_obj.admin1).first()
+            household_obj.admin1_title = admin_area_level_1.name if admin_area_level_1 else ""
         if household_obj.admin2:
-            admin_area_level_2 = AdminArea.objects.filter(p_code=household_obj.admin2).first()
-            # TODO part of the new structure
-            if False:
-                admin_area_level_2 = Area.objects.filter(p_code=household_obj.admin2).first()
-            household_obj.admin2_title = admin_area_level_2.title if admin_area_level_2 else ""
+            admin_area_level_2 = Area.objects.filter(p_code=household_obj.admin2).first()
+            household_obj.admin2_title = admin_area_level_2.name if admin_area_level_2 else ""
 
         return household_obj
 
