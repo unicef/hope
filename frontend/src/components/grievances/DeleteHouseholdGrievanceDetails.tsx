@@ -157,12 +157,12 @@ export function DeleteHouseholdGrievanceDetails({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Administrative Level 1')}>
-            {ticket.household.admin1?.title}
+            {ticket.household.admin1?.name}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Administrative Level 2')}>
-            {ticket.household.admin2?.title}
+            {ticket.household.admin2?.name}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
