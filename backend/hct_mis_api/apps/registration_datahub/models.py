@@ -441,6 +441,9 @@ class Record(models.Model):
     ignored = models.BooleanField(default=False, blank=True, null=True, db_index=True)
     source_id = models.IntegerField(db_index=True)
 
+    fields = models.JSONField(default=dict, null=True, blank=True)
+    files = models.BinaryField(null=True, blank=True)
+
     data = models.JSONField(default=dict, blank=True, null=True)
 
     @classmethod
