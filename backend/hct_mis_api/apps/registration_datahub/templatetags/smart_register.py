@@ -81,7 +81,7 @@ def is_image(element):
         im = Image.open(io.BytesIO(imgdata))
         im.verify()
         return True
-    except UnidentifiedImageError:
+    except (UnidentifiedImageError, ValueError):
         return None
 
 
