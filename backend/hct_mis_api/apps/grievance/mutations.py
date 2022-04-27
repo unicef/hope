@@ -67,6 +67,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
+from hct_mis_api.apps.grievance.utils import get_individual, traverse_sibling_tickets
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -951,10 +952,10 @@ class SimpleApproveMutation(PermissionMutation):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
-        if grievance_ticket.category in [
+        if grievance_ticket.category in (
             GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
             GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-        ]:
+        ):
             cls.has_creator_or_owner_permission(
                 info,
                 grievance_ticket.business_area,
@@ -1106,8 +1107,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         ticket_details = grievance_ticket.ticket_details
 
         if selected_individual_id:
-            decoded_selected_individual_id = decode_id_string(selected_individual_id)
-            selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
+            selected_individual = get_individual(selected_individual_id)
 
             if selected_individual not in (
                     ticket_details.golden_records_individual,
@@ -1120,47 +1120,11 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             ticket_details.role_reassign_data = {}
 
         if selected_individual_ids:  # Allow choosing multiple individuals
-            selected_individuals = [
-                get_object_or_404(Individual, id=decode_id_string(selected_individual_id))
-                for selected_individual_id in selected_individual_ids
-            ]
-
+            selected_individuals = list(map(get_individual, selected_individual_ids))
             for selected_individual in selected_individuals:
-                sibling_tickets = GrievanceTicket.objects.filter(
-                    registration_data_import_id=grievance_ticket.registration_data_import_id
+                traverse_sibling_tickets(
+                    grievance_ticket, selected_individual, selected_individuals
                 )
-
-                logger.info("*"*20)
-
-                for ticket in sibling_tickets:
-                    ticket_possible_duplicates = [
-                        ticket.ticket_details.golden_records_individual,
-                        *ticket.ticket_details.possible_duplicates.all()
-                    ]
-                    ticket_selected_individuals = ticket.ticket_details.selected_individuals.all()
-
-                    logger.info(ticket)
-                    logger.info(ticket_possible_duplicates)
-                    logger.info(ticket_selected_individuals)
-
-                    if selected_individual in ticket_possible_duplicates \
-                            and selected_individual not in ticket_selected_individuals:
-                        ticket.ticket_details.selected_individuals.add(selected_individual)
-                        logger.info(
-                            "Individual with id: %s added to ticket %s", str(selected_individual.id), str(ticket.id)
-                        )
-
-                    individuals_to_unselect = [
-                        individual for individual in ticket.ticket_details.selected_individuals.all()
-                        if individual not in selected_individuals
-                    ]
-
-                    if individuals_to_unselect:
-                        for individual in individuals_to_unselect:
-                            ticket.ticket_details.selected_individuals.remove(individual)
-                            logger.info(
-                                "Individual with id: %s removed from ticket %s", str(individual.id), str(ticket.id)
-                            )
 
         ticket_details.save()
         grievance_ticket.refresh_from_db()
