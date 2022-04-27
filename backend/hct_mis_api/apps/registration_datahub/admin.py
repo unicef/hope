@@ -342,7 +342,8 @@ class AlexisFilter(SimpleListFilter):
 @admin.register(Record)
 class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "ignored")
-    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored", "registration_data_import")
+    readonly_fields = ("id", "registration", "timestamp", "source_id", "registration_data_import")
+    list_editable = ("ignored",)
     exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
@@ -460,15 +461,18 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     #             response.set_cookie(k, v)
     #     return response
 
-    @button()
-    def extract_all(self, request):
-        records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)
-        Record.extract(records_ids)
-
+    # @button()
+    # def extract_all(self, request):
+    #     records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)
+    #     Record.extract(records_ids)
+    #
     @button(label="Extract")
     def extract_single(self, request, pk):
         records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
-        Record.extract(records_ids)
+        try:
+            Record.extract(records_ids, raise_exception=True)
+        except Exception as e:
+            self.message_error_to_user(request, e)
 
     def has_add_permission(self, request):
         return False
