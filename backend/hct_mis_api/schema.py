@@ -7,6 +7,7 @@ import hct_mis_api.apps.activity_log.schema
 # DO NOT DELETE THIS IMPORT
 import hct_mis_api.apps.core.converters
 import hct_mis_api.apps.core.schema
+import hct_mis_api.apps.geo.schema
 import hct_mis_api.apps.grievance.mutations
 import hct_mis_api.apps.grievance.schema
 import hct_mis_api.apps.household.schema
@@ -40,6 +41,7 @@ class Query(
     hct_mis_api.apps.sanction_list.schema.Query,
     hct_mis_api.apps.reporting.schema.Query,
     hct_mis_api.apps.activity_log.schema.Query,
+    hct_mis_api.apps.geo.schema.Query,
     graphene.ObjectType,
 ):
     debug = graphene.Field(DjangoDebug, name="_debug")
