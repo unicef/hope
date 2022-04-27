@@ -438,13 +438,13 @@ class Record(models.Model):
         on_delete=models.SET_NULL,
         null=True,
     )
-    ignored = models.BooleanField(default=False, blank=True, null=True)
+    ignored = models.BooleanField(default=False, blank=True, null=True, db_index=True)
     source_id = models.IntegerField(db_index=True)
 
     data = models.JSONField(default=dict, blank=True, null=True)
 
     @classmethod
-    def extract(cls, records_ids: List[int]):
+    def extract(cls, records_ids: List[int], raise_exception=False):
         def _filter(d):
             if isinstance(d, list):
                 return [_filter(v) for v in d]
@@ -501,6 +501,8 @@ class Record(models.Model):
                 }
                 record.save()
             except Exception as e:
+                if raise_exception:
+                    raise
                 logger.exception(e)
 
 
