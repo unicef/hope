@@ -253,12 +253,11 @@ def process_flex_records_task(rdi_id, records_ids):
 
 
 @app.task
-def extract_records_task():
+def extract_records_task(max_records=1000):
     logger.info("extract_records_task start")
 
-    records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)[:5000]
+    records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     Record.extract(records_ids)
-
     logger.info("extract_records_task end")
 
 
