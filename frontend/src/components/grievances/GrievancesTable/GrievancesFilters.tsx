@@ -6,6 +6,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  TextField,
 } from '@material-ui/core';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import SearchIcon from '@material-ui/icons/Search';
@@ -14,7 +15,8 @@ import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import TextField from '../../../shared/TextField';
+import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { FieldLabel } from '../../core/FieldLabel';
@@ -47,6 +49,12 @@ export function GrievancesFilters({
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
+
+  const issueTypeDict = useArrayToDict(
+    choicesData?.grievanceTicketIssueTypeChoices,
+    'category',
+    '*',
+  );
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -156,9 +164,6 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
-          <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
-        </Grid>
-        <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Category</InputLabel>
             <Select
@@ -179,6 +184,35 @@ export function GrievancesFilters({
               })}
             </Select>
           </StyledFormControl>
+        </Grid>
+        {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+        filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+          <Grid item>
+            <StyledFormControl variant='outlined' margin='dense'>
+              <InputLabel>Issue Type</InputLabel>
+              <Select
+                onChange={(e) => handleFilterChange(e, 'issueType')}
+                variant='outlined'
+                label='Issue Type'
+                value={filter.issueType || ''}
+              >
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+                {issueTypeDict[filter.category].subCategories.map((item) => {
+                  return (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </StyledFormControl>
+          </Grid>
+        ) : null}
+
+        <Grid item>
+          <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
         </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
@@ -201,6 +235,47 @@ export function GrievancesFilters({
               })}
             </Select>
           </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <Box display='flex' flexDirection='column'>
+            <FieldLabel>{t('Similarity Score')}</FieldLabel>
+            <TextField
+              value={filter.score.min || ''}
+              variant='outlined'
+              margin='dense'
+              placeholder='From'
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  size: {
+                    ...filter.score,
+                    min: e.target.value || undefined,
+                  },
+                })
+              }
+              type='number'
+            />
+          </Box>
+        </Grid>
+        <Grid item>
+          <Box display='flex' flexDirection='column'>
+            <TextField
+              value={filter.score.max || ''}
+              variant='outlined'
+              margin='dense'
+              placeholder='To'
+              onChange={(e) =>
+                onFilterChange({
+                  ...filter,
+                  size: {
+                    ...filter.score,
+                    max: e.target.value || undefined,
+                  },
+                })
+              }
+              type='number'
+            />
+          </Box>
         </Grid>
       </Grid>
     </ContainerWithBorder>
