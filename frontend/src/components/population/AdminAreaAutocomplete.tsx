@@ -10,7 +10,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import TextField from '../../shared/TextField';
 import {
-  AdminAreaNodeEdge,
+  AreaNodeEdge,
   AllAdminAreasQuery,
   useAllAdminAreasLazyQuery,
 } from '../../__generated__/graphql';
@@ -33,7 +33,7 @@ export function AdminAreaAutocomplete({
   fullWidth?: boolean;
   onFilterChange;
   name: string;
-  value?: AdminAreaNodeEdge;
+  value?: AreaNodeEdge;
 }): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
