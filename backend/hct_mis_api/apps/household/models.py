@@ -2,7 +2,6 @@ import logging
 import re
 from datetime import date, datetime
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -13,10 +12,14 @@ from django.db.models import DecimalField, F, JSONField, Sum
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
+from model_utils.managers import SoftDeletableManager
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
+from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -28,7 +31,6 @@ from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
-    PhoneNumberField,
 )
 
 BLANK = ""
@@ -690,7 +692,7 @@ class DocumentType(TimeStampedUUIDModel):
 
 
 class Document(SoftDeletableModel, TimeStampedUUIDModel):
-    document_number = models.CharField(max_length=255, blank=True, db_index=True)
+    document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
@@ -848,8 +850,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     birth_date = models.DateField(db_index=True)
     estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
-    phone_no = PhoneNumberField(blank=True, db_index=True)
-    phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
+    phone_no = PhoneNumberField(blank=True)
+    phone_no_alternative = PhoneNumberField(blank=True)
     relationship = models.CharField(
         max_length=255,
         blank=True,
