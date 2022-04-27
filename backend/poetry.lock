@@ -396,7 +396,7 @@ test = ["pytz", "xlrd (>=0.9.2)", "xlwt", "check-manifest", "django-dynamic-fixt
 
 [[package]]
 name = "django-adminfilters"
-version = "2.0.1"
+version = "2.0.2"
 description = "Extra filters for django admin site"
 category = "main"
 optional = false
@@ -1793,7 +1793,7 @@ tests = ["pytest", "typeguard", "pygments", "littleutils", "cython"]
 
 [[package]]
 name = "tablib"
-version = "3.2.0"
+version = "3.2.1"
 description = "Format agnostic tabular data library (XLS, JSON, YAML, CSV)"
 category = "main"
 optional = false
@@ -2025,7 +2025,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "2e13fbc563ff4ea69a5ab549a5443804956bf7feeb239270deba921052fcba41"
+content-hash = "a44da5de7a30c44d080ac72227baaef3114c6ee1a28fda699d55d05f0b22e7c0"
 
 [metadata.files]
 amqp = [
@@ -2216,7 +2216,7 @@ django-adminactions = [
     {file = "django-adminactions-1.15.tar.gz", hash = "sha256:a3e16fb25e1d326c82dc5f854ae9e08b502c6c49d9dc64baa5c46b062e53d4eb"},
 ]
 django-adminfilters = [
-    {file = "django-adminfilters-2.0.1.tar.gz", hash = "sha256:fe3f13a8b2ee268d132bbc1d28e6843a7c763671027588812c95760d7079ceef"},
+    {file = "django-adminfilters-2.0.2.tar.gz", hash = "sha256:e8f5223f7c4775f473db73501c1fb6903ba247897b0a3ca84c1e793129fd5126"},
 ]
 django-advanced-filters = [
     {file = "django-advanced-filters-1.4.0.tar.gz", hash = "sha256:3877ffa956b8f1d3918556f00285750478c67312849fee5d882060fd7cad9d99"},
@@ -2985,8 +2985,8 @@ stack-data = [
     {file = "stack_data-0.2.0.tar.gz", hash = "sha256:45692d41bd633a9503a5195552df22b583caf16f0b27c4e58c98d88c8b648e12"},
 ]
 tablib = [
-    {file = "tablib-3.2.0-py3-none-any.whl", hash = "sha256:1ba12da7b0b17e33f5997fb1bc8ed560aae3535f5892ae5e5c01a056c47d4d78"},
-    {file = "tablib-3.2.0.tar.gz", hash = "sha256:12d8686454c721de88d8ca5adf07e1f419ef6dbcecedf65e8950d4a329daf3a0"},
+    {file = "tablib-3.2.1-py3-none-any.whl", hash = "sha256:870d7e688f738531a14937a055e8bba404fbc388e77d4d500b2c904075d1019c"},
+    {file = "tablib-3.2.1.tar.gz", hash = "sha256:a57f2770b8c225febec1cb1e65012a69cf30dd28be810e0ff98d024768c7d0f1"},
 ]
 tblib = [
     {file = "tblib-1.7.0-py2.py3-none-any.whl", hash = "sha256:289fa7359e580950e7d9743eab36b0691f0310fce64dee7d9c31065b8f723e23"},
