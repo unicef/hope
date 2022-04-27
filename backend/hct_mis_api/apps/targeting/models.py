@@ -46,7 +46,6 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.steficon.models import RuleCommit
-from hct_mis_api.apps.targeting.utils import get_annotate_for_children_count
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -294,22 +293,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return queryset.distinct()
 
     @property
-    def has_children_filter(self):
-        return (
-            TargetingCriteriaRuleFilter.objects.filter(
-                field_name="number_of_children",
-                targeting_criteria_rule__targeting_criteria=self.candidate_list_targeting_criteria,
-            ).count()
-            != 0
-        )
-
-    @property
     def candidate_list(self):
         if self.status != TargetPopulation.STATUS_DRAFT:
             return []
         household_queryset = Household.objects
-        if self.has_children_filter:
-            household_queryset = get_annotate_for_children_count(household_queryset)
         return household_queryset.filter(self.candidate_list_targeting_criteria.get_query()).filter(
             business_area=self.business_area
         )
