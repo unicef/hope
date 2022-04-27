@@ -61,7 +61,7 @@ class VerificationPlanStatusChangeServices:
         pv_id = self.cash_plan_verification.id
         phone_numbers = list(
             Individual.objects.filter(
-                heading_household__payment_records__verifications__cash_plan_payment_verification=pv_id
+                heading_household__payment_records__verification__cash_plan_payment_verification=pv_id
             ).values_list("phone_no", flat=True)
         )
         flow_start_info = api.start_flow(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
