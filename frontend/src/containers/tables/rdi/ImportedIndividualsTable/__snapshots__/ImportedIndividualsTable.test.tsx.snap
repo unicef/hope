@@ -245,7 +245,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
           class="MuiTableBody-root"
         >
           <tr
-            class="MuiTableRow-root sc-dnqmqq bPwZQa MuiTableRow-hover"
+            class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
             role="checkbox"
           >
             <td
@@ -254,9 +254,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               <a
                 class="sc-bxivhb iRvpKE"
                 href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozYjcwYzY4MC0xZWI2LTQ0ODAtOWExNS0yMDMwNDFhZTI4NzY="
-              >
-                3b70c680-1eb6-4480-9a15-203041ae2876
-              </a>
+              />
             </td>
             <td
               class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"

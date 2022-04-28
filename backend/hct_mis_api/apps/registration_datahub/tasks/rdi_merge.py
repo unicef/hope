@@ -2,6 +2,7 @@ import logging
 
 from django.db import transaction
 from django.forms import model_to_dict
+from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -278,6 +279,18 @@ class RdiMergeTask:
 
         return roles_to_create
 
+    def _update_individuals_and_households(self, individual_ids):
+        # update mis_unicef_id for ImportedIndividual
+        individual_qs = Individual.objects.filter(id__in=individual_ids)
+        for individual in individual_qs:
+            imported_individual = get_object_or_404(ImportedIndividual, id=individual.imported_individual_id)
+            imported_individual.mis_unicef_id = individual.unicef_id
+            imported_individual.save()
+
+            if individual.household and imported_individual.household:
+                imported_individual.household.mis_unicef_id = individual.household.unicef_id
+                imported_individual.household.save()
+
     def execute(self, registration_data_import_id):
         individual_ids = []
         try:
@@ -380,6 +393,9 @@ class RdiMergeTask:
                     obj_hct.save()
                     DeduplicateTask.hard_deduplicate_documents(documents_to_create, registration_data_import=obj_hct)
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
+
+            self._update_individuals_and_households(individual_ids)
+
         except:
             remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise

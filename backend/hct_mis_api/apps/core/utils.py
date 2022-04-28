@@ -123,11 +123,11 @@ def _slug_strip(value, separator="-"):
     if separator == "-" or not separator:
         re_sep = "-"
     else:
-        re_sep = "(?:-|%s)" % re.escape(separator)
+        re_sep = "(?:-|{})".format(re.escape(separator))
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("%s+" % re_sep, separator, value)
+        value = re.sub("{}+".format(re_sep, separator, value))
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -613,8 +613,8 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
 def admin_area1_query(comparision_method, args):
     from django.db.models import Q
 
-    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__level=1)) | Q(
-        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__level=1)
+    return Q(Q(admin_area_new__p_code=args[0]) & Q(admin_area_new__area_type__area_level=1)) | Q(
+        Q(admin_area_new__parent__p_code=args[0]) & Q(admin_area_new__parent__area_type__area_level=1)
     )
 
 

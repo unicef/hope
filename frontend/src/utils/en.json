@@ -586,5 +586,11 @@
   "Household to be withdrawn": "Household to be withdrawn",
   "Alternate Collector Issue": "Alternate Collector Issue",
   "One of the Household members is an alternate collector. This household cannot be withdrawn.": "One of the Household members is an alternate collector. This household cannot be withdrawn.",
-  "Are you sure you would like to delete this verification plan?": "Are you sure you would like to delete this verification plan?"
+  "Are you sure you would like to delete this verification plan?": "Are you sure you would like to delete this verification plan?",
+  "Payment Details": "Payment Details",
+  "Delivered Value": "Delivered Value",
+  "Received Value": "Received Value",
+  "New Verified Value": "New Verified Value",
+  "Bank account number": "Bank account number",
+  "Bank name": "Bank name"
 }

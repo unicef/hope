@@ -42,8 +42,8 @@ export const fakeApolloAllHouseholds = [
                 admin2: {
                   id:
                     'QWRtaW5BcmVhTm9kZTo2ZDRmZmJhNi0xN2Q3LTRhYjctYWJkYS1kODg2OWM3NjQxODc=',
-                  title: 'Achin',
-                  __typename: 'AdminAreaNode',
+                  name: 'Achin',
+                  __typename: 'AreaNode',
                 },
                 residenceStatus: 'REFUGEE',
                 totalCashReceived: null,

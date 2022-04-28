@@ -330,3 +330,18 @@ def generate_real_cash_plans():
         .filter(cash_plan__in=cash_plans)
         .values_list("household__id", flat=True)
     )
+
+
+def generate_real_cash_plans_for_households(households):
+    if ServiceProvider.objects.count() < 3:
+        ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
+    program = RealProgramFactory(business_area=households[0].business_area)
+    cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
+    for cash_plan in cash_plans:
+        for hh in households:
+            RealPaymentRecordFactory(cash_plan=cash_plan, household=hh, business_area=hh.business_area,)
+    program.households.set(
+        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
+        .filter(cash_plan__in=cash_plans)
+        .values_list("household__id", flat=True)
+    )

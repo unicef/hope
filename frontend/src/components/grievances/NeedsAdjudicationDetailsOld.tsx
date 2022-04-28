@@ -247,7 +247,7 @@ export function NeedsAdjudicationDetailsOld({
               }
             </TableCell>
             <TableCell align='left'>
-              {details.goldenRecordsIndividual?.household?.admin2?.title}
+              {details.goldenRecordsIndividual?.household?.admin2?.name}
             </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.household?.village}
@@ -310,7 +310,7 @@ export function NeedsAdjudicationDetailsOld({
               }
             </TableCell>
             <TableCell align='left'>
-              {details.possibleDuplicate?.household?.admin2?.title}
+              {details.possibleDuplicate?.household?.admin2?.name}
             </TableCell>
             <TableCell align='left'>
               {details.possibleDuplicate?.household?.village}

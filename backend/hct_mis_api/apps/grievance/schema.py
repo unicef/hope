@@ -55,6 +55,8 @@ from hct_mis_api.apps.core.utils import (
     nested_getattr,
     to_choice_object,
 )
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
@@ -143,7 +145,7 @@ class GrievanceTicketFilter(FilterSet):
     admin = ModelMultipleChoiceFilter(
         field_name="admin",
         method="admin_filter",
-        queryset=AdminArea.objects.filter(admin_area_level__admin_level=2),
+        queryset=Area.objects.filter(area_type__area_level=2),
     )
     cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
@@ -214,7 +216,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def admin_filter(self, qs, name, value):
         if value:
-            return qs.filter(admin2__in=[admin.id for admin in value])
+            return qs.filter(admin2_new__in=[admin.id for admin in value])
         return qs
 
     def permissions_filter(self, qs, name, value):
@@ -358,6 +360,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_record = graphene.Field(PaymentRecordNode)
     related_tickets = graphene.List(lambda: GrievanceTicketNode)
     admin = graphene.String()
+    admin2 = graphene.Field(AreaNode)
 
     @staticmethod
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
@@ -419,9 +422,12 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         return GrievanceTicketNode._search_for_lookup(grievance_ticket, "payment_record")
 
     def resolve_admin(grievance_ticket, info):
-        if grievance_ticket.admin2:
-            return grievance_ticket.admin2.title
+        if grievance_ticket.admin2_new:
+            return grievance_ticket.admin2_new.name
         return None
+
+    def resolve_admin2(grievance_ticket, info):
+        return grievance_ticket.admin2_new
 
 
 class TicketNoteNode(DjangoObjectType):
@@ -617,6 +623,8 @@ class TicketSystemFlaggingDetailsNode(DjangoObjectType):
 
 
 class TicketPaymentVerificationDetailsNode(DjangoObjectType):
+    has_multiple_payment_verifications = graphene.Boolean(source='has_multiple_payment_verifications')
+
     class Meta:
         model = TicketPaymentVerificationDetails
         exclude = ("ticket",)
@@ -847,13 +855,11 @@ class Query(graphene.ObjectType):
 
         filters = chart_filters_decoder(kwargs)
         if filters.get("administrative_area") is not None:
-            from hct_mis_api.apps.core.models import AdminArea
-
             try:
                 grievance_tickets = grievance_tickets.filter(
-                    admin=AdminArea.objects.get(id=filters.get("administrative_area")).title
+                    admin2_new=Area.objects.get(id=filters.get("administrative_area")).name
                 )
-            except AdminArea.DoesNotExist:
+            except Area.DoesNotExist:
                 pass
 
         grievance_status_labels = [
