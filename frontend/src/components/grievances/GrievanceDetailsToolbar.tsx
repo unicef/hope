@@ -150,13 +150,7 @@ export const GrievanceDetailsToolbar = ({
 
     const noDuplicatesFound =
       ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-      !ticket.needsAdjudicationTicketDetails?.selectedIndividual &&
-      !ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
-
-    const noDuplicatesFoundMultiple =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-      ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
-      !ticket.needsAdjudicationTicketDetails?.selectedIndividuals.length;
+      !ticket.needsAdjudicationTicketDetails?.selectedIndividual;
 
     // added msg handling for
     let confirmationMessage = '';
@@ -172,11 +166,8 @@ export const GrievanceDetailsToolbar = ({
       confirmationMessage = t(
         'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
       );
-    } else if (noDuplicatesFoundMultiple) {
-      confirmationMessage = t(
-        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
-      );
     }
+
     return confirmationMessage;
   };
 
@@ -264,8 +255,7 @@ export const GrievanceDetailsToolbar = ({
   if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
     ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
-    !ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
-    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividual
+    !ticket?.needsAdjudicationTicketDetails?.selectedIndividual
   ) {
     closeButton = (
       <ButtonDialog

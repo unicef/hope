@@ -27,7 +27,6 @@ export interface ConfirmationDialogOptions {
   content?: string;
   continueText?: string;
   extraContent?: string;
-  disabled?: boolean;
 }
 
 export interface ConfirmationDialogProps extends ConfirmationDialogOptions {
@@ -44,7 +43,6 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   extraContent,
   onSubmit,
   onClose,
-  disabled = false,
 }) => {
   const { t } = useTranslation();
 
@@ -68,12 +66,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
           <Button color='primary' onClick={onClose} autoFocus>
             {t('Cancel')}
           </Button>
-          <Button
-            variant='contained'
-            color='primary'
-            disabled={disabled}
-            onClick={onSubmit}
-          >
+          <Button variant='contained' color='primary' onClick={onSubmit}>
             {continueText || t('Continue')}
           </Button>
         </DialogActions>

@@ -38,7 +38,7 @@ const StyledTable = styled(Table)`
   }
 `;
 
-export function NeedsAdjudicationDetailsNew({
+export function NeedsAdjudicationDetails({
   ticket,
   canApprove,
 }: {
@@ -58,55 +58,18 @@ export function NeedsAdjudicationDetailsNew({
     ],
   });
   const details = ticket.needsAdjudicationTicketDetails;
-  const initialIds = details.selectedIndividuals.map((el) => el.id);
-
-  const [selectedDuplicates, setSelectedDuplicates] = useState(initialIds);
+  const [selectedDuplicate, setSelectedDuplicate] = useState(
+    details?.selectedIndividual?.id,
+  );
   const [isEditMode, setIsEditMode] = useState(false);
-
-  const handleChecked = (id: string): void => {
-    let newSelected = [...selectedDuplicates];
-    if (selectedDuplicates.includes(id)) {
-      newSelected = newSelected.filter((el) => el !== id);
-    } else {
-      newSelected.push(id);
-    }
-    setSelectedDuplicates(newSelected);
-  };
-
-  const allSelected = (): boolean => {
-    let tableItemsCount = details.possibleDuplicates.length;
-    if (details.goldenRecordsIndividual?.id) {
-      tableItemsCount += 1;
-    }
-    return tableItemsCount === selectedDuplicates.length;
-  };
-
-  const getConfirmationText = (): string => {
-    let confirmationText = '';
-    if (selectedDuplicates.length === 1) {
-      confirmationText = t(
-        'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.',
-      );
-    }
-    if (selectedDuplicates.length > 1) {
-      confirmationText = t(
-        'Are you sure you want to mark these records as duplicates? They will be removed from Golden Records upon ticket closure.',
-      );
-    }
-
-    if (allSelected()) {
-      confirmationText = t('You cannot mark all individuals as duplicates');
-    }
-    return confirmationText;
-  };
+  const confirmationText = t(
+    'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.',
+  );
   const isApproved = !!details.selectedIndividual;
   const isEditable = isEditMode || !isApproved;
 
   const isApproveDisabled = (): boolean => {
-    return (
-      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-      !selectedDuplicates.length
-    );
+    return ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   };
 
   const findRecord = (itemId) => (record) => record.hitId === itemId;
@@ -129,10 +92,8 @@ export function NeedsAdjudicationDetailsNew({
     );
   };
 
-  const getPossibleDuplicateSimilarity = (
-    possibleDuplicate,
-  ): number | string => {
-    const { extraData, goldenRecordsIndividual } = details;
+  const getPossibleDuplicateSimilarity = (): number | string => {
+    const { extraData, goldenRecordsIndividual, possibleDuplicate } = details;
     const individualId = goldenRecordsIndividual?.id;
     const extraDataPossibleDuplicate1 = extraData?.possibleDuplicate;
     const deduplicationGoldenRecordResults =
@@ -142,65 +103,6 @@ export function NeedsAdjudicationDetailsNew({
       getSimilarity(extraDataPossibleDuplicate1, individualId) ||
       getSimilarity(deduplicationGoldenRecordResults, individualId) ||
       '-'
-    );
-  };
-
-  const renderPossibleDuplicateRow = (
-    possibleDuplicate,
-  ): React.ReactElement => {
-    return (
-      <TableRow key={possibleDuplicate?.id}>
-        <TableCell align='left'>
-          <Checkbox
-            color='primary'
-            disabled={
-              !isEditable ||
-              ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-            }
-            checked={selectedDuplicates.includes(possibleDuplicate?.id)}
-            onChange={() => handleChecked(possibleDuplicate?.id)}
-          />
-        </TableCell>
-        <TableCell align='left'>
-          <BlackLink
-            to={`/${businessArea}/population/individuals/${possibleDuplicate?.id}`}
-          >
-            {possibleDuplicate?.unicefId}
-          </BlackLink>
-        </TableCell>
-        <TableCell align='left'>
-          <BlackLink
-            to={`/${businessArea}/population/household/${possibleDuplicate?.household?.id}`}
-          >
-            {possibleDuplicate?.household?.unicefId || '-'}
-          </BlackLink>
-        </TableCell>
-        <TableCell align='left'>{possibleDuplicate?.fullName}</TableCell>
-        <TableCell align='left'>{possibleDuplicate?.sex}</TableCell>
-        <TableCell align='left'>
-          <UniversalMoment>{possibleDuplicate?.birthDate}</UniversalMoment>
-        </TableCell>
-        <TableCell align='left'>
-          {getPossibleDuplicateSimilarity(possibleDuplicate)}
-        </TableCell>
-        <TableCell align='left'>
-          <UniversalMoment>
-            {possibleDuplicate?.lastRegistrationDate}
-          </UniversalMoment>
-        </TableCell>
-        <TableCell align='left'>
-          {possibleDuplicate?.documents?.edges[0]?.node.type.label}
-        </TableCell>
-        <TableCell align='left'>
-          {possibleDuplicate?.documents?.edges[0]?.node.documentNumber}
-        </TableCell>
-        <TableCell align='left'>
-          {possibleDuplicate?.household?.admin2?.title}
-        </TableCell>
-        <TableCell align='left'>
-          {possibleDuplicate?.household?.village}
-        </TableCell>
-      </TableRow>
     );
   };
 
@@ -241,13 +143,12 @@ export function NeedsAdjudicationDetailsNew({
                 disabled={isApproveDisabled()}
                 onClick={() =>
                   confirm({
-                    content: getConfirmationText(),
-                    disabled: allSelected(),
+                    content: confirmationText,
                   }).then(() => {
                     approve({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        selectedIndividualIds: selectedDuplicates,
+                        selectedIndividualId: selectedDuplicate,
                       },
                     });
                     setIsEditMode(false);
@@ -288,11 +189,13 @@ export function NeedsAdjudicationDetailsNew({
                   !isEditable ||
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                 }
-                checked={selectedDuplicates.includes(
-                  details.goldenRecordsIndividual?.id,
-                )}
-                onChange={() =>
-                  handleChecked(details.goldenRecordsIndividual?.id)
+                checked={
+                  selectedDuplicate === details.goldenRecordsIndividual?.id
+                }
+                onChange={(event, checked) =>
+                  setSelectedDuplicate(
+                    checked ? details.goldenRecordsIndividual?.id : null,
+                  )
                 }
               />
             </TableCell>
@@ -341,15 +244,75 @@ export function NeedsAdjudicationDetailsNew({
               }
             </TableCell>
             <TableCell align='left'>
-              {details.goldenRecordsIndividual?.household?.admin2?.title}
+              {details.goldenRecordsIndividual?.household?.admin2?.name}
             </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.household?.village}
             </TableCell>
           </TableRow>
-          {details.possibleDuplicates.map((el) =>
-            renderPossibleDuplicateRow(el),
-          )}
+          <TableRow>
+            <TableCell align='left'>
+              <Checkbox
+                color='primary'
+                disabled={
+                  !isEditable ||
+                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                }
+                checked={selectedDuplicate === details.possibleDuplicate?.id}
+                onChange={(event, checked) =>
+                  setSelectedDuplicate(
+                    checked ? details.possibleDuplicate?.id : null,
+                  )
+                }
+              />
+            </TableCell>
+            <TableCell align='left'>
+              <BlackLink
+                to={`/${businessArea}/population/individuals/${details.possibleDuplicate?.id}`}
+              >
+                {details.possibleDuplicate?.unicefId}
+              </BlackLink>
+            </TableCell>
+            <TableCell align='left'>
+              <BlackLink
+                to={`/${businessArea}/population/household/${details.possibleDuplicate?.household?.id}`}
+              >
+                {details.possibleDuplicate?.household?.unicefId || '-'}
+              </BlackLink>
+            </TableCell>
+            <TableCell align='left'>
+              {details.possibleDuplicate?.fullName}
+            </TableCell>
+            <TableCell align='left'>{details.possibleDuplicate?.sex}</TableCell>
+            <TableCell align='left'>
+              <UniversalMoment>
+                {details.possibleDuplicate?.birthDate}
+              </UniversalMoment>
+            </TableCell>
+            <TableCell align='left'>
+              {getPossibleDuplicateSimilarity()}
+            </TableCell>
+            <TableCell align='left'>
+              <UniversalMoment>
+                {details.possibleDuplicate?.lastRegistrationDate}
+              </UniversalMoment>
+            </TableCell>
+            <TableCell align='left'>
+              {details.possibleDuplicate?.documents?.edges[0]?.node.type.label}
+            </TableCell>
+            <TableCell align='left'>
+              {
+                details.possibleDuplicate?.documents?.edges[0]?.node
+                  .documentNumber
+              }
+            </TableCell>
+            <TableCell align='left'>
+              {details.possibleDuplicate?.household?.admin2?.name}
+            </TableCell>
+            <TableCell align='left'>
+              {details.possibleDuplicate?.household?.village}
+            </TableCell>
+          </TableRow>
         </TableBody>
       </StyledTable>
     </StyledBox>
