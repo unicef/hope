@@ -46,7 +46,7 @@ skip = "migrations"
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "2022.4.18"
+version = "2022.4.18-hotfix-2"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
@@ -62,7 +62,7 @@ defusedxml= "0.7.0rc1"
 django-advanced-filters = "*"
 django-admin-extra-buttons = "^1.1.0"
 django-adminactions = "^1.13"
-django-adminfilters = "2.0.1"
+django-adminfilters = "2.0.2"
 django-auditlog = { url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip" }
 django-celery-beat = "^2.2.0"
 django-celery-results = "^2.0.1"

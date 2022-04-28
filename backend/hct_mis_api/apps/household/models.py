@@ -5,6 +5,7 @@ from datetime import date, datetime
 from django.conf import settings
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
+from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.db.models import DecimalField, F, JSONField, Sum
@@ -375,6 +376,13 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    children_count = models.PositiveIntegerField(default=None, null=True)
+    male_children_count = models.PositiveIntegerField(default=None, null=True)
+    female_children_count = models.PositiveIntegerField(default=None, null=True)
+    children_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
+
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
         related_name="households",
@@ -591,6 +599,14 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         from_18_to_60_years = Q(birth_date__lte=date_18_years_ago, birth_date__gt=date_60_years_ago)
         from_60_years = Q(birth_date__lte=date_60_years_ago)
 
+        children_count = Q(birth_date__gt=date_18_years_ago)
+        female_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
+        male_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
+
+        children_disabled_count = Q(birth_date__gt=date_18_years_ago) & disabled_disability
+        female_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & female_disability_beneficiary
+        male_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & male_disability_beneficiary
+
         age_groups = self.individuals.aggregate(
             female_age_group_0_5_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_6_years)),
             female_age_group_6_11_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_6_to_12_years)),
@@ -656,8 +672,39 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
                 distinct=True,
                 filter=Q(is_beneficiary & active_beneficiary & Q(pregnant=True)),
             ),
+            children_count=Count(
+                "id",
+                distinct=True,
+                filter=children_count,
+            ),
+            female_children_count=Count(
+                "id",
+                distinct=True,
+                filter=female_children_count,
+            ),
+            male_children_count=Count(
+                "id",
+                distinct=True,
+                filter=male_children_count,
+            ),
+            children_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=children_disabled_count,
+            ),
+            female_children_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=female_children_disabled_count,
+            ),
+            male_children_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=male_children_disabled_count,
+            ),
         )
-        updated_fields = ["child_hoh", "fchild_hoh"]
+        updated_fields = ["child_hoh", "fchild_hoh", "updated_at"]
+
         for key, value in age_groups.items():
             updated_fields.append(key)
             setattr(self, key, value)
@@ -902,9 +949,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     deduplication_golden_record_results = JSONField(default=dict, blank=True)
     deduplication_batch_results = JSONField(default=dict, blank=True)
     imported_individual_id = models.UUIDField(null=True, blank=True)
-    sanction_list_possible_match = models.BooleanField(default=False)
-    sanction_list_confirmed_match = models.BooleanField(default=False)
-    sanction_list_last_check = models.DateTimeField(null=True, blank=True)
+    sanction_list_possible_match = models.BooleanField(default=False, db_index=True)
+    sanction_list_confirmed_match = models.BooleanField(default=False, db_index=True)
     pregnant = models.BooleanField(null=True)
     observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE, default=NONE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
@@ -969,6 +1015,10 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             return STATUS_INACTIVE
         return STATUS_ACTIVE
 
+    @property
+    def sanction_list_last_check(self):
+        return cache.get("sanction_list_last_check")
+
     def withdraw(self):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
@@ -1007,7 +1057,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             "selfcare_disability",
             "comms_disability",
         )
-        should_be_disabled = False
+        should_be_disabled = self.disability == DISABLED
         for field in disability_fields:
             value = getattr(self, field, None)
             should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
