@@ -612,18 +612,45 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
-    possible_duplicate = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
+    is_multiple_duplicates_version = models.BooleanField(default=False)
+    possible_duplicate = models.ForeignKey(
+        "household.Individual",
+        related_name="+",
+        on_delete=models.CASCADE
+    )  # this field will be deprecated
+    possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
     selected_individual = models.ForeignKey(
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
+    )  # this field will be deprecated
+    selected_individuals = models.ManyToManyField(
+        "household.Individual", related_name="ticket_selected"
     )
     role_reassign_data = JSONField(default=dict)
     extra_data = JSONField(default=dict)
 
     @property
     def has_duplicated_document(self):
-        documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
-        documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
-        return bool(set(documents1) & set(documents2))
+        if not self.is_multiple_duplicates_version:
+            documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
+            documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
+            return bool(set(documents1) & set(documents2))
+        else:
+            possible_duplicates = [self.golden_records_individual, *self.possible_duplicates.all()]
+            selected_individuals = self.selected_individuals.all()
+
+            unselected_individuals = [
+                individual for individual in possible_duplicates
+                if individual not in selected_individuals
+            ]
+
+            if unselected_individuals:
+                documents = []
+                for individual in unselected_individuals:
+                    documents.append(set([
+                        f"{x.document_number}--{x.type_id}" for x in individual.documents.all()
+                    ]))
+                return bool(set.intersection(*documents))
+            return False
 
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):

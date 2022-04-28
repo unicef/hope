@@ -582,12 +582,20 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
 class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
     golden_records = graphene.List(DeduplicationResultNode)
     possible_duplicate = graphene.List(DeduplicationResultNode)
+    possible_duplicates = graphene.List(IndividualNode)
+    selected_individuals = graphene.List(IndividualNode)
 
     def resolve_golden_records(self, info):
         return encode_ids(self.golden_records, "Individual", "hit_id")
 
     def resolve_possible_duplicate(self, info):
         return encode_ids(self.possible_duplicate, "Individual", "hit_id")
+
+    def resolve_possible_duplicates(self, info):
+        return self.possible_duplicates.all()
+
+    def resolve_selected_individuals(self, info):
+        return self.selected_individuals.all()
 
 
 class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):

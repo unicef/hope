@@ -69,6 +69,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
+from hct_mis_api.apps.grievance.utils import get_individual, traverse_sibling_tickets
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -1079,6 +1080,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         selected_individual_id = graphene.Argument(graphene.ID, required=False)
+        selected_individual_ids = graphene.List(graphene.ID, required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -1099,12 +1101,17 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         )
 
         selected_individual_id = kwargs.get("selected_individual_id", None)
+        selected_individual_ids = kwargs.get("selected_individual_ids", None)
+
+        if selected_individual_id and selected_individual_ids:
+            logger.error("Only one option for selected individuals is available")
+            raise GraphQLError("Only one option for selected individuals is available")
+
         ticket_details = grievance_ticket.ticket_details
         selected_individual = None
 
         if selected_individual_id:
-            decoded_selected_individual_id = decode_id_string(selected_individual_id)
-            selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
+            selected_individual = get_individual(selected_individual_id)
 
             if selected_individual not in (
                 ticket_details.golden_records_individual,
@@ -1113,8 +1120,16 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
                 logger.error("The selected individual is not valid, must be one of those attached to the ticket")
                 raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
 
-        ticket_details.selected_individual = selected_individual
-        ticket_details.role_reassign_data = {}
+            ticket_details.selected_individual = selected_individual
+            ticket_details.role_reassign_data = {}
+
+        if selected_individual_ids:  # Allow choosing multiple individuals
+            selected_individuals = list(map(get_individual, selected_individual_ids))
+            for selected_individual in selected_individuals:
+                traverse_sibling_tickets(
+                    grievance_ticket, selected_individual, selected_individuals
+                )
+
         ticket_details.save()
         grievance_ticket.refresh_from_db()
 
