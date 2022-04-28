@@ -278,7 +278,7 @@ export const GrievanceTicket = gql`
             village
             admin2 {
               id
-              title
+              name
             }
           }
           fullName
