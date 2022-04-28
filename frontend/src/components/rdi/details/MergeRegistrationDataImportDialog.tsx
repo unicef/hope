@@ -72,7 +72,7 @@ export function MergeRegistrationDataImportDialog({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>{t('Merge Import')}</Typography>
+            {t('Merge Import')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
