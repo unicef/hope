@@ -8,6 +8,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import serialize_flex_attributes
+from hct_mis_api.apps.geo.models import Area
 
 
 class TemplateFileGenerator:
@@ -29,7 +30,7 @@ class TemplateFileGenerator:
             is_admin_level = field_name in ("admin1_h_c", "admin2_h_c")
             choices = field_value["choices"]
             if is_admin_level:
-                choices = AdminArea.get_admin_areas_as_choices(field_name[-5])
+                choices = Area.get_admin_areas_as_choices(field_name[-5])
             if choices:
                 for choice in field_value["choices"]:
                     row = [

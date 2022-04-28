@@ -206,7 +206,7 @@ export function EditVerificationPlan({
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
     ? data.allAdminAreas.edges.map((el) => ({
         value: el.node.id,
-        name: el.node.title,
+        name: el.node.name,
       }))
     : [];
 
