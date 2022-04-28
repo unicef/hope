@@ -32,7 +32,7 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
           size
           adminArea {
             id
-            title
+            name
           }
           updatedAt
           address

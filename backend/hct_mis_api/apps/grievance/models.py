@@ -47,7 +47,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "created_by",
             "assigned_to",
             "description",
-            "admin",
+            "admin2",
             "area",
             "language",
             "consent",

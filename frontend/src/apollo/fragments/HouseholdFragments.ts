@@ -24,13 +24,13 @@ export const householdMinimal = gql`
     adminAreaTitle
     admin1 {
       id
-      title
+      name
       level
       pCode
     }
     admin2 {
       id
-      title
+      name
       level
       pCode
     }
