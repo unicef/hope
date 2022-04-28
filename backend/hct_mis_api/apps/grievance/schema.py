@@ -14,7 +14,6 @@ from django_filters import (
     ModelChoiceFilter,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
-    NumberFilter,
     OrderingFilter,
     TypedMultipleChoiceFilter,
     UUIDFilter,
@@ -43,7 +42,6 @@ from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
     FieldAttributeNode,
-    _custom_dict_or_attr_resolver,
     sort_by_attr,
 )
 from hct_mis_api.apps.core.utils import (
@@ -77,7 +75,7 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
-from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode, FlexFieldsScalar
+from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +194,7 @@ class GrievanceTicketFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$") | Q(linked_tickets__unicef_id__regex=rf"^(GRV-(0)+)?{value}$"))
+            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$")
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
