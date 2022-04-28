@@ -9,7 +9,9 @@ import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails'
 import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';
 import { FlagDetails } from '../FlagDetails';
-import { NeedsAdjudicationDetails } from '../NeedsAdjudicationDetails';
+import { NeedsAdjudicationDetailsNew } from '../NeedsAdjudicationDetailsNew';
+import { NeedsAdjudicationDetailsOld } from '../NeedsAdjudicationDetailsOld';
+
 import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDetails/PaymentGrievanceDetails';
 import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
@@ -38,8 +40,16 @@ export function GrievancesApproveSection({
       );
     }
     if (ticket?.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
+      if (ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion) {
+        return (
+          <NeedsAdjudicationDetailsNew
+            ticket={ticket}
+            canApprove={canApproveFlagAndAdjudication}
+          />
+        );
+      }
       return (
-        <NeedsAdjudicationDetails
+        <NeedsAdjudicationDetailsOld
           ticket={ticket}
           canApprove={canApproveFlagAndAdjudication}
         />
@@ -114,7 +124,7 @@ export function GrievancesApproveSection({
   };
 
   return (
-    <Grid item xs={9}>
+    <Grid item xs={12}>
       <Box p={3}>{matchDetailsComponent()}</Box>
     </Grid>
   );

@@ -253,7 +253,62 @@ export const GrievanceTicket = gql`
             score
           }
         }
+        isMultipleDuplicatesVersion
+        possibleDuplicates {
+          id
+          documents {
+            edges {
+              node {
+                id
+                country
+                type {
+                  label
+                  country
+                }
+                documentNumber
+                photo
+              }
+            }
+          }
+          unicefId
+          lastRegistrationDate
+          household {
+            unicefId
+            id
+            village
+            admin2 {
+              id
+              title
+            }
+          }
+          fullName
+          birthDate
+          sex
+          deduplicationGoldenRecordResults {
+            hitId
+            proximityToScore
+            score
+          }
+        }
         selectedIndividual {
+          ...individualDetailed
+          household {
+            ...householdDetailed
+          }
+          householdsAndRoles {
+            individual {
+              id
+              unicefId
+            }
+            household {
+              id
+              unicefId
+            }
+            id
+            role
+          }
+        }
+        selectedIndividuals {
           ...individualDetailed
           household {
             ...householdDetailed
