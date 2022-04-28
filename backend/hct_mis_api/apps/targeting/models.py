@@ -296,7 +296,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     def candidate_list(self):
         if self.status != TargetPopulation.STATUS_DRAFT:
             return []
-        return Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).filter(
+        household_queryset = Household.objects
+        return household_queryset.filter(self.candidate_list_targeting_criteria.get_query()).filter(
             business_area=self.business_area
         )
 

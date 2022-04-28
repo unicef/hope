@@ -1,10 +1,9 @@
 from typing import Union
 
-from django.db.models import Prefetch, Q
-from django.db.models.functions import Lower
-
 import django_filters
 import graphene
+from django.db.models import Prefetch, Q
+from django.db.models.functions import Lower
 from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter
 from graphene import relay
 from graphene_django import DjangoConnectionField, DjangoObjectType
@@ -350,8 +349,9 @@ class Query(graphene.ObjectType):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
         if target_population_model.status == target_models.TargetPopulation.STATUS_DRAFT:
+            household_queryset = Household.objects
             return prefetch_selections(
-                Household.objects.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
+                household_queryset.filter(target_population_model.candidate_list_targeting_criteria.get_query()),
             ).distinct()
         return (
             prefetch_selections(
@@ -413,6 +413,9 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
+        household_queryset = Household.objects
         return prefetch_selections(
-            Household.objects.filter(targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids))
+            household_queryset.filter(
+                targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids)
+            )
         ).distinct()

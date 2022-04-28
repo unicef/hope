@@ -9,6 +9,7 @@ from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
+from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import (
     populate_index,
@@ -19,22 +20,22 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     NEEDS_ADJUDICATION,
     Agency,
+    BankAccountInfo,
     Document,
     DocumentType,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
-    BankAccountInfo,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedBankAccountInfo,
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
     RegistrationDataImportDatahub,
-    ImportedBankAccountInfo,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -311,7 +312,9 @@ class RdiMergeTask:
                     ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
 
                     roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
-                    bank_account_infos_to_create = self._prepare_bank_account_info(imported_bank_account_infos, individuals_dict)
+                    bank_account_infos_to_create = self._prepare_bank_account_info(
+                        imported_bank_account_infos, individuals_dict
+                    )
                     Household.objects.bulk_create(households_dict.values())
                     Individual.objects.bulk_create(individuals_dict.values())
                     Document.objects.bulk_create(documents_to_create)
@@ -320,6 +323,9 @@ class RdiMergeTask:
                     BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
 
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
+                    household_ids = [str(household.id) for household in households_dict.values()]
+
+                    recalculate_population_fields_task.delay(household_ids)
 
                     kobo_submissions = []
                     for imported_household in imported_households:
