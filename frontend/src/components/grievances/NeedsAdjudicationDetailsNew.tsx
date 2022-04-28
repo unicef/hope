@@ -195,7 +195,7 @@ export function NeedsAdjudicationDetailsNew({
           {possibleDuplicate?.documents?.edges[0]?.node.documentNumber}
         </TableCell>
         <TableCell align='left'>
-          {possibleDuplicate?.household?.admin2?.title}
+          {possibleDuplicate?.household?.admin2?.name}
         </TableCell>
         <TableCell align='left'>
           {possibleDuplicate?.household?.village}
@@ -341,7 +341,7 @@ export function NeedsAdjudicationDetailsNew({
               }
             </TableCell>
             <TableCell align='left'>
-              {details.goldenRecordsIndividual?.household?.admin2?.title}
+              {details.goldenRecordsIndividual?.household?.admin2?.name}
             </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.household?.village}
