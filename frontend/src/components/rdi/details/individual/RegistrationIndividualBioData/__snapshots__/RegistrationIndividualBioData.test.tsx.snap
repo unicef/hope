@@ -344,6 +344,21 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         </div>
       </div>
       <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+      >
+        <div>
+          <span
+            class="sc-bwzfXH eoWrid"
+            color="textSecondary"
+          >
+            Disability
+          </span>
+          <div>
+            Not Disabled
+          </div>
+        </div>
+      </div>
+      <div
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
       >
         <div

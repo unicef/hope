@@ -1,9 +1,8 @@
 import datetime as dt
 import logging
 
-from django.db.models import Q
-
 from dateutil.relativedelta import relativedelta
+from django.db.models import Q
 from prompt_toolkit.validation import ValidationError
 
 from hct_mis_api.apps.core.countries import Countries

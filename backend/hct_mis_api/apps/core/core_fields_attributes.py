@@ -116,6 +116,18 @@ def convert_choices(field, *args, **kwargs):
 
 CORE_FIELDS_ATTRIBUTES = [
     {
+        "id": "c8da2910-4348-47ab-a82e-725b4cebc332",
+        "type": TYPE_INTEGER,
+        "name": "number_of_children",
+        "lookup": "children_count",
+        "label": {"English(EN)": "What is the number of children in the household?"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "number_of_children",
+    },
+    {
         "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
         "type": TYPE_INTEGER,
         "name": "age",

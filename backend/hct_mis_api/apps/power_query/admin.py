@@ -48,7 +48,7 @@ class QueryResource(resources.ModelResource):
 
 
 @register(Query)
-class QueryAdmin(ImportExportMixin, AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
+class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
     list_display = ("name", "target", "description", "owner", "status", "is_ready")
     search_fields = ("name",)
     list_filter = (
@@ -74,13 +74,13 @@ class QueryAdmin(ImportExportMixin, AdminFiltersMixin, ExtraButtonsMixin, ModelA
 
     is_ready.boolean = True
 
-    @button(visible=lambda o, r: "/change" in r.path)
+    @button(visible=lambda btn: "/change" in btn.context["request"].path)
     def create_report(self, request, pk):
         obj = self.get_object(request, pk)
         url = reverse("admin:power_query_report_add")
         return HttpResponseRedirect(f"{url}?q={obj.pk}")
 
-    @button(visible=lambda o, r: o.ready and "/change" in r.path)
+    @button(visible=lambda btn: btn.context["original"].ready and "/change" in btn.context["request"].path)
     def result(self, request, pk):
         obj = self.get_object(request, pk)
         try:
@@ -89,7 +89,7 @@ class QueryAdmin(ImportExportMixin, AdminFiltersMixin, ExtraButtonsMixin, ModelA
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda o, r: "/change" in r.path)
+    @button()
     def queue(self, request, pk):
         try:
             queue.delay(pk)
@@ -97,7 +97,7 @@ class QueryAdmin(ImportExportMixin, AdminFiltersMixin, ExtraButtonsMixin, ModelA
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda o, r: o.ready and "/change" in r.path)
+    @button(visible=lambda btn: btn.context["original"].ready and "/change" in btn.context["request"].path)
     def preview(self, request, pk):
         obj: Query = self.get_object(request, pk)
         try:
@@ -144,7 +144,7 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
     def target_type(self, obj):
         return obj.query.target
 
-    @button(visible=lambda o, r: "change" in r.path)
+    @button(visible=lambda btn: "change" in btn.context["request"].path)
     def export(self, request, pk):
         obj = self.get_object(request, pk)
         try:
@@ -167,7 +167,7 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda o, r: "change" in r.path)
+    @button(visible=lambda btn: "change" in btn.context["request"].path)
     def preview(self, request, pk):
         obj = self.get_object(request, pk)
         try:
@@ -176,6 +176,7 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
             context["dataset"] = to_dataset(data)
             return render(request, "power_query/preview.html", context)
         except Exception as e:
+            logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
 
@@ -198,7 +199,7 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
         models.TextField: {"widget": FormatterEditor(theme="abcdef")},
     }
 
-    @button(visible=lambda o, r: "change" in r.path)
+    @button(visible=lambda btn: "change" in btn.context["request"].path)
     def test(self, request, pk):
         context = self.get_common_context(request, pk)
         # obj = self.get_object(request, pk)
@@ -258,7 +259,7 @@ class ReportAdmin(ImportExportMixin, ExtraButtonsMixin, AdminFiltersMixin, Model
 
     is_ready.boolean = True
 
-    @button(visible=lambda o, r: "change" in r.path)
+    @button(visible=lambda btn: "change" in btn.context["request"].path)
     def execute(self, request, pk):
         obj: Report = self.get_object(request, pk)
         try:
@@ -267,12 +268,12 @@ class ReportAdmin(ImportExportMixin, ExtraButtonsMixin, AdminFiltersMixin, Model
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
-    @button(visible=lambda o, r: o.result and "/change" in r.path)
+    @button(visible=lambda btn: btn.context["original"].result and "/change" in btn.context["request"].path)
     def view(self, request, pk):
         url = reverse("power_query:report", args=[pk])
         return HttpResponseRedirect(url)
 
-    @button(visible=lambda o, r: r.path.endswith("/power_query/report/"))
+    @button(visible=lambda btn: btn.path.endswith("/power_query/report/"))
     def refresh(self, request):
         try:
             refresh_reports.delay()
