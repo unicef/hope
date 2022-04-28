@@ -854,6 +854,12 @@ type HouseholdNode implements Node {
   maleAgeGroup1217DisabledCount: Int
   maleAgeGroup1859DisabledCount: Int
   maleAgeGroup60DisabledCount: Int
+  childrenCount: Int
+  maleChildrenCount: Int
+  femaleChildrenCount: Int
+  childrenDisabledCount: Int
+  maleChildrenDisabledCount: Int
+  femaleChildrenDisabledCount: Int
   registrationDataImport: RegistrationDataImportNode!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean
