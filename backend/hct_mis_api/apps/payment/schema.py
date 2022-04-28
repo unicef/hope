@@ -490,7 +490,7 @@ class Query(graphene.ObjectType):
 
         admin_areas = (
             Area.objects.filter(
-                area_level=2,
+                area_type__area_level=2,
                 household__payment_records__in=payment_records,
             )
             .distinct()
