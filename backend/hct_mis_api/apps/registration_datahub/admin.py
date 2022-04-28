@@ -113,15 +113,12 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         "batch_score",
     )
     list_filter = (
-        DepotManager,
         ("deduplication_batch_results", NumberFilter),
         ("deduplication_golden_record_results", NumberFilter),
         ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
         ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
         "deduplication_batch_status",
         "deduplication_golden_record_status",
-        QueryStringFilter
-
     )
     date_hierarchy = "updated_at"
     # raw_id_fields = ("household", "registration_data_import")
@@ -199,28 +196,21 @@ class ImportDataAdmin(HOPEModelAdminBase):
 @admin.register(ImportedDocumentType)
 class ImportedDocumentTypeAdmin(HOPEModelAdminBase):
     list_display = ("label", "country")
-    list_filter = (("country", ChoicesFieldComboFilter),
-        "label",
-        QueryStringFilter
-        )
+    list_filter = (("country", ChoicesFieldComboFilter), "label", QueryStringFilter)
 
 
 @admin.register(ImportedDocument)
 class ImportedDocumentAdmin(HOPEModelAdminBase):
     list_display = ("document_number", "type", "individual")
     raw_id_fields = ("individual", "type")
-    list_filter = (("type", AutoCompleteFilter), 
-        QueryStringFilter
-        )
+    list_filter = (("type", AutoCompleteFilter), QueryStringFilter)
     date_hierarchy = "created_at"
 
 
 @admin.register(ImportedIndividualRoleInHousehold)
 class ImportedIndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
     raw_id_fields = ("individual", "household")
-    list_filter = ("role",
-        QueryStringFilter
-        )
+    list_filter = ("role", QueryStringFilter)
 
 
 @admin.register(KoboImportedSubmission)
@@ -238,7 +228,7 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
         "amended",
         ("registration_data_import", AutoCompleteFilter),
         ("imported_household", AutoCompleteFilter),
-        QueryStringFilter
+        QueryStringFilter,
     )
     advanced_filter_fields = (
         # "created_at",
@@ -350,7 +340,8 @@ class AlexisFilter(SimpleListFilter):
 @admin.register(Record)
 class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "ignored")
-    readonly_fields = ("id", "registration", "timestamp", "source_id", "ignored", "registration_data_import")
+    readonly_fields = ("id", "registration", "timestamp", "source_id", "registration_data_import")
+    list_editable = ("ignored",)
     exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
@@ -366,9 +357,8 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     change_list_template = "registration_datahub/admin/record/change_list.html"
 
     actions = [mass_update, "extract", "async_extract", "create_rdi"]
-    mass_update_fields = [
-        "fields",
-    ]
+
+    mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
 
     def get_queryset(self, request):
@@ -468,18 +458,21 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     #             response.set_cookie(k, v)
     #     return response
 
-    @button()
-    def extract_all(self, request):
-        records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)
-        Record.extract(records_ids)
-
+    # @button()
+    # def extract_all(self, request):
+    #     records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)
+    #     Record.extract(records_ids)
+    #
     @button(label="Extract")
     def extract_single(self, request, pk):
         records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
-        Record.extract(records_ids)
+        try:
+            Record.extract(records_ids, raise_exception=True)
+        except Exception as e:
+            self.message_error_to_user(request, e)
 
     def has_add_permission(self, request):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return is_root(request)

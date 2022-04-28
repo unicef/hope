@@ -21,7 +21,7 @@ export const GrievanceTicket = gql`
       admin
       admin2 {
         id
-        title
+        name
         pCode
       }
       area
@@ -204,7 +204,7 @@ export const GrievanceTicket = gql`
             village
             admin2 {
               id
-              title
+              name
             }
           }
           fullName
@@ -241,7 +241,7 @@ export const GrievanceTicket = gql`
             village
             admin2 {
               id
-              title
+              name
             }
           }
           fullName

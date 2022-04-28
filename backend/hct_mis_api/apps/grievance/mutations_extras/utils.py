@@ -51,7 +51,6 @@ def handle_add_document(document, individual):
 
     document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
     if document_already_exists:
-        logger.error(f"Document with number {number} of type {type_name} for country {country} already exist")
         raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
 
     return Document(document_number=number, individual=individual, type=document_type, photo=photo)
@@ -87,7 +86,6 @@ def handle_edit_document(document_data: dict):
         Document.objects.exclude(pk=document_id).filter(document_number=number, type=document_type).exists()
     )
     if document_already_exists:
-        logger.error(f"Document with number {number} of type {type_name} for country {country} already exist")
         raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
 
     document.document_number = number

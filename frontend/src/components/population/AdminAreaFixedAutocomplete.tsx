@@ -38,7 +38,7 @@ export function AdminAreaFixedAutocomplete({
   const businessArea = useBusinessArea();
   const { data, loading } = useAllAdminAreasQuery({
     variables: {
-      title: debouncedInputText,
+      name: debouncedInputText,
       businessArea,
       first: 50,
       level: 2,
@@ -49,7 +49,7 @@ export function AdminAreaFixedAutocomplete({
     if (data) {
       setNewValue(
         typeof value === 'string'
-          ? data.allAdminAreas.edges.find((item) => item.node.title === value)
+          ? data.allAdminAreas.edges.find((item) => item.node.name === value)
           : value,
       );
     } else {
@@ -58,7 +58,7 @@ export function AdminAreaFixedAutocomplete({
     // onInputTextChange('');
   }, [data, value]);
   const onChangeMiddleware = (e, selectedValue, reason): void => {
-    onInputTextChange(selectedValue?.node?.title);
+    onInputTextChange(selectedValue?.node?.name);
     onChange(e, selectedValue, reason);
   };
   return (
@@ -82,7 +82,7 @@ export function AdminAreaFixedAutocomplete({
         if (!option.node) {
           return '';
         }
-        return `${option.node.title}`;
+        return `${option.node.name}`;
       }}
       disabled={disabled}
       options={get(data, 'allAdminAreas.edges', [])}

@@ -13,6 +13,7 @@ from hct_mis_api.apps.cash_assist_datahub import (
 )
 from hct_mis_api.apps.cash_assist_datahub.models import Programme, Session
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
@@ -146,6 +147,9 @@ class Command(BaseCommand):
                         "admin_area": AdminArea.objects.filter(admin_area_level__business_area=business_area)
                         .order_by("?")
                         .first(),
+                        "admin_area_new": Area.objects.filter(area_type__business_area=business_area)
+                        .order_by("?")
+                        .first(),
                     },
                     {"registration_data_import": registration_data_import},
                 )
@@ -174,10 +178,16 @@ class Command(BaseCommand):
                     should_contain_payment_record = random.choice((True, False))
                     switch_dict = {
                         "feedback": lambda: GrievanceTicketFactory(
-                            admin=AdminArea.objects.filter(admin_area_level__business_area=business_area, level=2)
+                            admin2=AdminArea.objects.filter(admin_area_level__business_area=business_area, level=2)
                             .order_by("?")
                             .first()
-                            .title
+                            .title,
+                            admin2_new=Area.objects.filter(
+                                area_type__business_area=business_area, area_type__area_level=2
+                            )
+                            .order_by("?")
+                            .first()
+                            .title,
                         ),
                         "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
                             household=household,

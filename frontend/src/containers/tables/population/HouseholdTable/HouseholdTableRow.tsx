@@ -92,7 +92,7 @@ export function HouseHoldTableRow({
       </TableCell>
       <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household.admin2?.title || '-'}</TableCell>
+      <TableCell align='left'>{household.admin2?.name || '-'}</TableCell>
       <TableCell align='left'>
         {residenceStatusChoiceDict[household.residenceStatus]}
       </TableCell>

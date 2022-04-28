@@ -15,6 +15,7 @@ from openpyxl.utils import get_column_letter
 
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
     NONE,
@@ -156,9 +157,10 @@ class GenerateReportContentHelpers:
         result = []
         for admin_area_id in admin_areas_ids:
             admin_area_id = decode_id_string(admin_area_id)
-            admin_area = AdminArea.objects.filter(id=admin_area_id).first()
-            if admin_area:
+            if admin_area := AdminArea.objects.filter(id=admin_area_id).first():
                 result.append(admin_area.title)
+            elif admin_area := Area.objects.filter(id=admin_area_id).first():
+                result.append(admin_area.name)
         return ", ".join(result)
 
     @classmethod
