@@ -1,5 +1,4 @@
 import logging
-
 from decimal import Decimal
 from itertools import chain
 
@@ -252,9 +251,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             {"individual": "golden_records_individual"},
             {"household": "golden_records_individual.household"},
         ),
-        "payment_verification_ticket_details": (
-            {"payment_record": "payment_verification.payment_record"}
-        )
+        "payment_verification_ticket_details": ({"payment_record": "payment_verification.payment_record"}),
     }
 
     TICKET_DETAILS_NAME_MAPPING = {
@@ -353,9 +350,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
     @property
     def related_tickets(self):
-        all_through_objects = GrievanceTicketThrough.objects.filter(Q(linked_ticket=self) | Q(main_ticket=self)).values_list(
-            "main_ticket", "linked_ticket"
-        )
+        all_through_objects = GrievanceTicketThrough.objects.filter(
+            Q(linked_ticket=self) | Q(main_ticket=self)
+        ).values_list("main_ticket", "linked_ticket")
         ids = set(self.flatten(all_through_objects))
         ids.discard(self.id)
         return GrievanceTicket.objects.filter(id__in=ids)
@@ -417,6 +414,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
     def __str__(self):
         return self.description or str(self.pk)
+
+    def get_issue_type(self):
+        return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):
@@ -639,17 +639,9 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         choices=PaymentVerification.STATUS_CHOICES,
     )
     payment_verification = models.ForeignKey(
-        "payment.PaymentVerification",
-        related_name="ticket_detail",
-        on_delete=models.SET_NULL,
-        null=True
+        "payment.PaymentVerification", related_name="ticket_detail", on_delete=models.SET_NULL, null=True
     )
-    new_status = models.CharField(
-        max_length=50,
-        choices=PaymentVerification.STATUS_CHOICES,
-        default=None,
-        null=True
-    )
+    new_status = models.CharField(max_length=50, choices=PaymentVerification.STATUS_CHOICES, default=None, null=True)
     new_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=12,

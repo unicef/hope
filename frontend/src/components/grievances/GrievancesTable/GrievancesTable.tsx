@@ -40,11 +40,13 @@ export const GrievancesTable = ({
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify(filter.createdAtRange),
+    category: filter.category,
+    issueType: filter.issueType,
+    assignedTo: filter.assignedTo,
     admin: [decodeIdString(filter?.admin?.node?.id)],
     registrationDataImport: filter.registrationDataImport,
-    category: filter.category,
-    assignedTo: filter.assignedTo,
     cashPlan: filter.cashPlan,
+    // score: JSON.stringify(filter.score),
   };
 
   const {
