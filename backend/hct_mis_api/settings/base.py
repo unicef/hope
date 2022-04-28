@@ -7,9 +7,11 @@ from uuid import uuid4
 ####
 # Change per project
 ####
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from graphql import GraphQLError
 
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
@@ -607,6 +609,7 @@ if SENTRY_DSN:
         ],
         release=get_full_version(),
         send_default_pii=True,
+        ignore_errors=[ValidationError, GraphQLError],
     )
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
@@ -618,7 +621,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_INSTANCE}/0"
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 120 * 60
+CELERY_TASK_TIME_LIMIT = 240 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
 
