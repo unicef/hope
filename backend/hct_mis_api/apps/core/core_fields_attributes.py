@@ -1,3 +1,4 @@
+import copy
 import logging
 from datetime import datetime
 from functools import reduce
@@ -108,6 +109,7 @@ def country_origin_query(comparision_method, args):
 
 
 def convert_choices(field, *args, **kwargs):
+    field = copy.deepcopy(field)
     choices = field.get("choices")
     if callable(choices):
         field["choices"] = choices(*args, **kwargs)
