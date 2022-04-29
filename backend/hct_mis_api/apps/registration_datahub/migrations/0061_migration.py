@@ -10,12 +10,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL("CREATE INDEX individuals_num ON registration_datahub_record((data->'individuals_num'));"),
-        migrations.RunSQL("CREATE INDEX collectors_num ON registration_datahub_record((data->'collectors_num'));"),
-        migrations.RunSQL("CREATE INDEX head ON registration_datahub_record((data->'head'));"),
-        migrations.RunSQL("CREATE INDEX valid_phones ON registration_datahub_record((data->'valid_phones'));"),
-        migrations.RunSQL("CREATE INDEX birth_certificate ON registration_datahub_record((data->'birth_certificate'));"),
-        migrations.RunSQL("CREATE INDEX disability_certificate_match ON registration_datahub_record((data->'disability_certificate_match'));"),
-        migrations.RunSQL("CREATE INDEX collector_bank_account ON registration_datahub_record((data->'collector_bank_account'));"),
-        migrations.RunSQL("CREATE INDEX valid_payment ON registration_datahub_record((data->'valid_payment'));"),
+        # migrations.RunSQL("CREATE INDEX individuals_num ON registration_datahub_record((data->'individuals_num'));"),
+        # migrations.RunSQL("CREATE INDEX collectors_num ON registration_datahub_record((data->'collectors_num'));"),
+        # migrations.RunSQL("CREATE INDEX head ON registration_datahub_record((data->'head'));"),
+        # migrations.RunSQL("CREATE INDEX valid_phones ON registration_datahub_record((data->'valid_phones'));"),
+        # migrations.RunSQL("CREATE INDEX birth_certificate ON registration_datahub_record((data->'birth_certificate'));"),
+        # migrations.RunSQL("CREATE INDEX disability_certificate_match ON registration_datahub_record((data->'disability_certificate_match'));"),
+        # migrations.RunSQL("CREATE INDEX collector_bank_account ON registration_datahub_record((data->'collector_bank_account'));"),
+        # migrations.RunSQL("CREATE INDEX valid_payment ON registration_datahub_record((data->'valid_payment'));"),
     ]
