@@ -141,12 +141,13 @@ class FieldAttributeNode(graphene.ObjectType):
     is_flex_field = graphene.Boolean()
 
     def resolve_choices(parent, info):
-        if isinstance(
-            _custom_dict_or_attr_resolver("choices", None, parent, info),
-            Iterable,
-        ):
-            return sorted(parent["choices"], key=lambda elem: elem["label"]["English(EN)"])
-        return _custom_dict_or_attr_resolver("choices", None, parent, info).order_by("name").all()
+        choices = _custom_dict_or_attr_resolver("choices", None, parent, info)
+        if isinstance(parent, dict) and callable(choices):
+            choices = choices()
+
+        if isinstance(choices, Iterable):
+            return sorted(choices, key=lambda elem: elem["label"]["English(EN)"])
+        return choices.order_by("name").all()
 
     def resolve_is_flex_field(self, info):
         if isinstance(self, FlexibleAttribute):
