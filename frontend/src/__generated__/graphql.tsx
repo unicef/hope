@@ -5338,6 +5338,8 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   selectedIndividual?: Maybe<IndividualNode>,
   roleReassignData: Scalars['JSONString'],
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>,
+  scoreMin: Scalars['Float'],
+  scoreMax: Scalars['Float'],
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
 };
 
@@ -21204,6 +21206,8 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>,
+  scoreMin?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  scoreMax?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 

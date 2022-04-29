@@ -37,8 +37,8 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_IMAGE,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.filters import DateTimeRangeFilter
-from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
+from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
     FieldAttributeNode,
@@ -152,6 +152,8 @@ class GrievanceTicketFilter(FilterSet):
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
+    score_min = IntegerFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
+    score_max = IntegerFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
 
     class Meta:
         fields = {
