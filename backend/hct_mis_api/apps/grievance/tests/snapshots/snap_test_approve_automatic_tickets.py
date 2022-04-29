@@ -31,7 +31,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'locations': [
                 {
                     'column': 7,
-                    'line': 3
+                    'line': 5
                 }
             ],
             'message': 'Permission Denied: User does not have correct permission.',
@@ -43,29 +43,41 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
 }
 
 snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_allows_multiple_selected_individuals_0_with_permission 1'] = {
+    'data': {
+        'approveNeedsAdjudication': None
+    },
     'errors': [
         {
             'locations': [
                 {
-                    'column': 15,
-                    'line': 14
+                    'column': 7,
+                    'line': 5
                 }
             ],
-            'message': 'Cannot query field "id" on type "IndividualNodeConnection".'
+            'message': "'NoneType' object has no attribute 'id'",
+            'path': [
+                'approveNeedsAdjudication'
+            ]
         }
     ]
 }
 
 snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_allows_multiple_selected_individuals_1_without_permission 1'] = {
+    'data': {
+        'approveNeedsAdjudication': None
+    },
     'errors': [
         {
             'locations': [
                 {
-                    'column': 15,
-                    'line': 14
+                    'column': 7,
+                    'line': 5
                 }
             ],
-            'message': 'Cannot query field "id" on type "IndividualNodeConnection".'
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'approveNeedsAdjudication'
+            ]
         }
     ]
 }
@@ -92,7 +104,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'locations': [
                 {
                     'column': 7,
-                    'line': 3
+                    'line': 5
                 }
             ],
             'message': 'Permission Denied: User does not have correct permission.',

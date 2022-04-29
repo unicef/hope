@@ -39,8 +39,14 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     }
     """
     APPROVE_NEEDS_ADJUDICATION_MUTATION = """
-    mutation ApproveNeedsAdjudicationTicket($grievanceTicketId: ID!, $selectedIndividualId: ID) {
-      approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId) {
+    mutation ApproveNeedsAdjudicationTicket(
+    $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
+    ) {
+      approveNeedsAdjudication(
+      grievanceTicketId: $grievanceTicketId, 
+      selectedIndividualId: $selectedIndividualId, 
+      selectedIndividualIds: $selectedIndividualIds
+      ) {
         grievanceTicket {
           id
           needsAdjudicationTicketDetails {
