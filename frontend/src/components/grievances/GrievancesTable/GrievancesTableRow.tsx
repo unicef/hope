@@ -23,6 +23,7 @@ interface GrievancesTableRowProps {
   statusChoices: { [id: number]: string };
   categoryChoices: { [id: number]: string };
   canViewDetails: boolean;
+  issueTypeChoicesData;
 }
 
 export function GrievancesTableRow({
@@ -30,14 +31,22 @@ export function GrievancesTableRow({
   statusChoices,
   categoryChoices,
   canViewDetails,
+  issueTypeChoicesData,
 }: GrievancesTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const detailsPath = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
-
   const handleClick = (): void => {
     history.push(detailsPath);
   };
+
+  const issueType = ticket.issueType
+    ? issueTypeChoicesData
+        .filter((el) => el.category === ticket.category.toString())[0]
+        .subCategories.filter(
+          (el) => el.value === ticket.issueType.toString(),
+        )[0].name
+    : '-';
   return (
     <ClickableTableRow
       hover
@@ -62,6 +71,7 @@ export function GrievancesTableRow({
       </TableCell>
       <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
+      <TableCell align='left'>{issueType}</TableCell>
       <TableCell align='left'>{ticket.household?.unicefId || '-'}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{ticket.createdAt}</UniversalMoment>

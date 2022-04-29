@@ -19,8 +19,9 @@ export const AllGrievanceTicket = gql`
     $registrationDataImport: ID
     $assignedTo: ID
     $cashPlan: String
-  ) # $score: String
-  {
+    $scoreMin: Int
+    $scoreMax: Int
+  ) {
     allGrievanceTicket(
       before: $before
       after: $after
@@ -39,8 +40,9 @@ export const AllGrievanceTicket = gql`
       registrationDataImport: $registrationDataImport
       assignedTo: $assignedTo
       cashPlan: $cashPlan
-    ) # score: $score
-    {
+      scoreMin: $scoreMin
+      scoreMax: $scoreMax
+    ) {
       totalCount
       pageInfo {
         startCursor
@@ -61,6 +63,7 @@ export const AllGrievanceTicket = gql`
             id
           }
           category
+          issueType
           createdAt
           userModified
           admin

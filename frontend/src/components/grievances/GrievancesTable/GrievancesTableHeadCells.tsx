@@ -34,6 +34,13 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
+    label: 'Issue Type',
+    id: 'issueType',
+    numeric: false,
+    dataCy: 'issueType',
+  },
+  {
+    disablePadding: false,
     label: 'Household Id',
     id: 'household_unicef_id',
     numeric: false,
