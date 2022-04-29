@@ -278,6 +278,23 @@ export const GrievanceDetailsToolbar = ({
     );
   }
 
+  if (
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
+    ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
+    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividuals.length
+  ) {
+    closeButton = (
+      <ButtonDialog
+        title={t('Duplicate Document Conflict')}
+        buttonText={t('Close Ticket')}
+        message={t(
+          'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
+        )}
+      />
+    );
+  }
+
   return (
     <PageHeader
       title={`Ticket ID: ${ticket.unicefId}`}
