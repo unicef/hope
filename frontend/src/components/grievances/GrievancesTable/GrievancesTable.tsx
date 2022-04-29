@@ -6,7 +6,6 @@ import {
   PERMISSIONS,
 } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import { decodeIdString, reduceChoices } from '../../../utils/utils';
