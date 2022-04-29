@@ -6,6 +6,7 @@ import {
   PERMISSIONS,
 } from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import { decodeIdString, reduceChoices } from '../../../utils/utils';
@@ -46,7 +47,8 @@ export const GrievancesTable = ({
     admin: [decodeIdString(filter?.admin?.node?.id)],
     registrationDataImport: filter.registrationDataImport,
     cashPlan: filter.cashPlan,
-    // score: JSON.stringify(filter.score),
+    scoreMin: filter.scoreMin,
+    scoreMax: filter.scoreMax,
   };
 
   const {
@@ -58,6 +60,7 @@ export const GrievancesTable = ({
     loading: currentUserDataLoading,
   } = useMeQuery();
   const permissions = usePermissions();
+
   if (choicesLoading || currentUserDataLoading) return <LoadingComponent />;
   if (!choicesData || !currentUserData || permissions === null) return null;
 
@@ -68,6 +71,8 @@ export const GrievancesTable = ({
   const categoryChoices: {
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+
+  const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
 
   const currentUserId = currentUserData.me.id;
 
@@ -118,6 +123,7 @@ export const GrievancesTable = ({
             ticket={row}
             statusChoices={statusChoices}
             categoryChoices={categoryChoices}
+            issueTypeChoicesData={issueTypeChoicesData}
             canViewDetails={getCanViewDetailsOfTicket(row)}
           />
         )}
