@@ -637,7 +637,7 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
             should_populate_index=True,
-            registration_data_import_id=None,
+            registration_data_import_id=grievance_ticket.registration_data_import.pk,
             individuals_ids=[str(individual.id)],
         )
     )
@@ -749,7 +749,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
             should_populate_index=True,
-            registration_data_import_id=None,
+            registration_data_import_id=grievance_ticket.registration_data_import.pk,
             individuals_ids=[str(individual.id)],
         )
     )
