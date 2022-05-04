@@ -38,7 +38,7 @@ export const AllIndividuals = gql`
       household_Id: $householdId
       excludedId: $excludedId
       businessArea: $businessArea
-      household_AdminArea: $adminArea
+      household_AdminAreaNew: $adminArea
       withdrawn: $withdrawn
       admin2: $admin2
       flags: $flags
@@ -63,7 +63,7 @@ export const AllIndividuals = gql`
             unicefId
             admin2 {
               id
-              title
+              name
             }
             programs {
               edges {

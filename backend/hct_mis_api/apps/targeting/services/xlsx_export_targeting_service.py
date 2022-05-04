@@ -26,6 +26,7 @@ class XlsxExportTargetingService:
             "Household unicef_id": "household.unicef_id",
             "unicef_id": "unicef_id",
             "Linked Households": self._render_all_linked_households,
+            "Bank account information": self._bank_account_info
         }
 
     @cached_property
@@ -42,6 +43,7 @@ class XlsxExportTargetingService:
                 | Q(households_and_roles__household__in=self.households)
             )
             .select_related("household")
+            .prefetch_related("bank_account_info")
             .order_by("household__unicef_id")
             .distinct()
         )
@@ -114,15 +116,19 @@ class XlsxExportTargetingService:
         ]
         return ",".join(roles_string_list)
 
-    def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col):
+    @staticmethod
+    def _bank_account_info(individual):
+        if individual.bank_account_info.exists():
+            return ", ".join([str(bank_info) for bank_info in individual.bank_account_info.all()])
+        return ""
 
+    def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col):
         column_widths = []
 
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
-
             for cell in col:
                 value = cell.value
-                if value is not None:
+                if value:
 
                     if isinstance(value, str) is False:
                         value = str(value)

@@ -47,8 +47,7 @@ logger = logging.getLogger(__name__)
 class AutocompleteWidget(forms.Widget):
     template_name = "steficon/widgets/autocomplete.html"
     # template_name = 'django/forms/widgets/select.html'
-
-    url_name = "%s:%s_%s_autocomplete"
+    url_name = "{}:{}_{}_autocomplete"
 
     def __init__(self, model, admin_site, attrs=None, choices=(), using=None):
         self.model = model
@@ -59,7 +58,7 @@ class AutocompleteWidget(forms.Widget):
 
     def get_url(self):
         model = self.model
-        return reverse(self.url_name % (self.admin_site.name, model._meta.app_label, model._meta.model_name))
+        return reverse((self.url_name).format(self.admin_site.name, model._meta.app_label, model._meta.model_name))
 
     def get_context(self, name, value, attrs):
         context = {}
@@ -82,21 +81,21 @@ class AutocompleteWidget(forms.Widget):
     def media(self):
         extra = "" if settings.DEBUG else ".min"
         i18n_name = SELECT2_TRANSLATIONS.get(get_language())
-        i18n_file = ("admin/js/vendor/select2/i18n/%s.js" % i18n_name,) if i18n_name else ()
+        i18n_file = ("admin/js/vendor/select2/i18n/{}.js".format( i18n_name,)) if i18n_name else ()
         return forms.Media(
             js=(
-                "admin/js/vendor/jquery/jquery%s.js" % extra,
-                "admin/js/vendor/select2/select2.full%s.js" % extra,
+                "admin/js/vendor/jquery/jquery{}.js".format(extra),
+                "admin/js/vendor/select2/select2.full{}.js".format(extra),
             )
             + i18n_file
             + (
                 "admin/js/jquery.init.js",
                 "admin/js/autocomplete.js",
-                "adminfilters/adminfilters%s.js" % extra,
+                "adminfilters/adminfilters{}.js".format(extra),
             ),
             css={
                 "screen": (
-                    "admin/css/vendor/select2/select2%s.css" % extra,
+                    "admin/css/vendor/select2/select2{}.css".format(extra),
                     "adminfilters/adminfilters.css",
                 ),
             },
@@ -351,7 +350,7 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
                         response = HttpResponse(
                             content_type="text/csv",
                             headers={
-                                "Content-Disposition": 'attachment; filename="%s"' % form.cleaned_data["filename"]
+                                "Content-Disposition": 'attachment; filename="{}"'.format(form.cleaned_data["filename"])
                             },
                         )
 

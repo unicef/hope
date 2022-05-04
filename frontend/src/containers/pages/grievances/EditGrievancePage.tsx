@@ -92,7 +92,7 @@ export function EditGrievancePage(): React.ReactElement {
   } = useMeQuery();
 
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
-    variables: { businessArea },
+    variables: { businessArea, first: 1000 },
   });
 
   const {
