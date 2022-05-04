@@ -421,6 +421,20 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 collectors_to_create.append(collector)
         ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
+    @staticmethod
+    def _validate_birth_date(obj_to_create):
+        birth_date = obj_to_create.birth_date
+
+        if obj_to_create.birth_date < datetime(1904, 1, 1):
+            obj_to_create.birth_date = datetime(1923, 1, 1)
+        if obj_to_create.birth_date > datetime.today():
+            obj_to_create.birth_date = datetime(2022, 4, 25)
+
+        if birth_date != obj_to_create.birth_date:
+            obj_to_create.estimated_birth_date = True
+
+        return obj_to_create
+
     def _create_objects(self, sheet, registration_data_import):
         complex_fields = {
             "individuals": {
@@ -586,6 +600,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 else:
                     if household_id is None:
                         obj_to_create.relationship = NON_BENEFICIARY
+                    obj_to_create = self._validate_birth_date(obj_to_create)
                     self.individuals.append(obj_to_create)
             except Exception as e:
                 logger.exception(e)
