@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from datetime import datetime
 from functools import reduce
 
@@ -28,12 +29,13 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     LazyEvalMethodsDict,
     admin_area1_query,
     registration_data_import_query,
 )
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -108,13 +110,26 @@ def country_origin_query(comparision_method, args):
 
 
 def convert_choices(field, *args, **kwargs):
+    new_field = deepcopy(field)
     choices = field.get("choices")
     if callable(choices):
-        field["choices"] = choices(*args, **kwargs)
-    return field
+        new_field["choices"] = choices(*args, **kwargs)
+    return new_field
 
 
 CORE_FIELDS_ATTRIBUTES = [
+    {
+        "id": "c8da2910-4348-47ab-a82e-725b4cebc332",
+        "type": TYPE_INTEGER,
+        "name": "number_of_children",
+        "lookup": "children_count",
+        "label": {"English(EN)": "What is the number of children in the household?"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "number_of_children",
+    },
     {
         "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
         "type": TYPE_INTEGER,
@@ -210,12 +225,12 @@ CORE_FIELDS_ATTRIBUTES = [
             "id": "c53ea58b-e7cf-4bf3-82d0-dec41f66ef3a",
             "type": TYPE_SELECT_ONE,
             "name": "admin1",
-            "lookup": "admin_area__p_code",
+            "lookup": "admin_area_new__p_code",
             "get_query": admin_area1_query,
             "required": False,
             "label": {"English(EN)": "Household resides in which ${admin1_h_c}?"},
             "hint": "",
-            "choices": lambda: AdminArea.get_admin_areas_as_choices(1),
+            "choices": lambda: Area.get_admin_areas_as_choices(1),
             "associated_with": _HOUSEHOLD,
             "xlsx_field": "admin1_h_c",
         },
@@ -226,11 +241,11 @@ CORE_FIELDS_ATTRIBUTES = [
             "id": "e4eb6632-8204-44ed-b39c-fe791ded9246",
             "type": TYPE_SELECT_ONE,
             "name": "admin2",
-            "lookup": "admin_area__p_code",
+            "lookup": "admin_area_new__p_code",
             "required": False,
             "label": {"English(EN)": "Household resides in which ${admin2_h_c}?"},
             "hint": "",
-            "choices": lambda: AdminArea.get_admin_areas_as_choices(2),
+            "choices": lambda: Area.get_admin_areas_as_choices(2),
             "associated_with": _HOUSEHOLD,
             "xlsx_field": "admin2_h_c",
         }
@@ -1474,7 +1489,7 @@ HOUSEHOLD_EDIT_ONLY_FIELDS = [
             "required": False,
             "label": {"English(EN)": "Household resides in which admin area?"},
             "hint": "",
-            "choices": lambda: AdminArea.get_admin_areas(),
+            "choices": lambda: Area.get_admin_areas_as_choices(),
             "associated_with": _HOUSEHOLD,
             "xlsx_field": "admin_area_h_c",
         },

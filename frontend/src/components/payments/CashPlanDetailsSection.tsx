@@ -96,7 +96,7 @@ export const CashPlanDetailsSection = ({
                 <LabelizedField label={t('SUCCESSFUL')}>
                   <p>{bankReconciliationSuccessPercentage}%</p>
                 </LabelizedField>
-                <LabelizedField label={t('ERRONEUS')}>
+                <LabelizedField label={t('ERRONEOUS')}>
                   <p>{bankReconciliationErrorPercentage}%</p>
                 </LabelizedField>
               </Grid>
@@ -114,7 +114,7 @@ export const CashPlanDetailsSection = ({
                     },
                   }}
                   data={{
-                    labels: [t('SUCCESSFUL'), t('ERRONEUS')],
+                    labels: [t('SUCCESSFUL'), t('ERRONEOUS')],
                     datasets: [
                       {
                         data: [

@@ -53,6 +53,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Agency,
+    BankAccountInfo,
     Document,
     DocumentType,
     EntitlementCard,
@@ -322,6 +323,13 @@ class IndividualRoleInHouseholdInline(TabularInline):
         return False
 
 
+class BankAccountInfoStackedInline(admin.StackedInline):
+    model = BankAccountInfo
+
+    exclude = ("debit_card_number",)
+    extra = 0
+
+
 @admin.register(Individual)
 class IndividualAdmin(
     SoftDeletableAdminMixin,
@@ -352,7 +360,7 @@ class IndividualAdmin(
     search_fields = ("family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
     exclude = ("created_at", "updated_at")
-    inlines = [IndividualRoleInHouseholdInline]
+    inlines = [IndividualRoleInHouseholdInline, BankAccountInfoStackedInline]
     list_filter = (
         QueryStringFilter,
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
@@ -511,8 +519,8 @@ class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     def xlsx_update(self, request):
         if request.method == "GET":
             form = UpdateByXlsxStage1Form()
-            form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
-            form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
+            # form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
+            # form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
             context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
         elif request.POST.get("stage") == "2":
             form = UpdateByXlsxStage1Form(request.POST, request.FILES)

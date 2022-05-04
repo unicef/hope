@@ -27,7 +27,7 @@ def fqn(o):
     else:
         parts.append(cls.__name__)
     if not parts:
-        raise ValueError("Invalid argument `%s`" % o)
+        raise ValueError("Invalid argument `{}`".format(o))
     return ".".join(parts)
 
 

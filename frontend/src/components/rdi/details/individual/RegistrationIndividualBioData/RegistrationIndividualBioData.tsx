@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   choicesToDict,
-  decodeIdString,
   formatAge,
   renderBoolean,
   sexToCapitalize,
@@ -155,7 +154,7 @@ export function RegistrationIndividualBioData({
               <ContentLink
                 href={`/${businessArea}/registration-data-import/household/${individual?.household?.id}`}
               >
-                {decodeIdString(individual?.household?.id)}
+                {individual?.household.importId}
               </ContentLink>
             ) : (
               '-'
@@ -212,6 +211,11 @@ export function RegistrationIndividualBioData({
         <Grid item xs={3}>
           <LabelizedField label={t('Communicating disability severity')}>
             {severityOfDisabilityChoicesDict[individual.commsDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Disability')}>
+            {individual.disability === 'DISABLED' ? 'Disabled' : 'Not Disabled'}
           </LabelizedField>
         </Grid>
         {!mappedIndividualDocuments.length &&

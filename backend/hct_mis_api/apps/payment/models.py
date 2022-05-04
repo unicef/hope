@@ -192,18 +192,18 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     VERIFICATION_CHANNEL_XLSX = "XLSX"
     VERIFICATION_CHANNEL_MANUAL = "MANUAL"
     STATUS_CHOICES = (
-        (STATUS_PENDING, "Pending"),
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
+        (STATUS_PENDING, "Pending"),
     )
     SAMPLING_CHOICES = (
         (SAMPLING_FULL_LIST, "Full list"),
         (SAMPLING_RANDOM, "Random sampling"),
     )
     VERIFICATION_CHANNEL_CHOICES = (
+        (VERIFICATION_CHANNEL_MANUAL, "MANUAL"),
         (VERIFICATION_CHANNEL_RAPIDPRO, "RAPIDPRO"),
         (VERIFICATION_CHANNEL_XLSX, "XLSX"),
-        (VERIFICATION_CHANNEL_MANUAL, "MANUAL"),
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     cash_plan = models.ForeignKey(
@@ -306,9 +306,9 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_NOT_RECEIVED = "NOT_RECEIVED"
     STATUS_RECEIVED_WITH_ISSUES = "RECEIVED_WITH_ISSUES"
     STATUS_CHOICES = (
+        (STATUS_NOT_RECEIVED, "NOT RECEIVED"),
         (STATUS_PENDING, "PENDING"),
         (STATUS_RECEIVED, "RECEIVED"),
-        (STATUS_NOT_RECEIVED, "NOT RECEIVED"),
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
     cash_plan_payment_verification = models.ForeignKey(
@@ -353,9 +353,9 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
     STATUS_CHOICES = (
-        (STATUS_PENDING, "Pending"),
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
+        (STATUS_PENDING, "Pending"),
     )
     status = models.CharField(
         max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, verbose_name="Verification status", db_index=True

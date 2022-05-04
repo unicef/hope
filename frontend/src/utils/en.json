@@ -469,7 +469,7 @@
   "PAYMENT RECORDS": "PAYMENT RECORDS",
   "Bank reconciliation": "Bank reconciliation",
   "SUCCESSFUL": "SUCCESSFUL",
-  "ERRONEUS": "ERRONEUS",
+  "ERRONEOUS": "ERRONEOUS",
   "Verification Plan Details": "Verification Plan Details",
   "SAMPLING": "SAMPLING",
   "RESPONDED": "RESPONDED",
@@ -594,5 +594,11 @@
   "New Payment Plan": "New Payment Plan",
   "Select Target Population": "Select Target Population",
   "Target Population is required": "Target Population is required",
-  "Currency": "Currency"
+  "Currency": "Currency",
+  "Payment Details": "Payment Details",
+  "Delivered Value": "Delivered Value",
+  "Received Value": "Received Value",
+  "New Verified Value": "New Verified Value",
+  "Bank account number": "Bank account number",
+  "Bank name": "Bank name"
 }
