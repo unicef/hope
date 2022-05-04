@@ -36,14 +36,14 @@ const TextContainer = styled(TextField)`
   }
 `;
 
-interface PaymentPlansFiltersProps {
+interface FspFiltersProps {
   onFilterChange;
   filter;
 }
-export function PaymentPlansFilters({
+export function FspFilters({
   onFilterChange,
   filter,
-}: PaymentPlansFiltersProps): React.ReactElement {
+}: FspFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -73,35 +73,16 @@ export function PaymentPlansFilters({
             }}
           />
         </Grid>
-        <Grid item>
-          <KeyboardDatePicker
-            variant='inline'
-            inputVariant='outlined'
-            margin='dense'
-            label={t('Dispersion Date')}
-            autoOk
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                dispersionDate: moment(date)
-                  .startOf('day')
-                  .toISOString(),
-              })
-            }
-            value={filter.dispersionDate || null}
-            format='YYYY-MM-DD'
-            InputAdornmentProps={{ position: 'end' }}
-          />
-        </Grid>
+
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Status')}</InputLabel>
+            <InputLabel>{t('Payment Channel')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'status')}
               variant='outlined'
-              label={t('Status')}
+              label={t('Payment Channel')}
               multiple
               value={filter.status || []}
             >
@@ -116,45 +97,6 @@ export function PaymentPlansFilters({
               )}
             </Select>
           </StyledFormControl>
-        </Grid>
-        <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Entitled Quantity')}</FieldLabel>
-            <TextContainer
-              value={filter.entitlement.min}
-              variant='outlined'
-              margin='dense'
-              placeholder={t('From')}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  entitlement: {
-                    ...filter.entitlement,
-                    min: e.target.value || undefined,
-                  },
-                })
-              }
-              type='number'
-            />
-          </Box>
-        </Grid>
-        <Grid item>
-          <TextContainer
-            value={filter.entitlement.max}
-            variant='outlined'
-            margin='dense'
-            placeholder={t('To')}
-            onChange={(e) =>
-              onFilterChange({
-                ...filter,
-                entitlement: {
-                  ...filter.entitlement,
-                  min: e.target.value || undefined,
-                },
-              })
-            }
-            type='number'
-          />
         </Grid>
       </Grid>
     </ContainerWithBorder>
