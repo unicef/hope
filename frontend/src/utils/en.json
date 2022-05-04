@@ -600,5 +600,7 @@
   "Received Value": "Received Value",
   "New Verified Value": "New Verified Value",
   "Bank account number": "Bank account number",
-  "Bank name": "Bank name"
+  "Bank name": "Bank name",
+  "NEW FSP": "NEW FSP",
+  "Payment Channel": "Payment Channel"
 }
