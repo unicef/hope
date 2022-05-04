@@ -8,6 +8,8 @@ from django.core.files.base import ContentFile
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
+from django_countries.fields import Country
+
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.household.models import (
@@ -22,6 +24,7 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    YES,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
@@ -165,14 +168,20 @@ class FlexRegistrationService:
             household.admin1_title = admin_area1.title
         if admin_area2:
             household.admin2_title = admin_area2.title
+        household.kobo_asset_id = record.source_id
         household.save()
         for index, individual_dict in enumerate(individuals_array):
             try:
                 individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
                 role = individual_data.pop("role")
+                phone_no = individual_data.pop("phone_no", "")
+
                 individual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
+                individual.phone_no = phone_no
+                individual.kobo_asset_id = record.source_id
                 individual.save()
+
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
                 if bank_account_data:
                     self._create_object_and_validate(bank_account_data, ImportedBankAccountInfo)
@@ -223,6 +232,10 @@ class FlexRegistrationService:
             registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
+            country_origin=Country(code="UA"),
+            country=Country(code="UA"),
+            consent=True,
+            collect_individual_data=YES,
         )
 
         if residence_status := household_data.get("residence_status"):
@@ -244,10 +257,11 @@ class FlexRegistrationService:
             last_registration_date=household.last_registration_date,
         )
         disability = individual_data.get("disability", "n")
+        disability_certificate_picture = individual_data.get("disability_certificate_picture")
         if disability == "y":
             individual_data["disability"] = DISABLED
         else:
-            individual_data["disability"] = NOT_DISABLED
+            individual_data["disability"] = DISABLED if disability_certificate_picture else NOT_DISABLED
 
         if relationship := individual_data.get("relationship"):
             individual_data["relationship"] = relationship.upper()
@@ -260,7 +274,7 @@ class FlexRegistrationService:
             if not phone_no.startswith("+380"):
                 individual_data["phone_no"] = f"+380{phone_no}"
 
-        if disability_certificate_picture := individual_data.get("disability_certificate_picture"):
+        if disability_certificate_picture:
             certificate_picture = f"CERTIFICATE_PICTURE_{uuid.uuid4()}"
             disability_certificate_picture = self._prepare_picture_from_base64(
                 disability_certificate_picture, certificate_picture
@@ -288,7 +302,7 @@ class FlexRegistrationService:
             if not document_number and not certificate_picture:
                 continue
 
-            document_number = document_number or f"NOT_VALID_NUMBER_{uuid.uuid4()}"
+            document_number = document_number or f"ONLY_PICTURE_{uuid.uuid4()}"
 
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
@@ -313,6 +327,8 @@ class FlexRegistrationService:
 
     def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):
         if individual_dict.get("bank_account_h_f", "n") != "y":
+            return
+        if not individual_dict.get("bank_account_number"):
             return
         bank_name = individual_dict.get("bank_name_h_f", "")
         other_bank_name = individual_dict.get("other_bank_name", "")

@@ -2,6 +2,7 @@ import logging
 
 from django.db import transaction
 from django.forms import model_to_dict
+from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -9,6 +10,7 @@ from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
+from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import (
     populate_index,
@@ -19,22 +21,22 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     NEEDS_ADJUDICATION,
     Agency,
+    BankAccountInfo,
     Document,
     DocumentType,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
-    BankAccountInfo,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedBankAccountInfo,
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
     RegistrationDataImportDatahub,
-    ImportedBankAccountInfo,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -277,6 +279,18 @@ class RdiMergeTask:
 
         return roles_to_create
 
+    def _update_individuals_and_households(self, individual_ids):
+        # update mis_unicef_id for ImportedIndividual
+        individual_qs = Individual.objects.filter(id__in=individual_ids)
+        for individual in individual_qs:
+            imported_individual = get_object_or_404(ImportedIndividual, id=individual.imported_individual_id)
+            imported_individual.mis_unicef_id = individual.unicef_id
+            imported_individual.save()
+
+            if individual.household and imported_individual.household:
+                imported_individual.household.mis_unicef_id = individual.household.unicef_id
+                imported_individual.household.save()
+
     def execute(self, registration_data_import_id):
         individual_ids = []
         try:
@@ -311,7 +325,9 @@ class RdiMergeTask:
                     ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
 
                     roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
-                    bank_account_infos_to_create = self._prepare_bank_account_info(imported_bank_account_infos, individuals_dict)
+                    bank_account_infos_to_create = self._prepare_bank_account_info(
+                        imported_bank_account_infos, individuals_dict
+                    )
                     Household.objects.bulk_create(households_dict.values())
                     Individual.objects.bulk_create(individuals_dict.values())
                     Document.objects.bulk_create(documents_to_create)
@@ -320,6 +336,9 @@ class RdiMergeTask:
                     BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
 
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
+                    household_ids = [str(household.id) for household in households_dict.values()]
+
+                    recalculate_population_fields_task.delay(household_ids)
 
                     kobo_submissions = []
                     for imported_household in imported_households:
@@ -371,6 +390,9 @@ class RdiMergeTask:
                     obj_hct.save()
                     DeduplicateTask.hard_deduplicate_documents(documents_to_create, registration_data_import=obj_hct)
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
+
+            self._update_individuals_and_households(individual_ids)
+
         except:
             remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise

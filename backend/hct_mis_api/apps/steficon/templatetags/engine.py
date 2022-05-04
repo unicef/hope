@@ -14,7 +14,7 @@ register = template.Library()
 class HtmlDiff(difflib.HtmlDiff):
     def _format_line(self, side, flag, linenum, text):
         try:
-            linenum = "{}".format(inenum)
+            linenum = "{}".format(linenum)
             id = f' id="{self._prefix[side]}{linenum}"'
         except TypeError:
             id = ""
@@ -74,7 +74,7 @@ class HtmlDiff(difflib.HtmlDiff):
         )
 
         s = []
-        fmt = '<tr><td class="diff_next"%s>%s</td>%s<td class="diff_next">%s</td>%s</tr>\n'
+        fmt = '<tr><td class="diff_next"{}>{}</td>{}<td class="diff_next">{}</td>{}</tr>\n'
         for i in range(len(flaglist)):
             if flaglist[i] is None:
                 # mdiff yields None on separator lines skip the bogus ones
@@ -82,13 +82,13 @@ class HtmlDiff(difflib.HtmlDiff):
                 if i > 0:
                     s.append("        </tbody>        \n        <tbody>\n")
             else:
-                s.append(fmt % (next_id[i], next_href[i], fromlist[i], next_href[i], tolist[i]))
+                s.append(fmt.format(next_id[i], next_href[i], fromlist[i], next_href[i], tolist[i]))
         if fromdesc or todesc:
             header_row = "<thead><tr>{}{}{}{}</tr></thead>".format(
                 '<th class="diff_next"><br /></th>',
-                '<th colspan="2" class="diff_header">%s</th>' % fromdesc,
+                '<th colspan="2" class="diff_header">{}</th>'.format(fromdesc),
                 '<th class="diff_next"><br /></th>',
-                '<th colspan="2" class="diff_header">%s</th>' % todesc,
+                '<th colspan="2" class="diff_header">{}</th>'.format(todesc),
             )
         else:
             header_row = ""

@@ -56,13 +56,13 @@ export const individualMinimal = gql`
       status
       admin1 {
         id
-        title
+        name
         level
         pCode
       }
       admin2 {
         id
-        title
+        name
         level
         pCode
       }
@@ -103,6 +103,7 @@ export const individualDetailed = gql`
     seeingDisability
     physicalDisability
     selfcareDisability
+    disability
     photo
     workStatus
     documents {
@@ -150,7 +151,7 @@ export const individualDetailed = gql`
       countryOrigin
       adminArea {
         id
-        title
+        name
         level
       }
     }
@@ -173,6 +174,10 @@ export const individualDetailed = gql`
         id
         unicefId
       }
+    }
+    bankAccountInfo {
+      bankName
+      bankAccountNumber
     }
   }
 `;

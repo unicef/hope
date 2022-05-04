@@ -23,6 +23,8 @@ stages:
     displayName: DEPLOY
     jobs:
       - job: deploy_hope
+        pool:
+          vmImage: 'ubuntu-latest'
         displayName: "[HOPE] Deployment"
         steps:
           - task: HelmDeploy@0

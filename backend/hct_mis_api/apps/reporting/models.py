@@ -25,6 +25,7 @@ class Report(TimeStampedUUIDModel):
     CASH_PLAN = 6
     PROGRAM = 7
     INDIVIDUALS_AND_PAYMENT = 8
+    GRIEVANCES = 9
     REPORT_TYPES = (
         (INDIVIDUALS, _("Individuals")),
         (HOUSEHOLD_DEMOGRAPHICS, _("Households")),
@@ -34,6 +35,7 @@ class Report(TimeStampedUUIDModel):
         (CASH_PLAN, _("Cash Plan")),
         (PROGRAM, _("Programme")),
         (INDIVIDUALS_AND_PAYMENT, _("Individuals & Payment")),
+        (GRIEVANCES, _("Grievances")),
     )
 
     business_area = models.ForeignKey("core.BusinessArea", related_name="reports", on_delete=models.CASCADE)

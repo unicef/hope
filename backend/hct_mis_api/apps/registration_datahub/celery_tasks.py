@@ -1,4 +1,3 @@
-import json
 import logging
 
 from hct_mis_api.apps.core.celery import app
@@ -256,29 +255,18 @@ def process_flex_records_task(rdi_id, records_ids):
 def extract_records_task():
     logger.info("extract_records_task start")
 
-    def _filter(d):
-        if isinstance(d, list):
-            return [_filter(v) for v in d]
-        elif isinstance(d, dict):
-            out = {}
-
-            for k, v in d.items():
-                if k.endswith("_picture"):
-                    v = ""
-                out[k] = _filter(v)
-            return out
-        else:
-            return d
-
     records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)[:5000]
-    for record_id in records_ids:
-        record = Record.objects.get(pk=record_id)
-        try:
-            extracted = json.loads(record.storage.tobytes().decode())
-            record.data = _filter(extracted)
-            record.save()
-        except Exception as e:
-            logger.exception(e)
-            raise
+    Record.extract(records_ids)
 
     logger.info("extract_records_task end")
+
+
+@app.task
+def fresh_extract_records_task(records_ids=None):
+    logger.info("fresh_extract_records_task start")
+
+    if not records_ids:
+        records_ids = Record.objects.all().values_list("pk", flat=True)[:5000]
+    Record.extract(records_ids)
+
+    logger.info("fresh_extract_records_task end")

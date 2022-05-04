@@ -143,7 +143,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       label: t('Administrative Level 2'),
       value: (
         <span>
-          {report.adminArea?.edges.map((edge) => edge.node.title).join(', ') ||
+          {report.adminArea?.edges.map((edge) => edge.node.name).join(', ') ||
             '-'}
         </span>
       ),
