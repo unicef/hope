@@ -405,12 +405,12 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
         ) = get_data_from_role_data(role_data)
 
         if role_name == HEAD:
-            household.head_of_household = new_individual
-            # TODO: check this HH id
+            if household.head_of_household.pk != new_individual.pk:
+                household.head_of_household = new_individual
 
-            # can be directly saved, because there is always only one head of household to update
-            household.save()
-            household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
+                # can be directly saved, because there is always only one head of household to update
+                household.save()
+                household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             new_individual.relationship = HEAD
             new_individual.save()
             if info:
