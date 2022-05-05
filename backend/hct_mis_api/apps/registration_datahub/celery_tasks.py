@@ -252,12 +252,11 @@ def process_flex_records_task(rdi_id, records_ids):
 
 
 @app.task
-def extract_records_task():
+def extract_records_task(max_records=500):
     logger.info("extract_records_task start")
 
-    records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)[:5000]
+    records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     Record.extract(records_ids)
-
     logger.info("extract_records_task end")
 
 
@@ -266,7 +265,7 @@ def fresh_extract_records_task(records_ids=None):
     logger.info("fresh_extract_records_task start")
 
     if not records_ids:
-        records_ids = Record.objects.all().values_list("pk", flat=True)[:5000]
+        records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     Record.extract(records_ids)
 
     logger.info("fresh_extract_records_task end")

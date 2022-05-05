@@ -1057,7 +1057,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             "selfcare_disability",
             "comms_disability",
         )
-        should_be_disabled = False
+        should_be_disabled = self.disability == DISABLED
         for field in disability_fields:
             value = getattr(self, field, None)
             should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
