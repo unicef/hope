@@ -156,8 +156,16 @@ export function formatCriteriaFilters(filters) {
         }
         break;
       case 'DATE':
-        values = [each.value.from, each.value.to];
-        comparisionMethod = 'RANGE';
+        if (each.value.from && each.value.to) {
+          comparisionMethod = 'RANGE';
+          values = [each.value.from, each.value.to];
+        } else if (each.value.from && !each.value.to) {
+          comparisionMethod = 'GREATER_THAN';
+          values = [each.value.from];
+        } else {
+          comparisionMethod = 'LESS_THAN';
+          values = [each.value.to];
+        }
         break;
       case 'BOOL':
         comparisionMethod = 'EQUALS';
