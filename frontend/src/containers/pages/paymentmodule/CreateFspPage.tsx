@@ -1,13 +1,14 @@
+import { Box, Paper } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
 import moment from 'moment';
+import React from 'react';
+import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { CreatePaymentPlanHeader } from '../../../components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader/CreatePaymentPlanHeader';
-import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
-import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
+import { CreateFspHeader } from '../../../components/paymentmodule/CreateFspPlan/CreateFspHeader';
+import { Fsp } from '../../../components/paymentmodule/CreateFspPlan/Fsp';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -18,11 +19,12 @@ import {
   useAllTargetPopulationsQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
+import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
-export const CreatePaymentPlanPage = (): React.ReactElement => {
+export const CreateFspPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const initialValues = {
     targetPopulation: '',
@@ -106,16 +108,16 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     >
       {({ submitForm, values }) => (
         <Form>
-          <CreatePaymentPlanHeader
+          <CreateFspHeader
             handleSubmit={submitForm}
             businessArea={businessArea}
             permissions={permissions}
           />
-          <PaymentPlanTargeting
-            allTargetPopulations={allTargetPopulationsData}
-            loading={loadingTargetPopulations}
-          />
-          <PaymentPlanParameters values={values} />
+          <Box m={5}>
+            <ContainerColumnWithBorder>
+              <Fsp permissions={permissions} />
+            </ContainerColumnWithBorder>
+          </Box>
         </Form>
       )}
     </Formik>

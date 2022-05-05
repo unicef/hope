@@ -38,6 +38,7 @@ import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerif
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
+import { CreateFspPage } from './pages/paymentmodule/CreateFspPage';
 
 const Root = styled.div`
   display: flex;
@@ -146,6 +147,15 @@ export function HomeRouter(): React.ReactElement {
               }}
             >
               <CreatePaymentPlanPage />
+            </Sentry.ErrorBoundary>
+          </Route>
+          <Route path='/:businessArea/payment-module/new-fsp'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag('location', '/payment-module/new-fsp');
+              }}
+            >
+              <CreateFspPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route exact path='/:businessArea/payment-verification'>
