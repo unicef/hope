@@ -30,13 +30,18 @@ export function PaymentModulePage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const [selectedTab, setSelectedTab] = useState(0);
-  const [filter, setFilter] = useState({
+  const [planfilter, setPlanFilter] = useState({
     search: '',
     dispersionDate: '',
     status: '',
     entitlement: { min: null, max: null },
   });
-  const debouncedFilter = useDebounce(filter, 500);
+  const [fspFilter, setFspFilter] = useState({
+    search: '',
+    paymentChannel: '',
+  });
+  const debouncedPlanFilter = useDebounce(planfilter, 500);
+  const debouncedFspFilter = useDebounce(fspFilter, 500);
 
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_LIST, permissions))
@@ -62,7 +67,10 @@ export function PaymentModulePage(): React.ReactElement {
         </Box>
       </Paper>
       <TabPanel value={selectedTab} index={0}>
-        <PaymentPlansFilters filter={filter} onFilterChange={setFilter} />
+        <PaymentPlansFilters
+          filter={planfilter}
+          onFilterChange={setPlanFilter}
+        />
         <Box p={6} width='100%' display='flex' justifyContent='flex-end'>
           {hasPermissions(PERMISSIONS.PAYMENT_MODULE_CREATE, permissions) && (
             <Button
@@ -78,7 +86,7 @@ export function PaymentModulePage(): React.ReactElement {
         <Container>
           <TableWrapper>
             <PaymentPlansTable
-              filter={debouncedFilter}
+              filter={debouncedPlanFilter}
               businessArea={businessArea}
               canViewDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_MODULE_VIEW_DETAILS,
@@ -89,7 +97,7 @@ export function PaymentModulePage(): React.ReactElement {
         </Container>
       </TabPanel>
       <TabPanel value={selectedTab} index={1}>
-        <FspFilters filter={filter} onFilterChange={setFilter} />
+        <FspFilters filter={fspFilter} onFilterChange={setFspFilter} />
         <Box p={6} width='100%' display='flex' justifyContent='flex-end'>
           {hasPermissions(PERMISSIONS.PAYMENT_MODULE_CREATE, permissions) && (
             <Button
@@ -105,7 +113,7 @@ export function PaymentModulePage(): React.ReactElement {
         <Container>
           <TableWrapper>
             <FspTable
-              filter={debouncedFilter}
+              filter={debouncedFspFilter}
               businessArea={businessArea}
               canViewDetails={hasPermissions(
                 PERMISSIONS.PAYMENT_MODULE_VIEW_DETAILS,

@@ -1,27 +1,14 @@
-import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { Missing } from '../../../../components/core/Missing';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   AllCashPlansQuery,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import {
-  choicesToDict,
-  formatCurrencyWithSymbol,
-  paymentVerificationStatusToColor,
-} from '../../../../utils/utils';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { Missing } from '../../../../components/core/Missing';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 interface FspTableRowProps {
   plan: AllCashPlansQuery['allCashPlans']['edges'][number]['node'];
   canViewDetails: boolean;
@@ -42,9 +29,6 @@ export const FspTableRow = ({
   } = useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
-  const deliveryTypeChoicesDict = choicesToDict(
-    statusChoicesData.paymentRecordDeliveryTypeChoices,
-  );
 
   return (
     <ClickableTableRow

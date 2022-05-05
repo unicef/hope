@@ -1,13 +1,10 @@
-import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
+import { Grid, InputAdornment, MenuItem } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import SearchIcon from '@material-ui/icons/Search';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
-import { FieldLabel } from '../../../../components/core/FieldLabel';
 import InputLabel from '../../../../shared/InputLabel';
 import Select from '../../../../shared/Select';
 import TextField from '../../../../shared/TextField';
@@ -23,16 +20,6 @@ const SearchTextField = styled(TextField)`
   flex: 1;
   && {
     min-width: 150px;
-  }
-`;
-
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
   }
 `;
 
@@ -73,27 +60,26 @@ export function FspFilters({
             }}
           />
         </Grid>
-
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>{t('Payment Channel')}</InputLabel>
             <Select
               /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
               // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'status')}
+              onChange={(e) => handleFilterChange(e, 'paymentChannel')}
               variant='outlined'
-              label={t('Payment Channel')}
-              multiple
-              value={filter.status || []}
+              label='Modality'
+              value={filter.paymentChannel || ''}
             >
-              {statusChoicesData.cashPlanVerificationStatusChoices.map(
-                (item) => {
-                  return (
-                    <MenuItem key={item.value} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                },
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {statusChoicesData.paymentRecordDeliveryTypeChoices.map(
+                (item) => (
+                  <MenuItem key={item.name} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ),
               )}
             </Select>
           </StyledFormControl>
