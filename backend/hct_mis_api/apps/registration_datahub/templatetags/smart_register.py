@@ -4,8 +4,6 @@ import logging
 import re
 
 from django.template import Library, Node
-from django.urls import reverse
-from django.utils.safestring import mark_safe
 
 from PIL import Image, UnidentifiedImageError
 
@@ -74,7 +72,7 @@ def lookup(value, arg):
 
 @register.filter()
 def is_image(element):
-    if not isinstance(element, str) or len(element) < 200:
+    if not isinstance(element, str) or len(element) < 200 or (isinstance(element, str) and not element.isascii()):
         return False
     try:
         imgdata = base64.b64decode(str(element))
