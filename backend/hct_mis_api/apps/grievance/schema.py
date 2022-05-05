@@ -175,6 +175,7 @@ class GrievanceTicketFilter(FilterSet):
             "households_count",
             "user_modified",
             "household_unicef_id",
+            "issue_type",
         )
     )
 
