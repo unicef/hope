@@ -39,6 +39,7 @@ import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
 import { CreateFspPage } from './pages/paymentmodule/CreateFspPage';
+import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -156,6 +157,15 @@ export function HomeRouter(): React.ReactElement {
               }}
             >
               <CreateFspPage />
+            </Sentry.ErrorBoundary>
+          </Route>
+          <Route path='/:businessArea/payment-module/payment-plan/:id'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag('location', '/payment-module/payment-plan/:id');
+              }}
+            >
+              <PaymentPlanDetailsPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route exact path='/:businessArea/payment-verification'>

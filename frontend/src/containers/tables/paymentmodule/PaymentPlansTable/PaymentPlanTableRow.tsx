@@ -32,9 +32,9 @@ export const PaymentPlanTableRow = ({
 }: PaymentVerificationTableRowProps): React.ReactElement => {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const paymentVerificationPlanPath = `/${businessArea}/payment-verification/${plan.id}`;
+  const paymentPlanPath = `/${businessArea}/payment-module/payment-plan/${plan.id}`;
   const handleClick = (): void => {
-    history.push(paymentVerificationPlanPath);
+    history.push(paymentPlanPath);
   };
   const {
     data: statusChoicesData,
@@ -54,7 +54,7 @@ export const PaymentPlanTableRow = ({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <BlackLink to={paymentVerificationPlanPath}>{plan.caId}</BlackLink>
+          <BlackLink to={paymentPlanPath}>{plan.caId}</BlackLink>
         ) : (
           plan.caId
         )}
