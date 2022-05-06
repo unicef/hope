@@ -608,5 +608,9 @@
   "To be delivered USD": "To be delivered USD",
   "Total Maximum Amount": "Total Maximum Amount",
   "Set up order": "Set up order",
-  "Maximum Amount (USD)": "Maximum Amount (USD)"
+  "Maximum Amount (USD)": "Maximum Amount (USD)",
+  "Select Another Fsp": "Select Another Fsp",
+  "Transfer": "Transfer",
+  "Cash": "Cash",
+  "Wallet": "Wallet"
 }
