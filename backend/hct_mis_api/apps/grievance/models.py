@@ -614,7 +614,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
     possible_duplicate = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
     selected_individual = models.ForeignKey(
-        "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
+        "household.Individual", null=True, on_delete=models.CASCADE
     )
     role_reassign_data = JSONField(default=dict)
     extra_data = JSONField(default=dict)
