@@ -1,5 +1,9 @@
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
     from hct_mis_api.apps.grievance.models import (
@@ -7,17 +11,27 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         TicketNeedsAdjudicationDetails,
     )
 
-    details_already_exists = (
-        TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
-        .filter(
-            golden_records_individual__in=(main_individual, possible_duplicate),
-            possible_duplicate__in=(main_individual, possible_duplicate),
-        )
-        .exists()
-    )
-
-    if details_already_exists:
+    possible_duplicates = kwargs.get("possible_duplicates")
+    if not possible_duplicates:
         return None, None
+
+    registration_data_import = kwargs.get("registration_data_import", None)
+    if registration_data_import:
+        ticket_details_to_check = TicketNeedsAdjudicationDetails.objects.exclude(
+            ticket__status=GrievanceTicket.STATUS_CLOSED
+        ).filter(
+            ticket__registration_data_import_id=registration_data_import.pk
+        )
+
+        ticket_all_individuals = {main_individual, *possible_duplicates}
+
+        for ticket_detail in ticket_details_to_check:
+            other_ticket_all_individuals = {
+                ticket_detail.golden_records_individual,
+                *ticket_detail.possible_duplicates.all()
+            }
+            if set.intersection(ticket_all_individuals, other_ticket_all_individuals):
+                return None, None
 
     household = main_individual.household
     admin_level_2 = household.admin2 if household else None
@@ -30,7 +44,7 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         admin2=admin_level_2,
         admin2_new=admin_level_2_new,
         area=area,
-        registration_data_import=kwargs.pop("registration_data_import", None),
+        registration_data_import=registration_data_import,
     )
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
@@ -38,14 +52,13 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         possible_duplicate=possible_duplicate,
         is_multiple_duplicates_version=kwargs.get("is_multiple_duplicates_version", False),
         selected_individual=None,
-        extra_data = {
+        extra_data={
             "golden_records": main_individual.get_deduplication_golden_record(),
             "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
         }
     )
-    possible_duplicates = kwargs.get("possible_duplicates")
-    if possible_duplicates:
-        ticket_details.possible_duplicates.add(*possible_duplicates)
+
+    ticket_details.possible_duplicates.add(*possible_duplicates)
 
     GrievanceNotification.send_all_notifications(
         GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
@@ -57,13 +70,10 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
 def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area, **kwargs):
     from hct_mis_api.apps.household.models import Individual
 
-    registration_data_import = kwargs.pop("registration_data_import", None)
     if not individuals_queryset:
         return
 
     ticket_details_to_create = []
-    unique_individual_sets = []  # checks combination of individuals
-
     for possible_duplicate in individuals_queryset:
         linked_tickets = []
         possible_duplicates = []
@@ -75,17 +85,11 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
 
             possible_duplicates.append(duplicate)
 
-        individuals_set = {possible_duplicate, *possible_duplicates}
-        if not possible_duplicates or individuals_set in unique_individual_sets:
-            continue
-
-        unique_individual_sets.append(individuals_set)
-
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=possible_duplicate,
             possible_duplicate=possible_duplicate,  # for backward compatibility
             business_area=business_area,
-            registration_data_import=kwargs.pop("registration_data_import", None),
+            registration_data_import=kwargs.get("registration_data_import", None),
             possible_duplicates=possible_duplicates,
             is_multiple_duplicates_version=True
         )

@@ -708,6 +708,10 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             logger.error("New status is incorrect")
             raise GraphQLError("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
+            selected_individuals = grievance_ticket.ticket_details.selected_individuals.all()
+            for individual in selected_individuals:
+                traverse_sibling_tickets(grievance_ticket, individual)
+
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket, info)
             grievance_ticket.refresh_from_db()
@@ -1108,7 +1112,6 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             raise GraphQLError("Only one option for selected individuals is available")
 
         ticket_details = grievance_ticket.ticket_details
-        selected_individual = None
 
         if selected_individual_id:
             selected_individual = get_individual(selected_individual_id)
@@ -1124,11 +1127,9 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             ticket_details.role_reassign_data = {}
 
         if selected_individual_ids:  # Allow choosing multiple individuals
-            selected_individuals = list(map(get_individual, selected_individual_ids))
-            for selected_individual in selected_individuals:
-                traverse_sibling_tickets(
-                    grievance_ticket, selected_individual, selected_individuals
-                )
+            selected_individuals = [get_individual(_id) for _id in selected_individual_ids]
+            ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())
+            ticket_details.selected_individuals.add(*selected_individuals)
 
         ticket_details.save()
         grievance_ticket.refresh_from_db()

@@ -643,7 +643,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
                 if individual not in selected_individuals
             ]
 
-            if unselected_individuals:
+            if unselected_individuals and len(unselected_individuals) > 1:
                 documents = []
                 for individual in unselected_individuals:
                     documents.append(set([
