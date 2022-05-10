@@ -167,7 +167,7 @@ export function TargetCriteriaForm({
     filters,
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
-    const filterNull = (filter) => filter.value === null;
+    const filterNull = (filter): boolean => filter.value === null;
     const hasFiltersNullValues = Boolean(filters.filter(filterNull).length);
     const hasFiltersEmptyFromToValues = Boolean(
       filters.filter((filter) => {
