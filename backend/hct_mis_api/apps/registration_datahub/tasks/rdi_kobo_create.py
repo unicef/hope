@@ -224,10 +224,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         head_of_households_mapping = {}
         households_to_create = []
         individuals_to_create = {}
-        documents_and_identities_to_create = []
         collectors_to_create = defaultdict(list)
-        individuals_to_create_list = []
         for household in self.reduced_submissions:
+            individuals_to_create_list = []
+            documents_and_identities_to_create = []
             submission_meta_data = get_submission_metadata(household)
             if self.business_area.get_sys_option("ignore_amended_kobo_submissions"):
                 submission_meta_data["amended"] = False
@@ -325,10 +325,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 ind.last_registration_date = registration_date
                 ind.kobo_asset_id = household_obj.kobo_asset_id
 
+            ImportedIndividual.objects.bulk_create(individuals_to_create_list)
+            self._handle_documents_and_identities(documents_and_identities_to_create)
+
         ImportedHousehold.objects.bulk_create(households_to_create)
-        ImportedIndividual.objects.bulk_create(individuals_to_create_list)
         self._handle_collectors(collectors_to_create, individuals_to_create)
-        self._handle_documents_and_identities(documents_and_identities_to_create)
 
         households_to_update = []
         for household, individual in head_of_households_mapping.items():
