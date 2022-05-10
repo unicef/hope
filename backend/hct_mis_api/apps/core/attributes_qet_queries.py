@@ -143,6 +143,17 @@ def get_unhcr_id_issuer_query(_, args):
 
 
 def get_has_phone_number_query(_, args):
-    has_phone_no = eval(args[0])  # cast "True" on True, "False" on False
+    has_phone_no = args[0] in [True, "True"]
     return ~Q(phone_no="") if has_phone_no else Q(phone_no="")
 
+
+def get_has_bank_account_number_query(_, args):
+    has_bank_account_number = args[0] in [True, "True"]
+    if has_bank_account_number:  # Individual can have related object bank_account, but empty number
+        return Q(bank_account_info__isnull=False) & ~Q(bank_account_info__bank_account_number="")
+    return Q(bank_account_info__isnull=True) | Q(bank_account_info__bank_account_number="")
+
+
+def get_has_tax_id_query(_, args):
+    has_tax_id = args[0] in [True, "True"]
+    return Q(documents__type__type="TAX_ID") if has_tax_id else ~Q(documents__type__type="TAX_ID")

@@ -26,7 +26,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_scope_id_number_query,
     get_unhcr_id_issuer_query,
     get_unhcr_id_number_query,
-    get_has_phone_number_query,
+    get_has_phone_number_query, get_has_bank_account_number_query, get_has_tax_id_query,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -1590,6 +1590,30 @@ FILTER_ONLY_FIELDS = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "has_phone_number",
     },
+{
+        "id": "f4032e4f-00a9-4ed9-bff4-4e47d2f7b4be",
+        "type": TYPE_BOOL,
+        "name": "has_tax_id_number",
+        "get_query": get_has_tax_id_query,
+        "label": {"English(EN)": "Has tax ID number?"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "has_tax_ID_number",
+    },
+{
+        "id": "6b97e9a3-38bb-49a3-9637-65f05d5b8ea4",
+        "type": TYPE_BOOL,
+        "name": "has_the_bank_account_number",
+        "get_query": get_has_bank_account_number_query,
+        "label": {"English(EN)": "Has the bank account number?"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "has_the_bank_account_number",
+    }
 ]
 
 
