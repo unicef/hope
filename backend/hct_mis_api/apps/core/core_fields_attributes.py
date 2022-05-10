@@ -22,10 +22,11 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_other_document_number_query,
     get_other_issuer_query,
     get_role_query,
-    get_scope_id_issuer,
-    get_scope_id_number,
-    get_unhcr_id_issuer,
-    get_unhcr_id_number,
+    get_scope_id_issuer_query,
+    get_scope_id_number_query,
+    get_unhcr_id_issuer_query,
+    get_unhcr_id_number_query,
+    get_has_phone_number_query,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -655,7 +656,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "unhcr_id_no_i_c",
-        "get_query": get_unhcr_id_number,
+        "get_query": get_unhcr_id_number_query,
     },
     {
         "id": "801bdd67-d27d-4afa-9d23-823e1c8d1313",
@@ -668,7 +669,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": Countries.get_choices(output_code="alpha3"),
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "unhcr_id_issuer_i_c",
-        "get_query": get_unhcr_id_issuer,
+        "get_query": get_unhcr_id_issuer_query,
     },
     {
         "id": "2f9ca147-afde-4311-9d61-e906a8ef2334",
@@ -769,7 +770,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "scope_id_no_i_c",
-        "get_query": get_scope_id_number,
+        "get_query": get_scope_id_number_query,
     },
     {
         "id": "638a6383-6e87-4c4f-842c-6c5433599267",
@@ -782,7 +783,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": Countries.get_choices(output_code="alpha3"),
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "scope_id_issuer_i_c",
-        "get_query": get_scope_id_issuer,
+        "get_query": get_scope_id_issuer_query,
     },
     {
         "id": "4aa3d595-131a-48df-8752-ec171eabe3be",
@@ -1564,8 +1565,36 @@ def core_fields_to_separated_dict(append_household_id=True, append_xlsx=True):
     return result_dict
 
 
-TARGETING_CORE_FIELDS = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS + [ROLE_FIELD, RDI_FILTER]
-FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in CORE_FIELDS_ATTRIBUTES if x.get("type") in FILTERABLE_TYPES]
+FILTER_ONLY_FIELDS = [
+    {
+        "id": "c8da2910-4348-47ab-a82e-725b4cebc332",
+        "type": TYPE_INTEGER,
+        "name": "number_of_children",
+        "lookup": "children_count",
+        "label": {"English(EN)": "What is the number of children in the household?"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "number_of_children",
+    },
+    {
+        "id": "bc18c462-bd75-4607-b75d-b7111a658453",
+        "type": TYPE_BOOL,
+        "name": "has_phone_number",
+        "get_query": get_has_phone_number_query,
+        "label": {"English(EN)": "Has phone number?"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "has_phone_number",
+    },
+]
+
+
+TARGETING_CORE_FIELDS = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS + [ROLE_FIELD, RDI_FILTER] + FILTER_ONLY_FIELDS
+FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in TARGETING_CORE_FIELDS if x.get("type") in FILTERABLE_TYPES]
 
 CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, TARGETING_CORE_FIELDS, {})
 
