@@ -618,7 +618,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     )
     role_reassign_data = JSONField(default=dict)
     extra_data = JSONField(default=dict)
-    score_min = models.FloatField(default=0.0)  # TODO: need db_index here?
+    score_min = models.FloatField(default=0.0)
     score_max = models.FloatField(default=0.0)
 
     @property
