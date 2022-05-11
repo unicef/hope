@@ -135,7 +135,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         else:
             correct_value = self._cast_value(value, field)
 
-        if is_flex_field is True:
+        if is_flex_field:
             obj.flex_fields[field_data_dict["name"]] = correct_value
         else:
             setattr(obj, field_data_dict["name"], correct_value)
@@ -150,7 +150,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         identities = []
         for documents_dict in documents_and_identities:
             for document_name, data in documents_dict.items():
-                if ImportedIndividual.objects.filter(id=data["individual"].id).exists() is False:
+                if not ImportedIndividual.objects.filter(id=data["individual"].id).exists():
                     continue
 
                 is_identity = document_name in identity_fields
@@ -170,10 +170,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     type_name = document_name.upper()
                     if type_name == "OTHER_ID":
                         type_name = IDENTIFICATION_TYPE_OTHER
-                    label = IDENTIFICATION_TYPE_DICT.get(type_name)
+                    label = IDENTIFICATION_TYPE_DICT.get(type_name, data["name"])
                     country = Country(data["issuing_country"])
-                    if label is None:
-                        label = data["name"]
 
                     document_type, _ = ImportedDocumentType.objects.get_or_create(
                         country=country,
@@ -232,8 +230,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             if self.business_area.get_sys_option("ignore_amended_kobo_submissions"):
                 submission_meta_data["amended"] = False
 
-            submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
-            if submission_exists is True:
+            if KoboImportedSubmission.objects.filter(**submission_meta_data).exists():
                 continue
 
             submission_meta_data.pop("amended", None)
