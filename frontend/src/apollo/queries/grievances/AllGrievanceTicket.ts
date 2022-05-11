@@ -19,8 +19,8 @@ export const AllGrievanceTicket = gql`
     $registrationDataImport: ID
     $assignedTo: ID
     $cashPlan: String
-    $scoreMin: Int
-    $scoreMax: Int
+    $scoreMin: String
+    $scoreMax: String
   ) {
     allGrievanceTicket(
       before: $before

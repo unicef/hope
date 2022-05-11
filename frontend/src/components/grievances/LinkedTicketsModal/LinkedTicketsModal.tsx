@@ -43,6 +43,9 @@ export const StyledLink = styled.div`
 const StyledTable = styled(Table)`
   min-width: 100px;
 `;
+const StyledDialog = styled(Dialog)`
+  max-height: 800px;
+`;
 const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
@@ -153,7 +156,7 @@ export const LinkedTicketsModal = ({
   return (
     <>
       {renderLink()}
-      <Dialog
+      <StyledDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         scroll='paper'
@@ -201,7 +204,7 @@ export const LinkedTicketsModal = ({
             </Button>
           </DialogActions>
         </DialogFooter>
-      </Dialog>
+      </StyledDialog>
     </>
   );
 };
