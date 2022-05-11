@@ -72,6 +72,13 @@ export const AllGrievanceTicket = gql`
             id
           }
           unicefId
+          relatedTickets {
+            id
+            status
+            category
+            issueType
+            unicefId
+          }
         }
       }
     }

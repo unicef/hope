@@ -7769,7 +7769,10 @@ export type AllGrievanceTicketQuery = (
         )>, household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id'>
-        )> }
+        )>, relatedTickets: Maybe<Array<Maybe<(
+          { __typename?: 'GrievanceTicketNode' }
+          & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'unicefId'>
+        )>>> }
       )> }
     )>> }
   )> }
@@ -13867,6 +13870,13 @@ export const AllGrievanceTicketDocument = gql`
           id
         }
         unicefId
+        relatedTickets {
+          id
+          status
+          category
+          issueType
+          unicefId
+        }
       }
     }
   }

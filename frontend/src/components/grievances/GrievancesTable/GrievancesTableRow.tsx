@@ -12,6 +12,7 @@ import {
 import { UniversalMoment } from '../../core/UniversalMoment';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
+import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -73,6 +74,15 @@ export function GrievancesTableRow({
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>{issueType}</TableCell>
       <TableCell align='left'>{ticket.household?.unicefId || '-'}</TableCell>
+      <TableCell align='left'>
+        <LinkedTicketsModal
+          linkedTickets={ticket?.relatedTickets}
+          categoryChoices={categoryChoices}
+          statusChoices={statusChoices}
+          canViewDetails={canViewDetails}
+          businessArea={businessArea}
+        />
+      </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{ticket.createdAt}</UniversalMoment>
       </TableCell>
