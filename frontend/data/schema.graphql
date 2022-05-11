@@ -3294,8 +3294,8 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   selectedIndividual: IndividualNode
   roleReassignData: JSONString!
   extraData: TicketNeedsAdjudicationDetailsExtraDataNode
-  scoreMin: Float
-  scoreMax: Float
+  scoreMin: Float!
+  scoreMax: Float!
   hasDuplicatedDocument: Boolean
 }
 
