@@ -76,9 +76,10 @@ export function GrievancesTableRow({
       <TableCell align='left'>{ticket.household?.unicefId || '-'}</TableCell>
       <TableCell align='left'>
         <LinkedTicketsModal
-          linkedTickets={ticket?.relatedTickets}
+          ticket={ticket}
           categoryChoices={categoryChoices}
           statusChoices={statusChoices}
+          issueTypeChoicesData={issueTypeChoicesData}
           canViewDetails={canViewDetails}
           businessArea={businessArea}
         />
