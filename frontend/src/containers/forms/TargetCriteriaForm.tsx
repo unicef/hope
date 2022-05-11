@@ -168,16 +168,17 @@ export function TargetCriteriaForm({
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
     const filterNull = (filter): boolean => filter.value === null;
+
+    const filterEmptyFromTo = (filter): boolean =>
+      filter.value?.hasOwnProperty('from') &&
+      filter.value?.hasOwnProperty('to') &&
+      !filter.value.from &&
+      !filter.value.to;
+
     const hasFiltersNullValues = Boolean(filters.filter(filterNull).length);
+
     const hasFiltersEmptyFromToValues = Boolean(
-      filters.filter((filter) => {
-        return (
-          filter.value?.hasOwnProperty('from') &&
-          filter.value?.hasOwnProperty('to') &&
-          !filter.value.from &&
-          !filter.value.to
-        );
-      }).length,
+      filters.filter(filterEmptyFromTo).length,
     );
 
     const hasFiltersErrors =
@@ -187,11 +188,7 @@ export function TargetCriteriaForm({
       (block) => {
         const hasNulls = block.individualBlockFilters.some(filterNull);
         const hasFromToError = block.individualBlockFilters.some(
-          (filter) =>
-            filter.value?.hasOwnProperty('from') &&
-            filter.value?.hasOwnProperty('to') &&
-            !filter.value.from &&
-            !filter.value.to,
+          filterEmptyFromTo,
         );
 
         return hasNulls || hasFromToError;
