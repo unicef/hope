@@ -48,6 +48,13 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
+    label: 'Linked Tickets',
+    id: 'id',
+    numeric: false,
+    dataCy: 'linkedTickets',
+  },
+  {
+    disablePadding: false,
     label: 'Creation date',
     id: 'created_at',
     numeric: false,
