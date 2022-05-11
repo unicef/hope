@@ -3708,8 +3708,8 @@ export type QueryAllGrievanceTicketArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
   issueType?: Maybe<Scalars['String']>,
-  scoreMin?: Maybe<Scalars['Int']>,
-  scoreMax?: Maybe<Scalars['Int']>,
+  scoreMin?: Maybe<Scalars['String']>,
+  scoreMax?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5340,8 +5340,8 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   selectedIndividual?: Maybe<IndividualNode>,
   roleReassignData: Scalars['JSONString'],
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>,
-  scoreMin: Scalars['Float'],
-  scoreMax: Scalars['Float'],
+  scoreMin?: Maybe<Scalars['Float']>,
+  scoreMax?: Maybe<Scalars['Float']>,
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
 };
 
@@ -7741,8 +7741,8 @@ export type AllGrievanceTicketQueryVariables = {
   registrationDataImport?: Maybe<Scalars['ID']>,
   assignedTo?: Maybe<Scalars['ID']>,
   cashPlan?: Maybe<Scalars['String']>,
-  scoreMin?: Maybe<Scalars['Int']>,
-  scoreMax?: Maybe<Scalars['Int']>
+  scoreMin?: Maybe<Scalars['String']>,
+  scoreMax?: Maybe<Scalars['String']>
 };
 
 
@@ -13839,7 +13839,7 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: Int, $scoreMax: Int) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String) {
   allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax) {
     totalCount
     pageInfo {
@@ -21223,8 +21223,8 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>,
-  scoreMin?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  scoreMax?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  scoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  scoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
