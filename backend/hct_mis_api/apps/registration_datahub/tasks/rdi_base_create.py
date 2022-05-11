@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_flex_field_attr(field):
-    return field.endswith("_i_f") or field.endswith("_h_f")
+    return field.endswith(("_i_f","_h_f"))
 
 
 class RdiBaseCreateTask:
@@ -33,10 +33,10 @@ class RdiBaseCreateTask:
     def _assign_admin_areas_titles(household_obj):
         if household_obj.admin1:
             admin_area_level_1 = Area.objects.filter(p_code=household_obj.admin1).first()
-            household_obj.admin1_title = admin_area_level_1.name if admin_area_level_1 else ""
+            household_obj.admin1_title = getattr(admin_area_level_1, "name", "")
         if household_obj.admin2:
             admin_area_level_2 = Area.objects.filter(p_code=household_obj.admin2).first()
-            household_obj.admin2_title = admin_area_level_2.name if admin_area_level_2 else ""
+            household_obj.admin2_title = household_obj.admin1_title = getattr(admin_area_level_2, "name", "")
 
         return household_obj
 
@@ -44,7 +44,7 @@ class RdiBaseCreateTask:
         if isinstance(value, str):
             value = value.strip()
 
-        if value in (None, ""):
+        if not value:
             return value
 
         value_type = self.COMBINED_FIELDS[header]["type"]
@@ -63,7 +63,7 @@ class RdiBaseCreateTask:
         if value_type in (TYPE_SELECT_ONE, TYPE_SELECT_MANY):
             custom_cast_method = self.COMBINED_FIELDS[header].get("custom_cast_value")
 
-            if custom_cast_method is not None:
+            if custom_cast_method:
                 return custom_cast_method(input_value=value)
 
             choices = [x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]]
