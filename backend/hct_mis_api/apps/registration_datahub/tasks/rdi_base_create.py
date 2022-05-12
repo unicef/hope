@@ -36,7 +36,7 @@ class RdiBaseCreateTask:
             household_obj.admin1_title = getattr(admin_area_level_1, "name", "")
         if household_obj.admin2:
             admin_area_level_2 = Area.objects.filter(p_code=household_obj.admin2).first()
-            household_obj.admin2_title = household_obj.admin1_title = getattr(admin_area_level_2, "name", "")
+            household_obj.admin2_title = getattr(admin_area_level_2, "name", "")
 
         return household_obj
 
