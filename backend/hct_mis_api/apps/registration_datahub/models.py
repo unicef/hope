@@ -534,6 +534,15 @@ class DiiaHousehold(TimeStampedUUIDModel):
         "RegistrationDataImportDatahub",
         related_name="diia_households",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    import_household = models.ForeignKey(
+        "ImportedHousehold",
+        on_delete=models.CASCADE,
+        related_name="diia_households",
+        null=True,
+        blank=True
     )
 
     def __str__(self):
@@ -562,6 +571,15 @@ class DiiaIndividual(TimeStampedUUIDModel):
         "RegistrationDataImportDatahub",
         related_name="diia_individuals",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    imported_individual = models.ForeignKey(
+        "ImportedIndividual",
+        on_delete=models.CASCADE,
+        related_name="diia_individuals",
+        null=True,
+        blank=True
     )
 
     @property
