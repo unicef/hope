@@ -527,8 +527,6 @@ class DiiaHousehold(TimeStampedUUIDModel):
     address = models.CharField(max_length=255, blank=True, default=BLANK)
     consent = models.BooleanField()
     head_of_household = models.OneToOneField("DiiaIndividual", on_delete=models.CASCADE, null=True)
-    iban = models.CharField(max_length=255, blank=True, default=BLANK)
-    bank_name = models.CharField(max_length=255, blank=True, default=BLANK)
 
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
@@ -550,7 +548,7 @@ class DiiaHousehold(TimeStampedUUIDModel):
 
 
 class DiiaIndividual(TimeStampedUUIDModel):
-    individual_id = models.CharField(max_length=128, blank=True) # RNOKPP
+    individual_id = models.CharField(max_length=128, blank=True)  # RNOKPP
     last_name = models.CharField(max_length=85, blank=True, default=BLANK)
     first_name = models.CharField(max_length=85, blank=True, default=BLANK)
     second_name = models.CharField(max_length=85, blank=True, default=BLANK)
@@ -560,6 +558,8 @@ class DiiaIndividual(TimeStampedUUIDModel):
     birth_doc = models.CharField(max_length=128, blank=True)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE)
     disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
+    iban = models.CharField(max_length=255, blank=True, default=BLANK)
+    bank_name = models.CharField(max_length=255, blank=True, default=BLANK)
 
     household = models.ForeignKey(
         "DiiaHousehold",
