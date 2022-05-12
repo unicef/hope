@@ -37,7 +37,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
     Record,
-    RegistrationDataImportDatahub, DiiaHousehold, DiiaIndividual,
+    RegistrationDataImportDatahub,
+    DiiaHousehold,
+    DiiaIndividual,
 )
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
