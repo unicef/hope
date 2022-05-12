@@ -535,7 +535,7 @@ class DiiaHousehold(TimeStampedUUIDModel):
         null=True,
         blank=True
     )
-    import_household = models.ForeignKey(
+    imported_household = models.ForeignKey(
         "ImportedHousehold",
         on_delete=models.CASCADE,
         related_name="diia_households",
