@@ -12,6 +12,7 @@ import { BlackLink } from '../../../core/BlackLink';
 import { StatusBox } from '../../../core/StatusBox';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../core/UniversalMoment';
+import { WarningTooltipTable } from './WarningTooltipTable';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -45,6 +46,9 @@ export function PaymentTableRow({
       role='checkbox'
       key={ticket.id}
     >
+      <TableCell align='left'>
+        <WarningTooltipTable businessArea={businessArea} />
+      </TableCell>
       <TableCell align='left'>
         {canViewDetails ? (
           <BlackLink to={detailsPath}>{ticket.unicefId}</BlackLink>

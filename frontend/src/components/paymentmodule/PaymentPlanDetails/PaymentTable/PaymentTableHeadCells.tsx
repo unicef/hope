@@ -6,6 +6,12 @@ export const headCells: HeadCell<
 >[] = [
   {
     disablePadding: false,
+    label: '',
+    id: 'flag',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
     label: 'Payment Id',
     id: 'id',
     numeric: false,
