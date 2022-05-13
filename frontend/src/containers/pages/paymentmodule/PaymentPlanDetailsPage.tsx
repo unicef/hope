@@ -1,8 +1,7 @@
-import { Paper } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import { PaymentPlanDetails } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails';
 import { PaymentPlanDetailsHeader } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
@@ -30,6 +29,7 @@ export function PaymentPlanDetailsPage(): React.ReactElement {
         businessArea={businessArea}
         permissions={permissions}
       />
+      <Entitlement businessArea={businessArea} permissions={permissions} />
       <PaymentPlanDetailsResults />
     </>
   );
