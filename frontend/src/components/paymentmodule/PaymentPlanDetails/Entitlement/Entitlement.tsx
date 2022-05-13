@@ -8,22 +8,41 @@ import {
   Select,
   Typography,
 } from '@material-ui/core';
-import React, { useState } from 'react';
+import Publish from '@material-ui/icons/Publish';
+import GetApp from '@material-ui/icons/GetApp';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { Title } from '../../../core/Title';
+import { formatCurrencyWithSymbol } from '../../../../utils/utils';
+import { LabelizedField } from '../../../core/LabelizedField';
+import {
+  BigValueContainer,
+  BigValue,
+} from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
+import { Missing } from '../../../core/Missing';
 
 const GreyText = styled.p`
   color: #9e9e9e;
   font-size: 16px;
 `;
 
-const Divider = styled.div`
+const GreyTextSmall = styled.p`
+  color: #9e9e9e;
+  font-size: 14px;
+`;
+
+const OrDivider = styled.div`
   border-top: 1px solid #b1b1b5;
   height: 2px;
   width: 50%;
   margin-top: 20px;
+`;
+
+const Divider = styled.div`
+  border-top: 1px solid #b1b1b5;
+  height: 20px;
 `;
 
 const DividerLabel = styled.div`
@@ -43,6 +62,24 @@ const DividerLabel = styled.div`
   margin-top: 20px;
 `;
 
+const UploadIcon = styled(Publish)`
+  color: #043f91;
+`;
+const DownloadIcon = styled(GetApp)`
+  color: #043f91;
+`;
+
+const BoxWithBorderRight = styled(Box)`
+  border-right: 1px solid #b1b1b5;
+`;
+
+const StyledButton = styled(Button)`
+  margin-left: 10px;
+  font-weight: bold;
+  color: #043f91;
+  text-transform: uppercase;
+`;
+
 interface EntitlementProps {
   businessArea: string;
   permissions: string[];
@@ -54,10 +91,15 @@ export function Entitlement({
 }: EntitlementProps): React.ReactElement {
   const { t } = useTranslation();
   const [entitlement, setEntitlement] = useState<string>('');
+  const [file, setFile] = useState(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const entitlementChoices = [
     { name: 'USD', value: 'USD' },
     { name: 'PLN', value: 'PLN' },
   ];
+
+  console.log('file', file);
 
   return (
     <Box m={5}>
@@ -99,11 +141,66 @@ export function Entitlement({
             </Grid>
           </Grid>
           <Box display='flex' alignItems='center'>
-            <Divider />
+            <OrDivider />
             <DividerLabel>Or</DividerLabel>
-            <Divider />
+            <OrDivider />
           </Box>
         </Box>
+        <Grid container>
+          <Grid item xs={6}>
+            <BoxWithBorderRight
+              display='flex'
+              justifyContent='center'
+              alignItems='center'
+              flexDirection='column'
+            >
+              <Button
+                color='primary'
+                startIcon={<DownloadIcon />}
+                onClick={() => console.log('download')}
+              >
+                {t('Download Template')}
+              </Button>
+              <GreyTextSmall>
+                {t(
+                  'Template contains payment list with all targeted households',
+                )}
+              </GreyTextSmall>
+            </BoxWithBorderRight>
+          </Grid>
+          <Grid item xs={6}>
+            <Box
+              display='flex'
+              justifyContent='center'
+              alignItems='center'
+              flexDirection='column'
+            >
+              <Box>
+                <Button
+                  color='primary'
+                  startIcon={<UploadIcon />}
+                  onClick={() => inputRef.current.click()}
+                >
+                  {t('Upload File')}
+                </Button>
+                <input
+                  ref={inputRef}
+                  accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                  type='file'
+                  style={{ display: 'none' }}
+                  onChange={(e) => setFile(e.currentTarget.files[0])}
+                />
+              </Box>
+              <GreyTextSmall>{file?.name || null}</GreyTextSmall>
+            </Box>
+          </Grid>
+        </Grid>
+        <Divider />
+        <LabelizedField label={t('Total Cash Received')}>
+          <BigValue>
+            USD <Missing />
+          </BigValue>
+        </LabelizedField>
       </ContainerColumnWithBorder>
     </Box>
   );
