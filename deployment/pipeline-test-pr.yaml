@@ -67,7 +67,7 @@ stages:
             inputs:
               command: build
               arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(Build.SourceBranchName)-latest 
-              --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
+                          --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
               dockerfile: $(Docker.backend.filePath)
               repository: $(Docker.backend.repository)
               containerRegistry: $(Docker.registry)

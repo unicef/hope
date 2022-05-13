@@ -3,7 +3,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -233,13 +233,13 @@ def prepare_edit_documents(documents_to_edit):
 def prepare_previous_identities(identities_to_remove_with_approve_status):
     from django.shortcuts import get_object_or_404
 
-    from hct_mis_api.apps.core.utils import encode_id_base64
+    from hct_mis_api.apps.core.utils import encode_id_base64, decode_id_string
     from hct_mis_api.apps.household.models import IndividualIdentity
 
     previous_identities = {}
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
-        identity = get_object_or_404(IndividualIdentity, id=identity_id)
+        identity = get_object_or_404(IndividualIdentity, id=decode_id_string(identity_id))
         previous_identities[identity.id] = {
             "id": identity.id,
             "number": identity.number,
@@ -405,10 +405,12 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
         ) = get_data_from_role_data(role_data)
 
         if role_name == HEAD:
-            household.head_of_household = new_individual
-            # can be directly saved, because there is always only one head of household to update
-            household.save()
-            household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
+            if household.head_of_household.pk != new_individual.pk:
+                household.head_of_household = new_individual
+
+                # can be directly saved, because there is always only one head of household to update
+                household.save()
+                household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             new_individual.relationship = HEAD
             new_individual.save()
             if info:
