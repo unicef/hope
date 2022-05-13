@@ -60,7 +60,11 @@ class TestExtractRecords(TestCase):
             ],
         }
         Record.objects.create(
-            registration=1, timestamp=datetime.datetime.now(), source_id=1, storage=bytes(json.dumps(storage), "utf-8")
+            registration=1,
+            timestamp=datetime.datetime.now(),
+            data=None,
+            source_id=1,
+            storage=bytes(json.dumps(storage), "utf-8"),
         )
 
     def test_extract_to_data_field(self):

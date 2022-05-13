@@ -167,7 +167,38 @@ export function TargetCriteriaForm({
     filters,
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
+    const filterNull = (filter): boolean => filter.value === null;
+
+    const filterEmptyFromTo = (filter): boolean =>
+      filter.value?.hasOwnProperty('from') &&
+      filter.value?.hasOwnProperty('to') &&
+      !filter.value.from &&
+      !filter.value.to;
+
+    const hasFiltersNullValues = Boolean(filters.filter(filterNull).length);
+
+    const hasFiltersEmptyFromToValues = Boolean(
+      filters.filter(filterEmptyFromTo).length,
+    );
+
+    const hasFiltersErrors =
+      hasFiltersNullValues || hasFiltersEmptyFromToValues;
+
+    const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
+      (block) => {
+        const hasNulls = block.individualBlockFilters.some(filterNull);
+        const hasFromToError = block.individualBlockFilters.some(
+          filterEmptyFromTo,
+        );
+
+        return hasNulls || hasFromToError;
+      },
+    );
+
     const errors: { nonFieldErrors?: string[] } = {};
+    if (hasFiltersErrors || hasIndividualsFiltersBlocksErrors) {
+      errors.nonFieldErrors = ['You need to fill out missing values.'];
+    }
     if (filters.length + individualsFiltersBlocks.length === 0) {
       errors.nonFieldErrors = [
         'You need to add at least one household filter or an individual block filter.',
