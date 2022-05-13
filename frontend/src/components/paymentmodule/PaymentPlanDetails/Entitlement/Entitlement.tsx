@@ -146,8 +146,8 @@ export function Entitlement({
             <OrDivider />
           </Box>
         </Box>
-        <Grid container>
-          <Grid item xs={6}>
+        <Box display='flex'>
+          <Box width='50%'>
             <BoxWithBorderRight
               display='flex'
               justifyContent='center'
@@ -167,8 +167,8 @@ export function Entitlement({
                 )}
               </GreyTextSmall>
             </BoxWithBorderRight>
-          </Grid>
-          <Grid item xs={6}>
+          </Box>
+          <Box width='50%'>
             <Box
               display='flex'
               justifyContent='center'
@@ -193,8 +193,8 @@ export function Entitlement({
               </Box>
               <GreyTextSmall>{file?.name || null}</GreyTextSmall>
             </Box>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
         <Divider />
         <LabelizedField label={t('Total Cash Received')}>
           <BigValue>
