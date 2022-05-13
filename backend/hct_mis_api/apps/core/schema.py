@@ -5,6 +5,10 @@ from django.core.exceptions import ObjectDoesNotExist
 
 import graphene
 from constance import config
+from django.db import models
+from django.db.models import QuerySet
+from django.db.models.fields.related_descriptors import create_forward_many_to_many_manager
+from django_filters import CharFilter, FilterSet
 from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
@@ -142,10 +146,13 @@ class FieldAttributeNode(graphene.ObjectType):
 
     def resolve_choices(parent, info):
         choices = _custom_dict_or_attr_resolver("choices", None, parent, info)
-        if isinstance(parent, dict) and callable(choices):
-            choices = choices()
 
-        if isinstance(choices, Iterable):
+        if callable(choices) and not isinstance(choices, models.Manager):
+            choices = choices()
+        if isinstance(
+            choices,
+            Iterable,
+        ):
             return sorted(choices, key=lambda elem: elem["label"]["English(EN)"])
         return choices.order_by("name").all()
 
