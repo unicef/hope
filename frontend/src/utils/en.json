@@ -619,5 +619,8 @@
   "Total Amount": "Total Amount",
   "per FSP": "per FSP",
   "Entitlement Formula": "Entitlement Formula",
-  "Select Entitlement Formula": "Select Entitlement Formula"
+  "Select Entitlement Formula": "Select Entitlement Formula",
+  "Download Template": "Download Template",
+  "Upload File": "Upload File",
+  "Template contains payment list with all targeted households": "Template contains payment list with all targeted households"
 }
