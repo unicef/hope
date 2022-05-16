@@ -270,11 +270,11 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_has_bank_account_info(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_without_bank_account"}],
+            {"business_area": self.business_area}, [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_with_bank_account"}]
+            {"business_area": self.business_area}, [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}]
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -312,11 +312,11 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_has_not_bank_account_info(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_without_bank_account"}],
+            {"business_area": self.business_area}, [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_with_bank_account"}]
+            {"business_area": self.business_area}, [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}]
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -354,11 +354,11 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_tax_id(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_without_tax_id"}],
+            {"business_area": self.business_area}, [{"full_name": "individual_without_tax_id", "phone_no": "123456789"}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_with_tax_id"}]
+            {"business_area": self.business_area}, [{"full_name": "individual_with_tax_id", "phone_no": "123456789"}]
         )
 
         create_individual_document(individuals[0], document_type="TAX_ID")
