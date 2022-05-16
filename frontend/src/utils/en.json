@@ -626,5 +626,11 @@
   "Payments List": "Payments List",
   "Missing": "Missing",
   "Payment Plan ID": "Payment Plan ID",
-  "is also included in the following Payment Plans": "is also included in the following Payment Plans"
+  "is also included in the following Payment Plans": "is also included in the following Payment Plans",
+  "Unlock": "Unlock",
+  "Reject": "Reject",
+  "Authorize": "Authorize",
+  "Mark as Reviewed": "Mark as Reviewed",
+  "Download XLSX": "Download XLSX",
+  "Send to Fsp": "Send to Fsp"
 }
