@@ -125,7 +125,11 @@ def copy_admin_area_data():
                     if opts.app_label == "geo" and opts.model_name == "area":
                         old_field_name = field.name[:-4]
                         geo_name = field.name
-                        records = Model.objects.all()
+                        records = (
+                            Model.objects.filter(**{f"{field.name}__isnull": True})
+                            .select_related(old_field_name)
+                            .only(f"{old_field_name}__p_code")
+                        )
                         for record in records:
                             source = getattr(record, old_field_name)
                             if source:

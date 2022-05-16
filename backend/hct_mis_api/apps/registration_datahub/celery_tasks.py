@@ -10,9 +10,7 @@ logger = logging.getLogger(__name__)
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
     logger.info("registration_xlsx_import_task start")
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiXlsxCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 
         RdiXlsxCreateTask().execute(
             registration_data_import_id=registration_data_import_id,
@@ -43,9 +41,7 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
     logger.info("registration_kobo_import_task start")
 
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiKoboCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
 
         RdiKoboCreateTask().execute(
             registration_data_import_id=registration_data_import_id,
@@ -88,9 +84,7 @@ def registration_kobo_import_hourly_task():
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiKoboCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
 
         not_started_rdi = RegistrationDataImportDatahub.objects.filter(
             import_done=RegistrationDataImportDatahub.NOT_STARTED
@@ -121,9 +115,7 @@ def registration_xlsx_import_hourly_task():
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiXlsxCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 
         not_started_rdi = RegistrationDataImportDatahub.objects.filter(
             import_done=RegistrationDataImportDatahub.NOT_STARTED

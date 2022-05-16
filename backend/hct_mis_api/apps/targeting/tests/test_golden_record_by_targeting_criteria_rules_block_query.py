@@ -177,3 +177,99 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             request_string=GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase.QUERY,
             variables=variables,
         )
+
+    def test_golden_record_by_targeting_criteria_phone_number(self):
+        variables = {
+            "program": self.id_to_base64(self.program.id, "Program"),
+            "businessArea": self.business_area.slug,
+            "targetingCriteria": {
+                 "rules": [
+                  {
+                    "filters": [],
+                    "individualsFiltersBlocks": [
+                      {
+                        "individualBlockFilters": [
+                          {
+                            "comparisionMethod": "EQUALS",
+                            "arguments": [
+                              "True"
+                            ],
+                            "fieldName": "has_phone_number",
+                            "isFlexField": False
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+            },
+        }
+        self.snapshot_graphql_request(
+            context={"user": self.user},
+            request_string=GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase.QUERY,
+            variables=variables,
+        )
+
+    def test_golden_record_by_targeting_criteria_bank_account_info(self):
+        variables = {
+            "program": self.id_to_base64(self.program.id, "Program"),
+            "businessArea": self.business_area.slug,
+            "targetingCriteria": {
+                 "rules": [
+                  {
+                    "filters": [],
+                    "individualsFiltersBlocks": [
+                      {
+                        "individualBlockFilters": [
+                          {
+                            "comparisionMethod": "EQUALS",
+                            "arguments": [
+                              "False"
+                            ],
+                            "fieldName": "has_the_bank_account_number",
+                            "isFlexField": False
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+            },
+        }
+        self.snapshot_graphql_request(
+            context={"user": self.user},
+            request_string=GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase.QUERY,
+            variables=variables,
+        )
+
+    def test_golden_record_by_targeting_criteria_tax_id(self):
+        variables = {
+            "program": self.id_to_base64(self.program.id, "Program"),
+            "businessArea": self.business_area.slug,
+            "targetingCriteria": {
+                 "rules": [
+                  {
+                    "filters": [],
+                    "individualsFiltersBlocks": [
+                      {
+                        "individualBlockFilters": [
+                          {
+                            "comparisionMethod": "EQUALS",
+                            "arguments": [
+                              "True"
+                            ],
+                            "fieldName": "has_tax_id_number",
+                            "isFlexField": False
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+            },
+        }
+        self.snapshot_graphql_request(
+            context={"user": self.user},
+            request_string=GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase.QUERY,
+            variables=variables,
+        )
