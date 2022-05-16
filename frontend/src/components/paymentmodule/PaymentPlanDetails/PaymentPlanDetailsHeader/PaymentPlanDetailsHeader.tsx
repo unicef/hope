@@ -13,7 +13,10 @@ import {
 } from '../../../../utils/utils';
 import { StatusBox } from '../../../core/StatusBox';
 import { TargetPopulationStatus } from '../../../../__generated__/graphql';
-import { OpenPaymenPlanHeaderButtons } from './OpenPaymenPlanHeaderButtons';
+import { OpenPaymentPlanHeaderButtons } from './OpenPaymentPlanHeaderButtons';
+import { LockedPaymentPlanHeaderButtons } from './LockedPaymentPlanHeaderButtons';
+import { InApprovalPaymentPlanHeaderButtons } from './InApprovalPaymentPlanHeaderButtons';
+import { AcceptedPaymentPlanHeaderButtons } from './AcceptedPaymentPlanHeaderButtons';
 
 const StatusWrapper = styled.div`
   width: 140px;
@@ -47,7 +50,7 @@ export function PaymentPlanDetailsHeader({
     case 'OPEN':
       buttons = (
         <>
-          {/* <OpenPaymenPlanHeaderButtons
+          {/* <OpenPaymentPlanHeaderButtons
           targetPopulation={targetPopulation}
           setEditState={setEditState}
           canDuplicate={canDuplicate}
@@ -55,6 +58,76 @@ export function PaymentPlanDetailsHeader({
           canEdit={canEdit}
           canLock={canLock}
         /> */}
+        </>
+      );
+      break;
+    case 'LOCKED':
+      buttons = (
+        <>
+          {/* <LockedPaymentPlanHeaderButtons
+            targetPopulation={targetPopulation}
+            setEditState={setEditState}
+            canDuplicate={canDuplicate}
+            canRemove={canRemove}
+            canEdit={canEdit}
+            canLock={canLock}
+          /> */}
+        </>
+      );
+      break;
+    case 'IN_APPROVAL':
+      buttons = (
+        <>
+          {/* <InApprovalPaymentPlanHeaderButtons
+              targetPopulation={targetPopulation}
+              setEditState={setEditState}
+              canDuplicate={canDuplicate}
+              canRemove={canRemove}
+              canEdit={canEdit}
+              canLock={canLock}
+            /> */}
+        </>
+      );
+      break;
+    case 'IN_AUTHORIZATION':
+      buttons = (
+        <>
+          {/* <InAuthorizationPaymentPlanHeaderButtons
+                targetPopulation={targetPopulation}
+                setEditState={setEditState}
+                canDuplicate={canDuplicate}
+                canRemove={canRemove}
+                canEdit={canEdit}
+                canLock={canLock}
+              /> */}
+        </>
+      );
+      break;
+    case 'IN_REVIEW':
+      buttons = (
+        <>
+          {/* <InAuthorizationPaymentPlanHeaderButtons
+                  targetPopulation={targetPopulation}
+                  setEditState={setEditState}
+                  canDuplicate={canDuplicate}
+                  canRemove={canRemove}
+                  canEdit={canEdit}
+                  canLock={canLock}
+                /> */}
+        </>
+      );
+      break;
+    case 'ACCEPTED':
+      buttons = (
+        <>
+          {/* <AcceptedPaymentPlanHeaderButtons
+                    targetPopulation={targetPopulation}
+                    setEditState={setEditState}
+                    canDuplicate={canDuplicate}
+                    canRemove={canRemove}
+                    canEdit={canEdit}
+                    canLock={canLock}
+                  /> */}
         </>
       );
       break;
