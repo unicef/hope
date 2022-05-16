@@ -196,8 +196,6 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                 individuals{
                     edges{
                         node{
-                            sex
-                            maritalStatus
                             phoneNo
                             documents {
                               edges {

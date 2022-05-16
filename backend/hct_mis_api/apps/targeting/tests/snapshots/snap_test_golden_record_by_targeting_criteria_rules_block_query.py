@@ -111,9 +111,7 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                             'edges': [
                                             ]
                                         },
-                                        'maritalStatus': 'SINGLE',
-                                        'phoneNo': '',
-                                        'sex': 'FEMALE'
+                                        'phoneNo': ''
                                     }
                                 },
                                 {
@@ -130,9 +128,7 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                                 }
                                             ]
                                         },
-                                        'maritalStatus': 'DIVORCED',
-                                        'phoneNo': '',
-                                        'sex': 'MALE'
+                                        'phoneNo': ''
                                     }
                                 }
                             ]
@@ -156,39 +152,6 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                             'edges': [
                                 {
                                     'node': {
-                                        'bankAccountInfo': None,
-                                        'documents': {
-                                            'edges': [
-                                            ]
-                                        },
-                                        'maritalStatus': 'SEPARATED',
-                                        'phoneNo': '+48123456789',
-                                        'sex': 'FEMALE'
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'bankAccountInfo': None,
-                                        'documents': {
-                                            'edges': [
-                                            ]
-                                        },
-                                        'maritalStatus': 'A_',
-                                        'phoneNo': '+48 987654321',
-                                        'sex': 'MALE'
-                                    }
-                                }
-                            ]
-                        },
-                        'size': 2
-                    }
-                },
-                {
-                    'node': {
-                        'individuals': {
-                            'edges': [
-                                {
-                                    'node': {
                                         'bankAccountInfo': {
                                             'bankName': 'Santander'
                                         },
@@ -196,9 +159,7 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                             'edges': [
                                             ]
                                         },
-                                        'maritalStatus': 'SINGLE',
-                                        'phoneNo': '',
-                                        'sex': 'FEMALE'
+                                        'phoneNo': ''
                                     }
                                 },
                                 {
@@ -215,9 +176,36 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                                 }
                                             ]
                                         },
-                                        'maritalStatus': 'DIVORCED',
-                                        'phoneNo': '',
-                                        'sex': 'MALE'
+                                        'phoneNo': ''
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 2
+                    }
+                },
+                {
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'bankAccountInfo': None,
+                                        'documents': {
+                                            'edges': [
+                                            ]
+                                        },
+                                        'phoneNo': '+48123456789'
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'bankAccountInfo': None,
+                                        'documents': {
+                                            'edges': [
+                                            ]
+                                        },
+                                        'phoneNo': '+48 987654321'
                                     }
                                 }
                             ]
@@ -246,9 +234,7 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                             'edges': [
                                             ]
                                         },
-                                        'maritalStatus': 'SEPARATED',
-                                        'phoneNo': '+48123456789',
-                                        'sex': 'FEMALE'
+                                        'phoneNo': '+48123456789'
                                     }
                                 },
                                 {
@@ -258,9 +244,7 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                             'edges': [
                                             ]
                                         },
-                                        'maritalStatus': 'A_',
-                                        'phoneNo': '+48 987654321',
-                                        'sex': 'MALE'
+                                        'phoneNo': '+48 987654321'
                                     }
                                 }
                             ]
@@ -291,9 +275,7 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                             'edges': [
                                             ]
                                         },
-                                        'maritalStatus': 'SINGLE',
-                                        'phoneNo': '',
-                                        'sex': 'FEMALE'
+                                        'phoneNo': ''
                                     }
                                 },
                                 {
@@ -310,9 +292,7 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                                 }
                                             ]
                                         },
-                                        'maritalStatus': 'DIVORCED',
-                                        'phoneNo': '',
-                                        'sex': 'MALE'
+                                        'phoneNo': ''
                                     }
                                 }
                             ]
