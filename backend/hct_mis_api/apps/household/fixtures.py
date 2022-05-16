@@ -179,7 +179,6 @@ class DocumentTypeFactory(factory.DjangoModelFactory):
         model = DocumentType
 
     type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
-    document = factory.SubFactory(DocumentFactory)
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
@@ -298,7 +297,7 @@ def create_household_and_individuals(household_data=None, individuals_data=None,
 
 
 def create_individual_document(individual, document_type=None):
-    document = DocumentFactory(individual=individual)
     if document_type:
-        DocumentType(document=document, type=document_type)
+        DocumentTypeFactory(type=document_type)
+    document = DocumentFactory(individual=individual)
     return document

@@ -6,7 +6,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfo,
+    BankAccountInfoFactory,
     create_household_and_individuals,
     create_individual_document
 )
@@ -198,6 +198,19 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                         node{
                             sex
                             maritalStatus
+                            phoneNo
+                            documents {
+                              edges {
+                                node {
+                                  type {
+                                    type
+                                  }
+                                }
+                              }
+                            }
+                            bankAccountInfo {
+                              bankName
+                            }
                         }
                     }
                 }
@@ -222,7 +235,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
             {"business_area": cls.business_area}, [{"phone_no": ""}, {"phone_no": ""}]
         )
 
-        BankAccountInfo(individual=individuals[0])
+        BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
         create_individual_document(individuals[1], document_type="TAX_ID")
 
         cls.user = UserFactory()
@@ -260,7 +273,39 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
             variables=variables,
         )
 
-    def test_golden_record_by_targeting_criteria_bank_account_info(self):
+    def test_golden_record_by_targeting_criteria_has_bank_account_info(self):
+        variables = {
+            "program": self.id_to_base64(self.program.id, "Program"),
+            "businessArea": self.business_area.slug,
+            "targetingCriteria": {
+                "rules": [
+                    {
+                        "filters": [],
+                        "individualsFiltersBlocks": [
+                            {
+                                "individualBlockFilters": [
+                                    {
+                                        "comparisionMethod": "EQUALS",
+                                        "arguments": [
+                                            "True"
+                                        ],
+                                        "fieldName": "has_the_bank_account_number",
+                                        "isFlexField": False
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+        }
+        self.snapshot_graphql_request(
+            context={"user": self.user},
+            request_string=GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase.QUERY,
+            variables=variables,
+        )
+
+    def test_golden_record_by_targeting_criteria_has_not_bank_account_info(self):
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
