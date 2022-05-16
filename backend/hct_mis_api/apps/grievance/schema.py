@@ -14,7 +14,6 @@ from django_filters import (
     ModelChoiceFilter,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
-    NumberFilter,
     OrderingFilter,
     TypedMultipleChoiceFilter,
     UUIDFilter,

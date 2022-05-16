@@ -5,6 +5,7 @@ from typing import List
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
@@ -118,7 +119,8 @@ class FlexRegistrationService:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
         import_data = rdi_datahub.import_data
-        number_of_individuals = 0
+
+        Record.objects.filter(pk__in=records_ids).update(registration_data_import=rdi_datahub)
 
         try:
             with atomic("default"):
@@ -126,24 +128,37 @@ class FlexRegistrationService:
                     for record_id in records_ids:
                         try:
                             record = Record.objects.defer("data").get(id=record_id)
-                            number_of_individuals += self.create_household_for_rdi_household(record, rdi_datahub)
+                            self.create_household_for_rdi_household(record, rdi_datahub)
                         except ValidationError as e:
-                            raise ValidationError({f"Record id: {record_id}": [str(e)]})
+                            raise ValidationError({f"Record id: {record_id}": [str(e)]}) from e
 
-                    rdi.number_of_individuals = number_of_individuals
+                    number_of_individuals = ImportedIndividual.objects.filter(
+                        registration_data_import=rdi_datahub
+                    ).count()
                     import_data.number_of_individuals = number_of_individuals
+                    rdi.number_of_individuals = number_of_individuals
                     rdi.status = RegistrationDataImport.DEDUPLICATION
-                    rdi.save()
-                    rdi_deduplication_task.delay(rdi_datahub.id)
+                    rdi.save(
+                        update_fields=(
+                            "number_of_individuals",
+                            "status",
+                        )
+                    )
                     import_data.save(update_fields=("number_of_individuals",))
+                    transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
         except ValidationError as e:
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
-            rdi.save()
+            rdi.save(
+                update_fields=(
+                    "status",
+                    "error_message",
+                )
+            )
             raise
         except Exception:
             rdi.status = RegistrationDataImport.IMPORT_ERROR
-            rdi.save()
+            rdi.save(update_fields=("status",))
             raise
 
     def create_household_for_rdi_household(
@@ -168,7 +183,14 @@ class FlexRegistrationService:
             household.admin1_title = admin_area1.title
         if admin_area2:
             household.admin2_title = admin_area2.title
-        household.save()
+        household.kobo_asset_id = record.source_id
+        household.save(
+            update_fields=(
+                "admin1_title",
+                "admin2_title",
+                "kobo_asset_id",
+            )
+        )
         for index, individual_dict in enumerate(individuals_array):
             try:
                 individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
@@ -178,6 +200,7 @@ class FlexRegistrationService:
                 individual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
+                individual.kobo_asset_id = record.source_id
                 individual.save()
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
@@ -191,12 +214,9 @@ class FlexRegistrationService:
                     household.save(update_fields=("head_of_household",))
                 documents.extend(self._prepare_documents(individual_dict, individual))
             except ValidationError as e:
-                raise ValidationError({f"individual nr {index+1}": [str(e)]})
+                raise ValidationError({f"individual nr {index+1}": [str(e)]}) from e
 
-        record.registration_data_import = registration_data_import
-        record.save(update_fields=("registration_data_import",))
         ImportedDocument.objects.bulk_create(documents)
-        return len(individuals)
 
     def _set_default_head_of_household(self, individuals_array):
         for individual_data in individuals_array:

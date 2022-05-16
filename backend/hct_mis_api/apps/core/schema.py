@@ -5,6 +5,10 @@ from django.core.exceptions import ObjectDoesNotExist
 
 import graphene
 from constance import config
+from django.db import models
+from django.db.models import QuerySet
+from django.db.models.fields.related_descriptors import create_forward_many_to_many_manager
+from django_filters import CharFilter, FilterSet
 from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
@@ -141,12 +145,16 @@ class FieldAttributeNode(graphene.ObjectType):
     is_flex_field = graphene.Boolean()
 
     def resolve_choices(parent, info):
+        choices = _custom_dict_or_attr_resolver("choices", None, parent, info)
+
+        if callable(choices) and not isinstance(choices, models.Manager):
+            choices = choices()
         if isinstance(
-            _custom_dict_or_attr_resolver("choices", None, parent, info),
+            choices,
             Iterable,
         ):
-            return sorted(parent["choices"], key=lambda elem: elem["label"]["English(EN)"])
-        return _custom_dict_or_attr_resolver("choices", None, parent, info).order_by("name").all()
+            return sorted(choices, key=lambda elem: elem["label"]["English(EN)"])
+        return choices.order_by("name").all()
 
     def resolve_is_flex_field(self, info):
         if isinstance(self, FlexibleAttribute):

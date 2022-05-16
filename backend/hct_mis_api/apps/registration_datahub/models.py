@@ -445,7 +445,6 @@ class Record(models.Model):
     )
     ignored = models.BooleanField(default=False, blank=True, null=True, db_index=True)
     source_id = models.IntegerField(db_index=True)
-
     data = models.JSONField(default=dict, blank=True, null=True)
 
     @classmethod
@@ -518,3 +517,71 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
+
+
+class DiiaHousehold(TimeStampedUUIDModel):
+    rec_id = models.CharField(max_length=20, blank=True, default=BLANK)
+    vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True)
+    vpo_doc_id = models.CharField(max_length=128, blank=True, default=BLANK)
+    vpo_doc_date = models.DateField(blank=True)
+    address = models.CharField(max_length=255, blank=True, default=BLANK)
+    consent = models.BooleanField()
+    head_of_household = models.OneToOneField("DiiaIndividual", on_delete=models.CASCADE, null=True)
+
+    registration_data_import = models.ForeignKey(
+        "RegistrationDataImportDatahub",
+        related_name="diia_households",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    imported_household = models.ForeignKey(
+        "ImportedHousehold",
+        on_delete=models.CASCADE,
+        related_name="diia_households",
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return f"Diia Household ID: {self.id}"
+
+
+class DiiaIndividual(TimeStampedUUIDModel):
+    individual_id = models.CharField(max_length=128, blank=True)  # RNOKPP
+    last_name = models.CharField(max_length=85, blank=True, default=BLANK)
+    first_name = models.CharField(max_length=85, blank=True, default=BLANK)
+    second_name = models.CharField(max_length=85, blank=True, default=BLANK)
+    relationship = models.CharField(max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, default=BLANK)
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE)
+    birth_date = models.DateField()
+    birth_doc = models.CharField(max_length=128, blank=True)
+    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE)
+    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
+    iban = models.CharField(max_length=255, blank=True, default=BLANK)
+    bank_name = models.CharField(max_length=255, blank=True, default=BLANK)
+
+    household = models.ForeignKey(
+        "DiiaHousehold",
+        null=True,
+        related_name="individuals",
+        on_delete=models.CASCADE,
+    )
+    registration_data_import = models.ForeignKey(
+        "RegistrationDataImportDatahub",
+        related_name="diia_individuals",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    imported_individual = models.ForeignKey(
+        "ImportedIndividual",
+        on_delete=models.CASCADE,
+        related_name="diia_individuals",
+        null=True,
+        blank=True
+    )
+
+    @property
+    def full_name(self):
+        return f"{self.last_name} {self.first_name} {self.second_name}"
