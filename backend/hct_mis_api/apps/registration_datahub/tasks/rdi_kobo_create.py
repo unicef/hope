@@ -170,9 +170,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     type_name = document_name.upper()
                     if type_name == "OTHER_ID":
                         type_name = IDENTIFICATION_TYPE_OTHER
-                    label = IDENTIFICATION_TYPE_DICT.get(type_name)
-                    if label is None:
-                        label = data["name"]
+                    label = IDENTIFICATION_TYPE_DICT.get(type_name, data.get("name"))
                     country = Country(data["issuing_country"])
 
                     document_type, _ = ImportedDocumentType.objects.get_or_create(
