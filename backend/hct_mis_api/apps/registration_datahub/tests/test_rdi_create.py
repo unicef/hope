@@ -65,10 +65,8 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiKoboCreateTask,
-            RdiXlsxCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -215,11 +213,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(task.documents, expected)
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.SheetImageLoader",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.SheetImageLoader",
         ImageLoaderMock,
     )
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.timezone.now",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.timezone.now",
         lambda: "2020-06-22 12:00",
     )
     def test_handle_document_photo_fields(self):
@@ -362,10 +360,8 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiKoboCreateTask,
-            RdiXlsxCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -434,7 +430,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import.save()
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute(self):
@@ -473,7 +469,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(household_obj_data, expected)
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute_multiple_collectors(self):
@@ -514,7 +510,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         )
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_image_field(self):
@@ -563,7 +559,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         pass
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_documents_and_identities(self):
