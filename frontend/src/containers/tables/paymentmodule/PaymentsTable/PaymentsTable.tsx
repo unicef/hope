@@ -5,7 +5,7 @@ import {
   hasCreatorOrOwnerPermissions,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { UniversalTable } from '../../UniversalTable';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { GRIEVANCE_CATEGORIES } from '../../../../utils/constants';
 import { decodeIdString, reduceChoices } from '../../../../utils/utils';
@@ -16,25 +16,25 @@ import {
   AllGrievanceTicketQuery,
   useAllGrievanceTicketQuery,
 } from '../../../../__generated__/graphql';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { GrievancesTableRow } from '../../../grievances/GrievancesTable/GrievancesTableRow';
+import { LoadingComponent } from '../../../../components/core/LoadingComponent';
+import { GrievancesTableRow } from '../../../../components/grievances/GrievancesTable/GrievancesTableRow';
 
-import { headCells } from './PaymentTableHeadCells';
-import { PaymentTableRow } from './PaymentTableRow';
+import { headCells } from './PaymentsTableHeadCells';
+import { PaymentsTableRow } from './PaymentsTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;
 `;
 
-interface PaymentTableProps {
+interface PaymentsTableProps {
   businessArea: string;
   filter;
 }
 
-export const PaymentTable = ({
+export const PaymentsTable = ({
   businessArea,
   filter,
-}: PaymentTableProps): React.ReactElement => {
+}: PaymentsTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -105,7 +105,7 @@ export const PaymentTable = ({
         AllGrievanceTicketQueryVariables
       >
         headCells={headCells}
-        title={t('Grievance and Feedback List')}
+        title={t('Payments List')}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllGrievanceTicketQuery}
         queriedObjectName='allGrievanceTicket'
@@ -113,7 +113,7 @@ export const PaymentTable = ({
         defaultOrderBy='created_at'
         defaultOrderDirection='desc'
         renderRow={(row) => (
-          <PaymentTableRow
+          <PaymentsTableRow
             key={row.id}
             ticket={row}
             statusChoices={statusChoices}

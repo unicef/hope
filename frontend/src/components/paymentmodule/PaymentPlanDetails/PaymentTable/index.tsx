@@ -1,1 +1,0 @@
-export { PaymentTable } from './PaymentTable';
