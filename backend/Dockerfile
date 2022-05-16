@@ -1,4 +1,4 @@
-FROM python:3.9.12-slim-buster
+FROM python:3.9.12-slim-bullseye
 
 
 RUN apt-get update
@@ -9,8 +9,8 @@ RUN apt-get install -y --no-install-recommends \
     git-core \
     postgresql-client \
     libpq-dev \
-    python-psycopg2 \
-    python-gdal \
+    python3-psycopg2 \
+    python3-gdal \
     gdal-bin \
     curl
 RUN apt-get clean
