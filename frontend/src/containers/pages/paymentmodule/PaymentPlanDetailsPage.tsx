@@ -8,6 +8,7 @@ import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/Pay
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 
 export function PaymentPlanDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -31,6 +32,7 @@ export function PaymentPlanDetailsPage(): React.ReactElement {
       />
       <Entitlement businessArea={businessArea} permissions={permissions} />
       <PaymentPlanDetailsResults />
+      <PaymentsTable businessArea={businessArea} filter={{}} />
     </>
   );
 }
