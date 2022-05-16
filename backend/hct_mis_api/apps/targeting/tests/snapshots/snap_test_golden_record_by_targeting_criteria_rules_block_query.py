@@ -113,27 +113,10 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                         },
                                         'phoneNo': ''
                                     }
-                                },
-                                {
-                                    'node': {
-                                        'bankAccountInfo': None,
-                                        'documents': {
-                                            'edges': [
-                                                {
-                                                    'node': {
-                                                        'type': {
-                                                            'type': 'TAX_ID'
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        },
-                                        'phoneNo': ''
-                                    }
                                 }
                             ]
                         },
-                        'size': 2
+                        'size': 1
                     }
                 }
             ],
@@ -152,44 +135,6 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                             'edges': [
                                 {
                                     'node': {
-                                        'bankAccountInfo': {
-                                            'bankName': 'Santander'
-                                        },
-                                        'documents': {
-                                            'edges': [
-                                            ]
-                                        },
-                                        'phoneNo': ''
-                                    }
-                                },
-                                {
-                                    'node': {
-                                        'bankAccountInfo': None,
-                                        'documents': {
-                                            'edges': [
-                                                {
-                                                    'node': {
-                                                        'type': {
-                                                            'type': 'TAX_ID'
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        },
-                                        'phoneNo': ''
-                                    }
-                                }
-                            ]
-                        },
-                        'size': 2
-                    }
-                },
-                {
-                    'node': {
-                        'individuals': {
-                            'edges': [
-                                {
-                                    'node': {
                                         'bankAccountInfo': None,
                                         'documents': {
                                             'edges': [
@@ -197,24 +142,14 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                         },
                                         'phoneNo': '+48123456789'
                                     }
-                                },
-                                {
-                                    'node': {
-                                        'bankAccountInfo': None,
-                                        'documents': {
-                                            'edges': [
-                                            ]
-                                        },
-                                        'phoneNo': '+48 987654321'
-                                    }
                                 }
                             ]
                         },
-                        'size': 2
+                        'size': 1
                     }
                 }
             ],
-            'totalCount': 2
+            'totalCount': 1
         }
     }
 }
@@ -236,20 +171,10 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                         },
                                         'phoneNo': '+48123456789'
                                     }
-                                },
-                                {
-                                    'node': {
-                                        'bankAccountInfo': None,
-                                        'documents': {
-                                            'edges': [
-                                            ]
-                                        },
-                                        'phoneNo': '+48 987654321'
-                                    }
                                 }
                             ]
                         },
-                        'size': 2
+                        'size': 1
                     }
                 }
             ],
@@ -266,18 +191,6 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                     'node': {
                         'individuals': {
                             'edges': [
-                                {
-                                    'node': {
-                                        'bankAccountInfo': {
-                                            'bankName': 'Santander'
-                                        },
-                                        'documents': {
-                                            'edges': [
-                                            ]
-                                        },
-                                        'phoneNo': ''
-                                    }
-                                },
                                 {
                                     'node': {
                                         'bankAccountInfo': None,
@@ -297,7 +210,7 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                 }
                             ]
                         },
-                        'size': 2
+                        'size': 1
                     }
                 }
             ],

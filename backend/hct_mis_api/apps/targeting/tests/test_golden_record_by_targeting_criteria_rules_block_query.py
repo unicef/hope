@@ -224,22 +224,18 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
         cls.program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
-
-        create_household_and_individuals(
-            {"business_area": cls.business_area}, [{"phone_no": "+48 123456789"}, {"phone_no": "+48 987654321"}],
-        )
-
-        household, individuals = create_household_and_individuals(
-            {"business_area": cls.business_area}, [{"phone_no": ""}, {"phone_no": ""}]
-        )
-
-        BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
-        create_individual_document(individuals[1], document_type="TAX_ID")
-
         cls.user = UserFactory()
         cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)
 
     def test_golden_record_by_targeting_criteria_phone_number(self):
+        create_household_and_individuals(
+            {"business_area": self.business_area}, [{"phone_no": "+48 123456789"}],
+        )
+
+        create_household_and_individuals(
+            {"business_area": self.business_area}, [{"phone_no": ""}]
+        )
+
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
@@ -272,6 +268,16 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         )
 
     def test_golden_record_by_targeting_criteria_has_bank_account_info(self):
+        create_household_and_individuals(
+            {"business_area": self.business_area}, [{"phone_no": "+48 123456789"}],
+        )
+
+        _, individuals = create_household_and_individuals(
+            {"business_area": self.business_area}, [{"phone_no": ""}]
+        )
+
+        BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
+
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
@@ -304,6 +310,16 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         )
 
     def test_golden_record_by_targeting_criteria_has_not_bank_account_info(self):
+        create_household_and_individuals(
+            {"business_area": self.business_area}, [{"phone_no": "+48 123456789"}],
+        )
+
+        _, individuals = create_household_and_individuals(
+            {"business_area": self.business_area}, [{"phone_no": ""}]
+        )
+
+        BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
+
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
@@ -336,6 +352,16 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         )
 
     def test_golden_record_by_targeting_criteria_tax_id(self):
+        create_household_and_individuals(
+            {"business_area": self.business_area}, [{"phone_no": "+48 123456789"}],
+        )
+
+        _, individuals = create_household_and_individuals(
+            {"business_area": self.business_area}, [{"phone_no": ""}]
+        )
+
+        create_individual_document(individuals[0], document_type="TAX_ID")
+
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
