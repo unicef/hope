@@ -207,7 +207,7 @@ class PullFromDatahubTask:
             household_ids.append(payment_record.household_id)
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
-        save_total_cash_received_in_households(household_ids)
+        self.save_total_cash_received_in_household(household_ids)
 
     def save_total_cash_received_in_household(self, household_ids):
         handle_total_cash_in_specific_households(household_ids)
