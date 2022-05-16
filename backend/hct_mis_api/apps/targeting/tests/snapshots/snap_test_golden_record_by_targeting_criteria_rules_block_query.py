@@ -111,7 +111,8 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                             'edges': [
                                             ]
                                         },
-                                        'phoneNo': ''
+                                        'fullName': 'individual_with_bank_account',
+                                        'phoneNo': '901.140.7775x91889'
                                     }
                                 }
                             ]
@@ -140,7 +141,8 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                             'edges': [
                                             ]
                                         },
-                                        'phoneNo': '+48123456789'
+                                        'fullName': 'individual_without_bank_account',
+                                        'phoneNo': '(102)893-1778x0120'
                                     }
                                 }
                             ]
@@ -169,6 +171,7 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                             'edges': [
                                             ]
                                         },
+                                        'fullName': 'individual_with_phone',
                                         'phoneNo': '+48123456789'
                                     }
                                 }
@@ -205,7 +208,8 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase::test
                                                 }
                                             ]
                                         },
-                                        'phoneNo': ''
+                                        'fullName': 'individual_with_tax_id',
+                                        'phoneNo': '+16816852775'
                                     }
                                 }
                             ]

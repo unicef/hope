@@ -196,6 +196,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                 individuals{
                     edges{
                         node{
+                            fullName
                             phoneNo
                             documents {
                               edges {
@@ -229,11 +230,11 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_phone_number(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": "+48 123456789"}],
+            {"business_area": self.business_area}, [{"phone_no": "+48 123456789", "full_name": "individual_with_phone"}],
         )
 
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": ""}]
+            {"business_area": self.business_area}, [{"phone_no": "", "full_name": "individual_without_phone"}]
         )
 
         variables = {
@@ -269,11 +270,11 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_has_bank_account_info(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": "+48 123456789"}],
+            {"business_area": self.business_area}, [{"full_name": "individual_without_bank_account"}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": ""}]
+            {"business_area": self.business_area}, [{"full_name": "individual_with_bank_account"}]
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -311,11 +312,11 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_has_not_bank_account_info(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": "+48 123456789"}],
+            {"business_area": self.business_area}, [{"full_name": "individual_without_bank_account"}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": ""}]
+            {"business_area": self.business_area}, [{"full_name": "individual_with_bank_account"}]
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -353,11 +354,11 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_tax_id(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": "+48 123456789"}],
+            {"business_area": self.business_area}, [{"full_name": "individual_without_tax_id"}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": ""}]
+            {"business_area": self.business_area}, [{"full_name": "individual_with_tax_id"}]
         )
 
         create_individual_document(individuals[0], document_type="TAX_ID")
