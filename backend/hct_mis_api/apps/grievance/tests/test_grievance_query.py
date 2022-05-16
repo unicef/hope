@@ -141,7 +141,7 @@ class TestGrievanceQuery(APITestCase):
     """
 
     FILTER_BY_SCORE = """
-    query AllGrievanceTickets($category: String) {
+    query AllGrievanceTickets($scoreMin: String, $scoreMax: String) {
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", scoreMax: $scoreMax, scoreMin: $scoreMin) {
         edges {
           node {
