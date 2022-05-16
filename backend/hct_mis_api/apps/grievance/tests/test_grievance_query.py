@@ -14,6 +14,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.household.fixtures import create_household
 
 
 class TestGrievanceQuery(APITestCase):
@@ -189,6 +190,10 @@ class TestGrievanceQuery(APITestCase):
             name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
         )
 
+        _, individuals = create_household({"size": 2})
+        cls.individual_1 = individuals[0]
+        cls.individual_2 = individuals[1]
+
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
             GrievanceTicket.STATUS_ON_HOLD: datetime(year=2020, month=7, day=12),
@@ -248,8 +253,8 @@ class TestGrievanceQuery(APITestCase):
 
         TicketNeedsAdjudicationDetails.objects.create(
             ticket=GrievanceTicket.objects.first(),
-            # golden_records_individual='',
-            # possible_duplicate='',
+            golden_records_individual=cls.individual_1,
+            possible_duplicate=cls.individual_2,
             score_min=100,
             score_max=150
         )
