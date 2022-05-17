@@ -598,9 +598,9 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.VALID_JSON, business_area)
         self.assertEqual(result, [])
 
-        invalid_result = validator.validate_everything(self.INVALID_JSON, business_area)
+        result = validator.validate_everything(self.INVALID_JSON, business_area)
 
-        invalid_result.sort(key=itemgetter("header"))
+        result.sort(key=itemgetter("header"))
 
         expected = [
             {
@@ -628,4 +628,4 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "Missing household required field size_h_c"
             },
         ]
-        self.assertEqual(invalid_result, expected)
+        self.assertEqual(result, expected)
