@@ -1,3 +1,5 @@
+import datetime
+import json
 import logging
 
 from hct_mis_api.apps.core.celery import app
@@ -10,7 +12,9 @@ logger = logging.getLogger(__name__)
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
     logger.info("registration_xlsx_import_task start")
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
 
         RdiXlsxCreateTask().execute(
             registration_data_import_id=registration_data_import_id,
@@ -41,7 +45,9 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
     logger.info("registration_kobo_import_task start")
 
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
 
         RdiKoboCreateTask().execute(
             registration_data_import_id=registration_data_import_id,
@@ -84,7 +90,9 @@ def registration_kobo_import_hourly_task():
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
 
         not_started_rdi = RegistrationDataImportDatahub.objects.filter(
             import_done=RegistrationDataImportDatahub.NOT_STARTED
@@ -115,7 +123,9 @@ def registration_xlsx_import_hourly_task():
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
 
         not_started_rdi = RegistrationDataImportDatahub.objects.filter(
             import_done=RegistrationDataImportDatahub.NOT_STARTED
@@ -261,3 +271,25 @@ def fresh_extract_records_task(records_ids=None):
     Record.extract(records_ids)
 
     logger.info("fresh_extract_records_task end")
+
+
+@app.task
+def automate_rdi_creation_task(registration_id: int, page_size: int):
+    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+        FlexRegistrationService,
+    )
+
+    logger.info("automate_rdi_creation_task start")
+
+    service = FlexRegistrationService()
+
+    records_ids = Record.objects.filter(registration=registration_id, status=Record.STATUS_TO_IMPORT,).values_list(
+        "id", flat=True
+    )[:page_size]
+
+    if records_ids:
+        rdi_name = f"ukraine rdi {datetime.datetime.now()}"
+        rdi = service.create_rdi(None, rdi_name)
+        service.process_records(rdi.id, records_ids)
+
+    logger.info("automate_rdi_creation_task end")

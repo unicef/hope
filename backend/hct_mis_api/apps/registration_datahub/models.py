@@ -409,7 +409,7 @@ class ImportedIndividualIdentity(models.Model):
     )
 
     class Meta:
-        verbose_name_plural = 'Imported Individual Identities'
+        verbose_name_plural = "Imported Individual Identities"
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.document_number}"
@@ -434,6 +434,15 @@ class KoboImportedSubmission(models.Model):
 
 
 class Record(models.Model):
+    STATUS_TO_IMPORT = "TO_IMPORT"
+    STATUS_IMPORTED = "IMPORTED"
+    STATUS_ERROR = "ERROR"
+    STATUSES_CHOICES = (
+        (STATUS_TO_IMPORT, "To import"),
+        (STATUS_IMPORTED, "Imported"),
+        (STATUS_ERROR, "Error"),
+    )
+
     registration = models.IntegerField()
     timestamp = models.DateTimeField(db_index=True)
     storage = models.BinaryField(null=True, blank=True)
@@ -446,6 +455,17 @@ class Record(models.Model):
     ignored = models.BooleanField(default=False, blank=True, null=True, db_index=True)
     source_id = models.IntegerField(db_index=True)
     data = models.JSONField(default=dict, blank=True, null=True)
+    error_message = models.TextField(blank=True)
+    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, default=STATUS_TO_IMPORT)
+
+    def mark_as_invalid(self, msg: str):
+        self.error_message = msg
+        self.status = self.STATUS_ERROR
+        self.save()
+
+    def mark_as_imported(self):
+        self.status = self.STATUS_IMPORTED
+        self.save()
 
     @classmethod
     def extract(cls, records_ids: List[int], raise_exception=False):
@@ -529,18 +549,10 @@ class DiiaHousehold(TimeStampedUUIDModel):
     head_of_household = models.OneToOneField("DiiaIndividual", on_delete=models.CASCADE, null=True)
 
     registration_data_import = models.ForeignKey(
-        "RegistrationDataImportDatahub",
-        related_name="diia_households",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
+        "RegistrationDataImportDatahub", related_name="diia_households", on_delete=models.CASCADE, null=True, blank=True
     )
     imported_household = models.ForeignKey(
-        "ImportedHousehold",
-        on_delete=models.CASCADE,
-        related_name="diia_households",
-        null=True,
-        blank=True
+        "ImportedHousehold", on_delete=models.CASCADE, related_name="diia_households", null=True, blank=True
     )
 
     def __str__(self):
@@ -572,14 +584,10 @@ class DiiaIndividual(TimeStampedUUIDModel):
         related_name="diia_individuals",
         on_delete=models.CASCADE,
         null=True,
-        blank=True
+        blank=True,
     )
     imported_individual = models.ForeignKey(
-        "ImportedIndividual",
-        on_delete=models.CASCADE,
-        related_name="diia_individuals",
-        null=True,
-        blank=True
+        "ImportedIndividual", on_delete=models.CASCADE, related_name="diia_individuals", null=True, blank=True
     )
 
     @property
