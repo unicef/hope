@@ -1152,11 +1152,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def choice_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
         try:
             message = f"Invalid choice {value} for field {field}"
-            if field and field.startswith('admin'):
-                print('value',value)
-                print('header',field)
-                field1 = self.all_fields.get(field)
-                print(field1.get('choices'))
             field = self.all_fields.get(field)
             if not value:
                 return message
