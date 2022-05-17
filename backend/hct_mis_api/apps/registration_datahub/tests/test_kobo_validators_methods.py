@@ -598,25 +598,34 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.VALID_JSON, business_area)
         self.assertEqual(result, [])
 
-        result = validator.validate_everything(self.INVALID_JSON, business_area)
+        invalid_result = validator.validate_everything(self.INVALID_JSON, business_area)
 
-        result.sort(key=itemgetter("header"))
+        invalid_result.sort(key=itemgetter("header"))
 
         expected = [
-            {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
-            {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
             {
-                "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for birth_certificate_no_i_c is "
-                "required, when any document data are provided",
+                "header": "admin1_h_c",
+                "message": "Invalid choice SO25 for field admin1_h_c"
+            },
+            {
+                "header": "admin2_h_c",
+                "message": "Invalid choice SO2502 for field admin2_h_c"
             },
             {
                 "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for birth_certificate_no_i_c is "
-                "required, when any document data are provided",
+                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
             },
-            {"header": "role_i_c", "message": "Only one person can be a primary collector"},
-            {"header": "size_h_c", "message": "Missing household required field size_h_c"},
+            {
+                "header": "birth_certificate_no_i_c",
+                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+            },
+            {
+                "header": "role_i_c",
+                "message": "Only one person can be a primary collector"
+            },
+            {
+                "header": "size_h_c", "message":
+                "Missing household required field size_h_c"
+            },
         ]
-        expected.sort(key=itemgetter("header"))
-        self.assertEqual(result, expected)
+        self.assertEqual(invalid_result, expected)
