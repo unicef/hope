@@ -6,6 +6,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  TextField,
 } from '@material-ui/core';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import SearchIcon from '@material-ui/icons/Search';
@@ -14,8 +15,12 @@ import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import TextField from '../../../shared/TextField';
-import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
+import {
+  AllRegistrationDataImportsQuery,
+  GrievancesChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { FieldLabel } from '../../core/FieldLabel';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
@@ -37,16 +42,24 @@ interface GrievancesFiltersProps {
   filter;
   choicesData: GrievancesChoiceDataQuery;
   usersChoices;
+  rdiData: AllRegistrationDataImportsQuery;
 }
 export function GrievancesFilters({
   onFilterChange,
   filter,
   choicesData,
   usersChoices,
+  rdiData,
 }: GrievancesFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
+
+  const issueTypeDict = useArrayToDict(
+    choicesData?.grievanceTicketIssueTypeChoices,
+    'category',
+    '*',
+  );
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -156,9 +169,6 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
-          <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
-        </Grid>
-        <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Category</InputLabel>
             <Select
@@ -180,6 +190,35 @@ export function GrievancesFilters({
             </Select>
           </StyledFormControl>
         </Grid>
+        {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+        filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+          <Grid item>
+            <StyledFormControl variant='outlined' margin='dense'>
+              <InputLabel>Issue Type</InputLabel>
+              <Select
+                onChange={(e) => handleFilterChange(e, 'issueType')}
+                variant='outlined'
+                label='Issue Type'
+                value={filter.issueType || ''}
+              >
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+                {issueTypeDict[filter.category].subCategories.map((item) => {
+                  return (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </StyledFormControl>
+          </Grid>
+        ) : null}
+
+        <Grid item>
+          <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
+        </Grid>
         <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>{t('Assignee')}</InputLabel>
@@ -196,6 +235,55 @@ export function GrievancesFilters({
                 return (
                   <MenuItem key={item.value} value={item.value}>
                     {item.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <Box display='flex' flexDirection='column'>
+            <FieldLabel>{t('Similarity Score')}</FieldLabel>
+            <TextField
+              value={filter.scoreMin || null}
+              variant='outlined'
+              margin='dense'
+              placeholder='From'
+              onChange={(e) => handleFilterChange(e, 'scoreMin')}
+              type='number'
+            />
+          </Box>
+        </Grid>
+        <Grid item>
+          <Box display='flex' flexDirection='column'>
+            <TextField
+              value={filter.scoreMax || null}
+              variant='outlined'
+              margin='dense'
+              placeholder='To'
+              onChange={(e) => handleFilterChange(e, 'scoreMax')}
+              type='number'
+            />
+          </Box>
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>{t('Registration Data Import')}</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'registrationDataImport')}
+              variant='outlined'
+              label='Registration Data Import'
+              value={filter.registrationDataImport || ''}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {rdiData?.allRegistrationDataImports?.edges?.map((item) => {
+                return (
+                  <MenuItem key={item.node.id} value={item.node.id}>
+                    {item.node.name}
                   </MenuItem>
                 );
               })}

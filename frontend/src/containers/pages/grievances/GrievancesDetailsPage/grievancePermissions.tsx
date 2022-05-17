@@ -4,12 +4,11 @@ import {
   hasPermissions,
 } from '../../../../config/permissions';
 import { GRIEVANCE_CATEGORIES } from '../../../../utils/constants';
-import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
 
 export const grievancePermissions = (
   isCreator: boolean,
   isOwner: boolean,
-  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+  ticket,
   permissions: string[],
 ): { [key: string]: boolean } => {
   const canViewHouseholdDetails = hasCreatorOrOwnerPermissions(

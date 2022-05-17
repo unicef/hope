@@ -38,11 +38,10 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
-from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
     FieldAttributeNode,
-    _custom_dict_or_attr_resolver,
     sort_by_attr,
 )
 from hct_mis_api.apps.core.utils import (
@@ -78,7 +77,7 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
-from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode, FlexFieldsScalar
+from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +151,9 @@ class GrievanceTicketFilter(FilterSet):
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
+    issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
+    score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
+    score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
 
     class Meta:
         fields = {
@@ -173,6 +175,7 @@ class GrievanceTicketFilter(FilterSet):
             "households_count",
             "user_modified",
             "household_unicef_id",
+            "issue_type",
         )
     )
 
@@ -196,7 +199,7 @@ class GrievanceTicketFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$")
+            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$") | Q(registration_data_import__name__icontains=value)
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
