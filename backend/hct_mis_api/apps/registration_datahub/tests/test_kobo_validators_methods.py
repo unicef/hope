@@ -1,9 +1,10 @@
 from operator import itemgetter
 
+from django.conf import settings
 from django.test import TestCase
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
@@ -592,6 +593,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             self.assertEqual(result, data["expected"])
 
     def test_validate_everything(self):
+        print("********************** test_validate_everything *************************************")
         self.maxDiff = None
         validator = KoboProjectImportDataInstanceValidator()
         business_area = BusinessArea.objects.first()
@@ -602,7 +604,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.INVALID_JSON, business_area)
 
         result.sort(key=itemgetter("header"))
-
+        print("***********************************************************")
+        print(settings.DATABASES)
+        print(AdminArea)
+        print("***********************************************************")
         expected = [
             {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
             {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
@@ -619,4 +624,6 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
             {"header": "size_h_c", "message": "Missing household required field size_h_c"},
         ]
+        print("********************** END test_validate_everything *************************************")
         self.assertEqual(result, expected)
+
