@@ -5,6 +5,7 @@ from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
@@ -606,7 +607,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result.sort(key=itemgetter("header"))
         print("***********************************************************")
         print(settings.DATABASES)
-        print(AdminArea)
+        print(Area.objects.count())
         print("***********************************************************")
         expected = [
             {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},

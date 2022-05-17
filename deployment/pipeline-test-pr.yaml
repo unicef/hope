@@ -56,7 +56,7 @@ stages:
             inputs:
               containerRegistry: '$(Docker.registry)'
               command: 'login'
-          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(Build.SourceBranchName)-latest"
+          - script: "docker pull $(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.SourceBranch)-latest"
             displayName: Pull latest for layer caching for this branch
             continueOnError: true # for first build, no cache
           - script: "docker pull $(Docker.url)/$(Docker.backend.repository):latest"
