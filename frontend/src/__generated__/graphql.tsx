@@ -3707,6 +3707,9 @@ export type QueryAllGrievanceTicketArgs = {
   cashPlan?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
+  issueType?: Maybe<Scalars['String']>,
+  scoreMin?: Maybe<Scalars['String']>,
+  scoreMax?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5337,6 +5340,8 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   selectedIndividual?: Maybe<IndividualNode>,
   roleReassignData: Scalars['JSONString'],
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>,
+  scoreMin: Scalars['Float'],
+  scoreMax: Scalars['Float'],
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
 };
 
@@ -7725,6 +7730,7 @@ export type AllGrievanceTicketQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>,
   category?: Maybe<Scalars['String']>,
+  issueType?: Maybe<Scalars['String']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -7734,7 +7740,9 @@ export type AllGrievanceTicketQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   registrationDataImport?: Maybe<Scalars['ID']>,
   assignedTo?: Maybe<Scalars['ID']>,
-  cashPlan?: Maybe<Scalars['String']>
+  cashPlan?: Maybe<Scalars['String']>,
+  scoreMin?: Maybe<Scalars['String']>,
+  scoreMax?: Maybe<Scalars['String']>
 };
 
 
@@ -7751,7 +7759,7 @@ export type AllGrievanceTicketQuery = (
       & Pick<GrievanceTicketNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'GrievanceTicketNode' }
-        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'createdAt' | 'userModified' | 'admin' | 'unicefId'>
+        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'createdAt' | 'userModified' | 'admin' | 'unicefId'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -7761,7 +7769,10 @@ export type AllGrievanceTicketQuery = (
         )>, household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id'>
-        )> }
+        )>, relatedTickets: Maybe<Array<Maybe<(
+          { __typename?: 'GrievanceTicketNode' }
+          & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'unicefId'>
+        )>>> }
       )> }
     )>> }
   )> }
@@ -13828,8 +13839,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax) {
     totalCount
     pageInfo {
       startCursor
@@ -13850,6 +13861,7 @@ export const AllGrievanceTicketDocument = gql`
           id
         }
         category
+        issueType
         createdAt
         userModified
         admin
@@ -13858,6 +13870,13 @@ export const AllGrievanceTicketDocument = gql`
           id
         }
         unicefId
+        relatedTickets {
+          id
+          status
+          category
+          issueType
+          unicefId
+        }
       }
     }
   }
@@ -13899,6 +13918,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      last: // value for 'last'
  *      id: // value for 'id'
  *      category: // value for 'category'
+ *      issueType: // value for 'issueType'
  *      businessArea: // value for 'businessArea'
  *      search: // value for 'search'
  *      status: // value for 'status'
@@ -13909,6 +13929,8 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      registrationDataImport: // value for 'registrationDataImport'
  *      assignedTo: // value for 'assignedTo'
  *      cashPlan: // value for 'cashPlan'
+ *      scoreMin: // value for 'scoreMin'
+ *      scoreMax: // value for 'scoreMax'
  *   },
  * });
  */
@@ -21201,6 +21223,8 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>,
+  scoreMin?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  scoreMax?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
