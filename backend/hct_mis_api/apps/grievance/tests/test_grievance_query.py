@@ -13,7 +13,8 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.household.fixtures import create_household
 
 
 class TestGrievanceQuery(APITestCase):
@@ -139,6 +140,28 @@ class TestGrievanceQuery(APITestCase):
     }
     """
 
+    FILTER_BY_SCORE = """
+    query AllGrievanceTickets($scoreMin: String, $scoreMax: String) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", scoreMax: $scoreMax, scoreMin: $scoreMin) {
+        edges {
+          node {
+            needsAdjudicationTicketDetails {
+              scoreMin
+              scoreMax
+            }
+            status
+            category
+            admin
+            language
+            description
+            consent
+            createdAt
+          }
+        }
+      }
+    }
+    """
+
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
@@ -166,6 +189,10 @@ class TestGrievanceQuery(APITestCase):
         cls.admin_area_2_new = AreaFactory(
             name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
         )
+
+        _, individuals = create_household({"size": 2})
+        cls.individual_1 = individuals[0]
+        cls.individual_2 = individuals[1]
 
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
@@ -223,6 +250,15 @@ class TestGrievanceQuery(APITestCase):
             gt = GrievanceTicket.objects.get(status=status)
             gt.created_at = date
             gt.save()
+
+        TicketNeedsAdjudicationDetails.objects.create(
+            ticket=GrievanceTicket.objects.first(),
+            golden_records_individual=cls.individual_1,
+            possible_duplicate=cls.individual_2,
+            score_min=100,
+            score_max=150
+        )
+
 
     @parameterized.expand(
         [
@@ -345,4 +381,23 @@ class TestGrievanceQuery(APITestCase):
             request_string=self.FILTER_BY_ASSIGNED_TO,
             context={"user": self.user},
             variables={"assignedTo": self.id_to_base64(self.user2.id, "UserNode")},
+        )
+
+    def test_grievance_list_filtered_by_score(self):
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_SCORE,
+            context={"user": self.user},
+            variables={"scoreMin": 100, "scoreMax": 200},
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_SCORE,
+            context={"user": self.user},
+            variables={"scoreMin": 900, "scoreMax": 999},
         )

@@ -5,6 +5,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def _get_min_max_score(golden_records):
+    items = [item.get("score", 0.0) for item in golden_records]
+
+    return min(items, default=0.0), max(items, default=0.0)
+
+
 def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
     from hct_mis_api.apps.grievance.models import (
         GrievanceTicket,
@@ -46,16 +52,21 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         area=area,
         registration_data_import=registration_data_import,
     )
+    golden_records = main_individual.get_deduplication_golden_record()
+    extra_data = {
+        "golden_records": golden_records,
+        "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
+    }
+    score_min, score_max = _get_min_max_score(golden_records)
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
         golden_records_individual=main_individual,
         possible_duplicate=possible_duplicate,
         is_multiple_duplicates_version=kwargs.get("is_multiple_duplicates_version", False),
         selected_individual=None,
-        extra_data={
-            "golden_records": main_individual.get_deduplication_golden_record(),
-            "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
-        }
+        extra_data=extra_data,
+        score_min=score_min,
+        score_max=score_max
     )
 
     ticket_details.possible_duplicates.add(*possible_duplicates)
