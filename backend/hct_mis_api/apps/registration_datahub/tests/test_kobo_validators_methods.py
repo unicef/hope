@@ -592,6 +592,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             self.assertEqual(result, data["expected"])
 
     def test_validate_everything(self):
+        self.maxDiff = None
         validator = KoboProjectImportDataInstanceValidator()
         business_area = BusinessArea.objects.first()
 
