@@ -2,6 +2,7 @@ import logging
 import re
 from datetime import date, datetime
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -12,11 +13,8 @@ from django.db.models import DecimalField, F, JSONField, Sum
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-
-from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
-from model_utils.managers import SoftDeletableManager
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -415,6 +413,18 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     user_fields = JSONField(default=dict, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    total_cash_received_usd = models.DecimalField(
+        null=True,
+        decimal_places=2,
+        max_digits=64,
+        blank=True,
+    )
+    total_cash_received = models.DecimalField(
+        null=True,
+        decimal_places=2,
+        max_digits=64,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "Household"
@@ -514,7 +524,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
 
     @property
-    def total_cash_received(self):
+    def total_cash_received_realtime(self):
         return (
             self.payment_records.filter()
             .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
@@ -522,7 +532,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         )
 
     @property
-    def total_cash_received_usd(self):
+    def total_cash_received_usd_realtime(self):
         return (
             self.payment_records.filter()
             .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
