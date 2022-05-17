@@ -79,6 +79,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         settings.AUTH_USER_MODEL,
         related_name="registration_data_imports",
         on_delete=models.CASCADE,
+        null=True,
     )
     data_source = models.CharField(
         max_length=255,
