@@ -6,17 +6,17 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 
-interface CreateFspHeaderProps {
+interface CreateSetUpFspHeaderProps {
   handleSubmit: () => Promise<void>;
   businessArea: string;
   permissions: string[];
 }
 
-export function CreateFspHeader({
+export function CreateSetUpFspHeader({
   handleSubmit,
   businessArea,
   permissions,
-}: CreateFspHeaderProps): React.ReactElement {
+}: CreateSetUpFspHeaderProps): React.ReactElement {
   const { t } = useTranslation();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

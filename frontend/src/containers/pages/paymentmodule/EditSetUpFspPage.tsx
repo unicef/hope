@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { CreateFspHeader } from '../../../components/paymentmodule/CreateFspPlan/CreateFspHeader';
-import { FspArray } from '../../../components/paymentmodule/CreateFspPlan/FspArray';
+import { FspArray } from '../../../components/paymentmodule/CreateSetUpFspPlan/FspArray';
+import { EditSetUpFspHeader } from '../../../components/paymentmodule/EditSetUpFspPlan/EditSetUpFspHeader';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -15,7 +15,7 @@ import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import { handleValidationErrors } from '../../../utils/utils';
 import { useCreateTpMutation } from '../../../__generated__/graphql';
 
-export const CreateFspPage = (): React.ReactElement => {
+export const EditSetUpFspPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const initialValues = {
     mobileMoney: [
@@ -94,7 +94,7 @@ export const CreateFspPage = (): React.ReactElement => {
       {({ submitForm, values }) => {
         return (
           <Form>
-            <CreateFspHeader
+            <EditSetUpFspHeader
               handleSubmit={submitForm}
               businessArea={businessArea}
               permissions={permissions}

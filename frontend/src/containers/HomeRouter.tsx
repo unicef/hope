@@ -38,8 +38,8 @@ import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerif
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
-import { CreateFspPage } from './pages/paymentmodule/CreateFspPage';
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { EditFspPage } from './pages/paymentmodule/EditFspPage';
 
 const Root = styled.div`
   display: flex;
@@ -132,15 +132,6 @@ export function HomeRouter(): React.ReactElement {
               <TargetPopulationDetailsPage />
             </Sentry.ErrorBoundary>
           </Route>
-          <Route exact path='/:businessArea/payment-module'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-module');
-              }}
-            >
-              <PaymentModulePage />
-            </Sentry.ErrorBoundary>
-          </Route>
           <Route path='/:businessArea/payment-module/new-plan'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
@@ -156,7 +147,16 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/payment-module/new-fsp');
               }}
             >
-              <CreateFspPage />
+              <EditFspPage />
+            </Sentry.ErrorBoundary>
+          </Route>
+          <Route exact path='/:businessArea/payment-module'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag('location', '/payment-module');
+              }}
+            >
+              <PaymentModulePage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/payment-module/payment-plan/:id'>
@@ -168,6 +168,7 @@ export function HomeRouter(): React.ReactElement {
               <PaymentPlanDetailsPage />
             </Sentry.ErrorBoundary>
           </Route>
+
           <Route exact path='/:businessArea/payment-verification'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
