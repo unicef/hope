@@ -618,6 +618,8 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     )
     role_reassign_data = JSONField(default=dict)
     extra_data = JSONField(default=dict)
+    score_min = models.FloatField(default=0.0)
+    score_max = models.FloatField(default=0.0)
 
     @property
     def has_duplicated_document(self):
