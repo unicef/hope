@@ -1,12 +1,12 @@
 import React from 'react';
 import { PERMISSIONS } from '../../../../config/permissions';
 import { render } from '../../../../testUtils/testUtils';
-import { CreateFspHeader } from './CreateFspHeader';
+import { EditSetUpFspHeader } from './EditSetUpFspHeader';
 
-describe('components/paymentmodule/CreateFspHeader', () => {
+describe('components/paymentmodule/EditSetUpFspHeader', () => {
   it('should render', () => {
     const { container } = render(
-      <CreateFspHeader
+      <EditSetUpFspHeader
         handleSubmit={jest.fn()}
         businessArea='afghanistan'
         permissions={[PERMISSIONS.PAYMENT_MODULE_VIEW_LIST]}

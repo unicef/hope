@@ -12,7 +12,7 @@ interface EditFspHeaderProps {
   permissions: string[];
 }
 
-export function EditFspHeader({
+export function EditSetUpFspHeader({
   handleSubmit,
   businessArea,
   permissions,
@@ -28,7 +28,7 @@ export function EditFspHeader({
 
   return (
     <PageHeader
-      title={t('Edit FSP')}
+      title={t('Set up FSP')}
       breadCrumbs={
         hasPermissions(PERMISSIONS.PAYMENT_MODULE_VIEW_LIST, permissions)
           ? breadCrumbsItems
