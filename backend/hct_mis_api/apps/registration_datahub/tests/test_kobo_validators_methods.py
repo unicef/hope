@@ -595,11 +595,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
             self.assertEqual(result, data["expected"])
 
     def test_validate_everything(self):
+        # TODO Fix admin choices
         fields_admin1 = [x for x in CORE_FIELDS_ATTRIBUTES if x["name"] == "admin1"]
         fields_admin1[0]["choices"] = Area.get_admin_areas_as_choices(1)
         fields_admin2 = [x for x in CORE_FIELDS_ATTRIBUTES if x["name"] == "admin2"]
         fields_admin2[0]["choices"] = Area.get_admin_areas_as_choices(2)
-        print("********************** test_validate_everything *************************************")
         self.maxDiff = None
         validator = KoboProjectImportDataInstanceValidator()
         business_area = BusinessArea.objects.first()
@@ -610,10 +610,6 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.INVALID_JSON, business_area)
 
         result.sort(key=itemgetter("header"))
-        print("***********************************************************")
-        print(settings.DATABASES)
-        print(Area.objects.count())
-        print("***********************************************************")
         expected = [
             {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
             {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
@@ -630,5 +626,4 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
             {"header": "size_h_c", "message": "Missing household required field size_h_c"},
         ]
-        print("********************** END test_validate_everything *************************************")
         self.assertEqual(result, expected)
