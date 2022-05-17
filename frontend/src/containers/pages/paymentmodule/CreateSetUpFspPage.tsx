@@ -1,27 +1,47 @@
-import { Box } from '@material-ui/core';
-import { Field, Form, Formik } from 'formik';
+import { Box, Divider } from '@material-ui/core';
+import { Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { EditFspHeader } from '../../../components/paymentmodule/EditFspPlan/EditFspHeader';
+import { CreateSetUpFspHeader } from '../../../components/paymentmodule/CreateSetUpFspPlan/CreateSetUpFspHeader';
+import { FspArray } from '../../../components/paymentmodule/CreateSetUpFspPlan/FspArray';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikCheckboxGroup } from '../../../shared/Formik/FormikCheckboxGroup';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import { handleValidationErrors } from '../../../utils/utils';
 import { useCreateTpMutation } from '../../../__generated__/graphql';
 
-export const EditFspPage = (): React.ReactElement => {
+export const CreateSetUpFspPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const initialValues = {
-    name: '',
-    visionVendorNumber: '',
-    paymentChannels: null,
+    mobileMoney: [
+      {
+        fsp: '',
+        maximumAmount: '',
+      },
+    ],
+    transfer: [
+      {
+        fsp: '',
+        maximumAmount: '',
+      },
+    ],
+    cash: [
+      {
+        fsp: '',
+        maximumAmount: '',
+      },
+    ],
+    wallet: [
+      {
+        fsp: '',
+        maximumAmount: '',
+      },
+    ],
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -65,14 +85,6 @@ export const EditFspPage = (): React.ReactElement => {
     }
   };
 
-  const paymentChannelChoices = [
-    { name: t('Transfer'), value: 'transfer' },
-    { name: t('Mobile Money'), value: 'mobileMoney' },
-    { name: t('Deposit to Card'), value: 'depositToCard' },
-    { name: t('Cash'), value: 'cash' },
-    { name: t('Wallet'), value: 'wallet' },
-  ];
-
   return (
     <Formik
       initialValues={initialValues}
@@ -82,42 +94,40 @@ export const EditFspPage = (): React.ReactElement => {
       {({ submitForm, values }) => {
         return (
           <Form>
-            <EditFspHeader
+            <CreateSetUpFspHeader
               handleSubmit={submitForm}
               businessArea={businessArea}
               permissions={permissions}
             />
             <Box m={5}>
               <ContainerColumnWithBorder>
-                <Box mt={4}>
-                  <Field
-                    name='name'
-                    label={t('Name')}
-                    color='primary'
-                    variant='outlined'
-                    fullWidth
-                    component={FormikTextField}
-                  />
-                </Box>
-                <Box mt={4}>
-                  <Field
-                    name='visionVendorNumber'
-                    label={t('Vision Vendor Number')}
-                    color='primary'
-                    variant='outlined'
-                    fullWidth
-                    component={FormikTextField}
-                  />
-                </Box>
-                <Box mt={4}>
-                  <Field
-                    name='paymentChannels'
-                    label={t('Payment Channels')}
-                    component={FormikCheckboxGroup}
-                    choices={paymentChannelChoices}
-                    values={values}
-                  />
-                </Box>
+                <FspArray
+                  baseName='mobileMoney'
+                  label={t('Mobile Money')}
+                  values={values}
+                  permissions={permissions}
+                />
+                <Divider />
+                <FspArray
+                  baseName='transfer'
+                  label={t('Transfer')}
+                  values={values}
+                  permissions={permissions}
+                />
+                <Divider />
+                <FspArray
+                  baseName='cash'
+                  label={t('Cash')}
+                  values={values}
+                  permissions={permissions}
+                />
+                <Divider />
+                <FspArray
+                  baseName='wallet'
+                  label={t('Wallet')}
+                  values={values}
+                  permissions={permissions}
+                />
               </ContainerColumnWithBorder>
             </Box>
           </Form>

@@ -632,5 +632,8 @@
   "Authorize": "Authorize",
   "Mark as Reviewed": "Mark as Reviewed",
   "Download XLSX": "Download XLSX",
-  "Send to Fsp": "Send to Fsp"
+  "Send to Fsp": "Send to Fsp",
+  "Name": "Name",
+  "Vision Vendor Number": "Vision Vendor Number",
+  "Payment Channels": "Payment Channels"
 }
