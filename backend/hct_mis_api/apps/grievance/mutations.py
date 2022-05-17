@@ -708,9 +708,11 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             logger.error("New status is incorrect")
             raise GraphQLError("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
-            selected_individuals = grievance_ticket.ticket_details.selected_individuals.all()
-            for individual in selected_individuals:
-                traverse_sibling_tickets(grievance_ticket, individual)
+            ticket_details = grievance_ticket.ticket_details
+            if getattr(grievance_ticket.ticket_details, "is_multiple_duplicates_version", False):
+                selected_individuals = ticket_details.selected_individuals.all()
+                for individual in selected_individuals:
+                    traverse_sibling_tickets(grievance_ticket, individual)
 
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket, info)

@@ -88,5 +88,7 @@ def close_needs_adjudication_ticket(grievance_ticket, info):
         return
 
     if ticket_details.is_multiple_duplicates_version:
+        print("*"*20)
+        print("Robię dla multiple_duplicates")
         close_needs_adjudication_new_ticket(ticket_details, info)
     close_needs_adjudication_old_ticket(ticket_details, info)
