@@ -26,13 +26,19 @@ export function RegistrationDataImportTableRow({
 }: PaymentRecordTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const name = registrationDataImport.importedBy.firstName
-    ? `${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`
-    : registrationDataImport.importedBy.email;
   const importDetailsPath = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;
   const handleClick = (): void => {
     history.push(importDetailsPath);
   };
+  const renderImportedBy = (): string => {
+    if (registrationDataImport?.importedBy) {
+      if (registrationDataImport.importedBy.firstName) {
+        return `${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`;
+      }
+      return registrationDataImport.importedBy.email;
+    }
+    return "-";
+  }
   return (
     <ClickableTableRow
       hover
@@ -68,7 +74,7 @@ export function RegistrationDataImportTableRow({
       <TableCell align='right'>
         {registrationDataImport.numberOfHouseholds}
       </TableCell>
-      <TableCell align='left'>{name}</TableCell>
+      <TableCell align='left'>{renderImportedBy()}</TableCell>
       <TableCell align='left'>{registrationDataImport.dataSource}</TableCell>
     </ClickableTableRow>
   );
