@@ -74,7 +74,7 @@ stages:
               tags: |
                 $(Build.BuildId)
                 dev-latest
-                $(Build.SourceBranchName)-latest
+                $(System.PullRequest.PullRequestId)-latest
           - task: Docker@2
             displayName: Push
             inputs:
