@@ -1,9 +1,12 @@
 from operator import itemgetter
 
+from django.conf import settings
 from django.test import TestCase
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
@@ -592,6 +595,12 @@ class TestKoboSaveValidatorsMethods(TestCase):
             self.assertEqual(result, data["expected"])
 
     def test_validate_everything(self):
+        # TODO Fix admin choices
+        fields_admin1 = [x for x in CORE_FIELDS_ATTRIBUTES if x["name"] == "admin1"]
+        fields_admin1[0]["choices"] = Area.get_admin_areas_as_choices(1)
+        fields_admin2 = [x for x in CORE_FIELDS_ATTRIBUTES if x["name"] == "admin2"]
+        fields_admin2[0]["choices"] = Area.get_admin_areas_as_choices(2)
+        self.maxDiff = None
         validator = KoboProjectImportDataInstanceValidator()
         business_area = BusinessArea.objects.first()
 
@@ -601,7 +610,6 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.INVALID_JSON, business_area)
 
         result.sort(key=itemgetter("header"))
-
         expected = [
             {
                 "header": "admin1_h_c",
