@@ -66,7 +66,7 @@ stages:
             displayName: Build
             inputs:
               command: build
-              arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(Build.SourceBranchName)-latest 
+              arguments: "--cache-from=$(Docker.url)/$(Docker.backend.repository):$(System.PullRequest.SourceBranch)-latest 
                           --cache-from=$(Docker.url)/$(Docker.backend.repository):latest"
               dockerfile: $(Docker.backend.filePath)
               repository: $(Docker.backend.repository)
@@ -85,7 +85,7 @@ stages:
               tags: |
                 $(Build.BuildId)
                 dev-latest
-                $(Build.SourceBranchName)-latest
+                $(System.PullRequest.SourceBranch)-latest
 
   - stage: test_backend
     dependsOn: build_and_push
