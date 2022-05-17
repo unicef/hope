@@ -3,6 +3,7 @@ from operator import itemgetter
 from django.conf import settings
 from django.test import TestCase
 
+from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.geo.models import Area
@@ -594,6 +595,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             self.assertEqual(result, data["expected"])
 
     def test_validate_everything(self):
+        fields_admin1 = [x for x in CORE_FIELDS_ATTRIBUTES if x["name"] == "admin1"]
+        fields_admin1[0]["choices"] = Area.get_admin_areas_as_choices(1)
+        fields_admin2 = [x for x in CORE_FIELDS_ATTRIBUTES if x["name"] == "admin2"]
+        fields_admin2[0]["choices"] = Area.get_admin_areas_as_choices(2)
         print("********************** test_validate_everything *************************************")
         self.maxDiff = None
         validator = KoboProjectImportDataInstanceValidator()
@@ -627,4 +632,3 @@ class TestKoboSaveValidatorsMethods(TestCase):
         ]
         print("********************** END test_validate_everything *************************************")
         self.assertEqual(result, expected)
-
