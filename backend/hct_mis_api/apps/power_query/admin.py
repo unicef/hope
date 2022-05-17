@@ -106,8 +106,8 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
             context["type"] = type(ret).__name__
             context["raw"] = ret
             context["title"] = f"Result of {obj.name} ({type(ret).__name__})"
-            if isinstance(ret, QuerySet):
-                ret = ret[:100]
+            if isinstance(ret, QuerySet) or isinstance(ret, tuple):
+                ret = ret[0][:100]
                 context["queryset"] = ret
             elif isinstance(ret, tablib.Dataset):
                 context["dataset"] = ret
@@ -202,7 +202,6 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def test(self, request, pk):
         context = self.get_common_context(request, pk)
-        # obj = self.get_object(request, pk)
         form = FormatterTestForm()
         try:
             if request.method == "POST":

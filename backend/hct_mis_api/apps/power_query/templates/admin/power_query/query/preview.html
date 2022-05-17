@@ -23,9 +23,12 @@
         {% endif %}
     {% elif queryset %}
         <table>
-            <tr><th>id</th><th>record</th></tr>
+            <tr>
+                <th>id</th>
+                <th>record</th>
+            </tr>
             {% for row in queryset %}
-                <tr><td>{{ row.pk }}</td><td>{{ row }}</td></tr>{% endfor %}
+                <tr><td>{{ row.id }}</td><td>{{ row }}</td></tr>{% endfor %}
         </table>
     {% elif dataset %}
         <table>
