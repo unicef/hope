@@ -2,20 +2,19 @@ import logging
 import re
 from datetime import date, datetime
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
+from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.db.models import DecimalField, F, JSONField, Sum
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-
-from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
-from model_utils.managers import SoftDeletableManager
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -101,6 +100,8 @@ GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
 RELATIONSHIP_UNKNOWN = "UNKNOWN"
+RELATIONSHIP_OTHER = "OTHER"
+
 RELATIONSHIP_CHOICE = (
     (RELATIONSHIP_UNKNOWN, "Unknown"),
     (AUNT_UNCLE, "Aunt / Uncle"),
@@ -117,6 +118,7 @@ RELATIONSHIP_CHOICE = (
         NON_BENEFICIARY,
         "Not a Family Member. Can only act as a recipient.",
     ),
+    (RELATIONSHIP_OTHER, "Other"),
     (SISTERINLAW_BROTHERINLAW, "Sister-in-law / Brother-in-law"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
@@ -147,6 +149,8 @@ IDENTIFICATION_TYPE_DRIVERS_LICENSE = "DRIVERS_LICENSE"
 IDENTIFICATION_TYPE_NATIONAL_ID = "NATIONAL_ID"
 IDENTIFICATION_TYPE_NATIONAL_PASSPORT = "NATIONAL_PASSPORT"
 IDENTIFICATION_TYPE_ELECTORAL_CARD = "ELECTORAL_CARD"
+IDENTIFICATION_TYPE_TAX_ID = "TAX_ID"
+IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO = "RESIDENCE_PERMIT_NO"
 IDENTIFICATION_TYPE_OTHER = "OTHER"
 IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, _("Birth Certificate")),
@@ -154,6 +158,8 @@ IDENTIFICATION_TYPE_CHOICE = (
     (IDENTIFICATION_TYPE_ELECTORAL_CARD, _("Electoral Card")),
     (IDENTIFICATION_TYPE_NATIONAL_ID, _("National ID")),
     (IDENTIFICATION_TYPE_NATIONAL_PASSPORT, _("National Passport")),
+    (IDENTIFICATION_TYPE_TAX_ID, _("Tax Number Identification")),
+    (IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, _("Foreigner's Residence Permit")),
     (IDENTIFICATION_TYPE_OTHER, _("Other")),
 )
 IDENTIFICATION_TYPE_DICT = {
@@ -162,6 +168,8 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_NATIONAL_ID: "National ID",
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT: "National Passport",
+    IDENTIFICATION_TYPE_TAX_ID: "Tax Number Identification",
+    IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO: "Foreigner's Residence Permit",
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
 UNHCR = "UNHCR"
@@ -366,6 +374,13 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    children_count = models.PositiveIntegerField(default=None, null=True)
+    male_children_count = models.PositiveIntegerField(default=None, null=True)
+    female_children_count = models.PositiveIntegerField(default=None, null=True)
+    children_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
+
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
         related_name="households",
@@ -398,6 +413,18 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     user_fields = JSONField(default=dict, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    total_cash_received_usd = models.DecimalField(
+        null=True,
+        decimal_places=2,
+        max_digits=64,
+        blank=True,
+    )
+    total_cash_received = models.DecimalField(
+        null=True,
+        decimal_places=2,
+        max_digits=64,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "Household"
@@ -497,7 +524,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
 
     @property
-    def total_cash_received(self):
+    def total_cash_received_realtime(self):
         return (
             self.payment_records.filter()
             .aggregate(models.Sum("delivered_quantity", output_field=DecimalField()))
@@ -505,7 +532,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         )
 
     @property
-    def total_cash_received_usd(self):
+    def total_cash_received_usd_realtime(self):
         return (
             self.payment_records.filter()
             .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
@@ -582,6 +609,14 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         from_18_to_60_years = Q(birth_date__lte=date_18_years_ago, birth_date__gt=date_60_years_ago)
         from_60_years = Q(birth_date__lte=date_60_years_ago)
 
+        children_count = Q(birth_date__gt=date_18_years_ago)
+        female_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
+        male_children_count = Q(birth_date__gt=date_18_years_ago) & female_beneficiary
+
+        children_disabled_count = Q(birth_date__gt=date_18_years_ago) & disabled_disability
+        female_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & female_disability_beneficiary
+        male_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & male_disability_beneficiary
+
         age_groups = self.individuals.aggregate(
             female_age_group_0_5_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_6_years)),
             female_age_group_6_11_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_6_to_12_years)),
@@ -647,8 +682,39 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
                 distinct=True,
                 filter=Q(is_beneficiary & active_beneficiary & Q(pregnant=True)),
             ),
+            children_count=Count(
+                "id",
+                distinct=True,
+                filter=children_count,
+            ),
+            female_children_count=Count(
+                "id",
+                distinct=True,
+                filter=female_children_count,
+            ),
+            male_children_count=Count(
+                "id",
+                distinct=True,
+                filter=male_children_count,
+            ),
+            children_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=children_disabled_count,
+            ),
+            female_children_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=female_children_disabled_count,
+            ),
+            male_children_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=male_children_disabled_count,
+            ),
         )
-        updated_fields = ["child_hoh", "fchild_hoh"]
+        updated_fields = ["child_hoh", "fchild_hoh", "updated_at"]
+
         for key, value in age_groups.items():
             updated_fields.append(key)
             setattr(self, key, value)
@@ -893,9 +959,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     deduplication_golden_record_results = JSONField(default=dict, blank=True)
     deduplication_batch_results = JSONField(default=dict, blank=True)
     imported_individual_id = models.UUIDField(null=True, blank=True)
-    sanction_list_possible_match = models.BooleanField(default=False)
-    sanction_list_confirmed_match = models.BooleanField(default=False)
-    sanction_list_last_check = models.DateTimeField(null=True, blank=True)
+    sanction_list_possible_match = models.BooleanField(default=False, db_index=True)
+    sanction_list_confirmed_match = models.BooleanField(default=False, db_index=True)
     pregnant = models.BooleanField(null=True)
     observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE, default=NONE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
@@ -911,6 +976,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     child_hoh = models.BooleanField(default=False)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    disability_certificate_picture = models.ImageField(blank=True, null=True)
 
     @property
     def age(self):
@@ -959,6 +1025,10 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             return STATUS_INACTIVE
         return STATUS_ACTIVE
 
+    @property
+    def sanction_list_last_check(self):
+        return cache.get("sanction_list_last_check")
+
     def withdraw(self):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
@@ -997,7 +1067,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             "selfcare_disability",
             "comms_disability",
         )
-        should_be_disabled = False
+        should_be_disabled = self.disability == DISABLED
         for field in disability_fields:
             value = getattr(self, field, None)
             should_be_disabled = should_be_disabled or value == CANNOT_DO or value == LOT_DIFFICULTY
@@ -1067,3 +1137,13 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
     xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.PROTECT)
+
+
+class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
+    individual = models.ForeignKey("household.Individual", related_name="bank_account_info", on_delete=models.CASCADE)
+    bank_name = models.CharField(max_length=255)
+    bank_account_number = models.CharField(max_length=64)
+    debit_card_number = models.CharField(max_length=255, blank=True, default="")
+
+    def __str__(self):
+        return f"{self.bank_account_number} ({self.bank_name})"

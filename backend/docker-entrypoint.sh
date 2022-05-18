@@ -8,14 +8,6 @@ else
         "dev")
         until pg_isready -h db -p 5432;
           do echo "waiting for database"; sleep 2; done;
-        until pg_isready -h cash_assist_datahub_db -p 5432;
-          do echo "waiting for database"; sleep 2; done;
-        until pg_isready -h mis_datahub_db -p 5432;
-          do echo "waiting for database"; sleep 2; done;
-        until pg_isready -h erp_datahub_db -p 5432;
-          do echo "waiting for database"; sleep 2; done;
-        until pg_isready -h registration_datahub_db -p 5432;
-          do echo "waiting for database"; sleep 2; done;
         python manage.py collectstatic --no-input
         python manage.py migratealldb
         python manage.py runserver 0.0.0.0:8000

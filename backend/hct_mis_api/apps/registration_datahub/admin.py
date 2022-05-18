@@ -1,25 +1,34 @@
-import json
+import base64
+import datetime
 import logging
-import re
 
-from django.contrib import admin
-from django.contrib.admin import FieldListFilter, SimpleListFilter
+from django import forms
+from django.contrib import admin, messages
+from django.core.signing import BadSignature, Signer
+from django.db.models import F
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
+import requests
 from admin_extra_buttons.decorators import button, link
 from admin_extra_buttons.mixins import ExtraButtonsMixin
-from adminactions.helpers import AdminActionPermMixin
 from adminactions.mass_update import mass_update
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
+from adminfilters.json import JsonFieldFilter
 from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
+from requests.auth import HTTPBasicAuth
 
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    fresh_extract_records_task,
+    process_flex_records_task,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -29,10 +38,15 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     Record,
     RegistrationDataImportDatahub,
+    DiiaHousehold,
+    DiiaIndividual,
 )
-from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
+from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+    FlexRegistrationService,
+)
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +94,13 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
         return TemplateResponse(request, "registration_datahub/admin/inspect.html", context)
 
 
+class ImportedBankAccountInfoStackedInline(admin.StackedInline):
+    model = ImportedBankAccountInfo
+
+    exclude = ("debit_card_number",)
+    extra = 0
+
+
 @admin.register(ImportedIndividual)
 class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_display = (
@@ -103,6 +124,7 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     # raw_id_fields = ("household", "registration_data_import")
     autocomplete_fields = ("household", "registration_data_import")
     actions = ["enrich_deduplication"]
+    inlines = (ImportedBankAccountInfoStackedInline,)
 
     def score(self, obj):
         try:
@@ -145,6 +167,7 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 @admin.register(ImportedIndividualIdentity)
 class ImportedIndividualIdentityAdmin(HOPEModelAdminBase):
+    list_display = ("individual", "agency", "document_number")
     raw_id_fields = ("individual",)
 
 
@@ -155,37 +178,39 @@ class ImportedHouseholdAdmin(HOPEModelAdminBase):
     raw_id_fields = ("registration_data_import", "head_of_household")
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (
+        DepotManager,
         ("country", ChoicesFieldComboFilter),
         ("country_origin", ChoicesFieldComboFilter),
+        "registration_method",
         ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
-        ("kobo_submission_uuid", ValueFilter.factory(lookup_name="istartswith")),
-        ("kobo_submission_uuid", ValueFilter.factory(lookup_name="istartswith")),
+        ("kobo_submission_uuid", ValueFilter.factory(lookup_name="istartswith", title="Kobo Submission UUID")),
     )
 
 
 @admin.register(ImportData)
 class ImportDataAdmin(HOPEModelAdminBase):
-    list_filter = ("data_type",)
+    list_filter = ("data_type", "status", ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")))
     date_hierarchy = "created_at"
 
 
 @admin.register(ImportedDocumentType)
 class ImportedDocumentTypeAdmin(HOPEModelAdminBase):
     list_display = ("label", "country")
-    list_filter = (("country", ChoicesFieldComboFilter),)
+    list_filter = (("country", ChoicesFieldComboFilter), "label", QueryStringFilter)
 
 
 @admin.register(ImportedDocument)
 class ImportedDocumentAdmin(HOPEModelAdminBase):
     list_display = ("document_number", "type", "individual")
     raw_id_fields = ("individual", "type")
-    list_filter = (("type", AutoCompleteFilter),)
+    list_filter = (("type", AutoCompleteFilter), QueryStringFilter)
+    date_hierarchy = "created_at"
 
 
 @admin.register(ImportedIndividualRoleInHousehold)
 class ImportedIndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
     raw_id_fields = ("individual", "household")
-    list_filter = ("role",)
+    list_filter = ("role", QueryStringFilter)
 
 
 @admin.register(KoboImportedSubmission)
@@ -199,11 +224,11 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
         "imported_household_id",
         "registration_data_import_id",
     )
-    # date_hierarchy = "created_at"
     list_filter = (
         "amended",
         ("registration_data_import", AutoCompleteFilter),
         ("imported_household", AutoCompleteFilter),
+        QueryStringFilter,
     )
     advanced_filter_fields = (
         # "created_at",
@@ -214,21 +239,126 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
     raw_id_fields = ("registration_data_import", "imported_household")
 
 
+class RemeberDataForm(forms.Form):
+    SYNC_COOKIE = "fetch"
+    remember = forms.BooleanField(label="Remember me", required=False)
+
+    def get_signed_cookie(self, request):
+        signer = Signer(request.user.password)
+        return signer.sign_object(self.cleaned_data)
+
+    @classmethod
+    def get_saved_config(cls, request):
+        try:
+            signer = Signer(request.user.password)
+            obj: dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, {}))
+            return obj
+        except BadSignature:
+            return {}
+
+
+class FetchForm(RemeberDataForm):
+    SYNC_COOKIE = "fetch"
+
+    host = forms.URLField()
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    registration = forms.IntegerField()
+    start = forms.IntegerField()
+    end = forms.IntegerField()
+
+    def clean(self):
+        return super().clean()
+
+
+class ValidateForm(RemeberDataForm):
+    SYNC_COOKIE = "ocr"
+    picture_field = forms.CharField()
+    number_field = forms.CharField()
+
+
+from django.contrib.admin import SimpleListFilter
+
+
+class AlexisFilter(SimpleListFilter):
+    template = "adminfilters/alexis.html"
+    title = "Alexis"
+    parameter_name = "alexis"
+
+    def __init__(self, request, params, model, model_admin):
+        super().__init__(request, params, model, model_admin)
+        self.lookup_kwarg = self.parameter_name
+        self.lookup_val = request.GET.getlist(self.lookup_kwarg, [])
+
+    def queryset(self, request, queryset):
+        if "1" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__individuals_num=F("data__household__0__size_h_c"))
+        if "2" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__collectors_num=1)
+        if "3" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__head=1)
+        if "4" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__valid_phones__gt=0)
+        if "5" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__valid_taxid__gt=0)
+        if "6" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__birth_certificate__gt=0)
+        if "7" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__disability_certificate=True)
+        if "8" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__valid_payment__gt=0)
+        if "9" in self.lookup_val:
+            queryset = queryset.filter(data__w_counters__collector_bank_account=True)
+        return queryset
+
+    def lookups(self, request, model_admin):
+        return (
+            ["1", "Household size match"],
+            ["2", "Only one collector"],
+            ["3", "One and only one head"],
+            ["4", "More than 1 phone number"],
+            ["5", "At least 1 HoH has TaxId ans BankAccount"],
+            ["6", "at least one birth certificate picture"],
+            ["7", "disability certificate for each disabled"],
+            ["8", "At least 1 member has TaxId ans BankAccount"],
+            ["9", "Collector has BankAccount"],
+        )
+
+    def choices(self, changelist):
+        for lookup, title in self.lookup_choices:
+            qs = changelist.get_query_string(remove=[self.parameter_name]) + "&"
+            qs += "&".join([f"{self.parameter_name}={v}" for v in self.lookup_val if v != lookup])
+            if str(lookup) not in self.lookup_val:
+                qs += f"&{self.parameter_name}={lookup}"
+            yield {
+                "selected": str(lookup) in self.lookup_val,
+                "query_string": qs,
+                "display": title,
+            }
+
+
 @admin.register(Record)
-class RecordDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    readonly_fields = list_display = ("id", "registration", "timestamp", "source_id", "ignored")
+class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+    list_display = ("id", "registration", "timestamp", "source_id", "ignored")
+    readonly_fields = ("id", "registration", "timestamp", "source_id", "registration_data_import")
+    list_editable = ("ignored",)
+    exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
+        AlexisFilter,
+        ("registration_data_import", AutoCompleteFilter),
         ("source_id", NumberFilter),
-        "timestamp",
+        ("id", NumberFilter),
+        ("data", JsonFieldFilter),
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
-    actions = [mass_update, "extract"]
-    mass_update_fields = [
-        "fields",
-    ]
+    change_list_template = "registration_datahub/admin/record/change_list.html"
+
+    actions = [mass_update, "extract", "async_extract", "create_rdi"]
+
+    mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []
 
     def get_queryset(self, request):
@@ -236,35 +366,140 @@ class RecordDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModel
         qs = qs.defer("storage", "data")
         return qs
 
-    def extract(self, request, queryset):
-        def _filter(d):
-            if isinstance(d, list):
-                return [_filter(v) for v in d]
-            elif isinstance(d, dict):
-                return {k: _filter(v) for k, v in d.items()}
-            elif is_image(d):
-                return "::image::"
-            else:
-                return d
+    @admin.action(description="Create RDI")
+    def create_rdi(self, request, queryset):
+        service = FlexRegistrationService()
+        try:
+            records_ids = queryset.values_list("id", flat=True)
+            rdi = service.create_rdi(request.user, records_ids, f"ukraine rdi {datetime.datetime.now()}")
 
-        for r in queryset.all():
-            try:
-                extracted = json.loads(r.storage.tobytes().decode())
-                r.data = _filter(extracted)
-                r.save()
-            except Exception as e:
-                logger.exception(e)
+            process_flex_records_task.delay(rdi.id, list(records_ids))
+            self.message_user(request, f"RDI Import with name: {rdi.name} started", messages.SUCCESS)
+        except Exception as e:
+            self.message_user(request, str(e), messages.ERROR)
 
-    @button()
-    def extract_all(self, request):
-        self.extract(request, Record.objects.filter(data__isnull=True))
+    @admin.action(description="Async extract")
+    def async_extract(self, request, queryset):
+        try:
+            records_ids = queryset.values_list("id", flat=True)
+            fresh_extract_records_task.delay(list(records_ids))
+            self.message_user(request, f"Extracting data for {len(records_ids)} records", messages.SUCCESS)
+        except Exception as e:
+            self.message_user(request, str(e), messages.ERROR)
 
+    @button(permission=is_root)
+    def fetch(self, request):
+        ctx = self.get_common_context(request)
+        cookies = {}
+        if request.method == "POST":
+            form = FetchForm(request.POST)
+            if form.is_valid():
+                if form.cleaned_data["remember"]:
+                    cookies = {form.SYNC_COOKIE: form.get_signed_cookie(request)}
+
+                auth = HTTPBasicAuth(form.cleaned_data["username"], form.cleaned_data["password"])
+                url = "{host}api/data/{registration}/{start}/{end}/".format(**form.cleaned_data)
+                with requests.get(url, stream=True, auth=auth) as res:
+                    if res.status_code != 200:
+                        raise Exception(str(res))
+                    payload = res.json()
+                    for record in payload["data"]:
+                        Record.objects.update_or_create(
+                            source_id=record["id"],
+                            registration=2,
+                            defaults={"timestamp": record["timestamp"], "storage": base64.b64decode(record["storage"])},
+                        )
+        else:
+            form = FetchForm(initial=FetchForm.get_saved_config(request))
+
+        ctx["form"] = form
+        response = TemplateResponse(request, "registration_datahub/admin/record/fetch.html", ctx)
+        if cookies:
+            for k, v in cookies.items():
+                response.set_cookie(k, v)
+        return response
+
+    # @view()
+    # def validate_document(self, request, pk, target, fieldname):
+    #     ctx = self.get_common_context(request, pk)
+    #     cookies = {}
+    #     if request.method == "POST":
+    #         form = ValidateForm(request.POST)
+    #         if form.is_valid():
+    #             if form.cleaned_data["remember"]:
+    #                 cookies = {form.SYNC_COOKIE: form.get_signed_cookie(request)}
+    #             from PIL import Image
+    #             import pytesseract
+    #             try:
+    #                 childs, offset = target.split(":")
+    #                 record = self.object.data[childs][int(offset)-1]
+    #                 img = record[fieldname]
+    #                 imgdata = base64.b64decode(str(img))
+    #                 im = Image.open(io.BytesIO(imgdata))
+    #                 content = pytesseract.image_to_string(im)
+    #                 ctx['content'] = content
+    #                 self.message_user(request, "Done")
+    #             except Exception as e:
+    #                 logger.exception(e)
+    #                 self.message_error_to_user(request, e)
+    #     else:
+    #         initial = FetchForm.get_saved_config(request)
+    #         initial['picture_field'] = fieldname
+    #         childs, offset = target.split(":")
+    #         record = self.object.data[childs][int(offset)-1]
+    #         img = record[fieldname]
+    #         ctx['img'] = img
+    #         form = ValidateForm(initial=initial)
+    #
+    #     ctx["form"] = form
+    #     response = TemplateResponse(request, "registration_datahub/admin/record/validate_document.html", ctx)
+    #     if cookies:
+    #         for k, v in cookies.items():
+    #             response.set_cookie(k, v)
+    #     return response
+
+    # @button()
+    # def extract_all(self, request):
+    #     records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)
+    #     Record.extract(records_ids)
+    #
     @button(label="Extract")
     def extract_single(self, request, pk):
-        self.extract(request, Record.objects.filter(pk=pk))
+        records_ids = Record.objects.filter(pk=pk).values_list("pk", flat=True)
+        try:
+            Record.extract(records_ids, raise_exception=True)
+        except Exception as e:
+            self.message_error_to_user(request, e)
 
     def has_add_permission(self, request):
         return False
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return is_root(request)
+
+@admin.register(DiiaIndividual)
+class DiiaIndividualAdmin(HOPEModelAdminBase):
+    list_display = (
+        "registration_data_import",
+        "individual_id",
+        "full_name",
+        "sex",
+        "disability"
+    )
+    list_filter = (
+        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
+        ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
+        "disability"
+    )
+
+
+@admin.register(DiiaHousehold)
+class DiiaHouseholdAdmin(HOPEModelAdminBase):
+    search_fields = ("id", "registration_data_import", "rec_id")
+    list_display = ("registration_data_import", "rec_id")
+    raw_id_fields = ("registration_data_import", "head_of_household")
+    date_hierarchy = "registration_data_import__import_date"
+    list_filter = (
+        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
+        ("rec_id", ValueFilter.factory(lookup_name="istartswith",)),
+    )

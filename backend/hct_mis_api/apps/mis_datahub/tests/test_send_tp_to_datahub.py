@@ -4,9 +4,14 @@ from django.test import TestCase
 from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
@@ -78,7 +83,16 @@ class TestSendTpToDatahub(TestCase):
             business_area=business_area_with_data_sharing,
             admin_level=1,
         )
-        admin_area = AdminAreaFactory(admin_area_level=state_area_type)
+        admin_area = AdminAreaFactory(admin_area_level=state_area_type, p_code="asdfgfhghkjltr")
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
+            name="State",
+            country=country,
+            area_level=1,
+        )
+        admin_area_new = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+
         unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
         test_agency = Agency.objects.create(type="test", label="test")
 
@@ -101,11 +115,13 @@ class TestSendTpToDatahub(TestCase):
             size=4,
             registration_data_import=rdi,
             admin_area=admin_area,
+            admin_area_new=admin_area_new,
         )
         cls.household_second = HouseholdFactory.build(
             size=1,
             registration_data_import=rdi_second,
             admin_area=admin_area,
+            admin_area_new=admin_area_new,
         )
         cls.second_household_head = IndividualFactory(
             household=cls.household_second,
