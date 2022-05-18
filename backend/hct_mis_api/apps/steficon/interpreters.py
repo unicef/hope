@@ -138,7 +138,7 @@ class PythonExec(Interpreter):
             "exec",
         ]:
             if forbidden in self.init_string:
-                errors.append("Code contains an invalid statement '%s'" % forbidden)
+                errors.append("Code contains an invalid statement '{}'".format(forbidden))
         if errors:
             raise ValidationError(errors)
         try:

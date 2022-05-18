@@ -16,6 +16,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SEX_CHOICE,
     UNICEF,
+    BankAccountInfo,
     Document,
     DocumentType,
     EntitlementCard,
@@ -114,17 +115,9 @@ class HouseholdFactory(factory.DjangoModelFactory):
     @classmethod
     def build(cls, **kwargs):
         """Build an instance of the associated class, with overriden attrs."""
-        if "registration_data_import__imported_by__parnter" not in kwargs:
+        if "registration_data_import__imported_by__partner" not in kwargs:
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
-
-
-class DocumentFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Document
-
-    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
-    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by("?").first())
 
 
 class IndividualIdentityFactory(factory.DjangoModelFactory):
@@ -161,6 +154,31 @@ class IndividualFactory(factory.DjangoModelFactory):
     first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
+
+
+class BankAccountInfoFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = BankAccountInfo
+
+    individual = factory.SubFactory(IndividualFactory)
+    bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
+    bank_account_number = random.randint(10 ** 26, 10 ** 27 - 1)
+
+
+class DocumentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Document
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.LazyAttribute(lambda o: DocumentType.objects.order_by("?").first())
+    individual = factory.SubFactory(IndividualFactory)
+
+
+class DocumentTypeFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = DocumentType
+
+    type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
@@ -276,3 +294,10 @@ def create_household_and_individuals(household_data=None, individuals_data=None,
     household.head_of_household = individuals[0]
     household.save()
     return household, individuals
+
+
+def create_individual_document(individual, document_type=None):
+    if document_type:
+        DocumentTypeFactory(type=document_type)
+    document = DocumentFactory(individual=individual)
+    return document
