@@ -10,6 +10,7 @@ import { Missing } from '../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
+import { SuggestNewAmount } from './SuggestNewAmount';
 import { WarningTooltipTable } from './WarningTooltipTable';
 
 const ErrorText = styled.div`
@@ -90,6 +91,7 @@ export function PaymentsTableRow({
       </TableCell>
       <TableCell align='left'>
         <Missing />
+        <SuggestNewAmount businessArea={businessArea} />
       </TableCell>
     </ClickableTableRow>
   );
