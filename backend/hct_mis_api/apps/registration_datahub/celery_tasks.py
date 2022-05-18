@@ -283,9 +283,11 @@ def automate_rdi_creation_task(registration_id: int, page_size: int):
 
     service = FlexRegistrationService()
 
-    records_ids = Record.objects.filter(registration=registration_id, status=Record.STATUS_TO_IMPORT,).values_list(
-        "id", flat=True
-    )[:page_size]
+    records_ids = (
+        Record.objects.filter(registration=registration_id)
+        .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
+        .values_list("id", flat=True)[:page_size]
+    )
 
     if records_ids:
         rdi_name = f"ukraine rdi {datetime.datetime.now()}"
