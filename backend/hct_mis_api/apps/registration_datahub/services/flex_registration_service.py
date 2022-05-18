@@ -1,5 +1,6 @@
 import base64
 import json
+import logging
 import uuid
 from typing import List
 
@@ -43,6 +44,8 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 
 class FlexRegistrationService:
+    logger = logging.getLogger(__name__)
+
     INDIVIDUAL_MAPPING_DICT = {
         "given_name": "given_name_i_c",
         "family_name": "family_name_i_c",
@@ -130,7 +133,11 @@ class FlexRegistrationService:
                             record = Record.objects.defer("data").get(id=record_id)
                             self.create_household_for_rdi_household(record, rdi_datahub)
                 except ValidationError as e:
-                    record.mark_as_invalid(str(e))
+                    if not record.data:
+                        record.data = {}
+                    record.data["import_error"] = str(e)
+                    record.save()
+                    self.logger.error(f"Record id={record.id}: {e}")
 
             number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
             number_of_households = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub).count()
@@ -154,8 +161,6 @@ class FlexRegistrationService:
                     "number_of_households",
                 )
             )
-
-            record.mark_as_imported()
 
             transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
         except Exception as e:

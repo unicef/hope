@@ -339,15 +339,13 @@ class AlexisFilter(SimpleListFilter):
 
 @admin.register(Record)
 class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
+    list_display = ("id", "registration", "timestamp", "source_id", "ignored")
     readonly_fields = (
         "id",
         "registration",
         "timestamp",
         "source_id",
         "registration_data_import",
-        "status",
-        "error_message",
     )
     list_editable = ("ignored",)
     exclude = ("data",)
@@ -356,7 +354,6 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         DepotManager,
         AlexisFilter,
         ("registration_data_import", AutoCompleteFilter),
-        "status",
         ("source_id", NumberFilter),
         ("id", NumberFilter),
         ("data", JsonFieldFilter),
