@@ -2,6 +2,11 @@ version: '3.7'
 
 volumes:
   backend-data:
+  db:
+  db_ca:
+  db_mis:
+  db_erp:
+  db_reg:
 
 services:
   redis:
@@ -31,8 +36,7 @@ services:
       - erp_datahub_db
       - registration_datahub_db
       - redis
-      - elasticsearch_test
-
+      - elasticsearch
   db:
     image: mdillon/postgis:11-alpine
     env_file:
@@ -80,16 +84,17 @@ services:
       - erp_datahub_db
       - registration_datahub_db
       - redis
-      - elasticsearch_test
+      - elasticsearch
 
-  elasticsearch_test:
+  elasticsearch:
+    image: unicef/hct-elasticsearch
     build:
       context: elasticsearch
       dockerfile: Dockerfile
     environment:
-      - node.name=es02
-      - cluster.name=es-docker-cluster-test
-      - cluster.initial_master_nodes=es02
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - cluster.initial_master_nodes=es01
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -97,4 +102,4 @@ services:
         soft: -1
         hard: -1
     ports:
-      - "9201:9200"
+      - 9200:9200
