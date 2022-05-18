@@ -17,6 +17,7 @@ from hct_mis_api.apps.erp_datahub.utils import (
     get_payment_record_delivered_quantity_in_usd,
 )
 from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider, CashPlanPaymentVerificationSummary
+from hct_mis_api.apps.payment.services.handle_total_cash_in_households import handle_total_cash_in_specific_households
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -178,7 +179,7 @@ class PullFromDatahubTask:
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
-
+        household_ids = []
         for dh_payment_record in dh_payment_records:
             payment_record_args = self.build_arg_dict(
                 dh_payment_record,
@@ -203,8 +204,13 @@ class PullFromDatahubTask:
                 except Exception as e:
                     logger.exception(e)
                 payment_record.save(update_fields=["delivered_quantity_usd"])
+            household_ids.append(payment_record.household_id)
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
+        self.save_total_cash_received_in_household(household_ids)
+
+    def save_total_cash_received_in_household(self, household_ids):
+        handle_total_cash_in_specific_households(household_ids)
 
     def copy_service_providers(self, session):
         dh_service_providers = ca_models.ServiceProvider.objects.filter(session=session)
