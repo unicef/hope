@@ -12,15 +12,12 @@ import Publish from '@material-ui/icons/Publish';
 import GetApp from '@material-ui/icons/GetApp';
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { Title } from '../../../core/Title';
-import { formatCurrencyWithSymbol } from '../../../../utils/utils';
 import { LabelizedField } from '../../../core/LabelizedField';
-import {
-  BigValueContainer,
-  BigValue,
-} from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
+import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { Missing } from '../../../core/Missing';
 
 const GreyText = styled.p`
@@ -90,6 +87,7 @@ export function Entitlement({
   permissions,
 }: EntitlementProps): React.ReactElement {
   const { t } = useTranslation();
+  const { id } = useParams();
   const [entitlement, setEntitlement] = useState<string>('');
   const [file, setFile] = useState(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -201,6 +199,14 @@ export function Entitlement({
             USD <Missing />
           </BigValue>
         </LabelizedField>
+        <Button
+          color='primary'
+          variant='contained'
+          component={Link}
+          to={`/${businessArea}/payment-module/payment-plan/${id}/setup-fsp`}
+        >
+          {t('Set up FSP')}
+        </Button>
       </ContainerColumnWithBorder>
     </Box>
   );
