@@ -1,13 +1,17 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import encode_id_base64, create_afghanistan
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.reporting.models import Report
@@ -29,21 +33,30 @@ class TestReportingMutation(APITestCase):
     }
     """
 
-
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory()
         create_afghanistan()
         cls.business_area_slug = "afghanistan"
-        cls.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
+        cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         last_registration_dates = ("2020-01-01", "2021-01-01")
+
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
             business_area=cls.business_area,
         )
-        cls.admin_area_1 = AdminAreaFactory(title="Adminarea Test", admin_area_level=area_type)
+        AdminAreaFactory(title="Adminarea Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
+            name="Admin type one",
+            country=country,
+            area_level=2,
+        )
+        cls.admin_area_1 = AreaFactory(name="Adminarea Test", area_type=area_type, p_code="asdfgfhghkjltr")
+
         cls.program_1 = ProgramFactory(business_area=cls.business_area, end_date="2020-01-01")
 
         cls.households = []
@@ -124,7 +137,7 @@ class TestReportingMutation(APITestCase):
             "business_area_slug": self.business_area_slug,
             "date_from": "2019-01-01",
             "date_to": "2021-01-01",
-            "admin_area": [encode_id_base64(self.admin_area_1, "AdminArea")],
+            "admin_area": [encode_id_base64(self.admin_area_1, "Area")],
             "program": encode_id_base64(self.program_1, "Program"),
         }
         ReportValidator.validate_report_type_filters(report_data=report_data)

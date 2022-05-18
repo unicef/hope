@@ -1,6 +1,6 @@
 {% extends "admin_extra_buttons/change_form.html" %}{% load smart_register %}
 {% block after_field_sets %}
-    {% dump_dict original.data %}
+    {% dump original.data "" original %}
 {% endblock %}
 {% block inline_field_sets %}{% endblock %}
 {% block admin_change_form_document_ready %}
@@ -8,7 +8,7 @@
     <script>
         (function ($) {
             $(function () {
-                $(".base64 a")
+                $(".base64 a.preview")
                     .click(function (e) {
                         e.preventDefault();
                         $(this).parent().find(".preview").toggle();

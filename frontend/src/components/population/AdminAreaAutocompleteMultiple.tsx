@@ -40,7 +40,7 @@ export function AdminAreaAutocompleteMultiple({
   const { data, loading } = useAllAdminAreasQuery({
     variables: {
       first: 100,
-      title: debouncedInputText,
+      name: debouncedInputText,
       businessArea,
     },
   });
@@ -76,7 +76,7 @@ export function AdminAreaAutocompleteMultiple({
           if (!option.node) {
             return '';
           }
-          return `${option.node.title}`;
+          return `${option.node.name}`;
         }}
         disabled={disabled}
         options={get(data, 'allAdminAreas.edges', [])}

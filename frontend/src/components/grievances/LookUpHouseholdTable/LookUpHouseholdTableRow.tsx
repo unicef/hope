@@ -59,7 +59,7 @@ export function LookUpHouseholdTableRow({
       </TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household?.admin2?.title || '-'}</TableCell>
+      <TableCell align='left'>{household?.admin2?.name || '-'}</TableCell>
       <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
