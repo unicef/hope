@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='record',
             name='error_message',
-            field=models.TextField(blank=True),
+            field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name='record',
             name='status',
-            field=models.CharField(choices=[('TO_IMPORT', 'To import'), ('IMPORTED', 'Imported'), ('ERROR', 'Error')], default='TO_IMPORT', max_length=16),
+            field=models.CharField(choices=[('TO_IMPORT', 'To import'), ('IMPORTED', 'Imported'), ('ERROR', 'Error')], null=True, blank=True, max_length=16),
         ),
     ]
