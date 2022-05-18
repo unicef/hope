@@ -450,8 +450,8 @@ class Record(models.Model):
     ignored = models.BooleanField(default=False, blank=True, null=True, db_index=True)
     source_id = models.IntegerField(db_index=True)
     data = models.JSONField(default=dict, blank=True, null=True)
-    error_message = models.TextField(blank=True)
-    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, default=STATUS_TO_IMPORT)
+    error_message = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
 
     def mark_as_invalid(self, msg: str):
         self.error_message = msg
