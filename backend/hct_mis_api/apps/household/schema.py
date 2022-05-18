@@ -1,3 +1,4 @@
+import datetime
 import re
 
 from django.db.models import DecimalField, IntegerField, Prefetch, Q, Sum
@@ -7,7 +8,6 @@ import graphene
 from django_filters import (
     BooleanFilter,
     CharFilter,
-    DateFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
@@ -30,9 +30,8 @@ from hct_mis_api.apps.core.filters import (
     DateRangeFilter,
     IntegerRangeFilter,
 )
-from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
-    AdminAreaNode,
     ChoiceObject,
     FieldAttributeNode,
     _custom_dict_or_attr_resolver,
@@ -48,6 +47,8 @@ from hct_mis_api.apps.core.utils import (
     sum_lists_with_values,
     to_choice_object,
 )
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
     AGENCY_TYPE_CHOICES,
@@ -72,6 +73,7 @@ from hct_mis_api.apps.household.models import (
     STATUS_WITHDRAWN,
     WORK_STATUS_CHOICE,
     Agency,
+    BankAccountInfo,
     Document,
     DocumentType,
     Household,
@@ -110,7 +112,9 @@ class HouseholdFilter(FilterSet):
     search = CharFilter(method="search_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=AdminArea.objects.filter(level=2))
+    admin2 = ModelMultipleChoiceFilter(
+        field_name="admin_area_new", queryset=Area.objects.filter(area_type__area_level=2)
+    )
     withdrawn = BooleanFilter(field_name="withdrawn")
 
     class Meta:
@@ -121,7 +125,7 @@ class HouseholdFilter(FilterSet):
             "address": ["exact", "startswith"],
             "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],
-            "admin_area": ["exact"],
+            "admin_area_new": ["exact"],
             "target_populations": ["exact"],
             "programs": ["exact"],
             "residence_status": ["exact"],
@@ -138,7 +142,7 @@ class HouseholdFilter(FilterSet):
             "household_ca_id",
             "size",
             Lower("head_of_household__full_name"),
-            Lower("admin_area__title"),
+            Lower("admin_area_new__name"),
             "residence_status",
             Lower("registration_data_import__name"),
             "total_cash",
@@ -161,6 +165,7 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(head_of_household__family_name__istartswith=value)
             inner_query |= Q(residence_status__istartswith=value)
             inner_query |= Q(admin_area__title__istartswith=value)
+            inner_query |= Q(admin_area_new__name__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
             q_obj &= inner_query
@@ -176,7 +181,9 @@ class IndividualFilter(FilterSet):
     programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = ModelMultipleChoiceFilter(field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2))
+    admin2 = ModelMultipleChoiceFilter(
+        field_name="household__admin_area_new", queryset=Area.objects.filter(area_type__area_level=2)
+    )
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
@@ -192,6 +199,7 @@ class IndividualFilter(FilterSet):
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
             "household__admin_area": ["exact"],
+            "household__admin_area_new": ["exact"],
             "withdrawn": ["exact"],
         }
 
@@ -205,7 +213,7 @@ class IndividualFilter(FilterSet):
             "birth_date",
             "sex",
             "relationship",
-            Lower("household__admin_area__title"),
+            Lower("household__admin_area_new__name"),
             "last_registration_date",
             "first_registration_date",
         )
@@ -232,6 +240,7 @@ class IndividualFilter(FilterSet):
         q_obj = Q()
         for value in values:
             inner_query = Q(household__admin_area__title__istartswith=value)
+            inner_query |= Q(household__admin_area_new__name__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
             inner_query |= Q(household__unicef_id__istartswith=value)
@@ -383,15 +392,25 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
     consent_sharing = graphene.List(graphene.String)
-    admin1 = graphene.Field(AdminAreaNode)
-    admin2 = graphene.Field(AdminAreaNode)
+    admin1 = graphene.Field(AreaNode)
+    admin2 = graphene.Field(AreaNode)
     status = graphene.String()
     programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
     active_individuals_count = graphene.Int()
+    admin_area = graphene.Field(AreaNode)
+
+    def resolve_admin1(parent, info):
+        return parent.admin1_new
+
+    def resolve_admin2(parent, info):
+        return parent.admin2_new
+
+    def resolve_admin_area(parent, info):
+        return parent.admin_area_new
 
     def resolve_admin_area_title(parent, info):
-        if parent.admin_area:
-            return parent.admin_area.title
+        if parent.admin_area_new:
+            return parent.admin_area_new.name
         return ""
 
     def resolve_programs_with_delivered_quantity(parent, info):
@@ -469,6 +488,15 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
         model = IndividualRoleInHousehold
 
 
+class BankAccountInfoNode(DjangoObjectType):
+    class Meta:
+        model = BankAccountInfo
+        fields = (
+            "bank_name",
+            "bank_account_number",
+        )
+
+
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
@@ -489,6 +517,14 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     )
     photo = graphene.String()
     age = graphene.Int()
+    bank_account_info = graphene.Field(BankAccountInfoNode, required=False)
+    sanction_list_last_check = graphene.DateTime()
+
+    def resolve_bank_account_info(parent, info):
+        bank_account_info = parent.bank_account_info.first()
+        if bank_account_info:
+            return bank_account_info
+        return None
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -520,9 +556,12 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_flex_fields(parent, info):
         return resolve_flex_fields_choices_to_string(parent)
 
-    @staticmethod
     def resolve_age(parent, info):
         return parent.age
+
+    def resolve_sanction_list_last_check(parent, info):
+        return parent.sanction_list_last_check
+
 
     @classmethod
     def check_node_permission(cls, info, object_instance):

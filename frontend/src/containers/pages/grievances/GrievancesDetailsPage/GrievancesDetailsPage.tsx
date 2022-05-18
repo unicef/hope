@@ -59,6 +59,7 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
     canClose,
     canApproveDataChange,
     canApproveFlagAndAdjudication,
+    canApprovePaymentVerification,
     canAssign,
   } = grievancePermissions(isCreator, isOwner, ticket, permissions);
 
@@ -87,6 +88,7 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
           businessArea={businessArea}
           canApproveFlagAndAdjudication={canApproveFlagAndAdjudication}
           canApproveDataChange={canApproveDataChange}
+          canApprovePaymentVerification={canApprovePaymentVerification}
         />
         <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
         <GrievancesSidebar ticket={ticket} />

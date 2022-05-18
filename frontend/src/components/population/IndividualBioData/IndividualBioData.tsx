@@ -101,6 +101,27 @@ export function IndividualBioData({
     </Grid>
   );
 
+  const renderBankAccountInfo = (): React.ReactNode => {
+    if (!individual.bankAccountInfo) {
+      return null
+    }
+    return <>
+      <Grid item xs={12}>
+        <BorderBox/>
+      </Grid>
+      <Grid item xs={3}>
+        <LabelizedField label={t('Bank name')}>
+          {individual.bankAccountInfo.bankName}
+        </LabelizedField>
+      </Grid>
+      <Grid item xs={3}>
+        <LabelizedField label={t('Bank account number')}>
+          {individual.bankAccountInfo.bankAccountNumber}
+        </LabelizedField>
+      </Grid>
+    </>;
+  }
+
   return (
     <Overview>
       <Title>
@@ -228,6 +249,11 @@ export function IndividualBioData({
             {severityOfDisabilityChoicesDict[individual.commsDisability]}
           </LabelizedField>
         </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Disability')}>
+            {individual.disability === 'DISABLED' ? 'Disabled' : 'Not Disabled'}
+          </LabelizedField>
+        </Grid>
         {!mappedIndividualDocuments.length &&
         !mappedIdentities.length ? null : (
           <Grid item xs={12}>
@@ -261,6 +287,7 @@ export function IndividualBioData({
             </UniversalMoment>
           </LabelizedField>
         </Grid>
+        {renderBankAccountInfo()}
       </Grid>
     </Overview>
   );

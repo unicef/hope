@@ -29,7 +29,7 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
   {
     disablePadding: false,
     label: 'Location',
-    id: 'admin_area__title',
+    id: 'admin_area_new__name',
     numeric: false,
   },
   {

@@ -4,9 +4,6 @@ import sys
 from pathlib import Path
 from uuid import uuid4
 
-####
-# Change per project
-####
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -589,7 +586,7 @@ SENTRY_URL = env("SENTRY_URL")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.logging import LoggingIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
 
     from hct_mis_api import get_full_version
 
@@ -600,15 +597,11 @@ if SENTRY_DSN:
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[
-            DjangoIntegration(transaction_style="url"),
-            sentry_logging,
-            CeleryIntegration()
-            # RedisIntegration(),
-        ],
+        integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
         send_default_pii=True,
     )
+    ignore_logger("graphql.execution.utils")
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
@@ -619,7 +612,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_INSTANCE}/0"
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 120 * 60
+CELERY_TASK_TIME_LIMIT = 240 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
 

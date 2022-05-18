@@ -9,6 +9,7 @@ volumes:
   db_reg:
   data_es:
   data_es_test:
+  ipython_data_local:
 
 services:
   proxy:
@@ -34,11 +35,13 @@ services:
 
   backend:
     stdin_open: true
+    entrypoint: ./docker-entrypoint.sh
     image: unicef/hct-mis-backend
     env_file:
       - .env
     environment:
       - REDIS_INSTANCE=redis:6379
+      - PYTHONUNBUFFERED=1
     build:
       context: ./backend
       dockerfile: ./Dockerfile
@@ -49,13 +52,10 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
+      - ipython_data_local:/root/.ipython
     command: "dev"
     depends_on:
       - db
-      - cash_assist_datahub_db
-      - mis_datahub_db
-      - erp_datahub_db
-      - registration_datahub_db
       - redis
       - elasticsearch
 
@@ -75,10 +75,6 @@ services:
     depends_on:
       - backend
       - db
-      - cash_assist_datahub_db
-      - mis_datahub_db
-      - erp_datahub_db
-      - registration_datahub_db
       - redis
       - elasticsearch
 
@@ -98,10 +94,6 @@ services:
     depends_on:
       - backend
       - db
-      - cash_assist_datahub_db
-      - mis_datahub_db
-      - erp_datahub_db
-      - registration_datahub_db
       - redis
       - elasticsearch
 
@@ -122,38 +114,13 @@ services:
     image: johniak/postgis:11-alpine
     volumes:
       - db:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: hope,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
     env_file:
       - .env
     ports:
       - "5433:5432"
-
-  cash_assist_datahub_db:
-    image: johniak/postgis:11-alpine
-    volumes:
-      - db_ca:/var/lib/postgresql/data
-    env_file:
-      - .env
-
-  mis_datahub_db:
-    image: johniak/postgis:11-alpine
-    volumes:
-      - db_mis:/var/lib/postgresql/data
-    env_file:
-      - .env
-
-  erp_datahub_db:
-    image: johniak/postgis:11-alpine
-    volumes:
-      - db_erp:/var/lib/postgresql/data
-    env_file:
-      - .env
-
-  registration_datahub_db:
-    image: johniak/postgis:11-alpine
-    volumes:
-      - db_reg:/var/lib/postgresql/data
-    env_file:
-      - .env
 
   elasticsearch:
     image: unicef/hct-elasticsearch

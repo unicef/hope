@@ -9,9 +9,8 @@ volumes:
   db_reg:
 
 services:
-
   redis:
-    restart: always
+    restart: unless-stopped
     image: redis:4.0.11-alpine3.8
     expose:
       - "6379"
@@ -40,41 +39,28 @@ services:
       - elasticsearch
   db:
     image: mdillon/postgis:11-alpine
-    volumes:
-      - db:/var/lib/postgresql/data
     env_file:
       - .env
-    ports:
-      - "5433:5432"
 
   cash_assist_datahub_db:
     image: mdillon/postgis:11-alpine
-    volumes:
-      - db_ca:/var/lib/postgresql/data
     env_file:
       - .env
 
   mis_datahub_db:
     image: mdillon/postgis:11-alpine
-    volumes:
-      - db_mis:/var/lib/postgresql/data
     env_file:
       - .env
 
   erp_datahub_db:
     image: mdillon/postgis:11-alpine
-    volumes:
-      - db_erp:/var/lib/postgresql/data
     env_file:
       - .env
 
   registration_datahub_db:
     image: mdillon/postgis:11-alpine
-    volumes:
-      - db_reg:/var/lib/postgresql/data
     env_file:
       - .env
-
 
   celery_worker:
     stdin_open: true
@@ -88,7 +74,7 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
-    restart: always
+    restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
       - backend

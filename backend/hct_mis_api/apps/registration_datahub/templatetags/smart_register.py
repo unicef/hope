@@ -4,8 +4,6 @@ import logging
 import re
 
 from django.template import Library, Node
-from django.urls import reverse
-from django.utils.safestring import mark_safe
 
 from PIL import Image, UnidentifiedImageError
 
@@ -47,18 +45,18 @@ def isdict(value):
 
 
 @register.inclusion_tag("dump/dump.html")
-def dump(value):
-    return {"value": value}
+def dump(value, key=None, original=None):
+    return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/list.html")
-def dump_list(value):
-    return {"value": value}
+def dump_list(value, key=None, original=None):
+    return {"value": value, "key": key, "original": original}
 
 
 @register.inclusion_tag("dump/dict.html")
-def dump_dict(value):
-    return {"value": value}
+def dump_dict(value, key=None, original=None):
+    return {"value": value, "key": key, "original": original}
 
 
 @register.filter(name="smart")
@@ -74,14 +72,14 @@ def lookup(value, arg):
 
 @register.filter()
 def is_image(element):
-    if not isinstance(element, str) or len(element) < 200:
+    if not isinstance(element, str) or len(element) < 200 or (isinstance(element, str) and not element.isascii()):
         return False
     try:
         imgdata = base64.b64decode(str(element))
         im = Image.open(io.BytesIO(imgdata))
         im.verify()
         return True
-    except UnidentifiedImageError:
+    except (UnidentifiedImageError, ValueError):
         return None
 
 
@@ -94,3 +92,9 @@ def is_base64(element):
     except Exception as e:
         logger.exception(e)
     return False
+
+
+@register.filter
+def concat(a, b):
+    """concatenate arg1 & arg2"""
+    return "".join(map(str, (a, b)))
