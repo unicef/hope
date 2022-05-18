@@ -46,67 +46,6 @@ input AddIndividualIssueTypeExtras {
   individualData: AddIndividualDataObjectType!
 }
 
-type AdminAreaNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  externalId: String
-  title: String!
-  adminAreaLevel: AdminAreaTypeNode!
-  pCode: String
-  parent: AdminAreaNode
-  lft: Int!
-  rght: Int!
-  treeId: Int!
-  level: Int!
-  children(offset: Int, before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
-  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
-}
-
-type AdminAreaNodeConnection {
-  pageInfo: PageInfo!
-  edges: [AdminAreaNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type AdminAreaNodeEdge {
-  node: AdminAreaNode
-  cursor: String!
-}
-
-type AdminAreaTypeNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  name: String!
-  displayName: String
-  adminLevel: Int
-  businessArea: UserBusinessAreaNode
-  areaCode: String
-  countryName: String
-  country: AdminAreaTypeNode
-  datamartId: String
-  businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
-  adminarealevelSet(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
-  adminAreas(offset: Int, before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
-}
-
-type AdminAreaTypeNodeConnection {
-  pageInfo: PageInfo!
-  edges: [AdminAreaTypeNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type AdminAreaTypeNodeEdge {
-  node: AdminAreaTypeNode
-  cursor: String!
-}
-
 type AgeFilterObject {
   min: Int
   max: Int
@@ -135,7 +74,78 @@ type ApproveTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
 }
 
+type AreaNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  originalId: UUID
+  name: String!
+  parent: AreaNode
+  pCode: String
+  areaType: AreaTypeNode!
+  validFrom: DateTime
+  validUntil: DateTime
+  extras: JSONString!
+  lft: Int!
+  rght: Int!
+  treeId: Int!
+  level: Int!
+  areaSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
+  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+}
+
+type AreaNodeConnection {
+  pageInfo: PageInfo!
+  edges: [AreaNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type AreaNodeEdge {
+  node: AreaNode
+  cursor: String!
+}
+
+type AreaTypeNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  originalId: UUID
+  name: String!
+  areaLevel: Int!
+  parent: AreaTypeNode
+  validFrom: DateTime
+  validUntil: DateTime
+  extras: JSONString!
+  lft: Int!
+  rght: Int!
+  treeId: Int!
+  level: Int!
+  areatypeSet(offset: Int, before: String, after: String, first: Int, last: Int): AreaTypeNodeConnection!
+  areaSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
+}
+
+type AreaTypeNodeConnection {
+  pageInfo: PageInfo!
+  edges: [AreaTypeNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type AreaTypeNodeEdge {
+  node: AreaTypeNode
+  cursor: String!
+}
+
 scalar Arg
+
+type BankAccountInfoNode {
+  bankName: String!
+  bankAccountNumber: String!
+}
 
 scalar BigInt
 
@@ -156,7 +166,6 @@ type BusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   parent: UserBusinessAreaNode
   isSplit: Boolean!
-  countries(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   deduplicationDuplicateScore: Float!
   deduplicationPossibleDuplicateScore: Float!
   deduplicationBatchDuplicatesPercentage: Int!
@@ -165,7 +174,6 @@ type BusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
-  adminAreaLevel(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
@@ -293,9 +301,9 @@ enum CashPlanPaymentVerificationSampling {
 }
 
 enum CashPlanPaymentVerificationStatus {
-  PENDING
   ACTIVE
   FINISHED
+  PENDING
 }
 
 type CashPlanPaymentVerificationSummaryNode implements Node {
@@ -309,15 +317,15 @@ type CashPlanPaymentVerificationSummaryNode implements Node {
 }
 
 enum CashPlanPaymentVerificationSummaryStatus {
-  PENDING
   ACTIVE
   FINISHED
+  PENDING
 }
 
 enum CashPlanPaymentVerificationVerificationChannel {
+  MANUAL
   RAPIDPRO
   XLSX
-  MANUAL
 }
 
 enum CashPlanStatus {
@@ -732,7 +740,8 @@ type GrievanceTicketNode implements Node {
   category: Int!
   issueType: Int
   description: String!
-  admin2: AdminAreaNode
+  admin2: AreaNode
+  admin2New: AreaNode
   area: String!
   language: String!
   consent: Boolean!
@@ -820,7 +829,8 @@ type HouseholdNode implements Node {
   country: String
   size: Int!
   address: String!
-  adminArea: AdminAreaNode
+  adminArea: AreaNode
+  adminAreaNew: AreaNode
   representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int
@@ -844,6 +854,12 @@ type HouseholdNode implements Node {
   maleAgeGroup1217DisabledCount: Int
   maleAgeGroup1859DisabledCount: Int
   maleAgeGroup60DisabledCount: Int
+  childrenCount: Int
+  maleChildrenCount: Int
+  femaleChildrenCount: Int
+  childrenDisabledCount: Int
+  maleChildrenDisabledCount: Int
+  femaleChildrenDisabledCount: Int
   registrationDataImport: RegistrationDataImportNode!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean
@@ -888,8 +904,8 @@ type HouseholdNode implements Node {
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
-  admin1: AdminAreaNode
-  admin2: AdminAreaNode
+  admin1: AreaNode
+  admin2: AreaNode
   status: String
   programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
   activeIndividualsCount: Int
@@ -1559,8 +1575,10 @@ type ImportedHouseholdNode implements Node {
   koboAssetId: String!
   koboSubmissionTime: DateTime
   rowId: Int
+  misUnicefId: String
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
+  importId: String
 }
 
 type ImportedHouseholdNodeConnection {
@@ -1685,11 +1703,13 @@ type ImportedIndividualNode implements Node {
   koboAssetId: String!
   rowId: Int
   disabilityCertificatePicture: String
+  misUnicefId: String
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
   role: String
   age: Int
+  importId: String
 }
 
 type ImportedIndividualNodeConnection {
@@ -1828,7 +1848,6 @@ type IndividualNode implements Node {
   importedIndividualId: UUID
   sanctionListPossibleMatch: Boolean!
   sanctionListConfirmedMatch: Boolean!
-  sanctionListLastCheck: DateTime
   pregnant: Boolean
   observedDisability: [String]
   seeingDisability: String!
@@ -1851,6 +1870,8 @@ type IndividualNode implements Node {
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
   deleteIndividualTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketDeleteIndividualDetailsNodeConnection!
   ticketsystemflaggingdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketSystemFlaggingDetailsNodeConnection!
+  ticketDuplicates(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
+  ticketSelected(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   positiveFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
   negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
@@ -1859,9 +1880,11 @@ type IndividualNode implements Node {
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
+  bankAccountInfo: BankAccountInfoNode
   status: String
   role: String
   age: Int
+  sanctionListLastCheck: DateTime
 }
 
 type IndividualNodeConnection {
@@ -1889,6 +1912,7 @@ enum IndividualRelationship {
   MOTHERINLAW_FATHERINLAW
   NEPHEW_NIECE
   NON_BENEFICIARY
+  OTHER
   SISTERINLAW_BROTHERINLAW
   SON_DAUGHTER
   WIFE_HUSBAND
@@ -2068,7 +2092,8 @@ type Mutations {
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
-  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
+  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
+  approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
@@ -2126,6 +2151,10 @@ type PartnerType {
   name: String!
   isUn: Boolean!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+}
+
+type PaymentDetailsApproveMutation {
+  grievanceTicket: GrievanceTicketNode
 }
 
 enum PaymentRecordDeliveryType {
@@ -2240,6 +2269,7 @@ type PaymentVerificationNode implements Node {
   statusDate: DateTime
   receivedAmount: Float
   ticketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
+  ticketDetail(offset: Int, before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
   isManuallyEditable: Boolean
 }
 
@@ -2256,16 +2286,16 @@ type PaymentVerificationNodeEdge {
 }
 
 enum PaymentVerificationStatus {
+  NOT_RECEIVED
   PENDING
   RECEIVED
-  NOT_RECEIVED
   RECEIVED_WITH_ISSUES
 }
 
 enum PaymentVerificationStatusForUpdate {
+  NOT_RECEIVED
   PENDING
   RECEIVED
-  NOT_RECEIVED
   RECEIVED_WITH_ISSUES
 }
 
@@ -2293,7 +2323,7 @@ type ProgramNode implements Node {
   description: String!
   caId: String
   caHashId: String
-  adminAreas(offset: Int, before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
+  adminAreasNew(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   businessArea: UserBusinessAreaNode!
   budget: Decimal
   frequencyOfPayments: ProgramFrequencyOfPayments!
@@ -2353,6 +2383,8 @@ type ProgramsWithDeliveredQuantityNode {
 }
 
 type Query {
+  adminArea(id: ID!): AreaNode
+  allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, name: String, name_Istartswith: String, businessArea: String, level: Int): AreaNodeConnection
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
@@ -2364,7 +2396,7 @@ type Query {
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
@@ -2397,9 +2429,7 @@ type Query {
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
   allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): PaymentVerificationLogEntryNodeConnection
-  adminArea(id: ID!): AdminAreaNode
   businessArea(businessAreaSlug: String!): BusinessAreaNode
-  allAdminAreas(offset: Int, before: String, after: String, first: Int, last: Int, title: String, title_Istartswith: String, businessArea: String, level: Int): AdminAreaNodeConnection
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
@@ -2424,9 +2454,9 @@ type Query {
   finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, excludedIds: String!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
   household(id: ID!): HouseholdNode
-  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, countryOrigin: String, countryOrigin_Startswith: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, admin2: [ID], orderBy: String): HouseholdNodeConnection
+  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, countryOrigin: String, countryOrigin_Startswith: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminAreaNew: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, admin2: [ID], orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
-  allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, programs: [ID], businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
+  allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, programs: [ID], businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, household_AdminAreaNew: ID, withdrawn: Boolean, age: String, search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, flags: [String], orderBy: String): IndividualNodeConnection
   sectionHouseholdsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
   sectionIndividualsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
   sectionChildReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
@@ -2654,7 +2684,8 @@ type ReportNode implements Node {
   dateTo: Date!
   numberOfRecords: Int
   program: ProgramNode
-  adminArea(offset: Int, before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
+  adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
+  adminAreaNew(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
   fileUrl: String
 }
 
@@ -3261,11 +3292,28 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   goldenRecordsIndividual: IndividualNode!
+  isMultipleDuplicatesVersion: Boolean!
   possibleDuplicate: IndividualNode!
+  possibleDuplicates: [IndividualNode]
   selectedIndividual: IndividualNode
+  selectedIndividuals: [IndividualNode]
   roleReassignData: JSONString!
   extraData: TicketNeedsAdjudicationDetailsExtraDataNode
+  scoreMin: Float!
+  scoreMax: Float!
   hasDuplicatedDocument: Boolean
+}
+
+type TicketNeedsAdjudicationDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketNeedsAdjudicationDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketNeedsAdjudicationDetailsNodeEdge {
+  node: TicketNeedsAdjudicationDetailsNode
+  cursor: String!
 }
 
 type TicketNegativeFeedbackDetailsNode implements Node {
@@ -3308,12 +3356,29 @@ type TicketNoteNodeEdge {
   cursor: String!
 }
 
+input TicketPaymentVerificationDetailsExtras {
+  newReceivedAmount: Float
+  newStatus: String
+}
+
+enum TicketPaymentVerificationDetailsNewStatus {
+  NOT_RECEIVED
+  PENDING
+  RECEIVED
+  RECEIVED_WITH_ISSUES
+}
+
 type TicketPaymentVerificationDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   paymentVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus!
+  paymentVerification: PaymentVerificationNode
+  newStatus: TicketPaymentVerificationDetailsNewStatus
+  newReceivedAmount: Float
+  approveStatus: Boolean!
+  hasMultiplePaymentVerifications: Boolean
 }
 
 type TicketPaymentVerificationDetailsNodeConnection {
@@ -3329,9 +3394,9 @@ type TicketPaymentVerificationDetailsNodeEdge {
 }
 
 enum TicketPaymentVerificationDetailsPaymentVerificationStatus {
+  NOT_RECEIVED
   PENDING
   RECEIVED
-  NOT_RECEIVED
   RECEIVED_WITH_ISSUES
 }
 
@@ -3433,6 +3498,7 @@ input UpdateGrievanceTicketExtrasInput {
   individualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras
   addIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras
   category: CategoryExtrasInput
+  ticketPaymentVerificationDetailsExtras: TicketPaymentVerificationDetailsExtras
 }
 
 input UpdateGrievanceTicketInput {
@@ -3530,7 +3596,6 @@ type UserBusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   parent: UserBusinessAreaNode
   isSplit: Boolean!
-  countries(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   deduplicationDuplicateScore: Float!
   deduplicationPossibleDuplicateScore: Float!
   deduplicationBatchDuplicatesPercentage: Int!
@@ -3539,7 +3604,6 @@ type UserBusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
-  adminAreaLevel(offset: Int, before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!

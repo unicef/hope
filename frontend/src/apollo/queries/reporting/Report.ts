@@ -18,7 +18,7 @@ export const REPORT_QUERY = gql`
       adminArea {
         edges {
           node {
-            title
+            name
           }
         }
       }

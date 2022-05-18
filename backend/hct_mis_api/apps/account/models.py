@@ -115,6 +115,7 @@ class User(AbstractUser, UUIDModel):
             ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
             ("can_create_kobo_user", "Can create users in Kobo"),
             ("can_import_from_kobo", "Can import and sync users from Kobo"),
+            ("can_upload_to_kobo", "Can upload CSV file to Kobo"),
             ("can_debug", "Can access debug informations"),
             ("can_inspect", "Can inspect objects"),
             ("quick_links", "Can see quick links in admin"),

@@ -58,15 +58,15 @@ class ExportUsersXlsx:
     @transaction.atomic(using="default")
     def get_exported_users_file(self):
         fields = self.FIELDS_TO_COLUMNS_MAPPING.values()
-        users = User.objects.prefetch_related("user_roles").filter(
-            available_for_export=True, is_superuser=False, user_roles__business_area__slug=self.business_area_slug
+        users = (
+            User.objects.prefetch_related("user_roles")
+            .select_related("partner")
+            .filter(is_superuser=False, user_roles__business_area__slug=self.business_area_slug)
         )
         if users.exists() is False:
             return
 
-        for user in users:
+        for user in users.iterator(chunk_size=2000):
             self.ws.append([field.value(user, self.business_area_slug) for field in fields])
-
-        users.update(available_for_export=False)
 
         return self.wb

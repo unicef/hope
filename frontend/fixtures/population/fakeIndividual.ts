@@ -50,18 +50,18 @@ export const fakeIndividual = {
     admin1: {
       id:
         'QWRtaW5BcmVhTm9kZTo1MDIzZDBlNS03OGY5LTQ0NWItYWJlNi03N2FkYzBhZTBmYmU=',
-      title: 'Ghazni',
+      name: 'Ghazni',
       level: 1,
       pCode: 'AF11',
-      __typename: 'AdminAreaNode',
+      __typename: 'AreaNode',
     },
     admin2: {
       id:
         'QWRtaW5BcmVhTm9kZTpiOWQwZTU3ZS02NGVhLTQ3MGEtOTllMC01YTQyOTc2NjAxNWM=',
-      title: 'Abband',
+      name: 'Abband',
       level: 2,
       pCode: 'AF1115',
-      __typename: 'AdminAreaNode',
+      __typename: 'AreaNode',
     },
     programs: {
       edges: [
@@ -83,9 +83,9 @@ export const fakeIndividual = {
     adminArea: {
       id:
         'QWRtaW5BcmVhTm9kZTpiOWQwZTU3ZS02NGVhLTQ3MGEtOTllMC01YTQyOTc2NjAxNWM=',
-      title: 'Abband',
+      name: 'Abband',
       level: 2,
-      __typename: 'AdminAreaNode',
+      __typename: 'AreaNode',
     },
   },
   __typename: 'IndividualNode',
