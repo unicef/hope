@@ -635,5 +635,9 @@
   "Send to Fsp": "Send to Fsp",
   "Name": "Name",
   "Vision Vendor Number": "Vision Vendor Number",
-  "Payment Channels": "Payment Channels"
+  "Payment Channels": "Payment Channels",
+  "Suggest New Amount": "Suggest New Amount",
+  "Current Amount": "Current Amount",
+  "Proposed Amount": "Proposed Amount",
+  "Comment (Optional)": "Comment (Optional)"
 }
