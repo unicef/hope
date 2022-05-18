@@ -434,6 +434,15 @@ class KoboImportedSubmission(models.Model):
 
 
 class Record(models.Model):
+    STATUS_TO_IMPORT = "TO_IMPORT"
+    STATUS_IMPORTED = "IMPORTED"
+    STATUS_ERROR = "ERROR"
+    STATUSES_CHOICES = (
+        (STATUS_TO_IMPORT, "To import"),
+        (STATUS_IMPORTED, "Imported"),
+        (STATUS_ERROR, "Error"),
+    )
+
     registration = models.IntegerField()
     timestamp = models.DateTimeField(db_index=True)
     storage = models.BinaryField(null=True, blank=True)
@@ -446,6 +455,17 @@ class Record(models.Model):
     ignored = models.BooleanField(default=False, blank=True, null=True, db_index=True)
     source_id = models.IntegerField(db_index=True)
     data = models.JSONField(default=dict, blank=True, null=True)
+    error_message = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
+
+    def mark_as_invalid(self, msg: str):
+        self.error_message = msg
+        self.status = self.STATUS_ERROR
+        self.save()
+
+    def mark_as_imported(self):
+        self.status = self.STATUS_IMPORTED
+        self.save()
 
     @classmethod
     def extract(cls, records_ids: List[int], raise_exception=False):
