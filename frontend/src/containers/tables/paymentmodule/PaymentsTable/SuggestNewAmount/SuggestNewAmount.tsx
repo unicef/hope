@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core';
 import Edit from '@material-ui/icons/Edit';
 import { Field, Formik } from 'formik';
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -36,17 +36,20 @@ const GreyBox = styled(Box)`
 `;
 
 const StyledDialogContent = styled(DialogContent)`
-  z-index: 1000;
+  z-index: 9999;
 `;
 
 interface SuggestNewAmountProps {
   businessArea: string;
+  dialogOpen: boolean;
+  setDialogOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export const SuggestNewAmount = ({
   businessArea,
+  dialogOpen,
+  setDialogOpen,
 }: SuggestNewAmountProps): React.ReactElement => {
-  const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   const initialValues = {
     comment: '',
@@ -66,98 +69,90 @@ export const SuggestNewAmount = ({
       }}
     >
       {({ submitForm, setFieldValue }) => (
-        <>
-          <IconButton onClick={(e) => handleDialogOpen(e)}>
-            <Edit />
-          </IconButton>
-          <Dialog
-            open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-            maxWidth='lg'
-          >
-            <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title'>
-                {t('Suggest New Amount')}
-              </DialogTitle>
-            </DialogTitleWrapper>
-            <StyledDialogContent>
-              <GreyBox mt={4} p={3}>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <LabelizedField
-                      label={t('Household Id')}
-                      value={<Missing />}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <LabelizedField
-                      label={t('Head of Household')}
-                      value={<Missing />}
-                    />
-                  </Grid>
+        <Dialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          scroll='paper'
+          aria-labelledby='form-dialog-title'
+          maxWidth='lg'
+        >
+          <DialogTitleWrapper>
+            <DialogTitle id='scroll-dialog-title'>
+              {t('Suggest New Amount')}
+            </DialogTitle>
+          </DialogTitleWrapper>
+          <StyledDialogContent>
+            <GreyBox mt={4} p={3}>
+              <Grid container>
+                <Grid item xs={6}>
+                  <LabelizedField
+                    label={t('Household Id')}
+                    value={<Missing />}
+                  />
                 </Grid>
-              </GreyBox>
-              <Box mt={4}>
-                <LabelizedField
-                  label={t('Current Amount')}
-                  value={<Missing />}
-                />
-              </Box>
-              <Box mt={4}>
-                <Grid container>
-                  <Grid item xs={6}>
+                <Grid item xs={6}>
+                  <LabelizedField
+                    label={t('Head of Household')}
+                    value={<Missing />}
+                  />
+                </Grid>
+              </Grid>
+            </GreyBox>
+            <Box mt={4}>
+              <LabelizedField label={t('Current Amount')} value={<Missing />} />
+            </Box>
+            <Box mt={4}>
+              <Grid container>
+                <Grid item xs={6}>
+                  <Field
+                    name='proposedAmount'
+                    type='number'
+                    label={t('Proposed Amount')}
+                    color='primary'
+                    component={FormikTextField}
+                    variant='outlined'
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6} />
+                <Grid item xs={12}>
+                  <Box mt={4}>
                     <Field
-                      name='proposedAmount'
-                      type='number'
-                      label={t('Proposed Amount')}
+                      name='comment'
+                      label={t('Comment (Optional)')}
                       color='primary'
                       component={FormikTextField}
                       variant='outlined'
+                      multiline
+                      rows={6}
                       fullWidth
                     />
-                  </Grid>
-                  <Grid item xs={6} />
-                  <Grid item xs={12}>
-                    <Box mt={4}>
-                      <Field
-                        name='comment'
-                        label={t('Comment (Optional)')}
-                        color='primary'
-                        component={FormikTextField}
-                        variant='outlined'
-                        multiline
-                        rows={6}
-                        fullWidth
-                      />
-                    </Box>
-                  </Grid>
+                  </Box>
                 </Grid>
-              </Box>
-            </StyledDialogContent>
-            <DialogFooter>
-              <DialogActions>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDialogOpen(false);
-                  }}
-                >
-                  {t('CANCEL')}
-                </Button>
-                <Button
-                  type='submit'
-                  color='primary'
-                  variant='contained'
-                  onClick={submitForm}
-                >
-                  {t('SAVE')}
-                </Button>
-              </DialogActions>
-            </DialogFooter>
-          </Dialog>
-        </>
+              </Grid>
+            </Box>
+          </StyledDialogContent>
+          <DialogFooter>
+            <DialogActions>
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDialogOpen(false);
+                }}
+              >
+                {t('CANCEL')}
+              </Button>
+              <Button
+                type='submit'
+                color='primary'
+                variant='contained'
+                onClick={submitForm}
+              >
+                {t('SAVE')}
+              </Button>
+            </DialogActions>
+          </DialogFooter>
+        </Dialog>
       )}
     </Formik>
   );
