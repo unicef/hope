@@ -5,6 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Grid,
   IconButton,
   Table,
@@ -116,6 +117,9 @@ export const SuggestNewAmount = ({
                 </Grid>
                 <Grid item xs={6} />
                 <Grid item xs={12}>
+                  <Box mt={4}>
+                    <Divider />
+                  </Box>
                   <Box mt={4}>
                     <Field
                       name='comment'
