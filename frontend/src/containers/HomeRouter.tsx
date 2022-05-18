@@ -40,6 +40,7 @@ import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
 import { EditFspPage } from './pages/paymentmodule/EditFspPage';
+import { CreateSetUpFspPage } from './pages/paymentmodule/CreateSetUpFspPage';
 
 const Root = styled.div`
   display: flex;
@@ -159,6 +160,18 @@ export function HomeRouter(): React.ReactElement {
               <PaymentModulePage />
             </Sentry.ErrorBoundary>
           </Route>
+          <Route path='/:businessArea/payment-module/payment-plan/:id/setup-fsp'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag(
+                  'location',
+                  '/payment-module/payment-plan/:id/setup-fsp',
+                );
+              }}
+            >
+              <CreateSetUpFspPage />
+            </Sentry.ErrorBoundary>
+          </Route>
           <Route path='/:businessArea/payment-module/payment-plan/:id'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
@@ -168,7 +181,6 @@ export function HomeRouter(): React.ReactElement {
               <PaymentPlanDetailsPage />
             </Sentry.ErrorBoundary>
           </Route>
-
           <Route exact path='/:businessArea/payment-verification'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
