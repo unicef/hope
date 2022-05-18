@@ -23,8 +23,8 @@ class PythonEditor(forms.Textarea):
         }
         js = (
             static("admin/steficon/codemirror/codemirror.js"),
-            # static("admin/steficon/codemirror/python.js"),
-            static("admin/steficon/codemirror/javascript.js"),
+            static("admin/steficon/codemirror/python.js"),
+            # static("admin/steficon/codemirror/javascript.js"),
             static("admin/steficon/codemirror/fullscreen.js"),
             static("admin/steficon/codemirror/active-line.js"),
             static("admin/steficon/codemirror/foldcode.js"),

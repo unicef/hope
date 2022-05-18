@@ -22,7 +22,7 @@ from hct_mis_api.apps.targeting.models import (
 class TestTargetPopulationQuery(APITestCase):
     ALL_TARGET_POPULATION_QUERY = """
             query AllTargetPopulation($finalListTotalHouseholdsMin: Int) {
-                allTargetPopulation(finalListTotalHouseholdsMin:$finalListTotalHouseholdsMin, businessArea: "afghanistan") {
+                allTargetPopulation(finalListTotalHouseholdsMin:$finalListTotalHouseholdsMin, businessArea: "afghanistan", orderBy: "created_at") {
                     edges {
                         node {
                              name

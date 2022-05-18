@@ -1,13 +1,13 @@
 import logging
+import graphene
+
 from enum import Enum
-from typing import Dict, List, Union
+from typing import Union
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -61,12 +61,15 @@ from hct_mis_api.apps.grievance.mutations_extras.system_tickets import (
     close_needs_adjudication_ticket,
     close_system_flagging_ticket,
 )
+from hct_mis_api.apps.grievance.mutations_extras.ticket_payment_verification_details import \
+    update_ticket_payment_verification_details_extras
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     remove_parsed_data_fields,
     verify_required_arguments,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
+from hct_mis_api.apps.grievance.utils import get_individual, traverse_sibling_tickets
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -448,6 +451,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_REFERRAL: update_referral_extras,
             GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK: update_positive_feedback_extras,
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: update_negative_feedback_extras,
+            GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: update_ticket_payment_verification_details_extras
         }
         update_extra_method = update_extra_methods.get(grievance_ticket.category)
         if update_extra_method:
@@ -489,7 +493,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "assigned_to"))
-        assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
+        assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id) if assigned_to_id else None
         for field, value in input.items():
             current_value = getattr(grievance_ticket, field, None)
             if not current_value:
@@ -598,7 +602,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: _no_operation_close_method,
             GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: _no_operation_close_method,
         },
-        GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: _no_operation_close_method,
+        GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: save_payment_verification_extras,
         GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: _no_operation_close_method,
         GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: _no_operation_close_method,
         GrievanceTicket.CATEGORY_REFERRAL: _no_operation_close_method,
@@ -704,6 +708,12 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             logger.error("New status is incorrect")
             raise GraphQLError("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
+            ticket_details = grievance_ticket.ticket_details
+            if getattr(grievance_ticket.ticket_details, "is_multiple_duplicates_version", False):
+                selected_individuals = ticket_details.selected_individuals.all()
+                for individual in selected_individuals:
+                    traverse_sibling_tickets(grievance_ticket, individual)
+
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket, info)
             grievance_ticket.refresh_from_db()
@@ -1076,6 +1086,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         selected_individual_id = graphene.Argument(graphene.ID, required=False)
+        selected_individual_ids = graphene.List(graphene.ID, required=False)
         version = BigInt(required=False)
 
     @classmethod
@@ -1096,12 +1107,16 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         )
 
         selected_individual_id = kwargs.get("selected_individual_id", None)
+        selected_individual_ids = kwargs.get("selected_individual_ids", None)
+
+        if selected_individual_id and selected_individual_ids:
+            logger.error("Only one option for selected individuals is available")
+            raise GraphQLError("Only one option for selected individuals is available")
+
         ticket_details = grievance_ticket.ticket_details
-        selected_individual = None
 
         if selected_individual_id:
-            decoded_selected_individual_id = decode_id_string(selected_individual_id)
-            selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
+            selected_individual = get_individual(selected_individual_id)
 
             if selected_individual not in (
                 ticket_details.golden_records_individual,
@@ -1110,10 +1125,52 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
                 logger.error("The selected individual is not valid, must be one of those attached to the ticket")
                 raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
 
-        ticket_details.selected_individual = selected_individual
-        ticket_details.role_reassign_data = {}
+            ticket_details.selected_individual = selected_individual
+            ticket_details.role_reassign_data = {}
+
+        if selected_individual_ids:  # Allow choosing multiple individuals
+            selected_individuals = [get_individual(_id) for _id in selected_individual_ids]
+            ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())
+            ticket_details.selected_individuals.add(*selected_individuals)
+
         ticket_details.save()
         grievance_ticket.refresh_from_db()
+
+        return cls(grievance_ticket=grievance_ticket)
+
+
+class PaymentDetailsApproveMutation(PermissionMutation):
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
+        approve_status = graphene.Boolean(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, grievance_ticket_id, **kwargs):
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
+        )
+
+        if grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
+            logger.error("Payment Details changes can approve only for Grievance Ticket on status For Approval")
+            raise GraphQLError("Payment Details changes can approve only for Grievance Ticket on status For Approval")
+
+        old_payment_verification_ticket_details = grievance_ticket.payment_verification_ticket_details
+        grievance_ticket.payment_verification_ticket_details.approve_status = kwargs.get("approve_status", False)
+        grievance_ticket.payment_verification_ticket_details.save()
 
         return cls(grievance_ticket=grievance_ticket)
 
@@ -1130,4 +1187,5 @@ class Mutations(graphene.ObjectType):
     approve_delete_household = SimpleApproveMutation.Field()
     approve_system_flagging = SimpleApproveMutation.Field()
     approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
+    approve_payment_details = PaymentDetailsApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()

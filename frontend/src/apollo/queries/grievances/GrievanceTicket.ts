@@ -21,7 +21,7 @@ export const GrievanceTicket = gql`
       admin
       admin2 {
         id
-        title
+        name
         pCode
       }
       area
@@ -140,7 +140,20 @@ export const GrievanceTicket = gql`
         }
       }
       paymentVerificationTicketDetails {
+        id
+        newStatus
+        newReceivedAmount
+        approveStatus
         paymentVerificationStatus
+        hasMultiplePaymentVerifications
+        paymentVerification {
+          id
+          receivedAmount
+          paymentRecord {
+            id
+            deliveredQuantity
+          }
+        }
         paymentVerifications {
           edges {
             node {
@@ -191,7 +204,7 @@ export const GrievanceTicket = gql`
             village
             admin2 {
               id
-              title
+              name
             }
           }
           fullName
@@ -228,7 +241,44 @@ export const GrievanceTicket = gql`
             village
             admin2 {
               id
-              title
+              name
+            }
+          }
+          fullName
+          birthDate
+          sex
+          deduplicationGoldenRecordResults {
+            hitId
+            proximityToScore
+            score
+          }
+        }
+        isMultipleDuplicatesVersion
+        possibleDuplicates {
+          id
+          documents {
+            edges {
+              node {
+                id
+                country
+                type {
+                  label
+                  country
+                }
+                documentNumber
+                photo
+              }
+            }
+          }
+          unicefId
+          lastRegistrationDate
+          household {
+            unicefId
+            id
+            village
+            admin2 {
+              id
+              name
             }
           }
           fullName
@@ -241,6 +291,24 @@ export const GrievanceTicket = gql`
           }
         }
         selectedIndividual {
+          ...individualDetailed
+          household {
+            ...householdDetailed
+          }
+          householdsAndRoles {
+            individual {
+              id
+              unicefId
+            }
+            household {
+              id
+              unicefId
+            }
+            id
+            role
+          }
+        }
+        selectedIndividuals {
           ...individualDetailed
           household {
             ...householdDetailed

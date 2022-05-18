@@ -18,6 +18,7 @@ class ReportValidator(CommonValidator):
         Report.CASH_PLAN: ["program"],
         Report.PROGRAM: [],
         Report.INDIVIDUALS_AND_PAYMENT: ["admin_area", "program"],
+        Report.GRIEVANCES: [],
     }
 
     @classmethod

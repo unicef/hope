@@ -4,12 +4,11 @@ import {
   hasPermissions,
 } from '../../../../config/permissions';
 import { GRIEVANCE_CATEGORIES } from '../../../../utils/constants';
-import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
 
 export const grievancePermissions = (
   isCreator: boolean,
   isOwner: boolean,
-  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+  ticket,
   permissions: string[],
 ): { [key: string]: boolean } => {
   const canViewHouseholdDetails = hasCreatorOrOwnerPermissions(
@@ -125,6 +124,15 @@ export const grievancePermissions = (
     permissions,
   );
 
+  const canApprovePaymentVerification = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
+    permissions,
+  );
+
   const canAssign = hasPermissions(PERMISSIONS.GRIEVANCES_ASSIGN, permissions);
 
   return {
@@ -140,5 +148,6 @@ export const grievancePermissions = (
     canApproveDataChange,
     canApproveFlagAndAdjudication,
     canAssign,
+    canApprovePaymentVerification,
   };
 };

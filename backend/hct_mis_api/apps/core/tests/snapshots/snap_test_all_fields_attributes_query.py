@@ -8313,6 +8313,40 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'DATE'
             },
             {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'First household registration date',
+                'labels': [
+                    {
+                        'label': 'First household registration date',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'first_registration_date',
+                'required': True,
+                'type': 'DATE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'First individual registration date',
+                'labels': [
+                    {
+                        'label': 'First individual registration date',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'first_registration_date',
+                'required': True,
+                'type': 'DATE'
+            },
+            {
                 'associatedWith': 'Individual',
                 'choices': [
                 ],
@@ -11477,6 +11511,57 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'recent_illness_child_h_f',
                 'required': False,
                 'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Has phone number?',
+                'labels': [
+                    {
+                        'label': 'Has phone number?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'has_phone_number',
+                'required': False,
+                'type': 'BOOL'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Has tax ID number?',
+                'labels': [
+                    {
+                        'label': 'Has tax ID number?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'has_tax_id_number',
+                'required': False,
+                'type': 'BOOL'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Has the bank account number?',
+                'labels': [
+                    {
+                        'label': 'Has the bank account number?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'has_the_bank_account_number',
+                'required': False,
+                'type': 'BOOL'
             },
             {
                 'associatedWith': 'Household',
@@ -37856,6 +37941,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_MANY'
             },
             {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Registration Data Import',
+                'labels': [
+                    {
+                        'label': 'Registration Data Import',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'registration_data_import',
+                'required': False,
+                'type': 'SELECT_MANY'
+            },
+            {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
@@ -38224,6 +38326,53 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'red_coping_strategy_restrict_adult_h_f',
                 'required': False,
                 'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Alternate collector',
+                        'labels': [
+                            {
+                                'label': 'Alternate collector',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ALTERNATE'
+                    },
+                    {
+                        'labelEn': 'None',
+                        'labels': [
+                            {
+                                'label': 'None',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NO_ROLE'
+                    },
+                    {
+                        'labelEn': 'Primary collector',
+                        'labels': [
+                            {
+                                'label': 'Primary collector',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PRIMARY'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Role',
+                'labels': [
+                    {
+                        'label': 'Role',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'role',
+                'required': True,
+                'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Individual',
@@ -41011,6 +41160,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'debt_reason_h_f',
                 'required': False,
                 'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'What is the number of children in the household?',
+                'labels': [
+                    {
+                        'label': 'What is the number of children in the household?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'number_of_children',
+                'required': False,
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',

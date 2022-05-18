@@ -44,7 +44,7 @@ class HouseholdFilter(FilterSet):
             "id",
             Lower("head_of_household__full_name"),
             "size",
-            Lower("admin_area__title"),
+            Lower("admin_area_new__name"),
             "updated_at",
             "unicef_id",
         )
