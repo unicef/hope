@@ -77,8 +77,10 @@ LOGGING = {
 
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
-    "default": {"hosts": "elasticsearch_test:9200"},
+    "default": {"hosts": "elasticsearch:9200"},
+    "test": {"hosts": "elasticsearch:9200"},
 }
+ELASTICSEARCH_INDEX_PREFIX = 'test_'
 
 try:
     from .local import *  # noqa: ignore=F403
