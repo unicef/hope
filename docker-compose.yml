@@ -58,7 +58,6 @@ services:
       - db
       - redis
       - elasticsearch
-      - elasticsearch_test
 
   celery_worker:
     stdin_open: true
@@ -78,7 +77,6 @@ services:
       - db
       - redis
       - elasticsearch
-      - elasticsearch_test
 
   celery-beat:
     stdin_open: true
@@ -98,7 +96,6 @@ services:
       - db
       - redis
       - elasticsearch
-      - elasticsearch_test
 
   celery-flower:
     image: johniak/flower:1.6
@@ -144,21 +141,3 @@ services:
       - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-
-  elasticsearch_test:
-    image: unicef/hct-elasticsearch-test
-    build:
-      context: elasticsearch
-      dockerfile: Dockerfile
-    environment:
-      - node.name=es02
-      - cluster.name=es-docker-cluster-test
-      - cluster.initial_master_nodes=es02
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - data_es_test:/usr/share/elasticsearch/data
