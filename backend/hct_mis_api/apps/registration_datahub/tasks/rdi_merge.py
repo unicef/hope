@@ -368,7 +368,10 @@ class RdiMergeTask:
                     )
 
                     create_needs_adjudication_tickets(
-                        golden_record_duplicates, "duplicates", obj_hct.business_area, registration_data_import=obj_hct
+                        golden_record_duplicates,
+                        "duplicates",
+                        obj_hct.business_area,
+                        registration_data_import=obj_hct
                     )
 
                     needs_adjudication = Individual.objects.filter(
