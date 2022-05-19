@@ -1264,6 +1264,8 @@ export type HouseholdNode = Node & {
   userFields: Scalars['JSONString'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  totalCashReceivedUsd?: Maybe<Scalars['Decimal']>,
+  totalCashReceived?: Maybe<Scalars['Decimal']>,
   paymentRecords: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
@@ -1278,8 +1280,6 @@ export type HouseholdNode = Node & {
   targetPopulations: TargetPopulationNodeConnection,
   selections: Array<HouseholdSelection>,
   adminAreaTitle?: Maybe<Scalars['String']>,
-  totalCashReceived?: Maybe<Scalars['Decimal']>,
-  totalCashReceivedUsd?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
   sanctionListConfirmedMatch?: Maybe<Scalars['Boolean']>,
@@ -4418,7 +4418,7 @@ export type RegistrationDataImportNode = Node & {
   name: Scalars['String'],
   status: RegistrationDataImportStatus,
   importDate: Scalars['DateTime'],
-  importedBy: UserNode,
+  importedBy?: Maybe<UserNode>,
   dataSource: RegistrationDataImportDataSource,
   numberOfIndividuals: Scalars['Int'],
   numberOfHouseholds: Scalars['Int'],
@@ -6152,10 +6152,10 @@ export type HouseholdDetailedFragment = (
   ), registrationDataImport: (
     { __typename?: 'RegistrationDataImportNode' }
     & Pick<RegistrationDataImportNode, 'name' | 'dataSource' | 'importDate'>
-    & { importedBy: (
+    & { importedBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName' | 'email' | 'username'>
-    ) }
+    )> }
   ), paymentRecords: (
     { __typename?: 'PaymentRecordNodeConnection' }
     & { edges: Array<Maybe<(
@@ -6295,10 +6295,10 @@ export type IndividualDetailedFragment = (
 export type RegistrationMinimalFragment = (
   { __typename?: 'RegistrationDataImportNode' }
   & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
-  & { importedBy: (
+  & { importedBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
-  ) }
+  )> }
 );
 
 export type RegistrationDetailedFragment = (
@@ -7846,7 +7846,7 @@ export type ExistingGrievanceTicketsQuery = (
       & Pick<GrievanceTicketNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'GrievanceTicketNode' }
-        & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'createdAt' | 'userModified' | 'admin'>
+        & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'createdAt' | 'issueType' | 'userModified' | 'admin'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -14049,6 +14049,7 @@ export const ExistingGrievanceTicketsDocument = gql`
         }
         category
         createdAt
+        issueType
         userModified
         admin
         household {
@@ -19885,6 +19886,8 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+  totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeSensitiveTicketDetailsArgs>,
@@ -19899,8 +19902,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -20782,7 +20783,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['RegistrationDataImportStatus'], ParentType, ContextType>,
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  importedBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
+  importedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   dataSource?: Resolver<ResolversTypes['RegistrationDataImportDataSource'], ParentType, ContextType>,
   numberOfIndividuals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,

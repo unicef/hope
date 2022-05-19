@@ -16,11 +16,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
-import {
-  AllRegistrationDataImportsQuery,
-  GrievancesChoiceDataQuery,
-} from '../../../__generated__/graphql';
+import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { FieldLabel } from '../../core/FieldLabel';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
@@ -42,14 +40,12 @@ interface GrievancesFiltersProps {
   filter;
   choicesData: GrievancesChoiceDataQuery;
   usersChoices;
-  rdiData: AllRegistrationDataImportsQuery;
 }
 export function GrievancesFilters({
   onFilterChange,
   filter,
   choicesData,
   usersChoices,
-  rdiData,
 }: GrievancesFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
@@ -267,28 +263,10 @@ export function GrievancesFilters({
           </Box>
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Registration Data Import')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'registrationDataImport')}
-              variant='outlined'
-              label='Registration Data Import'
-              value={filter.registrationDataImport || ''}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {rdiData?.allRegistrationDataImports?.edges?.map((item) => {
-                return (
-                  <MenuItem key={item.node.id} value={item.node.id}>
-                    {item.node.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <RdiAutocomplete
+            onFilterChange={onFilterChange}
+            name='registrationDataImport'
+          />
         </Grid>
       </Grid>
     </ContainerWithBorder>
