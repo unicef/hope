@@ -11,7 +11,7 @@ import {
   TableRow,
   Typography,
 } from '@material-ui/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,7 +22,7 @@ import {
 } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
-  useExistingGrievanceTicketsQuery,
+  useExistingGrievanceTicketsLazyQuery,
 } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
 import {
@@ -72,7 +72,10 @@ export const LinkedTicketsModal = ({
   issueTypeChoicesData,
 }: LinkedTicketsModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { data, loading } = useExistingGrievanceTicketsQuery({
+  const [
+    loadExistingTickets,
+    { data, loading },
+  ] = useExistingGrievanceTicketsLazyQuery({
     variables: {
       businessArea,
       household:
@@ -81,6 +84,11 @@ export const LinkedTicketsModal = ({
       //adding some random ID to get 0 results if there is no household id.
     },
   });
+  useEffect(() => {
+    loadExistingTickets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dialogOpen]);
+
   const history = useHistory();
   const { t } = useTranslation();
   const linkedTickets = ticket.relatedTickets;
