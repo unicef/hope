@@ -2105,6 +2105,7 @@ export type ImportedHouseholdNode = Node & {
   koboAssetId: Scalars['String'],
   koboSubmissionTime?: Maybe<Scalars['DateTime']>,
   rowId?: Maybe<Scalars['Int']>,
+  diiaRecId: Scalars['String'],
   misUnicefId?: Maybe<Scalars['String']>,
   individuals: ImportedIndividualNodeConnection,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
@@ -4385,6 +4386,7 @@ export type RegistrationDataImportDatahubNodeEdge = {
 export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
   Kobo = 'KOBO',
+  Diia = 'DIIA',
   FlexRegistration = 'FLEX_REGISTRATION'
 }
 
@@ -19903,6 +19905,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  diiaRecId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
