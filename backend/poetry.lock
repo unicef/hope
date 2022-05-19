@@ -446,6 +446,7 @@ python-dateutil = "2.6.0"
 [package.source]
 type = "url"
 url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip"
+
 [[package]]
 name = "django-author"
 version = "1.2.0"
@@ -584,21 +585,14 @@ Django = ">=2.2"
 
 [[package]]
 name = "django-filter"
-version = "2.2.0"
-description = ""
+version = "2.4.0"
+description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
 category = "main"
 optional = false
-python-versions = ">=3.4"
-develop = false
+python-versions = ">=3.5"
 
 [package.dependencies]
-Django = ">=1.11"
-
-[package.source]
-type = "git"
-url = "https://github.com/srugano/django-filter.git"
-reference = "b01c91990550ccf543cf23110f6750016ca38ec6"
-resolved_reference = "b01c91990550ccf543cf23110f6750016ca38ec6"
+Django = ">=2.2"
 
 [[package]]
 name = "django-hijack"
@@ -2027,7 +2021,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "fc65c432fd5fbc94c84311378d6d06ce689fc97673786a17ec6e77dfecf6a638"
+content-hash = "04f9c2084566163dcf909ae902f17b5a1c73dd49fb8b7f235d6c9094112a54b6"
 
 [metadata.files]
 amqp = [
@@ -2274,7 +2268,10 @@ django-extensions = [
     {file = "django-extensions-3.1.5.tar.gz", hash = "sha256:28e1e1bf49f0e00307ba574d645b0af3564c981a6dfc87209d48cb98f77d0b1a"},
     {file = "django_extensions-3.1.5-py3-none-any.whl", hash = "sha256:9238b9e016bb0009d621e05cf56ea8ce5cce9b32e91ad2026996a7377ca28069"},
 ]
-django-filter = []
+django-filter = [
+    {file = "django-filter-2.4.0.tar.gz", hash = "sha256:84e9d5bb93f237e451db814ed422a3a625751cbc9968b484ecc74964a8696b06"},
+    {file = "django_filter-2.4.0-py3-none-any.whl", hash = "sha256:e00d32cebdb3d54273c48f4f878f898dced8d5dfaad009438fe61ebdf535ace1"},
+]
 django-hijack = [
     {file = "django-hijack-3.2.0.tar.gz", hash = "sha256:e77f8a82c1e4fa35a414a37442f4287346ddc480d19c8eb3f1f8fe598dfae96a"},
     {file = "django_hijack-3.2.0-py3-none-any.whl", hash = "sha256:065916120cbf70e48fae12517ebb3e140334e1297f6c0e157e2be055ef3db6c7"},

@@ -7,9 +7,7 @@ from hct_mis_api.apps.activity_log.models import LogEntry
 class LogEntryFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
-    module = CharFilter(
-        field_name="content_type__model",
-    )
+    module = CharFilter(field_name="content_type__model")
 
     class Meta:
         model = LogEntry
