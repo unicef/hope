@@ -283,7 +283,8 @@ class FlexRegistrationService:
             last_registration_date=household.last_registration_date,
         )
         disability = individual_data.get("disability", "n")
-        if disability == "y":
+        disability_certificate_picture = individual_data.get("disability_certificate_picture")
+        if disability == "y" or disability_certificate_picture:
             individual_data["disability"] = DISABLED
         else:
             individual_data["disability"] = NOT_DISABLED
@@ -299,7 +300,7 @@ class FlexRegistrationService:
             if not phone_no.startswith("+380"):
                 individual_data["phone_no"] = f"+380{phone_no}"
 
-        if disability_certificate_picture := individual_data.get("disability_certificate_picture"):
+        if disability_certificate_picture:
             certificate_picture = f"CERTIFICATE_PICTURE_{uuid.uuid4()}"
             disability_certificate_picture = self._prepare_picture_from_base64(
                 disability_certificate_picture, certificate_picture
