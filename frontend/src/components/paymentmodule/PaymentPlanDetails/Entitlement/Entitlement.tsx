@@ -70,13 +70,6 @@ const BoxWithBorderRight = styled(Box)`
   border-right: 1px solid #b1b1b5;
 `;
 
-const StyledButton = styled(Button)`
-  margin-left: 10px;
-  font-weight: bold;
-  color: #043f91;
-  text-transform: uppercase;
-`;
-
 interface EntitlementProps {
   businessArea: string;
   permissions: string[];
@@ -96,8 +89,6 @@ export function Entitlement({
     { name: 'USD', value: 'USD' },
     { name: 'PLN', value: 'PLN' },
   ];
-
-  console.log('file', file);
 
   return (
     <Box m={5}>
