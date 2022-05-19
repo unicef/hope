@@ -884,6 +884,8 @@ type HouseholdNode implements Node {
   userFields: JSONString!
   koboAssetId: String!
   rowId: Int
+  totalCashReceivedUsd: Decimal
+  totalCashReceived: Decimal
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -898,8 +900,6 @@ type HouseholdNode implements Node {
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelection!]!
   adminAreaTitle: String
-  totalCashReceived: Decimal
-  totalCashReceivedUsd: Decimal
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
@@ -1047,6 +1047,7 @@ type ImportedDocumentNode implements Node {
   photo: String
   individual: ImportedIndividualNode!
   type: ImportedDocumentTypeNode!
+  docDate: Date
   country: String
 }
 
@@ -2599,7 +2600,7 @@ type RegistrationDataImportNode implements Node {
   name: String!
   status: RegistrationDataImportStatus!
   importDate: DateTime!
-  importedBy: UserNode!
+  importedBy: UserNode
   dataSource: RegistrationDataImportDataSource!
   numberOfIndividuals: Int!
   numberOfHouseholds: Int!
