@@ -163,6 +163,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     )
     phone_no = PhoneNumberField(blank=True, default=BLANK)
     phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
+    email = models.CharField(max_length=255, blank=True)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
