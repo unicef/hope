@@ -308,7 +308,6 @@ class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
     JSON = "JSON"
     FLEX_REGISTRATION = "FLEX"
-    # TODO: add Diia
     DATA_TYPE_CHOICES = (
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
