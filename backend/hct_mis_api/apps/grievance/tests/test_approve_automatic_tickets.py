@@ -39,12 +39,38 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     }
     """
     APPROVE_NEEDS_ADJUDICATION_MUTATION = """
-    mutation ApproveNeedsAdjudicationTicket($grievanceTicketId: ID!, $selectedIndividualId: ID) {
-      approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId) {
+    mutation ApproveNeedsAdjudicationTicket(
+    $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
+    ) {
+      approveNeedsAdjudication(
+      grievanceTicketId: $grievanceTicketId, 
+      selectedIndividualId: $selectedIndividualId, 
+      selectedIndividualIds: $selectedIndividualIds
+      ) {
         grievanceTicket {
           id
           needsAdjudicationTicketDetails {
             selectedIndividual {
+              id
+            }
+          }
+        }
+      }
+    }
+    """
+    APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION = """
+    mutation ApproveNeedsAdjudicationTicket(
+    $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
+    ) {
+      approveNeedsAdjudication(
+      grievanceTicketId: $grievanceTicketId, 
+      selectedIndividualId: $selectedIndividualId, 
+      selectedIndividualIds: $selectedIndividualIds
+      ) {
+        grievanceTicket {
+          id
+          needsAdjudicationTicketDetails {
+            selectedIndividuals {
               id
             }
           }
@@ -240,5 +266,31 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                     self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
                 ),
                 "selectedIndividualId": None,
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                    "with_permission",
+                    [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_approve_needs_adjudication_allows_multiple_selected_individuals(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "selectedIndividualIds": [
+                    self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                    self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+                ],
             },
         )
