@@ -30,6 +30,9 @@ class Command(BaseCommand):
         call_command(
             "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/data.json", database="registration_datahub"
         )
+        call_command(
+            "loaddata", "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json", database="registration_datahub"
+        )
 
         call_command("search_index", "--rebuild", "-f")
         generate_real_cash_plans()
