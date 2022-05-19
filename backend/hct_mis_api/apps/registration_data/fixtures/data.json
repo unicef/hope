@@ -20,5 +20,26 @@
     "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
     "screen_beneficiary": false
   }
+},
+{
+  "model": "registration_data.registrationdataimport",
+  "pk": "04992dce-8e47-154b-4938-743415412dce",
+  "fields": {
+    "created_at": "2022-05-25T09:22:14.870",
+    "updated_at": "2022-05-25T09:54:07.851",
+    "name": "Test Diia",
+    "status": "MERGED",
+    "import_date": "2022-03-30T09:22:14.870",
+    "imported_by": "4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+    "data_source": "DIIA",
+    "number_of_individuals": 5,
+    "number_of_households": 2,
+    "datahub_id": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "error_message": "",
+    "sentry_id": "",
+    "pull_pictures": true,
+    "business_area": "3e269a73-123b-43e1-86af-ced1b30d8e80",
+    "screen_beneficiary": false
+  }
 }
 ]

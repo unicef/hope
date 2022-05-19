@@ -1,16 +1,24 @@
 from django.db import transaction
+from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
-    HEAD
+    HEAD,
+    IDENTIFICATION_TYPE_DICT,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_OTHER
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedHousehold,
     RegistrationDataImportDatahub,
-    ImportData, ImportedBankAccountInfo, ImportedDocument,
+    ImportedBankAccountInfo,
+    ImportedDocument,
+    ImportedDocumentType,
+    DiiaIndividual,
+    DiiaHousehold,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
@@ -25,43 +33,35 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id, import_data_id):
+    def execute(self, registration_data_import_id):
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
 
-
         old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-        registration_data_import_mis = old_rdi_mis
-        registration_data_import_datahub = registration_data_import
         registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
         registration_data_import.save()
 
-        import_data = ImportData.objects.get(id=import_data_id)
+        self._get_document_types()
 
-        head_of_households_mapping = {}
         households_to_create = []
-        individuals_to_create_list = []
-        individuals_to_create = {}
-
-        for household in registration_data_import.diia_households.all():  # maybe add filter by imported_household__isnull=True
-
-
+        households_to_update = []
+        for household in registration_data_import.diia_households.all():
             household_obj = ImportedHousehold(
                 consent=household.consent,
                 address=household.address,
-                # TODO: need add this new fields for Diia import
-                diia_rec_id=household.rec_id,  # ?
-                diia_vpo_doc=household.vpo_doc,  # ?
-                diia_vpo_doc_id=household.vpo_doc_id,  # ?
-                diia_vpo_doc_date=household.diia_vpo_doc_date,  # ?
-
                 registration_data_import=registration_data_import,
-                first_registration_date = household.created_at,
-                last_registration_date = household.created_at
-                # head_of_household
-
+                first_registration_date=household.created_at,
+                last_registration_date=household.created_at,
+                diia_rec_id=household.rec_id,
+                size=household.individuals.all().count(),
             )
+
+            individuals_to_create_list = []
+            individuals_to_update_list = []
+            head_of_household = None
+            documents = []
+            bank_accounts = []
 
             for individual in household.individuals.all():
                 individual_obj = ImportedIndividual(
@@ -69,45 +69,59 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                     given_name=individual.first_name,
                     middle_name=individual.second_name,
                     family_name=individual.last_name,
+                    full_name=f"{individual.first_name} {individual.last_name}",
                     relationship=individual.relationship,
                     sex=individual.sex,
                     birth_date=individual.birth_date,
                     marital_status=individual.marital_status,
                     disability=individual.disability,
-                    # household=household_obj,
-
+                    registration_data_import=registration_data_import,
+                    first_registration_date=individual.created_at,
+                    last_registration_date=individual.created_at,
+                    household=household_obj
                 )
+                individuals_to_create_list.append(individual_obj)
+
                 if individual.relationship == HEAD:
-                    head_of_households_mapping[household_obj] = individual_obj
+                    head_of_household = individual_obj
 
-                # if individual.birth_doc create ImportedDocument
-                ImportedDocument(
-                )
+                if individual.birth_doc:
+                    self._add_birth_document(documents, individual, individual_obj)
 
-                # if individual.iban and create ImportedBankAccountInfo
-                ImportedBankAccountInfo(
-                )
+                if individual.iban:
+                    self._add_bank_account(bank_accounts, individual, individual_obj)
 
+                individual.imported_individual = individual_obj
+                individuals_to_update_list.append(individual)
 
-            household_obj.first_registration_date = household.created_at
-            household_obj.last_registration_date = household.registration_date
-            household_obj.registration_data_import = registration_data_import
-            household_obj = self._assign_admin_areas_titles(household_obj)
+            # create Individuals
+            ImportedIndividual.objects.bulk_create(individuals_to_create_list)
+            # update imported_individual
+            DiiaIndividual.objects.bulk_update(
+                individuals_to_update_list,
+                ["imported_individual"],
+                1000
+            )
+
+            if household.vpo_doc:
+                self._add_vpo_document(documents, head_of_household, household)
+
+            ImportedDocument.objects.bulk_create(documents)
+            ImportedBankAccountInfo.objects.bulk_create(bank_accounts)
+
+            household_obj.head_of_household = head_of_household
             households_to_create.append(household_obj)
 
-            ImportedIndividual.objects.bulk_create(individuals_to_create_list)
+            household.imported_household = household_obj
+            households_to_update.append(household)
 
         ImportedHousehold.objects.bulk_create(households_to_create)
-
-        households_to_update = []
-        for household, individual in head_of_households_mapping.items():
-            household.head_of_household = individual
-            households_to_update.append(household)
-        ImportedHousehold.objects.bulk_update(
+        DiiaHousehold.objects.bulk_update(
             households_to_update,
-            ["head_of_household"],
-            1000,
+            ["imported_household"],
+            1000
         )
+
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
 
@@ -117,3 +131,44 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
 
         DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
+
+    def _add_bank_account(self, bank_accounts, individual, individual_obj):
+        bank_accounts.append(
+            ImportedBankAccountInfo(
+                individual=individual_obj,
+                bank_name=individual.bank_name,
+                bank_account_number=individual.iban,
+            )
+        )
+
+    def _add_vpo_document(self, documents, head_of_household, household):
+        documents.append(
+            ImportedDocument(
+                document_number=household.vpo_doc_id,
+                individual=head_of_household,
+                type=self.other_document_type,
+                photo=household.vpo_doc,
+                doc_date=household.vpo_doc_date
+            )
+        )
+
+    def _add_birth_document(self, documents, individual, individual_obj):
+        documents.append(
+            ImportedDocument(
+                document_number=individual.birth_doc,
+                individual=individual_obj,
+                type=self.birth_document_type,
+            )
+        )
+
+    def _get_document_types(self):
+        self.birth_document_type, _ = ImportedDocumentType.objects.get_or_create(
+            country=Country("UA"),  # DiiaIndividual don't has issuing country
+            label=IDENTIFICATION_TYPE_DICT.get(IDENTIFICATION_TYPE_BIRTH_CERTIFICATE),
+            type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+        )
+        self.other_document_type, _ = ImportedDocumentType.objects.get_or_create(
+            country=Country("UA"),  # DiiaIndividual don't has issuing country
+            label=IDENTIFICATION_TYPE_DICT.get(IDENTIFICATION_TYPE_OTHER),
+            type=IDENTIFICATION_TYPE_OTHER,
+        )

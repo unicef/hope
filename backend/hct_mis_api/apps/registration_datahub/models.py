@@ -119,6 +119,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    diia_rec_id = models.CharField(max_length=50, blank=True, default=BLANK)
     flex_registrations_record = models.ForeignKey(
         "registration_datahub.Record",
         related_name="imported_households",
@@ -307,6 +308,7 @@ class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
     JSON = "JSON"
     FLEX_REGISTRATION = "FLEX"
+    # TODO: add Diia
     DATA_TYPE_CHOICES = (
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
@@ -371,6 +373,7 @@ class ImportedDocument(TimeStampedUUIDModel):
         related_name="documents",
         on_delete=models.CASCADE,
     )
+    doc_date=models.DateField(blank=True, null=True, default=None)
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -545,6 +548,10 @@ class DiiaHousehold(TimeStampedUUIDModel):
 
     def __str__(self):
         return f"Diia Household ID: {self.id}"
+
+    @property
+    def head_of_household_full_name(self):
+        return self.head_of_household.full_name if self.head_of_household else "-"
 
 
 class DiiaIndividual(TimeStampedUUIDModel):
