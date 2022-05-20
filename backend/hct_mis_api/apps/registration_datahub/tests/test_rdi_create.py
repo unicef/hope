@@ -37,7 +37,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
 )
-from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import RdiDiiaCreateTask
 
 
 class ImageLoaderMock:
@@ -795,8 +794,14 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json"
     ]
 
+    @classmethod
+    def setUpTestData(cls):
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import RdiDiiaCreateTask
+
+        cls.RdiDiiaCreateTask = RdiDiiaCreateTask
+
     def test_execute(self):
-        RdiDiiaCreateTask().execute("c57848bf-a5df-154b-4938-f30b6b29aaab")
+        self.RdiDiiaCreateTask ().execute("c57848bf-a5df-154b-4938-f30b6b29aaab")
 
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
