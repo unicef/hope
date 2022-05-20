@@ -792,7 +792,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = [
         "hct_mis_api/apps/core/fixtures/data.json",
-        "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json",
+        "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json"
     ]
 
     def test_execute(self):
