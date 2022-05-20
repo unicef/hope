@@ -7,7 +7,7 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_DICT,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_OTHER
+    IDENTIFICATION_TYPE_OTHER,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -55,7 +55,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 last_registration_date=household.created_at,
                 diia_rec_id=household.rec_id,
                 size=household.individuals.all().count(),
-                country=Country("UA")
+                country=Country("UA"),
             )
 
             individuals_to_create_list = []
@@ -79,7 +79,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                     registration_data_import=registration_data_import,
                     first_registration_date=individual.created_at,
                     last_registration_date=individual.created_at,
-                    household=household_obj
+                    household=household_obj,
                 )
                 individuals_to_create_list.append(individual_obj)
 
@@ -98,11 +98,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             # create Individuals
             ImportedIndividual.objects.bulk_create(individuals_to_create_list)
             # update imported_individual
-            DiiaIndividual.objects.bulk_update(
-                individuals_to_update_list,
-                ["imported_individual"],
-                1000
-            )
+            DiiaIndividual.objects.bulk_update(individuals_to_update_list, ["imported_individual"], 1000)
 
             if household.vpo_doc:
                 self._add_vpo_document(documents, head_of_household, household)
@@ -117,11 +113,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             households_to_update.append(household)
 
         ImportedHousehold.objects.bulk_create(households_to_create)
-        DiiaHousehold.objects.bulk_update(
-            households_to_update,
-            ["imported_household"],
-            1000
-        )
+        DiiaHousehold.objects.bulk_update(households_to_update, ["imported_household"], 1000)
 
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
@@ -149,7 +141,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 individual=head_of_household,
                 type=self.other_document_type,
                 photo=household.vpo_doc,
-                doc_date=household.vpo_doc_date
+                doc_date=household.vpo_doc_date,
             )
         )
 
