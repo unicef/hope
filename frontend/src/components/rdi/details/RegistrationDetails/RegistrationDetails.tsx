@@ -78,6 +78,12 @@ export function RegistrationDetails({
         registration?.goldenRecordPossibleDuplicatesCountAndPercentage.count,
     },
   ];
+  const renderImportedBy = (): string => {
+    if (registration?.importedBy) {
+      return `${registration?.importedBy?.firstName} ${registration?.importedBy?.lastName}`;
+    }
+    return "-";
+  };
   return (
     <ContainerColumnWithBorder>
       <Title>
@@ -121,7 +127,7 @@ export function RegistrationDetails({
               <Grid item xs={6}>
                 <LabelizedField
                   label={t('Imported by')}
-                  value={`${registration?.importedBy?.firstName} ${registration?.importedBy?.lastName}`}
+                  value={renderImportedBy()}
                 />
               </Grid>
             </Grid>
