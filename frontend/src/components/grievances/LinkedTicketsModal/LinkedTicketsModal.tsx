@@ -86,8 +86,7 @@ export const LinkedTicketsModal = ({
   });
   useEffect(() => {
     loadExistingTickets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dialogOpen]);
+  }, [dialogOpen, loadExistingTickets]);
 
   const history = useHistory();
   const { t } = useTranslation();

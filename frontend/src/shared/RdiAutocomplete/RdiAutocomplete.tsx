@@ -48,8 +48,7 @@ export function RdiAutocomplete({
   });
   useEffect(() => {
     loadRdiData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedInputText]);
+  }, [debouncedInputText, loadRdiData]);
 
   const onChangeMiddleware = (e, selectedValue): void => {
     onFilterChange((filters) => ({
