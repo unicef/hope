@@ -791,7 +791,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = [
         "hct_mis_api/apps/core/fixtures/data.json",
-        "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json"
+        "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json",
     ]
 
     @classmethod
@@ -801,7 +801,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         cls.RdiDiiaCreateTask = RdiDiiaCreateTask
 
     def test_execute(self):
-        self.RdiDiiaCreateTask ().execute("c57848bf-a5df-154b-4938-f30b6b29aaab")
+        self.RdiDiiaCreateTask().execute("c57848bf-a5df-154b-4938-f30b6b29aaab")
 
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
@@ -824,9 +824,5 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(individuals_obj_data, expected)
 
         household_obj_data = model_to_dict(individual.household, ("country", "size", "diia_rec_id"))
-        expected = {
-            "country": Country(code="UA"),
-            "size": 3,
-            "diia_rec_id": "32132122"
-        }
+        expected = {"country": Country(code="UA"), "size": 3, "diia_rec_id": "32132122"}
         self.assertEqual(household_obj_data, expected)
