@@ -570,7 +570,7 @@ class DiiaHousehold(TimeStampedUUIDModel):
 
     @property
     def head_of_household_full_name(self):
-        return self.head_of_household.full_name if self.head_of_household else "-"
+        return getattr(self.head_of_household, "full_name", "-")
 
 
 class DiiaIndividual(TimeStampedUUIDModel):
