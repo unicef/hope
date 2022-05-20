@@ -372,7 +372,7 @@ class ImportedDocument(TimeStampedUUIDModel):
         related_name="documents",
         on_delete=models.CASCADE,
     )
-    doc_date=models.DateField(blank=True, null=True, default=None)
+    doc_date = models.DateField(blank=True, null=True, default=None)
 
     def clean(self):
         from django.core.exceptions import ValidationError
