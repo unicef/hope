@@ -55,6 +55,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 last_registration_date=household.created_at,
                 diia_rec_id=household.rec_id,
                 size=household.individuals.all().count(),
+                country=Country("UA")
             )
 
             individuals_to_create_list = []
