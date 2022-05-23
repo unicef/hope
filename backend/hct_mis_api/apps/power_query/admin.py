@@ -106,7 +106,7 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
             context["type"] = type(ret).__name__
             context["raw"] = ret
             context["title"] = f"Result of {obj.name} ({type(ret).__name__})"
-            if isinstance(ret, QuerySet) or isinstance(ret, tuple):
+            if instance(ret, (Queryset, tuple)):
                 ret = ret[0][:100]
                 context["queryset"] = ret
             elif isinstance(ret, tablib.Dataset):
