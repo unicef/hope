@@ -3,22 +3,25 @@ import {
   Button,
   FormControl,
   Grid,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
   Typography,
 } from '@material-ui/core';
-import Publish from '@material-ui/icons/Publish';
+import AttachFileIcon from '@material-ui/icons/AttachFile';
+import Delete from '@material-ui/icons/Delete';
 import GetApp from '@material-ui/icons/GetApp';
+import Publish from '@material-ui/icons/Publish';
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { Title } from '../../../core/Title';
 import { LabelizedField } from '../../../core/LabelizedField';
-import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { Missing } from '../../../core/Missing';
+import { Title } from '../../../core/Title';
+import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -62,8 +65,16 @@ const DividerLabel = styled.div`
 const UploadIcon = styled(Publish)`
   color: #043f91;
 `;
+
 const DownloadIcon = styled(GetApp)`
   color: #043f91;
+`;
+
+const SpinaczIconContainer = styled(Box)`
+  position: relative;
+  top: 4px;
+  font-size: 16px;
+  color: #666666;
 `;
 
 const BoxWithBorderRight = styled(Box)`
@@ -180,7 +191,23 @@ export function Entitlement({
                   onChange={(e) => setFile(e.currentTarget.files[0])}
                 />
               </Box>
-              <GreyTextSmall>{file?.name || null}</GreyTextSmall>
+              {file?.name && (
+                <Box alignItems='center' display='flex'>
+                  <SpinaczIconContainer>
+                    <AttachFileIcon fontSize='inherit' />
+                  </SpinaczIconContainer>
+                  <GreyTextSmall>{file?.name || null}</GreyTextSmall>
+                  <Box ml={2}>
+                    <IconButton
+                      onClick={() => {
+                        setFile(null);
+                      }}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Box>
+                </Box>
+              )}
             </Box>
           </Box>
         </Box>
