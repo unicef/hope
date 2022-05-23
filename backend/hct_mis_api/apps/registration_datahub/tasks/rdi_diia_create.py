@@ -130,7 +130,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             ImportedBankAccountInfo(
                 individual=individual_obj,
                 bank_name=individual.bank_name,
-                bank_account_number=individual.iban,
+                bank_account_number=individual.iban.replace(" ", ""),
             )
         )
 
