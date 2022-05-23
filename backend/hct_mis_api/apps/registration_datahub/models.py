@@ -538,6 +538,13 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
 
+    def save(self, *args, **kwargs):
+        if self.bank_account_number:
+            self.bank_account_number = self.bank_account_number.replace(" ", "")
+        if self.debit_card_number:
+            self.bank_account_number = self.bank_account_number.replace(" ", "")
+        super().save(*args, **kwargs)
+
 
 class DiiaHousehold(TimeStampedUUIDModel):
     rec_id = models.CharField(max_length=20, blank=True, default=BLANK)
