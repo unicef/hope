@@ -41,6 +41,8 @@ import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPa
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
 import { EditFspPage } from './pages/paymentmodule/EditFspPage';
 import { CreateSetUpFspPage } from './pages/paymentmodule/CreateSetUpFspPage';
+import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
+import { SetUpFspPage } from './pages/paymentmodule/SetupFspPage';
 
 const Root = styled.div`
   display: flex;
@@ -160,16 +162,40 @@ export function HomeRouter(): React.ReactElement {
               <PaymentModulePage />
             </Sentry.ErrorBoundary>
           </Route>
+          <Route path='/:businessArea/payment-module/payment-plan/:id/setup-fsp/create'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag(
+                  'location',
+                  '/payment-module/payment-plan/:id/setup-fsp/create',
+                );
+              }}
+            >
+              <CreateSetUpFspPage />
+            </Sentry.ErrorBoundary>
+          </Route>
+          <Route path='/:businessArea/payment-module/payment-plan/:id/setup-fsp/edit'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag(
+                  'location',
+                  '/payment-module/payment-plan/:id/setup-fsp/edit',
+                );
+              }}
+            >
+              <EditSetUpFspPage />
+            </Sentry.ErrorBoundary>
+          </Route>
           <Route path='/:businessArea/payment-module/payment-plan/:id/setup-fsp'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
                 scope.setTag(
                   'location',
-                  '/payment-module/payment-plan/:id/setup-fsp',
+                  '/payment-module/payment-plan/:id/setup-fsp/',
                 );
               }}
             >
-              <CreateSetUpFspPage />
+              <SetUpFspPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/payment-module/payment-plan/:id'>
