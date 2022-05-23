@@ -611,3 +611,8 @@ class DiiaIndividual(TimeStampedUUIDModel):
     @property
     def full_name(self):
         return f"{self.last_name} {self.first_name} {self.second_name}"
+
+    def save(self, *args, **kwargs):
+        if self.iban:
+            self.iban = self.iban.replace(" ", "")
+        super().save(*args, **kwargs)
