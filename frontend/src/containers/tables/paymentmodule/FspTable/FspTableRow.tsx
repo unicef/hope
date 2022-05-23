@@ -1,4 +1,6 @@
+import { IconButton, Box } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
+import { Edit, Delete } from '@material-ui/icons';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Missing } from '../../../../components/core/Missing';
@@ -48,6 +50,24 @@ export const FspTableRow = ({
       </TableCell>
       <TableCell align='left'>
         <Missing />
+      </TableCell>
+      <TableCell>
+        <Box display='flex' align-items='center'>
+          <IconButton
+            onClick={() => {
+              console.log('DELETE');
+            }}
+          >
+            <Delete />
+          </IconButton>
+          <IconButton
+            onClick={() => {
+              console.log('EDIT');
+            }}
+          >
+            <Edit />
+          </IconButton>
+        </Box>
       </TableCell>
     </ClickableTableRow>
   );
