@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { Missing } from '../../../core/Missing';
 import { Title } from '../../../core/Title';
-import { Fsp } from '../Fsp/Fsp';
+import { FspForm } from '../FspForm/FspForm';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -53,7 +53,7 @@ export function FspArray({
           return (
             <>
               {values[baseName].map((item, index) => (
-                <Fsp key={label} index={index} baseName={baseName} />
+                <FspForm key={label} index={index} baseName={baseName} />
               ))}
               <Grid container>
                 <Grid item xs={12}>

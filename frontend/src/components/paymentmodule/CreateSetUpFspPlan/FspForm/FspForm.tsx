@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 
-interface FspProps {
+interface FspFormProps {
   index: number;
   baseName: string;
 }
 
-export function Fsp({ index, baseName }: FspProps): React.ReactElement {
+export function FspForm({ index, baseName }: FspFormProps): React.ReactElement {
   const { t } = useTranslation();
 
   return (

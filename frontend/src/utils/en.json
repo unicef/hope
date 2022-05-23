@@ -641,5 +641,7 @@
   "Current Amount": "Current Amount",
   "Proposed Amount": "Proposed Amount",
   "Comment (Optional)": "Comment (Optional)",
-  "Linked Tickets": "Linked Tickets"
+  "Linked Tickets": "Linked Tickets",
+  "To be delivered": "To be delivered",
+  "Maximum Amount": "Maximum Amount"
 }
