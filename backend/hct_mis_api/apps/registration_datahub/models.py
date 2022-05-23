@@ -614,5 +614,5 @@ class DiiaIndividual(TimeStampedUUIDModel):
 
     def save(self, *args, **kwargs):
         if self.iban:
-            self.iban = self.iban.replace(" ", "")
+            self.iban = str(self.iban).replace(" ", "")
         super().save(*args, **kwargs)
