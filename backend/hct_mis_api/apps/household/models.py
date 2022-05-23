@@ -1152,5 +1152,5 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
         if self.bank_account_number:
             self.bank_account_number = self.bank_account_number.replace(" ", "")
         if self.debit_card_number:
-            self.bank_account_number = self.bank_account_number.replace(" ", "")
+            self.debit_card_number = self.debit_card_number.replace(" ", "")
         super().save(*args, **kwargs)
