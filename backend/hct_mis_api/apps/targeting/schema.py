@@ -319,7 +319,7 @@ class Query(graphene.ObjectType):
         targeting_criteria=TargetingCriteriaObjectType(required=True),
         program=graphene.Argument(graphene.ID, required=True),
         excluded_ids=graphene.Argument(graphene.String, required=True),
-        criteria_fit_range=graphene.List(graphene.Int, required=False),
+        criteria_fit_range=graphene.Argument(graphene.List(graphene.Int), required=False),
         filterset_class=HouseholdFilter,
         permission_classes=(
             hopePermissionClass(Permissions.TARGETING_UPDATE),
@@ -414,7 +414,7 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_golden_record_by_targeting_criteria(
-        parent, info, targeting_criteria, program, excluded_ids, criteria_fit_range, **kwargs
+        parent, info, targeting_criteria, program, excluded_ids, criteria_fit_range=None, **kwargs
     ):
         household_queryset = Household.objects
         return prefetch_selections(

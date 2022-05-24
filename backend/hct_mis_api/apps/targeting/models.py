@@ -610,12 +610,19 @@ class TargetingIndividualRuleFilterBlockMixin:
             # only filtering against heads of household
             individuals_query &= Q(heading_household__isnull=False)
         ind_query = Individual.objects.filter(individuals_query)
-        if self.criteria_fit_range:
+        if getattr(self, "criteria_fit_range", None):
             min_individuals, max_individuals = tuple(self.criteria_fit_range)
+
+            criteria_fit_range = Q()
+            if min_individuals:
+                criteria_fit_range &= Q(household_count__gte=min_individuals)
+            if max_individuals:
+                criteria_fit_range &= Q(household_count__lte=max_individuals)
+
             households_id = (
                 ind_query.values("household_id")
                 .annotate(household_count=Count("household_id"))
-                .filter(household_count__gte=min_individuals, household_count__lte=max_individuals)
+                .filter(criteria_fit_range)
                 .values_list("household_id", flat=True)
             )
         else:
