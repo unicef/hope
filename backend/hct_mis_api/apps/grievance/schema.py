@@ -39,11 +39,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.schema import (
-    ChoiceObject,
-    FieldAttributeNode,
-    sort_by_attr,
-)
+from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode, sort_by_attr
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
@@ -625,7 +621,7 @@ class TicketSystemFlaggingDetailsNode(DjangoObjectType):
 
 
 class TicketPaymentVerificationDetailsNode(DjangoObjectType):
-    has_multiple_payment_verifications = graphene.Boolean(source='has_multiple_payment_verifications')
+    has_multiple_payment_verifications = graphene.Boolean(source="has_multiple_payment_verifications")
 
     class Meta:
         model = TicketPaymentVerificationDetails
@@ -859,7 +855,7 @@ class Query(graphene.ObjectType):
         if filters.get("administrative_area") is not None:
             try:
                 grievance_tickets = grievance_tickets.filter(
-                    admin2_new=Area.objects.get(id=filters.get("administrative_area")).name
+                    admin2_new=Area.objects.get(id=filters.get("administrative_area"))
                 )
             except Area.DoesNotExist:
                 pass

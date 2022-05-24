@@ -361,9 +361,9 @@ class FlexRegistrationService:
         if not bank_name:
             bank_name = other_bank_name
         bank_account_info_data = {
-            "bank_account_number": individual_dict.get("bank_account_number", ""),
+            "bank_account_number": individual_dict.get("bank_account_number", "").replace(" ", ""),
             "bank_name": bank_name,
-            "debit_card_number": individual_dict.get("bank_account_number", ""),
+            "debit_card_number": individual_dict.get("bank_account_number", "").replace(" ", ""),
             "individual": individual,
         }
         return bank_account_info_data
