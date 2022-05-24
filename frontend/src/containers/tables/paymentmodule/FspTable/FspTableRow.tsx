@@ -3,7 +3,7 @@ import TableCell from '@material-ui/core/TableCell';
 import { Edit, Delete } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
 import { Missing } from '../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
@@ -67,11 +67,7 @@ export const FspTableRow = ({
           >
             <Delete />
           </IconButton>
-          <IconButton
-            onClick={() => {
-              console.log('EDIT');
-            }}
-          >
+          <IconButton component={Link} to={editFspPath}>
             <Edit />
           </IconButton>
         </Box>
