@@ -221,7 +221,7 @@ export function Entitlement({
           color='primary'
           variant='contained'
           component={Link}
-          to={`/${businessArea}/payment-module/payment-plan/${id}/setup-fsp`}
+          to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp`}
         >
           {t('Set up FSP')}
         </Button>

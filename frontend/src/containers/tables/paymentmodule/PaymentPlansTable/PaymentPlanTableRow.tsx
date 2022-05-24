@@ -32,7 +32,7 @@ export const PaymentPlanTableRow = ({
 }: PaymentVerificationTableRowProps): React.ReactElement => {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const paymentPlanPath = `/${businessArea}/payment-module/payment-plan/${plan.id}`;
+  const paymentPlanPath = `/${businessArea}/payment-module/payment-plans/${plan.id}`;
   const handleClick = (): void => {
     history.push(paymentPlanPath);
   };
