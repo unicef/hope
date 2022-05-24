@@ -1,14 +1,23 @@
-import { Box, Button, Divider, Grid, Typography } from '@material-ui/core';
-import { Link, useParams } from 'react-router-dom';
-import EditIcon from '@material-ui/icons/EditRounded';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
-import { Title } from '../../../core/Title';
+import styled from 'styled-components';
+import { useParams } from 'react-router-dom';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { Missing } from '../../../core/Missing';
+import { Title } from '../../../core/Title';
+
+const DividerContainer = styled.div`
+  height: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+`;
+const Divider = styled.div`
+  border-top: 1px solid #b1b1b5;
+  height: 1px;
+  width: 100%;
+`;
 
 interface FspDisplayProps {
   fsp;
@@ -37,7 +46,7 @@ export function FspDisplay({ fsp }: FspDisplayProps): React.ReactElement {
           </LabelizedField>
         </Grid>
       </Grid>
-      <Box mt={2} mb={2}>
+      <Box mt={4} mb={4}>
         <Typography>Order</Typography>
       </Box>
       {fsp.fsps?.map((el) => (
@@ -52,9 +61,9 @@ export function FspDisplay({ fsp }: FspDisplayProps): React.ReactElement {
           </Grid>
         </Grid>
       ))}
-      <Box mt={8} mb={8}>
+      <DividerContainer>
         <Divider />
-      </Box>
+      </DividerContainer>
     </>
   );
 }

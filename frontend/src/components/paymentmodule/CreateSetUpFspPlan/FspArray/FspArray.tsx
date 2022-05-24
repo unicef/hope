@@ -57,7 +57,7 @@ export function FspArray({
               ))}
               <Grid container>
                 <Grid item xs={12}>
-                  <Box mt={4} mb={6}>
+                  <Box>
                     <Button
                       color='primary'
                       onClick={() => {
