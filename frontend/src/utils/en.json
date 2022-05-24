@@ -643,5 +643,7 @@
   "Comment (Optional)": "Comment (Optional)",
   "Linked Tickets": "Linked Tickets",
   "To be delivered": "To be delivered",
-  "Maximum Amount": "Maximum Amount"
+  "Maximum Amount": "Maximum Amount",
+  "New FSP": "New FSP",
+  "Are you sure you want to delete this FSP?": "Are you sure you want to delete this FSP?"
 }

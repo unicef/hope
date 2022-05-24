@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { EditFspHeader } from '../../../components/paymentmodule/EditFspPlan/EditFspHeader';
+import { EditFspHeader } from '../../../components/paymentmodule/EditFsp/EditFspHeader';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
