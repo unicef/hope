@@ -627,8 +627,6 @@ class TargetingIndividualRuleFilterBlockMixin:
             )
         else:
             households_id = ind_query.values_list("household_id", flat=True)
-        logger.info("*Households*")
-        logger.info(households_id)
         return Q(id__in=households_id)
 
 
