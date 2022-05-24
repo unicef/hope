@@ -273,7 +273,7 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
 
 
 def targeting_criteria_object_type_to_query(
-    targeting_criteria_object_type, program: Union[str, Program], excluded_ids=""
+    targeting_criteria_object_type, program: Union[str, Program], excluded_ids="", criteria_fit_range=None
 ):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     if not isinstance(program, Program):
@@ -289,7 +289,7 @@ def targeting_criteria_object_type_to_query(
             targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
         for individuals_filters_block_dict in rule.get("individuals_filters_blocks", []):
             individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockMixin(
-                [], not program.individual_data_needed
+                [], not program.individual_data_needed, criteria_fit_range
             )
             targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)
             for individual_block_filter_dict in individuals_filters_block_dict.get("individual_block_filters", []):
@@ -319,6 +319,7 @@ class Query(graphene.ObjectType):
         targeting_criteria=TargetingCriteriaObjectType(required=True),
         program=graphene.Argument(graphene.ID, required=True),
         excluded_ids=graphene.Argument(graphene.String, required=True),
+        criteria_fit_range=graphene.List(graphene.Int, required=False),
         filterset_class=HouseholdFilter,
         permission_classes=(
             hopePermissionClass(Permissions.TARGETING_UPDATE),
@@ -412,10 +413,12 @@ class Query(graphene.ObjectType):
             .all()
         )
 
-    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
+    def resolve_golden_record_by_targeting_criteria(
+        parent, info, targeting_criteria, program, excluded_ids, criteria_fit_range, **kwargs
+    ):
         household_queryset = Household.objects
         return prefetch_selections(
             household_queryset.filter(
-                targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids)
+                targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids, criteria_fit_range)
             )
         ).distinct()
