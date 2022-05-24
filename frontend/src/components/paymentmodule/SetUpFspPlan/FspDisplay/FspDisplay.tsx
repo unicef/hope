@@ -1,4 +1,6 @@
 import { Box, Grid, Typography } from '@material-ui/core';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import WarningIcon from '@material-ui/icons/Warning';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -13,10 +15,19 @@ const DividerContainer = styled.div`
   display: flex;
   align-items: center;
 `;
+
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;
   height: 1px;
   width: 100%;
+`;
+
+const WarnIcon = styled(WarningIcon)`
+  color: ${({ theme }) => theme.hctPalette.oragne};
+`;
+
+const CheckIcon = styled(CheckCircleOutlineIcon)`
+  color: ${({ theme }) => theme.hctPalette.green};
 `;
 
 interface FspDisplayProps {
@@ -50,14 +61,24 @@ export function FspDisplay({ fsp }: FspDisplayProps): React.ReactElement {
         <Typography>Order</Typography>
       </Box>
       {fsp.fsps?.map((el) => (
-        <Grid container>
-          <Grid key={el.id} item xs={3}>
+        <Grid key={el.id} container>
+          <Grid item xs={3}>
             <LabelizedField label={t('FSP')}>{el.name}</LabelizedField>
           </Grid>
-          <Grid key={el.id} item xs={3}>
+          <Grid item xs={3}>
             <LabelizedField label={`${t('Maximum Amount')} ${'(PLN)'}`}>
               {el.maxAmount}
             </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            {false ? (
+              <CheckIcon />
+            ) : (
+              <Box display='flex' alignItems='center'>
+                <WarnIcon />
+                {t('Missing')} 2020202020220020202 PLN
+              </Box>
+            )}
           </Grid>
         </Grid>
       ))}
