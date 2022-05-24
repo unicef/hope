@@ -2,7 +2,9 @@ import { IconButton, Box } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import { Edit, Delete } from '@material-ui/icons';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
 import { Missing } from '../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
@@ -22,9 +24,12 @@ export const FspTableRow = ({
 }: FspTableRowProps): React.ReactElement => {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const paymentVerificationPlanPath = `/${businessArea}/payment-verification/${plan.id}`;
+  const confirm = useConfirmation();
+  const { t } = useTranslation();
+  const editFspPath = `/${businessArea}/payment-module/fsp/${plan.id}`;
+  const dialogText = t('Are you sure you want to delete this FSP?');
   const handleClick = (): void => {
-    history.push(paymentVerificationPlanPath);
+    history.push(editFspPath);
   };
   const {
     data: statusChoicesData,
@@ -39,9 +44,7 @@ export const FspTableRow = ({
       role='checkbox'
       key={plan.id}
     >
-      <TableCell align='left'>
-        <Missing />
-      </TableCell>
+      <TableCell align='left'>{plan.id}</TableCell>
       <TableCell align='left'>
         <Missing />
       </TableCell>
@@ -54,8 +57,12 @@ export const FspTableRow = ({
       <TableCell>
         <Box display='flex' align-items='center'>
           <IconButton
-            onClick={() => {
-              console.log('DELETE');
+            onClick={(e) => {
+              e.stopPropagation();
+              confirm({
+                title: t('Warning'),
+                content: dialogText,
+              }).then(null);
             }}
           >
             <Delete />

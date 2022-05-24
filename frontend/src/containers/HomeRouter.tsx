@@ -39,6 +39,7 @@ import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
 import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { CreateFspPage } from './pages/paymentmodule/CreateFspPage';
 import { EditFspPage } from './pages/paymentmodule/EditFspPage';
 import { CreateSetUpFspPage } from './pages/paymentmodule/CreateSetUpFspPage';
 import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
@@ -150,6 +151,15 @@ export function HomeRouter(): React.ReactElement {
                 scope.setTag('location', '/payment-module/new-fsp');
               }}
             >
+              <CreateFspPage />
+            </Sentry.ErrorBoundary>
+          </Route>
+          <Route path='/:businessArea/payment-module/fsp/:id'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag('location', '/payment-module/fsp/:id');
+              }}
+            >
               <EditFspPage />
             </Sentry.ErrorBoundary>
           </Route>
@@ -162,46 +172,46 @@ export function HomeRouter(): React.ReactElement {
               <PaymentModulePage />
             </Sentry.ErrorBoundary>
           </Route>
-          <Route path='/:businessArea/payment-module/payment-plan/:id/setup-fsp/create'>
+          <Route path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
                 scope.setTag(
                   'location',
-                  '/payment-module/payment-plan/:id/setup-fsp/create',
+                  '/payment-module/payment-plans/:id/setup-fsp/create',
                 );
               }}
             >
               <CreateSetUpFspPage />
             </Sentry.ErrorBoundary>
           </Route>
-          <Route path='/:businessArea/payment-module/payment-plan/:id/setup-fsp/edit'>
+          <Route path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/edit'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
                 scope.setTag(
                   'location',
-                  '/payment-module/payment-plan/:id/setup-fsp/edit',
+                  '/payment-module/payment-plans/:id/setup-fsp/edit',
                 );
               }}
             >
               <EditSetUpFspPage />
             </Sentry.ErrorBoundary>
           </Route>
-          <Route path='/:businessArea/payment-module/payment-plan/:id/setup-fsp'>
+          <Route path='/:businessArea/payment-module/payment-plans/:id/setup-fsp'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
                 scope.setTag(
                   'location',
-                  '/payment-module/payment-plan/:id/setup-fsp/',
+                  '/payment-module/payment-plans/:id/setup-fsp/',
                 );
               }}
             >
               <SetUpFspPage />
             </Sentry.ErrorBoundary>
           </Route>
-          <Route path='/:businessArea/payment-module/payment-plan/:id'>
+          <Route path='/:businessArea/payment-module/payment-plans/:id'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-module/payment-plan/:id');
+                scope.setTag('location', '/payment-module/payment-plans/:id');
               }}
             >
               <PaymentPlanDetailsPage />
