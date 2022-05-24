@@ -272,8 +272,8 @@ class RdiMergeTask:
             role = BankAccountInfo(
                 individual=individuals_dict.get(imported_bank_account_info.individual.id),
                 bank_name=imported_bank_account_info.bank_name,
-                bank_account_number=imported_bank_account_info.bank_account_number,
-                debit_card_number=imported_bank_account_info.debit_card_number,
+                bank_account_number=imported_bank_account_info.bank_account_number.replace(" ", ""),
+                debit_card_number=imported_bank_account_info.debit_card_number.replace(" ", ""),
             )
             roles_to_create.append(role)
 
