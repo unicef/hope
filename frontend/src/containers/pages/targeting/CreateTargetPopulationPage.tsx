@@ -83,6 +83,10 @@ export function CreateTargetPopulationPage(): React.ReactElement {
             exclusionReason: values.exclusionReason,
             businessAreaSlug: businessArea,
             ...getTargetingCriteriaVariables(values),
+            criteriaFitRange: [
+              values.criteriaFitRangeMin,
+              values.criteriaFitRangeMax,
+            ],
           },
         },
       });

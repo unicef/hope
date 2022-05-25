@@ -4052,6 +4052,7 @@ export type QueryGoldenRecordByTargetingCriteriaArgs = {
   targetingCriteria: TargetingCriteriaObjectType,
   program: Scalars['ID'],
   excludedIds: Scalars['String'],
+  criteriaFitRange?: Maybe<Array<Maybe<Scalars['Int']>>>,
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,

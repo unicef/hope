@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
-import { FieldArray, Formik } from 'formik';
+import { Field, FieldArray, Formik } from 'formik';
 import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
 import {
@@ -23,6 +23,8 @@ import {
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
+import { useTranslation } from 'react-i18next';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -136,6 +138,7 @@ export function TargetCriteriaForm({
   title,
   shouldShowWarningForIndividualFilter,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
+  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const { data, loading } = useImportedIndividualFieldsQuery({
     variables: {
@@ -144,7 +147,7 @@ export function TargetCriteriaForm({
   });
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
-  const initialValue = mapCriteriaToInitialValues(criteria);
+  const initialValues = mapCriteriaToInitialValues(criteria);
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
   useEffect(() => {
@@ -229,7 +232,7 @@ export function TargetCriteriaForm({
   return (
     <DialogContainer>
       <Formik
-        initialValues={initialValue}
+        initialValues={initialValues}
         onSubmit={handleSubmit}
         validate={validate}
         validationSchema={validationSchema}
@@ -363,6 +366,33 @@ export function TargetCriteriaForm({
                     ADD INDIVIDUAL RULE GROUP
                   </Button>
                 </ButtonBox>
+              </Box>
+              <Box mt={3}>
+                <Typography>
+                  {t(
+                    'How many individuals in the household should fit these criteria?',
+                  )}
+                </Typography>
+                <Box mt={2} display='flex'>
+                  <Box mr={2}>
+                    <Field
+                      name='criteriaFitRangeMin'
+                      type='number'
+                      label={t('Min')}
+                      color='primary'
+                      component={FormikTextField}
+                      variant='outlined'
+                    />
+                  </Box>
+                  <Field
+                    name='criteriaFitRangeMax'
+                    type='number'
+                    label={t('Max')}
+                    color='primary'
+                    component={FormikTextField}
+                    variant='outlined'
+                  />
+                </Box>
               </Box>
             </DialogContent>
             <DialogFooter>
