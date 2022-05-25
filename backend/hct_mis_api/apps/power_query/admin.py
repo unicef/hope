@@ -106,9 +106,12 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
             context["type"] = type(ret).__name__
             context["raw"] = ret
             context["title"] = f"Result of {obj.name} ({type(ret).__name__})"
-            if instance(ret, (Queryset, tuple)):
+            if isinstance(ret, QuerySet):
                 ret = ret[0][:100]
                 context["queryset"] = ret
+            if isinstance(ret,  tuple):
+                ret = ret[0][:100]
+                context["result"] = ret
             elif isinstance(ret, tablib.Dataset):
                 context["dataset"] = ret
             elif isinstance(ret, dict):
@@ -174,7 +177,7 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
             context = self.get_common_context(request, pk, title="Results")
             data = pickle.loads(obj.result)
             context["dataset"] = to_dataset(data)
-            return render(request, "power_query/preview.html", context)
+            return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
