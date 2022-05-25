@@ -17,3 +17,7 @@ git tag $VERSION &> /dev/null
 git push origin --tags &> /dev/null
 git push origin &> /dev/null
 echo "New version $VERSION pushed to origin"
+CURRENT_BRANCH=$(git branch --show-current)
+if [[ "$CURRENT_BRANCH" == "develop" ]]; then
+    gh pr create -a "@me" -t "Staging $VERSION" --base staging -b ''
+fi

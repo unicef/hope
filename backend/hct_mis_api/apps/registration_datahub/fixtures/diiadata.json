@@ -1,0 +1,203 @@
+[
+{
+  "model": "registration_data.registrationdataimport",
+  "pk": "04992dce-8e47-154b-4938-743415412dce",
+  "fields": {
+    "created_at": "2022-05-25T09:22:14.870",
+    "updated_at": "2022-05-25T09:54:07.851",
+    "name": "Test Diia",
+    "status": "MERGED",
+    "import_date": "2022-03-30T09:22:14.870",
+    "imported_by": null,
+    "data_source": "DIIA",
+    "number_of_individuals": 5,
+    "number_of_households": 2,
+    "datahub_id": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "error_message": "",
+    "sentry_id": "",
+    "pull_pictures": true,
+    "business_area": "3e269a73-123b-43e1-86af-ced1b30d8e80",
+    "screen_beneficiary": false
+  }
+},
+{
+  "model": "registration_datahub.registrationdataimportdatahub",
+  "pk": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+  "fields": {
+    "created_at": "2022-03-30T09:22:14.856",
+    "updated_at": "2022-03-30T09:22:16.791",
+    "name": "Test Diia",
+    "import_date": "2022-03-30T09:22:14.856",
+    "hct_id": "04992dce-8e47-154b-4938-743415412dce",
+    "import_data": "e38f6f0c-36e9-a1f0-4b73-84742f7d025d",
+    "import_done": "NOT_STARTED",
+    "business_area_slug": "ukraine"
+  }
+},
+{
+  "model": "registration_datahub.importdata",
+  "pk": "e38f6f0c-36e9-a1f0-4b73-84742f7d025d",
+  "fields": {
+    "created_at": "2022-05-29T09:21:29.900",
+    "updated_at": "2022-04-29T09:21:34.214",
+    "status": "PENDING",
+    "business_area_slug": "ukraine",
+    "file": null,
+    "data_type": "JSON",
+    "number_of_households": 2,
+    "number_of_individuals": 5,
+    "error": "",
+    "validation_errors": "",
+    "created_by_id": null
+  }
+},
+{
+  "model": "registration_datahub.diiahousehold",
+  "pk": "4a8c7079-802d-e75e-4818-18d9e1debffe",
+  "fields": {
+    "rec_id": "32132111",
+    "vpo_doc": "test_file_name.jpg",
+    "vpo_doc_id": "VPO-DOC-001",
+    "vpo_doc_date": "2022-04-30",
+    "address": "Староміська майдан, 854, кв. 794, 80571, Одеса, Луганська область, Ukraine",
+    "consent": true,
+    "head_of_household": "2156fa32-c961-4e91-a123-e4722707635d",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_household": null,
+    "created_at": "2022-03-30T09:22:16.600",
+    "updated_at": "2022-03-30T09:22:16.600"
+  }
+},
+{
+  "model": "registration_datahub.diiahousehold",
+  "pk": "4a8c7079-4818-e75e-802d-ebffe18d9123",
+  "fields": {
+    "rec_id": "32132122",
+    "vpo_doc": "test_file_name.jpg",
+    "vpo_doc_id": "VPO-DOC-2222",
+    "vpo_doc_date": "2022-04-29",
+    "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
+    "consent": true,
+    "head_of_household": "2156fa32-c961-4e91-c961-e4722707638d",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_household": null,
+    "created_at": "2022-03-30T09:22:16.600",
+    "updated_at": "2022-03-30T09:22:16.600"
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": "2156fa32-a123-a123-a123-e4722707631d",
+  "fields": {
+    "created_at": "2022-03-30T09:22:16.762",
+    "updated_at": "2022-03-30T09:22:16.762",
+    "individual_id": "111222333111",
+    "last_name": "Hurst",
+    "first_name": "Fiona",
+    "second_name": "Second",
+    "relationship": "WIFE_HUSBAND",
+    "sex": "FEMALE",
+    "birth_date": "2001-10-15",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": false,
+    "iban": "",
+    "bank_name": "",
+    "household": "4a8c7079-802d-e75e-4818-18d9e1debffe",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": "2156fa32-c961-4e91-a123-e4722707635d",
+  "fields": {
+    "created_at": "2022-03-30T09:22:16.762",
+    "updated_at": "2022-03-30T09:22:16.762",
+    "individual_id": "111222333444",
+    "last_name": "Clay",
+    "first_name": "Francis",
+    "second_name": "Mid",
+    "relationship": "HEAD",
+    "sex": "MALE",
+    "birth_date": "1999-01-11",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": false,
+    "iban": "1234123412341234",
+    "bank_name": "PrivatBank",
+    "household": "4a8c7079-802d-e75e-4818-18d9e1debffe",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": "2156fa32-c961-4e91-c961-e4722707638d",
+  "fields": {
+    "created_at": "2022-03-30T09:22:16.762",
+    "updated_at": "2022-03-30T09:22:16.762",
+    "individual_id": "123412341234",
+    "last_name": "Duarte",
+    "first_name": "Erik",
+    "second_name": "Mid",
+    "relationship": "HEAD",
+    "sex": "MALE",
+    "birth_date": "1989-02-22",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": false,
+    "iban": "6543789043215678",
+    "bank_name": "MonoBank",
+    "household": "4a8c7079-4818-e75e-802d-ebffe18d9123",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": "2156fa32-c961-4e91-4e91-e4722707636d",
+  "fields": {
+    "created_at": "2022-03-30T09:22:16.762",
+    "updated_at": "2022-03-30T09:22:16.762",
+    "individual_id": "76543113349",
+    "last_name": "Burnett",
+    "first_name": "Lydia",
+    "second_name": "Lin",
+    "relationship": "WIFE_HUSBAND",
+    "sex": "FEMALE",
+    "birth_date": "1993-01-19",
+    "birth_doc": "",
+    "marital_status": "MARRIED",
+    "disability": false,
+    "iban": "",
+    "bank_name": "",
+    "household": "4a8c7079-4818-e75e-802d-ebffe18d9123",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+},
+{
+  "model": "registration_datahub.diiaindividual",
+  "pk": "2156fa32-a123-4e91-a123-e4722707635d",
+  "fields": {
+    "created_at": "2022-03-30T09:22:16.762",
+    "updated_at": "2022-03-30T09:22:16.762",
+    "individual_id": "",
+    "last_name": "Bautista",
+    "first_name": "Sam",
+    "second_name": "Bautista",
+    "relationship": "SON_DAUGHTER",
+    "sex": "MALE",
+    "birth_date": "2009-06-16",
+    "birth_doc": "BRS321333",
+    "marital_status": "",
+    "disability": true,
+    "iban": "",
+    "bank_name": "",
+    "household": "4a8c7079-4818-e75e-802d-ebffe18d9123",
+    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
+    "imported_individual": null
+  }
+}
+]
