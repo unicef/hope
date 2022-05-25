@@ -119,6 +119,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    diia_rec_id = models.CharField(max_length=50, blank=True, default=BLANK)
     flex_registrations_record = models.ForeignKey(
         "registration_datahub.Record",
         related_name="imported_households",
@@ -371,6 +372,7 @@ class ImportedDocument(TimeStampedUUIDModel):
         related_name="documents",
         on_delete=models.CASCADE,
     )
+    doc_date = models.DateField(blank=True, null=True, default=None)
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -573,6 +575,10 @@ class DiiaHousehold(TimeStampedUUIDModel):
     def __str__(self):
         return f"Diia Household ID: {self.id}"
 
+    @property
+    def head_of_household_full_name(self):
+        return getattr(self.head_of_household, "full_name", "-")
+
 
 class DiiaIndividual(TimeStampedUUIDModel):
     individual_id = models.CharField(max_length=128, blank=True)  # RNOKPP
@@ -612,3 +618,8 @@ class DiiaIndividual(TimeStampedUUIDModel):
     @property
     def full_name(self):
         return f"{self.last_name} {self.first_name} {self.second_name}"
+
+    def save(self, *args, **kwargs):
+        if self.iban:
+            self.iban = str(self.iban).replace(" ", "")
+        super().save(*args, **kwargs)
