@@ -3,20 +3,33 @@
     <h2>Dataset is: {{ type }}</h2>
     {% if result %}
         {% if result.fields %}
-        <table>
-            <tr>{% for field in result.fields %}
-                <th>{{ field }}</th>{% endfor %}</tr>
-            {% for obj in result.data %}
-                <tr>
-                    {% for field in result.fields %}
-                        <td>{{ obj|field:field }}</td>{% endfor %}
-                </tr>{% endfor %}
-        </table>
+            <table>
+                <tr>{% for field in result.fields %}
+                    <th>{{ field }}</th>{% endfor %}</tr>
+                {% for obj in result.data %}
+                    <tr>
+                        {% for field in result.fields %}
+                            <td>{{ obj|field:field }}</td>{% endfor %}
+                    </tr>{% endfor %}
+            </table>
         {% elif type == "list" %}
             <table>
-                <tr><th>record</th></tr>
+                <tr>
+                    <th>Records</th>
+                </tr>
                 {% for row in result %}
                     <tr><td>{{ row }}</td></tr>{% endfor %}
+            </table>
+        {% elif type == "tuple" %}
+            <table>
+                <tr>
+                    <th>Records</th>
+                </tr>
+                {% for row in result %}
+                    <tr>
+                        <td>{{row}}</td>
+                    </tr>
+                {% endfor %}
             </table>
         {% else %}
             {{ result }}
