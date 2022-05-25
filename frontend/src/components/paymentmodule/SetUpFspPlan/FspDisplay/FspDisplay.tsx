@@ -8,19 +8,7 @@ import { useParams } from 'react-router-dom';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { Missing } from '../../../core/Missing';
 import { Title } from '../../../core/Title';
-
-const DividerContainer = styled.div`
-  height: 50px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-`;
-
-const Divider = styled.div`
-  border-top: 1px solid #b1b1b5;
-  height: 1px;
-  width: 100%;
-`;
+import { DividerLine } from '../../../core/DividerLine';
 
 const WarnIcon = styled(WarningIcon)`
   color: ${({ theme }) => theme.hctPalette.oragne};
@@ -82,9 +70,7 @@ export function FspDisplay({ fsp }: FspDisplayProps): React.ReactElement {
           </Grid>
         </Grid>
       ))}
-      <DividerContainer>
-        <Divider />
-      </DividerContainer>
+      <DividerLine />
     </>
   );
 }
