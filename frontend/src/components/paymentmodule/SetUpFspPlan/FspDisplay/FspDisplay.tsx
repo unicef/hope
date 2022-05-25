@@ -9,6 +9,7 @@ import { LabelizedField } from '../../../core/LabelizedField';
 import { Missing } from '../../../core/Missing';
 import { Title } from '../../../core/Title';
 import { DividerLine } from '../../../core/DividerLine';
+import { WarningMissingAmount } from '../../WarningMissingAmount';
 
 const WarnIcon = styled(WarningIcon)`
   color: ${({ theme }) => theme.hctPalette.oragne};
@@ -62,10 +63,7 @@ export function FspDisplay({ fsp }: FspDisplayProps): React.ReactElement {
             {false ? (
               <CheckIcon />
             ) : (
-              <Box display='flex' alignItems='center'>
-                <WarnIcon />
-                {t('Missing')} 2020202020220020202 PLN
-              </Box>
+              <WarningMissingAmount amount={22222333} currency='PLN' />
             )}
           </Grid>
         </Grid>
