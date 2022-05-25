@@ -1,8 +1,6 @@
 import json
-import os
 import secrets
-import time
-import unittest
+
 from datetime import date
 from io import BytesIO
 from pathlib import Path
@@ -11,10 +9,8 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
-from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
-from django.test import TestCase
 
 from django_countries.fields import Country
 from PIL import Image
@@ -789,3 +785,44 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             "w+",
         ) as json_file:
             json_file.write(json.dumps(result))
+
+
+class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
+    databases = "__all__"
+    fixtures = [
+        "hct_mis_api/apps/core/fixtures/data.json",
+        "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import RdiDiiaCreateTask
+
+        cls.RdiDiiaCreateTask = RdiDiiaCreateTask
+
+    def test_execute(self):
+        self.RdiDiiaCreateTask().execute("c57848bf-a5df-154b-4938-f30b6b29aaab")
+
+        households = ImportedHousehold.objects.all()
+        individuals = ImportedIndividual.objects.all()
+
+        self.assertEqual(2, households.count())
+        self.assertEqual(5, individuals.count())
+
+        individual = individuals.get(full_name="Erik Duarte")
+
+        individuals_obj_data = model_to_dict(
+            individual,
+            ("sex", "age", "marital_status", "relationship", "middle_name"),
+        )
+        expected = {
+            "relationship": "HEAD",
+            "sex": "MALE",
+            "middle_name": "Mid",
+            "marital_status": "MARRIED",
+        }
+        self.assertEqual(individuals_obj_data, expected)
+
+        household_obj_data = model_to_dict(individual.household, ("country", "size", "diia_rec_id"))
+        expected = {"country": Country(code="UA"), "size": 3, "diia_rec_id": "32132122"}
+        self.assertEqual(household_obj_data, expected)
