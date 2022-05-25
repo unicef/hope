@@ -1,9 +1,7 @@
 import logging
-import sys
 
 from django.db import transaction
 from django.db.models import Count
-from django.utils.functional import cached_property
 
 from sentry_sdk import configure_scope
 
@@ -11,13 +9,19 @@ from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
-from hct_mis_api.apps.core.utils import nested_getattr
+from hct_mis_api.apps.core.utils import build_arg_dict
 from hct_mis_api.apps.erp_datahub.utils import (
     get_exchange_rate_for_cash_plan,
     get_payment_record_delivered_quantity_in_usd,
 )
-from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider, CashPlanPaymentVerificationSummary
-from hct_mis_api.apps.payment.services.handle_total_cash_in_households import handle_total_cash_in_specific_households
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerificationSummary,
+    PaymentRecord,
+    ServiceProvider,
+)
+from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
+    handle_total_cash_in_specific_households,
+)
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -83,6 +87,9 @@ class PullFromDatahubTask:
         "vision_id": "vision_id",
     }
 
+    def __init__(self, exchange_rates_client: ExchangeRates = None):
+        self.exchange_rates_client = exchange_rates_client or ExchangeRates()
+
     def execute(self):
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
         ret = {
@@ -105,64 +112,56 @@ class PullFromDatahubTask:
                     self.copy_session(session)
                     ret["successes"].append(session.id)
                 except Exception as e:
+                    logger.exception(e)
                     ret["failures"].append(session.id)
         return ret
-
-    def build_arg_dict(self, model_object, mapping_dict):
-        return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
 
     def copy_session(self, session):
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
-            STATUS = session.STATUS_PROCESSING
-            TB = ""
-            SID = ""
-            session.status = STATUS
-            session.save()
+            session.status = session.STATUS_PROCESSING
+            session.save(update_fields=("status",))
             try:
                 with transaction.atomic(using="default"):
                     with transaction.atomic(using="cash_assist_datahub_ca"):
-                        try:
-                            self.copy_service_providers(session)
-                            programs = self.copy_programs_ids(session)
-                            Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
-                            TargetPopulation.objects.bulk_update(
-                                self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"]
-                            )
-                            self.copy_cash_plans(session)
-                            self.copy_payment_records(session)
-                            STATUS = session.STATUS_COMPLETED
-                        except Exception as e:
-                            logger.exception(e)
-                            session.process_exception(e)
-                            STATUS = session.status
-                            TB = session.traceback
-                            SID = session.sentry_id
-                            raise
-            finally:
-                session.sentry_id = SID
-                session.traceback = TB
-                session.status = STATUS
-                session.save()
+                        self.copy_service_providers(session)
+                        self.copy_programs(session)
+                        self.copy_target_population(session)
+                        self.copy_cash_plans(session)
+                        self.copy_payment_records(session)
+                        session.status = session.STATUS_COMPLETED
+                        session.save(update_fields=("status",))
+            except Exception as e:
+                session.process_exception(e)
+                session.save(
+                    update_fields=(
+                        "status",
+                        "traceback",
+                        "sentry_id",
+                    )
+                )
+                raise
 
     def copy_cash_plans(self, session):
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
         for dh_cash_plan in dh_cash_plans:
-            cash_plan_args = self.build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
+            cash_plan_args = build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
             self.set_cash_plan_service_provider(cash_plan_args)
             cash_plan_args["business_area"] = BusinessArea.objects.get(code=dh_cash_plan.business_area)
             (
                 cash_plan,
                 created,
             ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
-            try:
-                if not cash_plan.exchange_rate:
-                    exchange_rates_client = ExchangeRates()
-                    cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, exchange_rates_client)
+
+            if created:
+                CashPlanPaymentVerificationSummary.objects.create(cash_plan=cash_plan)
+
+            if not cash_plan.exchange_rate:
+                try:
+                    cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, self.exchange_rates_client)
                     cash_plan.save(update_fields=["exchange_rate"])
-                    CashPlanPaymentVerificationSummary.objects.create(cash_plan=cash_plan)
-            except Exception as e:
-                logger.exception(e)
+                except Exception as e:
+                    logger.exception(e)
 
     def set_cash_plan_service_provider(self, cash_plan_args):
         assistance_through = cash_plan_args.get("assistance_through")
@@ -173,15 +172,11 @@ class PullFromDatahubTask:
             return
         cash_plan_args["service_provider"] = service_provider
 
-    @cached_property
-    def exchange_rates_client(self):
-        return ExchangeRates()
-
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
         household_ids = []
         for dh_payment_record in dh_payment_records:
-            payment_record_args = self.build_arg_dict(
+            payment_record_args = build_arg_dict(
                 dh_payment_record,
                 PullFromDatahubTask.MAPPING_PAYMENT_RECORD_DICT,
             )
@@ -195,15 +190,13 @@ class PullFromDatahubTask:
                 payment_record,
                 created,
             ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
-            # FIXME: Slow methods, HOTFIX
-            if False:
-                try:
-                    payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
-                        payment_record, self.exchange_rates_client
-                    )
-                except Exception as e:
-                    logger.exception(e)
+            try:
+                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
+                    payment_record, self.exchange_rates_client
+                )
                 payment_record.save(update_fields=["delivered_quantity_usd"])
+            except Exception as e:
+                logger.exception(e)
             household_ids.append(payment_record.household_id)
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
@@ -215,7 +208,7 @@ class PullFromDatahubTask:
     def copy_service_providers(self, session):
         dh_service_providers = ca_models.ServiceProvider.objects.filter(session=session)
         for dh_service_provider in dh_service_providers:
-            service_provider_args = self.build_arg_dict(
+            service_provider_args = build_arg_dict(
                 dh_service_provider,
                 PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
@@ -223,7 +216,7 @@ class PullFromDatahubTask:
             service_provider_args["country"] = CountryCodeMap.objects.get_iso3_code(dh_service_provider.country)
             ServiceProvider.objects.update_or_create(ca_id=dh_service_provider.ca_id, defaults=service_provider_args)
 
-    def copy_programs_ids(self, session):
+    def copy_programs(self, session):
         dh_programs = ca_models.Programme.objects.filter(session=session)
         programs = []
         for dh_program in dh_programs:
@@ -231,13 +224,14 @@ class PullFromDatahubTask:
             program.ca_id = dh_program.ca_id
             program.ca_hash_id = dh_program.ca_hash_id
             programs.append(program)
-        return programs
+        Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
 
-    def copy_target_population_ids(self, session):
+    def copy_target_population(self, session):
         dh_target_populations = ca_models.TargetPopulation.objects.filter(session=session)
-
+        target_populations = []
         for dh_target_population in dh_target_populations:
             target_population = TargetPopulation.objects.get(id=dh_target_population.mis_id)
             target_population.ca_id = dh_target_population.ca_id
             target_population.ca_hash_id = dh_target_population.ca_hash_id
-            yield target_population
+            target_populations.append(target_population)
+        TargetPopulation.objects.bulk_update(target_populations, ["ca_id", "ca_hash_id"])
