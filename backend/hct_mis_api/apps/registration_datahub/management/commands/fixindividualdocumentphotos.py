@@ -40,17 +40,15 @@ def fix_document_photos():
         )
         .annotate(hct_id=F("individual__registration_data_import__hct_id"))
         .annotate(import_data_id=F("individual__registration_data_import__import_data"))
-        .values("document_number", "hct_id", "import_data_id")
     )
 
     documents_to_update = []
     imported_documents_to_update = []
     for imported_document in imported_documents:
-        hct_id = imported_document.get("hct_id")
-        document_number = imported_document.get("document_number")
+        document_number = imported_document.document_number
         file = None
 
-        rdi = RegistrationDataImport.objects.filter(id=hct_id).first()
+        rdi = RegistrationDataImport.objects.filter(id=imported_document.hct_id).first()
         if not rdi:
             print(f"Not found RegistrationDataImport object for Imported Document: {imported_document.id}")
             continue
@@ -58,7 +56,7 @@ def fix_document_photos():
             continue
 
         try:
-            json_file = ImportData.objects.get(id=imported_document.get("import_data_id")).file.read()
+            json_file = ImportData.objects.get(id=imported_document.import_data_id).file.read()
         except Exception as e:
             print(f"Error get or read json file for Imported Document: {imported_document.id}. {e}")
             continue
@@ -97,7 +95,7 @@ def fix_document_photos():
             imported_documents_to_update.append(imported_document)
 
             document = Document.objects.filter(
-                individual__registration_data_import__id=hct_id, document_number=document_number, photo=""
+                individual__registration_data_import__id=imported_document.hct_id, document_number=document_number, photo=""
             ).first()
 
             if document:
