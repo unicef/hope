@@ -45,6 +45,8 @@ export function EditTargetPopulation({
     criterias: targetPopulationCriterias.rules || [],
     excludedIds: targetPopulation.excludedIds || '',
     exclusionReason: targetPopulation.exclusionReason || '',
+    criteriaFitRangeMin: targetPopulation.criteriaFitRange[0],
+    criteriaFitRangeMax: targetPopulation.criteriaFitRange[1],
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
     targetPopulationCriterias:
@@ -89,6 +91,12 @@ export function EditTargetPopulation({
       },
     ),
     exclusionReason: Yup.string().max(500, t('Too long')),
+    criteriaFitRangeMin: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
+    criteriaFitRangeMax: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
   });
 
   const handleSubmit = async (values, { setFieldError }): Promise<void> => {
@@ -106,6 +114,10 @@ export function EditTargetPopulation({
             ...getTargetingCriteriaVariables({
               criterias: values.candidateListCriterias,
             }),
+            criteriaFitRange: [
+              values.criteriaFitRangeMin,
+              values.criteriaFitRangeMax,
+            ],
           },
         },
         refetchQueries: () => [
@@ -185,6 +197,10 @@ export function EditTargetPopulation({
                 }),
                 program: selectedProgram(values).id,
                 excludedIds: values.excludedIds,
+                criteriaFitRange: [
+                  values.criteriaFitRangeMin,
+                  values.criteriaFitRangeMax,
+                ],
                 businessArea,
               }}
               query={useGoldenRecordByTargetingCriteriaQuery}

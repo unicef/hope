@@ -11,6 +11,7 @@ export const GoldenRecordByTargetingCriteria = gql`
     $program: ID!
     $excludedIds: String!
     $businessArea: String
+    $criteriaFitRange: Int[]
   ) {
     goldenRecordByTargetingCriteria(
       targetingCriteria: $targetingCriteria
@@ -22,6 +23,7 @@ export const GoldenRecordByTargetingCriteria = gql`
       program: $program
       excludedIds: $excludedIds
       businessArea: $businessArea
+      criteriaFitRange: $criteriaFitRange
     ) {
       edges {
         node {

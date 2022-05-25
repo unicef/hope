@@ -70,6 +70,12 @@ export function CreateTargetPopulationPage(): React.ReactElement {
       },
     ),
     exclusionReason: Yup.string().max(500, t('Too long')),
+    criteriaFitRangeMin: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
+    criteriaFitRangeMax: Yup.number()
+      .min(0)
+      .max(99999999, t('Number is too big')),
   });
 
   const handleSubmit = async (values, { setFieldError }): Promise<void> => {
@@ -151,6 +157,10 @@ export function CreateTargetPopulationPage(): React.ReactElement {
               variables={{
                 ...getTargetingCriteriaVariables(values),
                 excludedIds: values.excludedIds,
+                criteriaFitRange: [
+                  values.criteriaFitRangeMin,
+                  values.criteriaFitRangeMax,
+                ],
               }}
               program={values.program}
               businessArea={businessArea}

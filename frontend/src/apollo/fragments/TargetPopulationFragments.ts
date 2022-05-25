@@ -32,11 +32,12 @@ export const targetPopulationDetailed = gql`
     caHashId
     excludedIds
     exclusionReason
+    criteriaFitRange
     steficonRule {
       id
-      rule{
-          id
-          name
+      rule {
+        id
+        name
       }
     }
     vulnerabilityScoreMin
