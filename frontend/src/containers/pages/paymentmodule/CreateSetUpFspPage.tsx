@@ -1,5 +1,4 @@
 import { Box } from '@material-ui/core';
-import styled from 'styled-components';
 import { Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,18 +14,7 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import { handleValidationErrors } from '../../../utils/utils';
 import { useCreateTpMutation } from '../../../__generated__/graphql';
-
-const DividerContainer = styled.div`
-  height: 50px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-`;
-const Divider = styled.div`
-  border-top: 1px solid #b1b1b5;
-  height: 1px;
-  width: 100%;
-`;
+import { DividerLine } from '../../../components/core/DividerLine';
 
 export const CreateSetUpFspPage = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -120,27 +108,21 @@ export const CreateSetUpFspPage = (): React.ReactElement => {
                   values={values}
                   permissions={permissions}
                 />
-                <DividerContainer>
-                  <Divider />
-                </DividerContainer>
+                <DividerLine />
                 <FspArray
                   baseName='transfer'
                   label={t('Transfer')}
                   values={values}
                   permissions={permissions}
                 />
-                <DividerContainer>
-                  <Divider />
-                </DividerContainer>
+                <DividerLine />
                 <FspArray
                   baseName='cash'
                   label={t('Cash')}
                   values={values}
                   permissions={permissions}
                 />
-                <DividerContainer>
-                  <Divider />
-                </DividerContainer>
+                <DividerLine />
                 <FspArray
                   baseName='wallet'
                   label={t('Wallet')}
