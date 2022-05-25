@@ -5,7 +5,6 @@ from collections import defaultdict
 from django.core.files import File
 from django.core.management import BaseCommand
 from django.db.models import F
-from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import get_field_name, KOBO_FORM_INDIVIDUALS_COLUMN_NAME
@@ -51,7 +50,11 @@ def fix_document_photos():
         document_number = imported_document.get("document_number")
         file = None
 
-        if not get_object_or_404(RegistrationDataImport, id=hct_id).pull_pictures:
+        rdi = RegistrationDataImport.objects.filter(id=hct_id).first()
+        if not rdi:
+            print(f"Not found RegistrationDataImport object for Imported Document: {imported_document.id}")
+            continue
+        if not rdi.pull_pictures:
             continue
 
         try:
