@@ -6,6 +6,7 @@ from django.db.models import Prefetch, Q
 from django.db.models.functions import Lower
 from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter
 from graphene import relay
+from graphql import GraphQLError
 from graphene_django import DjangoConnectionField, DjangoObjectType
 
 import hct_mis_api.apps.targeting.models as target_models
@@ -416,6 +417,11 @@ class Query(graphene.ObjectType):
     def resolve_golden_record_by_targeting_criteria(
         parent, info, targeting_criteria, program, excluded_ids, criteria_fit_range=None, **kwargs
     ):
+        if criteria_fit_range:
+            min_ind, max_ind = tuple(criteria_fit_range)
+            if min_ind > max_ind:
+                raise GraphQLError("Minimum number cannot be higher than maximum number.")
+
         household_queryset = Household.objects
         return prefetch_selections(
             household_queryset.filter(
