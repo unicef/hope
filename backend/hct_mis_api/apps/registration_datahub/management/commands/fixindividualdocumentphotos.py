@@ -101,6 +101,7 @@ def fix_document_photos():
             if document:
                 document.photo = file
                 documents_to_update.append(document)
+            print(f"Fixed Imported Document: {imported_document.id}")
         else:
             print(f"Not found photo for Imported Document: {imported_document.id}")
 
