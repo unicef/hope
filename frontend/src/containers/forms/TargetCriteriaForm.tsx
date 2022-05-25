@@ -238,190 +238,196 @@ export function TargetCriteriaForm({
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values, resetForm, errors }) => (
-          <Dialog
-            open={open}
-            onClose={onClose}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-            fullWidth
-            maxWidth='md'
-          >
-            <DialogTitleWrapper>
-              <DialogTitle id='scroll-dialog-title' disableTypography>
-                <Typography variant='h6'>{title}</Typography>
-              </DialogTitle>
-            </DialogTitleWrapper>
-            <DialogContent>
-              {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-              // @ts-ignore
-              errors.nonFieldErrors && (
-                <DialogError>
-                  <ul>
-                    {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                    // @ts-ignore
-                    errors.nonFieldErrors.map((message) => (
-                      <li>{message}</li>
-                    ))}
-                  </ul>
-                </DialogError>
-              )}
-              <DialogDescription>
-                All rules defined below have to be true for the entire
-                household.
-              </DialogDescription>
-              <FieldArray
-                name='filters'
-                render={(arrayHelpers) => (
-                  <ArrayFieldWrapper
-                    arrayHelpers={arrayHelpers}
-                    ref={filtersArrayWrapperRef}
-                  >
-                    {values.filters.map((each, index) => {
-                      return (
-                        <TargetingCriteriaFilter
-                          //eslint-disable-next-line
-                          key={index}
-                          index={index}
-                          data={householdData}
-                          each={each}
-                          onChange={(e, object) => {
-                            if (object) {
-                              return chooseFieldType(
-                                object,
-                                arrayHelpers,
-                                index,
-                              );
-                            }
-                            return clearField(arrayHelpers, index);
-                          }}
-                          values={values}
-                          onClick={() => arrayHelpers.remove(index)}
-                        />
-                      );
-                    })}
-                  </ArrayFieldWrapper>
+        {({ submitForm, values, resetForm, errors }) => {
+          return (
+            <Dialog
+              open={open}
+              onClose={onClose}
+              scroll='paper'
+              aria-labelledby='form-dialog-title'
+              fullWidth
+              maxWidth='md'
+            >
+              <DialogTitleWrapper>
+                <DialogTitle id='scroll-dialog-title' disableTypography>
+                  <Typography variant='h6'>{title}</Typography>
+                </DialogTitle>
+              </DialogTitleWrapper>
+              <DialogContent>
+                {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                // @ts-ignore
+                errors.nonFieldErrors && (
+                  <DialogError>
+                    <ul>
+                      {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                      // @ts-ignore
+                      errors.nonFieldErrors.map((message) => (
+                        <li>{message}</li>
+                      ))}
+                    </ul>
+                  </DialogError>
                 )}
-              />
-              <Box display='flex' flexDirection='column'>
-                <ButtonBox>
-                  <Button
-                    onClick={() =>
-                      filtersArrayWrapperRef.current
-                        .getArrayHelpers()
-                        .push({ fieldName: '' })
-                    }
-                    color='primary'
-                  >
-                    <AddIcon />
-                    ADD HOUSEHOLD RULE
-                  </Button>
-                </ButtonBox>
-              </Box>
-              <AndDivider>
-                <AndDividerLabel>And</AndDividerLabel>
-              </AndDivider>
-              {values.individualsFiltersBlocks.length &&
-              shouldShowWarningForIndividualFilter ? (
                 <DialogDescription>
-                  In your programme, individual rules can only be applied to
-                  head of households.
+                  All rules defined below have to be true for the entire
+                  household.
                 </DialogDescription>
-              ) : null}
-              <FieldArray
-                name='individualsFiltersBlocks'
-                render={(arrayHelpers) => (
-                  <ArrayFieldWrapper
-                    arrayHelpers={arrayHelpers}
-                    ref={individualsFiltersBlocksWrapperRef}
-                  >
-                    {values.individualsFiltersBlocks.map((each, index) => {
-                      return (
-                        <TargetCriteriaFilterBlocks
-                          //eslint-disable-next-line
-                          key={index}
-                          blockIndex={index}
-                          data={individualData}
-                          values={values}
-                          onDelete={() => arrayHelpers.remove(index)}
-                        />
-                      );
-                    })}
-                  </ArrayFieldWrapper>
-                )}
-              />
-              <Box display='flex' flexDirection='column'>
-                <ButtonBox>
-                  <Button
-                    onClick={() =>
-                      individualsFiltersBlocksWrapperRef.current
-                        .getArrayHelpers()
-                        .push({
-                          individualBlockFilters: [{ fieldName: '' }],
-                        })
-                    }
-                    color='primary'
-                  >
-                    <AddIcon />
-                    ADD INDIVIDUAL RULE GROUP
-                  </Button>
-                </ButtonBox>
-              </Box>
-              <Box mt={3}>
-                <Typography>
-                  {t(
-                    'How many individuals in the household should fit these criteria?',
+                <FieldArray
+                  name='filters'
+                  render={(arrayHelpers) => (
+                    <ArrayFieldWrapper
+                      arrayHelpers={arrayHelpers}
+                      ref={filtersArrayWrapperRef}
+                    >
+                      {values.filters.map((each, index) => {
+                        return (
+                          <TargetingCriteriaFilter
+                            //eslint-disable-next-line
+                            key={index}
+                            index={index}
+                            data={householdData}
+                            each={each}
+                            onChange={(e, object) => {
+                              if (object) {
+                                return chooseFieldType(
+                                  object,
+                                  arrayHelpers,
+                                  index,
+                                );
+                              }
+                              return clearField(arrayHelpers, index);
+                            }}
+                            values={values}
+                            onClick={() => arrayHelpers.remove(index)}
+                          />
+                        );
+                      })}
+                    </ArrayFieldWrapper>
                   )}
-                </Typography>
-                <Box mt={2} display='flex'>
-                  <Box mr={2}>
-                    <Field
-                      name='criteriaFitRangeMin'
-                      type='number'
-                      label={t('Min')}
+                />
+                <Box display='flex' flexDirection='column'>
+                  <ButtonBox>
+                    <Button
+                      onClick={() =>
+                        filtersArrayWrapperRef.current
+                          .getArrayHelpers()
+                          .push({ fieldName: '' })
+                      }
                       color='primary'
-                      component={FormikTextField}
-                      variant='outlined'
-                    />
-                  </Box>
-                  <Field
-                    name='criteriaFitRangeMax'
-                    type='number'
-                    label={t('Max')}
-                    color='primary'
-                    component={FormikTextField}
-                    variant='outlined'
-                  />
+                    >
+                      <AddIcon />
+                      ADD HOUSEHOLD RULE
+                    </Button>
+                  </ButtonBox>
                 </Box>
-              </Box>
-            </DialogContent>
-            <DialogFooter>
-              <DialogActions>
-                <StyledBox display='flex' justifyContent='flex-end'>
-                  <div>
-                    <Button
-                      onClick={() => {
-                        resetForm();
-                        onClose();
-                      }}
+                <AndDivider>
+                  <AndDividerLabel>And</AndDividerLabel>
+                </AndDivider>
+                {values.individualsFiltersBlocks.length &&
+                shouldShowWarningForIndividualFilter ? (
+                  <DialogDescription>
+                    In your programme, individual rules can only be applied to
+                    head of households.
+                  </DialogDescription>
+                ) : null}
+                <FieldArray
+                  name='individualsFiltersBlocks'
+                  render={(arrayHelpers) => (
+                    <ArrayFieldWrapper
+                      arrayHelpers={arrayHelpers}
+                      ref={individualsFiltersBlocksWrapperRef}
                     >
-                      Cancel
-                    </Button>
+                      {values.individualsFiltersBlocks.map((each, index) => {
+                        return (
+                          <TargetCriteriaFilterBlocks
+                            //eslint-disable-next-line
+                            key={index}
+                            blockIndex={index}
+                            data={individualData}
+                            values={values}
+                            onDelete={() => arrayHelpers.remove(index)}
+                          />
+                        );
+                      })}
+                    </ArrayFieldWrapper>
+                  )}
+                />
+                <Box display='flex' flexDirection='column'>
+                  <ButtonBox>
                     <Button
-                      onClick={submitForm}
-                      type='submit'
+                      onClick={() =>
+                        individualsFiltersBlocksWrapperRef.current
+                          .getArrayHelpers()
+                          .push({
+                            individualBlockFilters: [{ fieldName: '' }],
+                          })
+                      }
                       color='primary'
-                      variant='contained'
-                      data-cy='button-target-population-add-criteria'
                     >
-                      Save
+                      <AddIcon />
+                      ADD INDIVIDUAL RULE GROUP
                     </Button>
-                  </div>
-                </StyledBox>
-              </DialogActions>
-            </DialogFooter>
-          </Dialog>
-        )}
+                  </ButtonBox>
+                </Box>
+                {values.individualsFiltersBlocks.length ? (
+                  <>
+                    <Box mt={3}>
+                      <Typography>
+                        {t(
+                          'How many individuals in the household should fit these criteria?',
+                        )}
+                      </Typography>
+                      <Box mt={2} display='flex'>
+                        <Box mr={2}>
+                          <Field
+                            name='criteriaFitRangeMin'
+                            type='number'
+                            label={t('Min')}
+                            color='primary'
+                            component={FormikTextField}
+                            variant='outlined'
+                          />
+                        </Box>
+                        <Field
+                          name='criteriaFitRangeMax'
+                          type='number'
+                          label={t('Max')}
+                          color='primary'
+                          component={FormikTextField}
+                          variant='outlined'
+                        />
+                      </Box>
+                    </Box>
+                  </>
+                ) : null}
+              </DialogContent>
+              <DialogFooter>
+                <DialogActions>
+                  <StyledBox display='flex' justifyContent='flex-end'>
+                    <div>
+                      <Button
+                        onClick={() => {
+                          resetForm();
+                          onClose();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={submitForm}
+                        type='submit'
+                        color='primary'
+                        variant='contained'
+                        data-cy='button-target-population-add-criteria'
+                      >
+                        Save
+                      </Button>
+                    </div>
+                  </StyledBox>
+                </DialogActions>
+              </DialogFooter>
+            </Dialog>
+          );
+        }}
       </Formik>
     </DialogContainer>
   );

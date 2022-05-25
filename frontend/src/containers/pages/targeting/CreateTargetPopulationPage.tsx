@@ -34,6 +34,8 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     program: null,
     excludedIds: '',
     exclusionReason: '',
+    criteriaFitRangeMin: null,
+    criteriaFitRangeMax: null,
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
