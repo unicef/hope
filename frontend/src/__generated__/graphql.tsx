@@ -822,6 +822,7 @@ export type CreateTargetPopulationInput = {
   programId: Scalars['ID'],
   excludedIds: Scalars['String'],
   exclusionReason?: Maybe<Scalars['String']>,
+  criteriaFitRange?: Maybe<Array<Maybe<Scalars['Int']>>>,
 };
 
 export type CreateTargetPopulationMutation = {
@@ -5143,6 +5144,7 @@ export type TargetPopulationNode = Node & {
   vulnerabilityScoreMax?: Maybe<Scalars['Float']>,
   excludedIds: Scalars['String'],
   exclusionReason: Scalars['String'],
+  criteriaFitRange: Array<Maybe<Scalars['Int']>>,
   paymentRecords: PaymentRecordNodeConnection,
   selections: Array<HouseholdSelection>,
   totalHouseholds?: Maybe<Scalars['Int']>,
@@ -5669,6 +5671,7 @@ export type UpdateTargetPopulationInput = {
   vulnerabilityScoreMax?: Maybe<Scalars['Decimal']>,
   excludedIds?: Maybe<Scalars['String']>,
   exclusionReason?: Maybe<Scalars['String']>,
+  criteriaFitRange?: Maybe<Array<Maybe<Scalars['Int']>>>,
 };
 
 export type UpdateTargetPopulationMutation = {
@@ -6422,7 +6425,7 @@ export type TargetPopulationMinimalFragment = (
 
 export type TargetPopulationDetailedFragment = (
   { __typename?: 'TargetPopulationNode' }
-  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'excludedIds' | 'exclusionReason' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'changeDate' | 'finalizedAt'>
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'excludedIds' | 'exclusionReason' | 'criteriaFitRange' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'changeDate' | 'finalizedAt'>
   & { steficonRule: Maybe<(
     { __typename?: 'RuleCommitNode' }
     & Pick<RuleCommitNode, 'id'>
@@ -9600,7 +9603,8 @@ export type GoldenRecordByTargetingCriteriaQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   program: Scalars['ID'],
   excludedIds: Scalars['String'],
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  criteriaFitRange?: Maybe<Array<Maybe<Scalars['Int']>>>
 };
 
 
@@ -10205,6 +10209,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   caHashId
   excludedIds
   exclusionReason
+  criteriaFitRange
   steficonRule {
     id
     rule {
@@ -18304,8 +18309,8 @@ export type FinalHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<t
 export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaLazyQuery>;
 export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
-    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $program: ID!, $excludedIds: String!, $businessArea: String) {
-  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, program: $program, excludedIds: $excludedIds, businessArea: $businessArea) {
+    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $program: ID!, $excludedIds: String!, $businessArea: String, $criteriaFitRange: [Int]) {
+  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, program: $program, excludedIds: $excludedIds, businessArea: $businessArea, criteriaFitRange: $criteriaFitRange) {
     edges {
       node {
         id
@@ -18369,6 +18374,7 @@ export function withGoldenRecordByTargetingCriteria<TProps, TChildProps = {}>(op
  *      program: // value for 'program'
  *      excludedIds: // value for 'excludedIds'
  *      businessArea: // value for 'businessArea'
+ *      criteriaFitRange: // value for 'criteriaFitRange'
  *   },
  * });
  */
@@ -21213,6 +21219,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  criteriaFitRange?: Resolver<Array<Maybe<ResolversTypes['Int']>>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,

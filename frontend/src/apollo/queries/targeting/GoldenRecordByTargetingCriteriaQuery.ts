@@ -11,7 +11,7 @@ export const GoldenRecordByTargetingCriteria = gql`
     $program: ID!
     $excludedIds: String!
     $businessArea: String
-    $criteriaFitRange: Int[]
+    $criteriaFitRange: [Int]
   ) {
     goldenRecordByTargetingCriteria(
       targetingCriteria: $targetingCriteria

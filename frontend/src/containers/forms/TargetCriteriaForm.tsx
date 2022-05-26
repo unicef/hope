@@ -1,6 +1,3 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as Yup from 'yup';
-import styled from 'styled-components';
 import {
   Box,
   Button,
@@ -10,9 +7,12 @@ import {
   Typography,
 } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
-import { Field, FieldArray, Formik } from 'formik';
-import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { DialogActions } from '../dialogs/DialogActions';
+import { FieldArray, Formik } from 'formik';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import * as Yup from 'yup';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
   chooseFieldType,
   clearField,
@@ -20,12 +20,10 @@ import {
   formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
 } from '../../utils/targetingUtils';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
+import { DialogActions } from '../dialogs/DialogActions';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
-import { useTranslation } from 'react-i18next';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FieldLabel } from '../../components/core/FieldLabel';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -369,37 +367,6 @@ export function TargetCriteriaForm({
                     </Button>
                   </ButtonBox>
                 </Box>
-                {values.individualsFiltersBlocks.length ? (
-                  <>
-                    <Box mt={3}>
-                      <FieldLabel>
-                        {t(
-                          'How many individuals in the household should fit these criteria?',
-                        )}
-                      </FieldLabel>
-                      <Box mt={2} display='flex'>
-                        <Box mr={2}>
-                          <Field
-                            name='criteriaFitRangeMin'
-                            type='number'
-                            label={t('From')}
-                            color='primary'
-                            component={FormikTextField}
-                            variant='outlined'
-                          />
-                        </Box>
-                        <Field
-                          name='criteriaFitRangeMax'
-                          type='number'
-                          label={t('To')}
-                          color='primary'
-                          component={FormikTextField}
-                          variant='outlined'
-                        />
-                      </Box>
-                    </Box>
-                  </>
-                ) : null}
               </DialogContent>
               <DialogFooter>
                 <DialogActions>

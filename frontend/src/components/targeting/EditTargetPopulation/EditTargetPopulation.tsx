@@ -19,6 +19,7 @@ import {
   useGoldenRecordByTargetingCriteriaQuery,
   useUpdateTpMutation,
 } from '../../../__generated__/graphql';
+import { CriteriaFitRange } from '../CreateTargetPopulation/CriteriaFitRange';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { Results } from '../Results';
@@ -38,6 +39,7 @@ export function EditTargetPopulation({
   targetPopulation,
 }: EditTargetPopulationProps): React.ReactElement {
   const { t } = useTranslation();
+  console.log('targetPopulation', targetPopulation.criteriaFitRange[0]);
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
@@ -45,8 +47,8 @@ export function EditTargetPopulation({
     criterias: targetPopulationCriterias.rules || [],
     excludedIds: targetPopulation.excludedIds || '',
     exclusionReason: targetPopulation.exclusionReason || '',
-    criteriaFitRangeMin: targetPopulation.criteriaFitRange[0],
-    criteriaFitRangeMax: targetPopulation.criteriaFitRange[1],
+    criteriaFitRangeMin: targetPopulation.criteriaFitRange[0] || 0,
+    criteriaFitRangeMax: targetPopulation.criteriaFitRange[1] || 100,
     candidateListCriterias:
       targetPopulation.candidateListTargetingCriteria?.rules || [],
     targetPopulationCriterias:
@@ -100,6 +102,7 @@ export function EditTargetPopulation({
   });
 
   const handleSubmit = async (values, { setFieldError }): Promise<void> => {
+    console.log('submit values', values);
     try {
       await mutate({
         variables: {
@@ -161,61 +164,70 @@ export function EditTargetPopulation({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, submitForm }) => (
-        <Form>
-          <EditTargetPopulationHeader
-            handleSubmit={submitForm}
-            cancelEdit={cancelEdit}
-            values={values}
-            businessArea={businessArea}
-            targetPopulation={targetPopulation}
-          />
-          <TargetPopulationProgramme
-            allPrograms={allProgramsData}
-            loading={loadingPrograms}
-            program={values.program}
-          />
-
-          <FieldArray
-            name='candidateListCriterias'
-            render={(arrayHelpers) => (
-              <TargetingCriteria
-                helpers={arrayHelpers}
-                candidateListRules={values.candidateListCriterias}
-                isEdit
-                selectedProgram={selectedProgram(values)}
-              />
-            )}
-          />
-          <Exclusions initialOpen={Boolean(values.excludedIds)} />
-          <Results />
-          {values.candidateListCriterias.length && selectedProgram(values) ? (
-            <TargetPopulationHouseholdTable
-              variables={{
-                ...getTargetingCriteriaVariables({
-                  criterias: values.candidateListCriterias,
-                }),
-                program: selectedProgram(values).id,
-                excludedIds: values.excludedIds,
-                criteriaFitRange: [
-                  values.criteriaFitRangeMin,
-                  values.criteriaFitRangeMax,
-                ],
-                businessArea,
-              }}
-              query={useGoldenRecordByTargetingCriteriaQuery}
-              queryObjectName='goldenRecordByTargetingCriteria'
+      {({ values, submitForm }) => {
+        return (
+          <Form>
+            <EditTargetPopulationHeader
+              handleSubmit={submitForm}
+              cancelEdit={cancelEdit}
+              values={values}
+              businessArea={businessArea}
+              targetPopulation={targetPopulation}
             />
-          ) : (
-            <PaperContainer>
-              <Typography variant='h6'>
-                {t('Target Population Entries (Households)')}
-              </Typography>
-              <Label>{t('Add targeting criteria to see results.')}</Label>
-            </PaperContainer>
-          )}
-        </Form>
-      )}
+            <TargetPopulationProgramme
+              allPrograms={allProgramsData}
+              loading={loadingPrograms}
+              program={values.program}
+            />
+
+            <FieldArray
+              name='candidateListCriterias'
+              render={(arrayHelpers) => (
+                <TargetingCriteria
+                  helpers={arrayHelpers}
+                  candidateListRules={values.candidateListCriterias}
+                  isEdit
+                  selectedProgram={selectedProgram(values)}
+                />
+              )}
+            />
+            <Exclusions initialOpen={Boolean(values.excludedIds)} />
+            <CriteriaFitRange
+              initialOpen={
+                Boolean(values.criteriaFitRangeMin) ||
+                Boolean(values.criteriaFitRangeMax)
+              }
+            />
+
+            <Results />
+            {values.candidateListCriterias.length && selectedProgram(values) ? (
+              <TargetPopulationHouseholdTable
+                variables={{
+                  ...getTargetingCriteriaVariables({
+                    criterias: values.candidateListCriterias,
+                  }),
+                  program: selectedProgram(values).id,
+                  excludedIds: values.excludedIds,
+                  criteriaFitRange: [
+                    values.criteriaFitRangeMin,
+                    values.criteriaFitRangeMax,
+                  ],
+                  businessArea,
+                }}
+                query={useGoldenRecordByTargetingCriteriaQuery}
+                queryObjectName='goldenRecordByTargetingCriteria'
+              />
+            ) : (
+              <PaperContainer>
+                <Typography variant='h6'>
+                  {t('Target Population Entries (Households)')}
+                </Typography>
+                <Label>{t('Add targeting criteria to see results.')}</Label>
+              </PaperContainer>
+            )}
+          </Form>
+        );
+      }}
     </Formik>
   );
 }

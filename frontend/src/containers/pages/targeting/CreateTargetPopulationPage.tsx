@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { CreateTargetPopulationHeader } from '../../../components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
+import { CriteriaFitRange } from '../../../components/targeting/CreateTargetPopulation/CriteriaFitRange';
 import { EmptyTargetingCriteria } from '../../../components/targeting/CreateTargetPopulation/EmptyTargetingCriteria';
 import { Exclusions } from '../../../components/targeting/CreateTargetPopulation/Exclusions';
 import { Results } from '../../../components/targeting/Results';
@@ -34,8 +35,8 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     program: null,
     excludedIds: '',
     exclusionReason: '',
-    criteriaFitRangeMin: null,
-    criteriaFitRangeMax: null,
+    criteriaFitRangeMin: 0,
+    criteriaFitRangeMax: 100,
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -153,6 +154,7 @@ export function CreateTargetPopulationPage(): React.ReactElement {
             <TargetingCriteriaDisabled />
           )}
           <Exclusions />
+          <CriteriaFitRange />
           <Results />
           {values.criterias.length ? (
             <CreateTable

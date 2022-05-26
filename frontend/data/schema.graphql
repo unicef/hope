@@ -505,6 +505,7 @@ input CreateTargetPopulationInput {
   programId: ID!
   excludedIds: String!
   exclusionReason: String
+  criteriaFitRange: [Int]
 }
 
 type CreateTargetPopulationMutation {
@@ -3033,6 +3034,7 @@ type TargetPopulationNode implements Node {
   vulnerabilityScoreMax: Float
   excludedIds: String!
   exclusionReason: String!
+  criteriaFitRange: [Int]!
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
   totalHouseholds: Int
@@ -3568,6 +3570,7 @@ input UpdateTargetPopulationInput {
   vulnerabilityScoreMax: Decimal
   excludedIds: String
   exclusionReason: String
+  criteriaFitRange: [Int]
 }
 
 type UpdateTargetPopulationMutation {
