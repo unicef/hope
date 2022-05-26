@@ -48,6 +48,7 @@ export const ExistingGrievanceTickets = gql`
           }
           category
           createdAt
+          issueType
           userModified
           admin
           household {
