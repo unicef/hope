@@ -177,8 +177,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             if criteria_fit_min > criteria_fit_max:
                 raise ValidationError("Minimum number cannot be higher than maximum number.")
 
-            targeting_data["criteria_fit_min"] = criteria_fit_min
-            targeting_data["criteria_fit_max"] = criteria_fit_max
+            targeting_data["criteria_fit_range"] = [criteria_fit_min, criteria_fit_max]
 
         target_population = TargetPopulation(**targeting_data)
         target_population.candidate_list_targeting_criteria = targeting_criteria
@@ -259,10 +258,9 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             target_population.exclusion_reason = exclusion_reason
         if criteria_fit_range:
             criteria_fit_min, criteria_fit_max = tuple(criteria_fit_range)
-            if criteria_fit_min:
-                target_population.criteria_fit_min = criteria_fit_min
-            if criteria_fit_max:
-                target_population.criteria_fit_max = criteria_fit_max
+            if criteria_fit_min > criteria_fit_max:
+                raise ValidationError("Minimum number cannot be higher than maximum number.")
+            target_population.criteria_fit_range = [criteria_fit_min, criteria_fit_max]
         target_population.full_clean()
         target_population.save()
         log_create(

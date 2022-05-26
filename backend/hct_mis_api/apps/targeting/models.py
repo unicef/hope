@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField, IntegerRangeField
+from django.contrib.postgres.fields import CICharField, IntegerRangeField, ArrayField
 from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
     RangeMinValueValidator,
@@ -275,8 +275,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     )
     excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
-    criteria_fit_min = models.IntegerField(blank=True, null=True)
-    criteria_fit_max = models.IntegerField(blank=True, null=True)
+    criteria_fit_range = ArrayField(
+        models.IntegerField(null=True, blank=True),
+        default=list, blank=True, size=2
+    )
 
     @property
     def excluded_household_ids(self):
@@ -302,14 +304,15 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         query = Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).filter(
             business_area=self.business_area
         )
-
-        if self.criteria_fit_min or self.criteria_fit_max:
-            criteria_fit_range = Q()
-            if self.criteria_fit_min:
-                criteria_fit_range &= Q(household_count__gte=self.criteria_fit_min)
-            if self.criteria_fit_max:
-                criteria_fit_range &= Q(household_count__lte=self.criteria_fit_max)
-            return query.annotate(household_count=Count("id")).filter(criteria_fit_range)
+        if self.criteria_fit_range:
+            criteria_fit_min, criteria_fit_max = tuple(self.criteria_fit_range)
+            if criteria_fit_min or criteria_fit_max:
+                criteria_fit_range = Q()
+                if criteria_fit_min:
+                    criteria_fit_range &= Q(household_count__gte=criteria_fit_min)
+                if criteria_fit_max:
+                    criteria_fit_range &= Q(household_count__lte=criteria_fit_max)
+                return query.annotate(household_count=Count("id")).filter(criteria_fit_range)
         return query
 
     @property
@@ -410,16 +413,13 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.sent_to_datahub = True
 
     def is_finalized(self):
-        return self.status in [
-            self.STATUS_PROCESSING,
-            self.STATUS_READY_FOR_CASH_ASSIST,
-        ]
+        return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
     def is_locked(self):
         return self.status == self.STATUS_LOCKED
 
     def is_approved(self):
-        return self.status in [self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED]
+        return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
 
     def __str__(self):
         return self.name
