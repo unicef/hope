@@ -14,7 +14,6 @@ import { renderUserName } from '../../../utils/utils';
 import {
   useGrievancesChoiceDataQuery,
   useAllUsersForFiltersQuery,
-  useAllRegistrationDataImportsQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -55,19 +54,11 @@ export function GrievancesTablePage(): React.ReactElement {
     variables: { businessArea },
   });
 
-  const {
-    data: rdiData,
-    loading: rdiDataLoading,
-  } = useAllRegistrationDataImportsQuery({
-    variables: { businessArea, first: 100 },
-  });
-
-  if (choicesLoading || userDataLoading || rdiDataLoading)
-    return <LoadingComponent />;
+  if (choicesLoading || userDataLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
     return <PermissionDenied />;
-  if (!choicesData || !userData || !rdiData) return null;
+  if (!choicesData || !userData) return null;
 
   const usersChoices = userData.allUsers.edges.map((edge) => ({
     name: renderUserName(edge.node),
@@ -91,7 +82,6 @@ export function GrievancesTablePage(): React.ReactElement {
       <GrievancesFilters
         choicesData={choicesData}
         usersChoices={usersChoices}
-        rdiData={rdiData}
         filter={filter}
         onFilterChange={setFilter}
       />

@@ -1,7 +1,5 @@
 import datetime
 
-from django.core.management import call_command
-
 from dateutil.relativedelta import relativedelta
 from parameterized import parameterized
 
