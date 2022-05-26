@@ -25,6 +25,7 @@ import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { FieldLabel } from '../../components/core/FieldLabel';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -371,17 +372,17 @@ export function TargetCriteriaForm({
                 {values.individualsFiltersBlocks.length ? (
                   <>
                     <Box mt={3}>
-                      <Typography>
+                      <FieldLabel>
                         {t(
                           'How many individuals in the household should fit these criteria?',
                         )}
-                      </Typography>
+                      </FieldLabel>
                       <Box mt={2} display='flex'>
                         <Box mr={2}>
                           <Field
                             name='criteriaFitRangeMin'
                             type='number'
-                            label={t('Min')}
+                            label={t('From')}
                             color='primary'
                             component={FormikTextField}
                             variant='outlined'
@@ -390,7 +391,7 @@ export function TargetCriteriaForm({
                         <Field
                           name='criteriaFitRangeMax'
                           type='number'
-                          label={t('Max')}
+                          label={t('To')}
                           color='primary'
                           component={FormikTextField}
                           variant='outlined'
