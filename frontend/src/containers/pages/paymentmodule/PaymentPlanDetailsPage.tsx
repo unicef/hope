@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
 import { PaymentPlanDetails } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails';
 import { PaymentPlanDetailsHeader } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
@@ -27,6 +28,10 @@ export function PaymentPlanDetailsPage(): React.ReactElement {
         permissions={permissions}
       />
       <PaymentPlanDetails
+        businessArea={businessArea}
+        permissions={permissions}
+      />
+      <AcceptanceProcess
         businessArea={businessArea}
         permissions={permissions}
       />
