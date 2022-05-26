@@ -101,6 +101,7 @@ class UpdateTargetPopulationInput(graphene.InputObjectType):
     vulnerability_score_max = graphene.Decimal()
     excluded_ids = graphene.String()
     exclusion_reason = graphene.String()
+    criteria_fit_range = graphene.Argument(graphene.List(graphene.Int), required=False)
 
 
 class CreateTargetPopulationInput(graphene.InputObjectType):
@@ -110,6 +111,7 @@ class CreateTargetPopulationInput(graphene.InputObjectType):
     program_id = graphene.ID(required=True)
     excluded_ids = graphene.String(required=True)
     exclusion_reason = graphene.String()
+    criteria_fit_range = graphene.Argument(graphene.List(graphene.Int), required=False)
 
 
 def from_input_to_targeting_criteria(targeting_criteria_input, program: Program):
@@ -159,13 +161,26 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         business_area = BusinessArea.objects.get(slug=input.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
-        target_population = TargetPopulation(
-            name=input.get("name"),
-            created_by=user,
-            business_area=business_area,
-            excluded_ids=input.get("excluded_ids"),
-            exclusion_reason=input.get("exclusion_reason", ""),
-        )
+
+        targeting_data = {
+            "name":  input.get("name"),
+            "created_by":  user,
+            "business_area":  business_area,
+            "excluded_ids":  input.get("excluded_ids"),
+            "exclusion_reason":  input.get("exclusion_reason", ""),
+        }
+
+        criteria_fit_range = input.get("criteria_fit_range")
+        if criteria_fit_range:
+            criteria_fit_min, criteria_fit_max = tuple(criteria_fit_range)
+
+            if criteria_fit_min > criteria_fit_max:
+                raise ValidationError("Minimum number cannot be higher than maximum number.")
+
+            targeting_data["criteria_fit_min"] = criteria_fit_min
+            targeting_data["criteria_fit_max"] = criteria_fit_max
+
+        target_population = TargetPopulation(**targeting_data)
         target_population.candidate_list_targeting_criteria = targeting_criteria
         target_population.program = program
         target_population.full_clean()
@@ -199,6 +214,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         vulnerability_score_max = input.get("vulnerability_score_max")
         excluded_ids = input.get("excluded_ids")
         exclusion_reason = input.get("exclusion_reason")
+        criteria_fit_range = input.get("criteria_fit_range")
         if not target_population.is_approved() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
@@ -241,6 +257,12 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             target_population.excluded_ids = excluded_ids
         if exclusion_reason is not None:
             target_population.exclusion_reason = exclusion_reason
+        if criteria_fit_range:
+            criteria_fit_min, criteria_fit_max = tuple(criteria_fit_range)
+            if criteria_fit_min:
+                target_population.criteria_fit_min = criteria_fit_min
+            if criteria_fit_max:
+                target_population.criteria_fit_max = criteria_fit_max
         target_population.full_clean()
         target_population.save()
         log_create(

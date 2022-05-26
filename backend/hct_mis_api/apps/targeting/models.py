@@ -275,6 +275,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     )
     excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
+    criteria_fit_min = models.IntegerField(blank=True, null=True)
+    criteria_fit_max = models.IntegerField(blank=True, null=True)
 
     @property
     def excluded_household_ids(self):
@@ -296,10 +298,19 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     def candidate_list(self):
         if self.status != TargetPopulation.STATUS_DRAFT:
             return []
-        household_queryset = Household.objects
-        return household_queryset.filter(self.candidate_list_targeting_criteria.get_query()).filter(
+
+        query = Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).filter(
             business_area=self.business_area
         )
+
+        if self.criteria_fit_min or self.criteria_fit_max:
+            criteria_fit_range = Q()
+            if self.criteria_fit_min:
+                criteria_fit_range &= Q(household_count__gte=self.criteria_fit_min)
+            if self.criteria_fit_max:
+                criteria_fit_range &= Q(household_count__lte=self.criteria_fit_max)
+            return query.annotate(household_count=Count("id")).filter(criteria_fit_range)
+        return query
 
     @property
     def final_list(self):
