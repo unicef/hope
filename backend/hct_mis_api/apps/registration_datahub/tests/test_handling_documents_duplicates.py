@@ -118,7 +118,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_hard_documents_deduplication(self):
 
-        with self.assertNumQueries(2):
+        with self.assertNumQueries(20):
             DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
         self.document1.refresh_from_db()
         self.document2.refresh_from_db()
