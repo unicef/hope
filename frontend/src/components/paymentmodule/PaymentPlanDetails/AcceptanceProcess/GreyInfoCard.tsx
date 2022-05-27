@@ -1,24 +1,29 @@
-import { styled } from 'styled-components';
-import { Box, Typography } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { Title } from '../../../core/Title';
-import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
+import styled from 'styled-components';
 
 const GreyText = styled.div`
   color: #9e9e9e;
 `;
-interface AcceptanceProcessProps {
-  businessArea: string;
-  permissions: string[];
+
+const GreyBox = styled(Box)`
+  background-color: #f4f5f6;
+`;
+interface GreyInfoCardProps {
+  businessArea?: string;
+  permissions?: string[];
 }
 
-export function AcceptanceProcess({
+export function GreyInfoCard({
   businessArea,
   permissions,
-}: AcceptanceProcessProps): React.ReactElement {
+}: GreyInfoCardProps): React.ReactElement {
   const { t } = useTranslation();
 
-  return <Box p={3}></Box>;
+  return (
+    <GreyBox p={3}>
+      Approved by someone<GreyText>on 01/01/2022</GreyText>
+    </GreyBox>
+  );
 }
