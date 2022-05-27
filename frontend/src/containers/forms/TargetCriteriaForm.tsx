@@ -9,7 +9,6 @@ import {
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Formik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -137,7 +136,6 @@ export function TargetCriteriaForm({
   title,
   shouldShowWarningForIndividualFilter,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
-  const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const { data, loading } = useImportedIndividualFieldsQuery({
     variables: {

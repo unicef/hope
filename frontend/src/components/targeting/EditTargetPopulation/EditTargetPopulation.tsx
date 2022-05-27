@@ -39,7 +39,6 @@ export function EditTargetPopulation({
   targetPopulation,
 }: EditTargetPopulationProps): React.ReactElement {
   const { t } = useTranslation();
-  console.log('targetPopulation', targetPopulation.criteriaFitRange[0]);
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
@@ -102,7 +101,6 @@ export function EditTargetPopulation({
   });
 
   const handleSubmit = async (values, { setFieldError }): Promise<void> => {
-    console.log('submit values', values);
     try {
       await mutate({
         variables: {
