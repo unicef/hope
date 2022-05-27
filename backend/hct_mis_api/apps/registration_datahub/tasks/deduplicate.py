@@ -2,10 +2,10 @@ import logging
 from dataclasses import dataclass, fields
 from time import sleep
 
-from django.db.models import Q, Value, F, CharField
+from django.db.models import CharField, F, Q, Value
+from django.db.models.functions import Concat
 
 from constance import config
-from django.db.models.functions import Concat
 from django_countries.fields import Country
 from elasticsearch_dsl import connections
 
@@ -829,9 +829,11 @@ class DeduplicateTask:
         new_document_signatures_duplicated_in_batch = [
             d for d in new_document_signatures if new_document_signatures.count(d) > 1
         ]
-        all_matching_number_documents = Document.objects.filter(
-            document_number__in=documents_numbers, status=Document.STATUS_VALID
-        ).annotate(signature=Concat(F("type_id"), Value("--"), F("document_number"), output_field=CharField()))
+        all_matching_number_documents = (
+            Document.objects.select_related("individual", "individual__household", "individual__business_area")
+            .filter(document_number__in=documents_numbers, status=Document.STATUS_VALID)
+            .annotate(signature=Concat(F("type_id"), Value("--"), F("document_number"), output_field=CharField()))
+        )
         all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
         all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
         already_processed_signatures = []
