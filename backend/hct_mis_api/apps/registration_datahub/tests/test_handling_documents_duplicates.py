@@ -114,9 +114,12 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         cls.document1.save()
         cls.document2.save()
         cls.document3.save()
+        cls.document4.save()
 
     def test_hard_documents_deduplication(self):
-        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+
+        with self.assertNumQueries(2):
+            DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
         self.document1.refresh_from_db()
         self.document2.refresh_from_db()
         self.document3.refresh_from_db()
@@ -125,4 +128,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(self.document2.status, Document.STATUS_NEED_INVESTIGATION)
         self.assertEqual(self.document3.status, Document.STATUS_VALID)
         self.assertEqual(self.document4.status, Document.STATUS_NEED_INVESTIGATION)
-        self.assertEqual(GrievanceTicket.objects.count(), 2)
+        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        ticket_details = GrievanceTicket.objects.first().needs_adjudication_ticket_details
+        self.assertEqual(ticket_details.possible_duplicates.count(), 2)
+
