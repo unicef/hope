@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { Title } from '../../../core/Title';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
+import { GreyInfoCard } from './GreyInfoCard';
 
 interface AcceptanceProcessProps {
   businessArea: string;
@@ -25,6 +26,7 @@ export function AcceptanceProcess({
           </Title>
         </Box>
         <AcceptanceProcessStepper />
+        <GreyInfoCard />
       </ContainerColumnWithBorder>
     </Box>
   );
