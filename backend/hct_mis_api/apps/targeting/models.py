@@ -487,7 +487,6 @@ class TargetingCriteriaQueryingMixin:
             Q(size__gt=0)
             & Q(withdrawn=False)
             & ~Q(unicef_id__in=self.excluded_household_ids)
-            & ~Q(individuals__documents__status=Document.STATUS_INVALID)
         )
 
     def get_query(self):
