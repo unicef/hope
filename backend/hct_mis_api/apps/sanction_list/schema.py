@@ -8,6 +8,7 @@ from graphene_django import DjangoObjectType
 from hct_mis_api.apps.account.permissions import DjangoPermissionFilterConnectionField
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
+from hct_mis_api.apps.sanction_list.filters import SanctionListIndividualFilter
 from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualAliasName,
@@ -16,25 +17,6 @@ from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividualDocument,
     SanctionListIndividualNationalities,
 )
-
-
-class SanctionListIndividualFilter(FilterSet):
-    class Meta:
-        fields = {
-            "id": ["exact"],
-            "full_name": ["exact", "startswith"],
-            "reference_number": ["exact"],
-        }
-        model = SanctionListIndividual
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            "id",
-            "reference_number",
-            Lower("full_name"),
-            "listed_on",
-        )
-    )
 
 
 class SanctionListIndividualNode(DjangoObjectType):
