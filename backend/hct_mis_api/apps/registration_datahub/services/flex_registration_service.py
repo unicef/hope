@@ -77,10 +77,10 @@ class FlexRegistrationService:
 
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by, records_ids, rdi_name="rdi_name"):
+    def create_rdi(self, imported_by, rdi_name="rdi_name"):
         business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
-        number_of_households = len(records_ids)
+        number_of_households = 0
 
         rdi = RegistrationDataImport.objects.create(
             name=rdi_name,
@@ -98,7 +98,7 @@ class FlexRegistrationService:
             data_type=ImportData.FLEX_REGISTRATION,
             number_of_individuals=number_of_individuals,
             number_of_households=number_of_households,
-            created_by_id=imported_by.id,
+            created_by_id=imported_by.id if imported_by else None,
         )
         rdi_datahub = RegistrationDataImportDatahub.objects.create(
             name=rdi_name,
@@ -123,30 +123,42 @@ class FlexRegistrationService:
         Record.objects.filter(pk__in=records_ids).update(registration_data_import=rdi_datahub)
 
         try:
-            with atomic("default"):
-                with atomic("registration_datahub"):
-                    for record_id in records_ids:
-                        try:
+            for record_id in records_ids:
+                try:
+                    with atomic("default"):
+                        with atomic("registration_datahub"):
                             record = Record.objects.defer("data").get(id=record_id)
                             self.create_household_for_rdi_household(record, rdi_datahub)
-                        except ValidationError as e:
-                            raise ValidationError({f"Record id: {record_id}": [str(e)]}) from e
+                except ValidationError as e:
+                    record.mark_as_invalid(str(e))
 
-                    number_of_individuals = ImportedIndividual.objects.filter(
-                        registration_data_import=rdi_datahub
-                    ).count()
-                    import_data.number_of_individuals = number_of_individuals
-                    rdi.number_of_individuals = number_of_individuals
-                    rdi.status = RegistrationDataImport.DEDUPLICATION
-                    rdi.save(
-                        update_fields=(
-                            "number_of_individuals",
-                            "status",
-                        )
-                    )
-                    import_data.save(update_fields=("number_of_individuals",))
-                    transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
-        except ValidationError as e:
+            number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
+            number_of_households = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub).count()
+
+            import_data.number_of_individuals = number_of_individuals
+            rdi.number_of_individuals = number_of_individuals
+            import_data.number_of_households = number_of_households
+            rdi.number_of_households = number_of_households
+            rdi.status = RegistrationDataImport.DEDUPLICATION
+
+            rdi.save(
+                update_fields=(
+                    "number_of_individuals",
+                    "number_of_households",
+                    "status",
+                )
+            )
+            import_data.save(
+                update_fields=(
+                    "number_of_individuals",
+                    "number_of_households",
+                )
+            )
+
+            record.mark_as_imported()
+
+            transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
+        except Exception as e:
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
             rdi.save(
@@ -155,10 +167,6 @@ class FlexRegistrationService:
                     "error_message",
                 )
             )
-            raise
-        except Exception:
-            rdi.status = RegistrationDataImport.IMPORT_ERROR
-            rdi.save(update_fields=("status",))
             raise
 
     def create_household_for_rdi_household(
@@ -276,10 +284,10 @@ class FlexRegistrationService:
         )
         disability = individual_data.get("disability", "n")
         disability_certificate_picture = individual_data.get("disability_certificate_picture")
-        if disability == "y":
+        if disability == "y" or disability_certificate_picture:
             individual_data["disability"] = DISABLED
         else:
-            individual_data["disability"] = DISABLED if disability_certificate_picture else NOT_DISABLED
+            individual_data["disability"] = NOT_DISABLED
 
         if relationship := individual_data.get("relationship"):
             individual_data["relationship"] = relationship.upper()
@@ -353,9 +361,9 @@ class FlexRegistrationService:
         if not bank_name:
             bank_name = other_bank_name
         bank_account_info_data = {
-            "bank_account_number": individual_dict.get("bank_account_number", ""),
+            "bank_account_number": individual_dict.get("bank_account_number", "").replace(" ", ""),
             "bank_name": bank_name,
-            "debit_card_number": individual_dict.get("bank_account_number", ""),
+            "debit_card_number": individual_dict.get("bank_account_number", "").replace(" ", ""),
             "individual": individual,
         }
         return bank_account_info_data

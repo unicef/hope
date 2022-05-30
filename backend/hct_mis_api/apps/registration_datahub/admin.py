@@ -339,8 +339,16 @@ class AlexisFilter(SimpleListFilter):
 
 @admin.register(Record)
 class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    list_display = ("id", "registration", "timestamp", "source_id", "ignored")
-    readonly_fields = ("id", "registration", "timestamp", "source_id", "registration_data_import")
+    list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
+    readonly_fields = (
+        "id",
+        "registration",
+        "timestamp",
+        "source_id",
+        "registration_data_import",
+        "status",
+        "error_message",
+    )
     list_editable = ("ignored",)
     exclude = ("data",)
     date_hierarchy = "timestamp"
@@ -348,6 +356,7 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         DepotManager,
         AlexisFilter,
         ("registration_data_import", AutoCompleteFilter),
+        "status",
         ("source_id", NumberFilter),
         ("id", NumberFilter),
         ("data", JsonFieldFilter),
@@ -371,10 +380,13 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         service = FlexRegistrationService()
         try:
             records_ids = queryset.values_list("id", flat=True)
-            rdi = service.create_rdi(request.user, records_ids, f"ukraine rdi {datetime.datetime.now()}")
+            rdi = service.create_rdi(request.user, f"ukraine rdi {datetime.datetime.now()}")
 
             process_flex_records_task.delay(rdi.id, list(records_ids))
-            self.message_user(request, f"RDI Import with name: {rdi.name} started", messages.SUCCESS)
+            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+            self.message_user(
+                request, mark_safe(f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"), messages.SUCCESS
+            )
         except Exception as e:
             self.message_user(request, str(e), messages.ERROR)
 
@@ -496,7 +508,7 @@ class DiiaIndividualAdmin(HOPEModelAdminBase):
 @admin.register(DiiaHousehold)
 class DiiaHouseholdAdmin(HOPEModelAdminBase):
     search_fields = ("id", "registration_data_import", "rec_id")
-    list_display = ("registration_data_import", "rec_id")
+    list_display = ("registration_data_import", "head_of_household_full_name", "rec_id")
     raw_id_fields = ("registration_data_import", "head_of_household")
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (

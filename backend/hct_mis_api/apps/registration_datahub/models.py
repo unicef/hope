@@ -119,6 +119,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    diia_rec_id = models.CharField(max_length=50, blank=True, default=BLANK)
     flex_registrations_record = models.ForeignKey(
         "registration_datahub.Record",
         related_name="imported_households",
@@ -371,6 +372,7 @@ class ImportedDocument(TimeStampedUUIDModel):
         related_name="documents",
         on_delete=models.CASCADE,
     )
+    doc_date = models.DateField(blank=True, null=True, default=None)
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -434,6 +436,15 @@ class KoboImportedSubmission(models.Model):
 
 
 class Record(models.Model):
+    STATUS_TO_IMPORT = "TO_IMPORT"
+    STATUS_IMPORTED = "IMPORTED"
+    STATUS_ERROR = "ERROR"
+    STATUSES_CHOICES = (
+        (STATUS_TO_IMPORT, "To import"),
+        (STATUS_IMPORTED, "Imported"),
+        (STATUS_ERROR, "Error"),
+    )
+
     registration = models.IntegerField()
     timestamp = models.DateTimeField(db_index=True)
     storage = models.BinaryField(null=True, blank=True)
@@ -446,6 +457,17 @@ class Record(models.Model):
     ignored = models.BooleanField(default=False, blank=True, null=True, db_index=True)
     source_id = models.IntegerField(db_index=True)
     data = models.JSONField(default=dict, blank=True, null=True)
+    error_message = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
+
+    def mark_as_invalid(self, msg: str):
+        self.error_message = msg
+        self.status = self.STATUS_ERROR
+        self.save()
+
+    def mark_as_imported(self):
+        self.status = self.STATUS_IMPORTED
+        self.save()
 
     @classmethod
     def extract(cls, records_ids: List[int], raise_exception=False):
@@ -518,6 +540,13 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
 
+    def save(self, *args, **kwargs):
+        if self.bank_account_number:
+            self.bank_account_number = str(self.bank_account_number).replace(" ", "")
+        if self.debit_card_number:
+            self.debit_card_number = str(self.debit_card_number).replace(" ", "")
+        super().save(*args, **kwargs)
+
 
 class DiiaHousehold(TimeStampedUUIDModel):
     rec_id = models.CharField(max_length=20, blank=True, default=BLANK)
@@ -545,6 +574,10 @@ class DiiaHousehold(TimeStampedUUIDModel):
 
     def __str__(self):
         return f"Diia Household ID: {self.id}"
+
+    @property
+    def head_of_household_full_name(self):
+        return getattr(self.head_of_household, "full_name", "-")
 
 
 class DiiaIndividual(TimeStampedUUIDModel):
@@ -585,3 +618,8 @@ class DiiaIndividual(TimeStampedUUIDModel):
     @property
     def full_name(self):
         return f"{self.last_name} {self.first_name} {self.second_name}"
+
+    def save(self, *args, **kwargs):
+        if self.iban:
+            self.iban = str(self.iban).replace(" ", "")
+        super().save(*args, **kwargs)

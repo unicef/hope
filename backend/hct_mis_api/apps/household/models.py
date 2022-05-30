@@ -1147,3 +1147,10 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
 
     def __str__(self):
         return f"{self.bank_account_number} ({self.bank_name})"
+
+    def save(self, *args, **kwargs):
+        if self.bank_account_number:
+            self.bank_account_number = str(self.bank_account_number).replace(" ", "")
+        if self.debit_card_number:
+            self.debit_card_number = str(self.debit_card_number).replace(" ", "")
+        super().save(*args, **kwargs)

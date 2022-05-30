@@ -4,6 +4,7 @@ import graphene
 from django.db.models import Prefetch
 
 from graphene import relay
+from graphql import GraphQLError
 from graphene_django import DjangoConnectionField, DjangoObjectType
 
 import hct_mis_api.apps.targeting.models as target_models
@@ -296,7 +297,9 @@ class Query(graphene.ObjectType):
             .all()
         )
 
-    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
+    def resolve_golden_record_by_targeting_criteria(
+        parent, info, targeting_criteria, program, excluded_ids, **kwargs
+    ):
         household_queryset = Household.objects
         return prefetch_selections(
             household_queryset.filter(

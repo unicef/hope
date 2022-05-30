@@ -138,7 +138,7 @@ class RapidProAPI:
         if received_variable is not None:
             received = received_variable.get("value").upper() == variable_received_positive_string
         received_amount_variable = values.get(variable_amount_name)
-        if received_variable is not None:
+        if received_amount_variable is not None:
             received_amount = Decimal(received_amount_variable.get("value", 0))
         return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 

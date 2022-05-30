@@ -159,6 +159,7 @@
   "NEW TICKET": "NEW TICKET",
   "Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.": "Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.",
   "Needs Adjudication Details": "Needs Adjudication Details",
+  "Are you sure you want to mark these records as duplicates? They will be removed from Golden Records upon ticket closure.": "Are you sure you want to mark these records as duplicates? They will be removed from Golden Records upon ticket closure.",
   "Create Linked Ticket": "Create Linked Ticket",
   "Confirmation": "Confirmation",
   "Mark Duplicate": "Mark Duplicate",
@@ -592,5 +593,6 @@
   "New Verified Value": "New Verified Value",
   "Bank account number": "Bank account number",
   "Bank name": "Bank name",
-  "Linked Tickets": "Linked Tickets"
+  "Linked Tickets": "Linked Tickets",
+  "Registration Data Import": "Registration Data Import"
 }

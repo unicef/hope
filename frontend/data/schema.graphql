@@ -884,6 +884,8 @@ type HouseholdNode implements Node {
   userFields: JSONString!
   koboAssetId: String!
   rowId: Int
+  totalCashReceivedUsd: Decimal
+  totalCashReceived: Decimal
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -898,8 +900,6 @@ type HouseholdNode implements Node {
   targetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelection!]!
   adminAreaTitle: String
-  totalCashReceived: Decimal
-  totalCashReceivedUsd: Decimal
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
@@ -1047,6 +1047,7 @@ type ImportedDocumentNode implements Node {
   photo: String
   individual: ImportedIndividualNode!
   type: ImportedDocumentTypeNode!
+  docDate: Date
   country: String
 }
 
@@ -1575,6 +1576,7 @@ type ImportedHouseholdNode implements Node {
   koboAssetId: String!
   koboSubmissionTime: DateTime
   rowId: Int
+  diiaRecId: String!
   misUnicefId: String
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
@@ -1870,6 +1872,8 @@ type IndividualNode implements Node {
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
   deleteIndividualTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketDeleteIndividualDetailsNodeConnection!
   ticketsystemflaggingdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketSystemFlaggingDetailsNodeConnection!
+  ticketDuplicates(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
+  ticketSelected(offset: Int, before: String, after: String, first: Int, last: Int): TicketNeedsAdjudicationDetailsNodeConnection!
   positiveFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketPositiveFeedbackDetailsNodeConnection!
   negativeFeedbackTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketNegativeFeedbackDetailsNodeConnection!
   referralTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketReferralDetailsNodeConnection!
@@ -2090,7 +2094,7 @@ type Mutations {
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteHousehold(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
-  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
+  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, selectedIndividualIds: [ID], version: BigInt): NeedsAdjudicationApproveMutation
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
@@ -2552,6 +2556,7 @@ type RefuseRegistrationDataImportMutation {
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
+  DIIA
   FLEX_REGISTRATION
 }
 
@@ -2595,7 +2600,7 @@ type RegistrationDataImportNode implements Node {
   name: String!
   status: RegistrationDataImportStatus!
   importDate: DateTime!
-  importedBy: UserNode!
+  importedBy: UserNode
   dataSource: RegistrationDataImportDataSource!
   numberOfIndividuals: Int!
   numberOfHouseholds: Int!
@@ -3290,13 +3295,28 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   goldenRecordsIndividual: IndividualNode!
+  isMultipleDuplicatesVersion: Boolean!
   possibleDuplicate: IndividualNode!
+  possibleDuplicates: [IndividualNode]
   selectedIndividual: IndividualNode
+  selectedIndividuals: [IndividualNode]
   roleReassignData: JSONString!
   extraData: TicketNeedsAdjudicationDetailsExtraDataNode
   scoreMin: Float!
   scoreMax: Float!
   hasDuplicatedDocument: Boolean
+}
+
+type TicketNeedsAdjudicationDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketNeedsAdjudicationDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketNeedsAdjudicationDetailsNodeEdge {
+  node: TicketNeedsAdjudicationDetailsNode
+  cursor: String!
 }
 
 type TicketNegativeFeedbackDetailsNode implements Node {
