@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
@@ -26,7 +26,17 @@ export function AcceptanceProcess({
           </Title>
         </Box>
         <AcceptanceProcessStepper />
-        <GreyInfoCard />
+        <Grid container>
+          <Grid item xs={4}>
+            <GreyInfoCard />
+          </Grid>
+          <Grid item xs={4}>
+            <GreyInfoCard />
+          </Grid>
+          <Grid item xs={4}>
+            <GreyInfoCard />
+          </Grid>
+        </Grid>
       </ContainerColumnWithBorder>
     </Box>
   );
