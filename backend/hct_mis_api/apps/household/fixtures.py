@@ -5,8 +5,10 @@ from factory import enums, fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
+    IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
     NOT_DISABLED,
     ORG_ENUMERATOR_CHOICES,
@@ -100,6 +102,7 @@ class HouseholdFactory(factory.DjangoModelFactory):
     )
     org_name_enumerator = "Partner Organization"
     village = factory.Faker("city")
+    currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
     female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(0, 3)
     female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(0, 3)
     female_age_group_12_17_count = factory.fuzzy.FuzzyInteger(0, 3)
@@ -162,7 +165,7 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
 
     individual = factory.SubFactory(IndividualFactory)
     bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
-    bank_account_number = random.randint(10 ** 26, 10 ** 27 - 1)
+    bank_account_number = random.randint(10**26, 10**27 - 1)
 
 
 class DocumentFactory(factory.DjangoModelFactory):
@@ -178,7 +181,7 @@ class DocumentTypeFactory(factory.DjangoModelFactory):
     class Meta:
         model = DocumentType
 
-    type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
+    type = fuzzy.FuzzyChoice(IDENTIFICATION_TYPE_CHOICE, getter=lambda c: c[0])
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):
