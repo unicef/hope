@@ -122,10 +122,8 @@ class IndividualFilter(FilterSet):
         model = Individual
         fields = {
             "household__id": ["exact"],
-            "programs": ["exact"],
             "business_area": ["exact"],
             "full_name": ["exact", "startswith", "endswith"],
-            "age": ["range", "lte", "gte"],
             "sex": ["exact"],
             "household__admin_area": ["exact"],
             "household__admin_area_new": ["exact"],
