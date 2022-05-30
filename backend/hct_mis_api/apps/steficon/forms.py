@@ -17,23 +17,20 @@ from .models import Rule
 from .widget import ContentTypeChoiceField, PythonEditor
 
 logger = logging.getLogger(__name__)
-try:
-    import black
 
-    mode = black.Mode(
-        line_length=80,
-        string_normalization=True,
-    )
 
-    def format_code(code):
+def format_code(code):
+    try:
+        import black
+
+        mode = black.Mode(
+            line_length=80,
+            string_normalization=True,
+        )
         return black.format_file_contents(code, fast=False, mode=mode)
-
-
-except ImportError as ex:
-    if config.USE_BLACK:
-        logger.warning(f"Steficon is configured to use Black, but was unable to import it: {ex}")
-
-    def format_code(code):
+    except ImportError as ex:
+        if config.USE_BLACK:
+            logger.warning(f"Steficon is configured to use Black, but was unable to import it: {ex}")
         return code
 
 

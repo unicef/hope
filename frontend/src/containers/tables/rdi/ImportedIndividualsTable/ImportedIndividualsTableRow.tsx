@@ -1,21 +1,17 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { BlackLink } from '../../../../components/core/BlackLink';
+import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { DedupeResults } from '../../../../components/rdi/details/DedupeResults';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ImportedIndividualMinimalFragment,
 } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import {
-  choicesToDict,
-  decodeIdString,
-  sexToCapitalize,
-} from '../../../../utils/utils';
-import { DedupeResults } from '../../../../components/rdi/details/DedupeResults';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { BlackLink } from '../../../../components/core/BlackLink';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
@@ -51,9 +47,7 @@ export function ImportedIndividualsTableRow({
       key={individual.id}
     >
       <TableCell align='left'>
-        <BlackLink to={individualPath}>
-          {decodeIdString(individual.id)}
-        </BlackLink>
+        <BlackLink to={individualPath}>{individual.importId}</BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>

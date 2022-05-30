@@ -86,12 +86,10 @@ export function FinishVerificationPlan({
 
   const grievanceTickets = (): number => {
     if (verificationPlan?.sampleSize) {
-      const notReceivedTicketsCount = verificationPlan?.notReceivedCount
-        ? 1
-        : 0;
-      const receivedWithProblemsTicketsCount = verificationPlan?.receivedWithProblemsCount
-        ? 1
-        : 0;
+      const notReceivedTicketsCount = verificationPlan?.notReceivedCount;
+      const receivedWithProblemsTicketsCount =
+        verificationPlan?.receivedWithProblemsCount;
+
       return notReceivedTicketsCount + receivedWithProblemsTicketsCount;
     }
     return null;
