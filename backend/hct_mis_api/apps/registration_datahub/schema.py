@@ -2,12 +2,10 @@ import json
 from datetime import date
 
 from django.db.models import Prefetch, Q
-from django.db.models.functions import Lower
 
 import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from django_filters import BooleanFilter, CharFilter, FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -21,8 +19,6 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    CustomOrderingFilter,
-    decode_id_string,
     encode_ids,
     get_model_choices_fields,
     resolve_flex_fields_choices_to_string,
@@ -38,6 +34,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.registration_datahub.filters import ImportedHouseholdFilter, ImportedIndividualFilter
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedDocument,
@@ -68,61 +65,6 @@ class DeduplicationResultNode(graphene.ObjectType):
 
     def resolve_location(self, info):
         return self.get("location") or "Not provided"
-
-
-class ImportedHouseholdFilter(FilterSet):
-    rdi_id = CharFilter(method="filter_rdi_id")
-    business_area = CharFilter(field_name="registration_data_import__business_area_slug")
-
-    class Meta:
-        model = ImportedHousehold
-        fields = ()
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            "mis_unicef_id",
-            "id",
-            Lower("head_of_household__full_name"),
-            "size",
-            "first_registration_date",
-            "admin2_title",
-        )
-    )
-
-    def filter_rdi_id(self, queryset, model_field, value):
-        return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
-
-
-class ImportedIndividualFilter(FilterSet):
-    rdi_id = CharFilter(method="filter_rdi_id")
-    duplicates_only = BooleanFilter(method="filter_duplicates_only")
-    business_area = CharFilter(field_name="registration_data_import__business_area_slug")
-
-    class Meta:
-        model = ImportedIndividual
-        fields = ("household",)
-
-    order_by = OrderingFilter(
-        fields=(
-            "mis_unicef_id",
-            "id",
-            "full_name",
-            "birth_date",
-            "sex",
-            "deduplication_batch_status",
-            "deduplication_golden_record_status",
-        )
-    )
-
-    def filter_rdi_id(self, queryset, model_field, value):
-        return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
-
-    def filter_duplicates_only(self, queryset, model_field, value):
-        if value is True:
-            return queryset.filter(
-                Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
-            )
-        return queryset
 
 
 class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
