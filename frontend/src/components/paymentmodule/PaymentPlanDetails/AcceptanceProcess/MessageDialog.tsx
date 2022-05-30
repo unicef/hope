@@ -27,7 +27,10 @@ const GreyText = styled.div`
   color: #9e9e9e;
 `;
 
-const Message = styled(MessageIcon)`
+const MessageIconContainer = styled(Box)`
+  position: relative;
+  top: 4px;
+  font-size: 16px;
   color: #043f91;
 `;
 
@@ -46,8 +49,10 @@ export function MessageDialog({
   return (
     <>
       <Box p={2}>
-        <IconButton onClick={() => setMessageDialogOpen(true)}>
-          <Message />
+        <IconButton size='small' onClick={() => setMessageDialogOpen(true)}>
+          <MessageIconContainer>
+            <MessageIcon fontSize='inherit' />
+          </MessageIconContainer>
         </IconButton>
       </Box>
       <Dialog
