@@ -1,6 +1,5 @@
 import base64
 import datetime
-import json
 import logging
 
 from django import forms
@@ -39,11 +38,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     Record,
     RegistrationDataImportDatahub,
+    DiiaHousehold,
+    DiiaIndividual,
 )
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
 )
-from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
 from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
@@ -488,3 +488,30 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     def has_delete_permission(self, request, obj=None):
         return is_root(request)
+
+@admin.register(DiiaIndividual)
+class DiiaIndividualAdmin(HOPEModelAdminBase):
+    list_display = (
+        "registration_data_import",
+        "individual_id",
+        "full_name",
+        "sex",
+        "disability"
+    )
+    list_filter = (
+        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
+        ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
+        "disability"
+    )
+
+
+@admin.register(DiiaHousehold)
+class DiiaHouseholdAdmin(HOPEModelAdminBase):
+    search_fields = ("id", "registration_data_import", "rec_id")
+    list_display = ("registration_data_import", "head_of_household_full_name", "rec_id")
+    raw_id_fields = ("registration_data_import", "head_of_household")
+    date_hierarchy = "registration_data_import__import_date"
+    list_filter = (
+        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
+        ("rec_id", ValueFilter.factory(lookup_name="istartswith",)),
+    )

@@ -573,11 +573,13 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingM
 
 
 class TargetingIndividualRuleFilterBlockMixin:
-    def __init__(self, individual_block_filters=None, target_only_hoh=None):
+    def __init__(self, individual_block_filters=None, target_only_hoh=None, criteria_fit_range=None):
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
         if target_only_hoh is not None:
             self.target_only_hoh = target_only_hoh
+        if criteria_fit_range is not None:
+            self.criteria_fit_range = criteria_fit_range
 
     def get_criteria_string(self):
         filters = (
@@ -607,7 +609,24 @@ class TargetingIndividualRuleFilterBlockMixin:
         if self.target_only_hoh:
             # only filtering against heads of household
             individuals_query &= Q(heading_household__isnull=False)
-        households_id = Individual.objects.filter(individuals_query).values_list("household_id", flat=True)
+        ind_query = Individual.objects.filter(individuals_query)
+        if getattr(self, "criteria_fit_range", None):
+            min_individuals, max_individuals = tuple(self.criteria_fit_range)
+
+            criteria_fit_range = Q()
+            if min_individuals:
+                criteria_fit_range &= Q(household_count__gte=min_individuals)
+            if max_individuals:
+                criteria_fit_range &= Q(household_count__lte=max_individuals)
+
+            households_id = (
+                ind_query.values("household_id")
+                .annotate(household_count=Count("household_id"))
+                .filter(criteria_fit_range)
+                .values_list("household_id", flat=True)
+            )
+        else:
+            households_id = ind_query.values_list("household_id", flat=True)
         return Q(id__in=households_id)
 
 

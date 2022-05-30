@@ -12,6 +12,7 @@ from django_filters import (
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -22,6 +23,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
@@ -57,9 +59,13 @@ class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
         convert_choices_to_enum = False
 
     file_url = graphene.String()
+    admin_area = DjangoFilterConnectionField(AreaNode)
 
     def resolve_file_url(self, info, **kwargs):
         return self.file.url if self.file else ""
+
+    def resolve_admin_area(self, info, **kwargs):
+        return self.admin_area_new.all()
 
 
 class Query(graphene.ObjectType):

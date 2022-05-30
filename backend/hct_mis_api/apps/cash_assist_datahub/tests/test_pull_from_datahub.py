@@ -274,6 +274,8 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.registration_ca_id, self.dh_payment_record.registration_ca_id)
 
         self.assertIn(self.household, self.program.households.all())
+        self.household.refresh_from_db()
+        self.assertEqual(self.household.total_cash_received, 10)
 
 
 class TestSessionsPullDataFromDatahub(TestCase):
