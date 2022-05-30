@@ -30,6 +30,7 @@ class TargetPopulationAdmin(
         "final_list_total_households",
         # "final_list_total_individuals",
     )
+    date_hierarchy = "created_at"
     search_fields = ("name",)
     list_filter = (
         ("status", ChoicesFieldComboFilter),

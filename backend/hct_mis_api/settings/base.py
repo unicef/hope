@@ -4,14 +4,9 @@ import sys
 from pathlib import Path
 from uuid import uuid4
 
-####
-# Change per project
-####
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from graphql import GraphQLError
 
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
@@ -450,6 +445,7 @@ SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
+ELASTICSEARCH_INDEX_PREFIX = ''
 
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
@@ -590,7 +586,7 @@ SENTRY_URL = env("SENTRY_URL")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.logging import LoggingIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
 
     from hct_mis_api import get_full_version
 
@@ -601,16 +597,11 @@ if SENTRY_DSN:
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[
-            DjangoIntegration(transaction_style="url"),
-            sentry_logging,
-            CeleryIntegration()
-            # RedisIntegration(),
-        ],
+        integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
         send_default_pii=True,
-        ignore_errors=[ValidationError, GraphQLError],
     )
+    ignore_logger("graphql.execution.utils")
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
@@ -792,3 +783,5 @@ IMPORT_EXPORT_CELERY_MODELS = {
         "resource": resource,  # Optional
     }
 }
+
+
