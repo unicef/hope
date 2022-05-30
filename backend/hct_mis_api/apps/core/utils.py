@@ -337,17 +337,11 @@ def to_dict(instance, fields=None, dict_fields=None):
 
 
 def build_arg_dict(model_object, mapping_dict):
-    args = {}
-    for key in mapping_dict:
-        args[key] = nested_getattr(model_object, mapping_dict[key], None)
-    return args
+    return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
 def build_arg_dict_from_dict(data_dict, mapping_dict):
-    args = {}
-    for key, value in mapping_dict.items():
-        args[key] = data_dict.get(value)
-    return args
+    return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
 
 class CustomOrderingFilter(OrderingFilter):
