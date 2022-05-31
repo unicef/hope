@@ -5,12 +5,14 @@ import wait from 'waait';
 import { HouseholdTable } from '.';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
 import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
-import { fakeApolloAllHouseholds } from '../../../../../fixtures/population/fakeApolloAllHouseholds';
+import {
+  fakeApolloAllHouseholdsForPopulationTable
+} from "../../../../../fixtures/population/fakeApolloAllHouseholdsForPopulationTable";
 
 describe('containers/tables/population/HouseholdTable', () => {
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider addTypename={false} mocks={fakeApolloAllHouseholds}>
+      <MockedProvider addTypename={false} mocks={fakeApolloAllHouseholdsForPopulationTable}>
         <HouseholdTable
           businessArea='afghanistan'
           filter={{}}
@@ -29,7 +31,7 @@ describe('containers/tables/population/HouseholdTable', () => {
       <MockedProvider
         link={new ApolloLoadingLink()}
         addTypename={false}
-        mocks={fakeApolloAllHouseholds}
+        mocks={fakeApolloAllHouseholdsForPopulationTable}
       >
         <HouseholdTable
           businessArea='afghanistan'
