@@ -585,21 +585,14 @@ Django = ">=2.2"
 
 [[package]]
 name = "django-filter"
-version = "2.2.0"
-description = ""
+version = "2.4.0"
+description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
 category = "main"
 optional = false
-python-versions = ">=3.4"
-develop = false
+python-versions = ">=3.5"
 
 [package.dependencies]
-Django = ">=1.11"
-
-[package.source]
-type = "git"
-url = "https://github.com/srugano/django-filter.git"
-reference = "b01c91990550ccf543cf23110f6750016ca38ec6"
-resolved_reference = "b01c91990550ccf543cf23110f6750016ca38ec6"
+Django = ">=2.2"
 
 [[package]]
 name = "django-hijack"
