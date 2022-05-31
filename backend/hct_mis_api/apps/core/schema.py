@@ -6,9 +6,6 @@ from django.core.exceptions import ObjectDoesNotExist
 import graphene
 from constance import config
 from django.db import models
-from django.db.models import QuerySet
-from django.db.models.fields.related_descriptors import create_forward_many_to_many_manager
-from django_filters import CharFilter, FilterSet
 from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
