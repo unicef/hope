@@ -28,7 +28,7 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
     DateRangeFilter,
-    IntegerRangeFilter,
+    IntegerRangeFilter, BusinessAreaSlugFilter,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
@@ -107,7 +107,7 @@ INDIVIDUALS_CHART_LABELS = [
 
 
 class HouseholdFilter(FilterSet):
-    business_area = CharFilter(field_name="business_area__slug")
+    business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
@@ -145,7 +145,7 @@ class HouseholdFilter(FilterSet):
             Lower("admin_area_new__name"),
             "residence_status",
             Lower("registration_data_import__name"),
-            "total_cash",
+            "total_cash_received",
             "last_registration_date",
             "first_registration_date",
         )
@@ -173,9 +173,7 @@ class HouseholdFilter(FilterSet):
 
 
 class IndividualFilter(FilterSet):
-    business_area = CharFilter(
-        field_name="business_area__slug",
-    )
+    business_area = BusinessAreaSlugFilter()
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
     programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
@@ -694,11 +692,7 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
-        return Household.objects.annotate(
-            total_cash=Coalesce(
-                Sum("payment_records__delivered_quantity", output_field=DecimalField()), 0, output_field=IntegerField()
-            )
-        ).order_by("created_at")
+        return Household.objects.order_by("created_at")
 
     def resolve_residence_status_choices(self, info, **kwargs):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
