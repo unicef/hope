@@ -54,7 +54,7 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
     label: 'Total Cash Received',
-    id: 'totalCash',
+    id: 'totalCashReceived',
     numeric: true,
     dataCy: 'household-total-cash-received',
   },

@@ -5,7 +5,7 @@ import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
   AllHouseholdsQueryVariables,
-  useAllHouseholdsQuery,
+  useAllHouseholdsQuery, useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
@@ -46,7 +46,7 @@ export const HouseholdTable = ({
         title={t('Households')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllHouseholdsQuery}
+        query={useAllHouseholdsForPopulationTableQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
         defaultOrderBy='unicef_id'
