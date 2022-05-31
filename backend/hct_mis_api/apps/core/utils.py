@@ -721,3 +721,10 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
     ).values_list("unicef_id", flat=True)
     excluded_household_ids_array.extend(excluded_household_ids_from_individuals_array)
     return excluded_household_ids_array
+
+
+@functools.lru_cache(maxsize=None)
+def cached_business_areas_slug_id_dict():
+    from hct_mis_api.apps.core.models import BusinessArea
+
+    return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}
