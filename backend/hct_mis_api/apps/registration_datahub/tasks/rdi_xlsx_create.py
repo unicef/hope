@@ -1,6 +1,4 @@
 import numbers
-import openpyxl
-
 from collections import defaultdict
 from datetime import datetime
 from functools import partial
@@ -11,6 +9,8 @@ from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
+
+import openpyxl
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -18,26 +18,29 @@ from hct_mis_api.apps.core.core_fields_attributes import COLLECTORS_FIELDS
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader
 from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_DICT,
-    ROLE_PRIMARY,
-    ROLE_ALTERNATE,
     HEAD,
-    NON_BENEFICIARY
+    IDENTIFICATION_TYPE_DICT,
+    NON_BENEFICIARY,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportedIndividualRoleInHousehold,
-    ImportedDocumentType,
-    ImportedDocument,
-    ImportedIndividualIdentity,
+    ImportData,
     ImportedAgency,
+    ImportedDocument,
+    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    ImportedIndividualIdentity,
+    ImportedIndividualRoleInHousehold,
     RegistrationDataImportDatahub,
-    ImportData
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask, logger
+from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
+    RdiBaseCreateTask,
+    logger,
+)
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 
@@ -294,7 +297,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _validate_birth_date(obj_to_create):
         birth_date = obj_to_create.birth_date
 
-        if obj_to_create.birth_date < datetime(1904, 1, 1):
+        if obj_to_create.birth_date < datetime(1923, 1, 1):
             obj_to_create.birth_date = datetime(1923, 1, 1)
         if obj_to_create.birth_date > datetime.today():
             obj_to_create.birth_date = datetime(2022, 4, 25)

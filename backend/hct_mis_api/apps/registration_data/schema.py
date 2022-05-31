@@ -1,7 +1,4 @@
-from django.db.models.functions import Lower
-
 import graphene
-from django_filters import CharFilter, DateFilter, FilterSet
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
@@ -12,42 +9,16 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, get_count_and_percentage
+from hct_mis_api.apps.core.utils import get_count_and_percentage
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     NEEDS_ADJUDICATION,
     UNIQUE,
 )
+from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import UNIQUE_IN_BATCH
-
-
-class RegistrationDataImportFilter(FilterSet):
-    import_date = DateFilter(field_name="import_date__date")
-    business_area = CharFilter(field_name="business_area__slug")
-
-    class Meta:
-        model = RegistrationDataImport
-        fields = {
-            "imported_by__id": ["exact"],
-            "import_date": ["exact"],
-            "status": ["exact"],
-            "name": ["exact", "startswith"],
-            "business_area": ["exact"],
-        }
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            Lower("name"),
-            "status",
-            "import_date",
-            "number_of_individuals",
-            "number_of_households",
-            "data_source",
-            Lower("imported_by__first_name"),
-        )
-    )
 
 
 class CountAndPercentageNode(graphene.ObjectType):
