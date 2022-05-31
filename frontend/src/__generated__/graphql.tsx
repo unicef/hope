@@ -4134,7 +4134,6 @@ export type QueryAllIndividualsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   household_Id?: Maybe<Scalars['UUID']>,
-  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   businessArea?: Maybe<Scalars['String']>,
   fullName?: Maybe<Scalars['String']>,
   fullName_Startswith?: Maybe<Scalars['String']>,
@@ -4144,6 +4143,7 @@ export type QueryAllIndividualsArgs = {
   household_AdminAreaNew?: Maybe<Scalars['ID']>,
   withdrawn?: Maybe<Scalars['Boolean']>,
   age?: Maybe<Scalars['String']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   search?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
@@ -4200,11 +4200,11 @@ export type QueryAllUsersArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
-  search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   partner?: Maybe<Array<Maybe<Scalars['String']>>>,
-  roles?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  roles?: Maybe<Array<Maybe<Scalars['String']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -8789,7 +8789,7 @@ export type AllHouseholdsForPopulationTableQuery = (
       & Pick<HouseholdNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'HouseholdNode' }
-        & Pick<HouseholdNode, 'id' | 'status' | 'unicefId' | 'hasDuplicates' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'size' | 'residenceStatus' | 'totalCashReceived' | 'lastRegistrationDate'>
+        & Pick<HouseholdNode, 'id' | 'status' | 'unicefId' | 'hasDuplicates' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'size' | 'residenceStatus' | 'totalCashReceived' | 'currency' | 'lastRegistrationDate'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'fullName'>
@@ -16222,6 +16222,7 @@ export const AllHouseholdsForPopulationTableDocument = gql`
         }
         residenceStatus
         totalCashReceived
+        currency
         lastRegistrationDate
       }
     }
