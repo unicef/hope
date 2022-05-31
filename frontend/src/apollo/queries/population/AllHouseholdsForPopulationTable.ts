@@ -62,6 +62,7 @@ export const AllHouseholdsForPopulationTable = gql`
           }
           residenceStatus
           totalCashReceived
+          currency
           lastRegistrationDate
         }
       }
