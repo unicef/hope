@@ -8,22 +8,13 @@ import {
 import { Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { LookUpRelatedTicketsFilters } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
 import { LookUpRelatedTicketsTable } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
 
 export const LookUpRelatedTicketsModal = ({
   onValueChange,
