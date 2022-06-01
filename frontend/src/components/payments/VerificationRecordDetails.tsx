@@ -24,13 +24,6 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
 `;
 
-const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
-  padding-bottom: 0;
-`;
 const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
@@ -233,9 +226,7 @@ export function VerificationRecordDetails({
         </Grid>
       </Overview>
       {canViewActivityLog && (
-        <TableWrapper>
-          <UniversalActivityLogTable objectId={paymentVerification.id} />
-        </TableWrapper>
+        <UniversalActivityLogTable objectId={paymentVerification.id} />
       )}
     </>
   );

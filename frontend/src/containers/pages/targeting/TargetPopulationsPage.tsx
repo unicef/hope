@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import get from 'lodash/get';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { Button, IconButton } from '@material-ui/core';
 import { Info } from '@material-ui/icons';
-import { useDebounce } from '../../../hooks/useDebounce';
+import get from 'lodash/get';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TargetPopulationFilters } from '../../../components/targeting/TargetPopulationFilters';
-import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { usePermissions } from '../../../hooks/usePermissions';
 import {
   ProgramNode,
   useAllProgramsQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
+import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 
 export function TargetPopulationsPage(): React.ReactElement {
   const { t } = useTranslation();
