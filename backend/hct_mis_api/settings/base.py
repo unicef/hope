@@ -451,7 +451,7 @@ RAPID_PRO_URL = env("RAPID_PRO_URL")
 
 # DJANGO CONSTANCE settings
 CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
-
+CONSTANCE_REDIS_CACHE_TIMEOUT = 1
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",
