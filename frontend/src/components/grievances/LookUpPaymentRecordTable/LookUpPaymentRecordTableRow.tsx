@@ -1,7 +1,6 @@
 import { Checkbox } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import styled from 'styled-components';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
@@ -11,11 +10,6 @@ import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
 import { StatusBox } from '../../core/StatusBox';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
@@ -60,12 +54,10 @@ export function LookUpPaymentRecordTableRow({
       </TableCell>
       <TableCell align='left'>
         {paymentRecord.verification?.status ? (
-          <StatusContainer>
-            <StatusBox
-              status={paymentRecord.verification?.status}
-              statusToColor={verificationRecordsStatusToColor}
-            />
-          </StatusContainer>
+          <StatusBox
+            status={paymentRecord.verification?.status}
+            statusToColor={verificationRecordsStatusToColor}
+          />
         ) : (
           '-'
         )}

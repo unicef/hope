@@ -1,7 +1,6 @@
 import { TableRow } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import styled from 'styled-components';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
@@ -13,10 +12,6 @@ import {
 } from '../../../../utils/utils';
 import { PaymentVerificationNode } from '../../../../__generated__/graphql';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 interface VerificationRecordsTableRowProps {
   record: PaymentVerificationNode;
   canViewRecordDetails: boolean;
@@ -48,12 +43,10 @@ export function VerificationRecordsTableRow({
         {record.cashPlanPaymentVerification.unicefId}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={record.status}
-            statusToColor={verificationRecordsStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={record.status}
+          statusToColor={verificationRecordsStatusToColor}
+        />
       </TableCell>
       <AnonTableCell>
         {record.paymentRecord.household.headOfHousehold.fullName}
@@ -62,12 +55,10 @@ export function VerificationRecordsTableRow({
         {record.paymentRecord.household.unicefId}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={record.paymentRecord.household.status}
-            statusToColor={householdStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={record.paymentRecord.household.status}
+          statusToColor={householdStatusToColor}
+        />
       </TableCell>
       <TableCell align='right'>
         {formatCurrencyWithSymbol(
