@@ -16,6 +16,8 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '../../../containers/dialogs/Dialog';
+import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import {
   decodeIdString,
   grievanceTicketStatusToColor,
@@ -25,10 +27,6 @@ import {
   useExistingGrievanceTicketsLazyQuery,
 } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
-import {
-  DialogFooter,
-  DialogTitleWrapper,
-} from '../../core/ConfirmationDialog/ConfirmationDialog';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { StatusBox } from '../../core/StatusBox';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
