@@ -24,10 +24,6 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
 `;
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 interface VerificationRecordDetailsProps {
   paymentRecord: PaymentRecordNode;
   canViewActivityLog: boolean;
@@ -51,12 +47,10 @@ export function PaymentRecordDetails({
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField label={t('STATUS')}>
-              <StatusContainer>
-                <StatusBox
-                  status={paymentRecord.status}
-                  statusToColor={paymentRecordStatusToColor}
-                />
-              </StatusContainer>
+              <StatusBox
+                status={paymentRecord.status}
+                statusToColor={paymentRecordStatusToColor}
+              />
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
@@ -87,12 +81,10 @@ export function PaymentRecordDetails({
           <Grid container spacing={3}>
             <Grid item xs={3}>
               <LabelizedField label={t('STATUS')}>
-                <StatusContainer>
-                  <StatusBox
-                    status={paymentVerification.status}
-                    statusToColor={verificationRecordsStatusToColor}
-                  />
-                </StatusContainer>
+                <StatusBox
+                  status={paymentVerification.status}
+                  statusToColor={verificationRecordsStatusToColor}
+                />
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>

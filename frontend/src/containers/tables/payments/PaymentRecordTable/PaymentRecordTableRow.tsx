@@ -1,24 +1,18 @@
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { PaymentRecordNode } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
+import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
   paymentRecordStatusToColor,
 } from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
-import { BlackLink } from '../../../../components/core/BlackLink';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
+import { PaymentRecordNode } from '../../../../__generated__/graphql';
 
 interface PaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
@@ -50,22 +44,18 @@ export function PaymentRecordTableRow({
         <BlackLink to={paymentRecordPath}>{paymentRecord.caId}</BlackLink>
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={paymentRecord.status}
-            statusToColor={paymentRecordStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={paymentRecord.status}
+          statusToColor={paymentRecordStatusToColor}
+        />
       </TableCell>
       <AnonTableCell>{paymentRecord.headOfHousehold?.fullName}</AnonTableCell>
       <TableCell align='left'>{paymentRecord.household.unicefId}</TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={paymentRecord.household.status}
-            statusToColor={householdStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={paymentRecord.household.status}
+          statusToColor={householdStatusToColor}
+        />
       </TableCell>
       <TableCell align='left'>{paymentRecord.household.size}</TableCell>
       <TableCell align='right'>

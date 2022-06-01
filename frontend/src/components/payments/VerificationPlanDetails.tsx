@@ -51,11 +51,6 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
-
 export const VerificationPlanDetails = ({
   verificationPlan,
   samplingChoicesData,
@@ -186,12 +181,10 @@ export const VerificationPlanDetails = ({
           <Grid container>
             <Grid item xs={3}>
               <LabelizedField label={t('STATUS')}>
-                <StatusContainer>
-                  <StatusBox
-                    status={verificationPlan.status}
-                    statusToColor={paymentVerificationStatusToColor}
-                  />
-                </StatusContainer>
+                <StatusBox
+                  status={verificationPlan.status}
+                  statusToColor={paymentVerificationStatusToColor}
+                />
               </LabelizedField>
             </Grid>
             {[
