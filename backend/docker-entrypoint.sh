@@ -2,7 +2,9 @@
 set -e
 
 if [ $# -eq 0 ]; then
-    exec gunicorn hct_mis_api.wsgi -c /code/gunicorn_config.py
+    echo 'Jan starts'
+    export NEW_RELIC_CONFIG_FILE=/code/newrelic.ini
+    exec newrelic-admin run-program gunicorn hct_mis_api.wsgi -c /code/gunicorn_config.py
 else
     case "$1" in
         "dev")
