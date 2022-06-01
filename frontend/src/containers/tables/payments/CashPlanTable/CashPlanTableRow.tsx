@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -12,11 +11,6 @@ import {
 } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface CashPlanTableRowProps {
   cashPlan: CashPlanNode;
@@ -50,12 +44,10 @@ export function CashPlanTableRow({
         </BlackLink>
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={cashPlan.status}
-            statusToColor={cashPlanStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={cashPlan.status}
+          statusToColor={cashPlanStatusToColor}
+        />
       </TableCell>
       <TableCell align='right'>{cashPlan.totalNumberOfHouseholds}</TableCell>
       <TableCell align='left'>{cashPlan.assistanceMeasurement}</TableCell>

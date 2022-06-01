@@ -1,17 +1,11 @@
-import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { HouseholdNode } from '../../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
-import { AnonTableCell } from '../../../../../components/core/Table/AnonTableCell';
 import { BlackLink } from '../../../../../components/core/BlackLink';
+import { AnonTableCell } from '../../../../../components/core/Table/AnonTableCell';
+import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
+import { useBusinessArea } from '../../../../../hooks/useBusinessArea';
 import { renderIndividualName } from '../../../../../utils/utils';
-
-interface TargetPopulationHouseholdTableRowProps {
-  household: HouseholdNode;
-  canViewDetails?: boolean;
-}
 
 export function ProgrammeTableRow({
   household,

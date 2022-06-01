@@ -15,11 +15,6 @@ interface VerificationPlansSummaryProps {
   cashPlan: CashPlanQuery['cashPlan'];
 }
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
-
 export function VerificationPlansSummary({
   cashPlan,
 }: VerificationPlansSummaryProps): React.ReactElement {
@@ -44,12 +39,10 @@ export function VerificationPlansSummary({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Status')}>
-                <StatusContainer>
-                  <StatusBox
-                    status={status}
-                    statusToColor={paymentVerificationStatusToColor}
-                  />
-                </StatusContainer>
+                <StatusBox
+                  status={status}
+                  statusToColor={paymentVerificationStatusToColor}
+                />
               </LabelizedField>
             </Box>
           </Grid>

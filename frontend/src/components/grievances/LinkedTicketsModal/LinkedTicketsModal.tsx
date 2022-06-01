@@ -46,10 +46,7 @@ const StyledTable = styled(Table)`
 const StyledDialog = styled(Dialog)`
   max-height: 800px;
 `;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
+
 const Bold = styled.span`
   font-weight: bold;
 `;
@@ -131,12 +128,10 @@ export const LinkedTicketsModal = ({
         <TableCell align='left'>{categoryChoices[row.category]}</TableCell>
         <TableCell align='left'>{issueType || '-'}</TableCell>
         <TableCell align='left'>
-          <StatusContainer>
-            <StatusBox
-              status={statusChoices[row.status]}
-              statusToColor={grievanceTicketStatusToColor}
-            />
-          </StatusContainer>
+          <StatusBox
+            status={statusChoices[row.status]}
+            statusToColor={grievanceTicketStatusToColor}
+          />
         </TableCell>
       </ClickableTableRow>
     );

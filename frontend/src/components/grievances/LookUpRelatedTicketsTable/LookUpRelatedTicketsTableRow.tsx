@@ -1,5 +1,4 @@
 import TableCell from '@material-ui/core/TableCell';
-import styled from 'styled-components';
 import React from 'react';
 import { Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -11,11 +10,6 @@ import {
 } from '../../../utils/utils';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface LookUpRelatedTicketsTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
@@ -62,12 +56,10 @@ export function LookUpRelatedTicketsTableRow({
         </BlackLink>
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={statusChoices[ticket.status]}
-            statusToColor={grievanceTicketStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={statusChoices[ticket.status]}
+          statusToColor={grievanceTicketStatusToColor}
+        />
       </TableCell>
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>{ticket.household?.unicefId || '-'}</TableCell>
