@@ -47,9 +47,6 @@ const Overview = styled(Paper)`
     margin-top: 0;
   }
 `;
-const Content = styled.div`
-  margin-top: 20px;
-`;
 
 const SubTitle = styled(Typography)`
   && {
@@ -93,7 +90,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const { household } = data;
 
   return (
-    <div>
+    <>
       <PageHeader
         title={`${t('Household ID')}: ${household.unicefId}`}
         breadCrumbs={
@@ -215,12 +212,10 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             </>
           )}
         </Overview>
-        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-          <Content>
-            <UniversalActivityLogTable objectId={data.household.id} />
-          </Content>
-        )}
       </Container>
-    </div>
+      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+        <UniversalActivityLogTable objectId={data.household.id} />
+      )}
+    </>
   );
 }

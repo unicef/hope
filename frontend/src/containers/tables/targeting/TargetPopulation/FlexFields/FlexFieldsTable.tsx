@@ -6,10 +6,6 @@ import { getComparator, stableSort } from '../../../../../utils/utils';
 import { AllFieldsAttributesQuery } from '../../../../../__generated__/graphql';
 import { headCells } from './HeadCells';
 
-const TableWrapper = styled.div`
-  padding: 0;
-`;
-
 const StyledCell = styled(TableCell)`
   width: 70%;
 `;
@@ -64,27 +60,25 @@ export const FlexFieldsTable = ({
   };
 
   return (
-    <TableWrapper>
-      <Table aria-label='simple table'>
-        <EnhancedTableHead
-          order={order as Order}
-          headCells={headCells}
-          orderBy={orderBy}
-          onRequestSort={handleRequestSort}
-          rowCount={fields.length - 1}
-        />
-        <TableBody>
-          {orderResults().map((row) => (
-            <TableRow key={row.id}>
-              <StyledCell>{row.labelEn}</StyledCell>
-              <TableCell>{row.associatedWith}</TableCell>
-              <TableCell>
-                {row.isFlexField ? 'Flex field' : 'Core field'}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableWrapper>
+    <Table aria-label='simple table'>
+      <EnhancedTableHead
+        order={order as Order}
+        headCells={headCells}
+        orderBy={orderBy}
+        onRequestSort={handleRequestSort}
+        rowCount={fields.length - 1}
+      />
+      <TableBody>
+        {orderResults().map((row) => (
+          <TableRow key={row.id}>
+            <StyledCell>{row.labelEn}</StyledCell>
+            <TableCell>{row.associatedWith}</TableCell>
+            <TableCell>
+              {row.isFlexField ? 'Flex field' : 'Core field'}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 };
