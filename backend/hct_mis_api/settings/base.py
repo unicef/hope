@@ -599,6 +599,7 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
+        traces_sample_rate=1.0,
         send_default_pii=True,
     )
     ignore_logger("graphql.execution.utils")
