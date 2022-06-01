@@ -50,7 +50,7 @@ interface Props {
   currentLocation: string;
 }
 export function DrawerItems({ currentLocation }: Props): React.ReactElement {
-  const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery();
+  const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const clearLocation = currentLocation.replace(`/${businessArea}`, '');
