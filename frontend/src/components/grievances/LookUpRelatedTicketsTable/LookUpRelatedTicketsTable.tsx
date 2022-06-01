@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { decodeIdString, reduceChoices } from '../../../utils/utils';
 import {
@@ -8,12 +7,9 @@ import {
   useAllGrievanceTicketQuery,
   useGrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
+import { TableWrapper } from '../../core/TableWrapper';
 import { headCells } from './LookUpRelatedTicketsHeadCells';
 import { LookUpRelatedTicketsTableRow } from './LookUpRelatedTicketsTableRow';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
 
 interface LookUpRelatedTicketsTableProps {
   businessArea: string;
