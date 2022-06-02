@@ -65,7 +65,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField()
     size = models.PositiveIntegerField()
-    address = models.CharField(max_length=255, blank=True, default=BLANK)
+    address = models.CharField(max_length=1024, blank=True, default=BLANK)
     country = CountryField()
     admin1 = models.CharField(max_length=255, blank=True, default=BLANK)
     admin1_title = models.CharField(max_length=255, blank=True, default=BLANK)
