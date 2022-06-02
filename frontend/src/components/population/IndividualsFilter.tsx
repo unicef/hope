@@ -1,5 +1,4 @@
 import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
-import FormControl from '@material-ui/core/FormControl';
 import CakeIcon from '@material-ui/icons/Cake';
 import SearchIcon from '@material-ui/icons/Search';
 import WcIcon from '@material-ui/icons/Wc';
@@ -13,6 +12,7 @@ import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { FieldLabel } from '../core/FieldLabel';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
+import { StyledFormControl } from '../StyledFormControl';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -22,12 +22,6 @@ const TextContainer = styled(TextField)`
   input[type='number'] {
     -moz-appearance: textfield;
   }
-`;
-
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
 `;
 
 const SearchTextField = styled(TextField)`

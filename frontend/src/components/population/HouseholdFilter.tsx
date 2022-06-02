@@ -27,11 +27,6 @@ const TextContainer = styled(TextField)`
     -moz-appearance: textfield;
   }
 `;
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
 
 const SearchTextField = styled(TextField)`
   flex: 1;

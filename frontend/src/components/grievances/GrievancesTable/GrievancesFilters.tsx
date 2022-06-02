@@ -1,6 +1,5 @@
 import {
   Box,
-  FormControl,
   Grid,
   InputAdornment,
   InputLabel,
@@ -22,17 +21,13 @@ import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { FieldLabel } from '../../core/FieldLabel';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
+import { StyledFormControl } from '../../StyledFormControl';
 
 const SearchTextField = styled(TextField)`
   flex: 1;
   && {
     min-width: 150px;
   }
-`;
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
 `;
 
 interface GrievancesFiltersProps {

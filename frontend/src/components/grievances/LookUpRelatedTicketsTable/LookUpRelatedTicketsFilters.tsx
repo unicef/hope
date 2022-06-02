@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  FormControl,
   Grid,
   InputAdornment,
   InputLabel,
@@ -26,11 +25,6 @@ const SearchTextField = styled(TextField)`
   && {
     min-width: 150px;
   }
-`;
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
 `;
 
 interface LookUpRelatedTicketsFiltersProps {

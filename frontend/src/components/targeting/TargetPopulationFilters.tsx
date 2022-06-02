@@ -1,10 +1,4 @@
-import {
-  Box,
-  FormControl,
-  Grid,
-  InputAdornment,
-  MenuItem,
-} from '@material-ui/core';
+import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
 import { Group, Person, Search } from '@material-ui/icons';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
@@ -32,12 +26,6 @@ const SearchTextField = styled(TextField)`
   && {
     min-width: 150px;
   }
-`;
-
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
 `;
 
 const StartInputAdornment = styled(InputAdornment)`
