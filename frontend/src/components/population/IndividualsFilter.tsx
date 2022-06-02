@@ -4,14 +4,12 @@ import WcIcon from '@material-ui/icons/Wc';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import InputLabel from '../../shared/InputLabel';
-import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { FieldLabel } from '../core/FieldLabel';
 import { SearchTextField } from '../core/SearchTextField';
-import { StyledFormControl } from '../StyledFormControl';
+import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
@@ -22,10 +20,6 @@ const TextContainer = styled(TextField)`
   input[type='number'] {
     -moz-appearance: textfield;
   }
-`;
-
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
 `;
 
 interface IndividualsFilterProps {
@@ -60,36 +54,24 @@ export function IndividualsFilter({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Gender')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'sex')}
-              variant='outlined'
-              value={filter.sex || ''}
-              label={t('Gender')}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <WcIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-              SelectDisplayProps={{
-                'data-cy': 'filters-sex',
-              }}
-              MenuProps={{
-                'data-cy': 'filters-sex-options',
-              }}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
-              <MenuItem value='MALE'>{t('Male')}</MenuItem>
-              <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'sex')}
+            value={filter.sex || ''}
+            label={t('Gender')}
+            icon={<WcIcon />}
+            SelectDisplayProps={{
+              'data-cy': 'filters-sex',
+            }}
+            MenuProps={{
+              'data-cy': 'filters-sex-options',
+            }}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            <MenuItem value='MALE'>{t('Male')}</MenuItem>
+            <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
+          </SelectFilter>
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
@@ -139,32 +121,26 @@ export function IndividualsFilter({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Flags')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'flags')}
-              variant='outlined'
-              label={t('Flags')}
-              multiple
-              value={filter.flags}
-              SelectDisplayProps={{ 'data-cy': 'filters-flags' }}
-              MenuProps={{
-                'data-cy': 'filters-flags-options',
-              }}
-            >
-              {choicesData?.flagChoices.map((each, index) => (
-                <MenuItem
-                  key={each.value}
-                  value={each.value}
-                  data-cy={`select-option-${index}`}
-                >
-                  {each.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'flags')}
+            label={t('Flags')}
+            multiple
+            value={filter.flags}
+            SelectDisplayProps={{ 'data-cy': 'filters-flags' }}
+            MenuProps={{
+              'data-cy': 'filters-flags-options',
+            }}
+          >
+            {choicesData?.flagChoices.map((each, index) => (
+              <MenuItem
+                key={each.value}
+                value={each.value}
+                data-cy={`select-option-${index}`}
+              >
+                {each.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
       </Grid>
     </ContainerWithBorder>

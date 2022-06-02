@@ -1,17 +1,10 @@
-import { Grid, InputAdornment, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
 import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import InputLabel from '../../shared/InputLabel';
-import Select from '../../shared/Select';
-import { StyledFormControl } from '../StyledFormControl';
 import { ContainerWithBorder } from './ContainerWithBorder';
 import { SearchTextField } from './SearchTextField';
-
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
-`;
+import { SelectFilter } from './SelectFilter';
 
 interface ActivityLogPageFiltersProps {
   onFilterChange;
@@ -46,39 +39,27 @@ export function ActivityLogPageFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Module')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'module')}
-              variant='outlined'
-              label={t('Module')}
-              value={filter.module || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <ViewModuleRoundedIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-              SelectDisplayProps={{
-                'data-cy': 'filters-residence-status',
-              }}
-              MenuProps={{
-                'data-cy': 'filters-residence-status-options',
-              }}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'module')}
+            label={t('Module')}
+            value={filter.module || ''}
+            icon={<ViewModuleRoundedIcon />}
+            SelectDisplayProps={{
+              'data-cy': 'filters-residence-status',
+            }}
+            MenuProps={{
+              'data-cy': 'filters-residence-status-options',
+            }}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {Object.entries(modules).map(([key, value]) => (
+              <MenuItem key={key} value={key}>
+                {value}
               </MenuItem>
-              {Object.entries(modules).map(([key, value]) => (
-                <MenuItem key={key} value={key}>
-                  {value}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+            ))}
+          </SelectFilter>
         </Grid>
       </Grid>
     </ContainerWithBorder>

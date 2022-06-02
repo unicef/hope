@@ -13,8 +13,6 @@ import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import InputLabel from '../../../../shared/InputLabel';
-import Select from '../../../../shared/Select';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
@@ -22,8 +20,8 @@ import {
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { FieldLabel } from '../../../core/FieldLabel';
 import { SearchTextField } from '../../../core/SearchTextField';
+import { SelectFilter } from '../../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../../population/AdminAreaAutocomplete';
-import { StyledFormControl } from '../../../StyledFormControl';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -33,10 +31,6 @@ const TextContainer = styled(TextField)`
   input[type='number'] {
     -moz-appearance: textfield;
   }
-`;
-
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
 `;
 
 interface LookUpHouseholdFiltersProps {
@@ -70,33 +64,21 @@ export function LookUpHouseholdFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Programme')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'programs')}
-              variant='outlined'
-              label={t('Programme')}
-              value={filter.programs || []}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <FlashOnIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'programs')}
+            label={t('Programme')}
+            value={filter.programs || []}
+            icon={<FlashOnIcon />}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {programs.map((program) => (
+              <MenuItem key={program.id} value={program.id}>
+                {program.name}
               </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
@@ -144,25 +126,19 @@ export function LookUpHouseholdFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Status')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'residenceStatus')}
-              variant='outlined'
-              label={t('Status')}
-              value={filter.residenceStatus || ''}
-            >
-              {choicesData.residenceStatusChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'residenceStatus')}
+            label={t('Status')}
+            value={filter.residenceStatus || ''}
+          >
+            {choicesData.residenceStatusChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <AdminAreaAutocomplete
