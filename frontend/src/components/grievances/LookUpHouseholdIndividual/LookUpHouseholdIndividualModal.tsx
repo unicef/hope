@@ -96,6 +96,7 @@ export const LookUpHouseholdIndividualModal = ({
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
+    fetchPolicy:'cache-and-network'
   });
   const {
     data: choicesData,
