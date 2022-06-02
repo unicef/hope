@@ -1,9 +1,7 @@
 import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
-import FormControl from '@material-ui/core/FormControl';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import GroupIcon from '@material-ui/icons/Group';
-import SearchIcon from '@material-ui/icons/Search';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -16,6 +14,8 @@ import {
 } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { FieldLabel } from '../core/FieldLabel';
+import { SearchTextField } from '../core/SearchTextField';
+import { StyledFormControl } from '../StyledFormControl';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
@@ -25,13 +25,6 @@ const TextContainer = styled(TextField)`
   }
   input[type='number'] {
     -moz-appearance: textfield;
-  }
-`;
-
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
   }
 `;
 
@@ -60,17 +53,8 @@ export function HouseholdFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            variant='outlined'
             value={filter.text || ''}
-            margin='dense'
             onChange={(e) => handleFilterChange(e, 'text')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
             data-cy='filters-search'
           />
         </Grid>

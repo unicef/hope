@@ -1,10 +1,4 @@
-import {
-  FormControl,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  TextField,
-} from '@material-ui/core';
+import { Grid, InputAdornment, MenuItem, TextField } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -1,21 +1,12 @@
-import { FormControl, Grid, InputAdornment, MenuItem } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
+import { Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
-import TextField from '../../shared/TextField';
 import { useUserChoiceDataQuery } from '../../__generated__/graphql';
 import { StyledFormControl } from '../StyledFormControl';
 import { ContainerWithBorder } from './ContainerWithBorder';
-
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
+import { SearchTextField } from './SearchTextField';
 
 interface UsersListFiltersProps {
   onFilterChange;
@@ -39,16 +30,8 @@ export function UsersListFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            variant='outlined'
-            margin='dense'
+            value={filter.search || ''}
             onChange={(e) => handleFilterChange(e, 'search')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
           />
         </Grid>
         <Grid item>

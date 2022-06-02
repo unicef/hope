@@ -1,12 +1,12 @@
 import React from 'react';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { decodeIdString } from '../../../utils/utils';
+import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { decodeIdString } from '../../../../utils/utils';
 import {
   AllIndividualsQuery,
   AllIndividualsQueryVariables,
   useAllIndividualsQuery,
-} from '../../../__generated__/graphql';
-import { TableWrapper } from '../../core/TableWrapper';
+} from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
 

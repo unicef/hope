@@ -6,10 +6,8 @@ import {
   Grid,
   InputAdornment,
   MenuItem,
-  TextField,
 } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
-import SearchIcon from '@material-ui/icons/Search';
 import WcIcon from '@material-ui/icons/Wc';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
@@ -20,15 +18,10 @@ import InputLabel from '../../../../shared/InputLabel';
 import Select from '../../../../shared/Select';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { FieldLabel } from '../../../core/FieldLabel';
+import { SearchTextField } from '../../../core/SearchTextField';
 import { AdminAreaAutocomplete } from '../../../population/AdminAreaAutocomplete';
 import { StyledFormControl } from '../../../StyledFormControl';
 
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
 `;
@@ -58,17 +51,8 @@ export function LookUpIndividualFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            variant='outlined'
-            margin='dense'
             value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
             data-cy='filters-search'
           />
         </Grid>

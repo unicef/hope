@@ -1,15 +1,14 @@
 import { InputAdornment, MenuItem } from '@material-ui/core';
-import FormControl from '@material-ui/core/FormControl';
 import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
+import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { UsersAutocomplete } from '../core/UsersAutocomplete';
 import { StyledFormControl } from '../StyledFormControl';
 

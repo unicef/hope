@@ -1,23 +1,16 @@
-import {
-  Box,
-  FormControl,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  Paper,
-} from '@material-ui/core';
+import { Box, Grid, InputAdornment, MenuItem, Paper } from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
-import SearchIcon from '@material-ui/icons/Search';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
+import { FieldLabel } from '../../../components/core/FieldLabel';
+import { SearchTextField } from '../../../components/core/SearchTextField';
+import { StyledFormControl } from '../../../components/StyledFormControl';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import TextField from '../../../shared/TextField';
-import { FieldLabel } from '../../../components/core/FieldLabel';
-import { StyledFormControl } from '../../../components/StyledFormControl';
+import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 
 const Container = styled(Paper)`
   display: flex;
@@ -43,13 +36,6 @@ const TextContainer = styled(TextField)`
   }
 `;
 
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
-
 interface ProgrammesFilterProps {
   onFilterChange;
   filter;
@@ -71,17 +57,8 @@ export function ProgrammesFilters({
             <Grid item>
               <SearchTextField
                 label='Search'
-                variant='outlined'
                 value={filter.search || ''}
-                margin='dense'
                 onChange={(e) => handleFilterChange(e, 'search')}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position='start'>
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
                 data-cy='filters-search'
               />
             </Grid>

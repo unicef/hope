@@ -13,6 +13,7 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { FieldLabel } from '../../../components/core/FieldLabel';
 import { StyledFormControl } from '../../../components/StyledFormControl';
+import { SelectFilter } from '../../../components/core/SelectFilter';
 
 interface ReportingFiltersProps {
   onFilterChange;
@@ -32,28 +33,22 @@ export const ReportingFilters = ({
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Report Type</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'type')}
-              variant='outlined'
-              label='Type'
-              value={filter.type || ''}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.reportTypesChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            label='Report Type'
+            onChange={(e) => handleFilterChange(e, 'type')}
+            value={filter.type || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.reportTypesChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
@@ -103,28 +98,22 @@ export const ReportingFilters = ({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'status')}
-              variant='outlined'
-              label='Status'
-              value={filter.status || ''}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.reportStatusChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            label='Status'
+            onChange={(e) => handleFilterChange(e, 'status')}
+            value={filter.status || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.reportStatusChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
         <Grid item xs={12}>
           <FormControlLabel
