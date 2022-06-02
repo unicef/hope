@@ -91,7 +91,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                         "type": individual.doc_type,
                         "document_number": f"{individual.doc_serie} {individual.doc_number}",
                         "doc_date": individual.doc_issue_date,
-                        individual: individual_obj
+                        "individual": individual_obj
                     }
                     self._add_hh_doc(hh_doc, documents)
 

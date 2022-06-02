@@ -128,7 +128,12 @@
     "bank_name": "PrivatBank",
     "household": "4a8c7079-802d-e75e-4818-18d9e1debffe",
     "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_individual": null
+    "imported_individual": null,
+    "imported_individual": null,
+    "doc_type": "passport",
+    "doc_serie": "FA",
+    "doc_number": "33344321",
+    "doc_issue_date": "2029-03-07"
   }
 },
 {
@@ -151,7 +156,11 @@
     "bank_name": "MonoBank",
     "household": "4a8c7079-4818-e75e-802d-ebffe18d9123",
     "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_individual": null
+    "imported_individual": null,
+    "doc_type": "passport",
+    "doc_serie": "AM",
+    "doc_number": "12344543",
+    "doc_issue_date": "2032-01-05"
   }
 },
 {
