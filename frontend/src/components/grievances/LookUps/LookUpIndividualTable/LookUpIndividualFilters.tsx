@@ -4,7 +4,6 @@ import {
   Checkbox,
   FormControlLabel,
   Grid,
-  InputAdornment,
   MenuItem,
 } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
@@ -13,18 +12,11 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import InputLabel from '../../../../shared/InputLabel';
-import Select from '../../../../shared/Select';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { FieldLabel } from '../../../core/FieldLabel';
 import { SearchTextField } from '../../../core/SearchTextField';
+import { SelectFilter } from '../../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../../population/AdminAreaAutocomplete';
-import { StyledFormControl } from '../../../StyledFormControl';
-
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
-`;
 
 interface LookUpIndividualFiltersProps {
   onFilterChange;
@@ -57,33 +49,21 @@ export function LookUpIndividualFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Programme')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'programs')}
-              variant='outlined'
-              label={t('Programme')}
-              value={filter.programs || []}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <FlashOnIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'programs')}
+            label={t('Programme')}
+            value={filter.programs || []}
+            icon={<FlashOnIcon />}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {programs.map((program) => (
+              <MenuItem key={program.id} value={program.id}>
+                {program.name}
               </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
@@ -131,30 +111,24 @@ export function LookUpIndividualFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Status')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'status')}
-              multiple
-              variant='outlined'
-              label={t('Status')}
-              value={filter.status || []}
-            >
-              {[
-                { value: 'ACTIVE', name: 'Active' },
-                { value: 'WITHDRAWN', name: 'Withdrawn' },
-                { value: 'DUPLICATE', name: 'Duplicate' },
-              ].map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'status')}
+            multiple
+            label={t('Status')}
+            value={filter.status || []}
+          >
+            {[
+              { value: 'ACTIVE', name: 'Active' },
+              { value: 'WITHDRAWN', name: 'Withdrawn' },
+              { value: 'DUPLICATE', name: 'Duplicate' },
+            ].map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <AdminAreaAutocomplete
@@ -164,36 +138,24 @@ export function LookUpIndividualFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Gender')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'sex')}
-              variant='outlined'
-              value={filter.sex || ''}
-              label={t('Gender')}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <WcIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-              SelectDisplayProps={{
-                'data-cy': 'filters-sex',
-              }}
-              MenuProps={{
-                'data-cy': 'filters-sex-options',
-              }}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
-              <MenuItem value='MALE'>{t('Male')}</MenuItem>
-              <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'sex')}
+            value={filter.sex || ''}
+            label={t('Gender')}
+            icon={<WcIcon />}
+            SelectDisplayProps={{
+              'data-cy': 'filters-sex',
+            }}
+            MenuProps={{
+              'data-cy': 'filters-sex-options',
+            }}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            <MenuItem value='MALE'>{t('Male')}</MenuItem>
+            <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
+          </SelectFilter>
         </Grid>
         {household && (
           <Grid item>

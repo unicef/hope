@@ -5,8 +5,6 @@ import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import InputLabel from '../../shared/InputLabel';
-import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
 import {
   HouseholdChoiceDataQuery,
@@ -15,7 +13,7 @@ import {
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { FieldLabel } from '../core/FieldLabel';
 import { SearchTextField } from '../core/SearchTextField';
-import { StyledFormControl } from '../StyledFormControl';
+import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
@@ -26,10 +24,6 @@ const TextContainer = styled(TextField)`
   input[type='number'] {
     -moz-appearance: textfield;
   }
-`;
-
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
 `;
 
 interface HouseholdFiltersProps {
@@ -59,65 +53,41 @@ export function HouseholdFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Programme')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'program')}
-              variant='outlined'
-              label={t('Programme')}
-              value={filter.program || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <FlashOnIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'program')}
+            label={t('Programme')}
+            value={filter.program || ''}
+            icon={<FlashOnIcon />}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {programs.map((program) => (
+              <MenuItem key={program.id} value={program.id}>
+                {program.name}
               </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Residence Status')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'residenceStatus')}
-              variant='outlined'
-              label='Residence Status'
-              value={filter.residenceStatus || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <AssignmentIndRoundedIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-              SelectDisplayProps={{
-                'data-cy': 'filters-residence-status',
-              }}
-              MenuProps={{
-                'data-cy': 'filters-residence-status-options',
-              }}
-            >
-              {choicesData.residenceStatusChoices.map((program) => (
-                <MenuItem key={program.value} value={program.value}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'residenceStatus')}
+            label={t('Residence Status')}
+            value={filter.residenceStatus || ''}
+            icon={<AssignmentIndRoundedIcon />}
+            SelectDisplayProps={{
+              'data-cy': 'filters-residence-status',
+            }}
+            MenuProps={{
+              'data-cy': 'filters-residence-status-options',
+            }}
+          >
+            {choicesData.residenceStatusChoices.map((program) => (
+              <MenuItem key={program.value} value={program.value}>
+                {program.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <AdminAreaAutocomplete

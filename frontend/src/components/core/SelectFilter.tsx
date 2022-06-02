@@ -1,11 +1,18 @@
-import { InputLabel, Select } from '@material-ui/core';
+import { InputAdornment, InputLabel } from '@material-ui/core';
 import React from 'react';
+import styled from 'styled-components';
+import Select from '../../shared/Select';
 import { StyledFormControl } from '../StyledFormControl';
+
+const StartInputAdornment = styled(InputAdornment)`
+  margin-right: 0;
+`;
 
 export const SelectFilter = ({
   label,
   children,
   onChange,
+  icon = null,
   ...otherProps
 }): React.ReactElement => {
   return (
@@ -17,6 +24,17 @@ export const SelectFilter = ({
         onChange={onChange}
         variant='outlined'
         label={label}
+        InputProps={
+          icon
+            ? {
+                startAdornment: (
+                  <StartInputAdornment position='start'>
+                    {icon}
+                  </StartInputAdornment>
+                ),
+              }
+            : null
+        }
         {...otherProps}
       >
         {children}

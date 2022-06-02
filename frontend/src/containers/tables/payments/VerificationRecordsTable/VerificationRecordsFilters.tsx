@@ -3,9 +3,7 @@ import {
   Button,
   Collapse,
   Grid,
-  InputLabel,
   MenuItem,
-  Select,
   Typography,
 } from '@material-ui/core';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
@@ -13,7 +11,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { StyledFormControl } from '../../../../components/StyledFormControl';
+import { SelectFilter } from '../../../../components/core/SelectFilter';
 import { usePaymentVerificationChoicesQuery } from '../../../../__generated__/graphql';
 
 const Container = styled.div`
@@ -95,74 +93,56 @@ export function VerificationRecordsFilters({
               />
             </Grid>
             <Grid item>
-              <StyledFormControl variant='outlined' margin='dense'>
-                <InputLabel>{t('Verification Status')}</InputLabel>
-                <Select
-                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-                  // @ts-ignore
-                  onChange={(e) => handleFilterChange(e, 'status')}
-                  variant='outlined'
-                  label={t('Verification Status')}
-                  value={filter.status || ''}
-                >
-                  <MenuItem value=''>
-                    <em>None</em>
-                  </MenuItem>
-                  {choicesData.paymentVerificationStatusChoices.map((item) => {
+              <SelectFilter
+                onChange={(e) => handleFilterChange(e, 'status')}
+                label={t('Verification Status')}
+                value={filter.status || ''}
+              >
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+                {choicesData.paymentVerificationStatusChoices.map((item) => {
+                  return (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  );
+                })}
+              </SelectFilter>
+            </Grid>
+            <Grid item>
+              <SelectFilter
+                onChange={(e) => handleFilterChange(e, 'verificationChannel')}
+                label={t('Verification Channel')}
+                value={filter.verificationChannel || ''}
+              >
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+                {choicesData.cashPlanVerificationVerificationChannelChoices.map(
+                  (item) => {
                     return (
                       <MenuItem key={item.value} value={item.value}>
                         {item.name}
                       </MenuItem>
                     );
-                  })}
-                </Select>
-              </StyledFormControl>
+                  },
+                )}
+              </SelectFilter>
             </Grid>
             <Grid item>
-              <StyledFormControl variant='outlined' margin='dense'>
-                <InputLabel>{t('Verification Channel')}</InputLabel>
-                <Select
-                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-                  // @ts-ignore
-                  onChange={(e) => handleFilterChange(e, 'verificationChannel')}
-                  variant='outlined'
-                  label={t('Verification Channel')}
-                  value={filter.verificationChannel || ''}
-                >
-                  <MenuItem value=''>
-                    <em>None</em>
-                  </MenuItem>
-                  {choicesData.cashPlanVerificationVerificationChannelChoices.map(
-                    (item) => {
-                      return (
-                        <MenuItem key={item.value} value={item.value}>
-                          {item.name}
-                        </MenuItem>
-                      );
-                    },
-                  )}
-                </Select>
-              </StyledFormControl>
-            </Grid>
-            <Grid item>
-              <StyledFormControl variant='outlined' margin='dense'>
-                <InputLabel>{t('Verification Plan Id')}</InputLabel>
-                <Select
-                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-                  // @ts-ignore
-                  onChange={(e) =>
-                    handleFilterChange(e, 'cashPlanPaymentVerification')
-                  }
-                  variant='outlined'
-                  label={t('Verification Plan Id')}
-                  value={filter.cashPlanPaymentVerification || ''}
-                >
-                  <MenuItem value=''>
-                    <em>None</em>
-                  </MenuItem>
-                  {verificationPlanOptions}
-                </Select>
-              </StyledFormControl>
+              <SelectFilter
+                onChange={(e) =>
+                  handleFilterChange(e, 'cashPlanPaymentVerification')
+                }
+                label={t('Verification Plan Id')}
+                value={filter.cashPlanPaymentVerification || ''}
+              >
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+                {verificationPlanOptions}
+              </SelectFilter>
             </Grid>
           </Grid>
         </Collapse>

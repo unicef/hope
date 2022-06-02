@@ -43,7 +43,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bZQynM fgJQBP"
                 >
                   Individual ID
                 </span>
@@ -53,7 +53,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bZQynM fgJQBP"
                 >
                   Individual
                 </span>
@@ -63,7 +63,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bZQynM fgJQBP"
                 >
                   Status
                 </span>
@@ -73,7 +73,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bZQynM fgJQBP"
                 >
                   Role
                 </span>
@@ -83,7 +83,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bZQynM fgJQBP"
                 >
                   Relationship to HoH
                 </span>
@@ -93,7 +93,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bZQynM fgJQBP"
                 >
                   Date of Birth
                 </span>
@@ -103,7 +103,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bZQynM fgJQBP"
                 >
                   Gender
                 </span>
@@ -121,7 +121,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-EHOje fJINSq"
+                  class="sc-bdVaJa jPYjeL"
                   href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6YTI2ODYyMTAtYjBhNi00NTI1LWI4YTAtYTFmY2FlMWIwMjE5"
                 >
                   IND-42-0000.0001
@@ -136,10 +136,10 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-bZQynM hTcAyj"
+                  class="sc-bwzfXH jDYBWd"
                 >
                   <div
-                    class="sc-ifAKCX PznGL"
+                    class="sc-htpNat dNIAUP"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -179,7 +179,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-EHOje fJINSq"
+                  class="sc-bdVaJa jPYjeL"
                   href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
                 >
                   IND-88-0000.0005
@@ -194,10 +194,10 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-bZQynM hTcAyj"
+                  class="sc-bwzfXH jDYBWd"
                 >
                   <div
-                    class="sc-ifAKCX PznGL"
+                    class="sc-htpNat dNIAUP"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -237,7 +237,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-EHOje fJINSq"
+                  class="sc-bdVaJa jPYjeL"
                   href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6YWI5YWZhNzUtMTg0Yy00NDIxLWJmMGUtNTIzZGUxNWMyOGFm"
                 >
                   IND-88-0000.0006
@@ -252,10 +252,10 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-bZQynM hTcAyj"
+                  class="sc-bwzfXH jDYBWd"
                 >
                   <div
-                    class="sc-ifAKCX PznGL"
+                    class="sc-htpNat dNIAUP"
                     data-cy="status-container"
                   >
                     ACTIVE

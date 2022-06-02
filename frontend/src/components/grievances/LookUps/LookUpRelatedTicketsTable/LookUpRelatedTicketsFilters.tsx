@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-} from '@material-ui/core';
+import { Box, Button, Grid, MenuItem } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import React from 'react';
@@ -14,8 +7,8 @@ import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { FieldLabel } from '../../../core/FieldLabel';
 import { SearchTextField } from '../../../core/SearchTextField';
+import { SelectFilter } from '../../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../../population/AdminAreaAutocomplete';
-import { StyledFormControl } from '../../../StyledFormControl';
 
 interface LookUpRelatedTicketsFiltersProps {
   onFilterChange;
@@ -46,28 +39,22 @@ export function LookUpRelatedTicketsFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Status')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'status')}
-              variant='outlined'
-              label={t('Status')}
-              value={filter.status || null}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.grievanceTicketStatusChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'status')}
+            label={t('Status')}
+            value={filter.status || null}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketStatusChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <SearchTextField
