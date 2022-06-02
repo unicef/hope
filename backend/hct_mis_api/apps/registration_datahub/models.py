@@ -553,10 +553,10 @@ class DiiaHousehold(TimeStampedUUIDModel):
     vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True)
     vpo_doc_id = models.CharField(max_length=128, blank=True, default=BLANK)
     vpo_doc_date = models.DateField(blank=True)
-    address = models.CharField(max_length=255, blank=True, default=BLANK)
+    address = models.CharField(max_length=1024, blank=True, default=BLANK)
     consent = models.BooleanField()
     head_of_household = models.OneToOneField("DiiaIndividual", on_delete=models.CASCADE, null=True)
-
+    source_data = models.JSONField(default=dict, blank=True, null=True)
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="diia_households",
