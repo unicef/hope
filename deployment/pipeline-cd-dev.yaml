@@ -28,9 +28,6 @@ stages:
           vmImage: 'ubuntu-latest'
         displayName: "[HOPE] Deployment"
         steps:
-          - task: HelmInstaller@1
-            inputs:
-              helmVersionToInstall: '2.16.1'
           - task: HelmDeploy@0
             displayName: "Update Chart dependencies"
             inputs:
