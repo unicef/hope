@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Collapse,
-  FormControl,
   Grid,
   InputAdornment,
   InputLabel,
@@ -30,11 +29,6 @@ const Container = styled.div`
   && > div {
     margin: 5px;
   }
-`;
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
 `;
 
 const SearchTextField = styled(TextField)`

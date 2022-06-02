@@ -16,12 +16,7 @@ import {
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
-
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
+import { StyledFormControl } from '../../../../components/StyledFormControl';
 
 const SearchTextField = styled(TextField)`
   flex: 1;
@@ -152,7 +147,9 @@ export function PaymentFilters({
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                startDate: moment(date).startOf("day").toISOString(),
+                startDate: moment(date)
+                  .startOf('day')
+                  .toISOString(),
               })
             }
             value={filter.startDate || null}
@@ -168,7 +165,12 @@ export function PaymentFilters({
             label='End Date'
             autoOk
             onChange={(date) =>
-              onFilterChange({ ...filter, endDate: moment(date).endOf("day").toISOString() })
+              onFilterChange({
+                ...filter,
+                endDate: moment(date)
+                  .endOf('day')
+                  .toISOString(),
+              })
             }
             value={filter.endDate || null}
             format='YYYY-MM-DD'

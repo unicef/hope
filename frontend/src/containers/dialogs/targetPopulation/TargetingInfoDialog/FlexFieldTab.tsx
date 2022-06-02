@@ -9,6 +9,7 @@ import { Search } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { StyledFormControl } from '../../../../components/StyledFormControl';
 import InputLabel from '../../../../shared/InputLabel';
 import Select from '../../../../shared/Select';
 import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
@@ -22,12 +23,6 @@ const TextContainer = styled(TextField)`
   input[type='number'] {
     -moz-appearance: textfield;
   }
-`;
-
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
 `;
 
 const FilterWrapper = styled.div`

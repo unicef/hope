@@ -1,5 +1,4 @@
 import { Grid, InputAdornment, MenuItem } from '@material-ui/core';
-import FormControl from '@material-ui/core/FormControl';
 import SearchIcon from '@material-ui/icons/Search';
 import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
 import React from 'react';
@@ -8,13 +7,8 @@ import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
+import { StyledFormControl } from '../StyledFormControl';
 import { ContainerWithBorder } from './ContainerWithBorder';
-
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
 
 const SearchTextField = styled(TextField)`
   flex: 1;
