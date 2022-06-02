@@ -34,12 +34,14 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
+    fetchPolicy:'cache-and-network'
   });
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery({
     variables: { businessArea },
+    fetchPolicy: 'cache-first',
   });
 
   if (loading || choicesLoading) return <LoadingComponent />;

@@ -7588,6 +7588,17 @@ export type CashAssistUrlPrefixQuery = (
   & Pick<Query, 'cashAssistUrlPrefix'>
 );
 
+export type LoggedCheckerQueryVariables = {};
+
+
+export type LoggedCheckerQuery = (
+  { __typename?: 'Query' }
+  & { me: Maybe<(
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'id'>
+  )> }
+);
+
 export type MeQueryVariables = {};
 
 
@@ -13478,6 +13489,55 @@ export function useCashAssistUrlPrefixLazyQuery(baseOptions?: ApolloReactHooks.L
 export type CashAssistUrlPrefixQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixQuery>;
 export type CashAssistUrlPrefixLazyQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixLazyQuery>;
 export type CashAssistUrlPrefixQueryResult = ApolloReactCommon.QueryResult<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>;
+export const LoggedCheckerDocument = gql`
+    query LoggedChecker {
+  me {
+    id
+  }
+}
+    `;
+export type LoggedCheckerComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LoggedCheckerQuery, LoggedCheckerQueryVariables>, 'query'>;
+
+    export const LoggedCheckerComponent = (props: LoggedCheckerComponentProps) => (
+      <ApolloReactComponents.Query<LoggedCheckerQuery, LoggedCheckerQueryVariables> query={LoggedCheckerDocument} {...props} />
+    );
+    
+export type LoggedCheckerProps<TChildProps = {}> = ApolloReactHoc.DataProps<LoggedCheckerQuery, LoggedCheckerQueryVariables> & TChildProps;
+export function withLoggedChecker<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  LoggedCheckerQuery,
+  LoggedCheckerQueryVariables,
+  LoggedCheckerProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, LoggedCheckerQuery, LoggedCheckerQueryVariables, LoggedCheckerProps<TChildProps>>(LoggedCheckerDocument, {
+      alias: 'loggedChecker',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useLoggedCheckerQuery__
+ *
+ * To run a query within a React component, call `useLoggedCheckerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoggedCheckerQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoggedCheckerQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLoggedCheckerQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LoggedCheckerQuery, LoggedCheckerQueryVariables>) {
+        return ApolloReactHooks.useQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, baseOptions);
+      }
+export function useLoggedCheckerLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LoggedCheckerQuery, LoggedCheckerQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, baseOptions);
+        }
+export type LoggedCheckerQueryHookResult = ReturnType<typeof useLoggedCheckerQuery>;
+export type LoggedCheckerLazyQueryHookResult = ReturnType<typeof useLoggedCheckerLazyQuery>;
+export type LoggedCheckerQueryResult = ApolloReactCommon.QueryResult<LoggedCheckerQuery, LoggedCheckerQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {

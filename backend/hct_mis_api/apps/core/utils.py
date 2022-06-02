@@ -4,6 +4,7 @@ import itertools
 import logging
 import string
 from collections import MutableMapping, OrderedDict
+from time import sleep
 from typing import List
 
 from django.db.models import QuerySet
@@ -233,6 +234,7 @@ def get_attr_value(name, obj, default=None):
 
 
 def to_choice_object(choices):
+    sleep(.2)
     return [{"name": name, "value": value} for value, name in choices]
 
 

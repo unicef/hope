@@ -45,6 +45,7 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     loading: loadingPrograms,
   } = useAllProgramsQuery({
     variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy:'cache-and-network'
   });
 
   if (loadingPrograms) return <LoadingComponent />;

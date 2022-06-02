@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useMeQuery } from '../__generated__/graphql';
 import { useBusinessArea } from '../hooks/useBusinessArea';
+import {useCachedMe} from "../hooks/useCachedMe";
 
 const CountrySelect = styled(Select)`
   && {
@@ -43,9 +44,7 @@ const CountrySelect = styled(Select)`
 `;
 
 export function BusinessAreaSelect(): React.ReactElement {
-  const { data } = useMeQuery({
-    fetchPolicy: 'cache-first',
-  });
+  const { data } = useCachedMe();
   const businessArea = useBusinessArea();
   const history = useHistory();
   const onChange = (e): void => {
