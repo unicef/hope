@@ -1628,7 +1628,6 @@ def get_field_by_name(field_name: str):
 
 def filter_choices(field, args):
     choices = field.get("choices")
-    print(choices)
     if args and choices:
         field["choices"] = list(filter(lambda choice: str(choice["value"]) in args, choices))
     return field
