@@ -550,3 +550,9 @@ export const formatAge = (age): string | number => {
 export const renderIndividualName = (individual): string => {
   return individual?.fullName;
 };
+
+export function clearCache(apolloClient):void{
+  apolloClient.resetStore()
+  localStorage.removeItem('me-fetched-timestamp')
+  localStorage.removeItem('cache-targeting-core-fields-attributes')
+}

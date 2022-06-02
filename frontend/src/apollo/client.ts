@@ -1,8 +1,9 @@
 import ApolloClient from 'apollo-client';
 import { createUploadLink } from 'apollo-upload-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
+import { persistCache } from 'apollo-cache-persist';
 import { GRAPHQL_URL } from '../config';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
 
@@ -80,8 +81,21 @@ const link = ApolloLink.from([
   errorLink,
   createUploadLink({ uri: GRAPHQL_URL }),
 ]);
-
-export const client = new ApolloClient({
-  cache: new InMemoryCache(),
-  link,
-});
+let client;
+export async function getClient(): Promise<
+  ApolloClient<NormalizedCacheObject>
+> {
+  if (client) {
+    return client;
+  }
+  const cache = new InMemoryCache();
+  await persistCache({
+    cache,
+    storage: window.localStorage,
+  });
+  client = new ApolloClient({
+    cache,
+    link,
+  });
+  return client;
+}

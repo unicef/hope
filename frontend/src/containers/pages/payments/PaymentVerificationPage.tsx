@@ -40,6 +40,7 @@ export function PaymentVerificationPage(): React.ReactElement {
   const debouncedFilter = useDebounce(filter, 500);
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
+    fetchPolicy:'cache-and-network'
   });
   if (loading) return <LoadingComponent />;
   if (permissions === null) return null;
