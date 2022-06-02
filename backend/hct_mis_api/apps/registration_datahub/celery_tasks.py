@@ -286,3 +286,35 @@ def automate_rdi_creation_task(registration_id: int, page_size: int):
         service.process_records(rdi.id, records_ids)
 
     logger.info("automate_rdi_creation_task end")
+
+
+@app.task
+def registration_diia_import_task(registration_data_import_id):
+    logger.info("registration_diia_import_task start")
+
+    try:
+        from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.registration_datahub.models import (
+            RegistrationDataImportDatahub,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import RdiDiiaCreateTask
+
+        RdiDiiaCreateTask().execute(
+            registration_data_import_id=str(registration_data_import_id)
+        )
+    except Exception as e:
+        logger.exception(e)
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+        from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+
+        RegistrationDataImportDatahub.objects.filter(
+            id=registration_data_import_id,
+        ).update(import_done=RegistrationDataImportDatahub.DONE)
+
+        RegistrationDataImport.objects.filter(
+            datahub_id=registration_data_import_id,
+        ).update(status=RegistrationDataImport.IMPORT_ERROR)
+
+        raise
+
+    logger.info("registration_diia_import_task end")
