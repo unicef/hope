@@ -593,6 +593,10 @@ class DiiaIndividual(TimeStampedUUIDModel):
     disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
     iban = models.CharField(max_length=255, blank=True, default=BLANK)
     bank_name = models.CharField(max_length=255, blank=True, default=BLANK)
+    doc_type = models.CharField(max_length=128, blank=True, default=BLANK)
+    doc_serie = models.CharField(max_length=64, blank=True, default=BLANK)
+    doc_number = models.CharField(max_length=64, blank=True, default=BLANK)
+    doc_issue_date = models.DateField(null=True, blank=True)
 
     household = models.ForeignKey(
         "DiiaHousehold",
