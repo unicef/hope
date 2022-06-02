@@ -8,6 +8,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_DICT,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_OTHER,
+    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -86,6 +87,14 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 if individual.relationship == HEAD:
                     head_of_household = individual_obj
 
+                    hh_doc = {
+                        "type": individual.doc_type,
+                        "document_number": f"{individual.doc_serie} {individual.doc_number}",
+                        "doc_date": individual.doc_issue_date,
+                        individual: individual_obj
+                    }
+                    self._add_hh_doc(hh_doc, documents)
+
                 if individual.birth_doc:
                     self._add_birth_document(documents, individual, individual_obj)
 
@@ -154,7 +163,26 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             )
         )
 
+    def _add_hh_doc(self, data, documents):
+        # TODO: add more types maybe
+        doc_type = self.national_passport_document_type if data.get("type") == "passport" else self.other_document_type
+
+        documents.append(
+            ImportedDocument(
+                document_number=data.get("document_number"),
+                individual=data.get("individual"),
+                doc_date=data.get("doc_date"),
+                type=doc_type,
+            )
+        )
+
     def _get_document_types(self):
+        self.national_passport_document_type, _ = ImportedDocumentType.objects.get_or_create(
+            country=Country("UA"),  # DiiaIndividual don't has issuing country
+            label=IDENTIFICATION_TYPE_DICT.get(IDENTIFICATION_TYPE_NATIONAL_PASSPORT),
+            type=IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+        )
+
         self.birth_document_type, _ = ImportedDocumentType.objects.get_or_create(
             country=Country("UA"),  # DiiaIndividual don't has issuing country
             label=IDENTIFICATION_TYPE_DICT.get(IDENTIFICATION_TYPE_BIRTH_CERTIFICATE),
