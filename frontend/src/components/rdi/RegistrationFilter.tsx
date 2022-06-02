@@ -11,12 +11,7 @@ import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { UsersAutocomplete } from '../core/UsersAutocomplete';
-
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
+import { StyledFormControl } from '../StyledFormControl';
 
 const StyledTextField = styled(TextField)`
   flex: 1;

@@ -17,6 +17,7 @@ import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import TextField from '../../../shared/TextField';
 import { FieldLabel } from '../../../components/core/FieldLabel';
+import { StyledFormControl } from '../../../components/StyledFormControl';
 
 const Container = styled(Paper)`
   display: flex;
@@ -40,11 +41,6 @@ const TextContainer = styled(TextField)`
   input[type='number'] {
     -moz-appearance: textfield;
   }
-`;
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
 `;
 
 const SearchTextField = styled(TextField)`

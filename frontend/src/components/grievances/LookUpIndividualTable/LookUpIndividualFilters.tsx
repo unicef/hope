@@ -22,12 +22,7 @@ import Select from '../../../shared/Select';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { FieldLabel } from '../../core/FieldLabel';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
-
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
+import { StyledFormControl } from '../../StyledFormControl';
 
 const SearchTextField = styled(TextField)`
   flex: 1;

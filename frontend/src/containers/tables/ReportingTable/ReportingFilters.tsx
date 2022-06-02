@@ -1,10 +1,8 @@
 import React from 'react';
-import styled from 'styled-components';
 import moment from 'moment';
 import {
   Box,
   Checkbox,
-  FormControl,
   FormControlLabel,
   Grid,
   InputLabel,
@@ -14,12 +12,8 @@ import {
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { FieldLabel } from '../../../components/core/FieldLabel';
+import { StyledFormControl } from '../../../components/StyledFormControl';
 
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
 interface ReportingFiltersProps {
   onFilterChange;
   filter;
@@ -73,7 +67,11 @@ export const ReportingFilters = ({
               onChange={(date) =>
                 onFilterChange({
                   ...filter,
-                  createdFrom: date ? moment(date).startOf('day').toISOString() : null,
+                  createdFrom: date
+                    ? moment(date)
+                        .startOf('day')
+                        .toISOString()
+                    : null,
                 })
               }
               value={filter.createdFrom || null}
@@ -92,7 +90,11 @@ export const ReportingFilters = ({
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                createdTo: date ? moment(date).endOf('day').toISOString() : null,
+                createdTo: date
+                  ? moment(date)
+                      .endOf('day')
+                      .toISOString()
+                  : null,
               })
             }
             value={filter.createdTo || null}

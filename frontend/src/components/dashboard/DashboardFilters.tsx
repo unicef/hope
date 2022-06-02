@@ -1,10 +1,4 @@
-import {
-  FormControl,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  Paper,
-} from '@material-ui/core';
+import { Grid, InputAdornment, MenuItem, Paper } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +9,7 @@ import Select from '../../shared/Select';
 import { useAllProgramsQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
+import { StyledFormControl } from '../StyledFormControl';
 
 const Container = styled(Paper)`
   display: flex;
@@ -29,11 +24,7 @@ const Container = styled(Paper)`
     margin: 5px;
   }
 `;
-const StyledFormControl = styled(FormControl)`
-  width: 100%;
-  color: #5f6368;
-  border-bottom: 0;
-`;
+
 interface DashboardFiltersProps {
   onFilterChange;
   filter;

@@ -7,13 +7,8 @@ import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
 import { useUserChoiceDataQuery } from '../../__generated__/graphql';
+import { StyledFormControl } from '../StyledFormControl';
 import { ContainerWithBorder } from './ContainerWithBorder';
-
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
 
 const SearchTextField = styled(TextField)`
   flex: 1;
