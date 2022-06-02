@@ -28,6 +28,10 @@ stages:
           vmImage: 'ubuntu-latest'
         displayName: "[HOPE] Deployment"
         steps:
+          - task: HelmInstaller@0
+            displayName: Install Helm 3.8.0
+            inputs:
+              helmVersion: 3.8.0
           - task: HelmDeploy@0
             displayName: "Update Chart dependencies"
             inputs:
