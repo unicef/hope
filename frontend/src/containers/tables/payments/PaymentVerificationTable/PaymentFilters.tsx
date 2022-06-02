@@ -1,29 +1,19 @@
-import React from 'react';
-import styled from 'styled-components';
-import { InputAdornment, MenuItem, Grid } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import { Grid, InputAdornment, MenuItem } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
-import FormControl from '@material-ui/core/FormControl';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
-import TextField from '../../../../shared/TextField';
+import React from 'react';
+import styled from 'styled-components';
+import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
+import { SearchTextField } from '../../../../components/core/SearchTextField';
+import { StyledFormControl } from '../../../../components/StyledFormControl';
 import InputLabel from '../../../../shared/InputLabel';
 import Select from '../../../../shared/Select';
 import {
   ProgramNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
-import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
-import { StyledFormControl } from '../../../../components/StyledFormControl';
-
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
@@ -54,17 +44,9 @@ export function PaymentFilters({
       <Grid container spacing={3}>
         <Grid item>
           <SearchTextField
+            value={filter.search || ''}
             label='Cash Plan ID'
-            variant='outlined'
-            margin='dense'
             onChange={(e) => handleFilterChange(e, 'search')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
           />
         </Grid>
         <Grid item>
@@ -93,17 +75,9 @@ export function PaymentFilters({
         </Grid>
         <Grid item>
           <SearchTextField
+            value={filter.serviceProvider || ''}
             label='FSP'
-            variant='outlined'
-            margin='dense'
             onChange={(e) => handleFilterChange(e, 'serviceProvider')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <AccountBalanceIcon />
-                </InputAdornment>
-              ),
-            }}
           />
         </Grid>
         <Grid item>

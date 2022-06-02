@@ -1,21 +1,13 @@
 import { Grid, InputAdornment, MenuItem } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
 import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
-import TextField from '../../shared/TextField';
 import { StyledFormControl } from '../StyledFormControl';
 import { ContainerWithBorder } from './ContainerWithBorder';
-
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
+import { SearchTextField } from './SearchTextField';
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
@@ -48,17 +40,8 @@ export function ActivityLogPageFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            variant='outlined'
             value={filter.search || ''}
-            margin='dense'
             onChange={(e) => handleFilterChange(e, 'search')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
             data-cy='filters-search'
           />
         </Grid>

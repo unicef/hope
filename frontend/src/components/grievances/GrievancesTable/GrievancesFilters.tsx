@@ -1,34 +1,24 @@
 import {
   Box,
   Grid,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   TextField,
 } from '@material-ui/core';
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
-import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { FieldLabel } from '../../core/FieldLabel';
+import { SearchTextField } from '../../core/SearchTextField';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { StyledFormControl } from '../../StyledFormControl';
-
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
 
 interface GrievancesFiltersProps {
   onFilterChange;
@@ -56,19 +46,10 @@ export function GrievancesFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
-            variant='outlined'
-            margin='dense'
-            onChange={(e) => handleFilterChange(e, 'search')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-            data-cy='filters-search'
             value={filter.search || ''}
+            label='Search'
+            onChange={(e) => handleFilterChange(e, 'search')}
+            data-cy='filters-search'
           />
         </Grid>
         <Grid item>
@@ -97,17 +78,9 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <SearchTextField
+            value={filter.fsp || ''}
             label='FSP'
-            variant='outlined'
-            margin='dense'
             onChange={(e) => handleFilterChange(e, 'fsp')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <AccountBalanceIcon />
-                </InputAdornment>
-              ),
-            }}
           />
         </Grid>
         <Grid item>

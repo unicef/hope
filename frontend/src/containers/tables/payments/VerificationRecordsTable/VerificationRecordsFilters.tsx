@@ -3,18 +3,17 @@ import {
   Button,
   Collapse,
   Grid,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
-  TextField,
   Typography,
 } from '@material-ui/core';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
-import SearchIcon from '@material-ui/icons/Search';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { SearchTextField } from '../../../../components/core/SearchTextField';
+import { StyledFormControl } from '../../../../components/StyledFormControl';
 import { usePaymentVerificationChoicesQuery } from '../../../../__generated__/graphql';
 
 const Container = styled.div`
@@ -28,13 +27,6 @@ const Container = styled.div`
 
   && > div {
     margin: 5px;
-  }
-`;
-
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
   }
 `;
 
@@ -96,17 +88,9 @@ export function VerificationRecordsFilters({
           <Grid container spacing={3}>
             <Grid item>
               <SearchTextField
+                value={filter.search || ''}
                 label={t('Search')}
-                variant='outlined'
-                margin='dense'
                 onChange={(e) => handleFilterChange(e, 'search')}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position='start'>
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
                 data-cy='filters-search'
               />
             </Grid>

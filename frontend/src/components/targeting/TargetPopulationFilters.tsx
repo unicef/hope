@@ -11,6 +11,8 @@ import { TARGETING_STATES } from '../../utils/constants';
 import { ProgramNode } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { FieldLabel } from '../core/FieldLabel';
+import { SearchTextField } from '../core/SearchTextField';
+import { StyledFormControl } from '../StyledFormControl';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -19,12 +21,6 @@ const TextContainer = styled(TextField)`
   }
   input[type='number'] {
     -moz-appearance: textfield;
-  }
-`;
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
   }
 `;
 
@@ -53,17 +49,8 @@ export function TargetPopulationFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            variant='outlined'
             value={filter.name || ''}
-            margin='dense'
             onChange={(e) => handleFilterChange(e, 'name')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
             data-cy='filters-search'
           />
         </Grid>
