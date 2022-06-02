@@ -196,7 +196,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
         blank=True,
     )
-    deduplication_batch_results = JSONField(default=dict)
+    deduplication_batch_results = JSONField(null=True)
     deduplication_golden_record_results = JSONField(default=dict)
     flex_fields = JSONField(default=dict)
     pregnant = models.BooleanField(null=True)
