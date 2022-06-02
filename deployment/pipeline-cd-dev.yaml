@@ -31,7 +31,7 @@ stages:
           - task: HelmInstaller@0
             displayName: Install Helm 2.12.0
             inputs:
-              helmVersion: 2.12.0
+              helmVersion: v2.12.0
           - task: HelmDeploy@0
             displayName: "Update Chart dependencies"
             inputs:
