@@ -29,9 +29,9 @@ stages:
         displayName: "[HOPE] Deployment"
         steps:
           - task: HelmInstaller@0
-            displayName: Install Helm 3.8.0
+            displayName: Install Helm 2.16.1
             inputs:
-              helmVersion: 3.8.0
+              helmVersion: 2.16.1
           - task: HelmDeploy@0
             displayName: "Update Chart dependencies"
             inputs:
