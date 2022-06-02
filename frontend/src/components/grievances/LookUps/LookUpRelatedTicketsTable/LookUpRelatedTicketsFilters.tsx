@@ -2,30 +2,20 @@ import {
   Box,
   Button,
   Grid,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
-  TextField,
 } from '@material-ui/core';
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
-import SearchIcon from '@material-ui/icons/Search';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { FieldLabel } from '../../../core/FieldLabel';
+import { SearchTextField } from '../../../core/SearchTextField';
 import { AdminAreaAutocomplete } from '../../../population/AdminAreaAutocomplete';
-
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
+import { StyledFormControl } from '../../../StyledFormControl';
 
 interface LookUpRelatedTicketsFiltersProps {
   onFilterChange;
@@ -50,17 +40,8 @@ export function LookUpRelatedTicketsFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            variant='outlined'
-            margin='dense'
             value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
             data-cy='filters-search'
           />
         </Grid>
@@ -86,22 +67,13 @@ export function LookUpRelatedTicketsFilters({
                 );
               })}
             </Select>
-          </StyledFormControl../>
+          </StyledFormControl>
         </Grid>
         <Grid item>
           <SearchTextField
             label={t('FSP')}
-            variant='outlined'
-            margin='dense'
             value={filter.fsp}
             onChange={(e) => handleFilterChange(e, 'fsp')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <AccountBalanceIcon />
-                </InputAdornment>
-              ),
-            }}
           />
         </Grid>
         <Grid item>

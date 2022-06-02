@@ -1,6 +1,5 @@
 import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
 import CakeIcon from '@material-ui/icons/Cake';
-import SearchIcon from '@material-ui/icons/Search';
 import WcIcon from '@material-ui/icons/Wc';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,11 +7,12 @@ import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
+import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { FieldLabel } from '../core/FieldLabel';
-import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
-import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
+import { SearchTextField } from '../core/SearchTextField';
 import { StyledFormControl } from '../StyledFormControl';
+import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -24,12 +24,6 @@ const TextContainer = styled(TextField)`
   }
 `;
 
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
 `;
@@ -54,17 +48,8 @@ export function IndividualsFilter({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            variant='outlined'
-            margin='dense'
             value={filter.text}
             onChange={(e) => handleFilterChange(e, 'text')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
             data-cy='filters-search'
           />
         </Grid>
