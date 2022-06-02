@@ -1,11 +1,4 @@
-import {
-  Box,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from '@material-ui/core';
+import { Box, Grid, MenuItem, TextField } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import React from 'react';
@@ -17,8 +10,8 @@ import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { FieldLabel } from '../../core/FieldLabel';
 import { SearchTextField } from '../../core/SearchTextField';
+import { SelectFilter } from '../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { StyledFormControl } from '../../StyledFormControl';
 
 interface GrievancesFiltersProps {
   onFilterChange;
@@ -53,28 +46,22 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Status')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'status')}
-              variant='outlined'
-              label='Status'
-              value={filter.status || ''}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.grievanceTicketStatusChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'status')}
+            label={t('Status')}
+            value={filter.status || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketStatusChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <SearchTextField
@@ -133,50 +120,42 @@ export function GrievancesFilters({
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Category</InputLabel>
-            <Select
-              onChange={(e) => handleFilterChange(e, 'category')}
-              variant='outlined'
-              label='Category'
-              value={filter.category || ''}
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'category')}
+            label={t('Category')}
+            value={filter.category || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketCategoryChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
+        {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+        filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+          <Grid item>
+            <SelectFilter
+              onChange={(e) => handleFilterChange(e, 'issueType')}
+              label='Issue Type'
+              value={filter.issueType || ''}
             >
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {choicesData.grievanceTicketCategoryChoices.map((item) => {
+              {issueTypeDict[filter.category].subCategories.map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>
                     {item.name}
                   </MenuItem>
                 );
               })}
-            </Select>
-          </StyledFormControl>
-        </Grid>
-        {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-        filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
-          <Grid item>
-            <StyledFormControl variant='outlined' margin='dense'>
-              <InputLabel>Issue Type</InputLabel>
-              <Select
-                onChange={(e) => handleFilterChange(e, 'issueType')}
-                variant='outlined'
-                label='Issue Type'
-                value={filter.issueType || ''}
-              >
-                <MenuItem value=''>
-                  <em>None</em>
-                </MenuItem>
-                {issueTypeDict[filter.category].subCategories.map((item) => {
-                  return (
-                    <MenuItem key={item.value} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </StyledFormControl>
+            </SelectFilter>
           </Grid>
         ) : null}
 
@@ -184,26 +163,22 @@ export function GrievancesFilters({
           <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Assignee')}</InputLabel>
-            <Select
-              onChange={(e) => handleFilterChange(e, 'assignedTo')}
-              variant='outlined'
-              label={t('Assignee')}
-              value={filter.assignedTo || ''}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
-              {usersChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'assignedTo')}
+            label={t('Assignee')}
+            value={filter.assignedTo || ''}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {usersChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>

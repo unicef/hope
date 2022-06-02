@@ -6,9 +6,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { FieldLabel } from '../../../components/core/FieldLabel';
 import { SearchTextField } from '../../../components/core/SearchTextField';
-import { StyledFormControl } from '../../../components/StyledFormControl';
-import InputLabel from '../../../shared/InputLabel';
-import Select from '../../../shared/Select';
+import { SelectFilter } from '../../../components/core/SelectFilter';
 import TextField from '../../../shared/TextField';
 import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 
@@ -63,28 +61,22 @@ export function ProgrammesFilters({
               />
             </Grid>
             <Grid item>
-              <StyledFormControl variant='outlined' margin='dense'>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-                  // @ts-ignore
-                  onChange={(e) => handleFilterChange(e, 'status')}
-                  variant='outlined'
-                  label='Status'
-                  value={filter.status || null}
-                >
-                  <MenuItem value=''>
-                    <em>None</em>
-                  </MenuItem>
-                  {choicesData.programStatusChoices.map((item) => {
-                    return (
-                      <MenuItem key={item.value} value={item.value}>
-                        {item.name}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </StyledFormControl>
+              <SelectFilter
+                onChange={(e) => handleFilterChange(e, 'status')}
+                label='Status'
+                value={filter.status || null}
+              >
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+                {choicesData.programStatusChoices.map((item) => {
+                  return (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  );
+                })}
+              </SelectFilter>
             </Grid>
             <Grid item>
               <KeyboardDatePicker
@@ -123,28 +115,22 @@ export function ProgrammesFilters({
               />
             </Grid>
             <Grid item>
-              <StyledFormControl variant='outlined' margin='dense'>
-                <InputLabel>Sector</InputLabel>
-                <Select
-                  /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-                  // @ts-ignore
-                  onChange={(e) => handleFilterChange(e, 'sector')}
-                  variant='outlined'
-                  label='Sector'
-                  value={filter.sector || null}
-                >
-                  <MenuItem value=''>
-                    <em>None</em>
-                  </MenuItem>
-                  {choicesData.programSectorChoices.map((item) => {
-                    return (
-                      <MenuItem key={item.value} value={item.value}>
-                        {item.name}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </StyledFormControl>
+              <SelectFilter
+                onChange={(e) => handleFilterChange(e, 'sector')}
+                label='Sector'
+                value={filter.sector || null}
+              >
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+                {choicesData.programSectorChoices.map((item) => {
+                  return (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  );
+                })}
+              </SelectFilter>
             </Grid>
           </Grid>
         </Grid>

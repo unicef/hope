@@ -1,18 +1,15 @@
-import React from 'react';
-import moment from 'moment';
 import {
   Box,
   Checkbox,
   FormControlLabel,
   Grid,
-  InputLabel,
   MenuItem,
-  Select,
 } from '@material-ui/core';
 import { KeyboardDatePicker } from '@material-ui/pickers';
+import moment from 'moment';
+import React from 'react';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { FieldLabel } from '../../../components/core/FieldLabel';
-import { StyledFormControl } from '../../../components/StyledFormControl';
 import { SelectFilter } from '../../../components/core/SelectFilter';
 
 interface ReportingFiltersProps {

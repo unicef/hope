@@ -4,13 +4,11 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import InputLabel from '../../shared/InputLabel';
-import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { SelectFilter } from '../core/SelectFilter';
 import { UsersAutocomplete } from '../core/UsersAutocomplete';
-import { StyledFormControl } from '../StyledFormControl';
 
 const StyledTextField = styled(TextField)`
   flex: 1;
@@ -76,28 +74,23 @@ export function RegistrationFilters({
         }}
         value={filter.importedBy}
       />
-      <StyledFormControl variant='outlined' margin='dense'>
-        <InputLabel>{t('Status')}</InputLabel>
-        <Select
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-          // @ts-ignore
-          value={filter.status || ''}
-          variant='outlined'
-          label={t('Status')}
-          onChange={(e) => handleFilterChange(e, 'status')}
-        >
-          <MenuItem value=''>
-            <em>{t('None')}</em>
-          </MenuItem>
-          {registrationChoicesData.registrationDataStatusChoices.map((item) => {
-            return (
-              <MenuItem key={item.value} value={item.value}>
-                {item.name}
-              </MenuItem>
-            );
-          })}
-        </Select>
-      </StyledFormControl>
+
+      <SelectFilter
+        value={filter.status || ''}
+        label={t('Status')}
+        onChange={(e) => handleFilterChange(e, 'status')}
+      >
+        <MenuItem value=''>
+          <em>{t('None')}</em>
+        </MenuItem>
+        {registrationChoicesData.registrationDataStatusChoices.map((item) => {
+          return (
+            <MenuItem key={item.value} value={item.value}>
+              {item.name}
+            </MenuItem>
+          );
+        })}
+      </SelectFilter>
     </ContainerWithBorder>
   );
 }
