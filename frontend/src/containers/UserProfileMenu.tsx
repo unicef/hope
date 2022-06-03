@@ -11,6 +11,8 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 import { MeQuery } from '../__generated__/graphql';
+import { clearCache } from '../utils/utils';
+import { getClient } from '../apollo/client';
 
 const UserProfileButton = styled(Button)`
   && {
@@ -57,6 +59,10 @@ export function UserProfileMenu({
     localStorage.removeItem('AUTHENTICATED');
     handleClose(event);
   };
+  const handleClearCache = (event: React.MouseEvent<EventTarget>): void => {
+    clearCache(getClient());
+    handleClose(event);
+  };
   function handleListKeyDown(event: React.KeyboardEvent): void {
     if (event.key === 'Tab') {
       event.preventDefault();
@@ -99,6 +105,12 @@ export function UserProfileMenu({
                   id='menu-list-grow'
                   onKeyDown={handleListKeyDown}
                 >
+                  <MenuItem
+                    onClick={handleClearCache}
+                    data-cy='menu-item-logout'
+                  >
+                    Clear Cache
+                  </MenuItem>
                   <MenuItem onClick={handleLogout} data-cy='menu-item-logout'>
                     Logout
                   </MenuItem>
