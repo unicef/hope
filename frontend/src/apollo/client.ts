@@ -6,6 +6,7 @@ import { ApolloLink } from 'apollo-link';
 import { persistCache } from 'apollo-cache-persist';
 import { GRAPHQL_URL } from '../config';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
+import localForage from "localforage";
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -91,7 +92,9 @@ export async function getClient(): Promise<
   const cache = new InMemoryCache();
   await persistCache({
     cache,
-    storage: window.localStorage,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    storage: localForage,
   });
   client = new ApolloClient({
     cache,

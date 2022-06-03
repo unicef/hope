@@ -12,6 +12,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import {
   ProgramNode,
+  useAllProgramsForChoicesQuery,
   useAllProgramsQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
@@ -33,9 +34,9 @@ export function TargetPopulationsPage(): React.ReactElement {
   });
   const [isInfoOpen, setToggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);
-  const { data, loading } = useAllProgramsQuery({
+  const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
-    fetchPolicy:'cache-and-network'
+    fetchPolicy: 'cache-and-network',
   });
 
   if (loading) return <LoadingComponent />;
