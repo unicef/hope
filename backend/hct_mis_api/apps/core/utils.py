@@ -234,7 +234,6 @@ def get_attr_value(name, obj, default=None):
 
 
 def to_choice_object(choices):
-    sleep(.2)
     return [{"name": name, "value": value} for value, name in choices]
 
 

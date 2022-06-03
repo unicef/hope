@@ -13,7 +13,6 @@ import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInf
 import {
   ProgramNode,
   useAllProgramsForChoicesQuery,
-  useAllProgramsQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { usePermissions } from '../../../hooks/usePermissions';

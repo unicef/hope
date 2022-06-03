@@ -1,29 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import {
-  MeQuery,
-  MeQueryVariables,
-  useImportedIndividualFieldsLazyQuery,
-  useImportedIndividualFieldsQuery,
-  useMeQuery,
-} from '../__generated__/graphql';
-import { WatchQueryFetchPolicy } from 'apollo-client';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { QueryResult } from '@apollo/react-common';
 import { useEffect, useState } from 'react';
 import localForage from 'localforage';
+import { ApolloError } from 'apollo-client';
+import {
+  ImportedIndividualFieldsQuery,
+  useImportedIndividualFieldsLazyQuery,
+} from '../__generated__/graphql';
 
-function utf8tob64(str) {
-  return window.btoa(unescape(encodeURIComponent(str)));
-}
-
-function b64toutf8(str) {
-  return decodeURIComponent(escape(window.atob(str)));
-}
-export function useCachedImportedIndividualFieldsQuery(businessArea) {
+export function useCachedImportedIndividualFieldsQuery(
+  businessArea,
+): {
+  loading: boolean;
+  data: ImportedIndividualFieldsQuery;
+  error: ApolloError;
+} {
   const [loading, setLoading] = useState(true);
   const [oldBusinessArea, setOldBusinessArea] = useState('');
   const [cache, setCache] = useState(null);
-  const [needToRefreshCash, setNeedToRefreshCash] = useState(false);
   const lastUpdatedTimestamp =
     Number.parseInt(
       localStorage.getItem(
@@ -60,7 +53,6 @@ export function useCachedImportedIndividualFieldsQuery(businessArea) {
         if (value) {
           setCache(value);
         }
-        setNeedToRefreshCash(true);
       });
   }, [businessArea]);
   useEffect(() => {

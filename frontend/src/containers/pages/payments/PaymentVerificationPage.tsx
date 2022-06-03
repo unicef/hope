@@ -9,7 +9,10 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { ProgramNode, useAllProgramsQuery } from '../../../__generated__/graphql';
+import {
+  ProgramNode,
+  useAllProgramsQuery,
+} from '../../../__generated__/graphql';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentFilters } from '../../tables/payments/PaymentVerificationTable/PaymentFilters';
 
@@ -40,7 +43,7 @@ export function PaymentVerificationPage(): React.ReactElement {
   const debouncedFilter = useDebounce(filter, 500);
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
-    fetchPolicy:'cache-and-network'
+    fetchPolicy: 'cache-and-network',
   });
   if (loading) return <LoadingComponent />;
   if (permissions === null) return null;
