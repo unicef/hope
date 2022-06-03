@@ -3,32 +3,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { decodeIdString } from '../../../../utils/utils';
-
-const StyledBox = styled.div`
-  border: ${({ disabled }) => (disabled ? 0 : 1.5)}px solid #043e91;
-  border-radius: 5px;
-  font-size: 16px;
-  padding: 16px;
-  background-color: #f7faff;
-`;
-
-const BlueText = styled.span`
-  color: #033f91;
-  font-weight: 500;
-  font-size: 16px;
-`;
-
-const LightGrey = styled.span`
-  color: #949494;
-  margin-right: 10px;
-  cursor: pointer;
-`;
-const DarkGrey = styled.span`
-  color: #757575;
-  cursor: pointer;
-`;
+import { BlueText, DarkGrey, LightGrey, StyledBox } from '../LookUpStyles';
 
 export const LookUpPaymentRecordDisplay = ({
   values,
