@@ -1,12 +1,12 @@
 import { InputAdornment, MenuItem } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import TextField from '../../shared/TextField';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
+import { DatePickerFilter } from '../core/DatePickerFilter';
 import { SelectFilter } from '../core/SelectFilter';
 import { UsersAutocomplete } from '../core/UsersAutocomplete';
 
@@ -49,16 +49,10 @@ export function RegistrationFilters({
           ),
         }}
       />
-      <KeyboardDatePicker
-        variant='inline'
-        inputVariant='outlined'
-        margin='dense'
+      <DatePickerFilter
         label={t('Import Date')}
-        autoOk
         onChange={(date) => onFilterChange({ ...filter, importDate: date })}
-        value={filter.importDate || null}
-        format='YYYY-MM-DD'
-        InputAdornmentProps={{ position: 'end' }}
+        value={filter.importDate}
       />
       <UsersAutocomplete
         onInputTextChange={(value) =>

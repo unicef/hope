@@ -1,15 +1,9 @@
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  Grid,
-  MenuItem,
-} from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import { Checkbox, FormControlLabel, Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
-import { FieldLabel } from '../../../components/core/FieldLabel';
+import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { SelectFilter } from '../../../components/core/SelectFilter';
 
 interface ReportingFiltersProps {
@@ -23,6 +17,7 @@ export const ReportingFilters = ({
   filter,
   choicesData,
 }: ReportingFiltersProps): React.ReactElement => {
+  const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
 
@@ -31,7 +26,7 @@ export const ReportingFilters = ({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SelectFilter
-            label='Report Type'
+            label={t('Report Type')}
             onChange={(e) => handleFilterChange(e, 'type')}
             value={filter.type || ''}
           >
@@ -48,37 +43,25 @@ export const ReportingFilters = ({
           </SelectFilter>
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>Creation Date</FieldLabel>
-            <KeyboardDatePicker
-              variant='inline'
-              inputVariant='outlined'
-              margin='dense'
-              label='From'
-              autoOk
-              onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  createdFrom: date
-                    ? moment(date)
-                        .startOf('day')
-                        .toISOString()
-                    : null,
-                })
-              }
-              value={filter.createdFrom || null}
-              format='YYYY-MM-DD'
-              InputAdornmentProps={{ position: 'end' }}
-            />
-          </Box>
+          <DatePickerFilter
+            topLabel={t('Creation Date')}
+            label={t('From')}
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                createdFrom: date
+                  ? moment(date)
+                      .startOf('day')
+                      .toISOString()
+                  : null,
+              })
+            }
+            value={filter.createdFrom}
+          />
         </Grid>
         <Grid item>
-          <KeyboardDatePicker
-            variant='inline'
-            inputVariant='outlined'
-            margin='dense'
-            label='To'
-            autoOk
+          <DatePickerFilter
+            label={t('To')}
             onChange={(date) =>
               onFilterChange({
                 ...filter,
@@ -89,9 +72,7 @@ export const ReportingFilters = ({
                   : null,
               })
             }
-            value={filter.createdTo || null}
-            format='YYYY-MM-DD'
-            InputAdornmentProps={{ position: 'end' }}
+            value={filter.createdTo}
           />
         </Grid>
         <Grid item>
