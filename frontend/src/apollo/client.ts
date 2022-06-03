@@ -6,7 +6,8 @@ import { ApolloLink } from 'apollo-link';
 import { persistCache } from 'apollo-cache-persist';
 import { GRAPHQL_URL } from '../config';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
-import localForage from "localforage";
+import localForage from 'localforage';
+import { clearCache } from '../utils/utils';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -57,9 +58,17 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
         response: { headers },
       } = context;
       if (headers) {
+        const backendVersion = headers.get('X-Hope-Backend-Version');
+        const oldBackendVersion =
+          localStorage.getItem('backend-version') || '0';
+        if (backendVersion !== oldBackendVersion) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          clearCache();
+          localStorage.setItem('backend-version', backendVersion);
+        }
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         client.writeData({
-          data: { backendVersion: headers.get('X-Hope-Backend-Version') },
+          data: { backendVersion },
         });
       }
     }
@@ -88,6 +97,16 @@ export async function getClient(): Promise<
 > {
   if (client) {
     return client;
+  }
+  const cashInitializedTimestamp =
+    Number.parseInt(
+      await localForage.getItem('cache-initialized-timestamp'),
+      10,
+    ) || 0;
+  const cacheTtl = 2 * 24 * 60 * 60 * 1000;
+  if (Date.now() - cashInitializedTimestamp > cacheTtl) {
+    await clearCache();
+    await localForage.setItem('cache-initialized-timestamp', Date.now());
   }
   const cache = new InMemoryCache();
   await persistCache({

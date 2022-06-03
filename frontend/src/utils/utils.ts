@@ -8,6 +8,7 @@ import {
   TargetPopulationStatus,
 } from '../__generated__/graphql';
 import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
+import localForage from "localforage";
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -551,8 +552,10 @@ export const renderIndividualName = (individual): string => {
   return individual?.fullName;
 };
 
-export function clearCache(apolloClient):void{
-  apolloClient.resetStore()
+export async function clearCache(apolloClient=null):Promise<void>{
+  if(apolloClient)
+    apolloClient.resetStore()
   localStorage.removeItem('me-fetched-timestamp')
-  localStorage.removeItem('cache-targeting-core-fields-attributes')
+  await localForage.removeItem('cache-targeting-core-fields-attributes')
+  await localForage.removeItem('apollo-cache-persist')
 }
