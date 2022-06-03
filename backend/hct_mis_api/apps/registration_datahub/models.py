@@ -549,13 +549,12 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
 
 
 class DiiaHousehold(TimeStampedUUIDModel):
-    rec_id = models.CharField(max_length=20, blank=True, null=True)
+    rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
     vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True, null=True)
     vpo_doc_id = models.CharField(max_length=128, blank=True, null=True)
     vpo_doc_date = models.DateField(blank=True, null=True)
     address = models.CharField(max_length=1024, blank=True, null=True)
     consent = models.BooleanField(null=True)
-    head_of_household = models.OneToOneField("DiiaIndividual", on_delete=models.CASCADE, null=True)
     source_data = models.JSONField(default=dict, blank=True, null=True)
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
@@ -575,12 +574,9 @@ class DiiaHousehold(TimeStampedUUIDModel):
     def __str__(self):
         return f"Diia Household ID: {self.id}"
 
-    @property
-    def head_of_household_full_name(self):
-        return getattr(self.head_of_household, "full_name", "-")
-
 
 class DiiaIndividual(TimeStampedUUIDModel):
+    rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
     individual_id = models.CharField(max_length=128, blank=True, null=True)  # RNOKPP
     last_name = models.CharField(max_length=85, blank=True, null=True)
     first_name = models.CharField(max_length=85, blank=True, null=True)
@@ -598,12 +594,6 @@ class DiiaIndividual(TimeStampedUUIDModel):
     doc_number = models.CharField(max_length=64, blank=True, null=True)
     doc_issue_date = models.DateField(null=True, blank=True)
 
-    household = models.ForeignKey(
-        "DiiaHousehold",
-        null=True,
-        related_name="individuals",
-        on_delete=models.CASCADE,
-    )
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="diia_individuals",
