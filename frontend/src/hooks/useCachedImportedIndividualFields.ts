@@ -12,12 +12,9 @@ import { useEffect } from 'react';
 
 export function useCachedImportedIndividualFieldsQuery(businessArea) {
   const cachedData = localStorage.getItem(
-    'cache-targeting-core-fields-attributes',
+    `cache-targeting-core-fields-attributes-${businessArea}` ,
   );
-  const [
-    getAttributes,
-    { data, loading, error },
-  ] = useImportedIndividualFieldsLazyQuery({
+  const [getAttributes, results] = useImportedIndividualFieldsLazyQuery({
     variables: {
       businessAreaSlug: businessArea,
     },
@@ -28,5 +25,5 @@ export function useCachedImportedIndividualFieldsQuery(businessArea) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return { data, loading, error };
+  return { data: results.data, loading: results.loading, error: results.error };
 }
