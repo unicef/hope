@@ -555,7 +555,6 @@ export const renderIndividualName = (individual): string => {
 export async function clearCache(apolloClient=null):Promise<void>{
   if(apolloClient)
     apolloClient.resetStore()
-  localStorage.removeItem('me-fetched-timestamp')
-  await localForage.removeItem('cache-targeting-core-fields-attributes')
-  await localForage.removeItem('apollo-cache-persist')
+  localStorage.clear()
+  await localForage.clear()
 }

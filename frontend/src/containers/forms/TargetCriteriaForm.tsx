@@ -138,11 +138,7 @@ export function TargetCriteriaForm({
   shouldShowWarningForIndividualFilter,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const businessArea = useBusinessArea();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-    },
-  });
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(businessArea);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
