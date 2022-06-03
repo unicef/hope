@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -16,13 +16,7 @@ import { useConfirmation } from '../core/ConfirmationDialog';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
-
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
+import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -63,7 +57,7 @@ export function DeleteHouseholdGrievanceDetails({
   );
 
   return (
-    <StyledBox>
+    <ApproveBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>{t('Household to be withdrawn')}</Typography>
@@ -178,6 +172,6 @@ export function DeleteHouseholdGrievanceDetails({
           </LabelizedField>
         </Grid>
       </Grid>
-    </StyledBox>
+    </ApproveBox>
   );
 }

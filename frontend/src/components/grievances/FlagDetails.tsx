@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   makeStyles,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -13,7 +12,6 @@ import {
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { DATE_FORMAT } from '../../config';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
@@ -25,14 +23,8 @@ import { useConfirmation } from '../core/ConfirmationDialog';
 import { FlagTooltip } from '../core/FlagTooltip';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
+import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
-
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
 
 export function FlagDetails({
   ticket,
@@ -64,7 +56,7 @@ export function FlagDetails({
   const details = ticket.systemFlaggingTicketDetails;
   const isFlagConfirmed = details.approveStatus;
   return (
-    <StyledBox>
+    <ApproveBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>{t('Flag Details')}</Typography>
@@ -160,6 +152,6 @@ export function FlagDetails({
           </TableRow>
         </TableBody>
       </Table>
-    </StyledBox>
+    </ApproveBox>
   );
 }
