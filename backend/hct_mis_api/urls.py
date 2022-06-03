@@ -23,6 +23,8 @@ from hct_mis_api.apps.core.views import (
     trigger_error,
 )
 
+from hct_mis_api.apps.core.schema import all_fields_attributes
+
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])
 
@@ -74,6 +76,7 @@ urlpatterns = [
         name="dashboard_report",
     ),
     path(f"api/{settings.ADMIN_PANEL_URL}/", admin.site.urls),
+    path("api/fields_attributes/", all_fields_attributes),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
