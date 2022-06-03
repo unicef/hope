@@ -59,9 +59,7 @@ export function UserProfileMenu({
     localStorage.removeItem('AUTHENTICATED');
     handleClose(event);
   };
-  const handleClearCache = async (
-    event: React.MouseEvent<EventTarget>,
-  ): Promise<void> => {
+  const handleClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);
     window.location.reload();

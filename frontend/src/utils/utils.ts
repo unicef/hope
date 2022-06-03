@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import localForage from 'localforage';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
@@ -8,7 +9,6 @@ import {
   TargetPopulationStatus,
 } from '../__generated__/graphql';
 import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
-import localForage from "localforage";
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -552,9 +552,8 @@ export const renderIndividualName = (individual): string => {
   return individual?.fullName;
 };
 
-export async function clearCache(apolloClient=null):Promise<void>{
-  if(apolloClient)
-    apolloClient.resetStore()
-  localStorage.clear()
-  await localForage.clear()
+export async function clearCache(apolloClient = null): Promise<void> {
+  if (apolloClient) apolloClient.resetStore();
+  localStorage.clear();
+  await localForage.clear();
 }

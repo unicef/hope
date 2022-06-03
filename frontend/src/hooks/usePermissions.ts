@@ -1,6 +1,5 @@
-import { useMeQuery } from '../__generated__/graphql';
 import { useBusinessArea } from './useBusinessArea';
-import {useCachedMe} from "./useCachedMe";
+import { useCachedMe } from './useCachedMe';
 
 export function usePermissions(): string[] {
   const { data, loading } = useCachedMe();

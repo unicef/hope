@@ -11,7 +11,6 @@ import {
 } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Formik } from 'formik';
-import {useImportedIndividualFieldsLazyQuery, useImportedIndividualFieldsQuery} from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
 import {
   chooseFieldType,
@@ -21,9 +20,9 @@ import {
   mapCriteriaToInitialValues,
 } from '../../utils/targetingUtils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
-import {useCachedImportedIndividualFieldsQuery} from "../../hooks/useCachedImportedIndividualFields";
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -138,7 +137,9 @@ export function TargetCriteriaForm({
   shouldShowWarningForIndividualFilter,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const businessArea = useBusinessArea();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(businessArea);
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(
+    businessArea,
+  );
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);

@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
-import {useAllProgramsForChoicesQuery, useAllProgramsQuery} from '../../__generated__/graphql';
+import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
 
@@ -47,7 +47,7 @@ export const DashboardFilters = ({
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
-    fetchPolicy:'cache-and-network'
+    fetchPolicy: 'cache-and-network',
   });
   if (loading) return <LoadingComponent />;
 

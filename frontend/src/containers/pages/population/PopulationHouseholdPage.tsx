@@ -1,21 +1,17 @@
 import get from 'lodash/get';
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import styled from 'styled-components';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { HouseholdFilters } from '../../../components/population/HouseholdFilter';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { usePermissions } from '../../../hooks/usePermissions';
-import {
-  ProgramNode, useAllProgramsForChoicesQuery,
-  useAllProgramsQuery,
-  useHouseholdChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import { HouseholdTable } from '../../tables/population/HouseholdTable';
+import {LoadingComponent} from '../../../components/core/LoadingComponent';
+import {PageHeader} from '../../../components/core/PageHeader';
+import {PermissionDenied} from '../../../components/core/PermissionDenied';
+import {HouseholdFilters} from '../../../components/population/HouseholdFilter';
+import {hasPermissions, PERMISSIONS} from '../../../config/permissions';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {useDebounce} from '../../../hooks/useDebounce';
+import {usePermissions} from '../../../hooks/usePermissions';
+import {ProgramNode, useAllProgramsForChoicesQuery, useHouseholdChoiceDataQuery,} from '../../../__generated__/graphql';
+import {HouseholdTable} from '../../tables/population/HouseholdTable';
 
 const Container = styled.div`
   display: flex;
@@ -34,7 +30,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
-    fetchPolicy:'cache-and-network'
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,
