@@ -825,6 +825,18 @@ python-versions = "*"
 webtest = ">=1.3.3"
 
 [[package]]
+name = "djangorestframework"
+version = "3.13.1"
+description = "Web APIs for Django, made easy."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+django = ">=2.2"
+pytz = "*"
+
+[[package]]
 name = "elasticsearch"
 version = "7.13.4"
 description = "Python client for Elasticsearch"
@@ -2021,7 +2033,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "18c94bdbb3b7a7fa7a9910706141c876c42f28382f9a7057d8c6a59ac6c63712"
+content-hash = "7c11831f506b0f995935722e7e61c23792f9b9f685dfdc5df4190c3d5165762b"
 
 [metadata.files]
 amqp = [
@@ -2268,7 +2280,10 @@ django-extensions = [
     {file = "django-extensions-3.1.5.tar.gz", hash = "sha256:28e1e1bf49f0e00307ba574d645b0af3564c981a6dfc87209d48cb98f77d0b1a"},
     {file = "django_extensions-3.1.5-py3-none-any.whl", hash = "sha256:9238b9e016bb0009d621e05cf56ea8ce5cce9b32e91ad2026996a7377ca28069"},
 ]
-django-filter = []
+django-filter = [
+    {file = "django-filter-2.4.0.tar.gz", hash = "sha256:84e9d5bb93f237e451db814ed422a3a625751cbc9968b484ecc74964a8696b06"},
+    {file = "django_filter-2.4.0-py3-none-any.whl", hash = "sha256:e00d32cebdb3d54273c48f4f878f898dced8d5dfaad009438fe61ebdf535ace1"},
+]
 django-hijack = [
     {file = "django-hijack-3.2.0.tar.gz", hash = "sha256:e77f8a82c1e4fa35a414a37442f4287346ddc480d19c8eb3f1f8fe598dfae96a"},
     {file = "django_hijack-3.2.0-py3-none-any.whl", hash = "sha256:065916120cbf70e48fae12517ebb3e140334e1297f6c0e157e2be055ef3db6c7"},
@@ -2335,6 +2350,10 @@ django-timezone-field = [
 django-webtest = [
     {file = "django-webtest-1.9.10.tar.gz", hash = "sha256:c8c32041791cdae468e443097c432c67cf17cad339e1ab88b01a6c4841ee4c74"},
     {file = "django_webtest-1.9.10-py3-none-any.whl", hash = "sha256:ef075e98b38fe3836dc533c2924d3e37c6bb3483008c40567115518a0303b1af"},
+]
+djangorestframework = [
+    {file = "djangorestframework-3.13.1-py3-none-any.whl", hash = "sha256:24c4bf58ed7e85d1fe4ba250ab2da926d263cd57d64b03e8dcef0ac683f8b1aa"},
+    {file = "djangorestframework-3.13.1.tar.gz", hash = "sha256:0c33407ce23acc68eca2a6e46424b008c9c02eceb8cf18581921d0092bc1f2ee"},
 ]
 elasticsearch = [
     {file = "elasticsearch-7.13.4-py2.py3-none-any.whl", hash = "sha256:5920df0ab2630778680376d86bea349dc99860977eec9b6d2bd0860f337313f2"},
