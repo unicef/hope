@@ -65,6 +65,7 @@
     "jest-environment-jsdom-fourteen": "0.1.0",
     "jest-resolve": "24.9.0",
     "jest-watch-typeahead": "0.4.2",
+    "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "0.8.0",
     "moment": "^2.29.2",

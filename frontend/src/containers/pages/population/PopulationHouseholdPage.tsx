@@ -11,7 +11,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
-  ProgramNode,
+  ProgramNode, useAllProgramsForChoicesQuery,
   useAllProgramsQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
@@ -32,7 +32,7 @@ export function PopulationHouseholdPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const { data, loading } = useAllProgramsQuery({
+  const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy:'cache-and-network'
   });

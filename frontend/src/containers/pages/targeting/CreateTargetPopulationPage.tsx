@@ -21,6 +21,7 @@ import {
   handleValidationErrors,
 } from '../../../utils/utils';
 import {
+  useAllProgramsForChoicesQuery,
   useAllProgramsQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
@@ -43,7 +44,7 @@ export function CreateTargetPopulationPage(): React.ReactElement {
   const {
     data: allProgramsData,
     loading: loadingPrograms,
-  } = useAllProgramsQuery({
+  } = useAllProgramsForChoicesQuery({
     variables: { businessArea, status: ['ACTIVE'] },
     fetchPolicy:'cache-and-network'
   });
