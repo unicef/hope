@@ -13,7 +13,7 @@ global:
 backend:
   image: backend:latest
 
-  replicaCount: 2
+  replicaCount: 6
   podAnnotations: {}
 
   podSecurityContext: {}
