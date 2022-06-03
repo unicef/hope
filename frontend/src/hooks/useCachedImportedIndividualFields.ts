@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   MeQuery,
   MeQueryVariables,
@@ -20,38 +21,64 @@ function b64toutf8(str) {
 }
 export function useCachedImportedIndividualFieldsQuery(businessArea) {
   const [loading, setLoading] = useState(true);
-  const [cache, setCache] = useState(undefined);
+  const [oldBusinessArea, setOldBusinessArea] = useState('');
+  const [cache, setCache] = useState(null);
+  const [needToRefreshCash, setNeedToRefreshCash] = useState(false);
+  const lastUpdatedTimestamp =
+    Number.parseInt(
+      localStorage.getItem(
+        `cache-targeting-core-fields-attributes-${businessArea}-timestamp`,
+      ),
+      10,
+    ) || 0;
+  const ttl = 2 * 60 * 60 * 1000;
   const [getAttributes, results] = useImportedIndividualFieldsLazyQuery({
     variables: {
       businessAreaSlug: businessArea,
     },
   });
   useEffect(() => {
-    if (cache === null) {
-      getAttributes();
+    if (Date.now() - lastUpdatedTimestamp < ttl) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cache]);
+    getAttributes();
+  }, []);
   useEffect(() => {
-    console.log('results.loading', results.loading);
     if (results.data || results.error) {
       setLoading(results.loading);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results.loading]);
 
   useEffect(() => {
+    if (businessArea === oldBusinessArea) {
+      return;
+    }
+    setOldBusinessArea(businessArea);
     localForage
       .getItem(`cache-targeting-core-fields-attributes-${businessArea}`)
       .then((value) => {
-        console.log('get cache',value)
         if (value) {
-          setCache(JSON.parse(value as string));
-        } else {
-          setCache(null);
+          setCache(value);
         }
+        setNeedToRefreshCash(true);
       });
   }, [businessArea]);
+  useEffect(() => {
+    if (!results.data) {
+      return;
+    }
+    localForage.setItem(
+      `cache-targeting-core-fields-attributes-${businessArea}`,
+      results.data,
+    );
+    localStorage.setItem(
+      `cache-targeting-core-fields-attributes-${businessArea}-timestamp`,
+      Date.now().toString(),
+    );
+  }, [results.data]);
 
+  if (cache) {
+    return { data: cache, loading: false, error: null };
+  }
   return { data: results.data, loading, error: results.error };
 }

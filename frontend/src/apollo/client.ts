@@ -98,15 +98,15 @@ export async function getClient(): Promise<
   if (client) {
     return client;
   }
-  const cashInitializedTimestamp =
-    Number.parseInt(
-      await localForage.getItem('cache-initialized-timestamp'),
-      10,
-    ) || 0;
+  // eslint-disable-next-line
+  const cashInitializedTimestamp = Number.parseInt(localStorage.getItem('cache-initialized-timestamp'),10)|| 0  ;
   const cacheTtl = 2 * 24 * 60 * 60 * 1000;
   if (Date.now() - cashInitializedTimestamp > cacheTtl) {
     await clearCache();
-    await localForage.setItem('cache-initialized-timestamp', Date.now());
+    console.log('cashInitializedTimestamp',cashInitializedTimestamp)
+    setTimeout(()=>{
+      localStorage.setItem('cache-initialized-timestamp', Date.now().toString());
+    },1000)
   }
   const cache = new InMemoryCache();
   await persistCache({

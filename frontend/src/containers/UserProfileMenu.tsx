@@ -59,9 +59,12 @@ export function UserProfileMenu({
     localStorage.removeItem('AUTHENTICATED');
     handleClose(event);
   };
-  const handleClearCache = (event: React.MouseEvent<EventTarget>): void => {
-    clearCache(getClient());
-    handleClose(event);
+  const handleClearCache = async (
+    event: React.MouseEvent<EventTarget>,
+  ): Promise<void> => {
+    const client = await getClient();
+    await clearCache(client);
+    window.location.reload();
   };
   function handleListKeyDown(event: React.KeyboardEvent): void {
     if (event.key === 'Tab') {
