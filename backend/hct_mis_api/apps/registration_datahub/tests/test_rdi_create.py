@@ -824,5 +824,5 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(individuals_obj_data, expected)
 
         household_obj_data = model_to_dict(individual.household, ("country", "size", "diia_rec_id"))
-        expected = {"country": Country(code="UA"), "size": 3, "diia_rec_id": "32132122"}
+        expected = {"country": Country(code="UA"), "size": 3, "diia_rec_id": "222222"}
         self.assertEqual(household_obj_data, expected)
