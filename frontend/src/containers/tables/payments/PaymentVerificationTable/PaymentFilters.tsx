@@ -1,10 +1,10 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import React from 'react';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
+import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
 import { SearchTextField } from '../../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../../components/core/SelectFilter';
 import {
@@ -83,12 +83,8 @@ export function PaymentFilters({
           </SelectFilter>
         </Grid>
         <Grid item>
-          <KeyboardDatePicker
-            variant='inline'
-            inputVariant='outlined'
-            margin='dense'
+          <DatePickerFilter
             label='Start Date'
-            autoOk
             onChange={(date) =>
               onFilterChange({
                 ...filter,
@@ -97,18 +93,12 @@ export function PaymentFilters({
                   .toISOString(),
               })
             }
-            value={filter.startDate || null}
-            format='YYYY-MM-DD'
-            InputAdornmentProps={{ position: 'end' }}
+            value={filter.startDate}
           />
         </Grid>
         <Grid item>
-          <KeyboardDatePicker
-            variant='inline'
-            inputVariant='outlined'
-            margin='dense'
+          <DatePickerFilter
             label='End Date'
-            autoOk
             onChange={(date) =>
               onFilterChange({
                 ...filter,
@@ -117,9 +107,7 @@ export function PaymentFilters({
                   .toISOString(),
               })
             }
-            value={filter.endDate || null}
-            format='YYYY-MM-DD'
-            InputAdornmentProps={{ position: 'end' }}
+            value={filter.endDate}
           />
         </Grid>
         <Grid item>

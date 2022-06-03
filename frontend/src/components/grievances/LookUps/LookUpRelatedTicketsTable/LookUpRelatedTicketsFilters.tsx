@@ -1,11 +1,10 @@
-import { Box, Button, Grid, MenuItem } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import { Button, Grid, MenuItem } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
-import { FieldLabel } from '../../../core/FieldLabel';
+import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../../population/AdminAreaAutocomplete';
@@ -64,38 +63,26 @@ export function LookUpRelatedTicketsFilters({
           />
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Creation Date')}</FieldLabel>
-            <KeyboardDatePicker
-              variant='inline'
-              inputVariant='outlined'
-              margin='dense'
-              label='From'
-              autoOk
-              onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  createdAtRange: {
-                    ...filter.createdAtRange,
-                    min: moment(date)
-                      .startOf('day')
-                      .toISOString(),
-                  },
-                })
-              }
-              value={filter.createdAtRange.min || null}
-              format='YYYY-MM-DD'
-              InputAdornmentProps={{ position: 'end' }}
-            />
-          </Box>
+          <DatePickerFilter
+            topLabel={t('Creation Date')}
+            label='From'
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                createdAtRange: {
+                  ...filter.createdAtRange,
+                  min: moment(date)
+                    .startOf('day')
+                    .toISOString(),
+                },
+              })
+            }
+            value={filter.createdAtRange.min}
+          />
         </Grid>
         <Grid item>
-          <KeyboardDatePicker
-            variant='inline'
-            inputVariant='outlined'
-            margin='dense'
+          <DatePickerFilter
             label={t('To')}
-            autoOk
             onChange={(date) =>
               onFilterChange({
                 ...filter,
@@ -107,9 +94,7 @@ export function LookUpRelatedTicketsFilters({
                 },
               })
             }
-            value={filter.createdAtRange.max || null}
-            format='YYYY-MM-DD'
-            InputAdornmentProps={{ position: 'end' }}
+            value={filter.createdAtRange.max}
           />
         </Grid>
         <Grid item>
