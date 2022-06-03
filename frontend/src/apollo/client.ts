@@ -4,10 +4,10 @@ import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
 import { persistCache } from 'apollo-cache-persist';
-import { GRAPHQL_URL } from '../config';
-import { ValidationGraphQLError } from './ValidationGraphQLError';
 import localForage from 'localforage';
+import { GRAPHQL_URL } from '../config';
 import { clearCache } from '../utils/utils';
+import { ValidationGraphQLError } from './ValidationGraphQLError';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -98,15 +98,18 @@ export async function getClient(): Promise<
   if (client) {
     return client;
   }
-  // eslint-disable-next-line
-  const cashInitializedTimestamp = Number.parseInt(localStorage.getItem('cache-initialized-timestamp'),10)|| 0  ;
+  const cacheInitializedTimestamp =
+    Number.parseInt(localStorage.getItem('cache-initialized-timestamp'), 10) ||
+    0;
   const cacheTtl = 2 * 24 * 60 * 60 * 1000;
-  if (Date.now() - cashInitializedTimestamp > cacheTtl) {
+  if (Date.now() - cacheInitializedTimestamp > cacheTtl) {
     await clearCache();
-    console.log('cashInitializedTimestamp',cashInitializedTimestamp)
-    setTimeout(()=>{
-      localStorage.setItem('cache-initialized-timestamp', Date.now().toString());
-    },1000)
+    setTimeout(() => {
+      localStorage.setItem(
+        'cache-initialized-timestamp',
+        Date.now().toString(),
+      );
+    }, 1000);
   }
   const cache = new InMemoryCache();
   await persistCache({

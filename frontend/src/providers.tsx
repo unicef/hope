@@ -6,14 +6,16 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
+import ApolloClient from 'apollo-client';
+import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { getClient } from './apollo/client';
 import { ConfirmationDialogProvider } from './components/core/ConfirmationDialog';
 import { theme } from './theme';
-import ApolloClient from "apollo-client";
-import {NormalizedCacheObject} from "apollo-cache-inmemory";
 
 export const Providers: React.FC = ({ children }) => {
-  const [apolloClient, setApolloClient] = useState<ApolloClient<NormalizedCacheObject>>();
+  const [apolloClient, setApolloClient] = useState<
+    ApolloClient<NormalizedCacheObject>
+  >();
   useEffect(() => {
     getClient().then((client) => {
       setApolloClient(client);

@@ -5,7 +5,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import {AllProgramsForChoicesQuery, AllProgramsQuery, useAllProgramsForChoicesQuery} from '../../__generated__/graphql';
+import { AllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { OverviewContainer } from '../core/OverviewContainer';
 import { FormikSelectFieldConfirm } from './FormikSelectFieldConfirm';
