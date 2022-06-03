@@ -4,6 +4,7 @@ import itertools
 import logging
 import string
 from collections import MutableMapping, OrderedDict
+from time import sleep
 from typing import List
 
 from django.db.models import QuerySet
