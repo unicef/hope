@@ -8,7 +8,6 @@ import {
 } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import GroupIcon from '@material-ui/icons/Group';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +17,7 @@ import {
   ProgramNode,
 } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
+import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { FieldLabel } from '../../../core/FieldLabel';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
@@ -81,36 +81,24 @@ export function LookUpHouseholdFilters({
           </SelectFilter>
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Registration Date')}</FieldLabel>
-            <KeyboardDatePicker
-              variant='inline'
-              inputVariant='outlined'
-              margin='dense'
-              placeholder={t('From')}
-              autoOk
-              onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  lastRegistrationDate: {
-                    ...filter.lastRegistrationDate,
-                    min: date ? moment(date).format('YYYY-MM-DD') : null,
-                  },
-                })
-              }
-              value={filter.lastRegistrationDate.min || null}
-              format='YYYY-MM-DD'
-              InputAdornmentProps={{ position: 'end' }}
-            />
-          </Box>
+          <DatePickerFilter
+            topLabel={t('Registration Date')}
+            placeholder={t('From')}
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                lastRegistrationDate: {
+                  ...filter.lastRegistrationDate,
+                  min: date ? moment(date).format('YYYY-MM-DD') : null,
+                },
+              })
+            }
+            value={filter.lastRegistrationDate.min}
+          />
         </Grid>
         <Grid item>
-          <KeyboardDatePicker
-            variant='inline'
-            inputVariant='outlined'
-            margin='dense'
+          <DatePickerFilter
             placeholder={t('To')}
-            autoOk
             onChange={(date) =>
               onFilterChange({
                 ...filter,
@@ -120,9 +108,7 @@ export function LookUpHouseholdFilters({
                 },
               })
             }
-            value={filter.lastRegistrationDate.max || null}
-            format='YYYY-MM-DD'
-            InputAdornmentProps={{ position: 'end' }}
+            value={filter.lastRegistrationDate.max}
           />
         </Grid>
         <Grid item>

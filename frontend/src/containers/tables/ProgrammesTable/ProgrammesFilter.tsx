@@ -1,9 +1,9 @@
 import { Box, Grid, InputAdornment, MenuItem, Paper } from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
+import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
 import { FieldLabel } from '../../../components/core/FieldLabel';
 import { SearchTextField } from '../../../components/core/SearchTextField';
 import { SelectFilter } from '../../../components/core/SelectFilter';
@@ -79,39 +79,27 @@ export function ProgrammesFilters({
               </SelectFilter>
             </Grid>
             <Grid item>
-              <KeyboardDatePicker
-                variant='inline'
-                inputVariant='outlined'
-                margin='dense'
+              <DatePickerFilter
                 label='Start Date'
-                autoOk
                 onChange={(date) =>
                   onFilterChange({
                     ...filter,
                     startDate: date ? moment(date).format('YYYY-MM-DD') : null,
                   })
                 }
-                value={filter.startDate || null}
-                format='YYYY-MM-DD'
-                InputAdornmentProps={{ position: 'end' }}
+                value={filter.startDate}
               />
             </Grid>
             <Grid item>
-              <KeyboardDatePicker
-                variant='inline'
-                inputVariant='outlined'
-                margin='dense'
+              <DatePickerFilter
                 label='End Date'
-                autoOk
                 onChange={(date) =>
                   onFilterChange({
                     ...filter,
                     endDate: date ? moment(date).format('YYYY-MM-DD') : null,
                   })
                 }
-                value={filter.endDate || null}
-                format='YYYY-MM-DD'
-                InputAdornmentProps={{ position: 'end' }}
+                value={filter.endDate}
               />
             </Grid>
             <Grid item>
