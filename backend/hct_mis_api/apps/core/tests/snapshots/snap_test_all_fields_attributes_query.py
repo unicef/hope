@@ -41182,23 +41182,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                 ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'What is the number of children in the household?',
-                'labels': [
-                    {
-                        'label': 'What is the number of children in the household?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'number_of_children',
-                'required': False,
-                'type': 'INTEGER'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
                 'labelEn': 'What is the number of rooms in the dwelling excluding kitchen & bathroom?',
