@@ -9,13 +9,13 @@ import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { getClient } from './apollo/client';
 import { ConfirmationDialogProvider } from './components/core/ConfirmationDialog';
 import { theme } from './theme';
+import ApolloClient from "apollo-client";
+import {NormalizedCacheObject} from "apollo-cache-inmemory";
 
 export const Providers: React.FC = ({ children }) => {
-  const [apolloClient, setApolloClient] = useState();
+  const [apolloClient, setApolloClient] = useState<ApolloClient<NormalizedCacheObject>>();
   useEffect(() => {
     getClient().then((client) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore
       setApolloClient(client);
     });
   }, []);
