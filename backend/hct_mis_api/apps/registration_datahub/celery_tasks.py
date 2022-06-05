@@ -1,6 +1,10 @@
 import datetime
 import logging
 
+from django.core.cache import cache
+
+from redis.exceptions import LockError
+
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.registration_datahub.models import Record
 
@@ -273,30 +277,37 @@ def fresh_extract_records_task(records_ids=None):
 
 
 @app.task
-def automate_rdi_creation_task(registration_id: int,
-                               page_size: int,
-                               template="ukraine rdi {date}"):
+def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}"):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
 
-    logger.info("automate_rdi_creation_task start")
+    try:
+        with cache.lock(f"automate_rdi_creation_task-{registration_id}", timeout=85400) as lock:
+            try:
+                service = FlexRegistrationService()
 
-    service = FlexRegistrationService()
+                records_ids = (
+                    Record.objects.filter(registration=registration_id)
+                    .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
+                    .values_list("id", flat=True)[:page_size]
+                )
 
-    records_ids = (
-        Record.objects.filter(registration=registration_id)
-        .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
-        .values_list("id", flat=True)[:page_size]
-    )
-
-    if records_ids:
-        rdi_name = template.format(date=datetime.datetime.now(),
-                                   registration_id=registration_id,
-                                   page_size=page_size,
-                                   records=len(records_ids)
-                                   )
-        rdi = service.create_rdi(None, rdi_name)
-        service.process_records(rdi.id, records_ids)
-
-    logger.info("automate_rdi_creation_task end")
+                if records_ids:
+                    rdi_name = template.format(
+                        date=datetime.datetime.now(),
+                        registration_id=registration_id,
+                        page_size=page_size,
+                        records=len(records_ids),
+                    )
+                    rdi = service.create_rdi(None, rdi_name)
+                    service.process_records(rdi.id, records_ids)
+                    return [rdi_name, len(records_ids)]
+            except Exception as e:
+                logger.exception(e)
+            finally:
+                if lock.locked():
+                    lock.release()
+    except LockError as e:
+        logger.exception(e)
+        return []
