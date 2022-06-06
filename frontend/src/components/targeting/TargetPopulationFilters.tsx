@@ -1,26 +1,14 @@
-import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
 import { Group, Person } from '@material-ui/icons';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import TextField from '../../shared/TextField';
 import { TARGETING_STATES } from '../../utils/constants';
 import { ProgramNode } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
-import { FieldLabel } from '../core/FieldLabel';
+import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
-
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
 
 interface TargetPopulationFiltersProps {
   //targetPopulations: TargetPopulationNode[],
@@ -83,40 +71,27 @@ export function TargetPopulationFilters({
           </SelectFilter>
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Number of Households')}</FieldLabel>
-            <TextContainer
-              id='minFilter'
-              value={filter.numIndividuals.min}
-              variant='outlined'
-              margin='dense'
-              placeholder={t('From')}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  numIndividuals: {
-                    ...filter.numIndividuals,
-                    min: e.target.value || undefined,
-                  },
-                })
-              }
-              type='number'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <Group />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
+          <NumberTextField
+            id='minFilter'
+            topLabel={t('Number of Households')}
+            value={filter.numIndividuals.min}
+            placeholder={t('From')}
+            onChange={(e) =>
+              onFilterChange({
+                ...filter,
+                numIndividuals: {
+                  ...filter.numIndividuals,
+                  min: e.target.value || undefined,
+                },
+              })
+            }
+            icon={<Group />}
+          />
         </Grid>
         <Grid item>
-          <TextContainer
+          <NumberTextField
             id='maxFilter'
             value={filter.numIndividuals.max}
-            variant='outlined'
-            margin='dense'
             placeholder={t('To')}
             onChange={(e) =>
               onFilterChange({
@@ -127,14 +102,7 @@ export function TargetPopulationFilters({
                 },
               })
             }
-            type='number'
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <Group />
-                </InputAdornment>
-              ),
-            }}
+            icon={<Group />}
           />
         </Grid>
       </Grid>
