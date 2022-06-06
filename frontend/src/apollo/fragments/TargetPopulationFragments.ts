@@ -51,18 +51,6 @@ export const targetPopulationDetailed = gql`
     program {
       id
       name
-      startDate
-      endDate
-      status
-      caId
-      caHashId
-      description
-      budget
-      frequencyOfPayments
-      populationGoal
-      sector
-      totalNumberOfHouseholds
-      individualDataNeeded
     }
     createdBy {
       id
