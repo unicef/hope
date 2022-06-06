@@ -1,6 +1,7 @@
-import { InputAdornment, InputLabel } from '@material-ui/core';
+import { InputAdornment } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
+import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
 import { StyledFormControl } from '../StyledFormControl';
 

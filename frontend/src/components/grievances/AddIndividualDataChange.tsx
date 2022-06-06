@@ -177,7 +177,7 @@ export const AddIndividualDataChange = ({
                       });
                     }}
                   >
-                    <AddIcon />
+                    <AddCircleOutline />
                     {t('Add Document')}
                   </Button>
                 </Grid>
