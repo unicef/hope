@@ -1,11 +1,9 @@
 import { Redirect } from 'react-router-dom';
 import React from 'react';
-import { useMeQuery } from '../__generated__/graphql';
+import {useCachedMe} from "../hooks/useCachedMe";
 
 export function DefaultRoute(): React.ReactElement {
-  const { data } = useMeQuery({
-    fetchPolicy: 'cache-first',
-  });
+  const { data } = useCachedMe();
   if (!data || !data.me) {
     return null;
   }
