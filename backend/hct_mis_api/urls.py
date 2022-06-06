@@ -23,7 +23,7 @@ from hct_mis_api.apps.core.views import (
     trigger_error,
 )
 
-from hct_mis_api.apps.core.schema import all_fields_attributes
+from hct_mis_api.apps.core.rest_api import all_fields_attributes
 
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])
