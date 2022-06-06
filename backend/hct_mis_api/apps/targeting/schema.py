@@ -1,10 +1,9 @@
 from typing import Union
 
-import graphene
 from django.db.models import Prefetch
 
+import graphene
 from graphene import relay
-from graphql import GraphQLError
 from graphene_django import DjangoConnectionField, DjangoObjectType
 
 import hct_mis_api.apps.targeting.models as target_models
@@ -15,7 +14,8 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES_DICTIONARY,
+    filter_choices,
+    get_field_by_name,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
@@ -31,7 +31,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.filters import TargetPopulationFilter, HouseholdFilter
+from hct_mis_api.apps.targeting.filters import HouseholdFilter, TargetPopulationFilter
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -47,7 +47,8 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
-            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parent.field_name)
+            field_attribute = get_field_by_name(parent.field_name)
+            return filter_choices(field_attribute, parent.arguments)
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
@@ -64,7 +65,8 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
-            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parent.field_name)
+            field_attribute = get_field_by_name(parent.field_name)
+            return filter_choices(field_attribute, parent.arguments)
 
     class Meta:
         model = target_models.TargetingIndividualBlockRuleFilter
@@ -297,9 +299,7 @@ class Query(graphene.ObjectType):
             .all()
         )
 
-    def resolve_golden_record_by_targeting_criteria(
-        parent, info, targeting_criteria, program, excluded_ids, **kwargs
-    ):
+    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
         household_queryset = Household.objects
         return prefetch_selections(
             household_queryset.filter(
