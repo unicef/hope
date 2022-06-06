@@ -12,6 +12,8 @@ import { FieldArray, Formik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import * as Yup from 'yup';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
 import {
   chooseFieldType,
   clearField,
@@ -23,10 +25,8 @@ import { DialogContainer } from '../dialogs/DialogContainer';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
-import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -339,7 +339,7 @@ export function TargetCriteriaForm({
                     }
                     color='primary'
                   >
-                    <AddIcon />
+                    <AddCircleOutline />
                     ADD INDIVIDUAL RULE GROUP
                   </Button>
                 </ButtonBox>
