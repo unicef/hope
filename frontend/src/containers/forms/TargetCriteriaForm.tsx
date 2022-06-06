@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
@@ -11,7 +12,6 @@ import { FieldArray, Formik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
   chooseFieldType,
   clearField,
@@ -19,14 +19,14 @@ import {
   formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
 } from '../../utils/targetingUtils';
-import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { DialogActions } from '../dialogs/DialogActions';
 import { DialogContainer } from '../dialogs/DialogContainer';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
+import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -121,11 +121,10 @@ export function TargetCriteriaForm({
   shouldShowWarningForIndividualFilter,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const businessArea = useBusinessArea();
-  const { data, loading } = useImportedIndividualFieldsQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-    },
-  });
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(
+    businessArea,
+  );
+
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);

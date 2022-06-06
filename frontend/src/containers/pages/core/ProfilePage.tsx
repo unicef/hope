@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
-import { useMeQuery } from '../../../__generated__/graphql';
+import { useLoggedCheckerQuery } from '../../../__generated__/graphql';
 import { LOGIN_URL } from '../../../config';
 
 export function ProfilePage(): React.ReactElement {
   const location = useLocation();
-  const { error } = useMeQuery();
+  const { error } = useLoggedCheckerQuery({ fetchPolicy: 'network-only' });
   useEffect(() => {
     if (error) {
       window.location.replace(

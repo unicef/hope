@@ -81,6 +81,7 @@ export const LookUpReassignRoleModal = ({
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
+    fetchPolicy:'cache-and-network'
   });
 
   if (loading) return null;

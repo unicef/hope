@@ -2,9 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
+  AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   HouseholdNode,
-  AllHouseholdsQueryVariables,
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';

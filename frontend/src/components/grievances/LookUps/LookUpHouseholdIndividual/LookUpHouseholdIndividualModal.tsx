@@ -19,7 +19,7 @@ import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxFie
 import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
 import {
   ProgramNode,
-  useAllProgramsQuery,
+  useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { TabPanel } from '../../../core/TabPanel';
@@ -86,8 +86,9 @@ export const LookUpHouseholdIndividualModal = ({
   );
 
   const businessArea = useBusinessArea();
-  const { data, loading } = useAllProgramsQuery({
+  const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,
