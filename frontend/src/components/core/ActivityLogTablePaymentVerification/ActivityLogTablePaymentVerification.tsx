@@ -17,10 +17,10 @@ const Table = styled.div`
   display: flex;
   flex-direction: column;
 `;
+
 const HeadingCell = styled.div`
   display: flex;
   flex: ${({ weight }) => weight || 1};
-
   padding: 16px;
   font-size: 12px;
   text-align: left;
@@ -30,11 +30,13 @@ const HeadingCell = styled.div`
   letter-spacing: 0.01071em;
   vertical-align: inherit;
 `;
+
 const PaperContainer = styled(Paper)`
   width: 100%;
   padding: ${({ theme }) => theme.spacing(5)}px 0;
   margin-bottom: ${({ theme }) => theme.spacing(5)}px;
 `;
+
 const Toolbar = styled.div`
   margin: 0 ${({ theme }) => theme.spacing(6)}px;
   display: flex;
