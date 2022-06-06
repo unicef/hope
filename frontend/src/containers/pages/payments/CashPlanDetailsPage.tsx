@@ -45,7 +45,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const {
     data: caData,
     loading: caPrefixLoading,
-  } = useCashAssistUrlPrefixQuery();
+  } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
   const businessArea = useBusinessArea();
 
   if (loading || caPrefixLoading) return <LoadingComponent />;
