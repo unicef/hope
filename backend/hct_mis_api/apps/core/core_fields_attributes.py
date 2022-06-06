@@ -15,6 +15,9 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_drivers_licensee_issuer_query,
     get_electoral_card_document_number_query,
     get_electoral_card_issuer_query,
+    get_has_bank_account_number_query,
+    get_has_phone_number_query,
+    get_has_tax_id_query,
     get_national_id_document_number_query,
     get_national_id_issuer_query,
     get_national_passport_document_number_query,
@@ -26,7 +29,6 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_scope_id_number_query,
     get_unhcr_id_issuer_query,
     get_unhcr_id_number_query,
-    get_has_phone_number_query, get_has_bank_account_number_query, get_has_tax_id_query,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -119,18 +121,6 @@ def convert_choices(field, *args, **kwargs):
 
 
 CORE_FIELDS_ATTRIBUTES = [
-    {
-        "id": "c8da2910-4348-47ab-a82e-725b4cebc332",
-        "type": TYPE_INTEGER,
-        "name": "number_of_children",
-        "lookup": "children_count",
-        "label": {"English(EN)": "What is the number of children in the household?"},
-        "hint": "",
-        "required": False,
-        "choices": [],
-        "associated_with": _HOUSEHOLD,
-        "xlsx_field": "number_of_children",
-    },
     {
         "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
         "type": TYPE_INTEGER,
@@ -1591,7 +1581,7 @@ FILTER_ONLY_FIELDS = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "has_phone_number",
     },
-{
+    {
         "id": "f4032e4f-00a9-4ed9-bff4-4e47d2f7b4be",
         "type": TYPE_BOOL,
         "name": "has_tax_id_number",
@@ -1604,7 +1594,7 @@ FILTER_ONLY_FIELDS = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "has_tax_ID_number",
     },
-{
+    {
         "id": "6b97e9a3-38bb-49a3-9637-65f05d5b8ea4",
         "type": TYPE_BOOL,
         "name": "has_the_bank_account_number",
@@ -1616,7 +1606,7 @@ FILTER_ONLY_FIELDS = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "has_the_bank_account_number",
-    }
+    },
 ]
 
 
@@ -1626,3 +1616,18 @@ FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in TARGETING_CORE_FIELDS if x.get("
 CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, TARGETING_CORE_FIELDS, {})
 
 CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY = core_fields_to_separated_dict()
+
+
+def get_field_by_name(field_name: str):
+    field = copy.deepcopy(CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(field_name))
+    choices = field.get("choices")
+    if choices and callable(choices):
+        field["choices"] = choices()
+    return field
+
+
+def filter_choices(field, args):
+    choices = field.get("choices")
+    if args and choices:
+        field["choices"] = list(filter(lambda choice: str(choice["value"]) in args, choices))
+    return field
