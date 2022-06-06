@@ -76,7 +76,7 @@ urlpatterns = [
         name="dashboard_report",
     ),
     path(f"api/{settings.ADMIN_PANEL_URL}/", admin.site.urls),
-    path("api/fields_attributes/", all_fields_attributes),
+    path("api/fields_attributes/", all_fields_attributes, name="fields_attributes"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
