@@ -5,7 +5,6 @@ import { Field, FieldArray } from 'formik';
 import camelCase from 'lodash/camelCase';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { FormikFileField } from '../../shared/Formik/FormikFileField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
@@ -19,10 +18,6 @@ import { Title } from '../core/Title';
 import { AgencyField } from './AgencyField';
 import { DocumentField } from './DocumentField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
-
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
-`;
 
 export interface AddIndividualDataChangeFieldProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -211,6 +206,7 @@ export const AddIndividualDataChange = ({
                 <Grid item xs={12}>
                   <Button
                     color='primary'
+                    startIcon={<AddCircleOutline />}
                     onClick={() => {
                       arrayHelpers.push({
                         country: null,
@@ -219,7 +215,6 @@ export const AddIndividualDataChange = ({
                       });
                     }}
                   >
-                    <AddIcon />
                     {t('Add Identity')}
                   </Button>
                 </Grid>

@@ -53,9 +53,6 @@ const AndDivider = styled.div`
   position: relative;
 `;
 
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
-`;
 const ButtonBox = styled.div`
   width: 300px;
 `;
@@ -292,8 +289,8 @@ export function TargetCriteriaForm({
                         .push({ fieldName: '' })
                     }
                     color='primary'
+                    startIcon={<AddCircleOutline />}
                   >
-                    <AddIcon />
                     ADD HOUSEHOLD RULE
                   </Button>
                 </ButtonBox>
