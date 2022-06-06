@@ -177,7 +177,6 @@ class IndividualFilter(FilterSet):
             inner_query |= Q(documents__document_number__istartswith=value)
             inner_query |= Q(phone_no__istartswith=value)
             inner_query |= Q(phone_no_alternative__istartswith=value)
-            inner_query |= Q(relationship__istartswith=value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
