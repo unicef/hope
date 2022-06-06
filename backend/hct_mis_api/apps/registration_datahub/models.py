@@ -460,6 +460,17 @@ class Record(models.Model):
     error_message = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
 
+    unique_field = models.CharField(blank=True, null=True, max_length=255, db_index=True)
+    size = models.IntegerField(blank=True, null=True)
+    counters = models.JSONField(blank=True, null=True)
+
+    fields = models.JSONField(null=True, blank=True)
+    files = models.BinaryField(null=True, blank=True)
+
+    index1 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
+    index2 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
+    index3 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
+
     def mark_as_invalid(self, msg: str):
         self.error_message = msg
         self.status = self.STATUS_ERROR
