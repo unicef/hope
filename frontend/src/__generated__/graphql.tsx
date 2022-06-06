@@ -7588,6 +7588,17 @@ export type CashAssistUrlPrefixQuery = (
   & Pick<Query, 'cashAssistUrlPrefix'>
 );
 
+export type LoggedCheckerQueryVariables = {};
+
+
+export type LoggedCheckerQuery = (
+  { __typename?: 'Query' }
+  & { me: Maybe<(
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'id'>
+  )> }
+);
+
 export type MeQueryVariables = {};
 
 
@@ -9066,6 +9077,42 @@ export type AllProgramsQuery = (
       & { node: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllProgramsForChoicesQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  numberOfHouseholds?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllProgramsForChoicesQuery = (
+  { __typename?: 'Query' }
+  & { allPrograms: Maybe<(
+    { __typename?: 'ProgramNodeConnection' }
+    & Pick<ProgramNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'ProgramNodeEdge' }
+      & Pick<ProgramNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
       )> }
     )>> }
   )> }
@@ -13478,6 +13525,55 @@ export function useCashAssistUrlPrefixLazyQuery(baseOptions?: ApolloReactHooks.L
 export type CashAssistUrlPrefixQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixQuery>;
 export type CashAssistUrlPrefixLazyQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixLazyQuery>;
 export type CashAssistUrlPrefixQueryResult = ApolloReactCommon.QueryResult<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>;
+export const LoggedCheckerDocument = gql`
+    query LoggedChecker {
+  me {
+    id
+  }
+}
+    `;
+export type LoggedCheckerComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LoggedCheckerQuery, LoggedCheckerQueryVariables>, 'query'>;
+
+    export const LoggedCheckerComponent = (props: LoggedCheckerComponentProps) => (
+      <ApolloReactComponents.Query<LoggedCheckerQuery, LoggedCheckerQueryVariables> query={LoggedCheckerDocument} {...props} />
+    );
+    
+export type LoggedCheckerProps<TChildProps = {}> = ApolloReactHoc.DataProps<LoggedCheckerQuery, LoggedCheckerQueryVariables> & TChildProps;
+export function withLoggedChecker<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  LoggedCheckerQuery,
+  LoggedCheckerQueryVariables,
+  LoggedCheckerProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, LoggedCheckerQuery, LoggedCheckerQueryVariables, LoggedCheckerProps<TChildProps>>(LoggedCheckerDocument, {
+      alias: 'loggedChecker',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useLoggedCheckerQuery__
+ *
+ * To run a query within a React component, call `useLoggedCheckerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLoggedCheckerQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLoggedCheckerQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLoggedCheckerQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LoggedCheckerQuery, LoggedCheckerQueryVariables>) {
+        return ApolloReactHooks.useQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, baseOptions);
+      }
+export function useLoggedCheckerLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LoggedCheckerQuery, LoggedCheckerQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, baseOptions);
+        }
+export type LoggedCheckerQueryHookResult = ReturnType<typeof useLoggedCheckerQuery>;
+export type LoggedCheckerLazyQueryHookResult = ReturnType<typeof useLoggedCheckerLazyQuery>;
+export type LoggedCheckerQueryResult = ApolloReactCommon.QueryResult<LoggedCheckerQuery, LoggedCheckerQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -16935,6 +17031,82 @@ export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
+export const AllProgramsForChoicesDocument = gql`
+    query AllProgramsForChoices($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String) {
+  allPrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, numberOfHouseholds: $numberOfHouseholds, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      cursor
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export type AllProgramsForChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>, 'query'> & ({ variables: AllProgramsForChoicesQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllProgramsForChoicesComponent = (props: AllProgramsForChoicesComponentProps) => (
+      <ApolloReactComponents.Query<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables> query={AllProgramsForChoicesDocument} {...props} />
+    );
+    
+export type AllProgramsForChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables> & TChildProps;
+export function withAllProgramsForChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllProgramsForChoicesQuery,
+  AllProgramsForChoicesQueryVariables,
+  AllProgramsForChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables, AllProgramsForChoicesProps<TChildProps>>(AllProgramsForChoicesDocument, {
+      alias: 'allProgramsForChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllProgramsForChoicesQuery__
+ *
+ * To run a query within a React component, call `useAllProgramsForChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllProgramsForChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllProgramsForChoicesQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      status: // value for 'status'
+ *      sector: // value for 'sector'
+ *      businessArea: // value for 'businessArea'
+ *      search: // value for 'search'
+ *      numberOfHouseholds: // value for 'numberOfHouseholds'
+ *      budget: // value for 'budget'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllProgramsForChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>(AllProgramsForChoicesDocument, baseOptions);
+      }
+export function useAllProgramsForChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>(AllProgramsForChoicesDocument, baseOptions);
+        }
+export type AllProgramsForChoicesQueryHookResult = ReturnType<typeof useAllProgramsForChoicesQuery>;
+export type AllProgramsForChoicesLazyQueryHookResult = ReturnType<typeof useAllProgramsForChoicesLazyQuery>;
+export type AllProgramsForChoicesQueryResult = ApolloReactCommon.QueryResult<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>;
 export const ProgramDocument = gql`
     query Program($id: ID!) {
   program(id: $id) {
