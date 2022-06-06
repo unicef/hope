@@ -1,13 +1,15 @@
+import multiprocessing
+import os
+
 bind = "0.0.0.0:8000"
 backlog = 2048
 
 
-workers = 2
-worker_class = "gevent"
-worker_connections = 1000
+worker_class = "gthread"
 timeout = 30
 keepalive = 2
-
+workers = multiprocessing.cpu_count()
+threads = multiprocessing.cpu_count()
 
 proc_name = None
 daemon = False

@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import {
   IndividualNode,
   AllIndividualsQueryVariables,
-  useAllIndividualsQuery,
   HouseholdChoiceDataQuery, useAllIndividualsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';

@@ -65,7 +65,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField()
     size = models.PositiveIntegerField()
-    address = models.CharField(max_length=255, blank=True, default=BLANK)
+    address = models.CharField(max_length=1024, blank=True, default=BLANK)
     country = CountryField()
     admin1 = models.CharField(max_length=255, blank=True, default=BLANK)
     admin1_title = models.CharField(max_length=255, blank=True, default=BLANK)
@@ -196,7 +196,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
         blank=True,
     )
-    deduplication_batch_results = JSONField(default=dict)
+    deduplication_batch_results = JSONField(null=True)
     deduplication_golden_record_results = JSONField(default=dict)
     flex_fields = JSONField(default=dict)
     pregnant = models.BooleanField(null=True)
@@ -460,6 +460,17 @@ class Record(models.Model):
     error_message = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
 
+    unique_field = models.CharField(blank=True, null=True, max_length=255, db_index=True)
+    size = models.IntegerField(blank=True, null=True)
+    counters = models.JSONField(blank=True, null=True)
+
+    fields = models.JSONField(null=True, blank=True)
+    files = models.BinaryField(null=True, blank=True)
+
+    index1 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
+    index2 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
+    index3 = models.CharField(null=True, blank=True, max_length=255, db_index=True)
+
     def mark_as_invalid(self, msg: str):
         self.error_message = msg
         self.status = self.STATUS_ERROR
@@ -549,14 +560,13 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
 
 
 class DiiaHousehold(TimeStampedUUIDModel):
-    rec_id = models.CharField(max_length=20, blank=True, default=BLANK)
-    vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True)
-    vpo_doc_id = models.CharField(max_length=128, blank=True, default=BLANK)
-    vpo_doc_date = models.DateField(blank=True)
-    address = models.CharField(max_length=255, blank=True, default=BLANK)
-    consent = models.BooleanField()
-    head_of_household = models.OneToOneField("DiiaIndividual", on_delete=models.CASCADE, null=True)
-
+    rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
+    vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True, null=True)
+    vpo_doc_id = models.CharField(max_length=128, blank=True, null=True)
+    vpo_doc_date = models.DateField(blank=True, null=True)
+    address = models.CharField(max_length=1024, blank=True, null=True)
+    consent = models.BooleanField(null=True)
+    source_data = models.JSONField(default=dict, blank=True, null=True)
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="diia_households",
@@ -575,31 +585,26 @@ class DiiaHousehold(TimeStampedUUIDModel):
     def __str__(self):
         return f"Diia Household ID: {self.id}"
 
-    @property
-    def head_of_household_full_name(self):
-        return getattr(self.head_of_household, "full_name", "-")
-
 
 class DiiaIndividual(TimeStampedUUIDModel):
-    individual_id = models.CharField(max_length=128, blank=True)  # RNOKPP
-    last_name = models.CharField(max_length=85, blank=True, default=BLANK)
-    first_name = models.CharField(max_length=85, blank=True, default=BLANK)
-    second_name = models.CharField(max_length=85, blank=True, default=BLANK)
-    relationship = models.CharField(max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, default=BLANK)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE)
-    birth_date = models.DateField()
-    birth_doc = models.CharField(max_length=128, blank=True)
-    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE)
-    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
-    iban = models.CharField(max_length=255, blank=True, default=BLANK)
-    bank_name = models.CharField(max_length=255, blank=True, default=BLANK)
+    rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
+    individual_id = models.CharField(max_length=128, blank=True, null=True)  # RNOKPP
+    last_name = models.CharField(max_length=85, blank=True, null=True)
+    first_name = models.CharField(max_length=85, blank=True, null=True)
+    second_name = models.CharField(max_length=85, blank=True, null=True)
+    relationship = models.CharField(max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, null=True)
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE, null=True)
+    birth_date = models.DateField(null=True)
+    birth_doc = models.CharField(max_length=128, blank=True, null=True)
+    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True)
+    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True)
+    iban = models.CharField(max_length=255, blank=True, null=True)
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
+    doc_type = models.CharField(max_length=128, blank=True, null=True)
+    doc_serie = models.CharField(max_length=64, blank=True, null=True)
+    doc_number = models.CharField(max_length=64, blank=True, null=True)
+    doc_issue_date = models.DateField(null=True, blank=True)
 
-    household = models.ForeignKey(
-        "DiiaHousehold",
-        null=True,
-        related_name="individuals",
-        on_delete=models.CASCADE,
-    )
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="diia_individuals",
