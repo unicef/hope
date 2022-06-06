@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useAllProgramsQuery } from '../../__generated__/graphql';
+import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
@@ -34,8 +34,9 @@ export const DashboardFilters = ({
 }: DashboardFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const { data, loading } = useAllProgramsQuery({
+  const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
+    fetchPolicy: 'cache-and-network',
   });
   if (loading) return <LoadingComponent />;
 

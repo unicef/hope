@@ -21,7 +21,7 @@ import {
   handleValidationErrors,
 } from '../../../utils/utils';
 import {
-  useAllProgramsQuery,
+  useAllProgramsForChoicesQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
 import { CreateTable } from '../../tables/targeting/TargetPopulation/Create';
@@ -43,8 +43,9 @@ export function CreateTargetPopulationPage(): React.ReactElement {
   const {
     data: allProgramsData,
     loading: loadingPrograms,
-  } = useAllProgramsQuery({
+  } = useAllProgramsForChoicesQuery({
     variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
   });
 
   if (loadingPrograms) return <LoadingComponent />;

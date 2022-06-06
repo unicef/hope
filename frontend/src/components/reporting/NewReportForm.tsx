@@ -61,6 +61,7 @@ export const NewReportForm = (): React.ReactElement => {
     loading: loadingPrograms,
   } = useAllProgramsQuery({
     variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy:'cache-and-network'
   });
   const {
     data: choicesData,

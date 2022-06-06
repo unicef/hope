@@ -14,7 +14,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   ProgramNode,
-  useAllProgramsQuery,
+  useAllProgramsForChoicesQuery,
 } from '../../../__generated__/graphql';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
@@ -33,8 +33,9 @@ export function TargetPopulationsPage(): React.ReactElement {
   });
   const [isInfoOpen, setToggleInfo] = useState(false);
   const debouncedFilter = useDebounce(filter, 500);
-  const { data, loading } = useAllProgramsQuery({
+  const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
+    fetchPolicy: 'cache-and-network',
   });
 
   if (loading) return <LoadingComponent />;
