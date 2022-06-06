@@ -35,7 +35,7 @@ export function FinalizedTargetPopulationHeaderButtons({
   canDuplicate,
 }: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const { data, loading } = useCashAssistUrlPrefixQuery();
+  const { data, loading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
