@@ -25,6 +25,7 @@ const StyledBox = styled(Paper)`
   width: 100%;
   padding: 26px 22px;
 `;
+
 const OrangeTitle = styled.div`
   color: ${({ theme }) => theme.hctPalette.oragne};
 `;
