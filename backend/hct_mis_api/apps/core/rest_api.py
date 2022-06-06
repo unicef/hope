@@ -91,17 +91,15 @@ class FieldAttributeSerializer(serializers.Serializer):
 
 @api_view()
 def all_fields_attributes(request):
-    flex_field = request.data.get("flex_field", True)
     business_area_slug = request.data.get("business_area_slug")
 
     records = cache.get(business_area_slug)
     if records:
         return Response(records)
 
-    records = sort_by_attr(get_fields_attr_generators(flex_field, business_area_slug), "label.English(EN)")
+    records = sort_by_attr(get_fields_attr_generators(True, business_area_slug), "label.English(EN)")
     serializer = FieldAttributeSerializer(records, many=True)
     data = serializer.data
 
     cache.set(business_area_slug, data)
-
     return Response(data)

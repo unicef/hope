@@ -1,4 +1,9 @@
 from django.core.management import call_command
+from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
+from rest_framework import status
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -42,3 +47,19 @@ class TestMetaDataFilterType(APITestCase):
             request_string=self.QUERY,
             context={"user": self.user},
         )
+
+    @parameterized.expand(
+        [
+            ("afghanistan", status.HTTP_200_OK),
+            ("ukraine", status.HTTP_200_OK),
+        ]
+    )
+    def test_rest_endpoint_all_fields_attributes(self, business_area, status):
+        client = APIClient()
+        response = client.get(
+            reverse("fields_attributes"),
+            data={
+                "business_area_slug": business_area
+            }
+        )
+        self.assertEqual(response.status_code, status)
