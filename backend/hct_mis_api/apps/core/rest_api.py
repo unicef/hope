@@ -6,24 +6,31 @@ from rest_framework.response import Response
 from rest_framework import serializers
 
 
-from hct_mis_api.apps.core.models import (
-    FlexibleAttribute,
-    FlexibleAttributeChoice
-)
+from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice
 from hct_mis_api.apps.core.schema import sort_by_attr, get_fields_attr_generators
+from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
+
 
 logger = logging.getLogger(__name__)
 
 
-def get_label(obj):
-    labels = []
-    if isinstance(obj, FlexibleAttribute):
-        obj_labels = getattr(obj, "label")
-    else:
-        obj_labels = obj.get("label")
-    for k, v in obj_labels.items():
-        labels.append({"language": k, "label": v})
-    return labels
+def attr_resolver(attname, default_value, obj):
+    return getattr(obj, attname, default_value)
+
+
+def dict_resolver(attname, default_value, obj):
+    return obj.get(attname, default_value)
+
+
+def _custom_dict_or_attr_resolver(attname, default_value, obj):
+    resolver = attr_resolver
+    if isinstance(obj, (dict, LazyEvalMethodsDict)):
+        resolver = dict_resolver
+    return resolver(attname, default_value, obj)
+
+
+def resolve_label(obj):
+    return [{"language": k, "label": v} for k, v in obj.items()]
 
 
 class LabelSerializer(serializers.Serializer):
@@ -39,24 +46,15 @@ class CoreFieldChoiceSerializer(serializers.Serializer):
     list_name = serializers.CharField(default=None)
 
     def get_labels(self, obj):
-        return get_label(obj)
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
     def get_value(self, obj):
         if isinstance(obj, FlexibleAttributeChoice):
-            return getattr(obj, "name", None)
-        return obj.get("value", None)
+            return obj.name
+        return _custom_dict_or_attr_resolver("value", None, obj)
 
     def get_label_en(self, obj):
-        if isinstance(obj, FlexibleAttributeChoice):
-            return getattr(obj, "label", None)
-        else:
-            labels = obj.get("labels")
-            if labels:
-               obj_list = obj["labels"]
-               my_key = [obj for obj in obj_list if obj["name"] == "English(EN)"]
-               return my_key[0]["English(EN)"]
-            else:
-                return obj["label"]["English(EN)"]
+        return _custom_dict_or_attr_resolver("label", None, obj)["English(EN)"]
 
 
 class FieldAttributeSerializer(serializers.Serializer):
@@ -67,45 +65,43 @@ class FieldAttributeSerializer(serializers.Serializer):
     label_en = serializers.SerializerMethodField()
     hint = serializers.CharField()
     choices = CoreFieldChoiceSerializer(many=True)
-    associated_with = serializers.CharField()
+    associated_with = serializers.SerializerMethodField()
     is_flex_field = serializers.SerializerMethodField()
 
     def get_labels(self, obj):
-        return get_label(obj)
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
     def get_label_en(self, obj):
-        if isinstance(obj, FlexibleAttribute):
-            labels = get_label(obj)
-            my_key = [obj for obj in labels if obj["language"] == "English(EN)"]
-            return my_key[0]["label"]
-        else:
-           obj_list = get_label(obj)
-           my_key = [obj for obj in obj_list if obj["language"] == "English(EN)"]
-           logger.info(my_key)
-           return my_key[0]["label"]
+        return _custom_dict_or_attr_resolver("label", None, obj)["English(EN)"]
 
     def get_is_flex_field(self, obj):
         if isinstance(obj, FlexibleAttribute):
             return True
         return False
 
+    def get_associated_with(self, obj):
+        resolved = _custom_dict_or_attr_resolver("associated_with", None, obj)
+        if resolved == 0:
+            return "Household"
+        elif resolved == 1:
+            return "Individual"
+        else:
+            return resolved
+
 
 @api_view()
 def all_fields_attributes(request):
-    flex_field = request.data.get("flex_field", False)
+    flex_field = request.data.get("flex_field", True)
     business_area_slug = request.data.get("business_area_slug")
 
-    # logger.info("**********")
-    # logger.info(cache.keys("*"))
-    #
-    # records = cache.get(business_area_slug)
-    # if records:
-    #     return Response(records)
+    records = cache.get(business_area_slug)
+    if records:
+        return Response(records)
 
     records = sort_by_attr(get_fields_attr_generators(flex_field, business_area_slug), "label.English(EN)")
     serializer = FieldAttributeSerializer(records, many=True)
     data = serializer.data
 
-    # cache.set(business_area_slug, data)
+    cache.set(business_area_slug, data)
 
     return Response(data)
