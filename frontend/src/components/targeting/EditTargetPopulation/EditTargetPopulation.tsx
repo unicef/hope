@@ -59,6 +59,7 @@ export function EditTargetPopulation({
     loading: loadingPrograms,
   } = useAllProgramsQuery({
     variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
   });
 
   const handleValidate = (values): { candidateListCriterias?: string } => {
