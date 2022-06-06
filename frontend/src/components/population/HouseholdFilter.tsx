@@ -1,30 +1,18 @@
-import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
+import GroupIcon from '@material-ui/icons/Group';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
-import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import TextField from '../../shared/TextField';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
-import { FieldLabel } from '../core/FieldLabel';
+import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
-
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
 
 interface HouseholdFiltersProps {
   onFilterChange;
@@ -96,41 +84,29 @@ export function HouseholdFilters({
           />
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Household size')}</FieldLabel>
-            <TextContainer
-              id='minFilter'
-              value={filter.householdSize.min}
-              variant='outlined'
-              margin='dense'
-              placeholder={t('From')}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  householdSize: {
-                    ...filter.householdSize,
-                    min: e.target.value || undefined,
-                  },
-                })
-              }
-              type='number'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <GroupIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
+          <NumberTextField
+            id='minFilter'
+            topLabel={t('Household Size')}
+            value={filter.householdSize.min}
+            placeholder={t('From')}
+            icon={<GroupIcon />}
+            onChange={(e) =>
+              onFilterChange({
+                ...filter,
+                householdSize: {
+                  ...filter.householdSize,
+                  min: e.target.value || undefined,
+                },
+              })
+            }
+          />
         </Grid>
         <Grid item>
-          <TextContainer
+          <NumberTextField
             id='maxFilter'
             value={filter.householdSize.max}
-            variant='outlined'
-            margin='dense'
             placeholder={t('To')}
+            icon={<GroupIcon />}
             onChange={(e) =>
               onFilterChange({
                 ...filter,
@@ -140,14 +116,6 @@ export function HouseholdFilters({
                 },
               })
             }
-            type='number'
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <GroupIcon />
-                </InputAdornment>
-              ),
-            }}
           />
         </Grid>
       </Grid>

@@ -1,29 +1,12 @@
-import { Grid, InputAdornment, MenuItem, TextField } from '@material-ui/core';
-import { Search } from '@material-ui/icons';
+import { Box, Grid, MenuItem } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { StyledFormControl } from '../../../../components/StyledFormControl';
-import InputLabel from '../../../../shared/InputLabel';
-import Select from '../../../../shared/Select';
+import { SearchTextField } from '../../../../components/core/SearchTextField';
+import { SelectFilter } from '../../../../components/core/SelectFilter';
 import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
-
-const FilterWrapper = styled.div`
-  padding: 20px;
-`;
-
-export function FlexFieldTab(): React.ReactElement {
+export const FlexFieldTab = (): React.ReactElement => {
   const { t } = useTranslation();
   const { data } = useAllFieldsAttributesQuery();
   const [searchValue, setSearchValue] = useState('');
@@ -44,76 +27,57 @@ export function FlexFieldTab(): React.ReactElement {
   }
 
   return (
-    <FilterWrapper>
+    <Box p={3}>
       <Grid container spacing={3}>
         <Grid item>
-          <TextContainer
-            placeholder={t('Search')}
-            variant='outlined'
-            margin='dense'
-            onChange={(e) => setSearchValue(e.target.value)}
+          <SearchTextField
+            label={t('Search')}
             value={searchValue}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
+            onChange={(e) => setSearchValue(e.target.value)}
+            data-cy='filters-search'
           />
         </Grid>
         <Grid item>
           {selectOptions.length && (
-            <StyledFormControl variant='outlined' margin='dense'>
-              <InputLabel>{t('Type')}</InputLabel>
-              <Select
-                /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-                // @ts-ignore
-                onChange={(e) => setSelectedOption(e.target.value)}
-                variant='outlined'
-                label='Type'
-                value={selectedOption}
-              >
-                <MenuItem value=''>
-                  <em>{t('All')}</em>
-                </MenuItem>
-                {selectOptions.map((type) => {
-                  return (
-                    <MenuItem key={type} value={type}>
-                      {type}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </StyledFormControl>
-          )}
-        </Grid>
-        <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Field Type')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => setSelectedFieldType(e.target.value)}
+            <SelectFilter
+              onChange={(e) => setSelectedOption(e.target.value)}
               variant='outlined'
-              label={t('Field Type')}
-              value={selectedFieldType}
+              label={t('Type')}
+              value={selectedOption}
             >
-              <MenuItem value={t('All')}>
+              <MenuItem value=''>
                 <em>{t('All')}</em>
               </MenuItem>
-              {[
-                { name: 'Flex field', value: 'Flex field' },
-                { name: 'Core field', value: 'Core field' },
-              ].map((el) => {
+              {selectOptions.map((type) => {
                 return (
-                  <MenuItem key={el.name} value={el.value}>
-                    {el.name}
+                  <MenuItem key={type} value={type}>
+                    {type}
                   </MenuItem>
                 );
               })}
-            </Select>
-          </StyledFormControl>
+            </SelectFilter>
+          )}
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => setSelectedFieldType(e.target.value)}
+            label={t('Field Type')}
+            value={selectedFieldType}
+          >
+            <MenuItem value={t('All')}>
+              <em>{t('All')}</em>
+            </MenuItem>
+            {[
+              { name: 'Flex field', value: 'Flex field' },
+              { name: 'Core field', value: 'Core field' },
+            ].map((el) => {
+              return (
+                <MenuItem key={el.name} value={el.value}>
+                  {el.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
       </Grid>
       <FlexFieldsTable
@@ -122,6 +86,6 @@ export function FlexFieldTab(): React.ReactElement {
         selectedFieldType={selectedFieldType}
         fields={data.allFieldsAttributes}
       />
-    </FilterWrapper>
+    </Box>
   );
-}
+};
