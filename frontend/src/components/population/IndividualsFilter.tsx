@@ -1,26 +1,14 @@
-import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import TextField from '../../shared/TextField';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
-import { FieldLabel } from '../core/FieldLabel';
+import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
-
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
 
 interface IndividualsFilterProps {
   onFilterChange;
@@ -28,11 +16,11 @@ interface IndividualsFilterProps {
   choicesData: IndividualChoiceDataQuery;
 }
 
-export function IndividualsFilter({
+export const IndividualsFilter = ({
   onFilterChange,
   filter,
   choicesData,
-}: IndividualsFilterProps): React.ReactElement {
+}: IndividualsFilterProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -74,34 +62,21 @@ export function IndividualsFilter({
           </SelectFilter>
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>Age</FieldLabel>
-            <TextContainer
-              variant='outlined'
-              margin='dense'
-              placeholder={t('From')}
-              value={filter.age.min}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  age: { ...filter.age, min: e.target.value || undefined },
-                })
-              }
-              type='number'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <CakeIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
+          <NumberTextField
+            topLabel={t('Age')}
+            placeholder={t('From')}
+            value={filter.age.min}
+            onChange={(e) =>
+              onFilterChange({
+                ...filter,
+                age: { ...filter.age, min: e.target.value || undefined },
+              })
+            }
+            icon={<CakeIcon />}
+          />
         </Grid>
         <Grid item>
-          <TextContainer
-            variant='outlined'
-            margin='dense'
+          <NumberTextField
             placeholder={t('To')}
             value={filter.age.max}
             onChange={(e) =>
@@ -110,14 +85,7 @@ export function IndividualsFilter({
                 age: { ...filter.age, max: e.target.value || undefined },
               })
             }
-            type='number'
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <CakeIcon />
-                </InputAdornment>
-              ),
-            }}
+            icon={<CakeIcon />}
           />
         </Grid>
         <Grid item>
@@ -145,4 +113,4 @@ export function IndividualsFilter({
       </Grid>
     </ContainerWithBorder>
   );
-}
+};

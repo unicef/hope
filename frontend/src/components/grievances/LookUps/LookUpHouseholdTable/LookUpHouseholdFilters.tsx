@@ -1,37 +1,19 @@
-import {
-  Box,
-  Button,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  TextField,
-} from '@material-ui/core';
+import { Button, Grid, MenuItem } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { FieldLabel } from '../../../core/FieldLabel';
+import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../../population/AdminAreaAutocomplete';
-
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
 
 interface LookUpHouseholdFiltersProps {
   onFilterChange;
@@ -134,62 +116,39 @@ export function LookUpHouseholdFilters({
           />
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Household Size')}</FieldLabel>
-            <TextContainer
-              id='minFilter'
-              value={filter.size.min || ''}
-              variant='outlined'
-              margin='dense'
-              placeholder='From'
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  size: {
-                    ...filter.size,
-                    min: e.target.value || undefined,
-                  },
-                })
-              }
-              type='number'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <GroupIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
+          <NumberTextField
+            id='minFilter'
+            topLabel={t('Household Size')}
+            value={filter.size.min || ''}
+            placeholder='From'
+            icon={<GroupIcon />}
+            onChange={(e) =>
+              onFilterChange({
+                ...filter,
+                size: {
+                  ...filter.size,
+                  min: e.target.value || undefined,
+                },
+              })
+            }
+          />
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Household Size')}</FieldLabel>
-            <TextContainer
-              id='maxFilter'
-              value={filter.size.max || ''}
-              variant='outlined'
-              margin='dense'
-              placeholder='To'
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  size: {
-                    ...filter.size,
-                    max: e.target.value || undefined,
-                  },
-                })
-              }
-              type='number'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <GroupIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
+          <NumberTextField
+            id='maxFilter'
+            value={filter.size.max || ''}
+            placeholder='To'
+            icon={<GroupIcon />}
+            onChange={(e) =>
+              onFilterChange({
+                ...filter,
+                size: {
+                  ...filter.size,
+                  max: e.target.value || undefined,
+                },
+              })
+            }
+          />
         </Grid>
         <Grid container justify='flex-end'>
           <Button
