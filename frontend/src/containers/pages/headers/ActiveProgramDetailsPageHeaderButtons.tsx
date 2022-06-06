@@ -24,7 +24,7 @@ export function ActiveProgramDetailsPageHeaderButtons({
   canFinish,
   canEdit,
 }: ActiveProgramDetailsPageHeaderPropTypes): React.ReactElement {
-  const { data, loading } = useCashAssistUrlPrefixQuery();
+  const { data, loading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
