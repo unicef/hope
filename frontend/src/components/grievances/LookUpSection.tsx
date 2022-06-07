@@ -2,9 +2,9 @@ import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../utils/utils';
-import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual/LookUpHouseholdIndividual';
-import { LookUpPaymentRecord } from './LookUpPaymentRecord/LookUpPaymentRecord';
-import { LookUpRelatedTickets } from './LookUpRelatedTickets/LookUpRelatedTickets';
+import { LookUpHouseholdIndividual } from './LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividual';
+import { LookUpPaymentRecord } from './LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { LookUpRelatedTickets } from './LookUps/LookUpRelatedTickets/LookUpRelatedTickets';
 
 export const LookUpSection = ({
   onValueChange,

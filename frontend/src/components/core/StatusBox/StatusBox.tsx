@@ -8,6 +8,10 @@ interface Props {
   statusToColor: (theme: typeof themeObj, status: string) => string;
   statusNameMapping?: Function;
 }
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
+`;
 
 const StatusBoxContainer = styled.div`
   color: ${({ status, statusToColor, theme }) => statusToColor(theme, status)};
@@ -31,14 +35,16 @@ export function StatusBox({
 }: Props): React.ReactElement {
   const underscoreRemoveRegex = /_/g;
   return (
-    <StatusBoxContainer
-      status={status}
-      statusToColor={statusToColor}
-      data-cy='status-container'
-    >
-      {statusNameMapping
-        ? statusNameMapping(status)
-        : status?.replace(underscoreRemoveRegex, ' ')}
-    </StatusBoxContainer>
+    <StatusContainer>
+      <StatusBoxContainer
+        status={status}
+        statusToColor={statusToColor}
+        data-cy='status-container'
+      >
+        {statusNameMapping
+          ? statusNameMapping(status)
+          : status?.replace(underscoreRemoveRegex, ' ')}
+      </StatusBoxContainer>
+    </StatusContainer>
   );
 }

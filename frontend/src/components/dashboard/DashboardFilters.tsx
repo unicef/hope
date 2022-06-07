@@ -1,19 +1,12 @@
-import {
-  FormControl,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  Paper,
-} from '@material-ui/core';
+import { Grid, MenuItem, Paper } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import InputLabel from '../../shared/InputLabel';
-import Select from '../../shared/Select';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../population/AdminAreaAutocomplete';
 
 const Container = styled(Paper)`
@@ -29,11 +22,7 @@ const Container = styled(Paper)`
     margin: 5px;
   }
 `;
-const StyledFormControl = styled(FormControl)`
-  width: 100%;
-  color: #5f6368;
-  border-bottom: 0;
-`;
+
 interface DashboardFiltersProps {
   onFilterChange;
   filter;
@@ -59,33 +48,21 @@ export const DashboardFilters = ({
     <Container>
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Programme')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'program')}
-              variant='outlined'
-              label='Programme'
-              value={filter.program || ''}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <FlashOnIcon />
-                  </InputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value=''>
-                <em>None</em>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'program')}
+            label={t('Programme')}
+            value={filter.program || ''}
+            icon={<FlashOnIcon />}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {programs.map((program) => (
+              <MenuItem key={program.id} value={program.id}>
+                {program.name}
               </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <AdminAreaAutocomplete

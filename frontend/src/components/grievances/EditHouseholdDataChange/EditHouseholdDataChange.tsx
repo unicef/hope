@@ -3,7 +3,6 @@ import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import {
   AllHouseholdsQuery,
   useAllEditHouseholdFieldsQuery,
@@ -12,10 +11,6 @@ import {
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { Title } from '../../core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
-
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
-`;
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -88,11 +83,11 @@ export const EditHouseholdDataChange = ({
               <Grid item xs={4}>
                 <Button
                   color='primary'
+                  startIcon={<AddCircleOutline />}
                   onClick={() => {
                     arrayHelpers.push({ fieldName: null, fieldValue: null });
                   }}
                 >
-                  <AddIcon />
                   {t('Add new field')}
                 </Button>
               </Grid>
