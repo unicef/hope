@@ -9,20 +9,21 @@ def update_min_max_score(apps, schema_editor):
     TicketNeedsAdjudicationDetails = apps.get_model("grievance", "TicketNeedsAdjudicationDetails")
 
     db_alias = schema_editor.connection.alias
-    tickets = TicketNeedsAdjudicationDetails.objects.using(db_alias).all()
-    for ticket in tickets:
+    index = 0
+    for ticket in TicketNeedsAdjudicationDetails.objects.using(db_alias).only("extra_data").iterator(1000):
+        index += 1
+        if index % 100 == 0:
+            print(index)
         score_min, score_max = _get_min_max_score(ticket.extra_data.get("golden_records", []))
-
         ticket.score_min = score_min
         ticket.score_max = score_max
-
-    TicketNeedsAdjudicationDetails.objects.bulk_update(tickets, ["score_min", "score_max"])
+        ticket.save(update_fields=("score_min", "score_max"))
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('grievance', '0040_migration'),
+        ("grievance", "0040_migration"),
     ]
 
     operations = [

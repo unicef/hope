@@ -1,12 +1,9 @@
 from typing import Union
 
-import django_filters
+from django.db.models import Prefetch
+
 import graphene
-from django.db.models import Prefetch, Q
-from django.db.models.functions import Lower
-from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter
 from graphene import relay
-from graphql import GraphQLError
 from graphene_django import DjangoConnectionField, DjangoObjectType
 
 import hct_mis_api.apps.targeting.models as target_models
@@ -17,9 +14,9 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES_DICTIONARY,
+    filter_choices,
+    get_field_by_name,
 )
-from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
@@ -27,7 +24,6 @@ from hct_mis_api.apps.core.schema import (
     FieldAttributeNode,
 )
 from hct_mis_api.apps.core.utils import (
-    CustomOrderingFilter,
     decode_and_get_object,
     decode_id_string,
     map_unicef_ids_to_households_unicef_ids,
@@ -35,121 +31,9 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.filters import HouseholdFilter, TargetPopulationFilter
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 from hct_mis_api.apps.utils.schema import Arg
-
-
-class HouseholdFilter(FilterSet):
-    order_by = CustomOrderingFilter(
-        fields=(
-            "id",
-            Lower("head_of_household__full_name"),
-            "size",
-            Lower("admin_area_new__name"),
-            "updated_at",
-            "unicef_id",
-        )
-    )
-    business_area = CharFilter(field_name="business_area__slug")
-
-
-class TargetPopulationFilter(django_filters.FilterSet):
-    """Query target population records.
-
-    Loads associated entries for Households and TargetRules.
-    """
-
-    name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
-    created_by_name = django_filters.CharFilter(field_name="created_by", method="filter_created_by_name")
-    number_of_households_min = IntegerFilter(method="filter_number_of_households_min")
-    number_of_households_max = IntegerFilter(method="filter_number_of_households_max")
-    candidate_list_total_households_min = IntegerFilter(
-        field_name="candidate_list_total_households",
-        lookup_expr="gte",
-    )
-    candidate_list_total_households_max = IntegerFilter(
-        field_name="candidate_list_total_households",
-        lookup_expr="lte",
-    )
-    candidate_list_total_individuals_min = IntegerFilter(
-        field_name="candidate_list_total_individuals",
-        lookup_expr="gte",
-    )
-    candidate_list_total_individuals_max = IntegerFilter(
-        field_name="candidate_list_total_individuals",
-        lookup_expr="lte",
-    )
-
-    final_list_total_households_min = IntegerFilter(
-        field_name="final_list_total_households",
-        lookup_expr="gte",
-    )
-    final_list_total_households_max = IntegerFilter(
-        field_name="final_list_total_households",
-        lookup_expr="lte",
-    )
-    final_list_total_individuals_min = IntegerFilter(
-        field_name="final_list_total_individuals",
-        lookup_expr="gte",
-    )
-    final_list_total_individuals_max = IntegerFilter(
-        field_name="final_list_total_individuals",
-        lookup_expr="lte",
-    )
-    business_area = CharFilter(field_name="business_area__slug")
-    program = ModelMultipleChoiceFilter(field_name="program", to_field_name="id", queryset=Program.objects.all())
-
-    @staticmethod
-    def filter_created_by_name(queryset, model_field, value):
-        """Gets full name of the associated user from query."""
-        fname_query_key = f"{model_field}__given_name__icontains"
-        lname_query_key = f"{model_field}__family_name__icontains"
-        for name in value.strip().split():
-            queryset = queryset.filter(Q(**{fname_query_key: name}) | Q(**{lname_query_key: name}))
-        return queryset
-
-    def filter_number_of_households_min(self, queryset, model_field, value):
-        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_DRAFT).filter(
-            number_of_households__gte=value
-        )
-        return queryset
-
-    def filter_number_of_households_max(self, queryset, model_field, value):
-        queryset = queryset.exclude(status=target_models.TargetPopulation.STATUS_DRAFT).filter(
-            number_of_households__lte=value
-        )
-        return queryset
-
-    class Meta:
-        model = target_models.TargetPopulation
-        fields = (
-            "name",
-            "created_by_name",
-            "created_at",
-            "updated_at",
-            "status",
-            "households",
-        )
-
-        filter_overrides = {
-            target_models.IntegerRangeField: {"filter_class": django_filters.NumericRangeFilter},
-            target_models.models.DateTimeField: {"filter_class": django_filters.DateTimeFilter},
-        }
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            Lower("name"),
-            "created_at",
-            "created_by",
-            "updated_at",
-            "status",
-            "total_households",
-            "total_family_size",
-            "program__id",
-            "final_list_total_households",
-            "candidate_list_total_households",
-        )
-    )
 
 
 class TargetingCriteriaRuleFilterNode(DjangoObjectType):
@@ -163,7 +47,8 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
-            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parent.field_name)
+            field_attribute = get_field_by_name(parent.field_name)
+            return filter_choices(field_attribute, parent.arguments)
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
@@ -180,7 +65,8 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         if parent.is_flex_field:
             return FlexibleAttribute.objects.get(name=parent.field_name)
         else:
-            return CORE_FIELDS_ATTRIBUTES_DICTIONARY.get(parent.field_name)
+            field_attribute = get_field_by_name(parent.field_name)
+            return filter_choices(field_attribute, parent.arguments)
 
     class Meta:
         model = target_models.TargetingIndividualBlockRuleFilter
@@ -274,7 +160,7 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
 
 
 def targeting_criteria_object_type_to_query(
-    targeting_criteria_object_type, program: Union[str, Program], excluded_ids="", criteria_fit_range=None
+    targeting_criteria_object_type, program: Union[str, Program], excluded_ids=""
 ):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
     if not isinstance(program, Program):
@@ -290,7 +176,7 @@ def targeting_criteria_object_type_to_query(
             targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
         for individuals_filters_block_dict in rule.get("individuals_filters_blocks", []):
             individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockMixin(
-                [], not program.individual_data_needed, criteria_fit_range
+                [], not program.individual_data_needed
             )
             targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)
             for individual_block_filter_dict in individuals_filters_block_dict.get("individual_block_filters", []):
@@ -320,7 +206,6 @@ class Query(graphene.ObjectType):
         targeting_criteria=TargetingCriteriaObjectType(required=True),
         program=graphene.Argument(graphene.ID, required=True),
         excluded_ids=graphene.Argument(graphene.String, required=True),
-        criteria_fit_range=graphene.Argument(graphene.List(graphene.Int), required=False),
         filterset_class=HouseholdFilter,
         permission_classes=(
             hopePermissionClass(Permissions.TARGETING_UPDATE),
@@ -414,17 +299,10 @@ class Query(graphene.ObjectType):
             .all()
         )
 
-    def resolve_golden_record_by_targeting_criteria(
-        parent, info, targeting_criteria, program, excluded_ids, criteria_fit_range=None, **kwargs
-    ):
-        if criteria_fit_range:
-            min_ind, max_ind = tuple(criteria_fit_range)
-            if min_ind > max_ind:
-                raise GraphQLError("Minimum number cannot be higher than maximum number.")
-
+    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
         household_queryset = Household.objects
         return prefetch_selections(
             household_queryset.filter(
-                targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids, criteria_fit_range)
+                targeting_criteria_object_type_to_query(targeting_criteria, program, excluded_ids)
             )
         ).distinct()

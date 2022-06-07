@@ -4,6 +4,7 @@ import itertools
 import logging
 import string
 from collections import MutableMapping, OrderedDict
+from time import sleep
 from typing import List
 
 from django.db.models import QuerySet
@@ -337,17 +338,11 @@ def to_dict(instance, fields=None, dict_fields=None):
 
 
 def build_arg_dict(model_object, mapping_dict):
-    args = {}
-    for key in mapping_dict:
-        args[key] = nested_getattr(model_object, mapping_dict[key], None)
-    return args
+    return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
 def build_arg_dict_from_dict(data_dict, mapping_dict):
-    args = {}
-    for key, value in mapping_dict.items():
-        args[key] = data_dict.get(value)
-    return args
+    return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
 
 class CustomOrderingFilter(OrderingFilter):
@@ -727,3 +722,10 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
     ).values_list("unicef_id", flat=True)
     excluded_household_ids_array.extend(excluded_household_ids_from_individuals_array)
     return excluded_household_ids_array
+
+
+@functools.lru_cache(maxsize=None)
+def cached_business_areas_slug_id_dict():
+    from hct_mis_api.apps.core.models import BusinessArea
+
+    return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}
