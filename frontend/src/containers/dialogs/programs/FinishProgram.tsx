@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -20,23 +19,9 @@ import {
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
 import { DialogActions } from '../DialogActions';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
+import { DialogDescription } from '../DialogDescription';
+import { DialogFooter } from '../DialogFooter';
+import { DialogTitleWrapper } from '../DialogTitleWrapper';
 
 interface FinishProgramProps {
   program: ProgramNode;
