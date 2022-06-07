@@ -34,9 +34,9 @@ export const targetPopulationDetailed = gql`
     exclusionReason
     steficonRule {
       id
-      rule{
-          id
-          name
+      rule {
+        id
+        name
       }
     }
     vulnerabilityScoreMin
@@ -51,6 +51,7 @@ export const targetPopulationDetailed = gql`
     program {
       id
       name
+      status
     }
     createdBy {
       id
