@@ -33,11 +33,6 @@ def resolve_label(obj):
     return [{"language": k, "label": v} for k, v in obj.items()]
 
 
-class LabelSerializer(serializers.Serializer):
-    label = serializers.CharField()
-    language = serializers.CharField()
-
-
 class CoreFieldChoiceSerializer(serializers.Serializer):
     labels = serializers.SerializerMethodField()
     label_en = serializers.SerializerMethodField()
