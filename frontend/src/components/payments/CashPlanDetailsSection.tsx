@@ -8,11 +8,8 @@ import { countPercentage } from '../../utils/utils';
 import { CashPlanQuery } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
 import { LabelizedField } from '../core/LabelizedField';
+import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
 
 const ChartContainer = styled.div`
   width: 150px;

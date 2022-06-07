@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -12,11 +11,6 @@ import {
 } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface PaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
@@ -56,12 +50,10 @@ export function PaymentRecordHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={paymentRecord.status}
-            statusToColor={paymentRecordStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={paymentRecord.status}
+          statusToColor={paymentRecordStatusToColor}
+        />
       </TableCell>
       <TableCell align='left'>{paymentRecord.fullName}</TableCell>
       <TableCell align='left'>

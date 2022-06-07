@@ -1,18 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
   IndividualNode,
   AllIndividualsQueryVariables,
-  HouseholdChoiceDataQuery, useAllIndividualsForPopulationTableQuery,
+  HouseholdChoiceDataQuery,
+  useAllIndividualsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
 
 interface IndividualsListTableProps {
   filter;

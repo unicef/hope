@@ -1,7 +1,6 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   AllCashPlansQuery,
   useCashPlanVerificationStatusChoicesQuery,
@@ -17,10 +16,6 @@ import { StatusBox } from '../../../../components/core/StatusBox';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 interface PaymentVerificationTableRowProps {
   plan: AllCashPlansQuery['allCashPlans']['edges'][number]['node'];
   canViewDetails: boolean;
@@ -60,12 +55,10 @@ export function PaymentVerificationTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={plan.cashPlanPaymentVerificationSummary.status}
-            statusToColor={paymentVerificationStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={plan.cashPlanPaymentVerificationSummary.status}
+          statusToColor={paymentVerificationStatusToColor}
+        />
       </TableCell>
       <TableCell align='left'>
         {plan.serviceProvider?.fullName || '-'}
