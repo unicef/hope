@@ -9,11 +9,6 @@ import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { StatusBox } from '../../../components/core/StatusBox';
 import { userStatusToColor } from '../../../utils/utils';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
-
 const GreyText = styled.p`
   color: #959698;
 `;
@@ -45,9 +40,7 @@ export function UsersTableRow({
         </TableCell>
         <TableCell align='left'>{`${user.firstName} ${user.lastName}`}</TableCell>
         <TableCell align='left'>
-          <StatusContainer>
-            <StatusBox status={user.status} statusToColor={userStatusToColor} />
-          </StatusContainer>
+          <StatusBox status={user.status} statusToColor={userStatusToColor} />
         </TableCell>
         <TableCell align='left'>{user.partner?.name || '-'}</TableCell>
         <TableCell align='left'>{user.email}</TableCell>

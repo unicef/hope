@@ -15,11 +15,6 @@ import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
-
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)}px;
   border-color: #b1b1b5;
@@ -64,12 +59,10 @@ export function ProgramDetails({
         <Grid container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField label={t('status')}>
-              <StatusContainer>
-                <StatusBox
-                  status={program.status}
-                  statusToColor={programStatusToColor}
-                />
-              </StatusContainer>
+              <StatusBox
+                status={program.status}
+                statusToColor={programStatusToColor}
+              />
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>

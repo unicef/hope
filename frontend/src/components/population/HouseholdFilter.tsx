@@ -1,48 +1,18 @@
-import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
-import FormControl from '@material-ui/core/FormControl';
+import { Grid, MenuItem } from '@material-ui/core';
+import GroupIcon from '@material-ui/icons/Group';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
-import GroupIcon from '@material-ui/icons/Group';
-import SearchIcon from '@material-ui/icons/Search';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import InputLabel from '../../shared/InputLabel';
-import Select from '../../shared/Select';
-import TextField from '../../shared/TextField';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
 import { ContainerWithBorder } from '../core/ContainerWithBorder';
-import { FieldLabel } from '../core/FieldLabel';
+import { NumberTextField } from '../core/NumberTextField';
+import { SearchTextField } from '../core/SearchTextField';
+import { SelectFilter } from '../core/SelectFilter';
 import { AdminAreaAutocomplete } from './AdminAreaAutocomplete';
-
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
-
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
-
-const StartInputAdornment = styled(InputAdornment)`
-  margin-right: 0;
-`;
 
 interface HouseholdFiltersProps {
   onFilterChange;
@@ -65,80 +35,47 @@ export function HouseholdFilters({
         <Grid item>
           <SearchTextField
             label={t('Search')}
-            variant='outlined'
             value={filter.text || ''}
-            margin='dense'
             onChange={(e) => handleFilterChange(e, 'text')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
             data-cy='filters-search'
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Programme')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'program')}
-              variant='outlined'
-              label={t('Programme')}
-              value={filter.program || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <FlashOnIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'program')}
+            label={t('Programme')}
+            value={filter.program || ''}
+            icon={<FlashOnIcon />}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {programs.map((program) => (
+              <MenuItem key={program.id} value={program.id}>
+                {program.name}
               </MenuItem>
-              {programs.map((program) => (
-                <MenuItem key={program.id} value={program.id}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Residence Status')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'residenceStatus')}
-              variant='outlined'
-              label='Residence Status'
-              value={filter.residenceStatus || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <AssignmentIndRoundedIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-              SelectDisplayProps={{
-                'data-cy': 'filters-residence-status',
-              }}
-              MenuProps={{
-                'data-cy': 'filters-residence-status-options',
-              }}
-            >
-              {choicesData.residenceStatusChoices.map((program) => (
-                <MenuItem key={program.value} value={program.value}>
-                  {program.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'residenceStatus')}
+            label={t('Residence Status')}
+            value={filter.residenceStatus || ''}
+            icon={<AssignmentIndRoundedIcon />}
+            SelectDisplayProps={{
+              'data-cy': 'filters-residence-status',
+            }}
+            MenuProps={{
+              'data-cy': 'filters-residence-status-options',
+            }}
+          >
+            {choicesData.residenceStatusChoices.map((program) => (
+              <MenuItem key={program.value} value={program.value}>
+                {program.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <AdminAreaAutocomplete
@@ -147,41 +84,29 @@ export function HouseholdFilters({
           />
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Household size')}</FieldLabel>
-            <TextContainer
-              id='minFilter'
-              value={filter.householdSize.min}
-              variant='outlined'
-              margin='dense'
-              placeholder={t('From')}
-              onChange={(e) =>
-                onFilterChange({
-                  ...filter,
-                  householdSize: {
-                    ...filter.householdSize,
-                    min: e.target.value || undefined,
-                  },
-                })
-              }
-              type='number'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <GroupIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
+          <NumberTextField
+            id='minFilter'
+            topLabel={t('Household Size')}
+            value={filter.householdSize.min}
+            placeholder={t('From')}
+            icon={<GroupIcon />}
+            onChange={(e) =>
+              onFilterChange({
+                ...filter,
+                householdSize: {
+                  ...filter.householdSize,
+                  min: e.target.value || undefined,
+                },
+              })
+            }
+          />
         </Grid>
         <Grid item>
-          <TextContainer
+          <NumberTextField
             id='maxFilter'
             value={filter.householdSize.max}
-            variant='outlined'
-            margin='dense'
             placeholder={t('To')}
+            icon={<GroupIcon />}
             onChange={(e) =>
               onFilterChange({
                 ...filter,
@@ -191,14 +116,6 @@ export function HouseholdFilters({
                 },
               })
             }
-            type='number'
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <GroupIcon />
-                </InputAdornment>
-              ),
-            }}
           />
         </Grid>
       </Grid>

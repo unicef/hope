@@ -1,7 +1,6 @@
-import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
@@ -16,25 +15,16 @@ import { useConfirmation } from '../core/ConfirmationDialog';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { Title } from '../core/Title';
+import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
-export function DeleteHouseholdGrievanceDetails({
+export const DeleteHouseholdGrievanceDetails = ({
   ticket,
   canApproveDataChange,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
@@ -63,7 +53,7 @@ export function DeleteHouseholdGrievanceDetails({
   );
 
   return (
-    <StyledBox>
+    <ApproveBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>{t('Household to be withdrawn')}</Typography>
@@ -178,6 +168,6 @@ export function DeleteHouseholdGrievanceDetails({
           </LabelizedField>
         </Grid>
       </Grid>
-    </StyledBox>
+    </ApproveBox>
   );
-}
+};

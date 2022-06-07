@@ -1,7 +1,6 @@
-import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { getFlexFieldTextValue, renderBoolean } from '../../utils/utils';
@@ -14,13 +13,7 @@ import {
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { LabelizedField } from '../core/LabelizedField';
 import { Title } from '../core/Title';
-
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
+import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export function AddIndividualGrievanceDetails({
   ticket,
@@ -126,7 +119,7 @@ export function AddIndividualGrievanceDetails({
   }
 
   return (
-    <StyledBox>
+    <ApproveBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>{t('Individual Data')}</Typography>
@@ -180,6 +173,6 @@ export function AddIndividualGrievanceDetails({
       <Grid container spacing={6}>
         {allLabels}
       </Grid>
-    </StyledBox>
+    </ApproveBox>
   );
 }

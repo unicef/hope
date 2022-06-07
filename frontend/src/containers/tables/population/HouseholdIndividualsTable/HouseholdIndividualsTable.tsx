@@ -1,27 +1,26 @@
-import React, { ReactElement, useState } from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import styled from 'styled-components';
+import React, { ReactElement, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  HouseholdChoiceDataQuery,
-  HouseholdNode,
-  IndividualNode,
-} from '../../../../__generated__/graphql';
+import { BlackLink } from '../../../../components/core/BlackLink';
+import { StatusBox } from '../../../../components/core/StatusBox';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
 import {
   Order,
   TableComponent,
 } from '../../../../components/core/Table/TableComponent';
-import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { StatusBox } from '../../../../components/core/StatusBox';
 import {
   choicesToDict,
   populationStatusToColor,
   sexToCapitalize,
 } from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
+import {
+  HouseholdChoiceDataQuery,
+  HouseholdNode,
+  IndividualNode,
+} from '../../../../__generated__/graphql';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -67,10 +66,6 @@ const headCells: HeadCell<IndividualNode>[] = [
     numeric: false,
   },
 ];
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface HouseholdIndividualsTableProps {
   household: HouseholdNode;
@@ -133,12 +128,10 @@ export function HouseholdIndividualsTable({
             </TableCell>
             <TableCell align='left'>{row.fullName}</TableCell>
             <TableCell align='left'>
-              <StatusContainer>
-                <StatusBox
-                  status={row.status}
-                  statusToColor={populationStatusToColor}
-                />
-              </StatusContainer>
+              <StatusBox
+                status={row.status}
+                statusToColor={populationStatusToColor}
+              />
             </TableCell>
             <TableCell align='left'>{roleChoicesDict[row.role]}</TableCell>
             <TableCell align='left'>
