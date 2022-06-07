@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_finalized_0_with_permission 1'] = {
@@ -196,8 +197,14 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_w
     'data': {
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
+                {
+                    'node': {
+                        'residenceStatus': 'HOST',
+                        'size': 1
+                    }
+                }
             ],
-            'totalCount': 0
+            'totalCount': 1
         }
     }
 }
