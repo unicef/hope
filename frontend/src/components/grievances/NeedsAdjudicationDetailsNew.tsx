@@ -2,8 +2,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Paper,
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -13,7 +11,6 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
@@ -25,18 +22,10 @@ import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
-const StyledTable = styled(Table)`
-  && {
-    min-width: 100px;
-  }
-`;
+import {
+  ApproveBox,
+  StyledTable,
+} from './GrievancesApproveSection/ApproveSectionStyles';
 
 export function NeedsAdjudicationDetailsNew({
   ticket,
@@ -205,7 +194,7 @@ export function NeedsAdjudicationDetailsNew({
   };
 
   return (
-    <StyledBox>
+    <ApproveBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>
@@ -352,6 +341,6 @@ export function NeedsAdjudicationDetailsNew({
           )}
         </TableBody>
       </StyledTable>
-    </StyledBox>
+    </ApproveBox>
   );
 }

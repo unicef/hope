@@ -23,10 +23,6 @@ const BoxWithBorders = styled.div`
   padding: 15px 0;
 `;
 
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
-`;
-
 export interface EditIndividualDataChangeProps {
   values;
   setFieldValue;
@@ -117,8 +113,8 @@ export const EditIndividualDataChange = ({
                     onClick={() => {
                       arrayHelpers.push({ fieldName: null, fieldValue: '' });
                     }}
+                    startIcon={<AddCircleOutline />}
                   >
-                    <AddIcon />
                     {t('Add new field')}
                   </Button>
                 </Grid>

@@ -3,13 +3,8 @@ import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 import { AgencyField } from '../AgencyField';
-
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
-`;
 
 export interface NewIdentityFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
@@ -54,8 +49,8 @@ export function NewIdentityFieldArray({
                       number: '',
                     });
                   }}
+                  startIcon={<AddCircleOutline />}
                 >
-                  <AddIcon />
                   {t('Add Identity')}
                 </Button>
               </Grid>

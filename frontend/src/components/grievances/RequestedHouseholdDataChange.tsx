@@ -1,8 +1,7 @@
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Typography } from '@material-ui/core';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
@@ -11,14 +10,8 @@ import {
 } from '../../__generated__/graphql';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
+import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
-
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -142,7 +135,7 @@ export function RequestedHouseholdDataChange({
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
-        <StyledBox>
+        <ApproveBox>
           <Title>
             <Box display='flex' justifyContent='space-between'>
               <Typography variant='h6'>{t('Requested Data Change')}</Typography>
@@ -166,7 +159,7 @@ export function RequestedHouseholdDataChange({
             isEdit={isEdit}
             values={values}
           />
-        </StyledBox>
+        </ApproveBox>
       )}
     </Formik>
   );

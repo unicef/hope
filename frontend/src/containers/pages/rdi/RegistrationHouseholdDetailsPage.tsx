@@ -34,6 +34,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const permissions = usePermissions();
   const { data, loading, error } = useImportedHouseholdQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,

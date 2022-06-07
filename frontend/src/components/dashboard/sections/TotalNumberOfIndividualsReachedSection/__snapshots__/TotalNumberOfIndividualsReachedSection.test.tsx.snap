@@ -3,11 +3,11 @@
 exports[`components/dashboard/TotalNumberOfIndividualsReachedSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-gzVnrw iqhvAz MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root sc-dnqmqq QsoBu MuiPaper-elevation1 MuiPaper-rounded"
     color="#345DA0"
   >
     <div
-      class="sc-bdVaJa QtzJE"
+      class="sc-htpNat izTSWH"
     >
       TOTAL NUMBER OF INDIVIDUALS REACHED
     </div>
@@ -18,7 +18,7 @@ exports[`components/dashboard/TotalNumberOfIndividualsReachedSection should rend
         class="MuiGrid-root MuiGrid-item"
       >
         <div
-          class="sc-bZQynM fFXjrt"
+          class="sc-htoDjs fhSiPP"
         >
           0
         </div>
@@ -27,7 +27,7 @@ exports[`components/dashboard/TotalNumberOfIndividualsReachedSection should rend
         class="MuiGrid-root MuiGrid-item"
       >
         <div
-          class="sc-ifAKCX lmhInW"
+          class="sc-bZQynM jhNgfH"
           color="#023F90"
         >
           <svg
