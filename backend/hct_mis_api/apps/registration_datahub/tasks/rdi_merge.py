@@ -11,7 +11,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
-from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.documents import IndividualDocument, HouseholdDocument
 from hct_mis_api.apps.household.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
@@ -360,6 +360,7 @@ class RdiMergeTask:
                     # DEDUPLICATION
 
                     populate_index(Individual.objects.filter(registration_data_import=obj_hct), IndividualDocument)
+                    populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
 
                     DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
 
