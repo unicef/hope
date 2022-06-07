@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { TableWrapper } from '../../../components/core/TableWrapper';
 import { Title } from '../../../components/core/Title';
 import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
 import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
@@ -36,10 +37,6 @@ const StyledTabs = styled(Tabs)`
 `;
 const TabsContainer = styled.div`
   border-bottom: 1px solid #e8e8e8;
-`;
-
-const TableWrapper = styled.div`
-  padding: ${({ theme }) => theme.spacing(4)}px;
 `;
 
 interface TabPanelProps {

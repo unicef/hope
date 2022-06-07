@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import React from 'react';
@@ -9,11 +8,6 @@ import { StatusBox } from '../../../../components/core/StatusBox';
 import { registrationDataImportStatusToColor } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface PaymentRecordTableRowProps {
   registrationDataImport: RegistrationDataImportNode;
@@ -37,8 +31,8 @@ export function RegistrationDataImportTableRow({
       }
       return registrationDataImport.importedBy.email;
     }
-    return "-";
-  }
+    return '-';
+  };
   return (
     <ClickableTableRow
       hover
@@ -56,12 +50,10 @@ export function RegistrationDataImportTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={registrationDataImport.status}
-            statusToColor={registrationDataImportStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={registrationDataImport.status}
+          statusToColor={registrationDataImportStatusToColor}
+        />
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment withTime>

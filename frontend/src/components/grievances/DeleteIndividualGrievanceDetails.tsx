@@ -1,8 +1,7 @@
-import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 import snakeCase from 'lodash/snakeCase';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
@@ -19,13 +18,7 @@ import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 import { useConfirmation } from '../core/ConfirmationDialog';
-
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
+import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export type RoleReassignData = {
   role: IndividualRoleInHouseholdRole | string;
@@ -169,7 +162,7 @@ export function DeleteIndividualGrievanceDetails({
     );
   }
   return (
-    <StyledBox>
+    <ApproveBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>
@@ -225,6 +218,6 @@ export function DeleteIndividualGrievanceDetails({
       <Grid container spacing={6}>
         {allLabels}
       </Grid>
-    </StyledBox>
+    </ApproveBox>
   );
 }
