@@ -15,6 +15,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { DialogContainer } from '../../containers/dialogs/DialogContainer';
+import { DialogFooter } from '../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -34,17 +37,6 @@ import {
 import { FormikEffect } from '../core/FormikEffect';
 import { TabPanel } from '../core/TabPanel';
 
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
 const StyledTabs = styled(Tabs)`
   && {
     max-width: 500px;
@@ -52,9 +44,6 @@ const StyledTabs = styled(Tabs)`
 `;
 const TabsContainer = styled.div`
   border-bottom: 1px solid #e8e8e8;
-`;
-const DialogContainer = styled.div`
-  width: 700px;
 `;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

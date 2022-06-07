@@ -1,39 +1,17 @@
-import {
-  Box,
-  FormControl,
-  Grid,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from '@material-ui/core';
-import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
-import SearchIcon from '@material-ui/icons/Search';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import { Box, Grid, MenuItem, TextField } from '@material-ui/core';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
+import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { FieldLabel } from '../../core/FieldLabel';
+import { SearchTextField } from '../../core/SearchTextField';
+import { SelectFilter } from '../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
-
-const SearchTextField = styled(TextField)`
-  flex: 1;
-  && {
-    min-width: 150px;
-  }
-`;
-const StyledFormControl = styled(FormControl)`
-  width: 232px;
-  color: #5f6368;
-  border-bottom: 0;
-`;
 
 interface GrievancesFiltersProps {
   onFilterChange;
@@ -61,93 +39,58 @@ export function GrievancesFilters({
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
           <SearchTextField
-            label='Search'
-            variant='outlined'
-            margin='dense'
-            onChange={(e) => handleFilterChange(e, 'search')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-            data-cy='filters-search'
             value={filter.search || ''}
+            label='Search'
+            onChange={(e) => handleFilterChange(e, 'search')}
+            data-cy='filters-search'
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Status')}</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'status')}
-              variant='outlined'
-              label='Status'
-              value={filter.status || ''}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {choicesData.grievanceTicketStatusChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'status')}
+            label={t('Status')}
+            value={filter.status || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketStatusChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <SearchTextField
+            value={filter.fsp || ''}
             label='FSP'
-            variant='outlined'
-            margin='dense'
             onChange={(e) => handleFilterChange(e, 'fsp')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <AccountBalanceIcon />
-                </InputAdornment>
-              ),
-            }}
           />
         </Grid>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
-            <FieldLabel>{t('Creation Date')}</FieldLabel>
-            <KeyboardDatePicker
-              variant='inline'
-              inputVariant='outlined'
-              margin='dense'
-              label='From'
-              autoOk
-              onChange={(date) =>
-                onFilterChange({
-                  ...filter,
-                  createdAtRange: {
-                    ...filter.createdAtRange,
-                    min: moment(date)
-                      .set({ hour: 0, minute: 0 })
-                      .toISOString(),
-                  },
-                })
-              }
-              value={filter.createdAtRange.min || null}
-              format='YYYY-MM-DD'
-              InputAdornmentProps={{ position: 'end' }}
-            />
-          </Box>
+          <DatePickerFilter
+            topLabel={t('Creation Date')}
+            label='From'
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                createdAtRange: {
+                  ...filter.createdAtRange,
+                  min: moment(date)
+                    .set({ hour: 0, minute: 0 })
+                    .toISOString(),
+                },
+              })
+            }
+            value={filter.createdAtRange.min}
+          />
         </Grid>
         <Grid item>
-          <KeyboardDatePicker
-            variant='inline'
-            inputVariant='outlined'
-            margin='dense'
+          <DatePickerFilter
             label='To'
-            autoOk
             onChange={(date) =>
               onFilterChange({
                 ...filter,
@@ -159,56 +102,46 @@ export function GrievancesFilters({
                 },
               })
             }
-            value={filter.createdAtRange.max || null}
-            format='YYYY-MM-DD'
-            InputAdornmentProps={{ position: 'end' }}
+            value={filter.createdAtRange.max}
           />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Category</InputLabel>
-            <Select
-              onChange={(e) => handleFilterChange(e, 'category')}
-              variant='outlined'
-              label='Category'
-              value={filter.category || ''}
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'category')}
+            label={t('Category')}
+            value={filter.category || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketCategoryChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
+        {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+        filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+          <Grid item>
+            <SelectFilter
+              onChange={(e) => handleFilterChange(e, 'issueType')}
+              label='Issue Type'
+              value={filter.issueType || ''}
             >
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {choicesData.grievanceTicketCategoryChoices.map((item) => {
+              {issueTypeDict[filter.category].subCategories.map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>
                     {item.name}
                   </MenuItem>
                 );
               })}
-            </Select>
-          </StyledFormControl>
-        </Grid>
-        {filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-        filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
-          <Grid item>
-            <StyledFormControl variant='outlined' margin='dense'>
-              <InputLabel>Issue Type</InputLabel>
-              <Select
-                onChange={(e) => handleFilterChange(e, 'issueType')}
-                variant='outlined'
-                label='Issue Type'
-                value={filter.issueType || ''}
-              >
-                <MenuItem value=''>
-                  <em>None</em>
-                </MenuItem>
-                {issueTypeDict[filter.category].subCategories.map((item) => {
-                  return (
-                    <MenuItem key={item.value} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </StyledFormControl>
+            </SelectFilter>
           </Grid>
         ) : null}
 
@@ -216,26 +149,22 @@ export function GrievancesFilters({
           <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
         </Grid>
         <Grid item>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>{t('Assignee')}</InputLabel>
-            <Select
-              onChange={(e) => handleFilterChange(e, 'assignedTo')}
-              variant='outlined'
-              label={t('Assignee')}
-              value={filter.assignedTo || ''}
-            >
-              <MenuItem value=''>
-                <em>{t('None')}</em>
-              </MenuItem>
-              {usersChoices.map((item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </StyledFormControl>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'assignedTo')}
+            label={t('Assignee')}
+            value={filter.assignedTo || ''}
+          >
+            <MenuItem value=''>
+              <em>{t('None')}</em>
+            </MenuItem>
+            {usersChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>
