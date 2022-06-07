@@ -13,11 +13,6 @@ import { StatusBox } from '../StatusBox';
 import { Title } from '../Title';
 import { UniversalMoment } from '../UniversalMoment';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
-
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)}px;
   border-color: #b1b1b5;
@@ -86,12 +81,10 @@ export function CashPlanDetails({
           <Grid container spacing={6}>
             <Grid item xs={4}>
               <LabelizedField label={t('Status')}>
-                <StatusContainer>
-                  <StatusBox
-                    status={cashPlan.status}
-                    statusToColor={cashPlanStatusToColor}
-                  />
-                </StatusContainer>
+                <StatusBox
+                  status={cashPlan.status}
+                  statusToColor={cashPlanStatusToColor}
+                />
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>

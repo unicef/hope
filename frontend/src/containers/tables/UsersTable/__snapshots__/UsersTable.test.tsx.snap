@@ -3,10 +3,10 @@
 exports[`containers/tables/UsersTable should render loading 1`] = `
 <div>
   <div
-    class="sc-bZQynM hvLcDR"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
-      class="sc-bdVaJa iMXEqU"
+      class="sc-bwzfXH iIRzZu"
       data-cy="loading-container"
     >
       <div
@@ -36,7 +36,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
 exports[`containers/tables/UsersTable should render with data 1`] = `
 <div>
   <div
-    class="sc-bZQynM hvLcDR"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
       class="makeStyles-root-1"
@@ -80,7 +80,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -103,7 +103,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -127,7 +127,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE MuiTableSortLabel-active"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd MuiTableSortLabel-active"
                     role="button"
                     tabindex="0"
                   >
@@ -155,7 +155,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -178,7 +178,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -201,7 +201,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -266,7 +266,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                     class="sc-ifAKCX iPKgts"
                   >
                     <div
-                      class="sc-bxivhb jNtFAO"
+                      class="sc-EHOje eoikBB"
                       data-cy="status-container"
                     >
                       ACTIVE

@@ -1,7 +1,6 @@
 import { Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import {
   decodeIdString,
   grievanceTicketStatusToColor,
@@ -19,11 +18,6 @@ import { OverviewContainer } from '../../core/OverviewContainer';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -69,12 +63,10 @@ export function GrievancesDetails({
               {
                 label: t('STATUS'),
                 value: (
-                  <StatusContainer>
-                    <StatusBox
-                      status={statusChoices[ticket.status]}
-                      statusToColor={grievanceTicketStatusToColor}
-                    />
-                  </StatusContainer>
+                  <StatusBox
+                    status={statusChoices[ticket.status]}
+                    statusToColor={grievanceTicketStatusToColor}
+                  />
                 ),
                 size: 3,
               },
