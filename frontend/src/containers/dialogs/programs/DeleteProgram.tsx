@@ -18,24 +18,10 @@ import {
   useDeleteProgramMutation,
 } from '../../../__generated__/graphql';
 import { DialogActions } from '../DialogActions';
+import { DialogDescription } from '../DialogDescription';
+import { DialogFooter } from '../DialogFooter';
+import { DialogTitleWrapper } from '../DialogTitleWrapper';
 
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const DialogDescription = styled.div`
-  margin: ${({ theme }) => theme.spacing(5)}px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
 const RemoveButton = styled(Button)`
   && {
     color: ${({ theme }) => theme.palette.error.main};

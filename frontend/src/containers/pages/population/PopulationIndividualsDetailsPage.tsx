@@ -43,6 +43,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     variables: {
       id,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   const {

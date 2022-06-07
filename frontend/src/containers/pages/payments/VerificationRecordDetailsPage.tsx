@@ -23,6 +23,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   const permissions = usePermissions();
   const { data, loading, error } = usePaymentRecordVerificationQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,

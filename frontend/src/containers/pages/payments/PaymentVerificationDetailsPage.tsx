@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { TableWrapper } from '../../../components/core/TableWrapper';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -47,14 +48,6 @@ const BottomTitle = styled.div`
   padding: 70px;
 `;
 
-const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
-  padding-bottom: 0;
-`;
-
 export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
@@ -69,6 +62,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,
@@ -208,11 +202,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       ) : null}
       {cashPlan.verifications?.edges[0]?.node?.id &&
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-          <TableWrapper>
-            <UniversalActivityLogTablePaymentVerification
-              objectId={cashPlan.id}
-            />
-          </TableWrapper>
+          <UniversalActivityLogTablePaymentVerification
+            objectId={cashPlan.id}
+          />
         )}
     </>
   );

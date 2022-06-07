@@ -275,6 +275,7 @@ OTHER_APPS = [
     "explorer",
     "import_export",
     "import_export_celery",
+    "rest_framework"
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -445,7 +446,7 @@ SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
-ELASTICSEARCH_INDEX_PREFIX = ''
+ELASTICSEARCH_INDEX_PREFIX = ""
 
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
@@ -554,6 +555,16 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
 """,
         "",
         str,
+    ),
+    "USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH": (
+        False,
+        "Use elastic search for individuals search",
+        bool,
+    ),
+    "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH": (
+        False,
+        "Use elastic search for households search",
+        bool,
     ),
 }
 
@@ -785,4 +796,4 @@ IMPORT_EXPORT_CELERY_MODELS = {
     }
 }
 
-
+CONCURRENCY_ENABLED = False

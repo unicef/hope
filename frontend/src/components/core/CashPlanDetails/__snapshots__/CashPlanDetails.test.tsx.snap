@@ -9,7 +9,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
       class="MuiBox-root MuiBox-root-1"
     >
       <div
-        class="sc-bZQynM ghLfwz"
+        class="sc-gzVnrw AoKEu"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6"
@@ -35,10 +35,10 @@ exports[`components/core/CashPlanDetails should render 1`] = `
               </span>
               <div>
                 <div
-                  class="sc-gzVnrw bspsIV"
+                  class="sc-EHOje gFjtOh"
                 >
                   <div
-                    class="sc-EHOje eoikBB"
+                    class="sc-bZQynM kQLhqL"
                     data-cy="status-container"
                   >
                     DISTRIBUTION COMPLETED
