@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import {
   hasCreatorOrOwnerPermissions,
   PERMISSIONS,
@@ -17,12 +16,9 @@ import {
   useMeQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
+import { TableWrapper } from '../../core/TableWrapper';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
 
 interface GrievancesTableProps {
   businessArea: string;
