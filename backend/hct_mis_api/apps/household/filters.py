@@ -227,7 +227,7 @@ class IndividualFilter(FilterSet):
 
 def get_elasticsearch_query_for_individuals(value):
     match_fields = [
-        "phone_no",
+        "phone_no_text",
         "phone_no_alternative",
         "documents.number",
         "admin1",
@@ -238,6 +238,7 @@ def get_elasticsearch_query_for_individuals(value):
         "middle_name",
         "unicef_id",
         "household.unicef_id",
+        "phone_no_text"
     ]
     wildcard_fields = ["phone_no", "unicef_id", "household.unicef_id"]
     match_queries = [
