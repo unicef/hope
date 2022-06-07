@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { BusinessAreaSelect } from '../../containers/BusinessAreaSelect';
 import { UserProfileMenu } from '../../containers/UserProfileMenu';
 import { MiśTheme } from '../../theme';
-import { useMeQuery } from '../../__generated__/graphql';
+import { useCachedMe } from '../../hooks/useCachedMe';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   root: {
@@ -63,9 +63,7 @@ const StyledLink = styled.a`
 `;
 
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-first',
-  });
+  const { data: meData, loading: meLoading } = useCachedMe();
   const classes = useStyles({});
   if (meLoading) {
     return null;

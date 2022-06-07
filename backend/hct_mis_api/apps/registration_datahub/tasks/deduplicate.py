@@ -2,7 +2,8 @@ import logging
 from dataclasses import dataclass, fields
 from time import sleep
 
-from django.db.models import Q
+from django.db.models import CharField, F, Q, Value
+from django.db.models.functions import Concat
 
 from constance import config
 from django_countries.fields import Country
@@ -822,30 +823,53 @@ class DeduplicateTask:
             )
 
     @classmethod
-    def hard_deduplicate_documents(cls, documents, registration_data_import=None):
-        batch_document_strings = [f"{d.type}--{d.document_number}" for d in documents]
-        batch_document_strings = [d for d in batch_document_strings if batch_document_strings.count(d) > 1]
-        for document in documents:
-            document_string = f"{document.type}--{document.document_number}"
-            documents_queryset = Document.objects.filter(
-                Q(document_number=document.document_number)
-                & Q(type=document.type)
-                & ~Q(individual=document.individual)
-                & Q(Q(status=Document.STATUS_VALID) | Q(status=Document.STATUS_PENDING))
-            )
-            documents_count = documents_queryset.count()
-            if documents_count > 0:
-                create_grievance_ticket_with_details(
-                    main_individual=documents_queryset.first().individual,
-                    possible_duplicate=document.individual,  # backward compatibility
-                    business_area=document.individual.business_area,
-                    registration_data_import=registration_data_import,
-                    is_multiple_duplicates_version=True,
-                    possible_duplicates=[document.individual]
+    def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
+        documents_numbers = [x.document_number for x in new_documents]
+        new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in new_documents]
+        new_document_signatures_duplicated_in_batch = [
+            d for d in new_document_signatures if new_document_signatures.count(d) > 1
+        ]
+        all_matching_number_documents = (
+            Document.objects.select_related("individual", "individual__household", "individual__business_area")
+            .filter(document_number__in=documents_numbers, status=Document.STATUS_VALID)
+            .annotate(signature=Concat(F("type_id"), Value("--"), F("document_number"), output_field=CharField()))
+        )
+        all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
+        all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
+        already_processed_signatures = []
+        ticket_data_dict = {}
+        for new_document in new_documents:
+            new_document_signature = f"{new_document.type_id}--{new_document.document_number}"
+            if new_document_signature in all_matching_number_documents_signatures:
+                new_document.status = Document.STATUS_NEED_INVESTIGATION
+                ticket_data = ticket_data_dict.get(
+                    new_document_signature,
+                    {"original": all_matching_number_documents_dict[new_document_signature], "possible_duplicates": []},
                 )
-                document.status = Document.STATUS_NEED_INVESTIGATION
-            else:
-                document.status = Document.STATUS_VALID
-            if document_string in batch_document_strings:
-                document.status = Document.STATUS_NEED_INVESTIGATION
-            document.save()
+                ticket_data["possible_duplicates"].append(new_document)
+                ticket_data_dict[new_document_signature] = ticket_data
+                continue
+            if (
+                new_document_signature in new_document_signatures_duplicated_in_batch
+                and new_document_signature in already_processed_signatures
+            ):
+                new_document.status = Document.STATUS_NEED_INVESTIGATION
+                ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
+                continue
+            new_document.status = Document.STATUS_VALID
+            already_processed_signatures.append(new_document_signature)
+            if new_document_signature in new_document_signatures_duplicated_in_batch:
+                ticket_data_dict[new_document_signature] = {
+                    "original": all_matching_number_documents_dict[new_document_signature],
+                    "possible_duplicates": [],
+                }
+        Document.objects.bulk_update(new_documents, ("status", "updated_at"))
+        for ticket_data in ticket_data_dict.values():
+            create_grievance_ticket_with_details(
+                main_individual=ticket_data["original"].individual,
+                business_area=ticket_data["original"].individual.business_area,
+                possible_duplicate=ticket_data["possible_duplicates"][0].individual,
+                registration_data_import=registration_data_import,
+                is_multiple_duplicates_version=True,
+                possible_duplicates=[d.individual for d in ticket_data["possible_duplicates"]],
+            )

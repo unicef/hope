@@ -2,23 +2,15 @@ from django.db.models import (
     Case,
     Count,
     DecimalField,
-    FloatField,
     IntegerField,
     Q,
     Sum,
     Value,
     When,
 )
-from django.db.models.functions import Coalesce, Lower
+from django.db.models.functions import Coalesce
 
 import graphene
-from django_filters import (
-    CharFilter,
-    DateFilter,
-    FilterSet,
-    MultipleChoiceFilter,
-    OrderingFilter,
-)
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -31,10 +23,9 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
+
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    CustomOrderingFilter,
     chart_filters_decoder,
     chart_map_choices,
     chart_permission_decorator,
@@ -42,53 +33,9 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
+from hct_mis_api.apps.program.filters import ProgramFilter, CashPlanFilter
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
-
-
-class ProgramFilter(FilterSet):
-    business_area = CharFilter(field_name="business_area__slug", required=True)
-    search = CharFilter(method="search_filter")
-    status = MultipleChoiceFilter(field_name="status", choices=Program.STATUS_CHOICE)
-    sector = MultipleChoiceFilter(field_name="sector", choices=Program.SECTOR_CHOICE)
-    number_of_households = IntegerRangeFilter(field_name="total_hh_count")
-    budget = DecimalRangeFilter(field_name="budget")
-    start_date = DateFilter(field_name="start_date", lookup_expr="gte")
-    end_date = DateFilter(field_name="end_date", lookup_expr="lte")
-
-    class Meta:
-        fields = (
-            "business_area",
-            "search",
-            "status",
-            "sector",
-            "number_of_households",
-            "budget",
-            "start_date",
-            "end_date",
-        )
-        model = Program
-
-    order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
-    )
-
-    def filter_queryset(self, queryset):
-        queryset = queryset.annotate(
-            total_hh_count=Count(
-                "cash_plans__payment_records__household",
-                filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
-                distinct=True,
-            )
-        )
-        return super().filter_queryset(queryset)
-
-    def search_filter(self, qs, name, value):
-        values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(name__istartswith=value)
-        return qs.filter(q_obj)
 
 
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -118,62 +65,6 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_number_of_households(self, info, **kwargs):
         return self.total_number_of_households
-
-
-class CashPlanFilter(FilterSet):
-    search = CharFilter(method="search_filter")
-    delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE)
-    verification_status = MultipleChoiceFilter(
-        field_name="cash_plan_payment_verification_summary__status", choices=CashPlanPaymentVerification.STATUS_CHOICES
-    )
-    business_area = CharFilter(
-        field_name="business_area__slug",
-    )
-
-    class Meta:
-        fields = {
-            "program": ["exact"],
-            "assistance_through": ["exact", "startswith"],
-            "service_provider__full_name": ["exact", "startswith"],
-            "start_date": ["exact", "lte", "gte"],
-            "end_date": ["exact", "lte", "gte"],
-            "business_area": ["exact"],
-        }
-        model = CashPlan
-
-    order_by = OrderingFilter(
-        fields=(
-            "ca_id",
-            "status",
-            "total_number_of_hh",
-            "total_entitled_quantity",
-            ("cash_plan_payment_verification_summary__status", "verification_status"),
-            "total_persons_covered",
-            "total_delivered_quantity",
-            "total_undelivered_quantity",
-            "dispersion_date",
-            "assistance_measurement",
-            "assistance_through",
-            "delivery_type",
-            "start_date",
-            "end_date",
-            "program__name",
-            "id",
-            "updated_at",
-            "service_provider__full_name",
-        )
-    )
-
-    def filter_queryset(self, queryset):
-        queryset = queryset.annotate(total_number_of_hh=Count("payment_records"))
-        return super().filter_queryset(queryset)
-
-    def search_filter(self, qs, name, value):
-        values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(ca_id__istartswith=value)
-        return qs.filter(q_obj)
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -208,23 +99,6 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.payment_records.filter(
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
-
-
-class ChartProgramFilter(FilterSet):
-    business_area = CharFilter(field_name="business_area__slug", required=True)
-
-    class Meta:
-        fields = ("business_area",)
-        model = Program
-
-    def search_filter(self, qs, name, value):
-        values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(first_name__startswith=value)
-            q_obj |= Q(last_name__startswith=value)
-            q_obj |= Q(email__startswith=value)
-        return qs.filter(q_obj)
 
 
 class Query(graphene.ObjectType):

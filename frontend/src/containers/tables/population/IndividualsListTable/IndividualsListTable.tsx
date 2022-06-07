@@ -4,8 +4,7 @@ import styled from 'styled-components';
 import {
   IndividualNode,
   AllIndividualsQueryVariables,
-  useAllIndividualsQuery,
-  HouseholdChoiceDataQuery,
+  HouseholdChoiceDataQuery, useAllIndividualsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
@@ -44,7 +43,7 @@ export const IndividualsListTable = ({
         title={t('Individuals')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllIndividualsQuery}
+        query={useAllIndividualsForPopulationTableQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
         defaultOrderBy='unicef_id'

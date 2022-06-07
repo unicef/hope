@@ -445,13 +445,13 @@ SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
-ELASTICSEARCH_INDEX_PREFIX = ''
+ELASTICSEARCH_INDEX_PREFIX = ""
 
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
 # DJANGO CONSTANCE settings
 CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
-
+CONSTANCE_REDIS_CACHE_TIMEOUT = 1
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",
@@ -599,6 +599,7 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
+        traces_sample_rate=1.0,
         send_default_pii=True,
     )
     ignore_logger("graphql.execution.utils")
@@ -784,4 +785,4 @@ IMPORT_EXPORT_CELERY_MODELS = {
     }
 }
 
-
+CONCURRENCY_ENABLED = False
