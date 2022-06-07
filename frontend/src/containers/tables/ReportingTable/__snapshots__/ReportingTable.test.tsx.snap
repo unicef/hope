@@ -3,10 +3,10 @@
 exports[`containers/tables/ReportingTable should render loading 1`] = `
 <div>
   <div
-    class="sc-htoDjs lnaoXq"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
-      class="sc-bdVaJa iMXEqU"
+      class="sc-bwzfXH iIRzZu"
       data-cy="loading-container"
     >
       <div
@@ -36,7 +36,7 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
 exports[`containers/tables/ReportingTable should render with data 1`] = `
 <div>
   <div
-    class="sc-htoDjs lnaoXq"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
       class="makeStyles-root-1"
@@ -71,7 +71,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -94,7 +94,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -117,7 +117,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -140,7 +140,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -163,7 +163,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -186,7 +186,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -209,7 +209,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -236,10 +236,10 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 role="checkbox"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body sc-bZQynM eHqpdM MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-body sc-gzVnrw dAxWKT MuiTableCell-alignLeft"
                 >
                   <span
-                    class="sc-bxivhb ksDfcC"
+                    class="sc-ifAKCX kDXhrk"
                   >
                     Individuals
                   </span>
@@ -267,7 +267,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                     class="sc-EHOje gFjtOh"
                   >
                     <div
-                      class="sc-ifAKCX ilSJSk"
+                      class="sc-bZQynM eoRnNj"
                       data-cy="status-container"
                     >
                       Processing
@@ -294,7 +294,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body sc-gzVnrw iMSgfw MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-body sc-htoDjs dTNsBe MuiTableCell-alignLeft"
                 />
               </tr>
               <tr

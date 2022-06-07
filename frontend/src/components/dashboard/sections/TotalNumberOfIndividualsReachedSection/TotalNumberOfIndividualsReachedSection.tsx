@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../../../../containers/dialogs/Dialog';
 import { DialogActions } from '../../../../containers/dialogs/DialogActions';
+import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
+import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { formatNumber } from '../../../../utils/utils';
 import { AllChartsQuery } from '../../../../__generated__/graphql';
 import { IndividualsReachedByAgeAndGenderGroupsChart } from '../../charts/IndividualsReachedByAgeAndGenderGroupsChart';
@@ -16,16 +18,6 @@ import {
   IconContainer,
 } from '../../DashboardCard';
 
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const DialogContainer = styled.div`
-  width: 700px;
-`;
 const ChartWrapper = styled.div`
   height: 200px;
 `;

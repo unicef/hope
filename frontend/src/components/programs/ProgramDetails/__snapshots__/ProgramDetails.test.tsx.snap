@@ -6,7 +6,7 @@ exports[`components/ProgramDetails should render 1`] = `
     class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="sc-EHOje eUSYOR"
+      class="sc-bZQynM ghLfwz"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6"
@@ -32,10 +32,10 @@ exports[`components/ProgramDetails should render 1`] = `
             </span>
             <div>
               <div
-                class="sc-bZQynM hTcAyj"
+                class="sc-ifAKCX iPKgts"
               >
                 <div
-                  class="sc-ifAKCX ilSJSk"
+                  class="sc-EHOje eEdtvm"
                   data-cy="status-container"
                 >
                   FINISHED

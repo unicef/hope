@@ -195,14 +195,14 @@ exports[`containers/tables/targeting/TargetPopulation/ApprovedTargeting should r
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+                class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-ifAKCX hQSvGu"
+                    class="sc-bxivhb iRvpKE"
                     href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTozZjg1YWZjMC0zNTVhLTQ3ODAtYmVkZC0wMTE2ZTU0MmUyOGY="
                   >
                     HH-21-0000.1137
@@ -225,14 +225,14 @@ exports[`containers/tables/targeting/TargetPopulation/ApprovedTargeting should r
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+                class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-ifAKCX hQSvGu"
+                    class="sc-bxivhb iRvpKE"
                     href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTpjMGQxMzIyMS0xYTk5LTQ2NDItYjZmNi05OTJjZWEzODAzNTY="
                   >
                     HH-21-0000.1133

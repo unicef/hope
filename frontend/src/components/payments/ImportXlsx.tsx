@@ -10,6 +10,7 @@ import get from 'lodash/get';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { ImportErrors } from '../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -19,10 +20,6 @@ import {
   XlsxErrorNode,
 } from '../../__generated__/graphql';
 import { DropzoneField } from '../core/DropzoneField';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
