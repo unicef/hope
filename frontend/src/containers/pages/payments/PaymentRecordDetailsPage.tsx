@@ -33,6 +33,7 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const permissions = usePermissions();
   const businessArea = useBusinessArea();

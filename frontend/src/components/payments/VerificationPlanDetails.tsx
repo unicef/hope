@@ -15,6 +15,7 @@ import {
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
+import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 import { ActivateVerificationPlan } from './ActivateVerificationPlan';
 import { DeleteVerificationPlan } from './DeleteVerificationPlan';
@@ -45,15 +46,6 @@ const Container = styled.div`
 
 const StyledLink = styled.a`
   text-decoration: none;
-`;
-
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
 `;
 
 export const VerificationPlanDetails = ({
@@ -186,12 +178,10 @@ export const VerificationPlanDetails = ({
           <Grid container>
             <Grid item xs={3}>
               <LabelizedField label={t('STATUS')}>
-                <StatusContainer>
-                  <StatusBox
-                    status={verificationPlan.status}
-                    statusToColor={paymentVerificationStatusToColor}
-                  />
-                </StatusContainer>
+                <StatusBox
+                  status={verificationPlan.status}
+                  statusToColor={paymentVerificationStatusToColor}
+                />
               </LabelizedField>
             </Grid>
             {[

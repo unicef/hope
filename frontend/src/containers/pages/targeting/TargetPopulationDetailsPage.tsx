@@ -19,6 +19,7 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
   const permissions = usePermissions();
   const { data, loading, error } = useTargetPopulationQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const [isEdit, setEditState] = useState(false);
 

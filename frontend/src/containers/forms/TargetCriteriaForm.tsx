@@ -1,17 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
-import * as Yup from 'yup';
-import styled from 'styled-components';
 import {
   Box,
   Button,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
 } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Formik } from 'formik';
-import { DialogActions } from '../dialogs/DialogActions';
+import React, { useEffect, useRef, useState } from 'react';
+import styled from 'styled-components';
+import * as Yup from 'yup';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
 import {
   chooseFieldType,
   clearField,
@@ -19,14 +21,12 @@ import {
   formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
 } from '../../utils/targetingUtils';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
+import { DialogContainer } from '../dialogs/DialogContainer';
+import { DialogDescription } from '../dialogs/DialogDescription';
+import { DialogFooter } from '../dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -53,14 +53,6 @@ const AndDivider = styled.div`
   position: relative;
 `;
 
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
-`;
 const ButtonBox = styled.div`
   width: 300px;
 `;
@@ -68,17 +60,6 @@ const DialogError = styled.div`
   margin: 20px 0;
   font-size: 14px;
   color: ${({ theme }) => theme.palette.error.dark};
-`;
-
-const DialogContainer = styled.div`
-  position: absolute;
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
 `;
 
 const StyledBox = styled(Box)`
@@ -308,8 +289,8 @@ export function TargetCriteriaForm({
                         .push({ fieldName: '' })
                     }
                     color='primary'
+                    startIcon={<AddCircleOutline />}
                   >
-                    <AddIcon />
                     ADD HOUSEHOLD RULE
                   </Button>
                 </ButtonBox>
@@ -358,7 +339,7 @@ export function TargetCriteriaForm({
                     }
                     color='primary'
                   >
-                    <AddIcon />
+                    <AddCircleOutline />
                     ADD INDIVIDUAL RULE GROUP
                   </Button>
                 </ButtonBox>

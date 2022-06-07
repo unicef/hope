@@ -3,7 +3,6 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { FlagTooltip } from '../../../../components/core/FlagTooltip';
 import { StatusBox } from '../../../../components/core/StatusBox';
@@ -22,10 +21,6 @@ import {
   HouseholdNode,
 } from '../../../../__generated__/graphql';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
@@ -83,12 +78,10 @@ export function HouseHoldTableRow({
         <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={household.status}
-            statusToColor={householdStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={household.status}
+          statusToColor={householdStatusToColor}
+        />
       </TableCell>
       <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
