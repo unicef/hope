@@ -8,14 +8,6 @@ import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
 
-const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
-  padding-bottom: 0;
-`;
-
 const Label = styled.p`
   color: #b1b1b5;
 `;
@@ -79,9 +71,7 @@ export function TargetPopulationCore({
           <Label>{t('Add targeting criteria to see results.')}</Label>
         </PaperContainer>
       )}
-      <TableWrapper>
-        <UniversalActivityLogTable objectId={targetPopulation.id} />
-      </TableWrapper>
+      <UniversalActivityLogTable objectId={targetPopulation.id} />
     </>
   );
 }

@@ -1,5 +1,4 @@
 import TableCell from '@material-ui/core/TableCell';
-import styled from 'styled-components';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -13,11 +12,6 @@ import { UniversalMoment } from '../../core/UniversalMoment';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface GrievancesTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
@@ -63,12 +57,10 @@ export function GrievancesTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={statusChoices[ticket.status]}
-            statusToColor={grievanceTicketStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={statusChoices[ticket.status]}
+          statusToColor={grievanceTicketStatusToColor}
+        />
       </TableCell>
       <TableCell align='left'>{renderUserName(ticket.assignedTo)}</TableCell>
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>

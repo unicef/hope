@@ -1,11 +1,7 @@
-import React from 'react';
 import { Box, DialogTitle } from '@material-ui/core';
-import styled from 'styled-components';
+import React from 'react';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { RotateImg } from './RotateImg';
-
-export const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
 
 export const PhotoModalHeader = ({
   turnAngle,
