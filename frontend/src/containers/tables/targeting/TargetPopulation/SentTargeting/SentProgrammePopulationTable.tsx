@@ -1,5 +1,4 @@
 import React, { ReactElement } from 'react';
-import styled from 'styled-components';
 import { useFinalHouseholdsListByTargetingCriteriaQuery } from '../../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../../hooks/useBusinessArea';
 import { UniversalTable } from '../../../UniversalTable';
@@ -8,10 +7,7 @@ import { headCells as programmeHeadCells } from './ProgrammeHeadCells';
 import { headCells as targetPopulationHeadCells } from './TargetPopulationHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationTableRow';
 import { useTranslation } from 'react-i18next';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
+import { TableWrapper } from '../../../../../components/core/TableWrapper';
 
 interface TargetPopulationHouseholdProps {
   id?: string;

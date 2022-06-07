@@ -25,10 +25,6 @@ import {
   useReportQuery,
 } from '../../../__generated__/graphql';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 const IconContainer = styled.div`
   color: #d1d1d1;
   font-size: 90px;
@@ -92,12 +88,10 @@ export const ReportingDetailsPage = (): React.ReactElement => {
     {
       label: t('STATUS'),
       value: (
-        <StatusContainer>
-          <StatusBox
-            status={statusChoices[report.status]}
-            statusToColor={reportStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={statusChoices[report.status]}
+          statusToColor={reportStatusToColor}
+        />
       ),
       size: 3,
     },

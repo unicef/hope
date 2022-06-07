@@ -22,23 +22,9 @@ import {
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
+import { DialogDescription } from '../dialogs/DialogDescription';
+import { DialogFooter } from '../dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 
 const DateFields = styled.div`
   display: flex;

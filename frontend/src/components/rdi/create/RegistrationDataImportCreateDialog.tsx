@@ -14,20 +14,11 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../../../containers/dialogs/Dialog';
 import { DialogActions } from '../../../containers/dialogs/DialogActions';
+import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
 import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
 
 const ComboBox = styled(Select)`
   & {

@@ -1,14 +1,10 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { TableWrapper } from '../../../../../components/core/TableWrapper';
 import { useGoldenRecordByTargetingCriteriaQuery } from '../../../../../__generated__/graphql';
 import { UniversalTable } from '../../../UniversalTable';
 import { headCells } from './HeadCells';
 import { TargetPopulationHouseholdTableRow } from './TableRow';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
 
 interface TargetPopulationHouseholdProps {
   id?: string;
