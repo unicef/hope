@@ -66,6 +66,7 @@ export function DashboardYearPage({
         administrativeArea: filter.administrativeArea?.node?.id,
       }),
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   const [

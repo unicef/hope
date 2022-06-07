@@ -906,8 +906,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     birth_date = models.DateField(db_index=True)
     estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
-    phone_no = PhoneNumberField(blank=True)
-    phone_no_alternative = PhoneNumberField(blank=True)
+    phone_no = PhoneNumberField(blank=True, db_index=True)
+    phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
     relationship = models.CharField(
         max_length=255,
         blank=True,

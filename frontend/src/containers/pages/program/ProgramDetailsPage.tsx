@@ -55,6 +55,7 @@ export function ProgramDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const { data, loading, error } = useProgramQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choices,

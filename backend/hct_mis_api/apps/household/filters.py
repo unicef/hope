@@ -1,5 +1,7 @@
+import json
 import re
 
+from constance import config
 from django.db.models import Q
 from django.db.models.functions import Lower
 
@@ -15,10 +17,12 @@ from hct_mis_api.apps.account.admin import BusinessAreaFilter
 from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
     DateRangeFilter,
-    IntegerRangeFilter, BusinessAreaSlugFilter,
+    IntegerRangeFilter,
+    BusinessAreaSlugFilter,
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.documents import IndividualDocument, HouseholdDocument
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     INDIVIDUAL_FLAGS_CHOICES,
@@ -81,7 +85,20 @@ class HouseholdFilter(FilterSet):
         )
     )
 
+    def _search_es(self, qs, value):
+        query_dict = get_elasticsearch_query_for_households(value)
+        es_response = (
+            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
+        )
+        es_ids = [x.meta["id"] for x in es_response]
+        return qs.filter(Q(id__in=es_ids)).distinct()
+
     def search_filter(self, qs, name, value):
+        if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
+            return self._search_es(qs, value)
+        return self._search_db(qs, value)
+
+    def _search_db(self, qs, value):
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:
@@ -158,7 +175,20 @@ class IndividualFilter(FilterSet):
 
         return qs.filter(q_obj)
 
+    def _search_es(self, qs, value):
+        query_dict = get_elasticsearch_query_for_individuals(value)
+        es_response = (
+            IndividualDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
+        )
+        es_ids = [x.meta["id"] for x in es_response]
+        return qs.filter(Q(id__in=es_ids)).distinct()
+
     def search_filter(self, qs, name, value):
+        if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
+            return self._search_es(qs, value)
+        return self._search_db(qs, value)
+
+    def _search_db(self, qs, value):
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
         else:
@@ -193,3 +223,203 @@ class IndividualFilter(FilterSet):
 
     def filter_excluded_id(self, qs, name, value):
         return qs.exclude(id=decode_id_string(value))
+
+
+def get_elasticsearch_query_for_individuals(value):
+    match_fields = [
+        "phone_no",
+        "phone_no_alternative",
+        "documents.number",
+        "admin1",
+        "admin2",
+    ]
+    prefix_fields = [
+        # "full_name",
+        "middle_name",
+        "unicef_id",
+        "household.unicef_id",
+    ]
+    wildcard_fields = ["phone_no", "unicef_id", "household.unicef_id"]
+    match_queries = [
+        {
+            "match": {
+                x: {
+                    "query": value,
+                }
+            }
+        }
+        for x in match_fields
+    ]
+    prefix_queries = [
+        {
+            "match_phrase_prefix": {
+                x: {
+                    "query": value,
+                }
+            }
+        }
+        for x in prefix_fields
+    ]
+    wildcard_queries = [
+        {
+            "wildcard": {
+                x: {
+                    "value": f"*{value}",
+                }
+            }
+        }
+        for x in wildcard_fields
+    ]
+    all_queries = []
+    all_queries.extend(wildcard_queries)
+    all_queries.extend(prefix_queries)
+    all_queries.extend(match_queries)
+
+    values = value.split(" ")
+    if len(values) == 2:
+        all_queries.extend(
+            [
+                {
+                    "match_phrase_prefix": {
+                        "given_name": {
+                            "query": values[0],
+                        }
+                    }
+                },
+                {
+                    "match_phrase_prefix": {
+                        "family_name": {
+                            "query": values[1],
+                        }
+                    }
+                },
+            ]
+        )
+    else:
+        all_queries.extend(
+            [
+                {
+                    "match_phrase_prefix": {
+                        "given_name": {
+                            "query": value,
+                        }
+                    }
+                },
+                {
+                    "match_phrase_prefix": {
+                        "family_name": {
+                            "query": value,
+                        }
+                    }
+                },
+            ]
+        )
+
+
+    query = {
+        "size": "100",
+        "_source": False,
+        "query": {
+            "bool": {
+                "minimum_should_match": 1,
+                "should": all_queries,
+            }
+        },
+    }
+    return query
+
+
+def get_elasticsearch_query_for_households(value):
+    match_fields = [
+        "admin1",
+        "admin2",
+    ]
+    prefix_fields = ["head_of_household.middle_name", "unicef_id", "residence_status"]
+    wildcard_fields = ["unicef_id"]
+    match_queries = [
+        {
+            "match": {
+                x: {
+                    "query": value,
+                }
+            }
+        }
+        for x in match_fields
+    ]
+    prefix_queries = [
+        {
+            "match_phrase_prefix": {
+                x: {
+                    "query": value,
+                }
+            }
+        }
+        for x in prefix_fields
+    ]
+    wildcard_queries = [
+        {
+            "wildcard": {
+                x: {
+                    "value": f"*{value}",
+                }
+            }
+        }
+        for x in wildcard_fields
+    ]
+    all_queries = []
+    all_queries.extend(wildcard_queries)
+    all_queries.extend(prefix_queries)
+    all_queries.extend(match_queries)
+
+    values = value.split(" ")
+    if len(values) == 2:
+        all_queries.extend(
+            [
+                {
+                    "match_phrase_prefix": {
+                        "head_of_household.given_name": {
+                            "query": values[0],
+                        }
+                    }
+                },
+                {
+                    "match_phrase_prefix": {
+                        "head_of_household.family_name": {
+                            "query": values[1],
+                        }
+                    }
+                },
+            ]
+        )
+    else:
+        all_queries.extend(
+            [
+                {
+                    "match_phrase_prefix": {
+                        "head_of_household.given_name": {
+                            "query": value,
+                        }
+                    }
+                },
+                {
+                    "match_phrase_prefix": {
+                        "head_of_household.family_name": {
+                            "query": value,
+                        }
+                    }
+                },
+            ]
+        )
+
+    query = {
+        "size": "100",
+        "_source": False,
+        "query": {
+            "bool": {
+                "minimum_should_match": 1,
+                "should": all_queries,
+            }
+        },
+    }
+    print(json.dumps(query))
+    return query

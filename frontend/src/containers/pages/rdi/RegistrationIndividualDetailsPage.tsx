@@ -42,6 +42,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
     variables: {
       id,
     },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,
