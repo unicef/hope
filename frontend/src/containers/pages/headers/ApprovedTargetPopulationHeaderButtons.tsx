@@ -9,6 +9,7 @@ import {
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useTranslation } from 'react-i18next';
 
 const IconContainer = styled.span`
   button {
@@ -38,6 +39,7 @@ export function ApprovedTargetPopulationHeaderButtons({
   canDuplicate,
   canUnlock,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+  const { t } = useTranslation();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
   const { showMessage } = useSnackbar();
@@ -75,8 +77,8 @@ export function ApprovedTargetPopulationHeaderButtons({
           <Tooltip
             title={
               targetPopulation.program.status !== 'ACTIVE'
-                ? 'Assigned programme is not ACTIVE'
-                : 'Send to cash assist'
+                ? t('Assigned programme is not ACTIVE')
+                : t('Send to Cash Assist')
             }
           >
             <span>
@@ -87,7 +89,7 @@ export function ApprovedTargetPopulationHeaderButtons({
                 onClick={() => setOpenFinalize(true)}
                 data-cy='button-target-population-send-to-cash-assist'
               >
-                Send to cash assist
+                {t('Send to Cash Assist')}
               </Button>
             </span>
           </Tooltip>

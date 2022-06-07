@@ -13,9 +13,11 @@ import {
 } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { DialogContainer } from '../../containers/dialogs/DialogContainer';
+import { DialogFooter } from '../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import {
@@ -23,21 +25,6 @@ import {
   useDashboardReportChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const DialogContainer = styled.div`
-  width: 700px;
-`;
 
 export const ExportModal = ({ filter, year }): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);

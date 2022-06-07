@@ -3,10 +3,10 @@
 exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable should render loading 1`] = `
 <div>
   <div
-    class="sc-gzVnrw dRZkta"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
-      class="sc-bdVaJa iMXEqU"
+      class="sc-bwzfXH iIRzZu"
       data-cy="loading-container"
     >
       <div
@@ -36,7 +36,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
 exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable should render with data 1`] = `
 <div>
   <div
-    class="sc-gzVnrw dRZkta"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
       class="makeStyles-root-1"
@@ -80,7 +80,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -103,7 +103,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -126,7 +126,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -149,7 +149,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -172,7 +172,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -195,7 +195,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -218,7 +218,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -241,14 +241,14 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+                class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-EHOje fJINSq"
+                    class="sc-gzVnrw hnJLim"
                     href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6OTlmZGJhYmQtMzc4Ni00MjQ0LWEwNGQtMjIyYTI5MGZmNzRh"
                   >
                     frfr
@@ -258,10 +258,10 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <div
-                    class="sc-bZQynM hTcAyj"
+                    class="sc-EHOje gFjtOh"
                   >
                     <div
-                      class="sc-ifAKCX jCMpis"
+                      class="sc-bZQynM cnJqP"
                       data-cy="status-container"
                     >
                       Locked
