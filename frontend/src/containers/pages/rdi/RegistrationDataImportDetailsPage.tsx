@@ -67,6 +67,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const { data, loading, error, stopPolling } = useRegistrationDataImportQuery({
     variables: { id },
     pollInterval: 30000,
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,
