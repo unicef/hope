@@ -35,6 +35,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const permissions = usePermissions();
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: caData,
