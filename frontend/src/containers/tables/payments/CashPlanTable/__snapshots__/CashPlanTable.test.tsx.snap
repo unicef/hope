@@ -264,7 +264,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-EHOje fJINSq"
+                  class="sc-bZQynM iXasVI"
                   href="/afghanistan/cashplans/Q2FzaFBsYW5Ob2RlOmNiNzBjYjdmLWY0N2EtNDI5Yy04Y2FjLTk0YzU0MDRiOTFkZA=="
                 >
                   <div
@@ -278,10 +278,10 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-bZQynM hTcAyj"
+                  class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-ifAKCX PznGL"
+                    class="sc-EHOje eoikBB"
                     data-cy="status-container"
                   >
                     TRANSACTION COMPLETED

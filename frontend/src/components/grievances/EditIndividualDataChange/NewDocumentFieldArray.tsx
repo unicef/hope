@@ -3,13 +3,8 @@ import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 import { DocumentField } from '../DocumentField';
-
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
-`;
 
 export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
@@ -57,8 +52,8 @@ export function NewDocumentFieldArray({
                       number: '',
                     });
                   }}
+                  startIcon={<AddCircleOutline />}
                 >
-                  <AddIcon />
                   {t('Add Document')}
                 </Button>
               </Grid>

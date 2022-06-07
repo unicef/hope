@@ -1,7 +1,6 @@
-import { Box, Paper, Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
@@ -10,21 +9,10 @@ import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { Title } from '../core/Title';
-
-const StyledBox = styled(Paper)`
-  border-radius: 3px;
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
-
-const BlueBold = styled.div`
-  color: ${({ theme }) => theme.hctPalette.navyBlue};
-  font-weight: 500;
-  cursor: pointer;
-`;
+import {
+  ApproveBox,
+  BlueBold,
+} from './GrievancesApproveSection/ApproveSectionStyles';
 
 export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const { t } = useTranslation();
@@ -70,7 +58,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
     : [];
 
   return householdTickets.length ? (
-    <StyledBox>
+    <ApproveBox>
       <Title>
         <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
       </Title>
@@ -105,6 +93,6 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
           </BlueBold>
         ) : null}
       </Box>
-    </StyledBox>
+    </ApproveBox>
   ) : null;
 }

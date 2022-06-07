@@ -11,10 +11,6 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { formatNumber, reportStatusToColor } from '../../../utils/utils';
 import { ReportNode } from '../../../__generated__/graphql';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 const UnderlinedTableCell = styled(TableCell)`
   text-decoration: underline;
 `;
@@ -54,12 +50,10 @@ export const ReportingTableRow = ({
         <UniversalMoment>{report.dateTo}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={statusChoices[report.status]}
-            statusToColor={reportStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={statusChoices[report.status]}
+          statusToColor={reportStatusToColor}
+        />
       </TableCell>
       <TableCell align='right'>
         {formatNumber(report.numberOfRecords)}
