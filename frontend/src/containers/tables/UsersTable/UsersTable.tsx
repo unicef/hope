@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { TableWrapper } from '../../../components/core/TableWrapper';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   AllUsersQueryVariables,
@@ -10,10 +10,6 @@ import {
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './UsersTableHeadCells';
 import { UsersTableRow } from './UsersTableRow';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
 
 interface UsersTableProps {
   filter;

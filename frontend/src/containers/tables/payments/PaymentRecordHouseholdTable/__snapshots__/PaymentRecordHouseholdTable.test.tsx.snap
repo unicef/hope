@@ -241,7 +241,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-EHOje fJINSq"
+                  class="sc-bZQynM iXasVI"
                   href="/afghanistan/payment-records/UGF5bWVudFJlY29yZE5vZGU6NWEyZmE4NWYtNTM4YS00M2VjLWEwZTItMzM4ZTBmZDNlODQ1"
                 >
                   123-21-PR-00006
@@ -251,10 +251,10 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-bZQynM hTcAyj"
+                  class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-ifAKCX PznGL"
+                    class="sc-EHOje eoikBB"
                     data-cy="status-container"
                   >
                     DISTRIBUTION SUCCESSFUL

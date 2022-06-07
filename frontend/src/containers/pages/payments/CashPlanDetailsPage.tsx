@@ -9,6 +9,7 @@ import { CashPlanDetails } from '../../../components/core/CashPlanDetails/CashPl
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { TableWrapper } from '../../../components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -28,19 +29,13 @@ const Container = styled.div`
   }
 `;
 
-const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
-`;
-
 export function CashPlanDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: caData,
