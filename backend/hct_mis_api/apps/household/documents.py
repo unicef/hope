@@ -91,7 +91,7 @@ class IndividualDocument(Document):
     def prepare_admin1(self, instance):
         household = instance.household
         if household:
-            if household.admin2:
+            if household.admin1:
                 return household.admin1.title
 
     def prepare_admin2(self, instance):
@@ -148,7 +148,7 @@ class HouseholdDocument(Document):
 
     def prepare_admin1(self, household):
         if household:
-            if household.admin2:
+            if household.admin1:
                 return household.admin1.title
 
     def prepare_admin2(self, household):
