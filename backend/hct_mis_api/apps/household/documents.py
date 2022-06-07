@@ -85,7 +85,7 @@ class IndividualDocument(Document):
     def prepare_phone_no_text(self, instance):
         return str(instance.phone_no).replace(" ", "")
 
-    def prepare_phone_no_text(self, instance):
+    def prepare_phone_no_alternative_text(self, instance):
         return str(instance.phone_no).replace(" ", "")
 
     def prepare_admin1(self, instance):
