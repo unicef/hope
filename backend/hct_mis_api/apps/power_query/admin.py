@@ -161,6 +161,10 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
                         "query": obj.query,
                     }
                     output = formatter.render(report_context)
+                    if formatter.content_type == 'xls':
+                        response = HttpResponse(output, content_type=formatter.content_type)
+                        response['Content-Disposition'] = f'attachment; filename=Dataset Report.xls'
+                        return response
                     return HttpResponse(output)
             else:
                 context["extra_buttons"] = ''
@@ -218,7 +222,7 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
                     }
                     if obj.content_type == 'xls':
                         output = obj.render(ctx)
-                        response = HttpResponse(output, content_type="application/vnd.ms-excel")
+                        response = HttpResponse(output, content_type=obj.content_type)
                         response['Content-Disposition'] = 'attachment; filename=Report.xls'
                         return response
                     else:    
