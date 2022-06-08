@@ -163,6 +163,7 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
                     output = formatter.render(report_context)
                     return HttpResponse(output)
             else:
+                context["extra_buttons"] = ''
                 form = ExportForm()
             context["form"] = form
             return render(request, "admin/power_query/dataset/export.html", context)
