@@ -283,7 +283,7 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
     )
 
     try:
-        with cache.lock(f"automate_rdi_creation_task-{registration_id}", timeout=85400) as lock:
+        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=85400) as lock:
             try:
                 service = FlexRegistrationService()
 
