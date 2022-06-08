@@ -1,13 +1,16 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceComplaintTicketFactory,
     GrievanceTicketFactory,
@@ -60,13 +63,24 @@ class TestAlreadyExistingFilterTickets(APITestCase):
       }
     }
     """
+
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+
         area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=cls.business_area)
-        cls.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type)
+        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
+            name="Admin type one",
+            country=country,
+            area_level=2,
+        )
+        AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+
         cls.household, cls.individuals = create_household(
             {"size": 1, "business_area": cls.business_area},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},

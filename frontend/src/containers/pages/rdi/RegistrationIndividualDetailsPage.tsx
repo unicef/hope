@@ -7,18 +7,18 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { ImportedIndividualPhotoModal } from '../../../components/population/ImportedIndividualPhotoModal';
+import { RegistrationIndividualBioData } from '../../../components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
+import { RegistrationIndividualVulnerabilities } from '../../../components/rdi/details/individual/RegistrationIndividualVulnerabilities/RegistrationIndividualVulnerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
+import { isPermissionDeniedError } from '../../../utils/utils';
 import {
   ImportedIndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
   useHouseholdChoiceDataQuery,
   useImportedIndividualQuery,
 } from '../../../__generated__/graphql';
-import { RegistrationIndividualBioData } from '../../../components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
-import { RegistrationIndividualVulnerabilities } from '../../../components/rdi/details/individual/RegistrationIndividualVulnerabilities/RegistrationIndividualVulnerabilities';
 
 const Container = styled.div`
   padding: 20px;
@@ -42,6 +42,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
     variables: {
       id,
     },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,
@@ -74,9 +75,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
 
   if (importedIndividual?.household?.id) {
     breadCrumbsItems.push({
-      title: `${t('HOUSEHOLD ID')}: ${decodeIdString(
-        importedIndividual?.household?.id,
-      )}`,
+      title: `${t('HOUSEHOLD ID')}: ${importedIndividual?.household.importId}`,
       to: `/${businessArea}/registration-data-import/household/${importedIndividual?.household?.id}`,
     });
   }
@@ -84,7 +83,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`${t('Individual ID')}: ${decodeIdString(id)}`}
+        title={`${t('Individual ID')}: ${importedIndividual.importId}`}
         breadCrumbs={breadCrumbsItems}
       >
         {importedIndividual.photo ? (

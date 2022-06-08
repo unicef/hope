@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import localForage from 'localforage';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
@@ -548,8 +549,11 @@ export const formatAge = (age): string | number => {
 };
 
 export const renderIndividualName = (individual): string => {
-  if (individual?.givenName && individual?.familyName) {
-    return `${individual.givenName} ${individual.familyName}`;
-  }
   return individual?.fullName;
 };
+
+export async function clearCache(apolloClient = null): Promise<void> {
+  if (apolloClient) apolloClient.resetStore();
+  localStorage.clear();
+  await localForage.clear();
+}

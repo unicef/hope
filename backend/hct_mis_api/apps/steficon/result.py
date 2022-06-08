@@ -3,10 +3,10 @@ class Result:
         self.value = 0
 
     def __repr__(self):
-        return "<steficon.result.Result object at %s>" % id(self)
+        return "<steficon.result.Result object at {}>".format(id(self))
 
     def __str__(self):
-        return "Result: %s" % self.value
+        return "Result: {}".format(self.value)
 
 
 class Score(Result):
@@ -15,7 +15,7 @@ class Score(Result):
         self.extra = {}
 
     def __repr__(self):
-        return "<steficon.result.Score object at %s>" % id(self)
+        return "<steficon.result.Score object at {}>".format(id(self))
 
     def __str__(self):
-        return "Score: %s" % self.value
+        return "Score: {}".format(self.value)

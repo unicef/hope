@@ -78,7 +78,7 @@ try:
                             with atomic():
                                 HouseholdSelection.objects.bulk_update(elements, ["vulnerability_score"])
                                 transaction.set_rollback(True)
-                            self.message_user(request, "%s scores calculated" % len(elements))
+                            self.message_user(request, "{} scores calculated".format(len(elements)))
                         else:
                             self.message_user(request, "No records found", messages.WARNING)
                     except Exception as e:

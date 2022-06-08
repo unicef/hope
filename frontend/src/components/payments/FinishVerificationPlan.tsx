@@ -8,9 +8,11 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { DialogContainer } from '../../containers/dialogs/DialogContainer';
+import { DialogFooter } from '../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { getPercentage } from '../../utils/utils';
@@ -20,20 +22,6 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../core/LoadingComponent';
 
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const DialogContainer = styled.div`
-  width: 700px;
-`;
 export interface FinishVerificationPlanProps {
   cashPlanVerificationId: string;
   cashPlanId: string;
@@ -86,12 +74,10 @@ export function FinishVerificationPlan({
 
   const grievanceTickets = (): number => {
     if (verificationPlan?.sampleSize) {
-      const notReceivedTicketsCount = verificationPlan?.notReceivedCount
-        ? 1
-        : 0;
-      const receivedWithProblemsTicketsCount = verificationPlan?.receivedWithProblemsCount
-        ? 1
-        : 0;
+      const notReceivedTicketsCount = verificationPlan?.notReceivedCount;
+      const receivedWithProblemsTicketsCount =
+        verificationPlan?.receivedWithProblemsCount;
+
       return notReceivedTicketsCount + receivedWithProblemsTicketsCount;
     }
     return null;

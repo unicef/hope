@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import React from 'react';
@@ -9,11 +8,6 @@ import { StatusBox } from '../../../../components/core/StatusBox';
 import { registrationDataImportStatusToColor } from '../../../../utils/utils';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../../components/core/BlackLink';
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 interface PaymentRecordTableRowProps {
   registrationDataImport: RegistrationDataImportNode;
@@ -26,12 +20,18 @@ export function RegistrationDataImportTableRow({
 }: PaymentRecordTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-  const name = registrationDataImport.importedBy.firstName
-    ? `${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`
-    : registrationDataImport.importedBy.email;
   const importDetailsPath = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;
   const handleClick = (): void => {
     history.push(importDetailsPath);
+  };
+  const renderImportedBy = (): string => {
+    if (registrationDataImport?.importedBy) {
+      if (registrationDataImport.importedBy.firstName) {
+        return `${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`;
+      }
+      return registrationDataImport.importedBy.email;
+    }
+    return '-';
   };
   return (
     <ClickableTableRow
@@ -50,12 +50,10 @@ export function RegistrationDataImportTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <StatusContainer>
-          <StatusBox
-            status={registrationDataImport.status}
-            statusToColor={registrationDataImportStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={registrationDataImport.status}
+          statusToColor={registrationDataImportStatusToColor}
+        />
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment withTime>
@@ -68,7 +66,7 @@ export function RegistrationDataImportTableRow({
       <TableCell align='right'>
         {registrationDataImport.numberOfHouseholds}
       </TableCell>
-      <TableCell align='left'>{name}</TableCell>
+      <TableCell align='left'>{renderImportedBy()}</TableCell>
       <TableCell align='left'>{registrationDataImport.dataSource}</TableCell>
     </ClickableTableRow>
   );

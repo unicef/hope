@@ -1,10 +1,12 @@
 import json
 from datetime import date, datetime, timedelta
 
-from django.forms import DateField, DateTimeField, DecimalField, Field, IntegerField
+from django.forms import DateField, DateTimeField, DecimalField, Field, IntegerField, CharField
 
 from dateutil.parser import parse
 from django_filters import Filter
+
+from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
 
 
 def _clean_data_for_range_field(value, field):
@@ -168,3 +170,11 @@ class IntegerFilter(Filter):
     """Custom Integer filter to parse Decimal values."""
 
     field_class = IntegerField
+
+
+class BusinessAreaSlugFilter(Filter):
+    field_class = CharField
+
+    def filter(self, qs, business_area_slug):
+        business_area_id =cached_business_areas_slug_id_dict()[business_area_slug]
+        return qs.filter(business_area_id=business_area_id)

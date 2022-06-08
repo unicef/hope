@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { decodeIdString } from '../../../../utils/utils';
 import {
@@ -11,10 +11,6 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
 
 interface TargetPopulationProps {
   filter;

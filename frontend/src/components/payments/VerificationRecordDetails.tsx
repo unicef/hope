@@ -24,17 +24,6 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
 `;
 
-const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
-  padding-bottom: 0;
-`;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 interface VerificationRecordDetailsProps {
   paymentVerification: PaymentVerificationNode;
   canViewActivityLog: boolean;
@@ -61,12 +50,10 @@ export function VerificationRecordDetails({
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField label={t('STATUS')}>
-              <StatusContainer>
-                <StatusBox
-                  status={paymentVerification.paymentRecord.status}
-                  statusToColor={paymentRecordStatusToColor}
-                />
-              </StatusContainer>
+              <StatusBox
+                status={paymentVerification.paymentRecord.status}
+                statusToColor={paymentRecordStatusToColor}
+              />
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
@@ -99,12 +86,10 @@ export function VerificationRecordDetails({
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField label={t('STATUS')}>
-              <StatusContainer>
-                <StatusBox
-                  status={paymentVerification.status}
-                  statusToColor={verificationRecordsStatusToColor}
-                />
-              </StatusContainer>
+              <StatusBox
+                status={paymentVerification.status}
+                statusToColor={verificationRecordsStatusToColor}
+              />
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
@@ -233,9 +218,7 @@ export function VerificationRecordDetails({
         </Grid>
       </Overview>
       {canViewActivityLog && (
-        <TableWrapper>
-          <UniversalActivityLogTable objectId={paymentVerification.id} />
-        </TableWrapper>
+        <UniversalActivityLogTable objectId={paymentVerification.id} />
       )}
     </>
   );

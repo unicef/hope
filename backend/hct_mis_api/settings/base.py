@@ -4,14 +4,9 @@ import sys
 from pathlib import Path
 from uuid import uuid4
 
-####
-# Change per project
-####
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from graphql import GraphQLError
 
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
@@ -280,6 +275,7 @@ OTHER_APPS = [
     "explorer",
     "import_export",
     "import_export_celery",
+    "rest_framework"
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -450,12 +446,13 @@ SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
+ELASTICSEARCH_INDEX_PREFIX = ""
 
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
 # DJANGO CONSTANCE settings
 CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
-
+CONSTANCE_REDIS_CACHE_TIMEOUT = 1
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",
@@ -559,6 +556,16 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         "",
         str,
     ),
+    "USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH": (
+        False,
+        "Use elastic search for individuals search",
+        bool,
+    ),
+    "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH": (
+        False,
+        "Use elastic search for households search",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
@@ -590,7 +597,7 @@ SENTRY_URL = env("SENTRY_URL")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.logging import LoggingIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
 
     from hct_mis_api import get_full_version
 
@@ -601,16 +608,12 @@ if SENTRY_DSN:
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[
-            DjangoIntegration(transaction_style="url"),
-            sentry_logging,
-            CeleryIntegration()
-            # RedisIntegration(),
-        ],
+        integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
+        traces_sample_rate=1.0,
         send_default_pii=True,
-        ignore_errors=[ValidationError, GraphQLError],
     )
+    ignore_logger("graphql.execution.utils")
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
@@ -792,3 +795,5 @@ IMPORT_EXPORT_CELERY_MODELS = {
         "resource": resource,  # Optional
     }
 }
+
+CONCURRENCY_ENABLED = False

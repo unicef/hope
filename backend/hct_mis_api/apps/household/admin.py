@@ -519,8 +519,8 @@ class XlsxUpdateFileAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     def xlsx_update(self, request):
         if request.method == "GET":
             form = UpdateByXlsxStage1Form()
-            form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
-            form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
+            # form.fields["registration_data_import"].widget = AutocompleteWidget(RegistrationDataImport, self.admin_site)
+            # form.fields["business_area"].widget = AutocompleteWidget(BusinessArea, self.admin_site)
             context = self.get_common_context(request, title="Update Individual by xlsx", form=form)
         elif request.POST.get("stage") == "2":
             form = UpdateByXlsxStage1Form(request.POST, request.FILES)

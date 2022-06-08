@@ -1,19 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
+  AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   HouseholdNode,
-  AllHouseholdsQueryVariables,
-  useAllHouseholdsQuery,
+  useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseHoldTableRow } from './HouseholdTableRow';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
 
 interface HouseholdTableProps {
   businessArea: string;
@@ -46,7 +42,7 @@ export const HouseholdTable = ({
         title={t('Households')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllHouseholdsQuery}
+        query={useAllHouseholdsForPopulationTableQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
         defaultOrderBy='unicef_id'

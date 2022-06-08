@@ -1,24 +1,16 @@
 import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { CashPlanQuery } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
 import { paymentVerificationStatusToColor } from '../../utils/utils';
 import { StatusBox } from '../core/StatusBox';
 import { UniversalMoment } from '../core/UniversalMoment';
+import { Title } from '../core/Title';
 
-const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
 interface VerificationPlansSummaryProps {
   cashPlan: CashPlanQuery['cashPlan'];
 }
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
 export function VerificationPlansSummary({
   cashPlan,
@@ -44,12 +36,10 @@ export function VerificationPlansSummary({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Status')}>
-                <StatusContainer>
-                  <StatusBox
-                    status={status}
-                    statusToColor={paymentVerificationStatusToColor}
-                  />
-                </StatusContainer>
+                <StatusBox
+                  status={status}
+                  statusToColor={paymentVerificationStatusToColor}
+                />
               </LabelizedField>
             </Box>
           </Grid>

@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 import graphene
 from constance import config
-from django_filters import CharFilter, FilterSet
+from django.db import models
 from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
@@ -20,12 +20,9 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     convert_choices,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.models import (
-    AdminArea,
-    AdminAreaLevel,
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
@@ -36,40 +33,9 @@ from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
 logger = logging.getLogger(__name__)
 
 
-class AdminAreaFilter(FilterSet):
-    business_area = CharFilter(
-        field_name="admin_area_level__country__business_area__slug",
-    )
-    level = IntegerFilter(
-        field_name="level",
-    )
-
-    class Meta:
-        model = AdminArea
-        fields = {
-            "title": ["exact", "istartswith"],
-        }
-
-
 class ChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
-
-
-class AdminAreaNode(DjangoObjectType):
-    class Meta:
-        model = AdminArea
-        exclude_fields = ["geom", "point"]
-        filter_fields = ["title"]
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class AdminAreaTypeNode(DjangoObjectType):
-    class Meta:
-        model = AdminAreaLevel
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 class BusinessAreaNode(DjangoObjectType):
@@ -176,12 +142,16 @@ class FieldAttributeNode(graphene.ObjectType):
     is_flex_field = graphene.Boolean()
 
     def resolve_choices(parent, info):
+        choices = _custom_dict_or_attr_resolver("choices", None, parent, info)
+
+        if callable(choices) and not isinstance(choices, models.Manager):
+            choices = choices()
         if isinstance(
-            _custom_dict_or_attr_resolver("choices", None, parent, info),
+            choices,
             Iterable,
         ):
-            return sorted(parent["choices"], key=lambda elem: elem["label"]["English(EN)"])
-        return _custom_dict_or_attr_resolver("choices", None, parent, info).order_by("name").all()
+            return sorted(choices, key=lambda elem: elem["label"]["English(EN)"])
+        return choices.order_by("name").all()
 
     def resolve_is_flex_field(self, info):
         if isinstance(self, FlexibleAttribute):
@@ -275,13 +245,11 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
 
 
 class Query(graphene.ObjectType):
-    admin_area = relay.Node.Field(AdminAreaNode)
     business_area = graphene.Field(
         BusinessAreaNode,
         business_area_slug=graphene.String(required=True, description="The business area slug"),
         description="Single business area",
     )
-    all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
     all_fields_attributes = graphene.List(
         FieldAttributeNode,
@@ -314,7 +282,7 @@ class Query(graphene.ObjectType):
         return BusinessArea.objects.filter(is_split=False)
 
     def resolve_cash_assist_url_prefix(parent, info):
-        return config.CASH_ASSIST_URL_PREFIX
+        return "https://cashassist.crm4.dynamics.com/main.aspx?appid=db085f33-2410-eb11-a813-000d3abb5f2c"
 
     def resolve_all_fields_attributes(parent, info, flex_field=None, business_area_slug=None):
         return sort_by_attr(get_fields_attr_generators(flex_field, business_area_slug), "label.English(EN)")
