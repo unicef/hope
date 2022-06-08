@@ -30,9 +30,10 @@ const ButtonContainer = styled.span`
 export function PaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery();
+  const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const permissions = usePermissions();
   const businessArea = useBusinessArea();

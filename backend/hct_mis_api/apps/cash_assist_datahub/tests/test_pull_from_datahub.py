@@ -24,15 +24,19 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
 from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
     PullFromDatahubTask,
 )
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.tests.test_exchange_rates import (
     EXCHANGE_RATES_WITH_HISTORICAL_DATA,
 )
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
+
+
+class DummyExchangeRates:
+    pass
 
 
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
@@ -274,6 +278,8 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.registration_ca_id, self.dh_payment_record.registration_ca_id)
 
         self.assertIn(self.household, self.program.households.all())
+        self.household.refresh_from_db()
+        self.assertEqual(self.household.total_cash_received, 10)
 
 
 class TestSessionsPullDataFromDatahub(TestCase):
@@ -294,7 +300,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
             "hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session",
             copy_session_mock,
         ):
-            task = PullFromDatahubTask()
+            task = PullFromDatahubTask(DummyExchangeRates())
             task.execute()
             self.assertEqual(copy_session_mock.call_count, 2)
         session1.delete()
@@ -310,7 +316,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
             "hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session",
             copy_session_mock,
         ):
-            task = PullFromDatahubTask()
+            task = PullFromDatahubTask(DummyExchangeRates())
             task.execute()
             self.assertEqual(copy_session_mock.call_count, 0)
             self.assertEqual(copy_session_mock.call_args_list, [])
@@ -329,7 +335,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
             "hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session",
             copy_session_mock,
         ):
-            task = PullFromDatahubTask()
+            task = PullFromDatahubTask(DummyExchangeRates())
             task.execute()
             self.assertEqual(copy_session_mock.call_count, 1)
             self.assertEqual(copy_session_mock.call_args_list[0][0][0].id, session3.id)
@@ -363,7 +369,8 @@ class TestSessionsPullDataFromDatahub(TestCase):
         dh_service_provider.country = ca_code
         dh_service_provider.vision_id = "random-sp-vision-id"
         dh_service_provider.save()
-        task = PullFromDatahubTask()
+
+        task = PullFromDatahubTask(DummyExchangeRates())
         task.copy_service_providers(session)
         service_provider = ServiceProvider.objects.filter(ca_id=dh_service_provider.ca_id).first()
         self.assertEqual(service_provider.country, expected)

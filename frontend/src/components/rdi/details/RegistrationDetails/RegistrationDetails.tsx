@@ -13,11 +13,6 @@ import { RegistrationDetailedFragment } from '../../../../__generated__/graphql'
 import { DedupeBox } from '../DedupeBox';
 import { Title } from '../../../core/Title';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
-
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)}px;
   border-color: #b1b1b5;
@@ -78,6 +73,12 @@ export function RegistrationDetails({
         registration?.goldenRecordPossibleDuplicatesCountAndPercentage.count,
     },
   ];
+  const renderImportedBy = (): string => {
+    if (registration?.importedBy) {
+      return `${registration?.importedBy?.firstName} ${registration?.importedBy?.lastName}`;
+    }
+    return '-';
+  };
   return (
     <ContainerColumnWithBorder>
       <Title>
@@ -90,12 +91,10 @@ export function RegistrationDetails({
               <Grid item xs={6}>
                 <Box display='flex' flexDirection='column'>
                   <LabelizedField label={t('status')}>
-                    <StatusContainer>
-                      <StatusBox
-                        status={registration?.status}
-                        statusToColor={registrationDataImportStatusToColor}
-                      />
-                    </StatusContainer>
+                    <StatusBox
+                      status={registration?.status}
+                      statusToColor={registrationDataImportStatusToColor}
+                    />
                   </LabelizedField>
                   {registration?.errorMessage && (
                     <Error>{registration.errorMessage}</Error>
@@ -121,7 +120,7 @@ export function RegistrationDetails({
               <Grid item xs={6}>
                 <LabelizedField
                   label={t('Imported by')}
-                  value={`${registration?.importedBy?.firstName} ${registration?.importedBy?.lastName}`}
+                  value={renderImportedBy()}
                 />
               </Grid>
             </Grid>

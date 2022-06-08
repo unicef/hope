@@ -4,6 +4,7 @@ import itertools
 import logging
 import string
 from collections import MutableMapping, OrderedDict
+from time import sleep
 from typing import List
 
 from django.db.models import QuerySet
@@ -123,11 +124,11 @@ def _slug_strip(value, separator="-"):
     if separator == "-" or not separator:
         re_sep = "-"
     else:
-        re_sep = "(?:-|%s)" % re.escape(separator)
+        re_sep = "(?:-|{})".format(re.escape(separator))
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("%s+" % re_sep, separator, value)
+        value = re.sub("{}+".format(re_sep, separator, value))
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -337,17 +338,11 @@ def to_dict(instance, fields=None, dict_fields=None):
 
 
 def build_arg_dict(model_object, mapping_dict):
-    args = {}
-    for key in mapping_dict:
-        args[key] = nested_getattr(model_object, mapping_dict[key], None)
-    return args
+    return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
 def build_arg_dict_from_dict(data_dict, mapping_dict):
-    args = {}
-    for key, value in mapping_dict.items():
-        args[key] = data_dict.get(value)
-    return args
+    return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
 
 class CustomOrderingFilter(OrderingFilter):
@@ -604,7 +599,7 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
         filter_query.update(
             {
                 f"{administrative_area_path}__id": filters.get("administrative_area"),
-                f"{administrative_area_path}__level": 2,
+                f"{administrative_area_path}__area_type__area_level": 2,
             }
         )
     return filter_query
@@ -613,8 +608,8 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
 def admin_area1_query(comparision_method, args):
     from django.db.models import Q
 
-    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__level=1)) | Q(
-        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__level=1)
+    return Q(Q(admin_area_new__p_code=args[0]) & Q(admin_area_new__area_type__area_level=1)) | Q(
+        Q(admin_area_new__parent__p_code=args[0]) & Q(admin_area_new__parent__area_type__area_level=1)
     )
 
 
@@ -727,3 +722,10 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
     ).values_list("unicef_id", flat=True)
     excluded_household_ids_array.extend(excluded_household_ids_from_individuals_array)
     return excluded_household_ids_array
+
+
+@functools.lru_cache(maxsize=None)
+def cached_business_areas_slug_id_dict():
+    from hct_mis_api.apps.core.models import BusinessArea
+
+    return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}

@@ -32,9 +32,14 @@ export function GrievancesTablePage(): React.ReactElement {
     status: '',
     fsp: '',
     createdAtRange: '',
+    category: '',
+    issueType: '',
+    assignedTo: '',
     admin: null,
     registrationDataImport: id,
     cashPlan: cashPlanId,
+    scoreMin: null,
+    scoreMax: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const {
@@ -53,7 +58,7 @@ export function GrievancesTablePage(): React.ReactElement {
   if (permissions === null) return null;
   if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
     return <PermissionDenied />;
-  if (!choicesData) return null;
+  if (!choicesData || !userData) return null;
 
   const usersChoices = userData.allUsers.edges.map((edge) => ({
     name: renderUserName(edge.node),

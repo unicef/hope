@@ -1,18 +1,11 @@
-import { Box, Paper, Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../core/ContentLink';
 import { Title } from '../core/Title';
-
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
+import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export const PaymentIds = ({
   verifications,
@@ -34,13 +27,13 @@ export const PaymentIds = ({
     ),
   );
   return (
-    <StyledBox>
+    <ApproveBox>
       <Title>
         <Typography variant='h6'>{t('Payment Ids')}</Typography>
       </Title>
       <Box display='flex' flexDirection='column'>
         {mappedIds}
       </Box>
-    </StyledBox>
+    </ApproveBox>
   );
 };

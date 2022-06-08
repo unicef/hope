@@ -1060,7 +1060,7 @@ class GroupAdmin(ImportExportModelAdmin, ExtraButtonsMixin, _GroupAdmin):
         context = self.get_common_context(request, pk, aeu_groups=["1"])
         group = context["original"]
         users = User.objects.filter(groups=group).distinct()
-        context["title"] = _('Users in group "%s"') % group.name
+        context["title"] = _('Users in group "{}"').format(group.name)
         context["user_opts"] = User._meta
         context["data"] = users
         return render(request, "admin/account/group/members.html", context)

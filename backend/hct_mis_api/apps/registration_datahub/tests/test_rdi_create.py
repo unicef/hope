@@ -1,8 +1,6 @@
 import json
-import os
 import secrets
-import time
-import unittest
+
 from datetime import date
 from io import BytesIO
 from pathlib import Path
@@ -11,17 +9,16 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
-from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
-from django.test import TestCase
 
 from django_countries.fields import Country
 from PIL import Image
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
@@ -64,10 +61,8 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiKoboCreateTask,
-            RdiXlsxCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -214,11 +209,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(task.documents, expected)
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.SheetImageLoader",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.SheetImageLoader",
         ImageLoaderMock,
     )
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.timezone.now",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.timezone.now",
         lambda: "2020-06-22 12:00",
     )
     def test_handle_document_photo_fields(self):
@@ -361,10 +356,8 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiKoboCreateTask,
-            RdiXlsxCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -403,7 +396,23 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         admin1 = AdminArea.objects.create(p_code="SO25", title="SO25", admin_area_level=admin1_level)
 
         admin2_level = AdminAreaLevel.objects.create(name="Ceel Barde", admin_level=2, business_area=cls.business_area)
-        AdminArea.objects.create(p_code="SO2502", title="SO2502", parent=admin1, admin_area_level=admin2_level)
+        admin2 = AdminArea.objects.create(p_code="SO2502", title="SO2502", parent=admin1, admin_area_level=admin2_level)
+
+        country = geo_models.Country.objects.first()
+
+        admin1_type = geo_models.AreaType.objects.create(
+            name="Bakool", area_level=1, country=country, original_id=admin1_level.id
+        )
+        admin1_new = geo_models.Area.objects.create(
+            p_code="SO25", name="SO25", area_type=admin1_type, original_id=admin1.id
+        )
+
+        admin2_type = geo_models.AreaType.objects.create(
+            name="Ceel Barde", area_level=2, country=country, original_id=admin2_level.id
+        )
+        geo_models.Area.objects.create(
+            p_code="SO2502", name="SO2502", parent=admin1_new, area_type=admin2_type, original_id=admin2.id
+        )
 
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug
@@ -417,7 +426,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import.save()
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute(self):
@@ -456,7 +465,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(household_obj_data, expected)
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute_multiple_collectors(self):
@@ -481,7 +490,9 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         first_household = households.get(size=3)
         second_household = households.get(size=2)
 
-        first_household_collectors = first_household.individuals_and_roles.order_by('individual__full_name').values_list("individual__full_name", "role")
+        first_household_collectors = first_household.individuals_and_roles.order_by(
+            "individual__full_name"
+        ).values_list("individual__full_name", "role")
         self.assertEqual(
             list(first_household_collectors),
             [("Tesa Testowski", "ALTERNATE"), ("Test Testowski", "PRIMARY")],
@@ -495,7 +506,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         )
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_image_field(self):
@@ -544,7 +555,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         pass
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_documents_and_identities(self):
@@ -774,3 +785,44 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             "w+",
         ) as json_file:
             json_file.write(json.dumps(result))
+
+
+class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
+    databases = "__all__"
+    fixtures = [
+        "hct_mis_api/apps/core/fixtures/data.json",
+        "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import RdiDiiaCreateTask
+
+        cls.RdiDiiaCreateTask = RdiDiiaCreateTask
+
+    def test_execute(self):
+        self.RdiDiiaCreateTask().execute("c57848bf-a5df-154b-4938-f30b6b29aaab")
+
+        households = ImportedHousehold.objects.all()
+        individuals = ImportedIndividual.objects.all()
+
+        self.assertEqual(2, households.count())
+        self.assertEqual(5, individuals.count())
+
+        individual = individuals.get(full_name="Erik Duarte")
+
+        individuals_obj_data = model_to_dict(
+            individual,
+            ("sex", "age", "marital_status", "relationship", "middle_name"),
+        )
+        expected = {
+            "relationship": "HEAD",
+            "sex": "MALE",
+            "middle_name": "Mid",
+            "marital_status": "MARRIED",
+        }
+        self.assertEqual(individuals_obj_data, expected)
+
+        household_obj_data = model_to_dict(individual.household, ("country", "size", "diia_rec_id"))
+        expected = {"country": Country(code="UA"), "size": 3, "diia_rec_id": "222222"}
+        self.assertEqual(household_obj_data, expected)

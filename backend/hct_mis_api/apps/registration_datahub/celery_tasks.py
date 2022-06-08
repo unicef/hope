@@ -1,5 +1,9 @@
-import json
+import datetime
 import logging
+
+from django.core.cache import cache
+
+from redis.exceptions import LockError
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.registration_datahub.models import Record
@@ -11,7 +15,7 @@ logger = logging.getLogger(__name__)
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
     logger.info("registration_xlsx_import_task start")
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
@@ -44,7 +48,7 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
     logger.info("registration_kobo_import_task start")
 
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
 
@@ -89,7 +93,7 @@ def registration_kobo_import_hourly_task():
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
 
@@ -122,7 +126,7 @@ def registration_xlsx_import_hourly_task():
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
         )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
@@ -253,12 +257,11 @@ def process_flex_records_task(rdi_id, records_ids):
 
 
 @app.task
-def extract_records_task():
+def extract_records_task(max_records=500):
     logger.info("extract_records_task start")
 
-    records_ids = Record.objects.filter(data={}).values_list("pk", flat=True)[:5000]
+    records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     Record.extract(records_ids)
-
     logger.info("extract_records_task end")
 
 
@@ -267,7 +270,44 @@ def fresh_extract_records_task(records_ids=None):
     logger.info("fresh_extract_records_task start")
 
     if not records_ids:
-        records_ids = Record.objects.all().values_list("pk", flat=True)[:5000]
+        records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     Record.extract(records_ids)
 
     logger.info("fresh_extract_records_task end")
+
+
+@app.task
+def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}", **filters):
+    from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+        FlexRegistrationService,
+    )
+
+    try:
+        with cache.lock(f"automate_rdi_creation_task-{registration_id}", timeout=85400, blocking_timeout=2) as lock:
+            try:
+                service = FlexRegistrationService()
+
+                records_ids = (
+                    Record.objects.filter(registration=registration_id, **filters)
+                    .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
+                    .values_list("id", flat=True)[:page_size]
+                )
+
+                if records_ids:
+                    rdi_name = template.format(
+                        date=datetime.datetime.now(),
+                        registration_id=registration_id,
+                        page_size=page_size,
+                        records=len(records_ids),
+                    )
+                    rdi = service.create_rdi(None, rdi_name)
+                    service.process_records(rdi.id, records_ids)
+                    return [rdi_name, len(records_ids)]
+            except Exception as e:
+                logger.exception(e)
+            finally:
+                if lock.locked():
+                    lock.release()
+    except LockError as e:
+        logger.exception(e)
+        return []

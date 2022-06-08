@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import {
   hasCreatorOrOwnerPermissions,
   PERMISSIONS,
@@ -17,12 +16,9 @@ import {
   useMeQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
+import { TableWrapper } from '../../core/TableWrapper';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
 
 interface GrievancesTableProps {
   businessArea: string;
@@ -40,11 +36,14 @@ export const GrievancesTable = ({
     status: [filter.status],
     fsp: filter.fsp,
     createdAtRange: JSON.stringify(filter.createdAtRange),
+    category: filter.category,
+    issueType: filter.issueType,
+    assignedTo: filter.assignedTo,
     admin: [decodeIdString(filter?.admin?.node?.id)],
     registrationDataImport: filter.registrationDataImport,
-    category: filter.category,
-    assignedTo: filter.assignedTo,
     cashPlan: filter.cashPlan,
+    scoreMin: filter.scoreMin,
+    scoreMax: filter.scoreMax,
   };
 
   const {
@@ -56,6 +55,7 @@ export const GrievancesTable = ({
     loading: currentUserDataLoading,
   } = useMeQuery();
   const permissions = usePermissions();
+
   if (choicesLoading || currentUserDataLoading) return <LoadingComponent />;
   if (!choicesData || !currentUserData || permissions === null) return null;
 
@@ -66,6 +66,8 @@ export const GrievancesTable = ({
   const categoryChoices: {
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+
+  const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
 
   const currentUserId = currentUserData.me.id;
 
@@ -116,6 +118,7 @@ export const GrievancesTable = ({
             ticket={row}
             statusChoices={statusChoices}
             categoryChoices={categoryChoices}
+            issueTypeChoicesData={issueTypeChoicesData}
             canViewDetails={getCanViewDetailsOfTicket(row)}
           />
         )}

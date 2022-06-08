@@ -12,11 +12,12 @@ import get from 'lodash/get';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import * as Yup from 'yup';
 import { ALL_REPORTS_QUERY } from '../../apollo/queries/reporting/AllReports';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { DialogFooter } from '../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
@@ -30,17 +31,6 @@ import {
 } from '../../__generated__/graphql';
 import { FieldLabel } from '../core/FieldLabel';
 import { LoadingComponent } from '../core/LoadingComponent';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
 
 export const NewReportForm = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -71,6 +61,7 @@ export const NewReportForm = (): React.ReactElement => {
     loading: loadingPrograms,
   } = useAllProgramsQuery({
     variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy:'cache-and-network'
   });
   const {
     data: choicesData,

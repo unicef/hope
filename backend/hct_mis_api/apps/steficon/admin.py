@@ -46,20 +46,17 @@ logger = logging.getLogger(__name__)
 
 class AutocompleteWidget(forms.Widget):
     template_name = "steficon/widgets/autocomplete.html"
-    # template_name = 'django/forms/widgets/select.html'
 
-    url_name = "%s:%s_%s_autocomplete"
-
-    def __init__(self, model, admin_site, attrs=None, choices=(), using=None):
+    def __init__(self, model, admin_site, attrs=None, choices=(), using=None, pk_field="id"):
         self.model = model
+        self.pk_field = pk_field
         self.admin_site = admin_site
         self.db = using
         self.choices = choices
         self.attrs = {} if attrs is None else attrs.copy()
 
     def get_url(self):
-        model = self.model
-        return reverse(self.url_name % (self.admin_site.name, model._meta.app_label, model._meta.model_name))
+        return reverse("admin:autocomplete")
 
     def get_context(self, name, value, attrs):
         context = {}
@@ -67,7 +64,11 @@ class AutocompleteWidget(forms.Widget):
             "query_string": "",
             "lookup_kwarg": "term",
             "url": self.get_url(),
-            "target_opts": {"app_label": "", "model_name": "", "target_field": ""},
+            "target_opts": {
+                "app_label": self.model._meta.app_label,
+                "model_name": self.model._meta.model_name,
+                "target_field": self.pk_field,
+            },
             "name": name,
             "media": self.media,
             "is_hidden": self.is_hidden,
@@ -82,21 +83,29 @@ class AutocompleteWidget(forms.Widget):
     def media(self):
         extra = "" if settings.DEBUG else ".min"
         i18n_name = SELECT2_TRANSLATIONS.get(get_language())
-        i18n_file = ("admin/js/vendor/select2/i18n/%s.js" % i18n_name,) if i18n_name else ()
+        i18n_file = (
+            (
+                "admin/js/vendor/select2/i18n/{}.js".format(
+                    i18n_name,
+                )
+            )
+            if i18n_name
+            else ()
+        )
         return forms.Media(
             js=(
-                "admin/js/vendor/jquery/jquery%s.js" % extra,
-                "admin/js/vendor/select2/select2.full%s.js" % extra,
+                "admin/js/vendor/jquery/jquery{}.js".format(extra),
+                "admin/js/vendor/select2/select2.full{}.js".format(extra),
             )
             + i18n_file
             + (
                 "admin/js/jquery.init.js",
                 "admin/js/autocomplete.js",
-                "adminfilters/adminfilters%s.js" % extra,
+                "adminfilters/adminfilters{}.js".format(extra),
             ),
             css={
                 "screen": (
-                    "admin/css/vendor/select2/select2%s.css" % extra,
+                    "admin/css/vendor/select2/select2{}.css".format(extra),
                     "adminfilters/adminfilters.css",
                 ),
             },
@@ -104,7 +113,8 @@ class AutocompleteWidget(forms.Widget):
 
 
 class TestRuleMixin:
-    @button(visible=lambda o, r: "/test/" not in r.path)
+    # @button(visible=lambda c: "/test/" not in c["request"].path)
+    @button()
     def test(self, request, pk):
         rule: Rule = self.get_object(request, pk)
         context = self.get_common_context(
@@ -351,7 +361,7 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
                         response = HttpResponse(
                             content_type="text/csv",
                             headers={
-                                "Content-Disposition": 'attachment; filename="%s"' % form.cleaned_data["filename"]
+                                "Content-Disposition": 'attachment; filename="{}"'.format(form.cleaned_data["filename"])
                             },
                         )
 

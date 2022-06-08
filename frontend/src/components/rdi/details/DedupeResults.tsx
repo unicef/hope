@@ -22,23 +22,10 @@ import {
   DeduplicationResultNode,
   ImportedIndividualMinimalFragment,
 } from '../../../__generated__/graphql';
+import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
+import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
 
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
   font-weight: bold;

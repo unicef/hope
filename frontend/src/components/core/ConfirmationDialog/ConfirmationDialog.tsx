@@ -1,25 +1,15 @@
-import React, { FC } from 'react';
-import styled from 'styled-components';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Typography,
 } from '@material-ui/core';
+import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-
-export const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-export const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
+import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 
 export interface ConfirmationDialogOptions {
   catchOnCancel?: boolean;
@@ -27,6 +17,7 @@ export interface ConfirmationDialogOptions {
   content?: string;
   continueText?: string;
   extraContent?: string;
+  disabled?: boolean;
 }
 
 export interface ConfirmationDialogProps extends ConfirmationDialogOptions {
@@ -43,6 +34,7 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   extraContent,
   onSubmit,
   onClose,
+  disabled = false,
 }) => {
   const { t } = useTranslation();
 
@@ -66,7 +58,12 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
           <Button color='primary' onClick={onClose} autoFocus>
             {t('Cancel')}
           </Button>
-          <Button variant='contained' color='primary' onClick={onSubmit}>
+          <Button
+            variant='contained'
+            color='primary'
+            disabled={disabled}
+            onClick={onSubmit}
+          >
             {continueText || t('Continue')}
           </Button>
         </DialogActions>

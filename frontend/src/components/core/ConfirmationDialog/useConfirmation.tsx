@@ -17,6 +17,7 @@ export interface ConfirmationDialogOptions {
   content?: string;
   continueText?: string;
   extraContent?: string;
+  disabled?: boolean;
 }
 export const useConfirmation = (): ((
   options: ConfirmationDialogOptions,
