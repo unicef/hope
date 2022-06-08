@@ -174,3 +174,6 @@ class Report(models.Model):
             return output
         except ObjectDoesNotExist:
             pass
+
+    def __str__(self):
+        return self.name
