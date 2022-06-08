@@ -10,7 +10,14 @@
             <input type="submit">
         </form>
     </div>
-    {# <iframe src="{%  %}"></iframe> #}
+    <div class="results">
         {{ results}}
-
+    </div>
+        
+<style>
+    .results {
+      overflow: auto;
+      white-space: nowrap;
+    }
+</style>
 {% endblock %}
