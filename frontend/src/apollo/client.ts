@@ -86,7 +86,18 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
     return response;
   });
 });
+
+const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
+  operation.setContext({
+    headers: {
+      'Business-Area': window.location.pathname.split('/')[1],
+    },
+  });
+  return forward(operation);
+});
+
 const link = ApolloLink.from([
+  addBusinessAreaHeaderMiddleware,
   validationErrorMiddleware,
   errorLink,
   createUploadLink({ uri: GRAPHQL_URL }),
