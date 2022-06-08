@@ -1,7 +1,9 @@
-{% extends "admin_extra_buttons/action_page.html" %}{% load power_query %}
+{% extends "admin_extra_buttons/action_page.html" %}
+{% load power_query %}
 {% block action-content %}
     <h2>Dataset is: {{ type }}</h2>
-    {% if result %}
+    <div class="scrollresults">
+        {% if result %}
         {% if result.fields %}
             <table>
                 <tr>{% for field in result.fields %}
@@ -53,5 +55,13 @@
                         <td>{{ col }}</td>{% endfor %}
                 </tr>{% endfor %}
         </table>
+<style>
+div.scrollresults {
+  background-color: #333;
+  overflow: auto;
+  white-space: nowrap;
+}
+</style>
     {% endif %}
+    </div>
 {% endblock action-content %}
