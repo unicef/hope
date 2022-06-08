@@ -28,8 +28,8 @@ spec:
       securityContext:
         {{- toYaml .Values.celery.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}-celery-worker
-          command: ["celery", "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info", "--max-tasks-per-child=4", "-Q",  "default,priority"]
+        - name: {{ .Chart.Name }}-celery-worker-low-priority
+          command: ["celery", "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info", "--max-tasks-per-child=4", "-Q",  "default"]
           securityContext:
             {{- toYaml .Values.celery.securityContext | nindent 12 }}
           image: "{{ .Values.celery.image }}"
@@ -39,6 +39,19 @@ spec:
               name: {{ include "hope.fullname" . }}-backend
           - configMapRef:
               name: {{ include "hope.fullname" . }}-backend
+          resources:
+            {{- toYaml .Values.celery.resources | nindent 12 }}
+        - name: { { .Chart.Name } }-celery-worker-high-priority
+          command: [ "celery", "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info", "--max-tasks-per-child=4", "-Q",  "priority" ]
+          securityContext:
+            { { - toYaml .Values.celery.securityContext | nindent 12 } }
+          image: "{{ .Values.celery.image }}"
+          imagePullPolicy: { { .Values.global.imagePullPolicy } }
+          envFrom:
+          - secretRef:
+              name: { { include "hope.fullname" . } }-backend
+          - configMapRef:
+              name: { { include "hope.fullname" . } }-backend
           resources:
             {{- toYaml .Values.celery.resources | nindent 12 }}
       {{- with .Values.celery.nodeSelector }}
