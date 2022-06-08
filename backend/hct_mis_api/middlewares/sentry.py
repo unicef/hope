@@ -14,5 +14,6 @@ class SentryScopeMiddleware:
         with configure_scope() as scope:
             # TODO: add business area
             scope.set_tag("username", request.user.username)
+            scope.set_tag("business_area", request.headers.get("Business-Area"))
             response = self.get_response(request)
         return response
