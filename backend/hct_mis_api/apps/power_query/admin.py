@@ -216,7 +216,13 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
                         "dataset": form.cleaned_data["query"].dataset,
                         "report": "None",
                     }
-                    context["results"] = str(obj.render(ctx))
+                    if obj.content_type == 'xls':
+                        output = obj.render(ctx)
+                        response = HttpResponse(output, content_type="application/vnd.ms-excel")
+                        response['Content-Disposition'] = 'attachment; filename=Report.xls'
+                        return response
+                    else:    
+                        context["results"] = str(obj.render(ctx))
                 else:
                     form = FormatterTestForm()
         except Exception as e:
