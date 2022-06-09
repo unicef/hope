@@ -30,12 +30,14 @@ export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
   canDuplicate: boolean;
 }
 
-export function FinalizedTargetPopulationHeaderButtons({
+export const FinalizedTargetPopulationHeaderButtons = ({
   targetPopulation,
   canDuplicate,
-}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const { data, loading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+  const { data, loading } = useCashAssistUrlPrefixQuery({
+    fetchPolicy: 'cache-first',
+  });
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
@@ -53,7 +55,7 @@ export function FinalizedTargetPopulationHeaderButtons({
           color='primary'
           component='a'
           disabled={!targetPopulation.caHashId}
-          target="_blank"
+          target='_blank'
           href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
@@ -67,4 +69,4 @@ export function FinalizedTargetPopulationHeaderButtons({
       />
     </div>
   );
-}
+};
