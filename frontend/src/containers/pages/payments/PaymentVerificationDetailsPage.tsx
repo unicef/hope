@@ -62,6 +62,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,

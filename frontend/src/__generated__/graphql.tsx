@@ -6435,7 +6435,7 @@ export type TargetPopulationDetailedFragment = (
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name'>
+    & Pick<ProgramNode, 'id' | 'name' | 'status'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
@@ -10366,6 +10366,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   program {
     id
     name
+    status
   }
   createdBy {
     id
