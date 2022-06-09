@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import { Button, Tooltip } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   TargetPopulationNode,
   useUnapproveTpMutation,
 } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useTranslation } from 'react-i18next';
 
 const IconContainer = styled.span`
   button {
