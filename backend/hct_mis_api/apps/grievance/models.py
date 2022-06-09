@@ -217,44 +217,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "golden_records_individual": "golden_records_individual",
         },
     }
-    FIELD_TICKET_TYPES_LOOKUPS = {
-        "complaint_ticket_details": (
-            "individual",
-            "household",
-            "payment_record",
-        ),
-        "sensitive_ticket_details": (
-            "individual",
-            "household",
-            "payment_record",
-        ),
-        "positive_feedback_ticket_details": (
-            "individual",
-            "household",
-        ),
-        "negative_feedback_ticket_details": (
-            "individual",
-            "household",
-        ),
-        "referral_ticket_details": (
-            "individual",
-            "household",
-        ),
-        "individual_data_update_ticket_details": ("individual", "household"),
-        "add_individual_ticket_details": ("household",),
-        "household_data_update_ticket_details": ("household",),
-        "delete_individual_ticket_details": ("individual",),
-        "delete_household_ticket_details": ("household",),
-        "system_flagging_ticket_details": (
-            {"individual": "golden_records_individual"},
-            {"household": "golden_records_individual.household"},
-        ),
-        "needs_adjudication_ticket_details": (
-            {"individual": "golden_records_individual"},
-            {"household": "golden_records_individual.household"},
-        ),
-        "payment_verification_ticket_details": ({"payment_record": "payment_verification.payment_record"}),
-    }
 
     TICKET_DETAILS_NAME_MAPPING = {
         CATEGORY_DATA_CHANGE: {
