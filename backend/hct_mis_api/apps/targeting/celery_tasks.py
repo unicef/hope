@@ -12,7 +12,7 @@ from ..targeting.models import HouseholdSelection, TargetPopulation
 logger = logging.getLogger(__name__)
 
 
-@app.task()
+@app.task(queue="priority")
 def target_population_apply_steficon(target_population_id):
     from hct_mis_api.apps.steficon.models import RuleCommit
 

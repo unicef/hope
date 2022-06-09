@@ -8,7 +8,7 @@ export const fakeApolloAllIndividualsForPopulationTable = [
         businessArea: 'afghanistan',
         sex: [null],
         first: 10,
-        orderBy: '-unicef_id',
+        orderBy: null,
       },
     },
     result: {
@@ -22,48 +22,28 @@ export const fakeApolloAllIndividualsForPopulationTable = [
           },
           edges: [
             {
-              cursor: 'YXJyYXljb25uZWN0aW9uOjU=',
+              cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
-                id:
-                  'SW5kaXZpZHVhbE5vZGU6ZmU5MTQzZDUtYzJjMC00ODQ2LTlmZWMtMDU0Y2I4N2Q5MDc0',
-                unicefId: 'IND-42-0000.0001',
+                id: 'SW5kaXZpZHVhbE5vZGU6Y2VkZDRiNDktNTRlMC00NDA4LThmZDItMTAzMGYwNWE3YTZh',
+                unicefId: 'IND-74-0000.0006',
                 sanctionListPossibleMatch: false,
                 sanctionListConfirmedMatch: false,
-                deduplicationGoldenRecordStatus: 'UNIQUE',
-                sanctionListLastCheck: null,
-                fullName: 'Alicja Kowalska',
-                household: null,
-                relationship: 'NON_BENEFICIARY',
-                age: 80,
-                sex: 'FEMALE',
-                lastRegistrationDate: '1942-12-12',
-                documents: {
-                  edges: [
-                    {
-                      node: {
-                        id:
-                          'RG9jdW1lbnROb2RlOjAxMDk5MGJhLTEzZmQtNDUwMC04ODJlLTczZTU5MjZhMmFkYw==',
-                        country: 'Poland',
-                        documentNumber: 'BSH221315',
-                        photo: null,
-                        type: {
-                          country: 'Poland',
-                          label: 'National ID',
-                          type: 'NATIONAL_ID',
-                          countryIso3: 'POL',
-                          __typename: 'DocumentTypeNode',
-                        },
-                        __typename: 'DocumentNode',
-                      },
-                      __typename: 'DocumentNodeEdge',
-                    },
-                  ],
-                  __typename: 'DocumentNodeConnection',
+                deduplicationGoldenRecordStatus: 'DUPLICATE',
+                sanctionListLastCheck: '2022-06-06T06:11:41.336055',
+                fullName: 'Jan Romaniak',
+                household: {
+                  id: 'SG91c2Vob2xkTm9kZTo5NjBmN2VlZS1kNDVhLTQ3OGEtYjRiNC04MmQwZThlODBhZGQ=',
+                  unicefId: 'HH-20-0000.0002',
+                  admin2: {
+                    id: 'QXJlYU5vZGU6NWYwNmViMzEtM2I1ZC00YmQ1LWIyOTMtYTg5YmE3OTgxYmZj',
+                    name: 'Abband',
+                    __typename: 'AreaNode',
+                  },
+                  __typename: 'HouseholdNode',
                 },
-                identities: {
-                  edges: [],
-                  __typename: 'IndividualIdentityNodeConnection',
-                },
+                relationship: 'HEAD',
+                age: 30,
+                sex: 'MALE',
                 __typename: 'IndividualNode',
               },
               __typename: 'IndividualNodeEdge',
