@@ -1,4 +1,4 @@
-import {AllHouseholdsForPopulationTableDocument} from '../../src/__generated__/graphql';
+import { AllHouseholdsForPopulationTableDocument } from '../../src/__generated__/graphql';
 
 export const fakeApolloAllHouseholdsForPopulationTable = [
   {
@@ -7,7 +7,7 @@ export const fakeApolloAllHouseholdsForPopulationTable = [
       variables: {
         businessArea: 'afghanistan',
         first: 10,
-        orderBy: '-unicef_id',
+        orderBy: null,
       },
     },
     result: {
@@ -25,23 +25,20 @@ export const fakeApolloAllHouseholdsForPopulationTable = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
-                id:
-                  'SG91c2Vob2xkTm9kZTo4MmI2MTA3ZC1hYzg5LTQ2NTctYmVjYi1lOTY4ODdjNTU0ZWQ=',
+                id: 'SG91c2Vob2xkTm9kZTowOWI4YWE2ZC1hOTViLTQ5NWEtYTM0ZS1kMGM0YmQyNWE4Njc=',
                 status: 'ACTIVE',
                 unicefId: 'HH-20-0000.0001',
                 hasDuplicates: false,
                 sanctionListPossibleMatch: false,
                 sanctionListConfirmedMatch: false,
                 headOfHousehold: {
-                  id:
-                    'SW5kaXZpZHVhbE5vZGU6MzIyYzFhYjAtNjQ3NS00NThhLWEyNTQtMWEyY2QzMjY5NDM2',
+                  id: 'SW5kaXZpZHVhbE5vZGU6N2JhZjlhMGItODQ4My00MDA0LTg2NzAtMGU4YTUwZjI1YTMw',
                   fullName: 'Agata Kowalska',
                   __typename: 'IndividualNode',
                 },
                 size: 4,
                 admin2: {
-                  id:
-                    'QWRtaW5BcmVhTm9kZTo2ZDRmZmJhNi0xN2Q3LTRhYjctYWJkYS1kODg2OWM3NjQxODc=',
+                  id: 'QXJlYU5vZGU6NzYxZjhkODQtOTljZi00MWExLTk1MmYtMTQ5ZWFhNjJkZDJh',
                   name: 'Achin',
                   __typename: 'AreaNode',
                 },
@@ -49,10 +46,6 @@ export const fakeApolloAllHouseholdsForPopulationTable = [
                 totalCashReceived: null,
                 currency: '',
                 lastRegistrationDate: '2020-08-22T00:00:00',
-                programs: {
-                  edges: [],
-                  __typename: 'ProgramNodeConnection',
-                },
                 __typename: 'HouseholdNode',
               },
               __typename: 'HouseholdNodeEdge',

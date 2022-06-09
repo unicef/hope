@@ -170,7 +170,7 @@ def merge_registration_data_import_task(registration_data_import_id):
     logger.info("merge_registration_data_import_task end")
 
 
-@app.task
+@app.task(queue="priority")
 def rdi_deduplication_task(registration_data_import_id):
     logger.info("rdi_deduplication_task start")
 
