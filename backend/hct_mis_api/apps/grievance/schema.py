@@ -37,6 +37,11 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
+from hct_mis_api.apps.grievance.filters import (
+    ExistingGrievanceTicketFilter,
+    GrievanceTicketFilter,
+    TicketNoteFilter,
+)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
@@ -56,7 +61,6 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
-from hct_mis_api.apps.grievance.filters import ExistingGrievanceTicketFilter, GrievanceTicketFilter, TicketNoteFilter
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
@@ -78,23 +82,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     related_tickets = graphene.List(lambda: GrievanceTicketNode)
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
-
-    @staticmethod
-    def _search_for_lookup(grievance_ticket_obj, lookup_name):
-        for field, lookups in GrievanceTicket.FIELD_TICKET_TYPES_LOOKUPS.items():
-            extras_field = getattr(grievance_ticket_obj, field, None)
-            if extras_field is None:
-                continue
-            real_lookup = lookup_name
-            for lookup in lookups:
-                if isinstance(lookup, dict):
-                    tmp_lookup = lookup.get(lookup_name)
-                    if tmp_lookup is not None:
-                        real_lookup = tmp_lookup
-                        break
-            obj = nested_getattr(extras_field, real_lookup, None)
-            if obj is not None:
-                return obj
+    existing_tickets = graphene.List(lambda: GrievanceTicketNode)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -126,25 +114,35 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_related_tickets(grievance_ticket, info):
+    @staticmethod
+    def resolve_related_tickets(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.related_tickets
 
-    def resolve_household(grievance_ticket, info):
-        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "household")
+    @staticmethod
+    def resolve_household(grievance_ticket: GrievanceTicket, info):
+        return getattr(grievance_ticket.ticket_details, "household", None)
 
-    def resolve_individual(grievance_ticket, info):
-        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "individual")
+    @staticmethod
+    def resolve_individual(grievance_ticket: GrievanceTicket, info):
+        return getattr(grievance_ticket.ticket_details, "individual", None)
 
-    def resolve_payment_record(grievance_ticket, info):
-        return GrievanceTicketNode._search_for_lookup(grievance_ticket, "payment_record")
+    @staticmethod
+    def resolve_payment_record(grievance_ticket: GrievanceTicket, info):
+        return getattr(grievance_ticket.ticket_details, "payment_record", None)
 
-    def resolve_admin(grievance_ticket, info):
-        if grievance_ticket.admin2_new:
-            return grievance_ticket.admin2_new.name
-        return None
+    @staticmethod
+    def resolve_admin(grievance_ticket: GrievanceTicket, info):
+        return getattr(grievance_ticket.admin2_new, "name", None)
 
-    def resolve_admin2(grievance_ticket, info):
+    @staticmethod
+    def resolve_admin2(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.admin2_new
+
+    @staticmethod
+    def resolve_existing_tickets(grievance_ticket: GrievanceTicket, info):
+        return GrievanceTicket.objects.filter(household_unicef_id=grievance_ticket.household_unicef_id).exclude(
+            pk=grievance_ticket.pk
+        )
 
 
 class TicketNoteNode(DjangoObjectType):
