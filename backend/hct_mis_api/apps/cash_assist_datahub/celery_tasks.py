@@ -6,7 +6,7 @@ from hct_mis_api.apps.core.exchange_rates.utils import fix_exchange_rates
 logger = logging.getLogger(__name__)
 
 
-@app.task
+@app.task(queue="priority")
 def pull_from_cashassist_datahub_task():
     logger.info("pull_from_cashassist_datahub_task start")
 
@@ -23,7 +23,7 @@ def pull_from_cashassist_datahub_task():
     logger.info("pull_from_cashassist_datahub_task end")
 
 
-@app.task
+@app.task(queue="priority")
 def fix_exchange_rates_task():
     try:
         fix_exchange_rates()

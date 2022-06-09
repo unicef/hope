@@ -2,8 +2,8 @@
 set -e
 
 if [ $# -eq 0 ]; then
-    echo 'Jan starts'
     export NEW_RELIC_CONFIG_FILE=/code/newrelic.ini
+    export NEW_RELIC_ENVIRONMENT=$ENV
     exec newrelic-admin run-program gunicorn hct_mis_api.wsgi -c /code/gunicorn_config.py
 else
     case "$1" in

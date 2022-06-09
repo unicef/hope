@@ -43,8 +43,6 @@ export const IndividualsListTable = ({
         query={useAllIndividualsForPopulationTableQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
-        defaultOrderBy='unicef_id'
-        defaultOrderDirection='desc'
         renderRow={(row) => (
           <IndividualsListTableRow
             key={row.id}

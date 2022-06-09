@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "hope.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.backend.replicaCount }}
+  replicas: {{ int (.Values.backend.replicaCount) }}
   selector:
     matchLabels:
       {{- include "hope.selectorLabels" . | nindent 6 }}
