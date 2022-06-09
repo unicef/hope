@@ -282,7 +282,7 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
         household_queryset = Household.objects
         households = household_queryset.filter(business_area=target_population.business_area).filter(
             target_population.candidate_list_targeting_criteria.get_query()
-        )
+        ).distinct()
         target_population.households.set(households)
         target_population.save()
         log_create(
