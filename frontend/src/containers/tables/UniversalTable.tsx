@@ -1,5 +1,5 @@
 import React, { ReactElement, useState } from 'react';
-import useDeepCompareEffect from 'use-deep-compare-effect'
+import useDeepCompareEffect from 'use-deep-compare-effect';
 import { LoadingComponent } from '../../components/core/LoadingComponent';
 import { HeadCell } from '../../components/core/Table/EnhancedTableHead';
 import {
