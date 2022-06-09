@@ -9,7 +9,7 @@ export const LoadingButton = ({
   return (
     <Button
       {...otherProps}
-      disabled={otherProps.disabled ? otherProps.disabled : loading}
+      disabled={otherProps.disabled || loading}
       endIcon={loading ? <CircularProgress color='inherit' size={20} /> : null}
     >
       {children}
