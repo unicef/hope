@@ -98,6 +98,42 @@ class HouseholdFilter(FilterSet):
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
+    def _prepare_kobo_asset_id_value(self, value):
+        """
+        preparing value for filter by kobo_asset_id
+        value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-202253186077
+        return asset_id number like 111222
+        """
+        _code = value
+        code = value[5:].split("/")
+        if len(code) == 2:
+            _code = code[1]
+        else:
+            code = code[0]
+            if code.startswith("20223"):
+                # month 3 day 25...31 id is 44...12067
+                _code = code[7:]
+
+            if code.startswith("20224"):
+                # TODO: not sure if this one is correct?
+                # code[5] is the day of month (or the first digit of it)
+                # month 4 id is 12068..157380
+                if code[5] in [1, 2, 3] and len(code) == 12:
+                    _code = code[-5:]
+                else:
+                    _code = code[-6:]
+
+            if code.startswith("20225"):
+                # month 5 id is 157381...392136
+                _code = code[-6:]
+
+            if code.startswith("20226"):
+                # month 6 id is 392137...
+                _code = code[-6:]
+            else:
+                _code = code[0]
+        return _code
+
     def _search_db(self, qs, value):
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
@@ -115,6 +151,9 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(admin_area_new__name__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
+            if value.startswith(("HOPE-", "KOBO-")):
+                _value = self._prepare_kobo_asset_id_value(value)
+                inner_query |= Q(kobo_asset_id__exact=_value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
