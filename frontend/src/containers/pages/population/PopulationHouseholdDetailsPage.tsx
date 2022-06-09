@@ -62,6 +62,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
 
   const { data, loading, error } = useHouseholdQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: flexFieldsData,
