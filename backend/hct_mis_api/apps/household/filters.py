@@ -153,7 +153,9 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(unicef_id__iendswith=value)
             if value.startswith(("HOPE-", "KOBO-")):
                 _value = self._prepare_kobo_asset_id_value(value)
-                inner_query |= Q(kobo_asset_id__exact=_value)
+                # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                # will filter by '111222' like 111222 is ID
+                inner_query |= Q(kobo_asset_id__endswith=_value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
