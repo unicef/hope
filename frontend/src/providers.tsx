@@ -12,10 +12,13 @@ import { getClient } from './apollo/client';
 import { ConfirmationDialogProvider } from './components/core/ConfirmationDialog';
 import { theme } from './theme';
 
-export const Providers: React.FC = ({ children }) => {
-  const [apolloClient, setApolloClient] = useState<
-    ApolloClient<NormalizedCacheObject>
-  >();
+export const Providers: React.FC = ({
+  children,
+}: {
+  children: React.ReactElement;
+}) => {
+  const [apolloClient, setApolloClient] =
+    useState<ApolloClient<NormalizedCacheObject>>();
   useEffect(() => {
     getClient().then((client) => {
       setApolloClient(client);
