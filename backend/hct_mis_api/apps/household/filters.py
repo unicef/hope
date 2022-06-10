@@ -104,32 +104,30 @@ class HouseholdFilter(FilterSet):
         value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
         return asset_id number like 111222
         """
-        if len(code) >= 6:
-            code = code[5:].split("/")  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
-            if len(code) == 2:
-                code = code[1]          # '111222'
+        if len(code) < 6:
+            return code
+
+        code = code[5:].split("/")[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
+        if code.startswith("20223"):
+            # month 3 day 25...31 id is 44...12067
+            code = code[7:]
+
+        if code.startswith("20224"):
+            # TODO: not sure if this one is correct?
+            # code[5] is the day of month (or the first digit of it)
+            # month 4 id is 12068..157380
+            if code[5] in [1, 2, 3] and len(code) == 12:
+                code = code[-5:]
             else:
-                code = code[0]          # '2022530111222'
-                if code.startswith("20223"):
-                    # month 3 day 25...31 id is 44...12067
-                    code = code[7:]
+                code = code[-6:]
 
-                if code.startswith("20224"):
-                    # TODO: not sure if this one is correct?
-                    # code[5] is the day of month (or the first digit of it)
-                    # month 4 id is 12068..157380
-                    if code[5] in [1, 2, 3] and len(code) == 12:
-                        code = code[-5:]
-                    else:
-                        code = code[-6:]
+        if code.startswith("20225"):
+            # month 5 id is 157381...392136
+            code = code[-6:]
 
-                if code.startswith("20225"):
-                    # month 5 id is 157381...392136
-                    code = code[-6:]
-
-                if code.startswith("20226"):
-                    # month 6 id is 392137...
-                    code = code[-6:]
+        if code.startswith("20226"):
+            # month 6 id is 392137...
+            code = code[-6:]
         return code
 
     def _search_db(self, qs, value):
