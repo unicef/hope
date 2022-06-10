@@ -99,6 +99,38 @@ class HouseholdFilter(FilterSet):
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
+    def _prepare_kobo_asset_id_value(self, code):
+        """
+        preparing value for filter by kobo_asset_id
+        value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
+        return asset_id number like 111222
+        """
+        if len(code) < 6:
+            return code
+
+        code = code[5:].split("/")[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
+        if code.startswith("20223"):
+            # month 3 day 25...31 id is 44...12067
+            code = code[7:]
+
+        if code.startswith("20224"):
+            # TODO: not sure if this one is correct?
+            # code[5] is the day of month (or the first digit of it)
+            # month 4 id is 12068..157380
+            if code[5] in [1, 2, 3] and len(code) == 12:
+                code = code[-5:]
+            else:
+                code = code[-6:]
+
+        if code.startswith("20225"):
+            # month 5 id is 157381...392136
+            code = code[-6:]
+
+        if code.startswith("20226"):
+            # month 6 id is 392137...
+            code = code[-6:]
+        return code
+
     def _search_db(self, qs, value):
         if re.match(r"([\"\']).+\1", value):
             values = [value.replace('"', "").strip()]
@@ -116,6 +148,11 @@ class HouseholdFilter(FilterSet):
             inner_query |= Q(admin_area_new__name__istartswith=value)
             inner_query |= Q(unicef_id__istartswith=value)
             inner_query |= Q(unicef_id__iendswith=value)
+            if value.startswith(("HOPE-", "KOBO-")):
+                _value = self._prepare_kobo_asset_id_value(value)
+                # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                # will filter by '111222' like 111222 is ID
+                inner_query |= Q(kobo_asset_id__endswith=_value)
             q_obj &= inner_query
         return qs.filter(q_obj).distinct()
 
