@@ -197,7 +197,7 @@ class GenerateDashboardReportContentHelpers:
             "created_at__year": report.year,
         }
         if report.admin_area:
-            filter_vars["admin"] = report.admin_area.title
+            filter_vars["admin2_new"] = report.admin_area_new
 
         if not cls._is_report_global(report):
             filter_vars["business_area"] = report.business_area
@@ -387,7 +387,7 @@ class GenerateDashboardReportContentHelpers:
         totals = admin_areas.aggregate(
             Sum("total_transferred", output_field=DecimalField()), Sum("num_households", output_field=DecimalField())
         )
-        admin_areas = admin_areas.values("id", "title", "p_code", "num_households", "total_transferred")
+        admin_areas = admin_areas.values("id", "name", "p_code", "num_households", "total_transferred")
 
         individual_count_fields = cls._get_all_individual_count_fields()
 
@@ -541,7 +541,7 @@ class GenerateDashboardReportContentHelpers:
             ) + shared_cells
         else:
             return (
-                instance.get("title", ""),
+                instance.get("name", ""),
                 instance.get("p_code", ""),
                 instance.get("total_transferred", 0),
                 instance.get("num_households", 0),
