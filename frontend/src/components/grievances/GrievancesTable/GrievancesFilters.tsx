@@ -12,18 +12,17 @@ import { FieldLabel } from '../../core/FieldLabel';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
 import { AdminAreaAutocomplete } from '../../population/AdminAreaAutocomplete';
+import { AssigneeAutocomplete } from './AssigneeAutocomplete';
 
 interface GrievancesFiltersProps {
   onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
-  usersChoices;
 }
 export function GrievancesFilters({
   onFilterChange,
   filter,
   choicesData,
-  usersChoices,
 }: GrievancesFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const handleFilterChange = (e, name): void =>
@@ -149,22 +148,10 @@ export function GrievancesFilters({
           <AdminAreaAutocomplete onFilterChange={onFilterChange} name='admin' />
         </Grid>
         <Grid item>
-          <SelectFilter
-            onChange={(e) => handleFilterChange(e, 'assignedTo')}
-            label={t('Assignee')}
-            value={filter.assignedTo || ''}
-          >
-            <MenuItem value=''>
-              <em>{t('None')}</em>
-            </MenuItem>
-            {usersChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
-          </SelectFilter>
+          <AssigneeAutocomplete
+            onFilterChange={onFilterChange}
+            name='assignedTo'
+          />
         </Grid>
         <Grid item>
           <Box display='flex' flexDirection='column'>

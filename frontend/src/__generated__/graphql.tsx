@@ -7546,7 +7546,8 @@ export type AllUsersForFiltersQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>
 };
 
 
@@ -7554,13 +7555,8 @@ export type AllUsersForFiltersQuery = (
   { __typename?: 'Query' }
   & { allUsers: Maybe<(
     { __typename?: 'UserNodeConnection' }
-    & Pick<UserNodeConnection, 'totalCount' | 'edgeCount'>
-    & { pageInfo: (
-      { __typename?: 'PageInfo' }
-      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
-    ), edges: Array<Maybe<(
+    & { edges: Array<Maybe<(
       { __typename?: 'UserNodeEdge' }
-      & Pick<UserNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -9615,6 +9611,29 @@ export type GlobalAreaChartsQuery = (
       { __typename?: '_DetailedDatasetsNode' }
       & Pick<_DetailedDatasetsNode, 'data' | 'label'>
     )>>> }
+  )> }
+);
+
+export type RdiAutocompleteQueryVariables = {
+  businessArea?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type RdiAutocompleteQuery = (
+  { __typename?: 'Query' }
+  & { allRegistrationDataImports: Maybe<(
+    { __typename?: 'RegistrationDataImportNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'RegistrationDataImportNodeEdge' }
+      & Pick<RegistrationDataImportNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'RegistrationDataImportNode' }
+        & Pick<RegistrationDataImportNode, 'id' | 'name'>
+      )> }
+    )>> }
   )> }
 );
 
@@ -13370,14 +13389,8 @@ export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
 export const AllUsersForFiltersDocument = gql`
-    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String) {
-  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      endCursor
-      startCursor
-    }
+    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String) {
+  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search) {
     edges {
       node {
         id
@@ -13385,10 +13398,7 @@ export const AllUsersForFiltersDocument = gql`
         lastName
         email
       }
-      cursor
     }
-    totalCount
-    edgeCount
   }
 }
     `;
@@ -13428,6 +13438,7 @@ export function withAllUsersForFilters<TProps, TChildProps = {}>(operationOption
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      orderBy: // value for 'orderBy'
+ *      search: // value for 'search'
  *   },
  * });
  */
@@ -18500,6 +18511,65 @@ export function useGlobalAreaChartsLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type GlobalAreaChartsQueryHookResult = ReturnType<typeof useGlobalAreaChartsQuery>;
 export type GlobalAreaChartsLazyQueryHookResult = ReturnType<typeof useGlobalAreaChartsLazyQuery>;
 export type GlobalAreaChartsQueryResult = ApolloReactCommon.QueryResult<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>;
+export const RdiAutocompleteDocument = gql`
+    query RdiAutocomplete($businessArea: String, $first: Int, $orderBy: String, $name: String) {
+  allRegistrationDataImports(businessArea: $businessArea, first: $first, orderBy: $orderBy, name_Startswith: $name) {
+    edges {
+      cursor
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export type RdiAutocompleteComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>, 'query'>;
+
+    export const RdiAutocompleteComponent = (props: RdiAutocompleteComponentProps) => (
+      <ApolloReactComponents.Query<RdiAutocompleteQuery, RdiAutocompleteQueryVariables> query={RdiAutocompleteDocument} {...props} />
+    );
+    
+export type RdiAutocompleteProps<TChildProps = {}> = ApolloReactHoc.DataProps<RdiAutocompleteQuery, RdiAutocompleteQueryVariables> & TChildProps;
+export function withRdiAutocomplete<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RdiAutocompleteQuery,
+  RdiAutocompleteQueryVariables,
+  RdiAutocompleteProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, RdiAutocompleteQuery, RdiAutocompleteQueryVariables, RdiAutocompleteProps<TChildProps>>(RdiAutocompleteDocument, {
+      alias: 'rdiAutocomplete',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRdiAutocompleteQuery__
+ *
+ * To run a query within a React component, call `useRdiAutocompleteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRdiAutocompleteQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRdiAutocompleteQuery({
+ *   variables: {
+ *      businessArea: // value for 'businessArea'
+ *      first: // value for 'first'
+ *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useRdiAutocompleteQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>) {
+        return ApolloReactHooks.useQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, baseOptions);
+      }
+export function useRdiAutocompleteLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, baseOptions);
+        }
+export type RdiAutocompleteQueryHookResult = ReturnType<typeof useRdiAutocompleteQuery>;
+export type RdiAutocompleteLazyQueryHookResult = ReturnType<typeof useRdiAutocompleteLazyQuery>;
+export type RdiAutocompleteQueryResult = ApolloReactCommon.QueryResult<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>;
 export const AllFieldsAttributesDocument = gql`
     query AllFieldsAttributes {
   allFieldsAttributes {
