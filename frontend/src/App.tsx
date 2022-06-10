@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Switch } from 'react-router-dom';
 import { AutoLogout } from './components/core/AutoLogout';
 import { ProtectedRoute } from './components/core/ProtectedRoute';
 import { SentryRoute } from './components/core/SentryRoute';
