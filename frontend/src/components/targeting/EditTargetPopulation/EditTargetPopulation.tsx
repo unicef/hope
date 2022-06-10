@@ -1,5 +1,5 @@
-import { Typography } from '@material-ui/core';
-import { Label } from '@material-ui/icons';
+import { Typography } from '@mui/material';
+import { Label } from '@mui/icons-material';
 import { Form, Formik, FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -54,13 +54,11 @@ export function EditTargetPopulation({
   const { showMessage } = useSnackbar();
   const { id } = useParams();
   const businessArea = useBusinessArea();
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsQuery({
+      variables: { businessArea, status: ['ACTIVE'] },
+      fetchPolicy: 'cache-and-network',
+    });
 
   const handleValidate = (values): { candidateListCriterias?: string } => {
     const { candidateListCriterias } = values;
@@ -73,9 +71,7 @@ export function EditTargetPopulation({
     return errors;
   };
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .min(2, 'Too short')
-      .max(255, 'Too long'),
+    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
     excludedIds: Yup.string().test(
       'testName',
       'ID is not in the correct format',

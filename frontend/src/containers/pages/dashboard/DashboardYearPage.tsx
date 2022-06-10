@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -69,12 +69,10 @@ export function DashboardYearPage({
     fetchPolicy: 'cache-and-network',
   });
 
-  const [
-    loadGlobal,
-    { data: globalData, loading: globalLoading },
-  ] = useGlobalAreaChartsLazyQuery({
-    variables: sharedVariables,
-  });
+  const [loadGlobal, { data: globalData, loading: globalLoading }] =
+    useGlobalAreaChartsLazyQuery({
+      variables: sharedVariables,
+    });
 
   useEffect(() => {
     if (isGlobal) {

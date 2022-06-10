@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Grid } from '@material-ui/core';
+import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import {
   AllImportedIndividualsQueryVariables,

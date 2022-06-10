@@ -1,4 +1,4 @@
-import { Tab, Tabs, Typography } from '@material-ui/core';
+import { Tab, Tabs, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DashboardFilters } from '../../../components/dashboard/DashboardFilters';

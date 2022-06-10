@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import { AllChartsQuery } from '../../../__generated__/graphql';

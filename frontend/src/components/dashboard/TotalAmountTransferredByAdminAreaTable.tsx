@@ -1,4 +1,4 @@
-import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableRow } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatNumber } from '../../utils/utils';

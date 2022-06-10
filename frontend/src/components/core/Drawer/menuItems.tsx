@@ -1,19 +1,19 @@
-import Assignment from '@material-ui/icons/Assignment';
-import AttachMoney from '@material-ui/icons/AttachMoney';
-import AutorenewIcon from '@material-ui/icons/AutorenewRounded';
-import DashboardIcon from '@material-ui/icons/DashboardRounded';
-import FaceIcon from '@material-ui/icons/Face';
-import Feedback from '@material-ui/icons/Feedback';
-import ListAltRounded from '@material-ui/icons/ListAltRounded';
-import LocalLibrary from '@material-ui/icons/LocalLibrary';
-import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
-import PaymentIcon from '@material-ui/icons/Payment';
-import PeopleIcon from '@material-ui/icons/PeopleRounded';
-import QuestionAnswerIcon from '@material-ui/icons/QuestionAnswer';
-import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
-import TrackChangesIcon from '@material-ui/icons/TrackChanges';
-import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
-import InfoIcon from '@material-ui/icons/Info';
+import Assignment from '@mui/icons-material/Assignment';
+import AttachMoney from '@mui/icons-material/AttachMoney';
+import AutorenewIcon from '@mui/icons-material/AutorenewRounded';
+import DashboardIcon from '@mui/icons-material/DashboardRounded';
+import FaceIcon from '@mui/icons-material/Face';
+import Feedback from '@mui/icons-material/Feedback';
+import ListAltRounded from '@mui/icons-material/ListAltRounded';
+import LocalLibrary from '@mui/icons-material/LocalLibrary';
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
+import PaymentIcon from '@mui/icons-material/Payment';
+import PeopleIcon from '@mui/icons-material/PeopleRounded';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import SupervisedUserCircle from '@mui/icons-material/SupervisedUserCircle';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import TrendingUpRounded from '@mui/icons-material/TrendingUpRounded';
+import InfoIcon from '@mui/icons-material/Info';
 import React from 'react';
 import { PERMISSIONS } from '../../../config/permissions';
 
@@ -139,14 +139,12 @@ export const menuItems = [
 export const resourcesItems = [
   {
     name: 'Knowledge Base',
-    href:
-      'https://unicef.service-now.com/cc?id=kb_search&kb_knowledge_base=be5501f9db003850d180f264f39619ee',
+    href: 'https://unicef.service-now.com/cc?id=kb_search&kb_knowledge_base=be5501f9db003850d180f264f39619ee',
     icon: <LocalLibrary />,
   },
   {
     name: 'Conversations',
-    href:
-      'https://web.yammer.com/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiI2NDk1MDA4In0',
+    href: 'https://web.yammer.com/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiI2NDk1MDA4In0',
     icon: <QuestionAnswerIcon />,
   },
   {

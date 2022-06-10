@@ -1,7 +1,7 @@
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import React from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 import {
   ProgramNode,
@@ -21,7 +21,9 @@ export function FinishedProgramDetailsPageHeaderButtons({
   program,
   canActivate,
 }: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement {
-  const { data, loading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+  const { data, loading } = useCashAssistUrlPrefixQuery({
+    fetchPolicy: 'cache-first',
+  });
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (

@@ -1,4 +1,4 @@
-import { Box, Grid, MenuItem } from '@material-ui/core';
+import { Box, Grid, MenuItem } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SearchTextField } from '../../../../components/core/SearchTextField';

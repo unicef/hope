@@ -1,4 +1,4 @@
-import { Box, FormHelperText } from '@material-ui/core';
+import { Box, FormHelperText } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isInvalid } from '../../../../utils/utils';

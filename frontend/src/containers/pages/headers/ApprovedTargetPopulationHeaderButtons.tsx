@@ -1,5 +1,5 @@
-import { Button, Tooltip } from '@material-ui/core';
-import { FileCopy } from '@material-ui/icons';
+import { Button, Tooltip } from '@mui/material';
+import { FileCopy } from '@mui/icons-material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

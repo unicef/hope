@@ -1,7 +1,7 @@
-import { Button, Grid, Typography } from '@material-ui/core';
-import { GetApp } from '@material-ui/icons';
-import CheckIcon from '@material-ui/icons/Check';
-import EmailIcon from '@material-ui/icons/Email';
+import { Button, Grid, Typography } from '@mui/material';
+import { GetApp } from '@mui/icons-material';
+import CheckIcon from '@mui/icons-material/Check';
+import EmailIcon from '@mui/icons-material/Email';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -52,10 +52,8 @@ export const ReportingDetailsPage = (): React.ReactElement => {
   const { data, loading } = useReportQuery({
     variables: { id },
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useReportChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;

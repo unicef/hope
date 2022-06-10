@@ -1,5 +1,5 @@
-import { Box, Typography } from '@material-ui/core';
-import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
+import { Box, Typography } from '@mui/material';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';

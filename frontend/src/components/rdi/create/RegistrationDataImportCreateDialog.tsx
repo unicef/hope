@@ -7,8 +7,8 @@ import {
   InputLabel,
   MenuItem,
   Select,
-} from '@material-ui/core';
-import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
+} from '@mui/material';
+import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

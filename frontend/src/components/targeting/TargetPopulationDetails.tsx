@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TargetPopulationNode } from '../../__generated__/graphql';
@@ -15,13 +15,8 @@ interface ProgramDetailsProps {
 export function TargetPopulationDetails({
   targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
-  const {
-    createdBy,
-    finalizedBy,
-    changeDate,
-    finalizedAt,
-    program,
-  } = targetPopulation;
+  const { createdBy, finalizedBy, changeDate, finalizedAt, program } =
+    targetPopulation;
   const { t } = useTranslation();
   const closeDate = changeDate ? (
     <UniversalMoment>{changeDate}</UniversalMoment>

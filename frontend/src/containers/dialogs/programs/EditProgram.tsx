@@ -1,5 +1,5 @@
-import { Button } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/EditRounded';
+import { Button } from '@mui/material';
+import EditIcon from '@mui/icons-material/EditRounded';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';

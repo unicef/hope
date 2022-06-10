@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import React from 'react';
 import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../utils/utils';
@@ -69,11 +69,14 @@ export const LookUpSection = ({
     </Grid>
   );
   const lookupDict = {
-    [GRIEVANCE_CATEGORIES.DATA_CHANGE]: householdIndividualRelatedTicketsLookups,
+    [GRIEVANCE_CATEGORIES.DATA_CHANGE]:
+      householdIndividualRelatedTicketsLookups,
     [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: allThree,
     [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: allThree,
-    [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: householdIndividualRelatedTicketsLookups,
-    [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: householdIndividualRelatedTicketsLookups,
+    [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]:
+      householdIndividualRelatedTicketsLookups,
+    [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]:
+      householdIndividualRelatedTicketsLookups,
     [GRIEVANCE_CATEGORIES.REFERRAL]: householdIndividualRelatedTicketsLookups,
   };
   return thingForSpecificGrievanceType(

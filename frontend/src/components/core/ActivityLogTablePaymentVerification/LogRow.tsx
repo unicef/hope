@@ -1,6 +1,6 @@
-import { IconButton, makeStyles } from '@material-ui/core';
-import Collapse from '@material-ui/core/Collapse';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
+import { IconButton, makeStyles } from '@mui/material';
+import Collapse from '@mui/material/Collapse';
+import ExpandMore from '@mui/icons-material/ExpandMoreRounded';
 import clsx from 'clsx';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';

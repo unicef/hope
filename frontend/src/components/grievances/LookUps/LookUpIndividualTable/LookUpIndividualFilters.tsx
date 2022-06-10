@@ -4,9 +4,9 @@ import {
   FormControlLabel,
   Grid,
   MenuItem,
-} from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
-import WcIcon from '@material-ui/icons/Wc';
+} from '@mui/material';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import WcIcon from '@mui/icons-material/Wc';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

@@ -5,7 +5,7 @@ import {
   Radio,
   RadioGroup,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import styled from 'styled-components';
 
 const FormLabelContainer = styled.div`

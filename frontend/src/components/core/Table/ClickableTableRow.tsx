@@ -1,5 +1,5 @@
 import React, { MouseEventHandler, useState } from 'react';
-import TableRow, { TableRowProps } from '@material-ui/core/TableRow';
+import TableRow, { TableRowProps } from '@mui/material/TableRow';
 import styled from 'styled-components';
 
 const StyledTableRow = styled(TableRow)`

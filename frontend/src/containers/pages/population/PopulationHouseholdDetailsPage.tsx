@@ -1,5 +1,5 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import Paper from '@material-ui/core/Paper';
+import { Box, Grid, Typography } from '@mui/material';
+import Paper from '@mui/material/Paper';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -64,14 +64,10 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: flexFieldsData,
-    loading: flexFieldsDataLoading,
-  } = useAllHouseholdsFlexFieldsAttributesQuery();
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
+    useAllHouseholdsFlexFieldsAttributesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   if (loading || choicesLoading || flexFieldsDataLoading)
     return <LoadingComponent />;

@@ -5,7 +5,7 @@ import {
   MenuItem,
   InputLabel,
   Select,
-} from '@material-ui/core';
+} from '@mui/material';
 import get from 'lodash/get';
 
 const toExternalValue = (internalValue): boolean | null => {

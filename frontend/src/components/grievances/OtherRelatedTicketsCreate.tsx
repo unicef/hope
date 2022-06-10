@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -64,8 +64,9 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
       </Title>
       <Box display='flex' flexDirection='column'>
         <LabelizedField
-          label={`${t('For Household')} ${values?.selectedHousehold?.unicefId ||
-            '-'} `}
+          label={`${t('For Household')} ${
+            values?.selectedHousehold?.unicefId || '-'
+          } `}
         >
           <>{renderIds(openHouseholdTickets)}</>
         </LabelizedField>
@@ -80,8 +81,9 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t('For Household')} ${values?.selectedHousehold
-                ?.unicefId || '-'} `}
+              label={`${t('For Household')} ${
+                values?.selectedHousehold?.unicefId || '-'
+              } `}
             >
               <>{renderIds(closedHouseholdTickets)}</>
             </LabelizedField>

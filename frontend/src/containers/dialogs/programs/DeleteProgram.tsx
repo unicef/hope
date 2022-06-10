@@ -4,8 +4,8 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/CloseRounded';
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

@@ -1,6 +1,6 @@
 import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
-import { Radio } from '@material-ui/core';
+import TableCell from '@mui/material/TableCell';
+import { Radio } from '@mui/material';
 import { AllIndividualsQuery } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { sexToCapitalize } from '../../../../utils/utils';

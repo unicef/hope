@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
@@ -19,10 +19,8 @@ export function PopulationIndividualsPage(): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const {
-    data: householdChoicesData,
-    loading: householdChoicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: householdChoicesData, loading: householdChoicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [filter, setFilter] = useState({
     sex: [],
@@ -30,10 +28,8 @@ export function PopulationIndividualsPage(): React.ReactElement {
     flags: [],
   });
   const debouncedFilter = useDebounce(filter, 500);
-  const {
-    data: individualChoicesData,
-    loading: individualChoicesLoading,
-  } = useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
   if (householdChoicesLoading || individualChoicesLoading)
     return <LoadingComponent />;

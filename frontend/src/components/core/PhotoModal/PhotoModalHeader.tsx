@@ -1,4 +1,4 @@
-import { Box, DialogTitle } from '@material-ui/core';
+import { Box, DialogTitle } from '@mui/material';
 import React from 'react';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { RotateImg } from './RotateImg';

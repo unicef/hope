@@ -1,6 +1,6 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import styled from 'styled-components';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import React from 'react';
 import {
   ProgramNode,
@@ -24,7 +24,9 @@ export function ActiveProgramDetailsPageHeaderButtons({
   canFinish,
   canEdit,
 }: ActiveProgramDetailsPageHeaderPropTypes): React.ReactElement {
-  const { data, loading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+  const { data, loading } = useCashAssistUrlPrefixQuery({
+    fetchPolicy: 'cache-first',
+  });
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
@@ -45,7 +47,7 @@ export function ActiveProgramDetailsPageHeaderButtons({
           color='primary'
           component='a'
           disabled={!program.caHashId}
-          target="_blank"
+          target='_blank'
           href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_program&id=${program.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >

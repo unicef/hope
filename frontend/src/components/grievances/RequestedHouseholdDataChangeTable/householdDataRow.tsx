@@ -1,5 +1,5 @@
-import { Checkbox, TableCell, TableRow } from '@material-ui/core';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import { Checkbox, TableCell, TableRow } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
 import React from 'react';

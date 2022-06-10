@@ -1,14 +1,17 @@
 import React from 'react';
-import { InputAdornment } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import { InputAdornment } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from 'moment';
 import get from 'lodash/get';
+import TextField from '../../TextField';
 
 export const FormikDateField = ({
   field,
   form,
   decoratorStart,
   decoratorEnd,
+  label = null,
+  placeholder = null,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
@@ -21,13 +24,14 @@ export const FormikDateField = ({
   }
 
   return (
-    <KeyboardDatePicker
+    <DatePicker
       {...field}
       {...otherProps}
       name={field.name}
       variant='inline'
       inputVariant='outlined'
       margin='dense'
+      label={label}
       value={formattedValue || null}
       error={isInvalid}
       onBlur={null}
@@ -39,14 +43,12 @@ export const FormikDateField = ({
         }, 0);
       }}
       onChange={(date) => {
-        if (date?.isValid()) {
-          field.onChange({
-            target: {
-              value: moment(date).format('YYYY-MM-DD') || null,
-              name: field.name,
-            },
-          });
-        }
+        field.onChange({
+          target: {
+            value: moment(date).format('YYYY-MM-DD') || null,
+            name: field.name,
+          },
+        });
       }}
       format={dateFormat}
       InputProps={{
@@ -65,6 +67,9 @@ export const FormikDateField = ({
       PopoverProps={{
         PaperProps: { 'data-cy': 'date-picker-container' },
       }}
+      renderInput={(params) => (
+        <TextField placeholder={placeholder} {...params} />
+      )}
     />
   );
 };

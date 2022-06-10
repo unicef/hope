@@ -1,10 +1,5 @@
 import React, { useEffect } from 'react';
-import {
-  FormControlLabel,
-  Checkbox,
-  Box,
-  FormHelperText,
-} from '@material-ui/core';
+import { FormControlLabel, Checkbox, Box, FormHelperText } from '@mui/material';
 import get from 'lodash/get';
 
 export const Check = ({

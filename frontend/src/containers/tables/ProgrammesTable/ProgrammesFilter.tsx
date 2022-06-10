@@ -1,5 +1,5 @@
-import { Grid, MenuItem, Paper } from '@material-ui/core';
-import GroupIcon from '@material-ui/icons/Group';
+import { Grid, MenuItem, Paper } from '@mui/material';
+import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';

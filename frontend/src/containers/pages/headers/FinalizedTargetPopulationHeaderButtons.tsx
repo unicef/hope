@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import { FileCopy } from '@material-ui/icons';
+import { Button } from '@mui/material';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import { FileCopy } from '@mui/icons-material';
 import {
   TargetPopulationNode,
   useCashAssistUrlPrefixQuery,
@@ -35,7 +35,9 @@ export function FinalizedTargetPopulationHeaderButtons({
   canDuplicate,
 }: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const { data, loading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+  const { data, loading } = useCashAssistUrlPrefixQuery({
+    fetchPolicy: 'cache-first',
+  });
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
@@ -53,7 +55,7 @@ export function FinalizedTargetPopulationHeaderButtons({
           color='primary'
           component='a'
           disabled={!targetPopulation.caHashId}
-          target="_blank"
+          target='_blank'
           href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >

@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -46,15 +46,11 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     fetchPolicy: 'cache-and-network',
   });
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
-  const {
-    data: flexFieldsData,
-    loading: flexFieldsDataLoading,
-  } = useAllIndividualsFlexFieldsAttributesQuery();
+  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
+    useAllIndividualsFlexFieldsAttributesQuery();
 
   if (loading || choicesLoading || flexFieldsDataLoading)
     return <LoadingComponent />;

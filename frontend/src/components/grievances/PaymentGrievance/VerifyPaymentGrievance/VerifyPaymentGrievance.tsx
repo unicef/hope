@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  Grid,
-} from '@material-ui/core';
+import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';

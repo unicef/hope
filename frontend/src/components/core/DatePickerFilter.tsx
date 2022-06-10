@@ -1,6 +1,7 @@
-import { Box } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import { Box } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import React from 'react';
+import TextField from '../../shared/TextField';
 import { FieldLabel } from './FieldLabel';
 
 export function DatePickerFilter({
@@ -13,17 +14,13 @@ export function DatePickerFilter({
   return (
     <Box display='flex' flexDirection='column'>
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
-      <KeyboardDatePicker
-        variant='inline'
-        inputVariant='outlined'
-        margin='dense'
+      <DatePicker
         label={label}
-        placeholder={placeholder}
-        autoOk
-        onChange={onChange}
         value={value || null}
-        format='YYYY-MM-DD'
-        InputAdornmentProps={{ position: 'end' }}
+        onChange={onChange}
+        renderInput={(params) => (
+          <TextField placeholder={placeholder} {...params} />
+        )}
       />
     </Box>
   );

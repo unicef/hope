@@ -1,5 +1,5 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
+import { Box, Button, Grid, Typography } from '@mui/material';
+import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -37,10 +37,8 @@ export const EditIndividualDataChange = ({
   const { t } = useTranslation();
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
-  const {
-    data: addIndividualFieldsData,
-    loading: addIndividualFieldsLoading,
-  } = useAllAddIndividualFieldsQuery();
+  const { data: addIndividualFieldsData, loading: addIndividualFieldsLoading } =
+    useAllAddIndividualFieldsQuery();
 
   const [
     getIndividual,

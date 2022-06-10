@@ -1,5 +1,5 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import CircularProgress from '@mui/material/CircularProgress';
+import Autocomplete from '@mui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,18 +34,16 @@ export function RdiAutocomplete({
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
   const businessArea = useBusinessArea();
-  const [
-    loadRdiData,
-    { data, loading },
-  ] = useAllRegistrationDataImportsLazyQuery({
-    variables: {
-      businessArea,
-      first: 50,
-      orderBy: 'name',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      name_Icontains: debouncedInputText,
-    },
-  });
+  const [loadRdiData, { data, loading }] =
+    useAllRegistrationDataImportsLazyQuery({
+      variables: {
+        businessArea,
+        first: 50,
+        orderBy: 'name',
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        name_Icontains: debouncedInputText,
+      },
+    });
   useEffect(() => {
     loadRdiData();
   }, [debouncedInputText, loadRdiData]);

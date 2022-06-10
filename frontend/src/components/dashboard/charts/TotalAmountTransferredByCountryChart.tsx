@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import React, { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';

@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
 import { useBusinessArea } from '../../../../../hooks/useBusinessArea';

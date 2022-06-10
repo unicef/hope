@@ -2,9 +2,9 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import clsx from "clsx";
-import InputBase from "@material-ui/core//InputBase";
-import NotchedOutline from "@material-ui/core/OutlinedInput/NotchedOutline";
-import withStyles from "@material-ui/core/styles/withStyles";
+import InputBase from "@mui/material//InputBase";
+import NotchedOutline from "@mui/material/OutlinedInput/NotchedOutline";
+import withStyles from "@mui/material/styles/withStyles";
 
 export const styles = theme => {
   const borderColor =

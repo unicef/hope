@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { Field, FormikProvider, useFormik } from 'formik';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';

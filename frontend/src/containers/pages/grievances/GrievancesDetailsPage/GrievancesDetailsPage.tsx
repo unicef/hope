@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
@@ -21,10 +21,8 @@ import { grievancePermissions } from './grievancePermissions';
 export const GrievancesDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const {
-    data: currentUserData,
-    loading: currentUserDataLoading,
-  } = useMeQuery();
+  const { data: currentUserData, loading: currentUserDataLoading } =
+    useMeQuery();
   const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
     fetchPolicy: 'network-only',
@@ -35,10 +33,8 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
   const isOwner = currentUserId === ticket?.assignedTo?.id;
 
   const businessArea = useBusinessArea();
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;

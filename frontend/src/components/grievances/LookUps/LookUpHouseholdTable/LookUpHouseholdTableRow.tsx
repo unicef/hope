@@ -1,5 +1,5 @@
-import { Radio } from '@material-ui/core';
-import TableCell from '@material-ui/core/TableCell';
+import { Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {

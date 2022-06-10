@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -125,8 +125,9 @@ export const OtherRelatedTickets = ({
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t('For Household')} ${ticket.household?.unicefId ||
-                '-'} `}
+              label={`${t('For Household')} ${
+                ticket.household?.unicefId || '-'
+              } `}
             >
               <>{renderIds(closedHouseholdTickets)}</>
             </LabelizedField>

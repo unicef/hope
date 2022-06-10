@@ -2,15 +2,15 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { refType } from '@material-ui/utils';
-import Input from '@material-ui/core/Input';
-import FilledInput from '@material-ui/core/FilledInput';
+import { refType } from '@mui/utils';
+import Input from '@mui/material/Input';
+import FilledInput from '@mui/material/FilledInput';
 import OutlinedInput from './OutlinedInput';
 import InputLabel from './InputLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
 import Select from './Select';
-import withStyles from '@material-ui/core/styles/withStyles';
+import withStyles from '@mui/material/styles/withStyles';
 
 const variantComponent = {
     standard: Input,

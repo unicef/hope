@@ -1,7 +1,7 @@
-import { InputAdornment } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import { InputAdornment } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import RoomRoundedIcon from '@mui/icons-material/RoomRounded';
+import Autocomplete from '@mui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

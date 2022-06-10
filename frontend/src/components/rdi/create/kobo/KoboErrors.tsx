@@ -1,10 +1,7 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import {
-  IconButton,
-  Collapse
-} from '@material-ui/core';
-import { ExpandLessRounded, ExpandMoreRounded } from '@material-ui/icons';
+import { IconButton, Collapse } from '@mui/material';
+import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
 import { KoboErrorNode } from '../../../../__generated__/graphql';
 
 const Error = styled.div`

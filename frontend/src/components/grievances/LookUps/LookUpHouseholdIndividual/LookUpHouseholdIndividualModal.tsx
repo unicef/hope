@@ -7,7 +7,7 @@ import {
   DialogTitle,
   Tab,
   Tabs,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -90,12 +90,10 @@ export const LookUpHouseholdIndividualModal = ({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery({
+      variables: { businessArea },
+    });
   if (loading || choicesLoading) return null;
 
   const { allPrograms } = data;

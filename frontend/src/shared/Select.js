@@ -1,15 +1,15 @@
 /* eslint-disable */
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import { mergeClasses } from '@material-ui/styles';
+import { mergeClasses } from '@mui/styles';
 import SelectInput from './SelectInput';
-import formControlState from '@material-ui/core/FormControl/formControlState';
-import useFormControl from '@material-ui/core/FormControl/useFormControl';
-import withStyles from '@material-ui/core/styles/withStyles';
-import ArrowDropDownIcon from '@material-ui/core/internal/svg-icons/ArrowDropDown';
-import Input from '@material-ui/core/Input';
-import NativeSelectInput from '@material-ui/core/NativeSelect/NativeSelectInput';
-import FilledInput from '@material-ui/core/FilledInput';
+import formControlState from '@mui/material/FormControl/formControlState';
+import useFormControl from '@mui/material/FormControl/useFormControl';
+import withStyles from '@mui/material/styles/withStyles';
+import ArrowDropDownIcon from '@mui/material/internal/svg-icons/ArrowDropDown';
+import Input from '@mui/material/Input';
+import NativeSelectInput from '@mui/material/NativeSelect/NativeSelectInput';
+import FilledInput from '@mui/material/FilledInput';
 import OutlinedInput from './OutlinedInput';
 
 export const styles = (theme) => ({

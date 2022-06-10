@@ -1,10 +1,5 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { Dialog, DialogContent, DialogTitle, Typography } from '@mui/material';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
 import React, { ReactElement } from 'react';
@@ -95,18 +90,12 @@ export function ProgramForm({
       .required(t('Sector is required'))
       .min(2, t('Too short'))
       .max(50, t('Too long')),
-    budget: Yup.number()
-      .min(0)
-      .max(99999999, t('Number is too big')),
+    budget: Yup.number().min(0).max(99999999, t('Number is too big')),
     administrativeAreasOfImplementation: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
-    description: Yup.string()
-      .min(2, t('Too short'))
-      .max(255, t('Too long')),
-    populationGoal: Yup.number()
-      .min(0)
-      .max(99999999, t('Number is too big')),
+    description: Yup.string().min(2, t('Too short')).max(255, t('Too long')),
+    populationGoal: Yup.number().min(0).max(99999999, t('Number is too big')),
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

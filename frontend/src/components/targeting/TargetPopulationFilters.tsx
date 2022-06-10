@@ -1,6 +1,6 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import { Group, Person } from '@material-ui/icons';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+import { Grid, MenuItem } from '@mui/material';
+import { Group, Person } from '@mui/icons-material';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TARGETING_STATES } from '../../utils/constants';

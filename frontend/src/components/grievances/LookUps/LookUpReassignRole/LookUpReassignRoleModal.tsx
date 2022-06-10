@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -81,7 +81,7 @@ export const LookUpReassignRoleModal = ({
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
-    fetchPolicy:'cache-and-network'
+    fetchPolicy: 'cache-and-network',
   });
 
   if (loading) return null;

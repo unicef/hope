@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import TableCell from '@material-ui/core/TableCell';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { Box, Collapse, IconButton, TableRow } from '@material-ui/core';
+import TableCell from '@mui/material/TableCell';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { Box, Collapse, IconButton, TableRow } from '@mui/material';
 import { UserNode } from '../../../__generated__/graphql';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { StatusBox } from '../../../components/core/StatusBox';

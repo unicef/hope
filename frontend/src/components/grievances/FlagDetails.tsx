@@ -8,7 +8,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

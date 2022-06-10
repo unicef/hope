@@ -7,8 +7,8 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+} from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

@@ -1,5 +1,5 @@
-import { InputAdornment, MenuItem } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
+import { InputAdornment, MenuItem } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

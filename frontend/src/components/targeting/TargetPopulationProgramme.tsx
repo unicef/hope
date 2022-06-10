@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import { Field } from 'formik';
 import get from 'lodash/get';
 import React from 'react';

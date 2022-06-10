@@ -1,4 +1,4 @@
-import { InputAdornment } from '@material-ui/core';
+import { InputAdornment } from '@mui/material';
 import React from 'react';
 import styled from 'styled-components';
 import InputLabel from '../../shared/InputLabel';

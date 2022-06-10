@@ -1,8 +1,8 @@
 import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Button, Paper, Typography } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
+import { Button, Paper, Typography } from '@mui/material';
+import { AddCircleOutline } from '@mui/icons-material';
 import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
 import { TargetPopulationQuery } from '../../../__generated__/graphql';
 import { Criteria } from './Criteria';

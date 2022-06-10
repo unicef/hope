@@ -1,5 +1,5 @@
-import { Box } from '@material-ui/core';
-import TableCell from '@material-ui/core/TableCell';
+import { Box } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';

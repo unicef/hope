@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Tooltip } from '@material-ui/core';
-import WarningIcon from '@material-ui/icons/Warning';
+import { Tooltip } from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
 
 const StyledWarning = styled(WarningIcon)`
   color: ${({ theme, confirmed }) =>

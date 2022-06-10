@@ -3,14 +3,17 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { Field, FormikProvider, useFormik } from 'formik';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-import {ImportDataStatus, useCreateRegistrationKoboImportMutation} from '../../../../__generated__/graphql';
+import {
+  ImportDataStatus,
+  useCreateRegistrationKoboImportMutation,
+} from '../../../../__generated__/graphql';
 import { handleValidationErrors } from '../../../../utils/utils';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';

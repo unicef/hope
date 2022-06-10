@@ -1,7 +1,7 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import GroupIcon from '@material-ui/icons/Group';
-import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+import { Grid, MenuItem } from '@mui/material';
+import GroupIcon from '@mui/icons-material/Group';
+import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {

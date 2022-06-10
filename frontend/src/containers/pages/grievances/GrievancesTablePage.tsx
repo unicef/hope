@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
@@ -42,17 +42,13 @@ export function GrievancesTablePage(): React.ReactElement {
     scoreMax: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
-  const {
-    data: userData,
-    loading: userDataLoading,
-  } = useAllUsersForFiltersQuery({
-    variables: { businessArea },
-  });
+  const { data: userData, loading: userDataLoading } =
+    useAllUsersForFiltersQuery({
+      variables: { businessArea },
+    });
 
   if (choicesLoading || userDataLoading) return <LoadingComponent />;
   if (permissions === null) return null;

@@ -2,13 +2,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import {
-  Button,
-  Box,
-  Paper,
-  SnackbarContent,
-  Snackbar,
-} from '@material-ui/core';
+import { Button, Box, Paper, SnackbarContent, Snackbar } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import { useCheckAgainstSanctionListUploadMutation } from '../../../__generated__/graphql';
 import { DropzoneField } from '../../../components/core/DropzoneField';
@@ -27,10 +21,8 @@ export function SanctionList(): React.ReactElement {
     setSnackbarMessage(message);
     setSnackbarShow(true);
   };
-  const [
-    checkAgainstSanctionMutate,
-    { loading: fileLoading },
-  ] = useCheckAgainstSanctionListUploadMutation();
+  const [checkAgainstSanctionMutate, { loading: fileLoading }] =
+    useCheckAgainstSanctionListUploadMutation();
 
   const { t } = useTranslation();
 

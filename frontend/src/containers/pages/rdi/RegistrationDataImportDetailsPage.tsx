@@ -1,5 +1,5 @@
-import { Tab, Typography } from '@material-ui/core';
-import Tabs from '@material-ui/core/Tabs';
+import { Tab, Typography } from '@mui/material';
+import Tabs from '@mui/material/Tabs';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -66,10 +66,8 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
     pollInterval: 30000,
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [selectedTab, setSelectedTab] = useState(0);
 

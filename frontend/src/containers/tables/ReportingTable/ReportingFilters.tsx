@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid, MenuItem } from '@material-ui/core';
+import { Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -50,9 +50,7 @@ export const ReportingFilters = ({
               onFilterChange({
                 ...filter,
                 createdFrom: date
-                  ? moment(date)
-                      .startOf('day')
-                      .toISOString()
+                  ? moment(date).startOf('day').toISOString()
                   : null,
               })
             }
@@ -66,9 +64,7 @@ export const ReportingFilters = ({
               onFilterChange({
                 ...filter,
                 createdTo: date
-                  ? moment(date)
-                      .endOf('day')
-                      .toISOString()
+                  ? moment(date).endOf('day').toISOString()
                   : null,
               })
             }

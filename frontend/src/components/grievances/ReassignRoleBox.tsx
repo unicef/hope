@@ -1,5 +1,5 @@
-import { Box, Paper, Typography } from '@material-ui/core';
-import WarningIcon from '@material-ui/icons/Warning';
+import { Box, Paper, Typography } from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
 import isEmpty from 'lodash/isEmpty';
 import capitalize from 'lodash/capitalize';
 import React from 'react';

@@ -1,5 +1,5 @@
 import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import {
   AllCashPlansQuery,
@@ -31,9 +31,8 @@ export function PaymentVerificationTableRow({
   const handleClick = (): void => {
     history.push(paymentVerificationPlanPath);
   };
-  const {
-    data: statusChoicesData,
-  } = useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } =
+    useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
   const deliveryTypeChoicesDict = choicesToDict(

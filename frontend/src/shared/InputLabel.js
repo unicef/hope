@@ -2,10 +2,10 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import formControlState from '@material-ui/core/FormControl/formControlState';
-import { useFormControl } from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
-import FormLabel from '@material-ui/core/FormLabel';
+import formControlState from '@mui/material/FormControl/formControlState';
+import { useFormControl } from '@mui/material';
+import { withStyles } from '@mui/material/styles';
+import FormLabel from '@mui/material/FormLabel';
 
 export const styles = (theme) => ({
   /* Styles applied to the root element. */

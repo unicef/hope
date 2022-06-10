@@ -1,4 +1,4 @@
-import { Box, Grid, MenuItem, TextField } from '@material-ui/core';
+import { Box, Grid, MenuItem, TextField } from '@mui/material';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -79,9 +79,7 @@ export function GrievancesFilters({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  min: moment(date)
-                    .set({ hour: 0, minute: 0 })
-                    .toISOString(),
+                  min: moment(date).set({ hour: 0, minute: 0 }).toISOString(),
                 },
               })
             }
@@ -96,9 +94,7 @@ export function GrievancesFilters({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  max: moment(date)
-                    .set({ hour: 23, minute: 59 })
-                    .toISOString(),
+                  max: moment(date).set({ hour: 23, minute: 59 }).toISOString(),
                 },
               })
             }

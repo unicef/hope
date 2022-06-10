@@ -1,7 +1,7 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import Close from '@material-ui/icons/Close';
-import Edit from '@material-ui/icons/Edit';
+import { Box, Grid, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
+import Close from '@mui/icons-material/Close';
+import Edit from '@mui/icons-material/Edit';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

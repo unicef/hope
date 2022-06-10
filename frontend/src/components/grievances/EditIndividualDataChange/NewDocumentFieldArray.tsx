@@ -1,5 +1,5 @@
-import { Button, Grid } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
+import { Button, Grid } from '@mui/material';
+import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

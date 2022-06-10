@@ -1,5 +1,5 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
-import { GetApp } from '@material-ui/icons';
+import { Box, Button, Grid, Typography } from '@mui/material';
+import { GetApp } from '@mui/icons-material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

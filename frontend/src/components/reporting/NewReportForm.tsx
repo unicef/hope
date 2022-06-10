@@ -5,8 +5,8 @@ import {
   Grid,
   Paper,
   Typography,
-} from '@material-ui/core';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+} from '@mui/material';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import moment from 'moment';
@@ -56,17 +56,13 @@ export const NewReportForm = (): React.ReactElement => {
       .required(t('Date To is required')),
   });
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy:'cache-and-network'
-  });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useReportChoiceDataQuery();
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsQuery({
+      variables: { businessArea, status: ['ACTIVE'] },
+      fetchPolicy: 'cache-and-network',
+    });
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
   const [mutate] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;

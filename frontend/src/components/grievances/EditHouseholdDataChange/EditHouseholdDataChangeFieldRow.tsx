@@ -1,5 +1,5 @@
-import { Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Grid, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { Field, useField } from 'formik';
 import camelCase from 'lodash/camelCase';
 import React, { useEffect } from 'react';

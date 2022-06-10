@@ -7,12 +7,12 @@ import {
   ListItemText,
   makeStyles,
   Typography,
-} from '@material-ui/core';
-import Divider from '@material-ui/core/Divider';
-import DrawerMaterial from '@material-ui/core/Drawer';
-import IconButton from '@material-ui/core/IconButton';
-import List from '@material-ui/core/List';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+} from '@mui/material';
+import Divider from '@mui/material/Divider';
+import DrawerMaterial from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { gql } from 'apollo-boost';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';

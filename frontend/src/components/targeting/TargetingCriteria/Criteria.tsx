@@ -1,5 +1,5 @@
-import { IconButton } from '@material-ui/core';
-import { Delete, Edit } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

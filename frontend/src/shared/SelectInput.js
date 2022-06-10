@@ -3,14 +3,14 @@ import * as React from 'react';
 import { isFragment } from 'react-is';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import capitalize from '@material-ui/core/utils/capitalize';
-import { refType } from '@material-ui/utils';
-import Menu from '@material-ui/core/Menu/Menu';
-import { isFilled } from '@material-ui/core/InputBase/utils';
-import useForkRef from '@material-ui/core/utils/useForkRef';
-import useControlled from '@material-ui/core/utils/useControlled';
-import { InputAdornment } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+import capitalize from '@mui/material/utils/capitalize';
+import { refType } from '@mui/utils';
+import Menu from '@mui/material/Menu/Menu';
+import { isFilled } from '@mui/material/InputBase/utils';
+import useForkRef from '@mui/material/utils/useForkRef';
+import useControlled from '@mui/material/utils/useControlled';
+import { InputAdornment } from '@mui/material';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
 
 function areEqualValues(a, b) {
   if (typeof b === 'object' && b !== null) {

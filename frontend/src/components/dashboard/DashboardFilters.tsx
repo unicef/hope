@@ -1,5 +1,5 @@
-import { Grid, MenuItem, Paper } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+import { Grid, MenuItem, Paper } from '@mui/material';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

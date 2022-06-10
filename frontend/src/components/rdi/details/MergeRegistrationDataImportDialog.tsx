@@ -4,8 +4,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
-import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';
+} from '@mui/material';
+import MergeTypeRoundedIcon from '@mui/icons-material/MergeTypeRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogDescription } from '../../../containers/dialogs/DialogDescription';

@@ -1,6 +1,6 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
-import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
+import { Grid, MenuItem } from '@mui/material';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import moment from 'moment';
 import React from 'react';
 import { ContainerWithBorder } from '../../../../components/core/ContainerWithBorder';
@@ -24,9 +24,8 @@ export function PaymentFilters({
 }: PaymentFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
-  const {
-    data: statusChoicesData,
-  } = useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } =
+    useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) {
     return null;
@@ -88,9 +87,7 @@ export function PaymentFilters({
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                startDate: moment(date)
-                  .startOf('day')
-                  .toISOString(),
+                startDate: moment(date).startOf('day').toISOString(),
               })
             }
             value={filter.startDate}
@@ -102,9 +99,7 @@ export function PaymentFilters({
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                endDate: moment(date)
-                  .endOf('day')
-                  .toISOString(),
+                endDate: moment(date).endOf('day').toISOString(),
               })
             }
             value={filter.endDate}

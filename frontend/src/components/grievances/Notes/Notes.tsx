@@ -1,11 +1,4 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Grid,
-  Paper,
-  Typography,
-} from '@material-ui/core';
+import { Avatar, Box, Button, Grid, Paper, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -136,8 +129,9 @@ export function Notes({
                     <Grid item xs={2}>
                       <Avatar
                         src={`${meData.me.firstName || meData.me.email}`}
-                        alt={`${meData.me.firstName ||
-                          meData.me.email} picture`}
+                        alt={`${
+                          meData.me.firstName || meData.me.email
+                        } picture`}
                       />
                     </Grid>
                     <Grid item xs={10}>

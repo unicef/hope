@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -103,24 +103,26 @@ export function IndividualBioData({
 
   const renderBankAccountInfo = (): React.ReactNode => {
     if (!individual.bankAccountInfo) {
-      return null
+      return null;
     }
-    return <>
-      <Grid item xs={12}>
-        <BorderBox/>
-      </Grid>
-      <Grid item xs={3}>
-        <LabelizedField label={t('Bank name')}>
-          {individual.bankAccountInfo.bankName}
-        </LabelizedField>
-      </Grid>
-      <Grid item xs={3}>
-        <LabelizedField label={t('Bank account number')}>
-          {individual.bankAccountInfo.bankAccountNumber}
-        </LabelizedField>
-      </Grid>
-    </>;
-  }
+    return (
+      <>
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Bank name')}>
+            {individual.bankAccountInfo.bankName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Bank account number')}>
+            {individual.bankAccountInfo.bankAccountNumber}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
 
   return (
     <Overview>

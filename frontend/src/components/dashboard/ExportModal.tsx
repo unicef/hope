@@ -10,7 +10,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '../../containers/dialogs/Dialog';
@@ -35,10 +35,8 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
   const numSelected = selected.length;
   const isSelected = (id: string): boolean => selected.includes(id);
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useDashboardReportChoiceDataQuery({ variables: { businessArea } });
+  const { data: choicesData, loading: choicesLoading } =
+    useDashboardReportChoiceDataQuery({ variables: { businessArea } });
   const [mutate] = useCreateDashboardReportMutation();
 
   useEffect(() => {

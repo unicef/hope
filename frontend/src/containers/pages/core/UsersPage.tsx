@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { UsersTable } from '../../tables/UsersTable';

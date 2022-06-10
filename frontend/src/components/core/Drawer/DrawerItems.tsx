@@ -1,11 +1,11 @@
-import { Box } from '@material-ui/core';
-import Collapse from '@material-ui/core/Collapse';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import { Box } from '@mui/material';
+import Collapse from '@mui/material/Collapse';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -50,7 +50,9 @@ interface Props {
   currentLocation: string;
 }
 export function DrawerItems({ currentLocation }: Props): React.ReactElement {
-  const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+  const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
+    fetchPolicy: 'cache-first',
+  });
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const clearLocation = currentLocation.replace(`/${businessArea}`, '');

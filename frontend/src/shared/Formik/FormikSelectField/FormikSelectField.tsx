@@ -5,7 +5,7 @@ import {
   MenuItem,
   InputLabel,
   Select,
-} from '@material-ui/core';
+} from '@mui/material';
 import get from 'lodash/get';
 
 export const FormikSelectField = ({

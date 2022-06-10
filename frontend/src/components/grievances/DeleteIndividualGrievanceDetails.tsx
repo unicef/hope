@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import snakeCase from 'lodash/snakeCase';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -179,8 +179,8 @@ export function DeleteIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.deleteIndividualTicketDetails
-                          ?.approveStatus,
+                        approveStatus:
+                          !ticket.deleteIndividualTicketDetails?.approveStatus,
                       },
                       refetchQueries: () => [
                         {

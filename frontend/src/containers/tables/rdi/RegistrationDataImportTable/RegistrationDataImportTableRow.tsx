@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import React from 'react';
 import { RegistrationDataImportNode } from '../../../../__generated__/graphql';

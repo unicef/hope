@@ -1,5 +1,5 @@
-import { Button } from '@material-ui/core';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
+import { Button } from '@mui/material';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -37,10 +37,8 @@ export function CashPlanDetailsPage(): React.ReactElement {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: caData,
-    loading: caPrefixLoading,
-  } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+  const { data: caData, loading: caPrefixLoading } =
+    useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
   const businessArea = useBusinessArea();
 
   if (loading || caPrefixLoading) return <LoadingComponent />;

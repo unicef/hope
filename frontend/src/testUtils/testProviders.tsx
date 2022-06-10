@@ -1,7 +1,7 @@
 import MomentUtils from '@date-io/moment';
-import { ThemeProvider } from '@material-ui/core';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { ThemeProvider } from '@mui/material';
+import CssBaseline from '@mui/material/CssBaseline';
+import { MuiPickersUtilsProvider } from '@mui/pickers';
 import moment from 'moment';
 import React from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';

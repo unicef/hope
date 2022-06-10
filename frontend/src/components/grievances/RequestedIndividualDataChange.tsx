@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
@@ -67,12 +67,14 @@ export function RequestedIndividualDataChange({
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
   allApprovedCount += documents.filter((el) => el.approve_status).length;
-  allApprovedCount += documentsToRemove.filter((el) => el.approve_status)
-    .length;
+  allApprovedCount += documentsToRemove.filter(
+    (el) => el.approve_status,
+  ).length;
   allApprovedCount += documentsToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += identities.filter((el) => el.approve_status).length;
-  allApprovedCount += identitiesToRemove.filter((el) => el.approve_status)
-    .length;
+  allApprovedCount += identitiesToRemove.filter(
+    (el) => el.approve_status,
+  ).length;
   allApprovedCount += identitiesToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += entries.filter(
     ([, value]: [string, { approve_status: boolean }]) => value.approve_status,

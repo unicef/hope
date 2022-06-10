@@ -1,5 +1,5 @@
-import { Button, IconButton } from '@material-ui/core';
-import { Info } from '@material-ui/icons';
+import { Button, IconButton } from '@mui/material';
+import { Info } from '@mui/icons-material';
 import get from 'lodash/get';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';

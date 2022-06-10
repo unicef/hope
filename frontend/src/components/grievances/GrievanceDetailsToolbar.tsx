@@ -1,5 +1,5 @@
-import { Box, Button } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/EditRounded';
+import { Box, Button } from '@mui/material';
+import EditIcon from '@mui/icons-material/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
@@ -92,38 +92,39 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
-  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange = (): string => {
-    const householdData =
-      ticket.householdDataUpdateTicketDetails?.householdData || {};
-    const individualData =
-      ticket.individualDataUpdateTicketDetails?.individualData || {};
-    const allData = {
-      ...householdData,
-      ...individualData,
-      ...householdData?.flex_fields,
-      ...individualData?.flex_fields,
-    };
-    delete allData.previous_documents;
-    delete allData.previous_identities;
-    delete allData.flex_fields;
+  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
+    (): string => {
+      const householdData =
+        ticket.householdDataUpdateTicketDetails?.householdData || {};
+      const individualData =
+        ticket.individualDataUpdateTicketDetails?.individualData || {};
+      const allData = {
+        ...householdData,
+        ...individualData,
+        ...householdData?.flex_fields,
+        ...individualData?.flex_fields,
+      };
+      delete allData.previous_documents;
+      delete allData.previous_identities;
+      delete allData.flex_fields;
 
-    const { approved, notApproved } = countApprovedAndUnapproved(
-      Object.values(allData),
-    );
-    // all changes were approved
-    if (!notApproved) return '';
-
-    // no changes were approved
-    if (!approved)
-      return t(
-        `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
+      const { approved, notApproved } = countApprovedAndUnapproved(
+        Object.values(allData),
       );
+      // all changes were approved
+      if (!notApproved) return '';
 
-    // some changes were approved
-    return `You approved ${approved} change${
-      approved > 1 ? 's' : ''
-    }. Remaining change requests (${notApproved}) will be automatically rejected.`;
-  };
+      // no changes were approved
+      if (!approved)
+        return t(
+          `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
+        );
+
+      // some changes were approved
+      return `You approved ${approved} change${
+        approved > 1 ? 's' : ''
+      }. Remaining change requests (${notApproved}) will be automatically rejected.`;
+    };
 
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
     const hasApproveOption =

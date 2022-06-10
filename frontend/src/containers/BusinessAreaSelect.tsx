@@ -1,4 +1,4 @@
-import { MenuItem, Select } from '@material-ui/core';
+import { MenuItem, Select } from '@mui/material';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';

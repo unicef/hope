@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

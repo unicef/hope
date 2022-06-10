@@ -2,10 +2,10 @@
 import React, { ReactElement, useState } from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
-import { IconButton, makeStyles } from '@material-ui/core';
+import { IconButton, makeStyles } from '@mui/material';
 import clsx from 'clsx';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
-import Collapse from '@material-ui/core/Collapse';
+import ExpandMore from '@mui/icons-material/ExpandMoreRounded';
+import Collapse from '@mui/material/Collapse';
 import { Link } from 'react-router-dom';
 import {
   AllLogEntriesQuery,

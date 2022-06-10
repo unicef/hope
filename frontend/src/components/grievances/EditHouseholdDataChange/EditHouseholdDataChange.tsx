@@ -1,5 +1,5 @@
-import { Button, Grid, Typography } from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
+import { Button, Grid, Typography } from '@mui/material';
+import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,10 +23,8 @@ export const EditHouseholdDataChange = ({
   const { t } = useTranslation();
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
-  const [
-    getHousehold,
-    { data: fullHousehold, loading: fullHouseholdLoading },
-  ] = useHouseholdLazyQuery({ variables: { id: household?.id } });
+  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
+    useHouseholdLazyQuery({ variables: { id: household?.id } });
   useEffect(() => {
     if (values.selectedHousehold) {
       getHousehold();
@@ -44,10 +42,8 @@ export const EditHouseholdDataChange = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const {
-    data: householdFieldsData,
-    loading: householdFieldsLoading,
-  } = useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, loading: householdFieldsLoading } =
+    useAllEditHouseholdFieldsQuery();
   if (!household) {
     return <div>{t('You have to select a household earlier')}</div>;
   }

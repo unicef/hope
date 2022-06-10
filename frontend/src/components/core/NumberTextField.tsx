@@ -1,4 +1,4 @@
-import { Box, InputAdornment } from '@material-ui/core';
+import { Box, InputAdornment } from '@mui/material';
 import styled from 'styled-components';
 import React from 'react';
 import TextField from '../../shared/TextField';

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Box } from '@material-ui/core';
+import { Grid, Box } from '@mui/material';
 import { MiśTheme } from '../../../theme';
 
 const GreyBox = styled.div`

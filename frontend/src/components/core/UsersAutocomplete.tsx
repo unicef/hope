@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import { InputAdornment } from '@material-ui/core';
-import PersonIcon from '@material-ui/icons/Person';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import {
-  AllUsersQuery,
-  useAllUsersQuery,
-} from '../../__generated__/graphql';
+import { InputAdornment } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import CircularProgress from '@mui/material/CircularProgress';
+import Autocomplete from '@mui/lab/Autocomplete';
+import { AllUsersQuery, useAllUsersQuery } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
 import TextField from '../../shared/TextField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';

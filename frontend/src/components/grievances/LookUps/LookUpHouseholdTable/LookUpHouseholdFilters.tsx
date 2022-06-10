@@ -1,6 +1,6 @@
-import { Button, Grid, MenuItem } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
-import GroupIcon from '@material-ui/icons/Group';
+import { Button, Grid, MenuItem } from '@mui/material';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

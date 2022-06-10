@@ -7,8 +7,8 @@ import {
   Tab,
   Tabs,
   Typography,
-} from '@material-ui/core';
-import EditIcon from '@material-ui/icons/EditRounded';
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/EditRounded';
 import { Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -205,9 +205,11 @@ export function EditVerificationPlan({
 
   const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
-        sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100})%`;
+      return ` (${
+        (sampleSizesData?.sampleSize?.sampleSize /
+          sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100
+      })%`;
     }
     return ` (0%)`;
   };

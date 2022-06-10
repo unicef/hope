@@ -1,6 +1,6 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
-import { Checkbox } from '@material-ui/core';
+import { Checkbox } from '@mui/material';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
 import { StatusBox } from '../../../core/StatusBox';

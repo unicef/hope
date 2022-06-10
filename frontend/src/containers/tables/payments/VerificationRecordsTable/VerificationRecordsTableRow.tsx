@@ -1,5 +1,5 @@
-import { TableRow } from '@material-ui/core';
-import TableCell from '@material-ui/core/TableCell';
+import { TableRow } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';

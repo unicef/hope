@@ -6,8 +6,8 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
+} from '@mui/material';
+import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray, Formik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -118,9 +118,8 @@ export function TargetCriteriaForm({
   shouldShowWarningForIndividualFilter,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const businessArea = useBusinessArea();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(
-    businessArea,
-  );
+  const { data, loading } =
+    useCachedImportedIndividualFieldsQuery(businessArea);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -167,9 +166,8 @@ export function TargetCriteriaForm({
     const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
       (block) => {
         const hasNulls = block.individualBlockFilters.some(filterNull);
-        const hasFromToError = block.individualBlockFilters.some(
-          filterEmptyFromTo,
-        );
+        const hasFromToError =
+          block.individualBlockFilters.some(filterEmptyFromTo);
 
         return hasNulls || hasFromToError;
       },
@@ -230,19 +228,23 @@ export function TargetCriteriaForm({
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
-              {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-              // @ts-ignore
-              errors.nonFieldErrors && (
-                <DialogError>
-                  <ul>
-                    {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                    // @ts-ignore
-                    errors.nonFieldErrors.map((message) => (
-                      <li>{message}</li>
-                    ))}
-                  </ul>
-                </DialogError>
-              )}
+              {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                // @ts-ignore
+                errors.nonFieldErrors && (
+                  <DialogError>
+                    <ul>
+                      {
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                        // @ts-ignore
+                        errors.nonFieldErrors.map((message) => (
+                          <li>{message}</li>
+                        ))
+                      }
+                    </ul>
+                  </DialogError>
+                )
+              }
               <DialogDescription>
                 All rules defined below have to be true for the entire
                 household.

@@ -1,10 +1,13 @@
 import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import { HouseholdNode } from '../../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
-import { decodeIdString, renderIndividualName } from '../../../../../utils/utils';
+import {
+  decodeIdString,
+  renderIndividualName,
+} from '../../../../../utils/utils';
 import { BlackLink } from '../../../../../components/core/BlackLink';
 
 interface TargetPopulationHouseholdTableRowProps {

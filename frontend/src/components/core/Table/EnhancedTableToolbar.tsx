@@ -1,7 +1,7 @@
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 import React from 'react';
-import { createStyles, lighten, makeStyles, Theme, } from '@material-ui/core/styles';
+import { createStyles, lighten, makeStyles, Theme } from '@mui/material/styles';
 
 interface EnhancedTableToolbarProps {
   title: string;

@@ -1,4 +1,4 @@
-import { Button, Grid, MenuItem } from '@material-ui/core';
+import { Button, Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -71,9 +71,7 @@ export function LookUpRelatedTicketsFilters({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  min: moment(date)
-                    .startOf('day')
-                    .toISOString(),
+                  min: moment(date).startOf('day').toISOString(),
                 },
               })
             }
@@ -88,9 +86,7 @@ export function LookUpRelatedTicketsFilters({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  max: moment(date)
-                    .endOf('day')
-                    .toISOString(),
+                  max: moment(date).endOf('day').toISOString(),
                 },
               })
             }

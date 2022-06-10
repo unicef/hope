@@ -1,6 +1,6 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import CakeIcon from '@material-ui/icons/Cake';
-import WcIcon from '@material-ui/icons/Wc';
+import { Grid, MenuItem } from '@mui/material';
+import CakeIcon from '@mui/icons-material/Cake';
+import WcIcon from '@mui/icons-material/Wc';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { IndividualChoiceDataQuery } from '../../__generated__/graphql';

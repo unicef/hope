@@ -1,6 +1,6 @@
 import React from 'react';
-import FlagIcon from '@material-ui/icons/Flag';
-import { Tooltip } from '@material-ui/core';
+import FlagIcon from '@mui/icons-material/Flag';
+import { Tooltip } from '@mui/material';
 import styled from 'styled-components';
 
 const StyledFlag = styled(FlagIcon)`
