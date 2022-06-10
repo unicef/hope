@@ -741,5 +741,5 @@ class TicketReferralDetails(TimeStampedUUIDModel):
 @receiver(post_save, sender=TicketNeedsAdjudicationDetails)
 @receiver(post_save, sender=TicketPaymentVerificationDetails)
 def update_household_unicef_id(sender, instance, *args, **kwargs):
-    instance.ticket.household_unicef_id = instance.household.unicef_id
+    instance.ticket.household_unicef_id = getattr(instance.household, "unicef_id", None)
     instance.ticket.save(update_fields=("household_unicef_id",))
