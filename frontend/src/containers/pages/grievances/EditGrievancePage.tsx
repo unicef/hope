@@ -53,6 +53,7 @@ import {
 } from '../../../components/grievances/utils/editGrievanceUtils';
 import { validate } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -87,30 +88,24 @@ export function EditGrievancePage(): React.ReactElement {
     },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: currentUserData,
-    loading: currentUserDataLoading,
-  } = useMeQuery();
+  const { data: currentUserData, loading: currentUserDataLoading } =
+    useMeQuery();
 
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
-  const [mutate] = useUpdateGrievanceMutation();
+  const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const {
-    data: householdFieldsData,
-    loading: householdFieldsLoading,
-  } = useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, loading: householdFieldsLoading } =
+    useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -266,13 +261,14 @@ export function EditGrievancePage(): React.ReactElement {
                     {t('Cancel')}
                   </Button>
                 </Box>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
                 >
                   {t('Save')}
-                </Button>
+                </LoadingButton>
               </Box>
             </PageHeader>
             <Grid container spacing={3}>
