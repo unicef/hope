@@ -86,7 +86,8 @@ class HouseholdFilter(FilterSet):
     )
 
     def _search_es(self, qs, value):
-        query_dict = get_elasticsearch_query_for_households(value)
+        business_area = self.data["business_area"]
+        query_dict = get_elasticsearch_query_for_households(value, business_area)
         es_response = (
             HouseholdDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
         )
@@ -176,7 +177,8 @@ class IndividualFilter(FilterSet):
         return qs.filter(q_obj)
 
     def _search_es(self, qs, value):
-        query_dict = get_elasticsearch_query_for_individuals(value)
+        business_area = self.data["business_area"]
+        query_dict = get_elasticsearch_query_for_individuals(value, business_area)
         es_response = (
             IndividualDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
         )
@@ -225,7 +227,7 @@ class IndividualFilter(FilterSet):
         return qs.exclude(id=decode_id_string(value))
 
 
-def get_elasticsearch_query_for_individuals(value):
+def get_elasticsearch_query_for_individuals(value, business_area):
     match_fields = [
         "phone_no_text",
         "phone_no_alternative",
@@ -238,7 +240,7 @@ def get_elasticsearch_query_for_individuals(value):
         "middle_name",
         "unicef_id",
         "household.unicef_id",
-        "phone_no_text"
+        "phone_no_text",
     ]
     wildcard_fields = ["phone_no", "unicef_id", "household.unicef_id"]
     match_queries = [
@@ -278,59 +280,76 @@ def get_elasticsearch_query_for_individuals(value):
 
     values = value.split(" ")
     if len(values) == 2:
+        all_queries.append(
+            {
+                "bool": {
+                    "must": [
+                        {
+                            "match_phrase_prefix": {
+                                "given_name": {
+                                    "query": values[0],
+                                }
+                            }
+                        },
+                        {
+                            "match_phrase_prefix": {
+                                "family_name": {
+                                    "query": values[1],
+                                }
+                            }
+                        },
+                    ],
+                },
+            }
+        )
+    elif len(values) == 1:
         all_queries.extend(
             [
                 {
                     "match_phrase_prefix": {
                         "given_name": {
-                            "query": values[0],
+                            "query": value,
+                            "boost": 1.1,
                         }
                     }
                 },
                 {
                     "match_phrase_prefix": {
                         "family_name": {
-                            "query": values[1],
+                            "query": value,
+                            "boost": 1.1,
                         }
                     }
                 },
-            ]
+            ],
         )
     else:
-        all_queries.extend(
-            [
-                {
-                    "match_phrase_prefix": {
-                        "given_name": {
-                            "query": value,
-                        }
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "full_name": {
+                        "query": value,
                     }
-                },
-                {
-                    "match_phrase_prefix": {
-                        "family_name": {
-                            "query": value,
-                        }
-                    }
-                },
-            ]
+                }
+            },
         )
-
 
     query = {
         "size": "100",
         "_source": False,
         "query": {
             "bool": {
+                "filter": {"term": {"business_area": business_area}},
                 "minimum_should_match": 1,
                 "should": all_queries,
             }
         },
     }
+    json.dumps(query)
     return query
 
 
-def get_elasticsearch_query_for_households(value):
+def get_elasticsearch_query_for_households(value, business_area):
     match_fields = [
         "admin1",
         "admin2",
@@ -374,42 +393,58 @@ def get_elasticsearch_query_for_households(value):
 
     values = value.split(" ")
     if len(values) == 2:
+        all_queries.append(
+            {
+                "bool": {
+                    "must": [
+                        {
+                            "match_phrase_prefix": {
+                                "head_of_household.given_name": {
+                                    "query": values[0],
+                                }
+                            }
+                        },
+                        {
+                            "match_phrase_prefix": {
+                                "head_of_household.family_name": {
+                                    "query": values[1],
+                                }
+                            }
+                        },
+                    ],
+                },
+            }
+        )
+    elif len(values) == 1:
         all_queries.extend(
             [
                 {
                     "match_phrase_prefix": {
                         "head_of_household.given_name": {
-                            "query": values[0],
+                            "query": value,
+                            "boost": 1.1,
                         }
                     }
                 },
                 {
                     "match_phrase_prefix": {
                         "head_of_household.family_name": {
-                            "query": values[1],
+                            "query": value,
+                            "boost": 1.1,
                         }
                     }
                 },
-            ]
+            ],
         )
     else:
-        all_queries.extend(
-            [
-                {
-                    "match_phrase_prefix": {
-                        "head_of_household.given_name": {
-                            "query": value,
-                        }
+        all_queries.append(
+            {
+                "match_phrase_prefix": {
+                    "head_of_household.full_name": {
+                        "query": value,
                     }
-                },
-                {
-                    "match_phrase_prefix": {
-                        "head_of_household.family_name": {
-                            "query": value,
-                        }
-                    }
-                },
-            ]
+                }
+            },
         )
 
     query = {
@@ -422,5 +457,7 @@ def get_elasticsearch_query_for_households(value):
             }
         },
     }
+    if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:
+        query["query"]["bool"]["filter"] = {"term": {"business_area": business_area}},
     print(json.dumps(query))
     return query

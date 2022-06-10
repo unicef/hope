@@ -145,6 +145,7 @@ class HouseholdDocument(Document):
     residence_status = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     admin1 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
+    business_area = fields.KeywordField(similarity="boolean")
 
     def prepare_admin1(self, household):
         if household:
@@ -155,6 +156,9 @@ class HouseholdDocument(Document):
         if household:
             if household.admin2:
                 return household.admin2.title
+
+    def prepare_business_area(self, instance):
+        return instance.business_area.slug
 
     class Django:
         model = Household
