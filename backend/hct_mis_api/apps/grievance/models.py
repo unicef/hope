@@ -342,6 +342,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     )
     unicef_id = models.CharField(max_length=250, blank=True, default="")
     extras = JSONField(blank=True, default=dict)
+    ignored = models.BooleanField(default=False, db_index=True)
 
     objects = GrievanceTicketManager()
 
@@ -614,17 +615,13 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
     is_multiple_duplicates_version = models.BooleanField(default=False)
     possible_duplicate = models.ForeignKey(
-        "household.Individual",
-        related_name="+",
-        on_delete=models.CASCADE
+        "household.Individual", related_name="+", on_delete=models.CASCADE
     )  # this field will be deprecated
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
     selected_individual = models.ForeignKey(
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
     )  # this field will be deprecated
-    selected_individuals = models.ManyToManyField(
-        "household.Individual", related_name="ticket_selected"
-    )
+    selected_individuals = models.ManyToManyField("household.Individual", related_name="ticket_selected")
     role_reassign_data = JSONField(default=dict)
     extra_data = JSONField(default=dict)
     score_min = models.FloatField(default=0.0)
@@ -641,16 +638,13 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             selected_individuals = self.selected_individuals.all()
 
             unselected_individuals = [
-                individual for individual in possible_duplicates
-                if individual not in selected_individuals
+                individual for individual in possible_duplicates if individual not in selected_individuals
             ]
 
             if unselected_individuals and len(unselected_individuals) > 1:
                 documents = []
                 for individual in unselected_individuals:
-                    documents.append(set([
-                        f"{x.document_number}--{x.type_id}" for x in individual.documents.all()
-                    ]))
+                    documents.append(set([f"{x.document_number}--{x.type_id}" for x in individual.documents.all()]))
                 return bool(set.intersection(*documents))
             return False
 
