@@ -240,7 +240,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             ISSUE_TYPE_SEXUAL_HARASSMENT: "sensitive_ticket_details",
             ISSUE_TYPE_MISCELLANEOUS: "sensitive_ticket_details",
         },
-        CATEGORY_PAYMENT_VERIFICATION: "",
+        CATEGORY_PAYMENT_VERIFICATION: "payment_verification_ticket_details",
         CATEGORY_GRIEVANCE_COMPLAINT: "complaint_ticket_details",
         CATEGORY_NEGATIVE_FEEDBACK: "negative_feedback_ticket_details",
         CATEGORY_REFERRAL: "referral_ticket_details",
@@ -339,6 +339,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         else:
             details_name = nested_dict_or_value
 
+        print("==> DICT_NAME", details_name)
         return getattr(self, details_name, None)
 
     @property

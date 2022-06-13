@@ -129,7 +129,7 @@ export function GrievancesDetails({
                       <ContentLink
                         href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
                       >
-                        ticket.paymentRecord.caId
+                        {ticket.paymentRecord.caId}
                       </ContentLink>
                     ) : (
                       '-'
