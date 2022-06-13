@@ -566,7 +566,7 @@ class DiiaHousehold(TimeStampedUUIDModel):
     vpo_doc_date = models.DateField(blank=True, null=True)
     address = models.CharField(max_length=1024, blank=True, null=True)
     consent = models.BooleanField(null=True)
-    source_data = models.JSONField(default=dict, blank=True, null=True)
+    source_data = models.TextField(default="", blank=True, null=True)
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="diia_households",
@@ -594,7 +594,7 @@ class DiiaIndividual(TimeStampedUUIDModel):
     second_name = models.CharField(max_length=85, blank=True, null=True)
     relationship = models.CharField(max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, null=True)
     sex = models.CharField(max_length=255, choices=SEX_CHOICE, null=True)
-    birth_date = models.DateField(null=True)
+    birth_date = models.CharField(max_length=64, blank=True, null=True)
     birth_doc = models.CharField(max_length=128, blank=True, null=True)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True)
     disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True)
@@ -603,7 +603,7 @@ class DiiaIndividual(TimeStampedUUIDModel):
     doc_type = models.CharField(max_length=128, blank=True, null=True)
     doc_serie = models.CharField(max_length=64, blank=True, null=True)
     doc_number = models.CharField(max_length=64, blank=True, null=True)
-    doc_issue_date = models.DateField(null=True, blank=True)
+    doc_issue_date = models.CharField(max_length=64, blank=True, null=True)
 
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
