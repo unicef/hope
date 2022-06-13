@@ -229,10 +229,7 @@ class IncompatibleRoles(TimeStampedUUIDModel):
             raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
-        for role_pair in [
-            (self.role_one, self.role_two),
-            (self.role_two, self.role_one),
-        ]:
+        for role_pair in ((self.role_one, self.role_two), (self.role_two, self.role_one)):
             for userrole in UserRole.objects.filter(role=role_pair[0]):
                 if UserRole.objects.filter(
                     user=userrole.user,
