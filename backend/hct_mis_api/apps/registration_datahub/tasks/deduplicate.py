@@ -822,6 +822,7 @@ class DeduplicateTask:
                 RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
             )
 
+
     @classmethod
     def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
         documents_to_dedup = [x for x in new_documents if  x.status != Document.STATUS_VALID]
@@ -859,9 +860,10 @@ class DeduplicateTask:
                 continue
             new_document.status = Document.STATUS_VALID
             already_processed_signatures.append(new_document_signature)
+
             if new_document_signature in new_document_signatures_duplicated_in_batch:
                 ticket_data_dict[new_document_signature] = {
-                    "original": all_matching_number_documents_dict[new_document_signature],
+                    "original": new_document,
                     "possible_duplicates": [],
                 }
         Document.objects.bulk_update(documents_to_dedup, ("status", "updated_at"))
