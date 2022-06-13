@@ -563,7 +563,7 @@ class DiiaHousehold(TimeStampedUUIDModel):
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
     vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True, null=True)
     vpo_doc_id = models.CharField(max_length=128, blank=True, null=True)
-    vpo_doc_date = models.DateField(blank=True, null=True)
+    vpo_doc_date = models.CharField(max_length=64, blank=True, null=True)
     address = models.CharField(max_length=1024, blank=True, null=True)
     consent = models.BooleanField(null=True)
     source_data = models.TextField(default="", blank=True, null=True)
