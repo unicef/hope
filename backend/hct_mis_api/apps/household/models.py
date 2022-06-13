@@ -781,6 +781,9 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
             )
         ]
 
+    def __str__(self):
+        return f"{self.type} - {self.document_number}"
+
 
 class Agency(models.Model):
     type = models.CharField(max_length=100, choices=AGENCY_TYPE_CHOICES)
