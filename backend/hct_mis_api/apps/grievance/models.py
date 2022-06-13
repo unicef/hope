@@ -339,7 +339,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         else:
             details_name = nested_dict_or_value
 
-        print("==> DICT_NAME", details_name)
         return getattr(self, details_name, None)
 
     @property
