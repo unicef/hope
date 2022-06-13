@@ -22,8 +22,6 @@
     "@types/node": "^12.0.0",
     "@types/react": "^18.0.12",
     "@types/react-dom": "^18.0.5",
-    "@typescript-eslint/eslint-plugin": "^2.9.0",
-    "@typescript-eslint/parser": "^2.9.0",
     "apollo-boost": "^0.4.7",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-cache-persist": "^0.1.1",
@@ -102,7 +100,7 @@
     "styled-jss": "^2.2.3",
     "terser-webpack-plugin": "2.2.1",
     "ts-pnp": "1.1.5",
-    "typescript": "^4.7.3",
+    "typescript": "4.7.2",
     "url-loader": "2.3.0",
     "use-deep-compare-effect": "^1.8.1",
     "webpack": "4.41.2",
@@ -158,6 +156,8 @@
     "jest-canvas-mock": "^2.3.1",
     "prettier": "^1.19.1",
     "string.prototype.replaceall": "^1.0.6",
-    "waait": "^1.0.5"
+    "waait": "^1.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/parser": "^5.26.0"
   }
 }
