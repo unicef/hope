@@ -251,7 +251,11 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             {"individual": "golden_records_individual"},
             {"household": "golden_records_individual.household"},
         ),
-        "payment_verification_ticket_details": ({"payment_record": "payment_verification.payment_record"}),
+        "payment_verification_ticket_details": (
+            {"payment_record": "payment_verification.payment_record"},
+            {"household": "payment_verification.payment_record.household"},
+            {"individual": "payment_verification.payment_record.head_of_household"},
+        ),
     }
 
     TICKET_DETAILS_NAME_MAPPING = {
