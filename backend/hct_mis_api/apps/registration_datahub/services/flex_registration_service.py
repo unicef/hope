@@ -121,7 +121,7 @@ class FlexRegistrationService:
         import_data = rdi_datahub.import_data
 
         Record.objects.filter(pk__in=records_ids).update(registration_data_import=rdi_datahub)
-
+        imported_records_ids = []
         try:
             for record_id in records_ids:
                 try:
@@ -129,6 +129,7 @@ class FlexRegistrationService:
                         with atomic("registration_datahub"):
                             record = Record.objects.defer("data").get(id=record_id)
                             self.create_household_for_rdi_household(record, rdi_datahub)
+                            imported_records_ids.append(record_id)
                 except ValidationError as e:
                     record.mark_as_invalid(str(e))
 
@@ -155,7 +156,7 @@ class FlexRegistrationService:
                 )
             )
 
-            record.mark_as_imported()
+            Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED)
 
             transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
         except Exception as e:
