@@ -48,6 +48,7 @@ import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlrea
 import { prepareVariables } from '../../../components/grievances/utils/createGrievanceUtils';
 import { validate } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -101,20 +102,16 @@ export function CreateGrievancePage(): React.ReactElement {
     variables: { businessArea, first: 1000 },
   });
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
-  const [mutate] = useCreateGrievanceMutation();
+  const [mutate, { loading }] = useCreateGrievanceMutation();
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const {
-    data: householdFieldsData,
-    loading: householdFieldsLoading,
-  } = useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, loading: householdFieldsLoading } =
+    useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -263,13 +260,14 @@ export function CreateGrievancePage(): React.ReactElement {
                     {t('Cancel')}
                   </Button>
                 </Box>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
                 >
                   {t('Save')}
-                </Button>
+                </LoadingButton>
               </Box>
             </PageHeader>
             <Grid container spacing={3}>

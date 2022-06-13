@@ -8142,6 +8142,18 @@
             "deprecationReason": null
           },
           {
+            "name": "householdUnicefId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "linkedTicketsRelated",
             "description": null,
             "args": [
@@ -8491,6 +8503,22 @@
               "kind": "SCALAR",
               "name": "String",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "existingTickets",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "GrievanceTicketNode",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

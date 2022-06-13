@@ -9,6 +9,7 @@ import {
 import { Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useDeleteTargetPopulationMutation } from '../../../__generated__/graphql';
@@ -21,13 +22,13 @@ export interface DeleteTargetPopulation {
   setOpen: Function;
 }
 
-export function DeleteTargetPopulation({
+export const DeleteTargetPopulation = ({
   open,
   setOpen,
   targetPopulationId,
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
-  const [mutate] = useDeleteTargetPopulationMutation();
+  const [mutate, { loading }] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const initialValues = {
@@ -71,14 +72,15 @@ export function DeleteTargetPopulation({
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   type='submit'
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
                 >
                   {t('Delete')}
-                </Button>
+                </LoadingButton>
               </DialogActions>
             </DialogFooter>
           </>
@@ -86,4 +88,4 @@ export function DeleteTargetPopulation({
       </Formik>
     </Dialog>
   );
-}
+};

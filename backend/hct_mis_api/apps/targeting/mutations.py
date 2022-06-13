@@ -275,14 +275,20 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root, info, **kwargs):
         user = info.context.user
         target_population = kwargs.get("model_object")
+        if target_population.status != TargetPopulation.STATUS_DRAFT:
+            logger.error("You can only lock open target population")
+            raise ValidationError("You can only lock open target population")
         old_target_population = kwargs.get("old_model_object")
         target_population.status = TargetPopulation.STATUS_LOCKED
         target_population.changed_by = user
         target_population.change_date = timezone.now()
         household_queryset = Household.objects
-        households = household_queryset.filter(business_area=target_population.business_area).filter(
-            target_population.candidate_list_targeting_criteria.get_query()
+        households = (
+            household_queryset.filter(business_area=target_population.business_area)
+            .filter(target_population.candidate_list_targeting_criteria.get_query())
+            .distinct()
         )
+        HouseholdSelection.objects.filter(target_population=target_population).delete()
         target_population.households.set(households)
         target_population.save()
         log_create(
