@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
     Individual,
+    IDENTIFICATION_TYPE_TAX_ID,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
@@ -116,6 +117,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ],
         )
         dt = DocumentType(country="PL", label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        dt_tax_id = DocumentType.objects.create(
+            country="PL", label=IDENTIFICATION_TYPE_TAX_ID, type=IDENTIFICATION_TYPE_TAX_ID
+        )
         dt.save()
         cls.document1 = Document(
             type=dt, document_number="ASD123", individual=cls.individuals[0], status=Document.STATUS_VALID
@@ -125,6 +129,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         cls.document4 = Document(type=dt, document_number="ASD123", individual=cls.individuals[3])
         cls.document5 = Document(
             type=dt, document_number="TOTALY UNIQ", individual=cls.individuals[4], status=Document.STATUS_VALID
+        )
+        cls.document6 = Document.objects.create(
+            type=dt_tax_id, document_number="ASD123", individual=cls.individuals[2], status=Document.STATUS_VALID
         )
         cls.document1.save()
         cls.document2.save()
