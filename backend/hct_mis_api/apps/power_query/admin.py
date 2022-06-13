@@ -102,20 +102,18 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
         obj: Query = self.get_object(request, pk)
         try:
             context = self.get_common_context(request, pk, title="Results")
-            ret = obj.execute(persist=False)
+            ret, info = obj.execute(persist=False)
             context["type"] = type(ret).__name__
             context["raw"] = ret
+            context["info"] = info
             context["title"] = f"Result of {obj.name} ({type(ret).__name__})"
             if isinstance(ret, QuerySet):
-                ret = ret[0][:100]
+                ret = ret[:100]
                 context["queryset"] = ret
-            if isinstance(ret,  tuple):
-                ret = ret[0][:100]
-                context["result"] = ret
             elif isinstance(ret, tablib.Dataset):
-                context["dataset"] = ret
-            elif isinstance(ret, (dict, list)):
-                context["result"] = ret
+                context["dataset"] = ret[:100]
+            elif isinstance(ret, (dict, list, tuple)):
+                context["result"] = ret[:100]
             else:
                 self.message_user(request, f"Query does not returns a valid result. It returned {type(ret)}")
             return render(request, "admin/power_query/query/preview.html", context)
