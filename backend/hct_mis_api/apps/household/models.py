@@ -431,10 +431,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
     def save(self, *args, **kwargs):
-        from hct_mis_api.apps.targeting.models import (
-            HouseholdSelection,
-            TargetPopulation,
-        )
+        from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
         if self.withdrawn:
             HouseholdSelection.objects.filter(
@@ -444,9 +441,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def status(self):
-        if self.withdrawn:
-            return STATUS_INACTIVE
-        return STATUS_ACTIVE
+        return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
 
     def withdraw(self):
         self.withdrawn = True
@@ -480,11 +475,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def admin2(self):
-        if self.admin_area is None:
-            return None
-        if self.admin_area.level == 0:
-            return None
-        if self.admin_area.level == 1:
+        if not self.admin_area or self.admin_area.level in (0, 1):
             return None
         current_admin = self.admin_area
         while current_admin.level != 2:
@@ -504,11 +495,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def admin2_new(self):
-        if self.admin_area_new is None:
-            return None
-        if self.admin_area_new.area_type.area_level == 0:
-            return None
-        if self.admin_area_new.area_type.area_level == 1:
+        if not self.admin_area_new or self.admin_area_new.area_type.area_level in (0, 1):
             return None
         current_admin = self.admin_area_new
         while current_admin.area_type.area_level != 2:
@@ -538,45 +525,6 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
             .aggregate(models.Sum("delivered_quantity_usd", output_field=DecimalField()))
             .get("delivered_quantity_usd__sum")
         )
-
-    @property
-    def programs_with_delivered_quantity(self):
-        programs = (
-            self.payment_records.all()
-            .annotate(program=F("cash_plan__program"))
-            .values("program")
-            .annotate(
-                total_delivered_quantity=Sum("delivered_quantity", output_field=DecimalField()),
-                total_delivered_quantity_usd=Sum("delivered_quantity_usd", output_field=DecimalField()),
-                currency=F("currency"),
-                program_name=F("cash_plan__program__name"),
-                program_id=F("cash_plan__program__id"),
-            )
-            .order_by("cash_plan__program__created_at")
-        )
-
-        programs_dict = {}
-
-        for program in programs:
-            if program["program_id"] not in programs_dict.keys():
-                programs_dict[program["program_id"]] = {
-                    "id": program["program_id"],
-                    "name": program["program_name"],
-                    "quantity": [
-                        {
-                            "total_delivered_quantity": program["total_delivered_quantity_usd"],
-                            "currency": "USD",
-                        }
-                    ],
-                }
-            if program["currency"] != "USD":
-                programs_dict[program["program_id"]]["quantity"].append(
-                    {
-                        "total_delivered_quantity": program["total_delivered_quantity"],
-                        "currency": program["currency"],
-                    }
-                )
-        return programs_dict.values()
 
     @property
     def active_individuals(self):
@@ -843,9 +791,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     @property
     def role(self):
         role = self.households_and_roles.first()
-        if role is not None:
-            return role.role
-        return ROLE_NO_ROLE
+        return role.role if role is not None else ROLE_NO_ROLE
 
     @property
     def get_hash_key(self):
@@ -877,9 +823,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     @property
     def cash_assist_status(self):
-        if self.withdrawn:
-            return STATUS_INACTIVE
-        if self.duplicate:
+        if self.withdrawn or self.duplicate:
             return STATUS_INACTIVE
         return STATUS_ACTIVE
 
@@ -940,9 +884,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     @cached_property
     def parents(self):
-        if self.household:
-            return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
-        return []
+        return self.household.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True)) if self.household else []
 
     def is_golden_record_duplicated(self):
         return self.deduplication_golden_record_status == DUPLICATE
