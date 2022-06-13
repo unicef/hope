@@ -750,6 +750,7 @@ type GrievanceTicketNode implements Node {
   registrationDataImport: RegistrationDataImportNode
   unicefId: String!
   extras: JSONString!
+  ignored: Boolean!
   householdUnicefId: String
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
