@@ -114,9 +114,7 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
                 context["result"] = ret
             elif isinstance(ret, tablib.Dataset):
                 context["dataset"] = ret
-            elif isinstance(ret, dict):
-                context["result"] = ret
-            elif isinstance(ret, list):
+            elif isinstance(ret, (dict, list)):
                 context["result"] = ret
             else:
                 self.message_user(request, f"Query does not returns a valid result. It returned {type(ret)}")
