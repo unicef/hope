@@ -1,15 +1,15 @@
 import logging
 import re
-from datetime import date, datetime
+from datetime import date
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.gis.db.models import Count, PointField, Q, UniqueConstraint
+from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
-from django.db.models import DecimalField, F, JSONField, Sum
+from django.db.models import DecimalField, JSONField
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -823,9 +823,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     @property
     def cash_assist_status(self):
-        if self.withdrawn or self.duplicate:
-            return STATUS_INACTIVE
-        return STATUS_ACTIVE
+        return STATUS_INACTIVE if self.withdrawn or self.duplicate else STATUS_ACTIVE
 
     @property
     def sanction_list_last_check(self):
