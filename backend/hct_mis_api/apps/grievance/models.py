@@ -240,7 +240,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             ISSUE_TYPE_SEXUAL_HARASSMENT: "sensitive_ticket_details",
             ISSUE_TYPE_MISCELLANEOUS: "sensitive_ticket_details",
         },
-        CATEGORY_PAYMENT_VERIFICATION: "",
+        CATEGORY_PAYMENT_VERIFICATION: "payment_verification_ticket_details",
         CATEGORY_GRIEVANCE_COMPLAINT: "complaint_ticket_details",
         CATEGORY_NEGATIVE_FEEDBACK: "negative_feedback_ticket_details",
         CATEGORY_REFERRAL: "referral_ticket_details",
@@ -661,6 +661,10 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
     @property
     def household(self):
         return self.payment_verification.payment_record.household
+
+    @property
+    def individual(self):
+        return self.payment_verification.payment_record.head_of_household
 
     @property
     def payment_record(self):
