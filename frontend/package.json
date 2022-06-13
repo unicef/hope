@@ -42,6 +42,7 @@
     "chartjs-plugin-datalabels": "^0.7.0",
     "clsx": "^1.1.0",
     "css-loader": "3.2.0",
+    "date-fns": "^2.28.0",
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
     "eslint-config-airbnb": "^18.0.1",
@@ -150,14 +151,14 @@
     "@storybook/react": "^6.0.0-alpha.6",
     "@tivix/eslint-config": "^1.0.0",
     "@tivix/prettier-config": "^1.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/parser": "^5.26.0",
     "apollo": "^2.16.0",
     "eslint": ">=6.6.0 <7",
     "graphql-codegen-compiler": "^0.13.0",
     "jest-canvas-mock": "^2.3.1",
     "prettier": "^1.19.1",
     "string.prototype.replaceall": "^1.0.6",
-    "waait": "^1.0.5",
-    "@typescript-eslint/eslint-plugin": "^5.26.0",
-    "@typescript-eslint/parser": "^5.26.0"
+    "waait": "^1.0.5"
   }
 }
