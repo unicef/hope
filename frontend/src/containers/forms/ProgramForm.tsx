@@ -55,14 +55,14 @@ interface ProgramFormPropTypes {
   title: string;
 }
 
-export function ProgramForm({
+export const ProgramForm = ({
   program = null,
   onSubmit,
   renderSubmit,
   open,
   onClose,
   title,
-}: ProgramFormPropTypes): ReactElement {
+}: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
 
@@ -95,18 +95,12 @@ export function ProgramForm({
       .required(t('Sector is required'))
       .min(2, t('Too short'))
       .max(50, t('Too long')),
-    budget: Yup.number()
-      .min(0)
-      .max(99999999, t('Number is too big')),
+    budget: Yup.number().min(0).max(99999999, t('Number is too big')),
     administrativeAreasOfImplementation: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
-    description: Yup.string()
-      .min(2, t('Too short'))
-      .max(255, t('Too long')),
-    populationGoal: Yup.number()
-      .min(0)
-      .max(99999999, t('Number is too big')),
+    description: Yup.string().min(2, t('Too short')).max(255, t('Too long')),
+    populationGoal: Yup.number().min(0).max(99999999, t('Number is too big')),
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -314,4 +308,4 @@ export function ProgramForm({
       </Dialog>
     </DialogContainer>
   );
-}
+};

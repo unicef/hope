@@ -35,6 +35,7 @@ import {
 } from '../../__generated__/graphql';
 import { ButtonTooltip } from '../core/ButtonTooltip';
 import { FormikEffect } from '../core/FormikEffect';
+import { LoadingButton } from '../core/LoadingButton';
 import { TabPanel } from '../core/TabPanel';
 
 const StyledTabs = styled(Tabs)`
@@ -115,7 +116,7 @@ export function CreateVerificationPlan({
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate] = useCreateCashPlanPaymentVerificationMutation();
+  const [mutate, { loading }] = useCreateCashPlanPaymentVerificationMutation();
   const businessArea = useBusinessArea();
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -431,7 +432,8 @@ export function CreateVerificationPlan({
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>CANCEL</Button>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   type='submit'
                   color='primary'
                   variant='contained'
@@ -439,7 +441,7 @@ export function CreateVerificationPlan({
                   data-cy='button-submit'
                 >
                   SAVE
-                </Button>
+                </LoadingButton>
               </DialogActions>
             </DialogFooter>
           </Dialog>

@@ -3,6 +3,7 @@ import { FileCopy } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   TargetPopulationNode,
@@ -43,7 +44,7 @@ export function ApprovedTargetPopulationHeaderButtons({
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useUnapproveTpMutation();
+  const [mutate, { loading }] = useUnapproveTpMutation();
 
   return (
     <div>
@@ -56,7 +57,8 @@ export function ApprovedTargetPopulationHeaderButtons({
       )}
       {canUnlock && (
         <ButtonContainer>
-          <Button
+          <LoadingButton
+            loading={loading}
             color='primary'
             variant='outlined'
             onClick={() => {
@@ -69,7 +71,7 @@ export function ApprovedTargetPopulationHeaderButtons({
             data-cy='button-target-population-unlocked'
           >
             Unlock
-          </Button>
+          </LoadingButton>
         </ButtonContainer>
       )}
       {canSend && (
