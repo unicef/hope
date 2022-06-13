@@ -2,7 +2,6 @@ import { Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  decodeIdString,
   grievanceTicketStatusToColor,
   reduceChoices,
   renderUserName,
@@ -126,11 +125,11 @@ export function GrievancesDetails({
                 label: t('PAYMENT ID'),
                 value: (
                   <span>
-                    {ticket.paymentRecord?.id ? (
+                    {ticket.paymentRecord?.caId ? (
                       <ContentLink
                         href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
                       >
-                        {decodeIdString(ticket.paymentRecord.id)}
+                        ticket.paymentRecord.caId
                       </ContentLink>
                     ) : (
                       '-'
