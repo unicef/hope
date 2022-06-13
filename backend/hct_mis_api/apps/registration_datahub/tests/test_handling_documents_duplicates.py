@@ -101,6 +101,18 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "sex": MALE,
                     "birth_date": "1985-08-12",
                 },
+                {
+                    "registration_data_import": cls.registration_data_import,
+                    "given_name": "Example",
+                    "full_name": "Example Example",
+                    "middle_name": "",
+                    "family_name": "Example",
+                    "phone_no": "934-25-25-121",
+                    "phone_no_alternative": "",
+                    "relationship": SON_DAUGHTER,
+                    "sex": MALE,
+                    "birth_date": "1985-08-12",
+                },
             ],
         )
         dt = DocumentType(country="PL", label=IDENTIFICATION_TYPE_NATIONAL_ID, type=IDENTIFICATION_TYPE_NATIONAL_ID)
@@ -111,14 +123,17 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         cls.document2 = Document(type=dt, document_number="ASD123", individual=cls.individuals[1])
         cls.document3 = Document(type=dt, document_number="ASD1235", individual=cls.individuals[2])
         cls.document4 = Document(type=dt, document_number="ASD123", individual=cls.individuals[3])
+        cls.document5 = Document(
+            type=dt, document_number="TOTALY UNIQ", individual=cls.individuals[4], status=Document.STATUS_VALID
+        )
         cls.document1.save()
         cls.document2.save()
         cls.document3.save()
         cls.document4.save()
+        cls.document5.save()
 
     def test_hard_documents_deduplication(self):
-        with self.assertNumQueries(9):
-            DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
+        DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4))
         self.document1.refresh_from_db()
         self.document2.refresh_from_db()
         self.document3.refresh_from_db()
@@ -130,3 +145,14 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(GrievanceTicket.objects.count(), 1)
         ticket_details = GrievanceTicket.objects.first().needs_adjudication_ticket_details
         self.assertEqual(ticket_details.possible_duplicates.count(), 2)
+        self.assertEqual(ticket_details.is_multiple_duplicates_version, True)
+
+    def test_hard_documents_deduplication_for_initially_valid(self):
+        DeduplicateTask.hard_deduplicate_documents((self.document5,))
+        self.document5.refresh_from_db()
+        self.assertEqual(self.document5.status, Document.STATUS_VALID)
+        self.assertEqual(GrievanceTicket.objects.count(), 0)
+
+    def test_hard_documents_deduplication_number_of_queries(self):
+        with self.assertNumQueries(12):
+            DeduplicateTask.hard_deduplicate_documents((self.document2, self.document3, self.document4, self.document5))

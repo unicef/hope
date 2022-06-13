@@ -2,6 +2,7 @@ import { Button } from '@material-ui/core';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { handleValidationErrors } from '../../../utils/utils';
@@ -13,7 +14,7 @@ export function CreateProgram(): ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const [mutate] = useCreateProgramMutation({
+  const [mutate, { loading }] = useCreateProgramMutation({
     refetchQueries: () => [
       { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
     ],
@@ -52,7 +53,8 @@ export function CreateProgram(): ReactElement {
     return (
       <>
         <Button onClick={() => setOpen(false)}>Cancel</Button>
-        <Button
+        <LoadingButton
+          loading={loading}
           onClick={submit}
           type='submit'
           color='primary'
@@ -60,7 +62,7 @@ export function CreateProgram(): ReactElement {
           data-cy='button-save'
         >
           {t('Save')}
-        </Button>
+        </LoadingButton>
       </>
     );
   };

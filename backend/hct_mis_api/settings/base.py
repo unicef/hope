@@ -566,6 +566,11 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         "Use elastic search for households search",
         bool,
     ),
+    "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA": (
+        False,
+        "Use business area during elastic search for households search",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
