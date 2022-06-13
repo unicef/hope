@@ -214,8 +214,6 @@ PROJECT_APPS = [
     "hct_mis_api.apps.core.apps.CoreConfig",
     "hct_mis_api.apps.grievance",
     "hct_mis_api.apps.household",
-    "hct_mis_api.apps.id_management",
-    "hct_mis_api.apps.intervention",
     "hct_mis_api.apps.payment",
     "hct_mis_api.apps.program",
     "hct_mis_api.apps.power_query.apps.Config",
