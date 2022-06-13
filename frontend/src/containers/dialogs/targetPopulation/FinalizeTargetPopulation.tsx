@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useFinalizeTpMutation } from '../../../__generated__/graphql';
@@ -20,16 +21,16 @@ export interface FinalizeTargetPopulationPropTypes {
   setOpen: Function;
 }
 
-export function FinalizeTargetPopulation({
+export const FinalizeTargetPopulation = ({
   open,
   setOpen,
   totalHouseholds,
   targetPopulationId,
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const [mutate, loading] = useFinalizeTpMutation();
+  const [mutate, { loading }] = useFinalizeTpMutation();
   const onSubmit = (id: string): void => {
     mutate({
       variables: {
@@ -66,17 +67,18 @@ export function FinalizeTargetPopulation({
       <DialogFooter>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-          <Button
+          <LoadingButton
             onClick={() => onSubmit(targetPopulationId)}
             color='primary'
             variant='contained'
-            disabled={!loading || !totalHouseholds}
+            loading={loading}
+            disabled={loading || !totalHouseholds}
             data-cy='button-target-population-send-to-cash-assist'
           >
             {t('Send to cash assist')}
-          </Button>
+          </LoadingButton>
         </DialogActions>
       </DialogFooter>
     </Dialog>
   );
-}
+};

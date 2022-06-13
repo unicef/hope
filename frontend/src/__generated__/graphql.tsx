@@ -1094,6 +1094,7 @@ export type GrievanceTicketNode = Node & {
   unicefId: Scalars['String'],
   extras: Scalars['JSONString'],
   ignored: Scalars['Boolean'],
+  householdUnicefId?: Maybe<Scalars['String']>,
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -1114,6 +1115,7 @@ export type GrievanceTicketNode = Node & {
   paymentRecord?: Maybe<PaymentRecordNode>,
   relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
   admin?: Maybe<Scalars['String']>,
+  existingTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
 };
 
 
@@ -7545,7 +7547,8 @@ export type AllUsersForFiltersQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>
 };
 
 
@@ -7553,13 +7556,8 @@ export type AllUsersForFiltersQuery = (
   { __typename?: 'Query' }
   & { allUsers: Maybe<(
     { __typename?: 'UserNodeConnection' }
-    & Pick<UserNodeConnection, 'totalCount' | 'edgeCount'>
-    & { pageInfo: (
-      { __typename?: 'PageInfo' }
-      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
-    ), edges: Array<Maybe<(
+    & { edges: Array<Maybe<(
       { __typename?: 'UserNodeEdge' }
-      & Pick<UserNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -7823,7 +7821,10 @@ export type AllGrievanceTicketQuery = (
         )>, household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id'>
-        )>, relatedTickets: Maybe<Array<Maybe<(
+        )>, existingTickets: Maybe<Array<Maybe<(
+          { __typename?: 'GrievanceTicketNode' }
+          & Pick<GrievanceTicketNode, 'id'>
+        )>>>, relatedTickets: Maybe<Array<Maybe<(
           { __typename?: 'GrievanceTicketNode' }
           & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'unicefId'>
         )>>> }
@@ -8217,6 +8218,25 @@ export type GrievancesChoiceDataQuery = (
       & Pick<ChoiceObject, 'name' | 'value'>
     )>>> }
   )>>> }
+);
+
+export type RelatedGrievanceTicketsQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type RelatedGrievanceTicketsQuery = (
+  { __typename?: 'Query' }
+  & { grievanceTicket: Maybe<(
+    { __typename?: 'GrievanceTicketNode' }
+    & { relatedTickets: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'unicefId'>
+    )>>>, existingTickets: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'unicefId'>
+    )>>> }
+  )> }
 );
 
 export type AllCashPlansQueryVariables = {
@@ -9592,6 +9612,29 @@ export type GlobalAreaChartsQuery = (
       { __typename?: '_DetailedDatasetsNode' }
       & Pick<_DetailedDatasetsNode, 'data' | 'label'>
     )>>> }
+  )> }
+);
+
+export type RdiAutocompleteQueryVariables = {
+  businessArea?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type RdiAutocompleteQuery = (
+  { __typename?: 'Query' }
+  & { allRegistrationDataImports: Maybe<(
+    { __typename?: 'RegistrationDataImportNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'RegistrationDataImportNodeEdge' }
+      & Pick<RegistrationDataImportNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'RegistrationDataImportNode' }
+        & Pick<RegistrationDataImportNode, 'id' | 'name'>
+      )> }
+    )>> }
   )> }
 );
 
@@ -13347,14 +13390,8 @@ export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
 export const AllUsersForFiltersDocument = gql`
-    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String) {
-  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      endCursor
-      startCursor
-    }
+    query AllUsersForFilters($businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $search: String) {
+  allUsers(businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy, search: $search) {
     edges {
       node {
         id
@@ -13362,10 +13399,7 @@ export const AllUsersForFiltersDocument = gql`
         lastName
         email
       }
-      cursor
     }
-    totalCount
-    edgeCount
   }
 }
     `;
@@ -13405,6 +13439,7 @@ export function withAllUsersForFilters<TProps, TChildProps = {}>(operationOption
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      orderBy: // value for 'orderBy'
+ *      search: // value for 'search'
  *   },
  * });
  */
@@ -14138,6 +14173,9 @@ export const AllGrievanceTicketDocument = gql`
           id
         }
         unicefId
+        existingTickets {
+          id
+        }
         relatedTickets {
           id
           status
@@ -14870,6 +14908,69 @@ export function useGrievancesChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.
 export type GrievancesChoiceDataQueryHookResult = ReturnType<typeof useGrievancesChoiceDataQuery>;
 export type GrievancesChoiceDataLazyQueryHookResult = ReturnType<typeof useGrievancesChoiceDataLazyQuery>;
 export type GrievancesChoiceDataQueryResult = ApolloReactCommon.QueryResult<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>;
+export const RelatedGrievanceTicketsDocument = gql`
+    query RelatedGrievanceTickets($id: ID!) {
+  grievanceTicket(id: $id) {
+    relatedTickets {
+      id
+      status
+      category
+      issueType
+      unicefId
+    }
+    existingTickets {
+      id
+      status
+      category
+      issueType
+      unicefId
+    }
+  }
+}
+    `;
+export type RelatedGrievanceTicketsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>, 'query'> & ({ variables: RelatedGrievanceTicketsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const RelatedGrievanceTicketsComponent = (props: RelatedGrievanceTicketsComponentProps) => (
+      <ApolloReactComponents.Query<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables> query={RelatedGrievanceTicketsDocument} {...props} />
+    );
+    
+export type RelatedGrievanceTicketsProps<TChildProps = {}> = ApolloReactHoc.DataProps<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables> & TChildProps;
+export function withRelatedGrievanceTickets<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RelatedGrievanceTicketsQuery,
+  RelatedGrievanceTicketsQueryVariables,
+  RelatedGrievanceTicketsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables, RelatedGrievanceTicketsProps<TChildProps>>(RelatedGrievanceTicketsDocument, {
+      alias: 'relatedGrievanceTickets',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRelatedGrievanceTicketsQuery__
+ *
+ * To run a query within a React component, call `useRelatedGrievanceTicketsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRelatedGrievanceTicketsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRelatedGrievanceTicketsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRelatedGrievanceTicketsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>) {
+        return ApolloReactHooks.useQuery<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>(RelatedGrievanceTicketsDocument, baseOptions);
+      }
+export function useRelatedGrievanceTicketsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>(RelatedGrievanceTicketsDocument, baseOptions);
+        }
+export type RelatedGrievanceTicketsQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsQuery>;
+export type RelatedGrievanceTicketsLazyQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsLazyQuery>;
+export type RelatedGrievanceTicketsQueryResult = ApolloReactCommon.QueryResult<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>;
 export const AllCashPlansDocument = gql`
     query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $serviceProvider: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime, $businessArea: String) {
   allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, serviceProvider_FullName_Startswith: $serviceProvider, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte, businessArea: $businessArea) {
@@ -18412,6 +18513,65 @@ export function useGlobalAreaChartsLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type GlobalAreaChartsQueryHookResult = ReturnType<typeof useGlobalAreaChartsQuery>;
 export type GlobalAreaChartsLazyQueryHookResult = ReturnType<typeof useGlobalAreaChartsLazyQuery>;
 export type GlobalAreaChartsQueryResult = ApolloReactCommon.QueryResult<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>;
+export const RdiAutocompleteDocument = gql`
+    query RdiAutocomplete($businessArea: String, $first: Int, $orderBy: String, $name: String) {
+  allRegistrationDataImports(businessArea: $businessArea, first: $first, orderBy: $orderBy, name_Startswith: $name) {
+    edges {
+      cursor
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export type RdiAutocompleteComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>, 'query'>;
+
+    export const RdiAutocompleteComponent = (props: RdiAutocompleteComponentProps) => (
+      <ApolloReactComponents.Query<RdiAutocompleteQuery, RdiAutocompleteQueryVariables> query={RdiAutocompleteDocument} {...props} />
+    );
+    
+export type RdiAutocompleteProps<TChildProps = {}> = ApolloReactHoc.DataProps<RdiAutocompleteQuery, RdiAutocompleteQueryVariables> & TChildProps;
+export function withRdiAutocomplete<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RdiAutocompleteQuery,
+  RdiAutocompleteQueryVariables,
+  RdiAutocompleteProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, RdiAutocompleteQuery, RdiAutocompleteQueryVariables, RdiAutocompleteProps<TChildProps>>(RdiAutocompleteDocument, {
+      alias: 'rdiAutocomplete',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRdiAutocompleteQuery__
+ *
+ * To run a query within a React component, call `useRdiAutocompleteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRdiAutocompleteQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRdiAutocompleteQuery({
+ *   variables: {
+ *      businessArea: // value for 'businessArea'
+ *      first: // value for 'first'
+ *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useRdiAutocompleteQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>) {
+        return ApolloReactHooks.useQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, baseOptions);
+      }
+export function useRdiAutocompleteLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, baseOptions);
+        }
+export type RdiAutocompleteQueryHookResult = ReturnType<typeof useRdiAutocompleteQuery>;
+export type RdiAutocompleteLazyQueryHookResult = ReturnType<typeof useRdiAutocompleteLazyQuery>;
+export type RdiAutocompleteQueryResult = ApolloReactCommon.QueryResult<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>;
 export const AllFieldsAttributesDocument = gql`
     query AllFieldsAttributes {
   allFieldsAttributes {
@@ -20218,6 +20378,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   ignored?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
@@ -20238,6 +20399,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
   relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
   admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  existingTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
 };
 
 export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {

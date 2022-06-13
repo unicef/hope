@@ -7,6 +7,7 @@ import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { PageHeader } from '../../core/PageHeader';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { LoadingButton } from '../../core/LoadingButton';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -17,6 +18,7 @@ interface CreateTargetPopulationHeaderProps {
   values;
   businessArea: string;
   permissions: string[];
+  loading: boolean;
 }
 
 export function CreateTargetPopulationHeader({
@@ -24,6 +26,7 @@ export function CreateTargetPopulationHeader({
   values,
   businessArea,
   permissions,
+  loading,
 }: CreateTargetPopulationHeaderProps): React.ReactElement {
   const { t } = useTranslation();
 
@@ -55,15 +58,16 @@ export function CreateTargetPopulationHeader({
     >
       <>
         <ButtonContainer>
-          <Button
+          <LoadingButton
             variant='contained'
             color='primary'
             onClick={handleSubmit}
-            disabled={values.criterias?.length === 0 || !values.name}
+            disabled={values.criterias?.length === 0 || !values.name || loading}
+            loading={loading}
             data-cy='button-target-population-create'
           >
             {t('Save')}
-          </Button>
+          </LoadingButton>
         </ButtonContainer>
       </>
     </PageHeader>

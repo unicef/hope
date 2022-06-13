@@ -1,6 +1,5 @@
 from django.db import models
 from django.db.models import Q
-from django.db.models.functions import Coalesce
 
 from django_filters import (
     CharFilter,
@@ -118,22 +117,6 @@ class GrievanceTicketFilter(FilterSet):
             "issue_type",
         )
     )
-
-    def filter_queryset(self, queryset):
-        queryset = queryset.annotate(
-            household_unicef_id=Coalesce(
-                "complaint_ticket_details__household__unicef_id",
-                "sensitive_ticket_details__household__unicef_id",
-                "sensitive_ticket_details__household__unicef_id",
-                "individual_data_update_ticket_details__individual__household__unicef_id",
-                "add_individual_ticket_details__household__unicef_id",
-                "household_data_update_ticket_details__household__unicef_id",
-                "delete_individual_ticket_details__individual__household__unicef_id",
-                "system_flagging_ticket_details__golden_records_individual__household__unicef_id",
-                "needs_adjudication_ticket_details__golden_records_individual__household__unicef_id",
-            )
-        )
-        return super().filter_queryset(queryset)
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")

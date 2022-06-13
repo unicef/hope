@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-import { useAllRegistrationDataImportsLazyQuery } from '../../__generated__/graphql';
+import { useRdiAutocompleteLazyQuery } from '../../__generated__/graphql';
 import TextField from '../TextField';
 
 const StyledAutocomplete = styled(Autocomplete)`
@@ -34,21 +34,19 @@ export function RdiAutocomplete({
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 500);
   const businessArea = useBusinessArea();
-  const [
-    loadRdiData,
-    { data, loading },
-  ] = useAllRegistrationDataImportsLazyQuery({
+  const [loadData, { data, loading }] = useRdiAutocompleteLazyQuery({
     variables: {
       businessArea,
-      first: 50,
+      first: 20,
       orderBy: 'name',
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      name_Icontains: debouncedInputText,
+      name: debouncedInputText,
     },
   });
   useEffect(() => {
-    loadRdiData();
-  }, [debouncedInputText, loadRdiData]);
+    if (open) {
+      loadData();
+    }
+  }, [open, debouncedInputText, loadData]);
 
   const onChangeMiddleware = (e, selectedValue): void => {
     onFilterChange((filters) => ({

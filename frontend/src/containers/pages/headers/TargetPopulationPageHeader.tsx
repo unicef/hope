@@ -40,7 +40,7 @@ export interface ProgramDetailsPageHeaderPropTypes {
   canSend: boolean;
 }
 
-export function TargetPopulationPageHeader({
+export const TargetPopulationPageHeader = ({
   targetPopulation,
   setEditState,
   canEdit,
@@ -49,7 +49,7 @@ export function TargetPopulationPageHeader({
   canLock,
   canUnlock,
   canSend,
-}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
+}: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -58,8 +58,9 @@ export function TargetPopulationPageHeader({
       to: `/${businessArea}/target-population/`,
     },
   ];
-  //TODO: Use statuses from node - not in backend yet
+
   let buttons;
+
   switch (targetPopulation.status) {
     case TargetPopulationStatus.Draft:
       buttons = (
@@ -115,4 +116,4 @@ export function TargetPopulationPageHeader({
       </PageHeader>
     </>
   );
-}
+};
