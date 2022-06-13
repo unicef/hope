@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
+import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
 
 const ButtonContainer = styled.span`
@@ -17,6 +18,7 @@ interface EditTargetPopulationProps {
   values;
   businessArea: string;
   targetPopulation;
+  loading: boolean;
 }
 
 export function EditTargetPopulationHeader({
@@ -25,6 +27,7 @@ export function EditTargetPopulationHeader({
   values,
   businessArea,
   targetPopulation,
+  loading,
 }: EditTargetPopulationProps): React.ReactElement {
   const { t } = useTranslation();
 
@@ -65,18 +68,21 @@ export function EditTargetPopulationHeader({
           </ButtonContainer>
         )}
         <ButtonContainer>
-          <Button
+          <LoadingButton
             variant='contained'
             color='primary'
             onClick={handleSubmit}
+            loading={loading}
             disabled={
               values.criterias?.length +
                 values.candidateListCriterias?.length ===
-                0 || !values.name
+                0 ||
+              !values.name ||
+              loading
             }
           >
             {t('Save')}
-          </Button>
+          </LoadingButton>
         </ButtonContainer>
       </>
     </PageHeader>
