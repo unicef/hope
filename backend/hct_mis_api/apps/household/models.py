@@ -411,7 +411,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     total_cash_received_usd = models.DecimalField(
         null=True,
@@ -906,8 +906,8 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     birth_date = models.DateField(db_index=True)
     estimated_birth_date = models.BooleanField(default=False)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
-    phone_no = PhoneNumberField(blank=True)
-    phone_no_alternative = PhoneNumberField(blank=True)
+    phone_no = PhoneNumberField(blank=True, db_index=True)
+    phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
     relationship = models.CharField(
         max_length=255,
         blank=True,

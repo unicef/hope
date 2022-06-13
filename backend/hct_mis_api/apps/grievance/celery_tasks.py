@@ -12,7 +12,7 @@ from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 logger = logging.getLogger(__name__)
 
 
-@app.task
+@app.task(queue="priority")
 def deduplicate_and_check_against_sanctions_list_task(
     should_populate_index, registration_data_import_id, individuals_ids
 ):

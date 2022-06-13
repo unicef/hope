@@ -4,7 +4,7 @@ from django.conf import settings
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 
 from .elasticsearch_utils import DEFAULT_SCRIPT
-from .models import Individual
+from .models import Individual, Household
 
 
 @registry.register_document
@@ -19,11 +19,15 @@ class IndividualDocument(Document):
     birth_date = fields.DateField(similarity="boolean")
     phone_no = fields.KeywordField("phone_no.__str__", similarity="boolean")
     phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__", similarity="boolean")
+    phone_no_text = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
+    phone_no_alternative_text = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     business_area = fields.KeywordField(similarity="boolean")
     admin1 = fields.KeywordField()
     admin2 = fields.KeywordField()
+    unicef_id = fields.TextField()
     household = fields.ObjectField(
         properties={
+            "unicef_id": fields.TextField(),
             "residence_status": fields.KeywordField(similarity="boolean"),
             "country_origin": fields.KeywordField(attr="country_origin.alpha3", similarity="boolean"),
             "size": fields.IntegerField(),
@@ -78,23 +82,23 @@ class IndividualDocument(Document):
         }
     )
 
+    def prepare_phone_no_text(self, instance):
+        return str(instance.phone_no).replace(" ", "")
+
+    def prepare_phone_no_alternative_text(self, instance):
+        return str(instance.phone_no).replace(" ", "")
+
     def prepare_admin1(self, instance):
         household = instance.household
         if household:
-            admin_area = household.admin_area
-            if admin_area:
-                return admin_area.title
-            return
+            if household.admin1:
+                return household.admin1.title
 
     def prepare_admin2(self, instance):
         household = instance.household
         if household:
-            admin_area = household.admin_area
-            if admin_area:
-                children = admin_area.children.filter(admin_area_level__admin_level=2).first()
-                if children:
-                    return children.title
-                return
+            if household.admin2:
+                return household.admin2.title
 
     def prepare_hash_key(self, instance):
         return instance.get_hash_key
@@ -126,3 +130,44 @@ class IndividualDocument(Document):
             "created_at",
             "updated_at",
         ]
+
+@registry.register_document
+class HouseholdDocument(Document):
+    head_of_household = fields.ObjectField(
+        properties={
+            "full_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "given_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "middle_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+            "family_name": fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10}),
+        }
+    )
+    unicef_id = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
+    residence_status = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
+    admin1 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
+    admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
+    business_area = fields.KeywordField(similarity="boolean")
+
+    def prepare_admin1(self, household):
+        if household:
+            if household.admin1:
+                return household.admin1.title
+
+    def prepare_admin2(self, household):
+        if household:
+            if household.admin2:
+                return household.admin2.title
+
+    def prepare_business_area(self, instance):
+        return instance.business_area.slug
+
+    class Django:
+        model = Household
+
+        fields = [
+        ]
+    class Index:
+        name = f"{settings.ELASTICSEARCH_INDEX_PREFIX}households"
+        settings = {
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+        }
