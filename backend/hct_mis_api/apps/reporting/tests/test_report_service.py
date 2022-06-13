@@ -26,7 +26,7 @@ class TestGenerateReportService(TestCase):
     @classmethod
     def setUpTestData(self):
         create_afghanistan()
-        from hct_mis_api.apps.reporting.generate_report_service import (
+        from hct_mis_api.apps.reporting.services.generate_report_service import (
             GenerateReportService,
         )
 
