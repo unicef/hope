@@ -1093,6 +1093,7 @@ export type GrievanceTicketNode = Node & {
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
   unicefId: Scalars['String'],
   extras: Scalars['JSONString'],
+  ignored: Scalars['Boolean'],
   householdUnicefId?: Maybe<Scalars['String']>,
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
@@ -7915,7 +7916,7 @@ export type GrievanceTicketQuery = (
       & HouseholdDetailedFragment
     )>, paymentRecord: Maybe<(
       { __typename?: 'PaymentRecordNode' }
-      & Pick<PaymentRecordNode, 'id'>
+      & Pick<PaymentRecordNode, 'id' | 'caId'>
     )>, relatedTickets: Maybe<Array<Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status'>
@@ -14391,6 +14392,7 @@ export const GrievanceTicketDocument = gql`
     }
     paymentRecord {
       id
+      caId
     }
     relatedTickets {
       id
@@ -20375,6 +20377,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  ignored?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
