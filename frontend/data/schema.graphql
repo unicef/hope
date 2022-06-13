@@ -750,6 +750,7 @@ type GrievanceTicketNode implements Node {
   registrationDataImport: RegistrationDataImportNode
   unicefId: String!
   extras: JSONString!
+  householdUnicefId: String
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -770,6 +771,7 @@ type GrievanceTicketNode implements Node {
   paymentRecord: PaymentRecordNode
   relatedTickets: [GrievanceTicketNode]
   admin: String
+  existingTickets: [GrievanceTicketNode]
 }
 
 type GrievanceTicketNodeConnection {
