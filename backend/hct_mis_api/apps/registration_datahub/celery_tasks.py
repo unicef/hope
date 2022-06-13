@@ -277,18 +277,18 @@ def fresh_extract_records_task(records_ids=None):
 
 
 @app.task
-def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}"):
+def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}", **filters):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
 
     try:
-        with cache.lock(f"automate_rdi_creation_task-{registration_id}", timeout=85400) as lock:
+        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=85400) as lock:
             try:
                 service = FlexRegistrationService()
 
                 records_ids = (
-                    Record.objects.filter(registration=registration_id)
+                    Record.objects.filter(registration=registration_id, **filters)
                     .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
                     .values_list("id", flat=True)[:page_size]
                 )
