@@ -221,7 +221,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                 # user_data["user_roles"] = user_roles
                 all_user_data[member.user.pk] = user_data
 
-                values = {key: value for (key, value) in user_data.items() if key not in ["action"]}
+                values = {key: value for (key, value) in user_data.items() if key != "action"}
                 signature = str(hash(frozenset(values.items())))
 
                 user_data["signature"] = signature
