@@ -446,6 +446,7 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     def has_delete_permission(self, request, obj=None):
         return is_root(request)
 
+
 @admin.register(DiiaIndividual)
 class DiiaIndividualAdmin(HOPEModelAdminBase):
     list_display = (
