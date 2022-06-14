@@ -13,8 +13,6 @@ app = Celery("hct_mis")
 
 app.config_from_object("django.conf:settings", namespace="CELERY")
 
-app.conf["task_acks_late"] = True
-app.conf["worker_prefetch_multiplier"] = 1
 app.conf["task_queues"] = (
     Queue(
         CELERY_QUEUE_DEFAULT,
