@@ -55,8 +55,8 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 consent=household.consent,
                 address=household.address,
                 registration_data_import=registration_data_import,
-                first_registration_date=household.created_at,
-                last_registration_date=household.created_at,
+                first_registration_date=registration_data_import.created_at,
+                last_registration_date=registration_data_import.created_at,
                 diia_rec_id=household.rec_id,
                 size=all_individuals.count(),
                 country=Country("UA"),
@@ -83,8 +83,8 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                     marital_status=individual.marital_status,
                     disability=individual.disability,
                     registration_data_import=registration_data_import,
-                    first_registration_date=individual.created_at,
-                    last_registration_date=individual.created_at,
+                    first_registration_date=registration_data_import.created_at,
+                    last_registration_date=registration_data_import.created_at,
                     household=household_obj,
                 )
                 individuals_to_create_list.append(individual_obj)
