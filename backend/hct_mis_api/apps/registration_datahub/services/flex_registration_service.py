@@ -121,9 +121,14 @@ class FlexRegistrationService:
         import_data = rdi_datahub.import_data
 
         Record.objects.filter(pk__in=records_ids).update(registration_data_import=rdi_datahub)
+        records_ids_to_import = (
+            Record.objects.filter(id__in=records_ids)
+            .exclude(status=Record.STATUS_IMPORTED)
+            .values_list("id", flat=True)
+        )
         imported_records_ids = []
         try:
-            for record_id in records_ids:
+            for record_id in records_ids_to_import:
                 try:
                     with atomic("default"):
                         with atomic("registration_datahub"):
