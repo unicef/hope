@@ -77,6 +77,12 @@ export const menuItems = [
     ],
   },
   {
+    name: 'Payment Management',
+    selectedRegexp: /^\/unique.*$/,
+    icon: <PaymentIcon />,
+    external: true,
+  },
+  {
     name: 'Payment Module',
     href: '/payment-module',
     selectedRegexp: /^\/payment-module.*$/,

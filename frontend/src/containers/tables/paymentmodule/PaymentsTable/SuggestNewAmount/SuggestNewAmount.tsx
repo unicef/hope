@@ -7,21 +7,17 @@ import {
   DialogTitle,
   Divider,
   Grid,
-  IconButton,
-  Table,
 } from '@material-ui/core';
-import Edit from '@material-ui/icons/Edit';
 import { Field, Formik } from 'formik';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  DialogFooter,
-  DialogTitleWrapper,
-} from '../../../../../components/core/ConfirmationDialog/ConfirmationDialog';
+
 import { LabelizedField } from '../../../../../components/core/LabelizedField';
 import { Missing } from '../../../../../components/core/Missing';
 import { FormikTextField } from '../../../../../shared/Formik/FormikTextField';
+import { DialogFooter } from '../../../../dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 
 export const StyledLink = styled.div`
   color: #000;
