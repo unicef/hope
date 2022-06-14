@@ -20,6 +20,7 @@ import {
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../../__generated__/graphql';
+import { LoadingButton } from '../../core/LoadingButton';
 import { OverviewContainerColumn } from '../../core/OverviewContainerColumn';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
@@ -55,7 +56,7 @@ export function Notes({
   });
 
   const { id } = useParams();
-  const [mutate] = useCreateGrievanceTicketNoteMutation();
+  const [mutate, { loading }] = useCreateGrievanceTicketNoteMutation();
 
   if (meLoading) {
     return null;
@@ -136,8 +137,9 @@ export function Notes({
                     <Grid item xs={2}>
                       <Avatar
                         src={`${meData.me.firstName || meData.me.email}`}
-                        alt={`${meData.me.firstName ||
-                          meData.me.email} picture`}
+                        alt={`${
+                          meData.me.firstName || meData.me.email
+                        } picture`}
                       />
                     </Grid>
                     <Grid item xs={10}>
@@ -162,13 +164,14 @@ export function Notes({
                               display='flex'
                               justifyContent='flex-end'
                             >
-                              <Button
+                              <LoadingButton
+                                loading={loading}
                                 color='primary'
                                 variant='contained'
                                 onClick={submitForm}
                               >
                                 {t('Add New Note')}
-                              </Button>
+                              </LoadingButton>
                             </Box>
                           </Form>
                         </DescMargin>

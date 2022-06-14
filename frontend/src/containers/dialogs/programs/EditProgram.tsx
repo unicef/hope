@@ -4,6 +4,7 @@ import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
@@ -22,7 +23,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const [mutate] = useUpdateProgramMutation({
+  const [mutate, { loading }] = useUpdateProgramMutation({
     refetchQueries: [
       {
         query: ALL_LOG_ENTRIES_QUERY,
@@ -76,7 +77,8 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
     return (
       <>
         <Button onClick={() => setOpen(false)}>Cancel</Button>
-        <Button
+        <LoadingButton
+          loading={loading}
           onClick={submit}
           type='submit'
           color='primary'
@@ -84,7 +86,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
           data-cy='button-save'
         >
           {t('Save')}
-        </Button>
+        </LoadingButton>
       </>
     );
   };
