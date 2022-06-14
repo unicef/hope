@@ -41,7 +41,8 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     verify_flex_fields,
     withdraw_individual_and_reassign_roles,
 )
-from hct_mis_api.apps.household.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
@@ -630,7 +631,7 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     IndividualIdentity.objects.bulk_create(identities_to_create)
 
     if individual.household:
-        individual.household.recalculate_data()
+        recalculate_data(individual.household)
     else:
         individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
@@ -742,7 +743,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     new_individual.refresh_from_db()
 
     if new_individual.household:
-        new_individual.household.recalculate_data()
+        recalculate_data(new_individual.household)
     else:
         new_individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
@@ -807,7 +808,7 @@ def close_update_household_grievance_ticket(grievance_ticket, info):
     merged_flex_fields.update(flex_fields)
     Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
     new_household = Household.objects.get(id=household.id)
-    new_household.recalculate_data()
+    recalculate_data(new_household)
     log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_household, new_household)
 
 
@@ -822,7 +823,7 @@ def close_delete_individual_ticket(grievance_ticket, info):
     withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove, info)
     if household:
         household.refresh_from_db()
-        household.recalculate_data()
+        recalculate_data(household)
 
 
 def check_external_collector(household):
