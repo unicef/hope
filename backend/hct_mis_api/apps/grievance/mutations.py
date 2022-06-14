@@ -61,8 +61,9 @@ from hct_mis_api.apps.grievance.mutations_extras.system_tickets import (
     close_needs_adjudication_ticket,
     close_system_flagging_ticket,
 )
-from hct_mis_api.apps.grievance.mutations_extras.ticket_payment_verification_details import \
-    update_ticket_payment_verification_details_extras
+from hct_mis_api.apps.grievance.mutations_extras.ticket_payment_verification_details import (
+    update_ticket_payment_verification_details_extras,
+)
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     remove_parsed_data_fields,
     verify_required_arguments,
@@ -451,16 +452,16 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_REFERRAL: update_referral_extras,
             GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK: update_positive_feedback_extras,
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: update_negative_feedback_extras,
-            GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: update_ticket_payment_verification_details_extras
+            GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: update_ticket_payment_verification_details_extras,
         }
         update_extra_method = update_extra_methods.get(grievance_ticket.category)
         if update_extra_method:
             grievance_ticket = update_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
 
-        if grievance_ticket.category in [
+        if grievance_ticket.category in (
             GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
             GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-        ]:
+        ):
             ticket_details = grievance_ticket.ticket_details
 
             if ticket_details.household and ticket_details.household != household:
