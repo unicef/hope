@@ -59,7 +59,7 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     readonly_fields = ("timestamp", "last_modified_date", "sentry_id", "source", "business_area")
 
     def run_time(self, obj):
-        if obj.status in [obj.STATUS_PROCESSING, obj.STATUS_LOADING]:
+        if obj.status in (obj.STATUS_PROCESSING, obj.STATUS_LOADING):
             elapsed = datetime.datetime.now() - obj.timestamp
             if elapsed.total_seconds() >= HOUR:
                 return elapsed
@@ -160,7 +160,7 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             elif elapsed.total_seconds() >= HOUR:
                 warnings.append([messages.WARNING, f"Session is running more than {elapsed}"])
 
-        for model in [Programme, CashPlan, TargetPopulation, PaymentRecord, ServiceProvider]:
+        for model in (Programme, CashPlan, TargetPopulation, PaymentRecord, ServiceProvider):
             count = model.objects.filter(session=pk).count()
             has_content = has_content or count
             context["data"][model] = {"count": count, "warnings": [], "errors": [], "meta": model._meta}
@@ -278,12 +278,12 @@ class PaymentRecordAdmin(ExtraButtonsMixin, AdminFiltersMixin, admin.ModelAdmin)
         from hct_mis_api.apps.household.models import Household, Individual
 
         # ba = BusinessArea.objects.get(code=payment_record.business_area)
-        for field_name, model, rk in [
+        for field_name, model, rk in (
             ("business_area", BusinessArea, "code"),
             ("household_mis_id", Household, "pk"),
             ("head_of_household_mis_id", Individual, "pk"),
             ("target_population_mis_id", TargetPopulation, "pk"),
-        ]:
+        ):
             instance = model.objects.filter(**{rk: getattr(payment_record, field_name)}).first()
             details = None
             if instance:
