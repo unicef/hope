@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "hope.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.celery.replicaCount }}
+  replicas: {{ int (.Values.celery.replicaCount) }}
   selector:
     matchLabels:
       {{- include "hope.selectorLabels" . | nindent 6 }}

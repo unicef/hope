@@ -31,14 +31,14 @@ export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   canLock: boolean;
 }
 
-export function InProgressTargetPopulationHeaderButtons({
+export const InProgressTargetPopulationHeaderButtons = ({
   targetPopulation,
   setEditState,
   canDuplicate,
   canEdit,
   canLock,
   canRemove,
-}: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+}: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -102,4 +102,4 @@ export function InProgressTargetPopulationHeaderButtons({
       />
     </div>
   );
-}
+};

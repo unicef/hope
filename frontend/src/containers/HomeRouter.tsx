@@ -1,40 +1,40 @@
-import React from 'react';
-import styled from 'styled-components';
 import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { Route, Switch, useLocation } from 'react-router-dom';
-import * as Sentry from '@sentry/react';
-import { MiśTheme } from '../theme';
-import { Drawer } from '../components/core/Drawer/Drawer';
+import React from 'react';
+import { Switch, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 import { AppBar } from '../components/core/AppBar';
+import { Drawer } from '../components/core/Drawer/Drawer';
+import { SentryRoute } from '../components/core/SentryRoute';
 import { useSnackbar } from '../hooks/useSnackBar';
-import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
-import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
+import { MiśTheme } from '../theme';
+import { ActivityLogPage } from './pages/core/MainActivityLogPage';
+import { UsersPage } from './pages/core/UsersPage';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
-import { DashboardPage } from './pages/dashboard/DashboardPage';
-import { ProgramsPage } from './pages/program/ProgramsPage';
-import { ProgramDetailsPage } from './pages/program/ProgramDetailsPage';
+import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
+import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
+import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
 import { PaymentRecordDetailsPage } from './pages/payments/PaymentRecordDetailsPage';
-import { PopulationHouseholdPage } from './pages/population/PopulationHouseholdPage';
-import { RegistrationDataImportPage } from './pages/rdi/RegistrationDataImportPage';
+import { PaymentVerificationDetailsPage } from './pages/payments/PaymentVerificationDetailsPage';
+import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
+import { VerificationRecordDetailsPage } from './pages/payments/VerificationRecordDetailsPage';
 import { PopulationHouseholdDetailsPage } from './pages/population/PopulationHouseholdDetailsPage';
-import { PopulationIndividualsPage } from './pages/population/PopulationIndividualsPage';
+import { PopulationHouseholdPage } from './pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from './pages/population/PopulationIndividualsDetailsPage';
-import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
-import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopulationPage';
+import { PopulationIndividualsPage } from './pages/population/PopulationIndividualsPage';
+import { ProgramDetailsPage } from './pages/program/ProgramDetailsPage';
+import { ProgramsPage } from './pages/program/ProgramsPage';
 import { RegistrationDataImportDetailsPage } from './pages/rdi/RegistrationDataImportDetailsPage';
+import { RegistrationDataImportPage } from './pages/rdi/RegistrationDataImportPage';
 import { RegistrationHouseholdDetailsPage } from './pages/rdi/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from './pages/rdi/RegistrationIndividualDetailsPage';
-import { PaymentVerificationPage } from './pages/payments/PaymentVerificationPage';
-import { PaymentVerificationDetailsPage } from './pages/payments/PaymentVerificationDetailsPage';
-import { VerificationRecordDetailsPage } from './pages/payments/VerificationRecordDetailsPage';
-import { UsersPage } from './pages/core/UsersPage';
-import { ReportingPage } from './pages/reporting/ReportingPage';
 import { ReportingDetailsPage } from './pages/reporting/ReportingDetailsPage';
-import { ActivityLogPage } from './pages/core/MainActivityLogPage';
-import { CashPlanVerificationRedirectPage } from './pages/payments/CashplanVerificationRedirectPage';
+import { ReportingPage } from './pages/reporting/ReportingPage';
+import { CreateTargetPopulationPage } from './pages/targeting/CreateTargetPopulationPage';
+import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
@@ -81,358 +81,120 @@ export function HomeRouter(): React.ReactElement {
       <MainContent data-cy='main-content'>
         <div className={classes.appBarSpacer} />
         <Switch>
-          <Route path='/:businessArea/population/household/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/population/household/:id');
-              }}
-            >
-              <PopulationHouseholdDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/population/individuals/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/population/individuals/:id');
-              }}
-            >
-              <PopulationIndividualsDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/cashplans/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/cashplans/:id');
-              }}
-            >
-              <CashPlanDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-
-          <Route exact path='/:businessArea/target-population'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/target-population');
-              }}
-            >
-              <TargetPopulationsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/target-population/create'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/target-population/create');
-              }}
-            >
-              <CreateTargetPopulationPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/target-population/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/target-population/:id');
-              }}
-            >
-              <TargetPopulationDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/payment-module/new-plan'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-module/new-plan');
-              }}
-            >
-              <CreatePaymentPlanPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/payment-module/new-fsp'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-module/new-fsp');
-              }}
-            >
-              <CreateFspPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/payment-module/fsp/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-module/fsp/:id');
-              }}
-            >
-              <EditFspPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route exact path='/:businessArea/payment-module'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-module');
-              }}
-            >
-              <PaymentModulePage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag(
-                  'location',
-                  '/payment-module/payment-plans/:id/setup-fsp/create',
-                );
-              }}
-            >
-              <CreateSetUpFspPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/edit'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag(
-                  'location',
-                  '/payment-module/payment-plans/:id/setup-fsp/edit',
-                );
-              }}
-            >
-              <EditSetUpFspPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/payment-module/payment-plans/:id/setup-fsp'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag(
-                  'location',
-                  '/payment-module/payment-plans/:id/setup-fsp/',
-                );
-              }}
-            >
-              <SetUpFspPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/payment-module/payment-plans/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-module/payment-plans/:id');
-              }}
-            >
-              <PaymentPlanDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route exact path='/:businessArea/payment-verification'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-verification');
-              }}
-            >
-              <PaymentVerificationPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/verification-records/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/verification-records/:id');
-              }}
-            >
-              <VerificationRecordDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/payment-verification/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-verification/:id');
-              }}
-            >
-              <PaymentVerificationDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/csh-payment-verification/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/csh-payment-verification/:id');
-              }}
-            >
-              <CashPlanVerificationRedirectPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/grievance-and-feedback/new-ticket'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/grievance-and-feedback/new-ticket');
-              }}
-            >
-              <CreateGrievancePage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/grievance-and-feedback/edit-ticket/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag(
-                  'location',
-                  '/grievance-and-feedback/edit-ticket/:id',
-                );
-              }}
-            >
-              <EditGrievancePage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/grievance-and-feedback/rdi/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag(
-                  'location',
-                  '/:businessArea/grievance-and-feedback',
-                );
-              }}
-            >
-              <GrievancesTablePage key='rdi' />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag(
-                  'location',
-                  '/:businessArea/grievance-and-feedback',
-                );
-              }}
-            >
-              <GrievancesTablePage key='verificationId' />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/grievance-and-feedback/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/grievance-and-feedback/:id');
-              }}
-            >
-              <GrievancesDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/grievance-and-feedback'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag(
-                  'location',
-                  '/:businessArea/grievance-and-feedback',
-                );
-              }}
-            >
-              <GrievancesTablePage key='all' />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/population/household'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/population/household');
-              }}
-            >
-              <PopulationHouseholdPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/population/individuals'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/population/individuals');
-              }}
-            >
-              <PopulationIndividualsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/programs/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/programs/:id');
-              }}
-            >
-              <ProgramDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/payment-records/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/payment-records/:id');
-              }}
-            >
-              <PaymentRecordDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/programs'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/programs');
-              }}
-            >
-              <ProgramsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/registration-data-import/household/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag(
-                  'location',
-                  '/registration-data-import/household/:id',
-                );
-              }}
-            >
-              <RegistrationHouseholdDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/registration-data-import/individual/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag(
-                  'location',
-                  '/registration-data-import/individual/:id',
-                );
-              }}
-            >
-              <RegistrationIndividualDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/registration-data-import/:id'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/registration-data-import/:id');
-              }}
-            >
-              <RegistrationDataImportDetailsPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/registration-data-import'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/registration-data-import');
-              }}
-            >
-              <RegistrationDataImportPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/reporting/:id'>
+          <SentryRoute path='/:businessArea/population/household/:id'>
+            <PopulationHouseholdDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/population/individuals/:id'>
+            <PopulationIndividualsDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/cashplans/:id'>
+            <CashPlanDetailsPage />
+          </SentryRoute>
+          <SentryRoute exact path='/:businessArea/target-population'>
+            <TargetPopulationsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/target-population/create'>
+            <CreateTargetPopulationPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/target-population/:id'>
+            <TargetPopulationDetailsPage />
+          </SentryRoute>
+          <SentryRoute exact path='/:businessArea/payment-verification'>
+            <PaymentVerificationPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/verification-records/:id'>
+            <VerificationRecordDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-verification/:id'>
+            <PaymentVerificationDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/csh-payment-verification/:id'>
+            <CashPlanVerificationRedirectPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/new-plan'>
+            <CreatePaymentPlanPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/new-fsp'>
+            <CreateFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/fsp/:id'>
+            <EditFspPage />
+          </SentryRoute>
+          <SentryRoute exact path='/:businessArea/payment-module'>
+            <PaymentModulePage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/create'>
+            <CreateSetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp/edit'>
+            <EditSetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id/setup-fsp'>
+            <SetUpFspPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-module/payment-plans/:id'>
+            <PaymentPlanDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/new-ticket'>
+            <CreateGrievancePage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/edit-ticket/:id'>
+            <EditGrievancePage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/rdi/:id'>
+            <GrievancesTablePage key='rdi' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
+            <GrievancesTablePage key='verificationId' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/:id'>
+            <GrievancesDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback'>
+            <GrievancesTablePage key='all' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/population/household'>
+            <PopulationHouseholdPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/population/individuals'>
+            <PopulationIndividualsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/programs/:id'>
+            <ProgramDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/payment-records/:id'>
+            <PaymentRecordDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/programs'>
+            <ProgramsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/registration-data-import/household/:id'>
+            <RegistrationHouseholdDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/registration-data-import/individual/:id'>
+            <RegistrationIndividualDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/registration-data-import/:id'>
+            <RegistrationDataImportDetailsPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/registration-data-import'>
+            <RegistrationDataImportPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/reporting/:id'>
             <ReportingDetailsPage />
-          </Route>
-          <Route path='/:businessArea/reporting'>
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/reporting'>
             <ReportingPage />
-          </Route>
-          <Route path='/:businessArea/users-list'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/users-list');
-              }}
-            >
-              <UsersPage />
-            </Sentry.ErrorBoundary>
-          </Route>
-          <Route path='/:businessArea/activity-log'>
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/users-list'>
+            <UsersPage />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/activity-log'>
             <ActivityLogPage />
-          </Route>
-          <Route path='/:businessArea'>
-            <Sentry.ErrorBoundary
-              beforeCapture={(scope) => {
-                scope.setTag('location', '/ - Dashboard');
-              }}
-            >
-              <DashboardPage />
-            </Sentry.ErrorBoundary>
-          </Route>
+          </SentryRoute>
+          <SentryRoute label='/ - Dashboard' path='/:businessArea'>
+            <DashboardPage />
+          </SentryRoute>
         </Switch>
       </MainContent>
       {snackBar.show && (

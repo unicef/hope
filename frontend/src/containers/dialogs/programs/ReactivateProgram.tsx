@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { programCompare } from '../../../utils/utils';
@@ -34,7 +35,7 @@ export function ReactivateProgram({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const [mutate] = useUpdateProgramMutation({
+  const [mutate, { loading }] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
         query: PROGRAM_QUERY,
@@ -98,14 +99,15 @@ export function ReactivateProgram({
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-            <Button
+            <LoadingButton
+              loading={loading}
               type='submit'
               color='primary'
               variant='contained'
               onClick={reactivateProgram}
             >
               {t('REACTIVATE')}
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </DialogFooter>
       </Dialog>
