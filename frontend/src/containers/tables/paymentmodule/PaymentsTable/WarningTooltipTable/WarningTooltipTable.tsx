@@ -18,14 +18,12 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { grievanceTicketStatusToColor } from '../../../../../utils/utils';
 import { BlackLink } from '../../../../../components/core/BlackLink';
-import {
-  DialogTitleWrapper,
-  DialogFooter,
-} from '../../../../../components/core/ConfirmationDialog/ConfirmationDialog';
 import { Missing } from '../../../../../components/core/Missing';
 import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../../components/core/WarningTooltip';
 import { LabelizedField } from '../../../../../components/core/LabelizedField';
+import { DialogFooter } from '../../../../dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 
 export const StyledLink = styled.div`
   color: #000;
