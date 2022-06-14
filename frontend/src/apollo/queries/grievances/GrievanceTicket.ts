@@ -51,6 +51,7 @@ export const GrievanceTicket = gql`
       }
       paymentRecord {
         id
+        caId
       }
       relatedTickets {
         id

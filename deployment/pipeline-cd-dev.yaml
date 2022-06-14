@@ -86,4 +86,5 @@ stages:
                 cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
                 cashassistdatahubpostgresql.externalDatabase.db=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH),\
-                backend.replicaCount=$(BACKEND_REPLICA_COUNT),"
+                backend.replicaCount=$(BACKEND_REPLICA_COUNT),\
+                celery.replicaCount=$(CELERY_REPLICA_COUNT),"

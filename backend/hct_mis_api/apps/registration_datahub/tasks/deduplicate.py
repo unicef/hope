@@ -824,8 +824,9 @@ class DeduplicateTask:
 
     @classmethod
     def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
-        documents_numbers = [x.document_number for x in new_documents]
-        new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in new_documents]
+        documents_to_dedup = [x for x in new_documents if  x.status != Document.STATUS_VALID]
+        documents_numbers = [x.document_number for x in documents_to_dedup]
+        new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]
         new_document_signatures_duplicated_in_batch = [
             d for d in new_document_signatures if new_document_signatures.count(d) > 1
         ]
@@ -838,7 +839,7 @@ class DeduplicateTask:
         all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
         already_processed_signatures = []
         ticket_data_dict = {}
-        for new_document in new_documents:
+        for new_document in documents_to_dedup:
             new_document_signature = f"{new_document.type_id}--{new_document.document_number}"
             if new_document_signature in all_matching_number_documents_signatures:
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
@@ -863,7 +864,7 @@ class DeduplicateTask:
                     "original": all_matching_number_documents_dict[new_document_signature],
                     "possible_duplicates": [],
                 }
-        Document.objects.bulk_update(new_documents, ("status", "updated_at"))
+        Document.objects.bulk_update(documents_to_dedup, ("status", "updated_at"))
         for ticket_data in ticket_data_dict.values():
             create_grievance_ticket_with_details(
                 main_individual=ticket_data["original"].individual,
