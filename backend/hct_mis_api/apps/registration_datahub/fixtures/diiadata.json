@@ -53,7 +53,7 @@
 },
 {
   "model": "registration_datahub.diiahousehold",
-  "pk": "4a8c7079-802d-e75e-4818-18d9e1debffe",
+  "pk": "1",
   "fields": {
     "rec_id": "111111",
     "vpo_doc": "test_file_name.jpg",
@@ -62,14 +62,12 @@
     "address": "Староміська майдан, 854, кв. 794, 80571, Одеса, Луганська область, Ukraine",
     "consent": true,
     "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_household": null,
-    "created_at": "2022-03-30T09:22:16.600",
-    "updated_at": "2022-03-30T09:22:16.600"
+    "imported_household": null
   }
 },
 {
   "model": "registration_datahub.diiahousehold",
-  "pk": "4a8c7079-4818-e75e-802d-ebffe18d9123",
+  "pk": "2",
   "fields": {
     "rec_id": "222222",
     "vpo_doc": "test_file_name.jpg",
@@ -78,18 +76,14 @@
     "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
     "consent": true,
     "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_household": null,
-    "created_at": "2022-03-30T09:22:16.600",
-    "updated_at": "2022-03-30T09:22:16.600"
+    "imported_household": null
   }
 },
 {
   "model": "registration_datahub.diiaindividual",
-  "pk": "2156fa32-a123-a123-a123-e4722707631d",
+  "pk": "1",
   "fields": {
     "rec_id": "111111",
-    "created_at": "2022-03-30T09:22:16.762",
-    "updated_at": "2022-03-30T09:22:16.762",
     "individual_id": "111222333111",
     "last_name": "Hurst",
     "first_name": "Fiona",
@@ -108,11 +102,9 @@
 },
 {
   "model": "registration_datahub.diiaindividual",
-  "pk": "2156fa32-c961-4e91-a123-e4722707635d",
+  "pk": "2",
   "fields": {
     "rec_id": "111111",
-    "created_at": "2022-03-30T09:22:16.762",
-    "updated_at": "2022-03-30T09:22:16.762",
     "individual_id": "111222333444",
     "last_name": "Clay",
     "first_name": "Francis",
@@ -131,11 +123,9 @@
 },
 {
   "model": "registration_datahub.diiaindividual",
-  "pk": "2156fa32-c961-4e91-c961-e4722707638d",
+  "pk": "3",
   "fields": {
     "rec_id": "222222",
-    "created_at": "2022-03-30T09:22:16.762",
-    "updated_at": "2022-03-30T09:22:16.762",
     "individual_id": "123412341234",
     "last_name": "Duarte",
     "first_name": "Erik",
@@ -154,11 +144,9 @@
 },
 {
   "model": "registration_datahub.diiaindividual",
-  "pk": "2156fa32-c961-4e91-4e91-e4722707636d",
+  "pk": "4",
   "fields": {
     "rec_id": "222222",
-    "created_at": "2022-03-30T09:22:16.762",
-    "updated_at": "2022-03-30T09:22:16.762",
     "individual_id": "76543113349",
     "last_name": "Burnett",
     "first_name": "Lydia",
@@ -177,11 +165,9 @@
 },
 {
   "model": "registration_datahub.diiaindividual",
-  "pk": "2156fa32-a123-4e91-a123-e4722707635d",
+  "pk": "5",
   "fields": {
     "rec_id": "222222",
-    "created_at": "2022-03-30T09:22:16.762",
-    "updated_at": "2022-03-30T09:22:16.762",
     "individual_id": "",
     "last_name": "Bautista",
     "first_name": "Sam",
