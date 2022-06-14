@@ -559,7 +559,7 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
         super().save(*args, **kwargs)
 
 
-class DiiaHousehold(TimeStampedUUIDModel):
+class DiiaHousehold(models.Model):
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
     vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True, null=True)
     vpo_doc_id = models.CharField(max_length=128, blank=True, null=True)
@@ -586,7 +586,7 @@ class DiiaHousehold(TimeStampedUUIDModel):
         return f"Diia Household ID: {self.id}"
 
 
-class DiiaIndividual(TimeStampedUUIDModel):
+class DiiaIndividual(models.Model):
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
     individual_id = models.CharField(max_length=128, blank=True, null=True)  # RNOKPP
     last_name = models.CharField(max_length=85, blank=True, null=True)
