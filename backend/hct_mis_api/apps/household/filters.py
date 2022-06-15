@@ -92,7 +92,18 @@ class HouseholdFilter(FilterSet):
             HouseholdDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
-        return qs.filter(Q(id__in=es_ids)).distinct()
+
+        split_values_list = value.split(" ")
+        record_id_query = []
+        inner_query = Q()
+        for split_value in split_values_list:
+            striped_value = split_value.strip(",")
+            if striped_value.startswith(("HOPE-", "KOBO-")):
+                _value = self._prepare_kobo_asset_id_value(value)
+                # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
+                # will filter by '111222' like 111222 is ID
+                inner_query |= Q(kobo_asset_id__endswith=_value)
+        return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def search_filter(self, qs, name, value):
         if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
@@ -495,6 +506,6 @@ def get_elasticsearch_query_for_households(value, business_area):
         },
     }
     if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:
-        query["query"]["bool"]["filter"] = {"term": {"business_area": business_area}},
+        query["query"]["bool"]["filter"] = ({"term": {"business_area": business_area}},)
     print(json.dumps(query))
     return query

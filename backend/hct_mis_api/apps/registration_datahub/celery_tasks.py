@@ -7,6 +7,7 @@ from redis.exceptions import LockError
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 
 logger = logging.getLogger(__name__)
 
@@ -261,7 +262,7 @@ def extract_records_task(max_records=500):
     logger.info("extract_records_task start")
 
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
-    Record.extract(records_ids)
+    extract(records_ids)
     logger.info("extract_records_task end")
 
 
@@ -271,7 +272,7 @@ def fresh_extract_records_task(records_ids=None):
 
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
-    Record.extract(records_ids)
+    extract(records_ids)
 
     logger.info("fresh_extract_records_task end")
 
