@@ -36,6 +36,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    DiiaHousehold,
 )
 
 
@@ -801,10 +802,13 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         cls.RdiDiiaCreateTask = RdiDiiaCreateTask
 
     def test_execute(self):
-        self.RdiDiiaCreateTask().execute("c57848bf-a5df-154b-4938-f30b6b29aaab")
+        rdi = self.RdiDiiaCreateTask().create_rdi(None, "Test import Diia")
+        self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[1, 2])
 
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
+
+        self.assertEqual(2, DiiaHousehold.objects.filter(status=DiiaHousehold.STATUS_IMPORTED).count())
 
         self.assertEqual(2, households.count())
         self.assertEqual(5, individuals.count())
@@ -813,6 +817,9 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(2, individual.documents.count())
         self.assertEqual(1, individual.bank_account_info.count())
         self.assertEqual(str(individual.documents.filter(document_number="VPO-DOC-2222").first().doc_date), "2022-04-29")
+
+        individual_2 = individuals.get(full_name="Sam Bautista")
+        self.assertEqual(str(individual_2.birth_date), "2009-06-16")
 
         individuals_obj_data = model_to_dict(
             individual,
@@ -837,3 +844,8 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
             "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
         }
         self.assertEqual(household_obj_data, expected)
+
+        # test create duplication ImportedHousehold
+        self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[1, 2])
+        self.assertEqual(2, ImportedHousehold.objects.all().count())
+        self.assertEqual(5, ImportedIndividual.objects.all().count())
