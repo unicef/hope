@@ -2,10 +2,10 @@ import logging
 from collections import Iterable
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 
 import graphene
 from constance import config
-from django.db import models
 from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
@@ -282,7 +282,7 @@ class Query(graphene.ObjectType):
         return BusinessArea.objects.filter(is_split=False)
 
     def resolve_cash_assist_url_prefix(parent, info):
-        return "https://cashassist.crm4.dynamics.com/main.aspx?appid=db085f33-2410-eb11-a813-000d3abb5f2c"
+        return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(parent, info, flex_field=None, business_area_slug=None):
         return sort_by_attr(get_fields_attr_generators(flex_field, business_area_slug), "label.English(EN)")

@@ -1,3 +1,5 @@
+import dateutil.parser
+
 from django.db import transaction
 from django_countries.fields import Country
 
@@ -53,8 +55,8 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 consent=household.consent,
                 address=household.address,
                 registration_data_import=registration_data_import,
-                first_registration_date=household.created_at,
-                last_registration_date=household.created_at,
+                first_registration_date=registration_data_import.created_at,
+                last_registration_date=registration_data_import.created_at,
                 diia_rec_id=household.rec_id,
                 size=all_individuals.count(),
                 country=Country("UA"),
@@ -67,6 +69,8 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             bank_accounts = []
 
             for individual in all_individuals:
+                b_date = dateutil.parser.parse(individual.birth_date)
+
                 individual_obj = ImportedIndividual(
                     individual_id=individual.individual_id,
                     given_name=individual.first_name,
@@ -75,12 +79,12 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                     full_name=f"{individual.first_name} {individual.last_name}",
                     relationship=individual.relationship,
                     sex=individual.sex,
-                    birth_date=individual.birth_date,
+                    birth_date=b_date,
                     marital_status=individual.marital_status,
                     disability=individual.disability,
                     registration_data_import=registration_data_import,
-                    first_registration_date=individual.created_at,
-                    last_registration_date=individual.created_at,
+                    first_registration_date=registration_data_import.created_at,
+                    last_registration_date=registration_data_import.created_at,
                     household=household_obj,
                 )
                 individuals_to_create_list.append(individual_obj)
@@ -145,13 +149,15 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
         )
 
     def _add_vpo_document(self, documents, head_of_household, household):
+        vpo_doc_date = dateutil.parser.parse(household.vpo_doc_date)
+
         documents.append(
             ImportedDocument(
                 document_number=household.vpo_doc_id,
                 individual=head_of_household,
                 type=self.other_document_type,
                 photo=household.vpo_doc,
-                doc_date=household.vpo_doc_date,
+                doc_date=vpo_doc_date,
             )
         )
 

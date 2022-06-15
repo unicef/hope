@@ -810,6 +810,9 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(5, individuals.count())
 
         individual = individuals.get(full_name="Erik Duarte")
+        self.assertEqual(2, individual.documents.count())
+        self.assertEqual(1, individual.bank_account_info.count())
+        self.assertEqual(str(individual.documents.filter(document_number="VPO-DOC-2222").first().doc_date), "2022-04-29")
 
         individuals_obj_data = model_to_dict(
             individual,
@@ -823,6 +826,14 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(individuals_obj_data, expected)
 
-        household_obj_data = model_to_dict(individual.household, ("country", "size", "diia_rec_id"))
-        expected = {"country": Country(code="UA"), "size": 3, "diia_rec_id": "222222"}
+        household_obj_data = model_to_dict(
+            individual.household,
+            ("country", "size", "diia_rec_id", "address")
+        )
+        expected = {
+            "country": Country(code="UA"),
+            "size": 3,
+            "diia_rec_id": "222222",
+            "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
+        }
         self.assertEqual(household_obj_data, expected)
