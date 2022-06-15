@@ -1,3 +1,4 @@
+from constance import config
 from elasticsearch.helpers.test import ElasticsearchTestCase
 from parameterized import parameterized
 
@@ -14,7 +15,7 @@ from hct_mis_api.apps.household.models import Individual, Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
-class TestIndividualQuery(APITestCase, ElasticsearchTestCase):
+class TestIndividualQuery(APITestCase):
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals($search: String) {
       allIndividuals(businessArea: "afghanistan", search: $search, orderBy:"id") {
@@ -193,8 +194,6 @@ class TestIndividualQuery(APITestCase, ElasticsearchTestCase):
     )
     def test_query_individuals_by_search_filter(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        populate_index(Individual.objects.all(), IndividualDocument)
-        populate_index(Household.objects.all(), HouseholdDocument)
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
