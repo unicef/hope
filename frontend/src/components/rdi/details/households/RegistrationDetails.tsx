@@ -21,6 +21,8 @@ interface RegistrationDetailsProps {
   registrationDate: string;
   deviceid: string;
   start: string;
+  rowId: number;
+  koboAssetId: string;
 }
 
 export function RegistrationDetails({
@@ -28,6 +30,8 @@ export function RegistrationDetails({
   registrationDate,
   deviceid,
   start,
+  rowId,
+  koboAssetId,
 }: RegistrationDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { data } = useRegistrationDataImportQuery({
@@ -78,6 +82,14 @@ export function RegistrationDetails({
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label={t('Device ID')}>{deviceid}</LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label={t('Row ID')}>{rowId}</LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label={t('Kobo Asset ID')}>
+                {koboAssetId}
+              </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label={t('User name')}>
