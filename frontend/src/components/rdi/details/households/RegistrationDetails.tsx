@@ -81,7 +81,7 @@ export function RegistrationDetails({
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label={t('User name')}>
-                {`${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`}
+                {`${registrationDataImport.importedBy?.firstName} ${registrationDataImport.importedBy?.lastName}`}
               </LabelizedField>
             </Grid>
           </Grid>
