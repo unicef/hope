@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
@@ -16,10 +16,6 @@ const IconContainer = styled.span`
       height: 20px;
     }
   }
-`;
-
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
 `;
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
@@ -43,7 +39,7 @@ export const InProgressTargetPopulationHeaderButtons = ({
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canDuplicate && (
         <IconContainer>
           <Button
@@ -62,7 +58,7 @@ export const InProgressTargetPopulationHeaderButtons = ({
         </IconContainer>
       )}
       {canEdit && (
-        <ButtonContainer>
+        <Box m={2}>
           <Button
             variant='outlined'
             color='primary'
@@ -71,10 +67,10 @@ export const InProgressTargetPopulationHeaderButtons = ({
           >
             Edit
           </Button>
-        </ButtonContainer>
+        </Box>
       )}
       {canLock && (
-        <ButtonContainer>
+        <Box m={2}>
           <Button
             variant='contained'
             color='primary'
@@ -83,7 +79,7 @@ export const InProgressTargetPopulationHeaderButtons = ({
           >
             Lock
           </Button>
-        </ButtonContainer>
+        </Box>
       )}
       <DuplicateTargetPopulation
         open={openDuplicate}
@@ -100,6 +96,6 @@ export const InProgressTargetPopulationHeaderButtons = ({
         setOpen={setOpenApprove}
         targetPopulationId={targetPopulation.id}
       />
-    </div>
+    </Box>
   );
 };
