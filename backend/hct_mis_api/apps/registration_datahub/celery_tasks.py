@@ -284,7 +284,7 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
     )
 
     try:
-        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=85400) as lock:
+        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=85400):
             try:
                 service = FlexRegistrationService()
 
@@ -306,9 +306,6 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
                     return [rdi_name, len(records_ids)]
             except Exception as e:
                 logger.exception(e)
-            finally:
-                if lock.locked():
-                    lock.release()
     except LockError as e:
         logger.exception(e)
         return []
@@ -323,7 +320,7 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
     )
 
     try:
-        with cache.lock(f"automate_rdi_diia_creation_task", blocking_timeout=2, timeout=85400) as lock:
+        with cache.lock(f"automate_rdi_diia_creation_task", blocking_timeout=2, timeout=85400):
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
@@ -335,9 +332,6 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
                 return [rdi_name, page_size]
             except Exception as e:
                 logger.exception(e)
-            finally:
-                if lock.locked():
-                    lock.release()
     except LockError as e:
         logger.exception(e)
         return []
@@ -354,7 +348,7 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
     )
 
     try:
-        with cache.lock(f"registration_diia_import_task", blocking_timeout=2, timeout=85400) as lock:
+        with cache.lock(f"registration_diia_import_task", blocking_timeout=2, timeout=85400):
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
@@ -366,9 +360,6 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
                 return [rdi_name, len(diia_hh_ids)]
             except Exception as e:
                 logger.exception(e)
-            finally:
-                if lock.locked():
-                    lock.release()
     except LockError as e:
         logger.exception(e)
         return []

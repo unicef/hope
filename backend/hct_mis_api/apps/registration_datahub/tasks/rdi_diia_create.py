@@ -186,8 +186,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 diia_household.status = DiiaHousehold.STATUS_IMPORTED
                 households_to_update.append(diia_household)
             except Exception as e:
-                print(f"Error importing DiiaHousehold {diia_household.pk}. {e}")
-                logger.error(f"Error importing DiiaHousehold {diia_household.pk}. {e}")
+                logger.exception(f"Error importing DiiaHousehold {diia_household.pk}. {e}")
                 diia_household.status = DiiaHousehold.STATUS_ERROR
                 households_to_update.append(diia_household)
 
