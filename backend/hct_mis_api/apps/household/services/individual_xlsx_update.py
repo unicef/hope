@@ -9,8 +9,8 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
-    CORE_FIELDS_ATTRIBUTES,
-    UNICEF_ID_FIELDS_ATTR,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.household.models import Individual
 
@@ -26,11 +26,13 @@ class IndividualXlsxUpdate:
     STATUS_MULTIPLE_MATCH = "MULTIPLE_MATCH"
 
     def __init__(self, xlsx_update_file):
-        our_attributes = CORE_FIELDS_ATTRIBUTES + UNICEF_ID_FIELDS_ATTR
+        our_attributes = FieldFactory.from_scopes([Scope.GLOBAL, Scope.INDIVIDUAL_UPDATE])
         self.xlsx_update_file = xlsx_update_file
         self.core_attr_by_names = {self._column_name_by_attr(attr): attr for attr in our_attributes}
         self.updatable_core_columns_names = [
-            self._column_name_by_attr(attr) for attr in CORE_FIELDS_ATTRIBUTES if attr["associated_with"] == _INDIVIDUAL
+            self._column_name_by_attr(attr)
+            for attr in FieldFactory.from_scope(Scope.GLOBAL)
+            if attr["associated_with"] == _INDIVIDUAL
         ]
         self.xlsx_match_columns = xlsx_update_file.xlsx_match_columns or []
         self.wb = openpyxl.load_workbook(xlsx_update_file.file, data_only=True)

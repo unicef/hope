@@ -13,11 +13,9 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.core_fields_attributes import (
-    FILTERABLE_CORE_FIELDS_ATTRIBUTES,
-    RDI_FILTER,
-    ROLE_FIELD,
-    XLSX_ONLY_FIELDS,
-    convert_choices,
+    FILTERABLE_TYPES,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.kobo.api import KoboAPI
@@ -219,10 +217,9 @@ def get_fields_attr_generators(flex_field, business_area_slug=None):
     if flex_field is not False:
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
-        yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
-        yield from XLSX_ONLY_FIELDS
-        yield ROLE_FIELD
-        yield convert_choices(RDI_FILTER, business_area_slug)
+        yield from FieldFactory.from_scopes(
+            [Scope.GLOBAL, Scope.XLSX, Scope.TARGETING, Scope.ROLE, Scope.RDI]
+        ).filtered_by_types(FILTERABLE_TYPES).apply_business_area(business_area_slug)
 
 
 def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
