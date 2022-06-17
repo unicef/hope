@@ -214,15 +214,14 @@ def serialize_flex_attributes():
 
 
 def get_combined_attributes():
-    from hct_mis_api.apps.core.core_fields_attributes import (
-        CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
-    )
+    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
     flex_attrs = serialize_flex_attributes()
     return {
-        **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY["individuals"],
+        **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]).to_dict_by(
+            "xlsx_field"
+        ),
         **flex_attrs["individuals"],
-        **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY["households"],
         **flex_attrs["households"],
     }
 
@@ -469,7 +468,7 @@ def update_labels_mapping(csv_file):
 
     from django.conf import settings
 
-    from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
     with open(csv_file, newline="") as csv_file:
         reader = csv.reader(csv_file)
@@ -481,7 +480,7 @@ def update_labels_mapping(csv_file):
             "old": core_field_data["label"],
             "new": {"English(EN)": fields_mapping.get(core_field_data["xlsx_field"], "")},
         }
-        for core_field_data in CORE_FIELDS_ATTRIBUTES
+        for core_field_data in FieldFactory.from_scope(Scope.GLOBAL)
         if core_field_data["label"].get("English(EN)", "") != fields_mapping.get(core_field_data["xlsx_field"], "")
     }
 

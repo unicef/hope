@@ -1,12 +1,10 @@
-from typing import Dict, List, Tuple
-
 import openpyxl
 
 from hct_mis_api.apps.core.core_fields_attributes import (
-    COLLECTORS_FIELDS,
     CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
+    FieldFactory,
+    Scope,
 )
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import serialize_flex_attributes
 from hct_mis_api.apps.geo.models import Area
 
@@ -76,7 +74,7 @@ class TemplateFileGenerator:
 
         individuals_fields = {
             **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY[individuals_sheet_title.lower()],
-            **COLLECTORS_FIELDS,
+            **FieldFactory.from_scope(Scope.COLLECTOR).to_dict_by("xlsx_field"),
             **flex_fields[individuals_sheet_title.lower()],
         }
 

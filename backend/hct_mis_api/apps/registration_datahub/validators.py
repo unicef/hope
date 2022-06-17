@@ -7,7 +7,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -18,12 +18,11 @@ from dateutil import parser
 from openpyxl import load_workbook
 
 from hct_mis_api.apps.core.core_fields_attributes import (
-    COLLECTORS_FIELDS,
     CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
-    KOBO_ONLY_HOUSEHOLD_FIELDS,
-    KOBO_ONLY_INDIVIDUAL_FIELDS,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
+    FieldFactory,
+    Scope,
     core_fields_to_separated_dict,
 )
 from hct_mis_api.apps.core.kobo.common import (
@@ -780,7 +779,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             core_fields = {**self.core_fields}
             core_fields["individuals"] = {
                 **core_fields["individuals"],
-                **COLLECTORS_FIELDS,
+                **FieldFactory.from_scope(Scope.COLLECTOR).to_dict_by("xlsx_field"),
             }
 
             for name, fields in core_fields.items():
@@ -996,7 +995,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def get_core_fields(self):
         try:
-            return core_fields_to_separated_dict(append_household_id=False, append_xlsx=False)
+            return core_fields_to_separated_dict(FieldFactory.from_scope(Scope.GLOBAL))
         except Exception as e:
             logger.exception(e)
             raise
@@ -1301,7 +1300,10 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 head_of_hh_counter = 0
                 primary_collector_counter = 0
                 alternate_collector_counter = 0
-                expected_hh_fields = {*self.expected_household_fields, *KOBO_ONLY_HOUSEHOLD_FIELDS.keys()}
+                expected_hh_fields = {
+                    *self.expected_household_fields,
+                    *FieldFactory.from_scope(Scope.KOBO).to_dict_by("xlsx_field"),
+                }
                 attachments = household.get("_attachments", [])
                 for hh_field, hh_value in household.items():
                     expected_hh_fields.discard(hh_field)
@@ -1309,7 +1311,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         for individual in hh_value:
                             expected_i_fields = {
                                 *self.expected_individuals_fields,
-                                *KOBO_ONLY_INDIVIDUAL_FIELDS,
+                                *FieldFactory.from_scope(Scope.ROLE).to_dict_by("xlsx_field"),
                             }
                             current_individual_docs_and_identities = defaultdict(dict)
                             for i_field, i_value in individual.items():

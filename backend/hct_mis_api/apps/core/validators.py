@@ -3,9 +3,6 @@ import logging
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
-    KOBO_ONLY_HOUSEHOLD_FIELDS,
-    KOBO_ONLY_INDIVIDUAL_FIELDS,
     TYPE_BOOL,
     TYPE_DATE,
     TYPE_DECIMAL,
@@ -15,6 +12,8 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
     TYPE_STRING,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
 from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
@@ -149,9 +148,7 @@ class KoboTemplateValidator:
         NOT_PROVIDED,
         RELATIONSHIP_UNKNOWN,
     )
-    ALL_CORE_FIELDS = (
-        CORE_FIELDS_ATTRIBUTES + list(KOBO_ONLY_HOUSEHOLD_FIELDS.values()) + list(KOBO_ONLY_INDIVIDUAL_FIELDS.values())
-    )
+    ALL_CORE_FIELDS = FieldFactory.from_scopes([Scope.GLOBAL, Scope.ROLE, Scope.KOBO])
 
     @classmethod
     def _map_columns_numbers(cls, first_row):
