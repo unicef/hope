@@ -17,11 +17,9 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
-    _INDIVIDUAL,
-    CORE_FIELDS_ATTRIBUTES,
-    HOUSEHOLD_EDIT_ONLY_FIELDS,
-    KOBO_ONLY_INDIVIDUAL_FIELDS,
     TYPE_IMAGE,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import FlexibleAttribute
@@ -32,7 +30,6 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     choices_to_dict,
     encode_ids,
-    nested_getattr,
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
@@ -490,16 +487,12 @@ class Query(graphene.ObjectType):
             "comms_disability",
             "who_answers_phone",
             "who_answers_alt_phone",
+            "role",
         ]
 
-        all_options = (
-            [
-                x
-                for x in CORE_FIELDS_ATTRIBUTES
-                if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
-            ]
-            + list(KOBO_ONLY_INDIVIDUAL_FIELDS.values())
-            + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL))
+        fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.ROLE]).associated_with_individual()
+        all_options = [x for x in fields if x.get("name") in ACCEPTABLE_FIELDS] + list(
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
         )
 
         return sort_by_attr(all_options, "label.English(EN)")
@@ -554,7 +547,7 @@ class Query(graphene.ObjectType):
         # yield from FlexibleAttribute.objects.order_by("name").all()
         all_options = [
             x
-            for x in HOUSEHOLD_EDIT_ONLY_FIELDS + CORE_FIELDS_ATTRIBUTES
+            for x in FieldFactory.from_scopes([Scope.GLOBAL, Scope.HOUSEHOLD_UPDATE])
             if x.get("associated_with") == _HOUSEHOLD and x.get("name") in ACCEPTABLE_FIELDS
         ] + list(FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD))
 
