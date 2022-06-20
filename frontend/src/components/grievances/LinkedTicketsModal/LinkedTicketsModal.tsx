@@ -18,13 +18,10 @@ import styled from 'styled-components';
 import { Dialog } from '../../../containers/dialogs/Dialog';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import {
-  decodeIdString,
-  grievanceTicketStatusToColor,
-} from '../../../utils/utils';
+import { grievanceTicketStatusToColor } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
-  useExistingGrievanceTicketsLazyQuery,
+  useRelatedGrievanceTicketsLazyQuery,
 } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
 import { LoadingComponent } from '../../core/LoadingComponent';
@@ -67,39 +64,34 @@ export const LinkedTicketsModal = ({
   issueTypeChoicesData,
 }: LinkedTicketsModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const history = useHistory();
+  const { t } = useTranslation();
   const [
     loadExistingTickets,
     { data, loading },
-  ] = useExistingGrievanceTicketsLazyQuery({
+  ] = useRelatedGrievanceTicketsLazyQuery({
     variables: {
-      businessArea,
-      household:
-        decodeIdString(ticket.household?.id) ||
-        '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
-      //adding some random ID to get 0 results if there is no household id.
+      id: ticket.id,
     },
   });
   useEffect(() => {
-    loadExistingTickets();
+    if (dialogOpen) {
+      loadExistingTickets();
+    }
   }, [dialogOpen, loadExistingTickets]);
 
-  const history = useHistory();
-  const { t } = useTranslation();
-  const linkedTickets = ticket.relatedTickets;
+  const renderIssueTypeName = (row): string => {
+    if (!row.issueType) {
+      return '-';
+    }
 
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
-
-  const existingTickets = data.existingGrievanceTickets;
+    return issueTypeChoicesData
+      .find((el) => el.category === row.category.toString())
+      .subCategories.find((el) => el.value === row.issueType.toString()).name;
+  };
 
   const renderRow = (row): React.ReactElement => {
-    const issueType = row.issueType
-      ? issueTypeChoicesData
-          .filter((el) => el.category === row.category.toString())[0]
-          .subCategories.filter(
-            (el) => el.value === row.issueType.toString(),
-          )[0].name
-      : '-';
+    const issueType = renderIssueTypeName(row);
 
     return (
       <ClickableTableRow
@@ -136,7 +128,8 @@ export const LinkedTicketsModal = ({
   };
 
   const renderLink = (): React.ReactElement => {
-    const ticketsCount = linkedTickets.length + existingTickets.totalCount;
+    const ticketsCount =
+      ticket.relatedTickets.length + ticket.existingTickets.length;
     if (ticketsCount === 0) {
       return <span>-</span>;
     }
@@ -150,6 +143,20 @@ export const LinkedTicketsModal = ({
         {ticketsCount} linked ticket
         {ticketsCount === 1 ? '' : 's'}
       </StyledLink>
+    );
+  };
+
+  const renderRows = (): React.ReactElement => {
+    if (loading) return <LoadingComponent />;
+    if (!data) return null;
+
+    const { existingTickets, relatedTickets } = data?.grievanceTicket;
+    return (
+      <>
+        {relatedTickets
+          .concat(existingTickets)
+          .map((relatedTicket) => renderRow(relatedTicket))}
+      </>
     );
   };
 
@@ -184,12 +191,7 @@ export const LinkedTicketsModal = ({
                 <TableCell align='left'>{t('Status')}</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {linkedTickets.map((linkedTicket) => renderRow(linkedTicket))}
-              {existingTickets.edges.map((existingTicket) =>
-                renderRow(existingTicket.node),
-              )}
-            </TableBody>
+            <TableBody>{renderRows()}</TableBody>
           </StyledTable>
         </DialogContent>
         <DialogFooter>

@@ -85,6 +85,8 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
           registrationDate={importedHousehold.firstRegistrationDate}
           deviceid={importedHousehold.deviceid}
           start={importedHousehold.start}
+          koboAssetId={importedHousehold.koboAssetId}
+          rowId={importedHousehold.rowId}
         />
       </Container>
     </div>

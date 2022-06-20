@@ -8,6 +8,7 @@ export const USERS_FILTER_QUERY = gql`
     $after: String
     $before: String
     $orderBy: String
+    $search: String
   ) {
     allUsers(
       businessArea: $businessArea
@@ -16,13 +17,8 @@ export const USERS_FILTER_QUERY = gql`
       after: $after
       before: $before
       orderBy: $orderBy
+      search: $search
     ) {
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        endCursor
-        startCursor
-      }
       edges {
         node {
           id
@@ -30,10 +26,7 @@ export const USERS_FILTER_QUERY = gql`
           lastName
           email
         }
-        cursor
       }
-      totalCount
-      edgeCount
     }
   }
 `;
