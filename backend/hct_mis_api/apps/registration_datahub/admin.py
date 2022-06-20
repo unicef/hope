@@ -466,7 +466,7 @@ class DiiaIndividualAdmin(HOPEModelAdminBase):
 @admin.register(DiiaHousehold)
 class DiiaHouseholdAdmin(HOPEModelAdminBase):
     search_fields = ("id", "registration_data_import", "rec_id")
-    list_display = ("registration_data_import", "rec_id")
+    list_display = ("registration_data_import", "status", "rec_id")
     raw_id_fields = ("registration_data_import",)
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (
