@@ -399,16 +399,13 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.sent_to_datahub = True
 
     def is_finalized(self):
-        return self.status in [
-            self.STATUS_PROCESSING,
-            self.STATUS_READY_FOR_CASH_ASSIST,
-        ]
+        return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
     def is_locked(self):
         return self.status == self.STATUS_LOCKED
 
     def is_approved(self):
-        return self.status in [self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED]
+        return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
 
     def __str__(self):
         return self.name
@@ -483,11 +480,7 @@ class TargetingCriteriaQueryingMixin:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self):
-        return (
-            Q(size__gt=0)
-            & Q(withdrawn=False)
-            & ~Q(unicef_id__in=self.excluded_household_ids)
-        )
+        return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.excluded_household_ids)
 
     def get_query(self):
         query = Q()

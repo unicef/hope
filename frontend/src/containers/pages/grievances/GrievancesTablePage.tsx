@@ -10,11 +10,7 @@ import {
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { renderUserName } from '../../../utils/utils';
-import {
-  useGrievancesChoiceDataQuery,
-  useAllUsersForFiltersQuery,
-} from '../../../__generated__/graphql';
+import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -47,23 +43,11 @@ export function GrievancesTablePage(): React.ReactElement {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  const {
-    data: userData,
-    loading: userDataLoading,
-  } = useAllUsersForFiltersQuery({
-    variables: { businessArea },
-  });
-
-  if (choicesLoading || userDataLoading) return <LoadingComponent />;
+  if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
     return <PermissionDenied />;
-  if (!choicesData || !userData) return null;
-
-  const usersChoices = userData.allUsers.edges.map((edge) => ({
-    name: renderUserName(edge.node),
-    value: edge.node.id,
-  }));
+  if (!choicesData) return null;
 
   return (
     <>
@@ -81,7 +65,6 @@ export function GrievancesTablePage(): React.ReactElement {
       </PageHeader>
       <GrievancesFilters
         choicesData={choicesData}
-        usersChoices={usersChoices}
         filter={filter}
         onFilterChange={setFilter}
       />
