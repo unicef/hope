@@ -1,7 +1,6 @@
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
-import styled from 'styled-components';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
 import {
   ProgramNode,
@@ -9,29 +8,28 @@ import {
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
 export interface FinishedProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
   canActivate: boolean;
 }
 
-export function FinishedProgramDetailsPageHeaderButtons({
+export const FinishedProgramDetailsPageHeaderButtons = ({
   program,
   canActivate,
-}: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement {
-  const { data, loading } = useCashAssistUrlPrefixQuery({fetchPolicy:"cache-first"});
+}: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+  const { data, loading } = useCashAssistUrlPrefixQuery({
+    fetchPolicy: 'cache-first',
+  });
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canActivate && (
-        <ButtonContainer>
+        <Box m={2}>
           <ReactivateProgram program={program} />
-        </ButtonContainer>
+        </Box>
       )}
-      <ButtonContainer>
+      <Box m={2}>
         <Button
           variant='contained'
           color='primary'
@@ -42,7 +40,7 @@ export function FinishedProgramDetailsPageHeaderButtons({
         >
           Open in CashAssist
         </Button>
-      </ButtonContainer>
-    </div>
+      </Box>
+    </Box>
   );
-}
+};
