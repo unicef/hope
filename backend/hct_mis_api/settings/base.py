@@ -178,7 +178,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
-    "author.middlewares.AuthorDefaultBackendMiddleware",
 ]
 
 TEMPLATES = [
@@ -214,8 +213,6 @@ PROJECT_APPS = [
     "hct_mis_api.apps.core.apps.CoreConfig",
     "hct_mis_api.apps.grievance",
     "hct_mis_api.apps.household",
-    "hct_mis_api.apps.id_management",
-    "hct_mis_api.apps.intervention",
     "hct_mis_api.apps.payment",
     "hct_mis_api.apps.program",
     "hct_mis_api.apps.power_query.apps.Config",
@@ -274,8 +271,7 @@ OTHER_APPS = [
     "django_celery_beat",
     "explorer",
     "import_export",
-    "import_export_celery",
-    "rest_framework"
+    "rest_framework",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -629,7 +625,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_INSTANCE}/0"
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 240 * 60
+CELERY_TASK_TIME_LIMIT = 360 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
 
@@ -783,22 +779,5 @@ IMPERSONATE = {
 # )
 
 POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
-
-IMPORT_EXPORT_CELERY_INIT_MODULE = "hct_mis_api.apps.core.celery"
-
-
-def resource():  # Optional
-    from hct_mis_api.apps.core.admin import AdminAreaResource
-
-    return AdminAreaResource
-
-
-IMPORT_EXPORT_CELERY_MODELS = {
-    "AdminArea": {
-        "app_label": "core",
-        "model_name": "AdminArea",
-        "resource": resource,  # Optional
-    }
-}
 
 CONCURRENCY_ENABLED = False
