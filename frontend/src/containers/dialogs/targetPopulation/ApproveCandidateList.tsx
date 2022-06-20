@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useApproveTpMutation } from '../../../__generated__/graphql';
@@ -29,7 +30,7 @@ export function ApproveCandidateList({
   const businessArea = useBusinessArea();
 
   const { showMessage } = useSnackbar();
-  const [mutate] = useApproveTpMutation();
+  const [mutate, { loading }] = useApproveTpMutation();
   return (
     <Dialog
       open={open}
@@ -58,9 +59,10 @@ export function ApproveCandidateList({
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-            <Button
+            <LoadingButton
               color='primary'
               variant='contained'
+              loading={loading}
               onClick={() => {
                 mutate({
                   variables: { id: targetPopulationId },
@@ -74,7 +76,7 @@ export function ApproveCandidateList({
               data-cy='button-target-population-close'
             >
               {t('Lock')}
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </DialogFooter>
       </>

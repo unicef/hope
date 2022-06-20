@@ -16,8 +16,9 @@ yarn start
 # in anthorer terminal
 cd ..
 docker-compose build
-docker-compose run --rm backend ./manage.py initdemo
 docker-compose up
+# once everything is up, in yet another terminal
+docker exec -it <prefix>_backend_1 ./manage.py initdemo
 ```
 ***
 Frontend app is run inside Docker (a lot slower)
@@ -34,6 +35,8 @@ docker-compose -f docker-compose.yml -f docker-compose.frontend.yml run --rm bac
 Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login)
 
 Backend can be accessed at `/api/` i.e. [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/)
+
+When running locally, you don't neet to provide AD credentials - you can go straight to [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/) and log in with `root:root1234`. When you have the necessary cookies in your browser, you can also access the FE dashboard.
 
 ### **Commands**
 

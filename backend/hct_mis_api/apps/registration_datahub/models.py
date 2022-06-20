@@ -308,10 +308,12 @@ class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
     JSON = "JSON"
     FLEX_REGISTRATION = "FLEX"
+    DIIA = "DIIA"
     DATA_TYPE_CHOICES = (
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
         (FLEX_REGISTRATION, _("Flex Registration")),
+        (DIIA, _("DIIA")),
     )
     STATUS_PENDING = "PENDING"
     STATUS_RUNNING = "RUNNING"
@@ -560,6 +562,17 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
 
 
 class DiiaHousehold(models.Model):
+    STATUS_TO_IMPORT = None
+    STATUS_IMPORTED = "IMPORTED"
+    STATUS_ERROR = "ERROR"
+    STATUS_IGNORED = "IGNORED"
+
+    STATUSES_CHOICES = (
+        (STATUS_TO_IMPORT, "To import"),
+        (STATUS_IMPORTED, "Imported"),
+        (STATUS_ERROR, "Error"),
+    )
+
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
     vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True, null=True)
     vpo_doc_id = models.CharField(max_length=128, blank=True, null=True)
@@ -581,6 +594,7 @@ class DiiaHousehold(models.Model):
         null=True,
         blank=True
     )
+    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
 
     def __str__(self):
         return f"Diia Household ID: {self.id}"
@@ -593,7 +607,7 @@ class DiiaIndividual(models.Model):
     first_name = models.CharField(max_length=85, blank=True, null=True)
     second_name = models.CharField(max_length=85, blank=True, null=True)
     relationship = models.CharField(max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, null=True)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE, null=True)
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE, null=True, blank=True)
     birth_date = models.CharField(max_length=64, blank=True, null=True)
     birth_doc = models.CharField(max_length=128, blank=True, null=True)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True)

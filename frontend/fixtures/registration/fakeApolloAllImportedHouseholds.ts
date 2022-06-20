@@ -44,6 +44,8 @@ export const fakeApolloAllImportedHouseholds = [
                 flexFields: { RCSI_h_f: 14 },
                 deviceid: '',
                 start: null,
+                koboAssetId: '',
+                rowId: null,
                 firstRegistrationDate: '2021-01-11T00:00:00',
                 lastRegistrationDate: '2021-01-11T00:00:00',
                 hasDuplicates: false,
