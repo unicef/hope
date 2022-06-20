@@ -9,6 +9,7 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
+from django.core.exceptions import ValidationError
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
@@ -846,6 +847,8 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(household_obj_data, expected)
 
         # test create duplication ImportedHousehold
-        self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[1, 2])
+        with self.assertRaises(ValidationError):
+            self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[1, 2])
+
         self.assertEqual(2, ImportedHousehold.objects.all().count())
         self.assertEqual(5, ImportedIndividual.objects.all().count())
