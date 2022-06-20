@@ -17,6 +17,7 @@ yarn start
 cd ..
 docker-compose build
 docker-compose up
+# once everything is up, in yet another terminal
 docker exec -it <prefix>_backend_1 ./manage.py initdemo
 ```
 ***
