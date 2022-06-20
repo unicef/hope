@@ -3,6 +3,7 @@ import dateutil.parser
 
 from django.db import transaction
 from django_countries.fields import Country
+from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
@@ -95,6 +96,12 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             id=rdi_mis.datahub_id,
         )
 
+        if not diia_household_import_ids:
+            rdi_mis.delete()
+            registration_data_import_data_hub.import_data.delete()
+            registration_data_import_data_hub.delete()
+            raise ValidationError("Rdi doesn't found any records within status to import")
+
         registration_data_import_data_hub.import_done = RegistrationDataImportDatahub.STARTED
         registration_data_import_data_hub.save()
 
@@ -129,6 +136,10 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
 
                 for individual in all_individuals:
                     b_date = dateutil.parser.parse(individual.birth_date, dayfirst=True) if individual.birth_date else ""
+                    sex_map = {
+                        "F": "FEMALE",
+                        "M": "MALE"
+                    }
 
                     individual_obj = ImportedIndividual(
                         individual_id=individual.individual_id if individual.individual_id else "",
@@ -137,7 +148,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                         family_name=individual.last_name,
                         full_name=f"{individual.first_name} {individual.last_name}",
                         relationship=individual.relationship if individual.relationship else "",
-                        sex=individual.sex if individual.sex else "",
+                        sex=sex_map.get(individual.sex, ""),
                         birth_date=b_date,
                         marital_status=individual.marital_status if individual.marital_status else "",
                         disability=individual.disability if individual.disability else "not disabled",

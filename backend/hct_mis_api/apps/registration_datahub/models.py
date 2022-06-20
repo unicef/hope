@@ -55,6 +55,14 @@ DEDUPLICATION_BATCH_STATUS_CHOICE = (
     (NOT_PROCESSED, "Not Processed"),
 )
 
+# using in Diia models
+MALE = "M"
+FEMALE = "F"
+DIIA_SEX_CHOICE = (
+    (MALE, _("Male")),
+    (FEMALE, _("Female")),
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -607,7 +615,7 @@ class DiiaIndividual(models.Model):
     first_name = models.CharField(max_length=85, blank=True, null=True)
     second_name = models.CharField(max_length=85, blank=True, null=True)
     relationship = models.CharField(max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, null=True)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE, null=True, blank=True)
+    sex = models.CharField(max_length=255, choices=DIIA_SEX_CHOICE, null=True, blank=True)
     birth_date = models.CharField(max_length=64, blank=True, null=True)
     birth_doc = models.CharField(max_length=128, blank=True, null=True)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True)
