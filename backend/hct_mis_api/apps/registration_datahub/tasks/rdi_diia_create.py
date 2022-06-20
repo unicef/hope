@@ -147,7 +147,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                         family_name=individual.last_name,
                         full_name=f"{individual.first_name} {individual.last_name}",
                         relationship=individual.relationship if individual.relationship else "",
-                        sex=sex_map.get(individual.sex, "") if individual.sex else "",
+                        sex=sex_map.get(individual.sex, ""),
                         birth_date=b_date,
                         marital_status=individual.marital_status if individual.marital_status else "",
                         disability=individual.disability if individual.disability else "not disabled",
