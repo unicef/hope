@@ -20,3 +20,21 @@ def post_process_dedupe_results(record):
                 max_score = max(max_score, entry["score"])
                 min_score = min(min_score, entry["score"])
             field["score"] = {"max": max_score, "min": min_score, "qty": len(duplicates)}
+
+
+def merge(final_collection, additional_collection):
+    """merges additional collection into final collection"""
+    for key in additional_collection:
+        if key in final_collection:
+            if isinstance(final_collection[key], dict) and isinstance(additional_collection[key], dict):
+                merge(final_collection[key], additional_collection[key])
+            elif final_collection[key] == additional_collection[key]:
+                pass  # same leaf value
+            elif isinstance(final_collection[key], list) and isinstance(additional_collection[key], list):
+                for idx, val in enumerate(additional_collection[key]):
+                    final_collection[key][idx] = merge(final_collection[key][idx], additional_collection[key][idx])
+            else:
+                final_collection[key] = additional_collection[key]
+        else:
+            final_collection[key] = additional_collection[key]
+    return final_collection

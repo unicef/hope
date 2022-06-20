@@ -2,7 +2,6 @@ import json
 import logging
 import re
 from datetime import date
-from typing import List
 
 from django.contrib.gis.db.models import PointField
 from django.core.validators import (
@@ -41,7 +40,7 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
 )
-from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
+from hct_mis_api.apps.registration_datahub.utils import merge
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
@@ -421,7 +420,7 @@ class ImportedIndividualIdentity(models.Model):
     )
 
     class Meta:
-        verbose_name_plural = 'Imported Individual Identities'
+        verbose_name_plural = "Imported Individual Identities"
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.document_number}"
@@ -490,67 +489,11 @@ class Record(models.Model):
         self.status = self.STATUS_IMPORTED
         self.save()
 
-    @classmethod
-    def extract(cls, records_ids: List[int], raise_exception=False):
-        def _filter(d):
-            if isinstance(d, list):
-                return [_filter(v) for v in d]
-            elif isinstance(d, dict):
-                return {k: _filter(v) for k, v in d.items()}
-            elif is_image(d):
-                return "::image::"
-            else:
-                return d
-
-        for record_id in records_ids:
-            record = cls.objects.get(pk=record_id)
-            try:
-                extracted = json.loads(record.storage.tobytes().decode())
-                record.data = _filter(extracted)
-
-                individuals = record.data.get("individuals", {})
-                collectors = [individual for individual in individuals if individual.get("role_i_c", "n") == "y"]
-                heads = [individual for individual in individuals if individual.get("relationship_i_c") == "head"]
-
-                record.data["w_counters"] = {
-                    "individuals_num": len(individuals),
-                    "collectors_num": len(collectors),
-                    "head": len(heads),
-                    "valid_phones": len([individual for individual in individuals if individual.get("phone_no_i_c")]),
-                    "valid_taxid": len(
-                        [head for head in heads if head.get("tax_id_no_i_c") and head.get("bank_account")]
-                    ),
-                    "valid_payment": len(
-                        [
-                            individual
-                            for individual in individuals
-                            if individual.get("tax_id_no_i_c") and individual.get("bank_account")
-                        ]
-                    ),
-                    "birth_certificate": len(
-                        [
-                            individual
-                            for individual in individuals
-                            if individual.get("birth_certificate_picture") == "::image::"
-                        ]
-                    ),
-                    "disability_certificate_match": (
-                        len(
-                            [
-                                individual
-                                for individual in individuals
-                                if individual.get("disability_certificate_picture") == "::image::"
-                            ]
-                        )
-                        == len([individual for individual in individuals if individual.get("disability_i_c") == "y"])
-                    ),
-                    "collector_bank_account": len([individual.get("bank_account") for individual in collectors]) > 0,
-                }
-                record.save()
-            except Exception as e:
-                if raise_exception:
-                    raise
-                logger.exception(e)
+    def get_data(self):
+        if self.storage:
+            return json.loads(self.storage.tobytes().decode())
+        files = json.loads(self.files.tobytes().decode())
+        return merge(files, self.fields)
 
 
 class ImportedBankAccountInfo(TimeStampedUUIDModel):
