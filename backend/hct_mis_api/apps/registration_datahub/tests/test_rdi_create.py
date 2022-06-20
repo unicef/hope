@@ -827,7 +827,7 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         )
         expected = {
             "relationship": "HEAD",
-            "sex": "MALE",
+            "sex": "M",
             "middle_name": "Mid",
             "marital_status": "MARRIED",
         }
