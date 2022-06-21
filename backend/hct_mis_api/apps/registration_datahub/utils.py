@@ -22,19 +22,26 @@ def post_process_dedupe_results(record):
             field["score"] = {"max": max_score, "min": min_score, "qty": len(duplicates)}
 
 
-def merge(final_collection, additional_collection):
-    """merges additional collection into final collection"""
-    for key in additional_collection:
-        if key in final_collection:
-            if isinstance(final_collection[key], dict) and isinstance(additional_collection[key], dict):
-                merge(final_collection[key], additional_collection[key])
-            elif final_collection[key] == additional_collection[key]:
+def combine_collections(a, b, path=None, update=True):
+    """merges b into a
+    version from flex registration"""
+    if path is None:
+        path = []
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                combine_collections(a[key], b[key], path + [str(key)])
+            elif a[key] == b[key]:
                 pass  # same leaf value
-            elif isinstance(final_collection[key], list) and isinstance(additional_collection[key], list):
-                for idx, val in enumerate(additional_collection[key]):
-                    final_collection[key][idx] = merge(final_collection[key][idx], additional_collection[key][idx])
+            elif isinstance(a[key], list) and isinstance(b[key], list):
+                for idx, val in enumerate(b[key]):
+                    a[key][idx] = combine_collections(
+                        a[key][idx], b[key][idx], path + [str(key), str(idx)], update=update
+                    )
+            elif update:
+                a[key] = b[key]
             else:
-                final_collection[key] = additional_collection[key]
+                raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
         else:
-            final_collection[key] = additional_collection[key]
-    return final_collection
+            a[key] = b[key]
+    return a
