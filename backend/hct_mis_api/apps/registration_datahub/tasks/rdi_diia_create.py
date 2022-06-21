@@ -17,7 +17,7 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     WIFE_HUSBAND,
     SON_DAUGHTER,
-    RELATIONSHIP_UNKNOWN,
+    RELATIONSHIP_UNKNOWN, MALE, FEMALE,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -52,6 +52,10 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
         DIIA_RELATIONSHIP_DAUGHTER: SON_DAUGHTER,
         DIIA_RELATIONSHIP_WIFE: WIFE_HUSBAND,
         DIIA_RELATIONSHIP_HUSBAND: WIFE_HUSBAND,
+    }
+    DIIA_SEX_MAP = {
+        "M": MALE,
+        "F": FEMALE
     }
     """
     Imports project data from DIIA models
@@ -165,7 +169,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                         family_name=individual.last_name,
                         full_name=f"{individual.first_name} {individual.last_name}",
                         relationship=self.DIIA_RELATION.get(individual.relationship, RELATIONSHIP_UNKNOWN),
-                        sex=sex_map.get(individual.sex, ""),
+                        sex=self.DIIA_SEX_MAP.get(individual.sex, ""),
                         birth_date=b_date,
                         marital_status=individual.marital_status if individual.marital_status else "",
                         disability=self.DIIA_DISABILITY_MAP.get(individual.disability, NOT_DISABLED),
