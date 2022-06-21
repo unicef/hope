@@ -180,7 +180,7 @@ class FlexRegistrationService:
     ):
         individuals: List[ImportedIndividual] = []
         documents: List[ImportedDocument] = []
-        record_data_dict = json.loads(record.storage.tobytes().decode("utf-8"))
+        record_data_dict = record.get_data()
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
 
