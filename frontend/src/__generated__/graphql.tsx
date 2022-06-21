@@ -1528,7 +1528,8 @@ export type HouseholdUpdateDataObjectType = {
 export enum ImportDataDataType {
   Xlsx = 'XLSX',
   Json = 'JSON',
-  Flex = 'FLEX'
+  Flex = 'FLEX',
+  Diia = 'DIIA'
 }
 
 export type ImportDataNode = Node & {
@@ -7904,7 +7905,7 @@ export type GrievanceTicketQuery = (
         & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
         & { individual: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'unicefId'>
+          & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
         ), household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -8121,7 +8122,7 @@ export type GrievanceTicketQuery = (
           & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
           & { individual: (
             { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'id' | 'unicefId'>
+            & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
           ), household: (
             { __typename?: 'HouseholdNode' }
             & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -8138,7 +8139,7 @@ export type GrievanceTicketQuery = (
           & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
           & { individual: (
             { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'id' | 'unicefId'>
+            & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
           ), household: (
             { __typename?: 'HouseholdNode' }
             & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -14380,6 +14381,7 @@ export const GrievanceTicketDocument = gql`
         individual {
           id
           unicefId
+          fullName
         }
         household {
           id
@@ -14642,6 +14644,7 @@ export const GrievanceTicketDocument = gql`
           individual {
             id
             unicefId
+            fullName
           }
           household {
             id
@@ -14660,6 +14663,7 @@ export const GrievanceTicketDocument = gql`
           individual {
             id
             unicefId
+            fullName
           }
           household {
             id

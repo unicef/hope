@@ -1009,6 +1009,7 @@ enum ImportDataDataType {
   XLSX
   JSON
   FLEX
+  DIIA
 }
 
 type ImportDataNode implements Node {
