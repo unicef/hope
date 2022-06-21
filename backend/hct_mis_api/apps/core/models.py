@@ -65,6 +65,7 @@ class BusinessArea(TimeStampedUUIDModel):
         limit_choices_to={"admin_level": 0},
         related_name="business_areas",
     )
+    postpone_deduplication = models.BooleanField(default=False)
     countries_new = models.ManyToManyField("geo.Country", related_name="business_areas")
     deduplication_duplicate_score = models.FloatField(
         default=6.0,
