@@ -293,7 +293,8 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
                     .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
                     .values_list("id", flat=True)[:page_size]
                 )
-
+                if len(records_ids) == 0:
+                    return "No records to import"
                 if records_ids:
                     rdi_name = template.format(
                         date=datetime.datetime.now(),
