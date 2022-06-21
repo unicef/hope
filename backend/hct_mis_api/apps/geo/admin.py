@@ -79,7 +79,7 @@ class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEM
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in ["iso_code2", "iso_code3", "iso_num"]:
+        if db_field.name in ("iso_code2", "iso_code3", "iso_num"):
             kwargs = {"widget": TextInput(attrs={"size": "10"})}
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)

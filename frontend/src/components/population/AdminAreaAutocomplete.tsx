@@ -43,16 +43,17 @@ export function AdminAreaAutocomplete({
   const businessArea = useBusinessArea();
   const [loadAdminAreas, { data, loading }] = useAllAdminAreasLazyQuery({
     variables: {
-      first: 50,
+      first: 20,
       name: debouncedInputText,
       businessArea,
       level: 2,
     },
   });
   useEffect(() => {
-    loadAdminAreas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedInputText]);
+    if (open) {
+      loadAdminAreas();
+    }
+  }, [open, debouncedInputText, loadAdminAreas]);
 
   const onChangeMiddleware = (e, selectedValue): void => {
     onFilterChange((filters) => ({

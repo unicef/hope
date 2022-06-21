@@ -8,6 +8,7 @@ import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
@@ -34,13 +35,13 @@ interface DuplicateTargetPopulationPropTypes {
   targetPopulationId: string;
 }
 
-export function DuplicateTargetPopulation({
+export const DuplicateTargetPopulation = ({
   open,
   setOpen,
   targetPopulationId,
-}: DuplicateTargetPopulationPropTypes): React.ReactElement {
+}: DuplicateTargetPopulationPropTypes): React.ReactElement => {
   const { t } = useTranslation();
-  const [mutate] = useCopyTargetPopulationMutation();
+  const [mutate, { loading }] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const initialValues = {
@@ -114,7 +115,8 @@ export function DuplicateTargetPopulation({
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   type='submit'
                   color='primary'
                   variant='contained'
@@ -122,7 +124,7 @@ export function DuplicateTargetPopulation({
                   data-cy='button-target-population-duplicate'
                 >
                   {t('Save')}
-                </Button>
+                </LoadingButton>
               </DialogActions>
             </DialogFooter>
           </>
@@ -130,4 +132,4 @@ export function DuplicateTargetPopulation({
       </Formik>
     </Dialog>
   );
-}
+};
