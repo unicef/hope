@@ -107,7 +107,6 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
     }
 
     if (shouldShowReassignMultipleBoxDataChange()) {
-      console.log('😂lollllllll');
       return (
         <Box p={3}>
           <Box display='flex' flexDirection='column'>
