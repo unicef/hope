@@ -40,7 +40,7 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
 )
-from hct_mis_api.apps.registration_datahub.utils import merge
+from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
@@ -493,7 +493,7 @@ class Record(models.Model):
         if self.storage:
             return json.loads(self.storage.tobytes().decode())
         files = json.loads(self.files.tobytes().decode())
-        return merge(files, self.fields)
+        return combine_collections(files, self.fields)
 
 
 class ImportedBankAccountInfo(TimeStampedUUIDModel):
@@ -536,19 +536,16 @@ class DiiaHousehold(models.Model):
         related_name="diia_households",
         on_delete=models.SET_NULL,
         null=True,
-        blank=True
+        blank=True,
     )
     imported_household = models.ForeignKey(
-        "ImportedHousehold",
-        on_delete=models.SET_NULL,
-        related_name="diia_households",
-        null=True,
-        blank=True
+        "ImportedHousehold", on_delete=models.SET_NULL, related_name="diia_households", null=True, blank=True
     )
     status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
 
     def __str__(self):
         return f"Diia Household ID: {self.id}"
+
 
 DIIA_DISABLED = "True"
 DIIA_NOT_DISABLED = "False"
@@ -581,6 +578,7 @@ DIIA_RELATIONSHIP_CHOICE = (
     (DIIA_RELATIONSHIP_WIFE, "Wife"),
 )
 
+
 class DiiaIndividual(models.Model):
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
     individual_id = models.CharField(max_length=128, blank=True, null=True)  # RNOKPP
@@ -592,7 +590,9 @@ class DiiaIndividual(models.Model):
     birth_date = models.CharField(max_length=64, blank=True, null=True)
     birth_doc = models.CharField(max_length=128, blank=True, null=True)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True)
-    disability = models.CharField(max_length=20, choices=DIIA_DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True)
+    disability = models.CharField(
+        max_length=20, choices=DIIA_DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True
+    )
     iban = models.CharField(max_length=255, blank=True, null=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     doc_type = models.CharField(max_length=128, blank=True, null=True)
@@ -605,14 +605,10 @@ class DiiaIndividual(models.Model):
         related_name="diia_individuals",
         on_delete=models.SET_NULL,
         null=True,
-        blank=True
+        blank=True,
     )
     imported_individual = models.ForeignKey(
-        "ImportedIndividual",
-        on_delete=models.SET_NULL,
-        related_name="diia_individuals",
-        null=True,
-        blank=True
+        "ImportedIndividual", on_delete=models.SET_NULL, related_name="diia_individuals", null=True, blank=True
     )
 
     @property
