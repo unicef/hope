@@ -1014,6 +1014,12 @@ class ReassignRoleMutation(graphene.Mutation):
 
     @classmethod
     def verify_if_role_exists(cls, household, current_individual, role):
+
+        logger.info("*"*20)
+        logger.info(household)
+        logger.info(current_individual)
+        logger.info(role)
+
         if role == HEAD:
             if household.head_of_household.id != current_individual.id:
                 logger.error("This individual is not a head of provided household")
