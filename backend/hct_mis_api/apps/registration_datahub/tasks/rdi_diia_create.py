@@ -243,10 +243,10 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
         rdi_mis.number_of_households = len(households_to_create)
         rdi_mis.save()
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, rdi_mis, rdi_mis)
-
-        DeduplicateTask.deduplicate_imported_individuals(
-            registration_data_import_datahub=registration_data_import_data_hub
-        )
+        if not rdi_mis.business_area.postpone_deduplication:
+            DeduplicateTask.deduplicate_imported_individuals(
+                registration_data_import_datahub=registration_data_import_data_hub
+            )
 
     def _add_bank_account(self, bank_accounts, individual, individual_obj):
         bank_accounts.append(
