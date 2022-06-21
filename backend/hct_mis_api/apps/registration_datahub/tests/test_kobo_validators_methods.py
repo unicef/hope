@@ -2,10 +2,8 @@ from operator import itemgetter
 
 from django.test import TestCase
 
-from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
 )
@@ -594,11 +592,6 @@ class TestKoboSaveValidatorsMethods(TestCase):
             self.assertEqual(result, data["expected"])
 
     def test_validate_everything(self):
-        # TODO Fix admin choices
-        fields_admin1 = [x for x in FieldFactory.from_scope(Scope.GLOBAL) if x["name"] == "admin1"]
-        fields_admin1[0]["choices"] = Area.get_admin_areas_as_choices(1)
-        fields_admin2 = [x for x in FieldFactory.from_scope(Scope.GLOBAL) if x["name"] == "admin2"]
-        fields_admin2[0]["choices"] = Area.get_admin_areas_as_choices(2)
         self.maxDiff = None
         validator = KoboProjectImportDataInstanceValidator()
         business_area = BusinessArea.objects.first()

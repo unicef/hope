@@ -26,7 +26,6 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
 )
-from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +109,7 @@ class CoreFieldChoiceObject(graphene.ObjectType):
 
 def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
     resolver = attr_resolver
-    if isinstance(root, (dict, LazyEvalMethodsDict)):
+    if isinstance(root, dict):
         resolver = dict_resolver
     return resolver(attname, default_value, root, info, **args)
 
@@ -217,9 +216,9 @@ def get_fields_attr_generators(flex_field, business_area_slug=None):
     if flex_field is not False:
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
-        yield from FieldFactory.from_scopes(
-            [Scope.GLOBAL, Scope.XLSX, Scope.TARGETING, Scope.ROLE, Scope.RDI]
-        ).filtered_by_types(FILTERABLE_TYPES).apply_business_area(business_area_slug)
+        yield from FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.TARGETING]).filtered_by_types(
+            FILTERABLE_TYPES
+        ).apply_business_area(business_area_slug)
 
 
 def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
