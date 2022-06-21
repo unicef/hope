@@ -1041,6 +1041,7 @@ class ReassignRoleMutation(graphene.Mutation):
         info,
         household_id,
         individual_id,
+        new_individual_id,
         grievance_ticket_id,
         role,
         **kwargs,
@@ -1059,7 +1060,10 @@ class ReassignRoleMutation(graphene.Mutation):
 
         ticket_details = grievance_ticket.ticket_details
         if grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
-            ticket_individual = ticket_details.selected_individual
+            if ticket_details.is_multiple_duplicates_version:
+                ticket_individual = get_object_or_404(Individual, id=decode_id_string(new_individual_id))
+            else:
+                ticket_individual = ticket_details.selected_individual
         elif grievance_ticket.category == GrievanceTicket.CATEGORY_SYSTEM_FLAGGING:
             ticket_individual = ticket_details.golden_records_individual
         else:
