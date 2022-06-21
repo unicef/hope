@@ -148,7 +148,7 @@ class KoboTemplateValidator:
         NOT_PROVIDED,
         RELATIONSHIP_UNKNOWN,
     )
-    ALL_CORE_FIELDS = FieldFactory.from_scopes([Scope.GLOBAL, Scope.ROLE, Scope.KOBO])
+    ALL_CORE_FIELDS = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)
 
     @classmethod
     def _map_columns_numbers(cls, first_row):
