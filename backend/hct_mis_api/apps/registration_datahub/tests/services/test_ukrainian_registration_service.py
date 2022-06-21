@@ -5,9 +5,15 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import DocumentType, IDENTIFICATION_TYPE_TAX_ID
-from hct_mis_api.apps.registration_datahub.models import Record, ImportedHousehold, ImportedDocumentType
-from hct_mis_api.apps.registration_datahub.services.flex_registration_service import FlexRegistrationService
+from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, DocumentType
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedDocumentType,
+    ImportedHousehold,
+    Record,
+)
+from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
+    FlexRegistrationService,
+)
 
 
 class TestUkrainianRegistrationService(TestCase):
@@ -43,7 +49,6 @@ class TestUkrainianRegistrationService(TestCase):
             }
         ]
         individual_wit_bank_account_and_tax_and_disability = {
-            "disability_certificate_picture": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
             "relationship_i_c": "head",
@@ -55,7 +60,6 @@ class TestUkrainianRegistrationService(TestCase):
             "phone_no_i_c": "0501706662",
         }
         individual_wit_bank_account_and_tax = {
-            "disability_certificate_picture": None,
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
             "relationship_i_c": "head",
@@ -67,7 +71,6 @@ class TestUkrainianRegistrationService(TestCase):
             "phone_no_i_c": "0501706662",
         }
         individual_with_no_tax = {
-            "disability_certificate_picture": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
             "tax_id_no_i_c": "",
             "bank_account_h_f": "y",
             "relationship_i_c": "head",
@@ -79,7 +82,6 @@ class TestUkrainianRegistrationService(TestCase):
             "phone_no_i_c": "0501706662",
         }
         individual_without_bank_account = {
-            "disability_certificate_picture": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "",
             "relationship_i_c": "head",
@@ -95,32 +97,38 @@ class TestUkrainianRegistrationService(TestCase):
             "timestamp": datetime.datetime(2022, 4, 1),
         }
 
+        files = {
+            "individuals": [
+                {
+                    "disability_certificate_picture": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                }
+            ]
+        }
+
         records = [
             Record(
                 **defaults,
                 source_id=1,
-                storage=json.dumps(
-                    {"household": household, "individuals": [individual_wit_bank_account_and_tax_and_disability]}
-                ).encode("utf-8"),
+                fields={"household": household, "individuals": [individual_wit_bank_account_and_tax_and_disability]},
+                files=json.dumps(files).encode(),
             ),
             Record(
                 **defaults,
                 source_id=2,
-                storage=json.dumps(
-                    {"household": household, "individuals": [individual_wit_bank_account_and_tax]}
-                ).encode("utf-8"),
+                fields={"household": household, "individuals": [individual_wit_bank_account_and_tax]},
+                files=json.dumps({}).encode(),
             ),
             Record(
                 **defaults,
                 source_id=3,
-                storage=json.dumps({"household": household, "individuals": [individual_with_no_tax]}).encode("utf-8"),
+                fields={"household": household, "individuals": [individual_with_no_tax]},
+                files=json.dumps(files).encode(),
             ),
             Record(
                 **defaults,
                 source_id=4,
-                storage=json.dumps({"household": household, "individuals": [individual_without_bank_account]}).encode(
-                    "utf-8"
-                ),
+                fields={"household": household, "individuals": [individual_without_bank_account]},
+                files=json.dumps(files).encode(),
             ),
         ]
         self.records = Record.objects.bulk_create(records)
