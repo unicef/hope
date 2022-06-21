@@ -4,6 +4,8 @@ from uuid import UUID
 from concurrency.api import disable_concurrency
 
 from hct_mis_api.apps.core.celery import app
+from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
         ):
             with disable_concurrency(Household):
                 with disable_concurrency(Individual):
-                    hh.recalculate_data()
+                    recalculate_data(hh)
 
     except Exception as e:
         logger.exception(e)

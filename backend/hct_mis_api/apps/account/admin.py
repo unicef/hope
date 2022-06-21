@@ -271,10 +271,7 @@ class DjAdminManager:
 
     def delete_user(self, username, pk):
         self.login()
-        for url in [
-            f"{self.admin_url_kc}auth/user/{pk}/delete/",
-            f"{self.admin_url}auth/user/{pk}/delete/",
-        ]:
+        for url in (f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"):
             self._get(url)
             self.assert_response([200, 404, 302], custom_error=url)
             if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
@@ -296,9 +293,7 @@ class HasKoboAccount(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "0":
-            return queryset.filter(
-                Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None),
-            )
+            return queryset.filter(Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None))
         elif self.value() == "1":
             return queryset.filter(custom_fields__kobo_pk__isnull=False).exclude(custom_fields__kobo_pk=None)
         return queryset
@@ -313,9 +308,7 @@ class BusinessAreaFilter(SimpleListFilter):
         return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
 
     def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(user_roles__business_area=self.value()).distinct()
-        return queryset
+        return queryset.filter(user_roles__business_area=self.value()).distinct() if self.value() else queryset
 
 
 @admin.register(account_models.Partner)
@@ -327,7 +320,6 @@ class PartnerAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 class HopeUserCreationForm(UserCreationForm):
     class Meta:
         model = User
-        # fields = ("username", "email")
         fields = ()
         field_classes = {"username": UsernameField, "email": EmailField}
 

@@ -17,7 +17,12 @@ def report(request, pk):
         if report.result is None:
             return HttpResponse("This report is not currently available", status=400)
         data = pickle.loads(report.result)
-        return HttpResponse(data, content_type=report.formatter.content_type)
+        if report.formatter.content_type == 'xls':
+            response = HttpResponse(data, content_type=report.formatter.content_type)
+            response['Content-Disposition'] = f'attachment; filename={report.name}.xls'
+            return response
+        else:
+            return HttpResponse(data, content_type=report.formatter.content_type)
     else:
         raise PermissionDenied()
 

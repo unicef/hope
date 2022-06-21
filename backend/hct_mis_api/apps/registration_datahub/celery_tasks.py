@@ -7,6 +7,7 @@ from redis.exceptions import LockError
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 
 logger = logging.getLogger(__name__)
 
@@ -261,7 +262,7 @@ def extract_records_task(max_records=500):
     logger.info("extract_records_task start")
 
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
-    Record.extract(records_ids)
+    extract(records_ids)
     logger.info("extract_records_task end")
 
 
@@ -271,7 +272,7 @@ def fresh_extract_records_task(records_ids=None):
 
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
-    Record.extract(records_ids)
+    extract(records_ids)
 
     logger.info("fresh_extract_records_task end")
 
@@ -283,7 +284,7 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
     )
 
     try:
-        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=85400) as lock:
+        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=85400):
             try:
                 service = FlexRegistrationService()
 
@@ -305,9 +306,62 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
                     return [rdi_name, len(records_ids)]
             except Exception as e:
                 logger.exception(e)
-            finally:
-                if lock.locked():
-                    lock.release()
     except LockError as e:
         logger.exception(e)
         return []
+
+
+@app.task
+def automate_registration_diia_import_task(page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters):
+    logger.info("automate_registration_diia_import_task start")
+
+    from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
+        RdiDiiaCreateTask,
+    )
+
+    try:
+        with cache.lock(f"automate_rdi_diia_creation_task", blocking_timeout=2, timeout=85400):
+            try:
+                service = RdiDiiaCreateTask()
+                rdi_name = template.format(
+                    date=datetime.datetime.now(),
+                    page_size=page_size,
+                )
+                rdi = service.create_rdi(None, rdi_name)
+                service.execute(rdi.id, diia_hh_count=page_size)
+                return [rdi_name, page_size]
+            except Exception as e:
+                logger.exception(e)
+    except LockError as e:
+        logger.exception(e)
+        return []
+
+    logger.info("automate_registration_diia_import_task end")
+
+
+@app.task
+def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters):
+    logger.info("registration_diia_import_task start")
+
+    from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
+        RdiDiiaCreateTask,
+    )
+
+    try:
+        with cache.lock(f"registration_diia_import_task", blocking_timeout=2, timeout=85400):
+            try:
+                service = RdiDiiaCreateTask()
+                rdi_name = template.format(
+                    date=datetime.datetime.now(),
+                    page_size=len(diia_hh_ids),
+                )
+                rdi = service.create_rdi(None, rdi_name)
+                service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
+                return [rdi_name, len(diia_hh_ids)]
+            except Exception as e:
+                logger.exception(e)
+    except LockError as e:
+        logger.exception(e)
+        return []
+
+    logger.info("registration_diia_import_task end")
