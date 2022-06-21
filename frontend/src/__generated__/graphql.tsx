@@ -2954,6 +2954,7 @@ export type MutationsReassignRoleArgs = {
   householdVersion?: Maybe<Scalars['BigInt']>,
   individualId: Scalars['ID'],
   individualVersion?: Maybe<Scalars['BigInt']>,
+  newIndividualId?: Maybe<Scalars['ID']>,
   role: Scalars['String'],
   version?: Maybe<Scalars['BigInt']>
 };
