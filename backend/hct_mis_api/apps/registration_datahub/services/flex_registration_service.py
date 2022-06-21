@@ -162,8 +162,11 @@ class FlexRegistrationService:
             )
 
             Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED)
-
-            transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
+            if not rdi.business_area.postpone_deduplication:
+                transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
+            else:
+                rdi.status = RegistrationDataImport.IN_REVIEW
+                rdi.save()
         except Exception as e:
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
