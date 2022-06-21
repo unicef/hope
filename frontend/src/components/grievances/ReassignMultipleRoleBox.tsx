@@ -50,22 +50,22 @@ export const ReassignMultipleRoleBox = ({
   const mappedReassignLookups = (): React.ReactElement => {
     return (
       <>
-        {selectedIndividualsToReassign.map((el) => {
-          const individual = el;
-          const { household } = el;
+        {selectedIndividualsToReassign.map((selectedIndividualToReassign) => {
+          const { household } = selectedIndividualToReassign;
           const reassignData = JSON.parse(
             ticket.needsAdjudicationTicketDetails.roleReassignData,
           );
           const uniqueIndividual =
             ticket.needsAdjudicationTicketDetails.possibleDuplicate.id ===
-            individual.id
+            selectedIndividualToReassign.id
               ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
               : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
 
-          const householdsAndRoles = individual?.householdsAndRoles;
+          const householdsAndRoles =
+            selectedIndividualToReassign?.householdsAndRoles;
 
           const shouldShowReassignHoH =
-            individual?.id === household?.headOfHousehold?.id;
+            selectedIndividualToReassign?.id === household?.headOfHousehold?.id;
 
           const mappedLookUpsForExternalHouseholds = householdsAndRoles
             .filter((element) => element.role !== 'NO_ROLE')
@@ -100,7 +100,7 @@ export const ReassignMultipleRoleBox = ({
                     }}
                     ticket={ticket}
                     household={householdAndRole.household}
-                    individual={individual}
+                    individual={selectedIndividualToReassign}
                   />
                   {reassignData[householdAndRole.id]?.individual !==
                   uniqueIndividual.id ? (
@@ -152,7 +152,7 @@ export const ReassignMultipleRoleBox = ({
                     individualRole={{ role: 'HEAD', id: 'HEAD' }}
                     ticket={ticket}
                     household={household}
-                    individual={individual}
+                    individual={selectedIndividualToReassign}
                   />
                 </Box>
               )}
