@@ -338,7 +338,7 @@ class RdiMergeTask:
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
                     household_ids = [str(household.id) for household in households_dict.values()]
 
-                    recalculate_population_fields_task.delay(household_ids)
+                    recalculate_population_fields_task(household_ids)
 
                     kobo_submissions = []
                     for imported_household in imported_households:
