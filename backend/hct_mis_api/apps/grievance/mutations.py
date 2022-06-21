@@ -1002,6 +1002,7 @@ class ReassignRoleMutation(graphene.Mutation):
         household_id = graphene.Argument(graphene.ID, required=True)
         household_version = BigInt(required=False)
         individual_id = graphene.Argument(graphene.ID, required=True)
+        new_individual_id = graphene.Argument(graphene.ID, required=False)
         individual_version = BigInt(required=False)
         role = graphene.String(required=True)
         version = BigInt(required=False)
