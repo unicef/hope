@@ -13,6 +13,11 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_OTHER,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    DISABLED,
+    NOT_DISABLED,
+    WIFE_HUSBAND,
+    SON_DAUGHTER,
+    RELATIONSHIP_UNKNOWN,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -25,6 +30,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     DiiaIndividual,
     DiiaHousehold,
     ImportData,
+    DIIA_DISABLED,
+    DIIA_RELATIONSHIP_HEAD,
+    DIIA_RELATIONSHIP_SON,
+    DIIA_RELATIONSHIP_DAUGHTER,
+    DIIA_RELATIONSHIP_WIFE,
+    DIIA_RELATIONSHIP_HUSBAND,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import RdiBaseCreateTask
@@ -34,6 +45,14 @@ logger = logging.getLogger(__name__)
 
 
 class RdiDiiaCreateTask(RdiBaseCreateTask):
+    DIIA_DISABILITY_MAP = {DIIA_DISABLED: DISABLED}
+    DIIA_RELATION = {
+        DIIA_RELATIONSHIP_HEAD: HEAD,
+        DIIA_RELATIONSHIP_SON: SON_DAUGHTER,
+        DIIA_RELATIONSHIP_DAUGHTER: SON_DAUGHTER,
+        DIIA_RELATIONSHIP_WIFE: WIFE_HUSBAND,
+        DIIA_RELATIONSHIP_HUSBAND: WIFE_HUSBAND,
+    }
     """
     Imports project data from DIIA models
     """
@@ -81,13 +100,12 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
             raise ValueError("You can't set two args diia_hh_ids and diia_hh_count")
 
         if not diia_hh_ids:
-            diia_household_import_ids = DiiaHousehold.objects.filter(
-                status=DiiaHousehold.STATUS_TO_IMPORT
-            ).values_list("id", flat=True)[:diia_hh_count]
+            diia_household_import_ids = DiiaHousehold.objects.filter(status=DiiaHousehold.STATUS_TO_IMPORT).values_list(
+                "id", flat=True
+            )[:diia_hh_count]
         else:
             diia_household_import_ids = DiiaHousehold.objects.filter(
-                status=DiiaHousehold.STATUS_TO_IMPORT,
-                id__in=diia_hh_ids
+                status=DiiaHousehold.STATUS_TO_IMPORT, id__in=diia_hh_ids
             ).values_list("id", flat=True)
 
         rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -112,7 +130,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
         individual_count = 0
 
         for diia_household_id in diia_household_import_ids:
-            diia_household = DiiaHousehold.objects.defer('source_data').get(id=diia_household_id)
+            diia_household = DiiaHousehold.objects.defer("source_data").get(id=diia_household_id)
 
             try:
                 all_individuals = DiiaIndividual.objects.filter(rec_id=diia_household.rec_id)
@@ -135,11 +153,10 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 individual_count += all_individuals.count()
 
                 for individual in all_individuals:
-                    b_date = dateutil.parser.parse(individual.birth_date, dayfirst=True) if individual.birth_date else ""
-                    sex_map = {
-                        "F": "FEMALE",
-                        "M": "MALE"
-                    }
+                    b_date = (
+                        dateutil.parser.parse(individual.birth_date, dayfirst=True) if individual.birth_date else ""
+                    )
+                    sex_map = {"F": "FEMALE", "M": "MALE"}
 
                     individual_obj = ImportedIndividual(
                         individual_id=individual.individual_id if individual.individual_id else "",
@@ -147,11 +164,11 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                         middle_name=individual.second_name,
                         family_name=individual.last_name,
                         full_name=f"{individual.first_name} {individual.last_name}",
-                        relationship=individual.relationship if individual.relationship else "",
+                        relationship=self.DIIA_RELATION.get(individual.relationship, RELATIONSHIP_UNKNOWN),
                         sex=sex_map.get(individual.sex, ""),
                         birth_date=b_date,
                         marital_status=individual.marital_status if individual.marital_status else "",
-                        disability=individual.disability if individual.disability else "not disabled",
+                        disability=self.DIIA_DISABILITY_MAP.get(individual.disability, NOT_DISABLED),
                         registration_data_import=registration_data_import_data_hub,
                         first_registration_date=registration_data_import_data_hub.created_at,
                         last_registration_date=registration_data_import_data_hub.created_at,
@@ -165,8 +182,10 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                         hh_doc = {
                             "type": individual.doc_type,
                             "document_number": f"{individual.doc_serie} {individual.doc_number}",
-                            "doc_date": dateutil.parser.parse(individual.doc_issue_date, dayfirst=True) if individual.doc_issue_date else None,
-                            "individual": individual_obj
+                            "doc_date": dateutil.parser.parse(individual.doc_issue_date, dayfirst=True)
+                            if individual.doc_issue_date
+                            else None,
+                            "individual": individual_obj,
                         }
                         self._add_hh_doc(hh_doc, documents)
 
@@ -194,6 +213,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 households_to_create.append(household_obj)
 
                 diia_household.imported_household = household_obj
+                diia_household.registration_data_import = registration_data_import_data_hub
                 diia_household.status = DiiaHousehold.STATUS_IMPORTED
                 households_to_update.append(diia_household)
             except Exception as e:
@@ -202,7 +222,9 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                 households_to_update.append(diia_household)
 
         ImportedHousehold.objects.bulk_create(households_to_create)
-        DiiaHousehold.objects.bulk_update(households_to_update, ["imported_household", "status"], 1000)
+        DiiaHousehold.objects.bulk_update(
+            households_to_update, ["imported_household", "status", "registration_data_import"], 1000
+        )
 
         registration_data_import_data_hub.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import_data_hub.save()
@@ -218,7 +240,9 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
         rdi_mis.save()
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, rdi_mis, rdi_mis)
 
-        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import_data_hub)
+        DeduplicateTask.deduplicate_imported_individuals(
+            registration_data_import_datahub=registration_data_import_data_hub
+        )
 
     def _add_bank_account(self, bank_accounts, individual, individual_obj):
         bank_accounts.append(
