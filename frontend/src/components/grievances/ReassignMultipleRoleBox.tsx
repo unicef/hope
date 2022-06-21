@@ -76,6 +76,14 @@ export const ReassignMultipleRoleBox = ({
                     <LabelizedField label={t('ROLE')}>
                       <>{capitalize(householdAndRole.role)} Collector</>
                     </LabelizedField>
+                    <LabelizedField label={t('INDIVIDUAL ID')}>
+                      <ContentLink
+                        href={`/${businessArea}/population/individuals/${householdAndRole.individual.id}`}
+                      >
+                        {householdAndRole.individual.unicefId}
+                      </ContentLink>{' '}
+                      {householdAndRole.individual.fullName}
+                    </LabelizedField>
                     <LabelizedField label={t('HOUSEHOLD ID')}>
                       <ContentLink
                         href={`/${businessArea}/population/household/${householdAndRole.household.id}`}
@@ -122,6 +130,14 @@ export const ReassignMultipleRoleBox = ({
                   <Box mb={2}>
                     <LabelizedField label={t('ROLE')}>
                       <>{t('Head of Household')}</>
+                    </LabelizedField>
+                    <LabelizedField label={t('INDIVIDUAL ID')}>
+                      <ContentLink
+                        href={`/${businessArea}/population/individuals/${ticket.individual.id}`}
+                      >
+                        {ticket.individual.unicefId}
+                      </ContentLink>{' '}
+                      {ticket.individual.fullName}
                     </LabelizedField>
                     <LabelizedField label={t('HOUSEHOLD ID')}>
                       <ContentLink
