@@ -1,10 +1,8 @@
 import logging
-import json
 from typing import List
 
 from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
-
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +21,7 @@ def extract(records_ids: List[int], raise_exception=False):
     for record_id in records_ids:
         record = Record.objects.get(pk=record_id)
         try:
-            extracted = json.loads(record.storage.tobytes().decode())
-            record.data = _filter(extracted)
+            record.data = _filter(record.get_data())
 
             individuals = record.data.get("individuals", {})
             collectors = [individual for individual in individuals if individual.get("role_i_c", "n") == "y"]
@@ -35,9 +32,7 @@ def extract(records_ids: List[int], raise_exception=False):
                 "collectors_num": len(collectors),
                 "head": len(heads),
                 "valid_phones": len([individual for individual in individuals if individual.get("phone_no_i_c")]),
-                "valid_taxid": len(
-                    [head for head in heads if head.get("tax_id_no_i_c") and head.get("bank_account")]
-                ),
+                "valid_taxid": len([head for head in heads if head.get("tax_id_no_i_c") and head.get("bank_account")]),
                 "valid_payment": len(
                     [
                         individual
