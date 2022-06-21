@@ -1,15 +1,11 @@
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
+import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
-
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
 
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;
@@ -17,15 +13,17 @@ interface EditTargetPopulationProps {
   values;
   businessArea: string;
   targetPopulation;
+  loading: boolean;
 }
 
-export function EditTargetPopulationHeader({
+export const EditTargetPopulationHeader = ({
   handleSubmit,
   cancelEdit,
   values,
   businessArea,
   targetPopulation,
-}: EditTargetPopulationProps): React.ReactElement {
+  loading,
+}: EditTargetPopulationProps): React.ReactElement => {
   const { t } = useTranslation();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -58,27 +56,30 @@ export function EditTargetPopulationHeader({
     >
       <>
         {values.name && (
-          <ButtonContainer>
+          <Box m={2}>
             <Button variant='outlined' color='primary' onClick={cancelEdit}>
               {t('Cancel')}
             </Button>
-          </ButtonContainer>
+          </Box>
         )}
-        <ButtonContainer>
-          <Button
+        <Box m={2}>
+          <LoadingButton
             variant='contained'
             color='primary'
             onClick={handleSubmit}
+            loading={loading}
             disabled={
               values.criterias?.length +
                 values.candidateListCriterias?.length ===
-                0 || !values.name
+                0 ||
+              !values.name ||
+              loading
             }
           >
             {t('Save')}
-          </Button>
-        </ButtonContainer>
+          </LoadingButton>
+        </Box>
       </>
     </PageHeader>
   );
-}
+};

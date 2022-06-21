@@ -57,6 +57,8 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import \
+    programs_with_delivered_quantity
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
@@ -225,7 +227,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return ""
 
     def resolve_programs_with_delivered_quantity(parent, info):
-        return parent.programs_with_delivered_quantity
+        return programs_with_delivered_quantity(parent)
 
     def resolve_country(parent, info):
         return parent.country.name

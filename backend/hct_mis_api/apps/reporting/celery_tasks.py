@@ -10,7 +10,7 @@ def report_export_task(report_id):
     logger.info("report_export_task start")
 
     try:
-        from hct_mis_api.apps.reporting.generate_report_service import (
+        from hct_mis_api.apps.reporting.services.generate_report_service import (
             GenerateReportService,
         )
         from hct_mis_api.apps.reporting.models import Report
@@ -30,7 +30,7 @@ def dashboard_report_export_task(dashboard_report_id):
     logger.info("dashboard_report_export_task start")
 
     try:
-        from hct_mis_api.apps.reporting.generate_dashboard_report_service import (
+        from hct_mis_api.apps.reporting.services.generate_dashboard_report_service import (
             GenerateDashboardReportService,
         )
         from hct_mis_api.apps.reporting.models import DashboardReport

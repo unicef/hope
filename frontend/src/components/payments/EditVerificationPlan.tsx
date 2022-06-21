@@ -35,6 +35,7 @@ import {
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
 import { FormikEffect } from '../core/FormikEffect';
+import { LoadingButton } from '../core/LoadingButton';
 import { TabPanel } from '../core/TabPanel';
 
 const StyledTabs = styled(Tabs)`
@@ -109,7 +110,7 @@ export function EditVerificationPlan({
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate] = useEditCashPlanPaymentVerificationMutation();
+  const [mutate, { loading }] = useEditCashPlanPaymentVerificationMutation();
   const businessArea = useBusinessArea();
   const {
     data: { cashPlan },
@@ -205,9 +206,11 @@ export function EditVerificationPlan({
 
   const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
-        sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100})%`;
+      return ` (${
+        (sampleSizesData?.sampleSize?.sampleSize /
+          sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100
+      })%`;
     }
     return ` (0%)`;
   };
@@ -444,7 +447,8 @@ export function EditVerificationPlan({
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   type='submit'
                   color='primary'
                   variant='contained'
@@ -452,7 +456,7 @@ export function EditVerificationPlan({
                   data-cy='button-submit'
                 >
                   {t('SAVE')}
-                </Button>
+                </LoadingButton>
               </DialogActions>
             </DialogFooter>
           </Dialog>

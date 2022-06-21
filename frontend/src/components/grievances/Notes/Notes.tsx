@@ -1,11 +1,4 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Grid,
-  Paper,
-  Typography,
-} from '@material-ui/core';
+import { Avatar, Box, Grid, Paper, Typography } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +13,7 @@ import {
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../../__generated__/graphql';
+import { LoadingButton } from '../../core/LoadingButton';
 import { OverviewContainerColumn } from '../../core/OverviewContainerColumn';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
@@ -55,7 +49,7 @@ export function Notes({
   });
 
   const { id } = useParams();
-  const [mutate] = useCreateGrievanceTicketNoteMutation();
+  const [mutate, { loading }] = useCreateGrievanceTicketNoteMutation();
 
   if (meLoading) {
     return null;
@@ -106,6 +100,8 @@ export function Notes({
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
+  const myName = `${meData.me.firstName || meData.me.email}`;
+
   return (
     <Grid item xs={9}>
       <Box p={3}>
@@ -134,11 +130,7 @@ export function Notes({
                 {canAddNote && (
                   <Grid container>
                     <Grid item xs={2}>
-                      <Avatar
-                        src={`${meData.me.firstName || meData.me.email}`}
-                        alt={`${meData.me.firstName ||
-                          meData.me.email} picture`}
-                      />
+                      <Avatar src={myName} alt={myName} />
                     </Grid>
                     <Grid item xs={10}>
                       <Grid item xs={12}>
@@ -162,13 +154,14 @@ export function Notes({
                               display='flex'
                               justifyContent='flex-end'
                             >
-                              <Button
+                              <LoadingButton
+                                loading={loading}
                                 color='primary'
                                 variant='contained'
                                 onClick={submitForm}
                               >
                                 {t('Add New Note')}
-                              </Button>
+                              </LoadingButton>
                             </Box>
                           </Form>
                         </DescMargin>

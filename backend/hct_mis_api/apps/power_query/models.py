@@ -75,11 +75,13 @@ class Query(models.Model):
         filters = query_args or {}
         _error = None
         try:
-            locals_ = dict()
-            locals_["conn"] = model._default_manager.using(settings.POWER_QUERY_DB_ALIAS)
-            locals_["query"] = self
-            locals_["query_filters"] = filters
-            locals_["invoke"] = self._invoke
+            locals_ = {
+                "conn": model._default_manager.using(settings.POWER_QUERY_DB_ALIAS),
+                "query": self,
+                "query_filters": filters,
+                "invoke": self._invoke,
+            }
+
             exec(self.code, globals(), locals_)
             result = locals_.get("result", None)
             debug_info = locals_.get("debug_info", None)
@@ -174,3 +176,6 @@ class Report(models.Model):
             return output
         except ObjectDoesNotExist:
             pass
+
+    def __str__(self):
+        return self.name

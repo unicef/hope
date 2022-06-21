@@ -153,9 +153,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 CONSENT
               </span>
               <div>
-                <span>
-                  Yes
-                </span>
+                Yes
               </div>
             </div>
           </div>
@@ -170,9 +168,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 CREATED BY
               </span>
               <div>
-                <span>
-                  Maciej Szewczyk
-                </span>
+                Maciej Szewczyk
               </div>
             </div>
           </div>
@@ -225,9 +221,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 DESCRIPTION
               </span>
               <div>
-                <span>
-                  dwdw
-                </span>
+                dwdw
               </div>
             </div>
           </div>
@@ -242,9 +236,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 ASSIGNED TO
               </span>
               <div>
-                <span>
-                  Maciej Szewczyk
-                </span>
+                Maciej Szewczyk
               </div>
             </div>
           </div>
@@ -259,7 +251,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 ADMINISTRATIVE LEVEL 2
               </span>
               <div>
-                <span />
+                -
               </div>
             </div>
           </div>
@@ -274,7 +266,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 AREA / VILLAGE / PAY POINT
               </span>
               <div>
-                <span />
+                -
               </div>
             </div>
           </div>
@@ -289,9 +281,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 LANGUAGES SPOKEN
               </span>
               <div>
-                <span>
-                  -
-                </span>
+                -
               </div>
             </div>
           </div>

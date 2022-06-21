@@ -30,6 +30,7 @@ import {
   useReportChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { FieldLabel } from '../core/FieldLabel';
+import { LoadingButton } from '../core/LoadingButton';
 import { LoadingComponent } from '../core/LoadingComponent';
 
 export const NewReportForm = (): React.ReactElement => {
@@ -56,18 +57,14 @@ export const NewReportForm = (): React.ReactElement => {
       .required(t('Date To is required')),
   });
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy:'cache-and-network'
-  });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useReportChoiceDataQuery();
-  const [mutate] = useCreateReportMutation();
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsQuery({
+      variables: { businessArea, status: ['ACTIVE'] },
+      fetchPolicy: 'cache-and-network',
+    });
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
+  const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
   const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
@@ -324,7 +321,8 @@ export const NewReportForm = (): React.ReactElement => {
                   <Button onClick={() => setDialogOpen(false)}>
                     {t('CANCEL')}
                   </Button>
-                  <Button
+                  <LoadingButton
+                    loading={loading}
                     type='submit'
                     color='primary'
                     variant='contained'
@@ -332,7 +330,7 @@ export const NewReportForm = (): React.ReactElement => {
                     data-cy='button-submit'
                   >
                     {t('GENERATE')}
-                  </Button>
+                  </LoadingButton>
                 </DialogActions>
               </DialogFooter>
             </>
