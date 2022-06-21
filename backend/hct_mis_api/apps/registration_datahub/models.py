@@ -607,6 +607,36 @@ class DiiaHousehold(models.Model):
     def __str__(self):
         return f"Diia Household ID: {self.id}"
 
+DIIA_DISABLED = "True"
+DIIA_NOT_DISABLED = "False"
+
+DIIA_DISABILITY_CHOICES = (
+    (
+        DIIA_DISABLED,
+        "disabled",
+    ),
+    (
+        DIIA_NOT_DISABLED,
+        "not disabled",
+    ),
+)
+
+
+DIIA_RELATIONSHIP_HEAD = "HEAD"
+DIIA_RELATIONSHIP_SON = "SON"
+DIIA_RELATIONSHIP_DAUGHTER = "DAUGHTER"
+DIIA_RELATIONSHIP_WIFE = "WIFE"
+DIIA_RELATIONSHIP_HUSBAND = "HUSBAND"
+DIIA_RELATIONSHIP_RELATIONSHIP_UNKNOWN = None
+
+DIIA_RELATIONSHIP_CHOICE = (
+    (DIIA_RELATIONSHIP_RELATIONSHIP_UNKNOWN, "Unknown"),
+    (DIIA_RELATIONSHIP_HEAD, "Head of household (self)"),
+    (DIIA_RELATIONSHIP_SON, "Son"),
+    (DIIA_RELATIONSHIP_DAUGHTER, "Daughter"),
+    (DIIA_RELATIONSHIP_HUSBAND, "Husband"),
+    (DIIA_RELATIONSHIP_WIFE, "Wife"),
+)
 
 class DiiaIndividual(models.Model):
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
@@ -614,12 +644,12 @@ class DiiaIndividual(models.Model):
     last_name = models.CharField(max_length=85, blank=True, null=True)
     first_name = models.CharField(max_length=85, blank=True, null=True)
     second_name = models.CharField(max_length=85, blank=True, null=True)
-    relationship = models.CharField(max_length=255, blank=True, choices=RELATIONSHIP_CHOICE, null=True)
+    relationship = models.CharField(max_length=255, blank=True, choices=DIIA_RELATIONSHIP_CHOICE, null=True)
     sex = models.CharField(max_length=255, choices=DIIA_SEX_CHOICE, null=True, blank=True)
     birth_date = models.CharField(max_length=64, blank=True, null=True)
     birth_doc = models.CharField(max_length=128, blank=True, null=True)
     marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True)
-    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True)
+    disability = models.CharField(max_length=20, choices=DIIA_DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True)
     iban = models.CharField(max_length=255, blank=True, null=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
     doc_type = models.CharField(max_length=128, blank=True, null=True)
