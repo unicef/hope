@@ -17,7 +17,7 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     WIFE_HUSBAND,
     SON_DAUGHTER,
-    RELATIONSHIP_UNKNOWN, MALE, FEMALE,
+    RELATIONSHIP_UNKNOWN, MALE, FEMALE, YES,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -144,6 +144,7 @@ class RdiDiiaCreateTask(RdiBaseCreateTask):
                     registration_data_import=registration_data_import_data_hub,
                     first_registration_date=registration_data_import_data_hub.created_at,
                     last_registration_date=registration_data_import_data_hub.created_at,
+                    collect_individual_data=YES,
                     diia_rec_id=diia_household.rec_id,
                     size=all_individuals.count(),
                     country=Country("UA"),
