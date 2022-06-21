@@ -591,13 +591,13 @@ class DiiaHousehold(models.Model):
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="diia_households",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
     imported_household = models.ForeignKey(
         "ImportedHousehold",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="diia_households",
         null=True,
         blank=True
@@ -630,13 +630,13 @@ class DiiaIndividual(models.Model):
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="diia_individuals",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
     imported_individual = models.ForeignKey(
         "ImportedIndividual",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="diia_individuals",
         null=True,
         blank=True
