@@ -164,22 +164,26 @@ export const ReassignMultipleRoleBox = ({
     );
   };
 
-  return (
-    <StyledBox>
-      <OrangeTitle>
-        <Typography variant='h6'>
-          <WarnIcon />
-          {t('Individual is the HOH or the external collector for a household')}
+  return selectedIndividualsToReassign.length ? (
+    <>
+      <StyledBox>
+        <OrangeTitle>
+          <Typography variant='h6'>
+            <WarnIcon />
+            {t(
+              'Individual is the HOH or the external collector for a household',
+            )}
+          </Typography>
+        </OrangeTitle>
+        <Typography variant='body2'>
+          {t(
+            'Upon removing you will need to select new individual(s) for this role.',
+          )}
         </Typography>
-      </OrangeTitle>
-      <Typography variant='body2'>
-        {t(
-          'Upon removing you will need to select new individual(s) for this role.',
-        )}
-      </Typography>
-      <Box mt={3} display='flex' flexDirection='column'>
-        {selectedIndividualsToReassign.length ? mappedReassignLookups() : null}
-      </Box>
-    </StyledBox>
-  );
+        <Box mt={3} display='flex' flexDirection='column'>
+          {mappedReassignLookups()}
+        </Box>
+      </StyledBox>
+    </>
+  ) : null;
 };
