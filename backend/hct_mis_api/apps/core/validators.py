@@ -148,7 +148,6 @@ class KoboTemplateValidator:
         NOT_PROVIDED,
         RELATIONSHIP_UNKNOWN,
     )
-    ALL_CORE_FIELDS = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)
 
     @classmethod
     def _map_columns_numbers(cls, first_row):
@@ -204,13 +203,14 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_db(cls):
+        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)
         return {
             core_field_data["xlsx_field"]: {
                 "type": core_field_data["type"],
                 "required": core_field_data["required"],
                 "choices": core_field_data["choices"],
             }
-            for core_field_data in cls.ALL_CORE_FIELDS
+            for core_field_data in all_core_fields
             if core_field_data["xlsx_field"].endswith("_c")
         }
 
