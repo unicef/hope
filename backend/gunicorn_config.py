@@ -8,7 +8,7 @@ backlog = 2048
 worker_class = "gthread"
 timeout = 30
 keepalive = 2
-workers = multiprocessing.cpu_count()
+workers = multiprocessing.cpu_count() / 2
 threads = multiprocessing.cpu_count()
 
 proc_name = None
