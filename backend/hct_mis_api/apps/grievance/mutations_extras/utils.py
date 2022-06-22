@@ -360,7 +360,12 @@ def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_t
     from hct_mis_api.apps.household.models import Individual
 
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
+    if ticket_details.is_multiple_duplicates_version:
+        household = reassign_roles_on_disable_individual(
+            individual_to_remove, ticket_details.role_reassign_data, info, is_new_ticket=True
+        )
+    else:
+        household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
     mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
 
 
@@ -382,7 +387,26 @@ def get_data_from_role_data(role_data):
     return role_name, old_individual, new_individual, household
 
 
-def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_data, info=None):
+def get_data_from_role_data_new_ticket(role_data):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.core.utils import decode_id_string
+    from hct_mis_api.apps.household.models import Household, Individual
+
+    role_name = role_data.get("role")
+
+    individual_id = decode_id_string(role_data.get("individual"))
+    new_individual_id = decode_id_string(role_data.get("new_individual"))
+    household_id = decode_id_string(role_data.get("household"))
+
+    old_individual = get_object_or_404(Individual, id=individual_id)
+    new_individual = get_object_or_404(Individual, id=new_individual_id)
+
+    household = get_object_or_404(Household, id=household_id)
+    return role_name, old_individual, new_individual, household
+
+
+def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_data, info=None, is_new_ticket=False):
     from django.shortcuts import get_object_or_404
 
     from graphql import GraphQLError
@@ -397,12 +421,20 @@ def reassign_roles_on_disable_individual(individual_to_remove, role_reassign_dat
 
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
-        (
-            role_name,
-            old_new_individual,
-            new_individual,
-            household,
-        ) = get_data_from_role_data(role_data)
+        if is_new_ticket:
+            (
+                role_name,
+                old_new_individual,
+                new_individual,
+                household,
+            ) = get_data_from_role_data_new_ticket(role_data)
+        else:
+            (
+                role_name,
+                old_new_individual,
+                new_individual,
+                household,
+            ) = get_data_from_role_data(role_data)
 
         if role_name == HEAD:
             if household.head_of_household.pk != new_individual.pk:
