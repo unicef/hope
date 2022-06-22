@@ -1009,18 +1009,12 @@ class ReassignRoleMutation(graphene.Mutation):
 
     @classmethod
     def verify_role_choices(cls, role):
-        if role not in [ROLE_PRIMARY, ROLE_ALTERNATE, HEAD]:
+        if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
             logger.error("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
             raise GraphQLError("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
     @classmethod
     def verify_if_role_exists(cls, household, current_individual, role):
-
-        logger.info("*"*20)
-        logger.info(household)
-        logger.info(current_individual)
-        logger.info(role)
-
         if role == HEAD:
             if household.head_of_household.id != current_individual.id:
                 logger.error("This individual is not a head of provided household")
@@ -1042,11 +1036,17 @@ class ReassignRoleMutation(graphene.Mutation):
         info,
         household_id,
         individual_id,
-        new_individual_id,
         grievance_ticket_id,
         role,
         **kwargs,
     ):
+
+        logger.info("*"*20)
+        logger.info(household_id)
+        logger.info(individual_id)
+        logger.info(kwargs)
+        logger.info(role)
+
         cls.verify_role_choices(role)
         decoded_household_id = decode_id_string(household_id)
         decoded_individual_id = decode_id_string(individual_id)
