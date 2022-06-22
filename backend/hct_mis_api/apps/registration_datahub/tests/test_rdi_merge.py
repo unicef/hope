@@ -7,7 +7,7 @@ from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from freezegun import freeze_time
 
 
-class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
+class TestRdiMergeTask(BaseElasticSearchTestCase):
     databases = "__all__"
     fixtures = [
         "hct_mis_api/apps/core/fixtures/data.json",
