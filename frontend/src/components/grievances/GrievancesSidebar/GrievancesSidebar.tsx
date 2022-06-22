@@ -63,7 +63,7 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
 
   const shouldShowReassignMultipleBoxDataChange = (): boolean =>
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-    ticket.needsAdjudicationTicketDetails.selectedIndividuals.length;
+    ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion;
 
   const renderRightSection = (): React.ReactElement => {
     if (
