@@ -9,6 +9,7 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphql import GraphQLError
+from graphql.error import GraphQLLocatedError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.account.schema import UserNode
@@ -1040,13 +1041,6 @@ class ReassignRoleMutation(graphene.Mutation):
         role,
         **kwargs,
     ):
-
-        logger.info("*"*20)
-        logger.info(household_id)
-        logger.info(individual_id)
-        logger.info(kwargs)
-        logger.info(role)
-
         cls.verify_role_choices(role)
         decoded_household_id = decode_id_string(household_id)
         decoded_individual_id = decode_id_string(individual_id)
@@ -1062,7 +1056,7 @@ class ReassignRoleMutation(graphene.Mutation):
         ticket_details = grievance_ticket.ticket_details
         if grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
             if ticket_details.is_multiple_duplicates_version:
-                ticket_individual = get_object_or_404(Individual, id=decode_id_string(new_individual_id))
+                ticket_individual = individual
             else:
                 ticket_individual = ticket_details.selected_individual
         elif grievance_ticket.category == GrievanceTicket.CATEGORY_SYSTEM_FLAGGING:
@@ -1087,6 +1081,10 @@ class ReassignRoleMutation(graphene.Mutation):
             "household": household_id,
             "individual": individual_id,
         }
+
+        if ticket_details.is_multiple_duplicates_version:
+            new_individual_id = kwargs.get("new_individual_id")
+            ticket_details.role_reassign_data[role_data_key]["new_individual"] = new_individual_id
         ticket_details.save()
 
         return cls(household=household, individual=individual)
