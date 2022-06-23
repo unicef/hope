@@ -95,6 +95,7 @@ class BusinessArea(TimeStampedUUIDModel):
         help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
     screen_beneficiary = models.BooleanField(default=False)
+    deduplication_ignore_withdraw = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
