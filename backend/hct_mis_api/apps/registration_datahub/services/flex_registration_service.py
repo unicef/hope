@@ -122,7 +122,6 @@ class FlexRegistrationService:
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
         import_data = rdi_datahub.import_data
 
-        Record.objects.filter(pk__in=records_ids).update(registration_data_import=rdi_datahub)
         records_ids_to_import = (
             Record.objects.filter(id__in=records_ids)
             .exclude(status=Record.STATUS_IMPORTED)
@@ -150,6 +149,7 @@ class FlexRegistrationService:
             rdi.number_of_households = number_of_households
             rdi.status = RegistrationDataImport.DEDUPLICATION
 
+
             rdi.save(
                 update_fields=(
                     "number_of_individuals",
@@ -164,7 +164,7 @@ class FlexRegistrationService:
                 )
             )
 
-            Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED)
+            Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub)
             if not rdi.business_area.postpone_deduplication:
                 transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
             else:

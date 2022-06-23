@@ -305,8 +305,6 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
                     rdi = service.create_rdi(None, rdi_name)
                     service.process_records(rdi.id, records_ids)
                     return [rdi_name, len(records_ids)]
-                else:
-                    return ["not data found", 0]
             except Exception as e:
                 logger.exception(e)
                 raise
