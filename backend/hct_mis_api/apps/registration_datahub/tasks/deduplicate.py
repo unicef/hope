@@ -349,6 +349,12 @@ class DeduplicateTask:
             "possible_duplicates": [],
         }
         for individual_hit in results:
+            if (
+                isinstance(individual, Individual)
+                and Individual.objects.filter(id=individual_hit.id, withdrawn=True).exists()
+                and individual.business_area.deduplication_ignore_withdraw
+            ):
+                continue
             score = individual_hit.meta.score
             results_core_data = {
                 "hit_id": individual_hit.id,
