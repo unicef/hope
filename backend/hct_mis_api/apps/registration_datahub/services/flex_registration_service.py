@@ -303,7 +303,7 @@ class FlexRegistrationService:
         if sex := individual_data.get("sex"):
             individual_data["sex"] = sex.upper()
 
-        if phone_no := individual_data.get("phone_no"):
+        if phone_no := individual_data.get("phone_no",'') or '':
             if phone_no.startswith("0") and not phone_no.startswith("00"):
                 phone_no = phone_no[1:]
             if not phone_no.startswith("+380"):
