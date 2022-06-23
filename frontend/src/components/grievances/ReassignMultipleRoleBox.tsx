@@ -52,14 +52,6 @@ export const ReassignMultipleRoleBox = ({
       <>
         {selectedIndividualsToReassign.map((selectedIndividualToReassign) => {
           const { household } = selectedIndividualToReassign;
-          const reassignData = JSON.parse(
-            ticket.needsAdjudicationTicketDetails.roleReassignData,
-          );
-          const uniqueIndividual =
-            ticket.needsAdjudicationTicketDetails.possibleDuplicate.id ===
-            selectedIndividualToReassign.id
-              ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
-              : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
 
           const householdsAndRoles =
             selectedIndividualToReassign?.householdsAndRoles;
@@ -102,18 +94,6 @@ export const ReassignMultipleRoleBox = ({
                     household={householdAndRole.household}
                     individual={selectedIndividualToReassign}
                   />
-                  {reassignData[householdAndRole.id]?.individual !==
-                  uniqueIndividual.id ? (
-                    <ReassignRoleUnique
-                      individualRole={{
-                        role: householdAndRole.role,
-                        id: householdAndRole.id,
-                      }}
-                      ticket={ticket}
-                      household={householdAndRole.household}
-                      individual={uniqueIndividual}
-                    />
-                  ) : null}
                 </Box>
               );
             });
