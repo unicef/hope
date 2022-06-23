@@ -15,6 +15,7 @@ import {
   RegistrationDetailedFragment,
   useRerunDedupeMutation,
 } from '../../../__generated__/graphql';
+import { LoadingButton } from '../../core/LoadingButton';
 
 interface RerunDedupeProps {
   registration: RegistrationDetailedFragment;
@@ -26,7 +27,7 @@ export function RerunDedupe({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useRerunDedupeMutation({
+  const [mutate, { loading }] = useRerunDedupeMutation({
     variables: { registrationDataImportDatahubId: registration.datahubId },
   });
   const rerunDedupe = async (): Promise<void> => {
@@ -62,14 +63,15 @@ export function RerunDedupe({
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-            <Button
+            <LoadingButton
+              loading={loading}
               type='submit'
               color='primary'
               variant='contained'
               onClick={rerunDedupe}
             >
               {t('Rerun')}
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </DialogFooter>
       </Dialog>
