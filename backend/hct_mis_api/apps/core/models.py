@@ -65,6 +65,7 @@ class BusinessArea(TimeStampedUUIDModel):
         limit_choices_to={"admin_level": 0},
         related_name="business_areas",
     )
+    postpone_deduplication = models.BooleanField(default=False)
     countries_new = models.ManyToManyField("geo.Country", related_name="business_areas")
     deduplication_duplicate_score = models.FloatField(
         default=6.0,
@@ -94,6 +95,7 @@ class BusinessArea(TimeStampedUUIDModel):
         help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
     screen_beneficiary = models.BooleanField(default=False)
+    deduplication_ignore_withdraw = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
