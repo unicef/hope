@@ -1,6 +1,5 @@
 import csv
 import logging
-import time
 from io import StringIO
 
 from django import forms
@@ -29,16 +28,9 @@ import xlrd
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    AllValuesComboFilter,
-    ChoicesFieldComboFilter,
-    ValueFilter,
-)
+from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminFiltersMixin
 from constance import config
-from import_export import fields, resources
-from import_export.admin import ImportExportModelAdmin
-from import_export.widgets import ForeignKeyWidget
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
@@ -47,11 +39,7 @@ from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
 )
-from hct_mis_api.apps.core.datamart.api import DatamartAPI
-from hct_mis_api.apps.core.export_locations import ExportLocations
 from hct_mis_api.apps.core.models import (
-    AdminArea,
-    AdminAreaLevel,
     BusinessArea,
     CountryCodeMap,
     FlexibleAttribute,
@@ -59,7 +47,6 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
 )
-from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.utils.admin import SoftDeletableAdminMixin
