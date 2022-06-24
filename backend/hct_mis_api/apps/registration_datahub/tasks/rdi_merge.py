@@ -338,7 +338,7 @@ class RdiMergeTask:
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
                     household_ids = [str(household.id) for household in households_dict.values()]
 
-                    recalculate_population_fields_task.delay(household_ids)
+                    recalculate_population_fields_task(household_ids)
 
                     kobo_submissions = []
                     for imported_household in imported_households:
@@ -361,30 +361,30 @@ class RdiMergeTask:
 
                     populate_index(Individual.objects.filter(registration_data_import=obj_hct), IndividualDocument)
                     populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
+                    if not obj_hct.business_area.postpone_deduplication:
+                        DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
 
-                    DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
+                        golden_record_duplicates = Individual.objects.filter(
+                            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                        )
 
-                    golden_record_duplicates = Individual.objects.filter(
-                        registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
-                    )
+                        create_needs_adjudication_tickets(
+                            golden_record_duplicates,
+                            "duplicates",
+                            obj_hct.business_area,
+                            registration_data_import=obj_hct
+                        )
 
-                    create_needs_adjudication_tickets(
-                        golden_record_duplicates,
-                        "duplicates",
-                        obj_hct.business_area,
-                        registration_data_import=obj_hct
-                    )
+                        needs_adjudication = Individual.objects.filter(
+                            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+                        )
 
-                    needs_adjudication = Individual.objects.filter(
-                        registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
-                    )
-
-                    create_needs_adjudication_tickets(
-                        needs_adjudication,
-                        "possible_duplicates",
-                        obj_hct.business_area,
-                        registration_data_import=obj_hct,
-                    )
+                        create_needs_adjudication_tickets(
+                            needs_adjudication,
+                            "possible_duplicates",
+                            obj_hct.business_area,
+                            registration_data_import=obj_hct,
+                        )
 
                     # SANCTION LIST CHECK
                     if obj_hct.should_check_against_sanction_list():
