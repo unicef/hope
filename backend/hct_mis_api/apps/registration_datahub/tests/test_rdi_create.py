@@ -9,6 +9,7 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
+from django.core.exceptions import ValidationError
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
@@ -36,6 +37,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
+    DiiaHousehold,
 )
 
 
@@ -787,53 +789,3 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             json_file.write(json.dumps(result))
 
 
-class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
-    databases = "__all__"
-    fixtures = [
-        "hct_mis_api/apps/core/fixtures/data.json",
-        "hct_mis_api/apps/registration_datahub/fixtures/diiadata.json",
-    ]
-
-    @classmethod
-    def setUpTestData(cls):
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import RdiDiiaCreateTask
-
-        cls.RdiDiiaCreateTask = RdiDiiaCreateTask
-
-    def test_execute(self):
-        self.RdiDiiaCreateTask().execute("c57848bf-a5df-154b-4938-f30b6b29aaab")
-
-        households = ImportedHousehold.objects.all()
-        individuals = ImportedIndividual.objects.all()
-
-        self.assertEqual(2, households.count())
-        self.assertEqual(5, individuals.count())
-
-        individual = individuals.get(full_name="Erik Duarte")
-        self.assertEqual(2, individual.documents.count())
-        self.assertEqual(1, individual.bank_account_info.count())
-        self.assertEqual(str(individual.documents.filter(document_number="VPO-DOC-2222").first().doc_date), "2022-04-29")
-
-        individuals_obj_data = model_to_dict(
-            individual,
-            ("sex", "age", "marital_status", "relationship", "middle_name"),
-        )
-        expected = {
-            "relationship": "HEAD",
-            "sex": "MALE",
-            "middle_name": "Mid",
-            "marital_status": "MARRIED",
-        }
-        self.assertEqual(individuals_obj_data, expected)
-
-        household_obj_data = model_to_dict(
-            individual.household,
-            ("country", "size", "diia_rec_id", "address")
-        )
-        expected = {
-            "country": Country(code="UA"),
-            "size": 3,
-            "diia_rec_id": "222222",
-            "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
-        }
-        self.assertEqual(household_obj_data, expected)

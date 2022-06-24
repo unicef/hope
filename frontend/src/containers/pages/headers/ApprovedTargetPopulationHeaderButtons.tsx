@@ -1,4 +1,4 @@
-import { Button, Tooltip } from '@material-ui/core';
+import { Box, Button, Tooltip } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,10 +23,6 @@ const IconContainer = styled.span`
   }
 `;
 
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
-
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
   canUnlock: boolean;
@@ -34,12 +30,12 @@ export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   canSend: boolean;
 }
 
-export function ApprovedTargetPopulationHeaderButtons({
+export const ApprovedTargetPopulationHeaderButtons = ({
   targetPopulation,
   canSend,
   canDuplicate,
   canUnlock,
-}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
@@ -47,7 +43,7 @@ export function ApprovedTargetPopulationHeaderButtons({
   const [mutate, { loading }] = useUnapproveTpMutation();
 
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canDuplicate && (
         <IconContainer>
           <Button onClick={() => setOpenDuplicate(true)}>
@@ -56,7 +52,7 @@ export function ApprovedTargetPopulationHeaderButtons({
         </IconContainer>
       )}
       {canUnlock && (
-        <ButtonContainer>
+        <Box m={2}>
           <LoadingButton
             loading={loading}
             color='primary'
@@ -72,10 +68,10 @@ export function ApprovedTargetPopulationHeaderButtons({
           >
             Unlock
           </LoadingButton>
-        </ButtonContainer>
+        </Box>
       )}
       {canSend && (
-        <ButtonContainer>
+        <Box m={2}>
           <Tooltip
             title={
               targetPopulation.program.status !== 'ACTIVE'
@@ -95,7 +91,7 @@ export function ApprovedTargetPopulationHeaderButtons({
               </Button>
             </span>
           </Tooltip>
-        </ButtonContainer>
+        </Box>
       )}
       <DuplicateTargetPopulation
         open={openDuplicate}
@@ -108,6 +104,6 @@ export function ApprovedTargetPopulationHeaderButtons({
         targetPopulationId={targetPopulation.id}
         totalHouseholds={targetPopulation.finalListTotalHouseholds}
       />
-    </div>
+    </Box>
   );
-}
+};
