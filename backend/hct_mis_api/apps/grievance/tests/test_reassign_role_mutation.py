@@ -24,12 +24,14 @@ class TestRoleReassignMutation(APITestCase):
       $grievanceTicketId: ID!, 
       $householdId: ID!, 
       $individualId: ID!, 
+      $newIndividualId: ID,
       $role: String!
     ) {
       reassignRole(
         grievanceTicketId: $grievanceTicketId, 
         householdId: $householdId, 
         individualId: $individualId, 
+        newIndividualId: $newIndividualId,
         role: $role
       ) {
         household {

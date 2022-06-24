@@ -1081,7 +1081,7 @@ class ReassignRoleMutation(graphene.Mutation):
             "individual": individual_id,
         }
 
-        if ticket_details.is_multiple_duplicates_version:
+        if getattr(ticket_details, "is_multiple_duplicates_version", False):
             new_individual_id = kwargs.get("new_individual_id")
             ticket_details.role_reassign_data[role_data_key]["new_individual"] = new_individual_id
         ticket_details.save()
