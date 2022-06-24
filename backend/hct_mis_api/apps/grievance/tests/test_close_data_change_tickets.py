@@ -1,5 +1,7 @@
 from datetime import date
 
+from django.core.management import call_command
+
 from django_countries.fields import Country
 from parameterized import parameterized
 
@@ -61,6 +63,7 @@ class TestCloseDataChangeTickets(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

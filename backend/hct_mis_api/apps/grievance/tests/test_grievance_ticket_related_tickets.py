@@ -1,3 +1,5 @@
+from django.core.management import call_command
+
 from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -28,6 +30,7 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

@@ -1,3 +1,5 @@
+from django.core.management import call_command
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -36,6 +38,7 @@ class TestWithdrawHousehold(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
 
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.first()

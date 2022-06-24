@@ -1,3 +1,5 @@
+from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -51,6 +53,7 @@ class TestTicketNotes(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=cls.business_area)

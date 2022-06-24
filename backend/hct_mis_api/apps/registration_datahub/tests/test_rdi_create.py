@@ -8,6 +8,7 @@ from unittest import mock
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
+from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
@@ -62,11 +63,13 @@ def create_document_image():
 
 
 class TestRdiCreateTask(BaseElasticSearchTestCase):
+    multi_db = True
     databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
@@ -383,6 +386,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
+    multi_db = True
     databases = "__all__"
 
     @staticmethod
@@ -394,6 +398,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
         )
