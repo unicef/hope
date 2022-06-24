@@ -1,5 +1,5 @@
 import base64
-import json
+import hashlib
 import logging
 import uuid
 from typing import List
@@ -9,7 +9,6 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
-
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
@@ -43,6 +42,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 class FlexRegistrationService:
     INDIVIDUAL_MAPPING_DICT = {
@@ -125,6 +125,7 @@ class FlexRegistrationService:
         records_ids_to_import = (
             Record.objects.filter(id__in=records_ids)
             .exclude(status=Record.STATUS_IMPORTED)
+            .exclude(ignored=True)
             .values_list("id", flat=True)
         )
         imported_records_ids = []
@@ -149,7 +150,6 @@ class FlexRegistrationService:
             rdi.number_of_households = number_of_households
             rdi.status = RegistrationDataImport.DEDUPLICATION
 
-
             rdi.save(
                 update_fields=(
                     "number_of_individuals",
@@ -164,7 +164,9 @@ class FlexRegistrationService:
                 )
             )
 
-            Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub)
+            Record.objects.filter(id__in=imported_records_ids).update(
+                status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
+            )
             if not rdi.business_area.postpone_deduplication:
                 transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
             else:
@@ -361,9 +363,8 @@ class FlexRegistrationService:
     def _prepare_picture_from_base64(self, certificate_picture, document_number):
         if certificate_picture:
             format_image = "jpg"
-            certificate_picture = ContentFile(
-                base64.b64decode(certificate_picture), name=f"{document_number}.{format_image}"
-            )
+            name = hashlib.md5(document_number.encode()).hexdigest()
+            certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
 
     def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):
