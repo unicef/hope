@@ -1,44 +1,16 @@
-import json
-import secrets
-
-from datetime import date
-from io import BytesIO
-from pathlib import Path
-from unittest import mock
-
-from django.conf import settings
-from django.contrib.gis.geos import Point
-from django.core.files import File
 from django.core.exceptions import ValidationError
-from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
 from django_countries.fields import Country
-from PIL import Image
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
-from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_CHOICE,
-    DocumentType,
     DISABLED,
     NOT_DISABLED,
     RELATIONSHIP_CHOICE,
     MARITAL_STATUS_CHOICE,
 )
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    ImportedIndividualFactory,
-    RegistrationDataImportDatahubFactory,
-)
 from hct_mis_api.apps.registration_datahub.models import (
-    ImportData,
-    ImportedDocument,
-    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
     DiiaHousehold,
@@ -125,7 +97,6 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(
             DiiaHousehold.objects.filter(registration_data_import__isnull=False, id__in=[991, 992, 993]).count(), 3
         )
-
 
     def test_execute_staging_data_choices_conversion(self):
         rdi = self.RdiDiiaCreateTask().create_rdi(None, "Test import Diia")
