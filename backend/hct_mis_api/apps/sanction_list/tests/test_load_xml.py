@@ -10,6 +10,7 @@ from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTas
 
 class TestLoadXML(BaseElasticSearchTestCase):
     databases = ("default", "registration_datahub")
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     def test_execute(self):
         main_test_files_path = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"

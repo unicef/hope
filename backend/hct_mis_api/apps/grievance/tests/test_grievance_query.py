@@ -1,6 +1,8 @@
 from datetime import datetime
 from django.utils import timezone
 
+from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -14,7 +16,10 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.household.fixtures import create_household
 
 
@@ -166,6 +171,7 @@ class TestGrievanceQuery(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         cls.user = UserFactory.create()
         cls.user2 = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
