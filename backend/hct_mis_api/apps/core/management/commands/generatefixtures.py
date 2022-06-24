@@ -109,9 +109,6 @@ class Command(BaseCommand):
             help="Suppresses Elasticsearch reindex.",
         )
 
-    def _generate_admin_areas(self, business_area):
-        call_command("loadadminareas", "--business_area", business_area.name)
-
     @staticmethod
     def _generate_program_with_dependencies(options, business_area_index):
         cash_plans_amount = options["cash_plans_amount"]
@@ -254,7 +251,6 @@ class Command(BaseCommand):
         if not UserRole.objects.count():
             call_command("generateroles")
         for index in range(business_area_amount):
-            self._generate_admin_areas(BusinessArea.objects.all()[index])
             for _ in range(programs_amount):
                 self._generate_program_with_dependencies(options, index)
 
