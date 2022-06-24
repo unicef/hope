@@ -569,7 +569,7 @@ class CountryCodeMapAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     search_fields = ("country",)
 
     def alpha2(self, obj):
-        return obj.country.countries.alpha2(obj.country.code)
+        return obj.country.iso_code2
 
     def alpha3(self, obj):
-        return obj.country.countries.alpha3(obj.country.code)
+        return obj.country.iso_code3
