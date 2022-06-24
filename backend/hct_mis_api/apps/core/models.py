@@ -451,16 +451,15 @@ class CountryCodeMapManager(models.Manager):
 
     def build_cache(self):
         if not self._cache[2] or not self._cache[3] or not self._cache["ca2"] or not self._cache["ca3"]:
-            for entry in self.all():
-                self._cache[2][entry.country.code] = entry.ca_code
-                self._cache[3][entry.country.countries.alpha3(entry.country.code)] = entry.ca_code
-                self._cache["ca2"][entry.ca_code] = entry.country.code
-                self._cache["ca3"][entry.ca_code] = entry.country.countries.alpha3(entry.country.code)
+            for entry in self.all().select_related("country"):
+                self._cache[2][entry.country.iso_code2] = entry.ca_code
+                self._cache[3][entry.country.iso_code3] = entry.ca_code
+                self._cache["ca2"][entry.ca_code] = entry.country.iso_code2
+                self._cache["ca3"][entry.ca_code] = entry.country.iso_code3
 
 
 class CountryCodeMap(models.Model):
-    country = CountryField(unique=True)
-    country_new = models.OneToOneField("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.OneToOneField("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     ca_code = models.CharField(max_length=5, unique=True)
 
     objects = CountryCodeMapManager()
