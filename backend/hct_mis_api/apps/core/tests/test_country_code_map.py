@@ -9,6 +9,7 @@ from hct_mis_api.apps.core.models import CountryCodeMap
 class TestCountryCodeMap(TestCase):
     @classmethod
     def setUpTestData(cls):
+        call_command("loadcountries")
         call_command("loadcountrycodes")
 
     @parameterized.expand(

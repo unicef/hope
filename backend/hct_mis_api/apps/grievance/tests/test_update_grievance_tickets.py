@@ -2,6 +2,7 @@ from datetime import date
 from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 
 from django_countries.fields import Country
 from parameterized import parameterized
@@ -84,6 +85,7 @@ class TestUpdateGrievanceTickets(APITestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
+        call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         cls.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")

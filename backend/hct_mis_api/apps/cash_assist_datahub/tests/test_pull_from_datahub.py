@@ -51,6 +51,7 @@ class TestPullDataFromDatahub(TestCase):
     @staticmethod
     def _pre_test_commands():
         create_afghanistan()
+        call_command("loadcountries")
         call_command("loadcountrycodes")
 
         # call_command("generatedocumenttypes")
@@ -284,6 +285,7 @@ class TestPullDataFromDatahub(TestCase):
 
 class TestSessionsPullDataFromDatahub(TestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls):
