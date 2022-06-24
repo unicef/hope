@@ -61,14 +61,8 @@ class BusinessArea(TimeStampedUUIDModel):
     )
     is_split = models.BooleanField(default=False)
 
-    countries = models.ManyToManyField(
-        "AdminAreaLevel",
-        blank=True,
-        limit_choices_to={"admin_level": 0},
-        related_name="business_areas",
-    )
     postpone_deduplication = models.BooleanField(default=False)
-    countries_new = models.ManyToManyField("geo.Country", related_name="business_areas")
+    countries = models.ManyToManyField("geo.Country", related_name="business_areas")
     deduplication_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
