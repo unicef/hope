@@ -391,18 +391,12 @@ def get_data_from_role_data_new_ticket(role_data):
     from django.shortcuts import get_object_or_404
 
     from hct_mis_api.apps.core.utils import decode_id_string
-    from hct_mis_api.apps.household.models import Household, Individual
+    from hct_mis_api.apps.household.models import Individual
 
-    role_name = role_data.get("role")
-
-    individual_id = decode_id_string(role_data.get("individual"))
+    role_name, old_individual, _, household = get_data_from_role_data(role_data)
     new_individual_id = decode_id_string(role_data.get("new_individual"))
-    household_id = decode_id_string(role_data.get("household"))
-
-    old_individual = get_object_or_404(Individual, id=individual_id)
     new_individual = get_object_or_404(Individual, id=new_individual_id)
 
-    household = get_object_or_404(Household, id=household_id)
     return role_name, old_individual, new_individual, household
 
 
