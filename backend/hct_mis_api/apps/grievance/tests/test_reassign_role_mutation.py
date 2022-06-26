@@ -10,7 +10,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
-    TicketDeleteIndividualDetailsFactory,
+    TicketDeleteIndividualDetailsFactory, TicketNeedsAdjudicationDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -236,18 +236,15 @@ class TestRoleReassignMutationNewTicket(APITestCase):
 
         cls.individual_1.household = cls.household
         cls.individual_2.household = cls.household
-        cls.individual_3.household = cls.household
 
         cls.individual_1.save()
         cls.individual_2.save()
-        cls.individual_3.save()
 
         cls.household.refresh_from_db()
         cls.individual_1.refresh_from_db()
         cls.individual_2.refresh_from_db()
-        cls.individual_3.refresh_from_db()
 
-        IndividualRoleInHousehold.objects.create(
+        cls.role = IndividualRoleInHousehold.objects.create(
             household=cls.household,
             individual=cls.individual_1,
             role=ROLE_PRIMARY,
@@ -262,5 +259,39 @@ class TestRoleReassignMutationNewTicket(APITestCase):
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
 
+        TicketNeedsAdjudicationDetailsFactory(
+            ticket=cls.grievance_ticket,
+            golden_records_individual=cls.individual_1,
+            possible_duplicate=cls.individual_2,
+            is_multiple_duplicates_version=True,
+            selected_individual=None
+        )
+
     def test_role_reassignment_new_ticket(self):
-        pass
+        variables = {
+            "grievanceTicketId": self.id_to_base64(self.grievance_ticket.id, "GrievanceTicketNode"),
+            "householdId": self.id_to_base64(self.household.id, "HouseholdNode"),
+            "individualId": self.id_to_base64(self.individual_1.id, "IndividualNode"),
+            "newIndividualId": self.id_to_base64(self.individual_2.id, "IndividualNode"),
+            "role": ROLE_PRIMARY,
+        }
+        self.graphql_request(
+            request_string=self.REASSIGN_ROLE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+        self.grievance_ticket.refresh_from_db()
+        ticket_details = self.grievance_ticket.ticket_details
+        role_reassign_data = ticket_details.role_reassign_data
+
+        expected_data = {
+            str(self.role.id): {
+                "role": "PRIMARY",
+                "household": self.id_to_base64("b5cb9bb2-a4f3-49f0-a9c8-a2f260026054", "HouseholdNode"),
+                "individual": self.id_to_base64("d4848d8e-4a1c-49e9-b1c0-1e994047164a", "IndividualNode"),
+                "new_individual": self.id_to_base64("5896ea05-1956-442f-9462-466d0eaccc68", "IndividualNode"),
+            }
+        }
+
+        self.assertEqual(role_reassign_data, expected_data)
