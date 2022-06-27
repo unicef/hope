@@ -6,6 +6,7 @@ from pytz import utc
 from faker import Faker
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
     MARITAL_STATUS_CHOICE,
@@ -83,8 +84,8 @@ class HouseholdFactory(factory.DjangoModelFactory):
         RESIDENCE_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    country_origin = factory.Faker("country_code")
-    country = factory.Faker("country_code")
+    country_origin = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
+    country = factory.LazyAttribute(lambda o: geo_models.Country.objects.order_by("?").first())
     size = factory.fuzzy.FuzzyInteger(3, 8)
     address = factory.Faker("address")
     registration_data_import = factory.SubFactory(

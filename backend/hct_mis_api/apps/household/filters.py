@@ -1,10 +1,10 @@
 import json
 import re
 
-from constance import config
 from django.db.models import Q
 from django.db.models.functions import Lower
 
+from constance import config
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -15,13 +15,13 @@ from django_filters import (
 
 from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
+    BusinessAreaSlugFilter,
     DateRangeFilter,
     IntegerRangeFilter,
-    BusinessAreaSlugFilter,
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.documents import IndividualDocument, HouseholdDocument
+from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     INDIVIDUAL_FLAGS_CHOICES,
@@ -82,12 +82,12 @@ class HouseholdFilter(FilterSet):
         field_name="admin_area_new", queryset=Area.objects.filter(area_type__area_level=2)
     )
     withdrawn = BooleanFilter(field_name="withdrawn")
+    country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
 
     class Meta:
         model = Household
         fields = {
             "business_area": ["exact"],
-            "country_origin": ["exact", "startswith"],
             "address": ["exact", "startswith"],
             "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],

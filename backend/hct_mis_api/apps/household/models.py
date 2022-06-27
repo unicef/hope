@@ -2,7 +2,6 @@ import logging
 import re
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -14,6 +13,8 @@ from django.db.models import DecimalField, JSONField
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -336,12 +337,8 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE)
-    country_origin = CountryField(blank=True, db_index=True)
-    country_origin_new = models.ForeignKey(
-        "geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT
-    )
-    country = CountryField(db_index=True)
-    country_new = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
+    country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
     size = models.PositiveIntegerField(db_index=True)
     address = CICharField(max_length=1024, blank=True)
     """location contains lowest administrative area info"""
@@ -434,7 +431,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
 
     def save(self, *args, **kwargs):
-        from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+        from hct_mis_api.apps.targeting.models import (
+            HouseholdSelection,
+            TargetPopulation,
+        )
 
         if self.withdrawn:
             HouseholdSelection.objects.filter(

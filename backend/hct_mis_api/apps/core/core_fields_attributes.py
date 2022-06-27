@@ -9,8 +9,6 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from hct_mis_api.apps.core.attributes_qet_queries import (
     admin_area1_query,
     age_to_birth_date_query,
-    country_origin_query,
-    country_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
     get_drivers_license_document_number_query,
@@ -37,7 +35,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
     DATA_SHARING_CHOICES,
@@ -162,14 +160,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "id": "e44efed6-47d6-4f60-bcf6-b1d2ffc4d7d1",
         "type": TYPE_SELECT_ONE,
         "name": "country_origin",
-        "lookup": "country_origin",
+        "lookup": "country_origin__iso_code3",
         "required": False,
         "label": {"English(EN)": "Country of Origin"},
         "hint": "country origin",
-        "get_query": country_origin_query,
-        "choices": Countries.get_choices(output_code="alpha3"),
-        "custom_validate_choices": Countries.is_valid_country_choice,
-        "custom_cast_value": Countries.get_country_value,
+        "_choices": lambda *args, **kwargs: Country.get_choices(),
+        "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "country_origin_h_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
@@ -178,14 +174,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "id": "aa79985c-b616-453c-9884-0666252c3070",
         "type": TYPE_SELECT_ONE,
         "name": "country",
-        "lookup": "country",
+        "lookup": "country__iso_code3",
         "required": True,
         "label": {"English(EN)": "Country of registration"},
         "hint": "",
-        "get_query": country_query,
-        "choices": Countries.get_choices(output_code="alpha3"),
-        "custom_validate_choices": Countries.is_valid_country_choice,
-        "custom_cast_value": Countries.get_country_value,
+        "_choices": lambda *args, **kwargs: Country.get_choices(),
+        "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "country_h_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],

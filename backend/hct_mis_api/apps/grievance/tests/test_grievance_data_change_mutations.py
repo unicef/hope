@@ -110,7 +110,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country="AFG")
+        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country=country)
         household_two = HouseholdFactory.build(id="ac540aa1-5c7a-47d0-a013-32054e2af454")
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()

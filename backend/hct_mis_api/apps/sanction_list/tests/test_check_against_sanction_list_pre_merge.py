@@ -25,14 +25,13 @@ from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTas
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     databases = "__all__"
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
 
     TEST_FILES_PATH = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
 
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-
-        call_command("loadcountries")
 
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
         task = LoadSanctionListXMLTask(full_sanction_list_path)
