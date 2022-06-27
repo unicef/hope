@@ -319,7 +319,7 @@ class TestSendTpToDatahub(TestCase):
     )
     def test_send_household_country(self, _, iso_code2, expected_ca_code):
         (household, individuals) = create_household(household_args={"size": 1})
-        household.country = iso_code2
+        household.country = geo_models.Country.objects.filter(iso_code2=iso_code2).first()
         household.save()
         task = SendTPToDatahubTask()
         task.dh_session = dh_models.Session()

@@ -23,6 +23,8 @@ from hct_mis_api.apps.reporting.models import Report
 
 
 class TestGenerateReportService(TestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     @classmethod
     def setUpTestData(self):
         create_afghanistan()
@@ -58,12 +60,13 @@ class TestGenerateReportService(TestCase):
         self.program_2 = ProgramFactory(business_area=self.business_area, end_date="2022-01-01")
         self.households = []
         self.individuals = []
+        country_origin = geo_models.Country.objects.filter(iso_code2="PL").first()
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household_and_individuals(
                 {
                     "size": family_size,
                     "address": "Lorem Ipsum",
-                    "country_origin": "PL",
+                    "country_origin": country_origin,
                     "business_area": self.business_area,
                     "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
                     "admin_area": None if index % 2 else self.admin_area_1,
