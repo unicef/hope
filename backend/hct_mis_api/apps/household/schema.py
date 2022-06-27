@@ -212,6 +212,14 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     active_individuals_count = graphene.Int()
     admin_area = graphene.Field(AreaNode)
 
+    @staticmethod
+    def resolve_country_origin(parent: Household, info):
+        return parent.country_origin.name
+
+    @staticmethod
+    def resolve_country(parent: Household, info):
+        return parent.country.name
+
     def resolve_admin1(parent, info):
         return parent.admin1_new
 

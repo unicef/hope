@@ -11,7 +11,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
-from hct_mis_api.apps.household.documents import IndividualDocument, HouseholdDocument
+from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
@@ -162,28 +162,26 @@ class RdiMergeTask:
 
     def _prepare_households(self, imported_households, obj_hct):
         households_dict = {}
-        business_area = obj_hct.business_area
         countries = {}
         for imported_household in imported_households:
             household_data = {**model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS)}
-            country_code = household_data["country"].code
-            country_origin_code = household_data["country_origin"].code
-            if country_code and country_code not in countries:
-                countries[country_code] = geo_models.Country.objects.get(iso_code2=country_code)
-            if country_origin_code and country_origin_code not in countries:
-                countries[country_origin_code] = geo_models.Country.objects.get(iso_code2=country_origin_code)
+            country = household_data.pop("country")
+            country_origin = household_data.pop("country_origin")
 
-            country_code = countries.get(country_code)
-            if country_code:
-                household_data["country_new"] = country_code
+            if country and country.code not in countries:
+                countries[country.code] = geo_models.Country.objects.get(iso_code2=country.code)
+            if country_origin and country_origin.code not in countries:
+                countries[country_origin.code] = geo_models.Country.objects.get(iso_code2=country_origin.code)
 
-            country_code_origin = countries.get(country_origin_code)
-            if country_code_origin:
-                household_data["country_origin_new"] = country_code_origin
+            if country := countries.get(country.code):
+                household_data["country"] = country
+
+            if country_origin := countries.get(country_origin.code):
+                household_data["country_origin"] = country_origin
             household = Household(
                 **household_data,
                 registration_data_import=obj_hct,
-                business_area=business_area,
+                business_area=obj_hct.business_area,
             )
             self.merge_admin_area(imported_household, household)
             households_dict[imported_household.id] = household

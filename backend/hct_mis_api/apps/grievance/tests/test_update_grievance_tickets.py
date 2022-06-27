@@ -591,7 +591,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
         result = self.household_data_change_grievance_ticket.household_data_update_ticket_details.household_data
-        expected_result = None
 
         if name == "with_permission":
             expected_result = {
@@ -599,7 +598,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "country": {
                     "value": "AFG",
                     "approve_status": False,
-                    "previous_value": self.household_one.country.alpha3,
+                    "previous_value": self.household_one.country.iso_code3,
                 },
                 "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
                 "flex_fields": {},

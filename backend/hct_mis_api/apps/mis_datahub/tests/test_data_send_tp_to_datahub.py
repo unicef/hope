@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
 )
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
@@ -111,8 +112,9 @@ class TestDataSendTpToDatahub(TestCase):
 
     @classmethod
     def create_first_household(cls, admin_area, rdi):
+        country = Country.objects.filter(iso_code2="PL").first()
         cls.household = HouseholdFactory.build(
-            size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country="PL"
+            size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country=country
         )
         unhcr_agency = Agency.objects.create(type=UNHCR)
         cls.individual = IndividualFactory(household=cls.household, relationship="HEAD", registration_data_import=rdi)
