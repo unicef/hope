@@ -19,15 +19,17 @@ import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
 import { ErrorButton } from '../../../core/ErrorButton';
 
-export interface RejectPaymentPlanProps {
+export interface MarkAsReviewedPaymentPlanProps {
   paymentPlanId: string;
 }
 
-export const RejectPaymentPlan = ({
+export const MarkAsReviewedPaymentPlan = ({
   paymentPlanId,
-}: RejectPaymentPlanProps): React.ReactElement => {
+}: MarkAsReviewedPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [markAsReviewedDialogOpen, setMarkAsReviewedDialogOpen] = useState(
+    false,
+  );
 
   const { showMessage } = useSnackbar();
   // const [mutate] = useActivateCashPlanPaymentVerificationMutation();
@@ -71,7 +73,7 @@ export const RejectPaymentPlan = ({
       <Formik
         initialValues={initialValues}
         onSubmit={(values, { resetForm }) => {
-          console.log('Reject');
+          console.log('MarkAsReviewed');
           resetForm({});
         }}
         validationSchema={validationSchema}
@@ -79,31 +81,38 @@ export const RejectPaymentPlan = ({
         {({ submitForm }) => (
           <>
             <Box p={2}>
-              <ErrorButton onClick={() => setRejectDialogOpen(true)}>
-                {t('Reject')}
-              </ErrorButton>
+              <Button
+                color='primary'
+                variant='contained'
+                onClick={() => setMarkAsReviewedDialogOpen(true)}
+                data-cy='button-lock-plan'
+              >
+                {t('Mark as reviewed')}
+              </Button>
             </Box>
             <Dialog
-              open={rejectDialogOpen}
-              onClose={() => setRejectDialogOpen(false)}
+              open={markAsReviewedDialogOpen}
+              onClose={() => setMarkAsReviewedDialogOpen(false)}
               scroll='paper'
               aria-labelledby='form-dialog-title'
               maxWidth='md'
             >
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title'>
-                  {t('Reject')}
+                  {t('MarkAsReviewed')}
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogContainer>
                   <Box p={5}>
-                    {t('Are you sure you want to reject this payment plan?')}
+                    {t(
+                      'Are you sure you want to mark this Payment Plan as reviewed?',
+                    )}
                   </Box>
                   <Box p={5}>
                     <GreyText>
                       {t(
-                        'Note: Upon proceeding this payment plan will be automatically moved to locked status.',
+                        'Note: You are the last reviewer. Upon proceeding, this Payment Plan will be automatically moved to accepted status',
                       )}
                     </GreyText>
                   </Box>
@@ -121,7 +130,7 @@ export const RejectPaymentPlan = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={() => setRejectDialogOpen(false)}>
+                  <Button onClick={() => setMarkAsReviewedDialogOpen(false)}>
                     CANCEL
                   </Button>
                   <LoadingButton
@@ -132,7 +141,7 @@ export const RejectPaymentPlan = ({
                     onClick={() => console.log(paymentPlanId)}
                     data-cy='button-submit'
                   >
-                    {t('Reject')}
+                    {t('Mark as reviewed')}
                   </LoadingButton>
                 </DialogActions>
               </DialogFooter>
