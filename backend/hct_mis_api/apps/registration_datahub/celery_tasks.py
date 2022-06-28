@@ -319,7 +319,7 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
                 logger.exception(e)
     except LockError as e:
         logger.exception(e)
-        return []
+    return None
 
 
 @app.task
