@@ -1,23 +1,8 @@
+import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { Button } from '@material-ui/core';
-import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
 import { ErrorButton } from '../../../../core/ErrorButton';
-
-const IconContainer = styled.span`
-  button {
-    color: #949494;
-    min-width: 40px;
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-`;
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
+import { RejectPaymentPlan } from '../RejectPaymentPlan';
 
 export interface InAuthorizationPaymentPlanHeaderButtonsProps {
   setEditState: Function;
@@ -41,14 +26,12 @@ export function InAuthorizationPaymentPlanHeaderButtons({
   return (
     <div>
       {canLock && (
-        <ButtonContainer>
-          <ErrorButton onClick={() => setOpenApprove(true)}>
-            {t('Reject')}
-          </ErrorButton>
-        </ButtonContainer>
+        <Box m={2}>
+          <RejectPaymentPlan paymentPlanId='33333' />
+        </Box>
       )}
       {canLock && (
-        <ButtonContainer>
+        <Box m={2}>
           <Button
             variant='contained'
             color='primary'
@@ -56,7 +39,7 @@ export function InAuthorizationPaymentPlanHeaderButtons({
           >
             {t('Authorize')}
           </Button>
-        </ButtonContainer>
+        </Box>
       )}
     </div>
   );
