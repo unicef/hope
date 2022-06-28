@@ -18,15 +18,15 @@ import { FormikTextField } from '../../../../shared/Formik/FormikTextField/Formi
 import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
 
-export interface ApprovePaymentPlanProps {
+export interface AuthorizePaymentPlanProps {
   paymentPlanId: string;
 }
 
-export const ApprovePaymentPlan = ({
+export const AuthorizePaymentPlan = ({
   paymentPlanId,
-}: ApprovePaymentPlanProps): React.ReactElement => {
+}: AuthorizePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [lockDialogOpen, setLockDialogOpen] = useState(false);
+  const [authorizeDialogOpen, setAuthorizeDialogOpen] = useState(false);
 
   const { showMessage } = useSnackbar();
   // const [mutate] = useActivateCashPlanPaymentVerificationMutation();
@@ -70,7 +70,7 @@ export const ApprovePaymentPlan = ({
       <Formik
         initialValues={initialValues}
         onSubmit={(values, { resetForm }) => {
-          console.log('approve');
+          console.log('authorize');
           resetForm({});
         }}
         validationSchema={validationSchema}
@@ -81,33 +81,33 @@ export const ApprovePaymentPlan = ({
               <Button
                 color='primary'
                 variant='contained'
-                onClick={() => setLockDialogOpen(true)}
+                onClick={() => setAuthorizeDialogOpen(true)}
                 data-cy='button-lock-plan'
               >
-                {t('Approve')}
+                {t('Authorize')}
               </Button>
             </Box>
             <Dialog
-              open={lockDialogOpen}
-              onClose={() => setLockDialogOpen(false)}
+              open={authorizeDialogOpen}
+              onClose={() => setAuthorizeDialogOpen(false)}
               scroll='paper'
               aria-labelledby='form-dialog-title'
               maxWidth='md'
             >
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title'>
-                  {t('Lock Payment Plan')}
+                  {t('Authorize')}
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogContainer>
                   <Box p={5}>
-                    {t('Are you sure you want to approve this Payment Plan?')}
+                    {t('Are you sure you want to authorize this Payment Plan?')}
                   </Box>
                   <Box p={5}>
                     <GreyText>
                       {t(
-                        'Note: You are the last approver. Upon proceeding, this Payment Plan will be automatically moved to authorization stage.',
+                        'Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Review stage.',
                       )}
                     </GreyText>
                   </Box>
@@ -125,7 +125,7 @@ export const ApprovePaymentPlan = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={() => setLockDialogOpen(false)}>
+                  <Button onClick={() => setAuthorizeDialogOpen(false)}>
                     CANCEL
                   </Button>
                   <LoadingButton
@@ -136,7 +136,7 @@ export const ApprovePaymentPlan = ({
                     onClick={() => console.log(paymentPlanId)}
                     data-cy='button-submit'
                   >
-                    {t('Approve')}
+                    {t('Authorize')}
                   </LoadingButton>
                 </DialogActions>
               </DialogFooter>
