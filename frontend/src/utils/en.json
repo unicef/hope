@@ -650,5 +650,10 @@
   "Preview": "Preview",
   "Comment": "Comment",
   "Registration Data Import": "Registration Data Import",
-  "Assigned programme is not ACTIVE": "Assigned programme is not ACTIVE"
+  "Assigned programme is not ACTIVE": "Assigned programme is not ACTIVE",
+  "Lock Payment Plan": "Lock Payment Plan",
+  "After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.": "After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.",
+  "There are": "There are",
+  "Note: ": "Note: ",
+  "households missing payment channel information. Grievance tickets will be automatically created.": "households missing payment channel information. Grievance tickets will be automatically created."
 }

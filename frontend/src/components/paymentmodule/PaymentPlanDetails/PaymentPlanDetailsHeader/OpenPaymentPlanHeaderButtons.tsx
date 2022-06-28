@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
+import { LockPaymentPlan } from './LockPaymentPlan';
 
 const IconContainer = styled.span`
   button {
@@ -35,17 +36,14 @@ export function OpenPaymentPlanHeaderButtons({
   canRemove,
 }: OpenPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
-  const [openApprove, setOpenApprove] = useState(false);
+  const [openLock, setOpenLock] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
     <div>
       {canDuplicate && (
         <IconContainer>
-          <Button
-            onClick={() => setOpenDuplicate(true)}
-            data-cy='button-target-population-duplicate'
-          >
+          <Button onClick={() => setOpenDuplicate(true)}>
             <FileCopy />
           </Button>
         </IconContainer>
@@ -71,14 +69,7 @@ export function OpenPaymentPlanHeaderButtons({
       )}
       {canLock && (
         <ButtonContainer>
-          <Button
-            variant='contained'
-            color='primary'
-            onClick={() => setOpenApprove(true)}
-            data-cy='button-target-population-close'
-          >
-            {t('Lock')}
-          </Button>
+          <LockPaymentPlan paymentPlanId='929292929' />
         </ButtonContainer>
       )}
     </div>
