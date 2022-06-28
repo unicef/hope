@@ -201,7 +201,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             individual=cls.individuals[0],
         )
 
-        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
+        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country=country_pl)
         cls.identity = IndividualIdentityFactory.create(
             id=1,
             agency=unhcr_agency,
@@ -351,6 +351,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 },
             }
         }
+        self.maxDiff = None
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
             context={"user": self.user},
