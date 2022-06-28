@@ -12,6 +12,8 @@ import { DialogContainer } from '../../../../containers/dialogs/DialogContainer'
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { GreyText } from '../../../core/GreyText';
+import { LoadingButton } from '../../../core/LoadingButton';
 import { Missing } from '../../../core/Missing';
 
 export interface LockPaymentPlanProps {
@@ -83,17 +85,20 @@ export const LockPaymentPlan = ({
               )}
             </Box>
             <Box p={5}>
-              {t('Note:')} {t('There are')} <Missing />{' '}
-              {t(
-                'households missing payment channel information. Grievance tickets will be automatically created.',
-              )}
+              <GreyText>
+                {t('Note:')} {t('There are')} <Missing />{' '}
+                {t(
+                  'households missing payment channel information. Grievance tickets will be automatically created.',
+                )}
+              </GreyText>
             </Box>
           </DialogContainer>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setLockDialogOpen(false)}>CANCEL</Button>
-            <Button
+            <LoadingButton
+              loading={true}
               type='submit'
               color='primary'
               variant='contained'
@@ -101,7 +106,7 @@ export const LockPaymentPlan = ({
               data-cy='button-submit'
             >
               {t('Lock')}
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </DialogFooter>
       </Dialog>
