@@ -171,7 +171,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             "city": "Karachi",
             "state_province": "",
             "address_note": "White House, Near Saudi Mosque, Clifton",
-            "country_of_birth": Country(code="IN"),
+            "country_of_birth": geo_models.Country.objects.get(iso_code2="IN"),
         }
         cls.sanction_list_individual = SanctionListIndividual.objects.create(**sanction_list_individual_data)
 

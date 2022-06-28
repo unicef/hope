@@ -127,8 +127,7 @@ def get_other_issuer_query(_, args):
 
 
 def get_documents_issuer_query(document_type, country_alpha3):
-    alpha2 = Countries.get_country_value(country_alpha3)
-    return Q(documents__type__type=document_type, documents__type__country=alpha2)
+    return Q(documents__type__type=document_type, documents__type__country__iso_code3=country_alpha3)
 
 
 def get_role_query(_, args):
@@ -140,8 +139,7 @@ def get_scope_id_number_query(_, args):
 
 
 def get_scope_id_issuer_query(_, args):
-    alpha2 = Countries.get_country_value(args[0])
-    return Q(identities__agency__type=WFP, identities__agency__country=alpha2)
+    return Q(identities__agency__type=WFP, identities__agency__country__iso_code3=args[0])
 
 
 def get_unhcr_id_number_query(_, args):
@@ -149,8 +147,7 @@ def get_unhcr_id_number_query(_, args):
 
 
 def get_unhcr_id_issuer_query(_, args):
-    alpha2 = Countries.get_country_value(args[0])
-    return Q(identities__agency__type=UNHCR, identities__agency__country=alpha2)
+    return Q(identities__agency__type=UNHCR, identities__agency__country__iso_code3=args[0])
 
 
 def get_has_phone_number_query(_, args):

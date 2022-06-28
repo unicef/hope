@@ -598,8 +598,7 @@ class Agency(models.Model):
     label = models.CharField(
         max_length=100,
     )
-    country = CountryField()
-    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name_plural = "Agencies"

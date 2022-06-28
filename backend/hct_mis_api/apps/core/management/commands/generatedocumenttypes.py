@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 "WFP",
             }
             for agency in agencies_types:
-                agencies.append(Agency(type=agency, label=agency, country=country.iso_code2))
+                agencies.append(Agency(type=agency, label=agency, country=country))
                 rdh_agencies.append(ImportedAgency(type=agency, label=agency, country=country.iso_code2))
 
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
