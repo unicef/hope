@@ -658,5 +658,8 @@
   "households missing payment channel information. Grievance tickets will be automatically created.": "households missing payment channel information. Grievance tickets will be automatically created.",
   "Are you sure you want to lock this Payment Plan?": "Are you sure you want to lock this Payment Plan?",
   "Are you sure you want to approve this Payment Plan?": "Are you sure you want to approve this Payment Plan?",
-  "Note: Upon proceeding this payment plan will be automatically moved to locked status.": "Note: Upon proceeding this payment plan will be automatically moved to locked status."
+  "Note: Upon proceeding this payment plan will be automatically moved to locked status.": "Note: Upon proceeding this payment plan will be automatically moved to locked status.",
+  "Mark as reviewed": "Mark as reviewed",
+  "Note: You are the last reviewer. Upon proceeding, this Payment Plan will be automatically moved to accepted status": "Note: You are the last reviewer. Upon proceeding, this Payment Plan will be automatically moved to accepted status",
+  "Are you sure you want to mark this Payment Plan as reviewed?": "Are you sure you want to mark this Payment Plan as reviewed?"
 }
