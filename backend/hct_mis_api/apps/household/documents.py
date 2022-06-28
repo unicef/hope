@@ -68,7 +68,7 @@ class IndividualDocument(Document):
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
             "type": fields.KeywordField(attr="type.type", similarity="boolean"),
-            "country": fields.KeywordField(attr="type.country.alpha3", similarity="boolean"),
+            "country": fields.KeywordField(attr="type.country.iso_code3", similarity="boolean"),
         }
     )
     identities = fields.ObjectField(

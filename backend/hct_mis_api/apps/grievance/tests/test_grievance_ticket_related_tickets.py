@@ -70,9 +70,10 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         }
 
         individual = IndividualFactory(**individual_data)
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country_pl = geo_models.Country.objects.get(iso_code2="PL")
+        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         birth_certificate_type = DocumentType.objects.get(
-            country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+            country=country_pl, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
 
         DocumentFactory(

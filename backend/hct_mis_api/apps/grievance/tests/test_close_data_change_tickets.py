@@ -145,9 +145,10 @@ class TestCloseDataChangeTickets(APITestCase):
         ]
 
         first_individual = cls.individuals[0]
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country_pl = geo_models.Country.objects.get(iso_code2="PL")
+        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         birth_certificate_type = DocumentType.objects.get(
-            country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+            country=country_pl, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
         cls.national_id = DocumentFactory(
             type=national_id_type, document_number="789-789-645", individual=first_individual
@@ -319,7 +320,8 @@ class TestCloseDataChangeTickets(APITestCase):
             created_individual = created_individual.first()
 
             document = Document.objects.get(document_number="123-123-UX-321")
-            cls.assertEqual(document.type.country, Country("POL"))
+            country_pl = geo_models.Country.objects.get(iso_code2="PL")
+            cls.assertEqual(document.type.country, country_pl)
             cls.assertEqual(document.photo, "test_file_name.jpg")
 
             role = created_individual.households_and_roles.get(
@@ -366,7 +368,8 @@ class TestCloseDataChangeTickets(APITestCase):
             cls.assertEqual(str(role.household.id), str(cls.household_one.id))
 
             document = Document.objects.get(document_number="999-888-777")
-            cls.assertEqual(document.type.country, Country("POL"))
+            country_pl = geo_models.Country.objects.get(iso_code2="PL")
+            cls.assertEqual(document.type.country, country_pl)
             cls.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
             cls.assertEqual(document.photo, "test_file_name.jpg")
 
@@ -382,7 +385,8 @@ class TestCloseDataChangeTickets(APITestCase):
             cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
         )
 
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country_pl = geo_models.Country.objects.get(iso_code2="PL")
+        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         national_id = DocumentFactory(
             type=national_id_type,
             document_number="999-888-777",
@@ -439,7 +443,7 @@ class TestCloseDataChangeTickets(APITestCase):
         individual.refresh_from_db()
 
         document = Document.objects.get(document_number="999-888-777")
-        cls.assertEqual(document.type.country, Country("POL"))
+        cls.assertEqual(document.type.country, country_pl)
         cls.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
         cls.assertEqual(document.photo.name, "new_test_file_name.jpg")
 

@@ -192,7 +192,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.save()
         cls.household_one = household_one
 
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country_pl = geo_models.Country.objects.get(iso_code2="PL")
+        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         cls.national_id = DocumentFactory.create(
             id="d367e431-b807-4c1f-a811-ef2e0d217cc4",
             type=national_id_type,
