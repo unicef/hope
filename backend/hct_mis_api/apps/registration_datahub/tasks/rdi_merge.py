@@ -192,11 +192,8 @@ class RdiMergeTask:
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
             document_type, _ = DocumentType.objects.get_or_create(
-                country=imported_document.type.country,
+                country=geo_models.Country.objects.get(iso_code2=imported_document.type.country.code),
                 type=imported_document.type.type,
-                defaults={
-                    "country_new": geo_models.Country.objects.get(iso_code2=imported_document.type.country.code),
-                },
             )
             document = Document(
                 document_number=imported_document.document_number,
@@ -209,11 +206,8 @@ class RdiMergeTask:
         for imported_identity in imported_individual.identities.all():
             agency, _ = Agency.objects.get_or_create(
                 type=imported_identity.agency.type,
-                country=imported_identity.agency.country,
+                country=geo_models.Country.objects.get(iso_code2=imported_identity.agency.country.code),
                 label=imported_identity.agency.label,
-                defaults={
-                    "country_new": geo_models.Country.objects.get(iso_code2=imported_identity.agency.country.code),
-                },
             )
             identity = IndividualIdentity(
                 agency=agency,

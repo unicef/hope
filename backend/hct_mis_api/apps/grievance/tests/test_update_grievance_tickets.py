@@ -252,7 +252,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.positive_feedback_grievance_ticket)
 
-        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country="POL")
+        unhcr_agency = Agency.objects.create(type="UNHCR", label="UNHCR", country=country_pl)
         cls.identity_to_update = IndividualIdentity.objects.create(
             agency=unhcr_agency,
             individual=cls.individuals[0],

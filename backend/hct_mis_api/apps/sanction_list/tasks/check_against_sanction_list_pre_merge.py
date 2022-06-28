@@ -1,7 +1,8 @@
 import logging
 
-from django.utils import timezone
 from django.core.cache import cache
+from django.utils import timezone
+
 from constance import config
 
 from hct_mis_api.apps.grievance.models import (
@@ -33,7 +34,7 @@ class CheckAgainstSanctionListPreMergeTask:
                     "must": [
                         {"match": {"documents.number": doc.document_number}},
                         {"match": {"documents.type": IDENTIFICATION_TYPE_NATIONAL_ID}},
-                        {"match": {"documents.country": doc.issuing_country.alpha3}},
+                        {"match": {"documents.country": getattr(doc.issuing_country, "iso_code3", "")}},
                     ],
                     "boost": 2,
                 }

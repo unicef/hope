@@ -119,14 +119,13 @@ def handle_update_payment_channel(payment_channel):
 
 
 def handle_add_identity(identity, individual):
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.household.models import Agency, IndividualIdentity
 
     agency_name = identity.get("agency")
     country_code = identity.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = identity.get("number")
     agency_type, _ = Agency.objects.get_or_create(
         country=country,
@@ -149,7 +148,6 @@ def handle_add_identity(identity, individual):
 def handle_edit_identity(identity_data: dict):
     from django.shortcuts import get_object_or_404
 
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -158,7 +156,7 @@ def handle_edit_identity(identity_data: dict):
     updated_identity = identity_data.get("value", {})
     agency_name = updated_identity.get("agency")
     country_code = updated_identity.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = updated_identity.get("number")
     identity_id = updated_identity.get("id")
 
@@ -269,7 +267,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status):
             "number": identity.number,
             "individual": encode_id_base64(identity.individual.id, "Individual"),
             "agency": identity.agency.type,
-            "country": identity.agency.country.alpha3,
+            "country": identity.agency.country.iso_code3,
         }
 
     return previous_identities
@@ -324,7 +322,7 @@ def prepare_edit_identities(identities):
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": identity.agency.country.alpha3,
+                    "country": identity.agency.country.iso_code3,
                     "agency": identity.agency.type,
                     "individual": encode_id_base64(identity.individual.id, "Individual"),
                     "number": identity.number,
