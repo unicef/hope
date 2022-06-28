@@ -655,5 +655,8 @@
   "After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.": "After you lock this Payment Plan, you will be able to run entitlement formula for selected target population.",
   "There are": "There are",
   "Note: ": "Note: ",
-  "households missing payment channel information. Grievance tickets will be automatically created.": "households missing payment channel information. Grievance tickets will be automatically created."
+  "households missing payment channel information. Grievance tickets will be automatically created.": "households missing payment channel information. Grievance tickets will be automatically created.",
+  "Are you sure you want to lock this Payment Plan?": "Are you sure you want to lock this Payment Plan?",
+  "Are you sure you want to approve this Payment Plan?": "Are you sure you want to approve this Payment Plan?",
+  "Note: Upon proceeding this payment plan will be automatically moved to locked status.": "Note: Upon proceeding this payment plan will be automatically moved to locked status."
 }

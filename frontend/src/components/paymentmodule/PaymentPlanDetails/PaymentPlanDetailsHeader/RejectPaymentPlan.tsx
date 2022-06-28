@@ -18,13 +18,13 @@ import { FormikTextField } from '../../../../shared/Formik/FormikTextField/Formi
 import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
 
-export interface ApprovePaymentPlanProps {
+export interface RejectPaymentPlanProps {
   paymentPlanId: string;
 }
 
-export const ApprovePaymentPlan = ({
+export const RejectPaymentPlan = ({
   paymentPlanId,
-}: ApprovePaymentPlanProps): React.ReactElement => {
+}: RejectPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
 
@@ -70,7 +70,7 @@ export const ApprovePaymentPlan = ({
       <Formik
         initialValues={initialValues}
         onSubmit={(values, { resetForm }) => {
-          console.log('approve');
+          console.log('Reject');
           resetForm({});
         }}
         validationSchema={validationSchema}
@@ -84,7 +84,7 @@ export const ApprovePaymentPlan = ({
                 onClick={() => setLockDialogOpen(true)}
                 data-cy='button-lock-plan'
               >
-                {t('Approve')}
+                {t('Reject')}
               </Button>
             </Box>
             <Dialog
@@ -96,18 +96,18 @@ export const ApprovePaymentPlan = ({
             >
               <DialogTitleWrapper>
                 <DialogTitle id='scroll-dialog-title'>
-                  {t('Lock Payment Plan')}
+                  {t('Reject')}
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
                 <DialogContainer>
                   <Box p={5}>
-                    {t('Are you sure you want to approve this Payment Plan?')}
+                    {t('Are you sure you want to reject this payment plan?')}
                   </Box>
                   <Box p={5}>
                     <GreyText>
                       {t(
-                        'Note: You are the last approver. Upon proceeding, this Payment Plan will be automatically moved to authorization stage.',
+                        'Note: Upon proceeding this payment plan will be automatically moved to locked status.',
                       )}
                     </GreyText>
                   </Box>
@@ -136,7 +136,7 @@ export const ApprovePaymentPlan = ({
                     onClick={() => console.log(paymentPlanId)}
                     data-cy='button-submit'
                   >
-                    {t('Lock')}
+                    {t('Reject')}
                   </LoadingButton>
                 </DialogActions>
               </DialogFooter>
