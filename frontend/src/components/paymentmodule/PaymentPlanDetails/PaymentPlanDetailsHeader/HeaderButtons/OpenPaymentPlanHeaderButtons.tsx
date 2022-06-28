@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
-import { LockPaymentPlan } from './LockPaymentPlan';
+import { LockPaymentPlan } from '../LockPaymentPlan';
 
 const IconContainer = styled.span`
   button {
