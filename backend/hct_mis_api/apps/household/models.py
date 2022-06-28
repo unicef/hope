@@ -543,8 +543,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class DocumentType(TimeStampedUUIDModel):
-    country = CountryField(default="U")
-    country_new = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
+    country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 

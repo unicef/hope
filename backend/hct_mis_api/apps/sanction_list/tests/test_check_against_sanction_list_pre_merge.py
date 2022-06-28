@@ -1,11 +1,10 @@
 from django.conf import settings
-from django.core.management import call_command
 
 from constance.test import override_config
-from django_countries.fields import Country
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     create_household_and_individuals,
@@ -115,8 +114,9 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
         )
 
         ind = Individual.objects.get(full_name="Abdul Afghanistan")
+        country = geo_models.Country.objects.get(iso_code3="AFG")
         doc_type = DocumentType.objects.create(
-            country=Country("AFG"),
+            country=country,
             label="National ID",
             type=IDENTIFICATION_TYPE_NATIONAL_ID,
         )
