@@ -144,9 +144,10 @@ class TestUpdateGrievanceTickets(APITestCase):
         ]
 
         first_individual = cls.individuals[0]
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country_pl = geo_models.Country.objects.get(iso_code2="PL")
+        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         birth_certificate_type = DocumentType.objects.get(
-            country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+            country=country_pl, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
         cls.national_id = DocumentFactory(
             type=national_id_type, document_number="789-789-645", individual=first_individual

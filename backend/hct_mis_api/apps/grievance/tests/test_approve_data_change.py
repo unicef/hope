@@ -168,9 +168,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
         ]
         first_individual = cls.individuals[0]
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        country_pl = geo_models.Country.objects.get(iso_code2="PL")
+        national_id_type = DocumentType.objects.get(country=country_pl, type=IDENTIFICATION_TYPE_NATIONAL_ID)
         birth_certificate_type = DocumentType.objects.get(
-            country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+            country=country_pl, type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
 
         cls.national_id = DocumentFactory(

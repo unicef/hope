@@ -13,6 +13,7 @@ from django.utils import timezone
 from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN, BankAccountInfo
 
@@ -36,14 +37,13 @@ def handle_role(role, household, individual):
 
 
 def handle_add_document(document, individual):
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.household.models import Document, DocumentType
 
     type_name = document.get("type")
     country_code = document.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = document.get("number")
     photo = document.get("photo")
     photoraw = document.get("photoraw")
@@ -61,7 +61,6 @@ def handle_add_document(document, individual):
 def handle_edit_document(document_data: dict):
     from django.shortcuts import get_object_or_404
 
-    from django_countries.fields import Country
     from graphql import GraphQLError
 
     from hct_mis_api.apps.core.utils import decode_id_string
@@ -71,7 +70,7 @@ def handle_edit_document(document_data: dict):
 
     type_name = updated_document.get("type")
     country_code = updated_document.get("country")
-    country = Country(country_code)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
     number = updated_document.get("number")
     photo = updated_document.get("photo")
     photoraw = updated_document.get("photoraw")
@@ -203,7 +202,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
             "type": document.type.type,
-            "country": document.type.country.alpha3,
+            "country": document.type.country.iso_code3,
         }
 
     return previous_documents
@@ -243,7 +242,7 @@ def prepare_edit_documents(documents_to_edit):
                 },
                 "previous_value": {
                     "id": encoded_id,
-                    "country": document.type.country.alpha3,
+                    "country": document.type.country.iso_code3,
                     "type": document.type.type,
                     "number": document.document_number,
                     "photo": document.photo.name,

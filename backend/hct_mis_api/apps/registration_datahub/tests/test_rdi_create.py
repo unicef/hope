@@ -23,7 +23,6 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_TAX_ID,
-    DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -412,7 +411,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(DocumentType(country=Country("AFG"), label=label, type=doc_type))
+            document_types.append(ImportedDocumentType(country=Country("AFG"), label=label, type=doc_type))
         ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
         content = Path(
