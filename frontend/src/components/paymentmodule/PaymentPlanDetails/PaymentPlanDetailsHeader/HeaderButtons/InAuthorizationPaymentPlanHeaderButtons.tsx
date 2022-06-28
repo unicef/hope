@@ -2,6 +2,7 @@ import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ErrorButton } from '../../../../core/ErrorButton';
+import { AuthorizePaymentPlan } from '../AuthorizePaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';
 
 export interface InAuthorizationPaymentPlanHeaderButtonsProps {
@@ -25,22 +26,8 @@ export function InAuthorizationPaymentPlanHeaderButtons({
   const [openDelete, setOpenDelete] = useState(false);
   return (
     <div>
-      {canLock && (
-        <Box m={2}>
-          <RejectPaymentPlan paymentPlanId='33333' />
-        </Box>
-      )}
-      {canLock && (
-        <Box m={2}>
-          <Button
-            variant='contained'
-            color='primary'
-            onClick={() => setOpenApprove(true)}
-          >
-            {t('Authorize')}
-          </Button>
-        </Box>
-      )}
+      {canLock && <RejectPaymentPlan paymentPlanId='33333' />}
+      {canLock && <AuthorizePaymentPlan paymentPlanId='33333' />}
     </div>
   );
 }
