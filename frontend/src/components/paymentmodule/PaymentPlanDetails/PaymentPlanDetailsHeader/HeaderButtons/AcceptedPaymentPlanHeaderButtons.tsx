@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
-import { ErrorButton } from '../../../core/ErrorButton';
+import { ErrorButton } from '../../../../core/ErrorButton';
 
 const IconContainer = styled.span`
   button {
@@ -20,7 +20,7 @@ const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
 `;
 
-export interface InApprovalPaymentPlanHeaderButtonsProps {
+export interface AcceptedPaymentPlanHeaderButtonsProps {
   setEditState: Function;
   canDuplicate: boolean;
   canRemove: boolean;
@@ -28,13 +28,13 @@ export interface InApprovalPaymentPlanHeaderButtonsProps {
   canLock: boolean;
 }
 
-export function InApprovalPaymentPlanHeaderButtons({
+export function AcceptedPaymentPlanHeaderButtons({
   setEditState,
   canDuplicate,
   canEdit,
   canLock,
   canRemove,
-}: InApprovalPaymentPlanHeaderButtonsProps): React.ReactElement {
+}: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
@@ -44,7 +44,7 @@ export function InApprovalPaymentPlanHeaderButtons({
       {canLock && (
         <ButtonContainer>
           <ErrorButton onClick={() => setOpenApprove(true)}>
-            {t('Reject')}
+            {t('Download XLSX')}
           </ErrorButton>
         </ButtonContainer>
       )}
@@ -55,7 +55,7 @@ export function InApprovalPaymentPlanHeaderButtons({
             color='primary'
             onClick={() => setOpenApprove(true)}
           >
-            {t('Approve')}
+            {t('Send to Fsp')}
           </Button>
         </ButtonContainer>
       )}

@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import { Button } from '@material-ui/core';
 import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
 import { useTranslation } from 'react-i18next';
-import { ErrorButton } from '../../../core/ErrorButton';
+import { ErrorButton } from '../../../../core/ErrorButton';
+import { ApprovePaymentPlan } from '../ApprovePaymentPlan';
 
 const IconContainer = styled.span`
   button {
@@ -15,11 +16,12 @@ const IconContainer = styled.span`
     }
   }
 `;
+
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
 `;
 
-export interface InAuthorizationPaymentPlanHeaderButtonsProps {
+export interface InApprovalPaymentPlanHeaderButtonsProps {
   setEditState: Function;
   canDuplicate: boolean;
   canRemove: boolean;
@@ -27,13 +29,13 @@ export interface InAuthorizationPaymentPlanHeaderButtonsProps {
   canLock: boolean;
 }
 
-export function InAuthorizationPaymentPlanHeaderButtons({
+export function InApprovalPaymentPlanHeaderButtons({
   setEditState,
   canDuplicate,
   canEdit,
   canLock,
   canRemove,
-}: InAuthorizationPaymentPlanHeaderButtonsProps): React.ReactElement {
+}: InApprovalPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
@@ -47,17 +49,7 @@ export function InAuthorizationPaymentPlanHeaderButtons({
           </ErrorButton>
         </ButtonContainer>
       )}
-      {canLock && (
-        <ButtonContainer>
-          <Button
-            variant='contained'
-            color='primary'
-            onClick={() => setOpenApprove(true)}
-          >
-            {t('Authorize')}
-          </Button>
-        </ButtonContainer>
-      )}
+      {canLock && <ApprovePaymentPlan paymentPlanId='33333' />}
     </div>
   );
 }
