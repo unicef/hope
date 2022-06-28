@@ -13,10 +13,10 @@ import {
 } from '../../../../utils/utils';
 import { StatusBox } from '../../../core/StatusBox';
 import { TargetPopulationStatus } from '../../../../__generated__/graphql';
-import { OpenPaymentPlanHeaderButtons } from './OpenPaymentPlanHeaderButtons';
-import { LockedPaymentPlanHeaderButtons } from './LockedPaymentPlanHeaderButtons';
-import { InApprovalPaymentPlanHeaderButtons } from './InApprovalPaymentPlanHeaderButtons';
-import { AcceptedPaymentPlanHeaderButtons } from './AcceptedPaymentPlanHeaderButtons';
+import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
+import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
+import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
+import { AcceptedPaymentPlanHeaderButtons } from './HeaderButtons/AcceptedPaymentPlanHeaderButtons';
 
 const StatusWrapper = styled.div`
   width: 140px;
