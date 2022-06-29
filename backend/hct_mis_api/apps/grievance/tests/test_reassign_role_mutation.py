@@ -134,6 +134,8 @@ class TestRoleReassignMutation(APITestCase):
 
 
 class TestRoleReassignMutationNewTicket(APITestCase):
+    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+
     REASSIGN_ROLE_MUTATION = """
     mutation ReassignRole(
       $grievanceTicketId: ID!, 
@@ -165,20 +167,13 @@ class TestRoleReassignMutationNewTicket(APITestCase):
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        cls.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sadf3223")
-
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
             name="Admin type one",
             country=country,
             area_level=2,
         )
-        cls.admin_area_new = AreaFactory(name="City Test", area_type=area_type, p_code="sadf3223")
+        cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="sadf3223")
 
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
@@ -246,7 +241,6 @@ class TestRoleReassignMutationNewTicket(APITestCase):
             id="ba655cec-08d6-4f67-9e08-642997324480",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
             admin2=cls.admin_area,
-            admin2_new=cls.admin_area_new,
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
