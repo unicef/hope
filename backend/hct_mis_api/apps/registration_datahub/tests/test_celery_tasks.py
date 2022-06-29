@@ -85,6 +85,17 @@ def create_imported_document_types(country_code):
         )
 
 
+def create_ukraine_business_area():
+    BusinessArea.objects.create(
+        slug="ukraine",
+        code="1234",
+        name="Ukraine",
+        long_name="the long name of ukraine",
+        region_code="3245",
+        region_name="UA",
+        has_data_sharing_agreement=True,
+    )
+
 
 class TestAutomatingRDICreationTask(TestCase):
     databases = [
@@ -100,15 +111,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert result == "No records to import"
 
     def test_not_running_with_record_status_not_to_import(self):
-        BusinessArea.objects.create(
-            slug="ukraine",
-            code="1234",
-            name="Ukraine",
-            long_name="the long name of ukraine",
-            region_code="3245",
-            region_name="UA",
-            has_data_sharing_agreement=True,
-        )
+        create_ukraine_business_area()
         create_imported_document_types(country_code="UA")
         record = create_record(registration=234, status=Record.STATUS_ERROR)
 
@@ -118,15 +121,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
 
     def test_successful_run_with_records_to_import(self):
-        BusinessArea.objects.create(
-            slug="ukraine",
-            code="1234",
-            name="Ukraine",
-            long_name="the long name of ukraine",
-            region_code="3245",
-            region_name="UA",
-            has_data_sharing_agreement=True,
-        )
+        create_ukraine_business_area()
         create_imported_document_types(country_code="UA")
         record = create_record(registration=234, status=Record.STATUS_TO_IMPORT)
 
@@ -135,3 +130,8 @@ class TestAutomatingRDICreationTask(TestCase):
         assert isinstance(result, list)
         assert len(result) == 2
         assert result[1] == 1 # 1 record was there
+
+    def test_expected_behaviour(self):
+        create_ukraine_business_area()
+        create_imported_document_types(country_code="UA")
+        # TODO
