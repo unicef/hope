@@ -431,7 +431,7 @@ class IndividualAdmin(
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
-    @button(label="Add/Update Individual IBAN by xlsx", visible=True)
+    @button(label="Add/Update Individual IBAN by xlsx")
     def update_individual_iban_from_xlsx(self, request):
         if request.method == "GET":
             form = UpdateIndividualsIBANFromXlsxForm()
@@ -458,7 +458,7 @@ class IndividualAdmin(
                             f"Started IBAN update for {form.cleaned_data['business_area']}, results will be send to {request.user.email}",
                             messages.SUCCESS,
                         )
-                        return redirect("/api/unicorn/household/individual/")
+                        return redirect(reverse("admin:household_individual_changelist"))
 
                 except Exception as e:
                     self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)

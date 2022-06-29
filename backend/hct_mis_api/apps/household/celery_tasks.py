@@ -76,7 +76,6 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
     from hct_mis_api.apps.household.services.individuals_iban_xlsx_update import IndividualsIBANXlsxUpdate
     from hct_mis_api.apps.account.models import User
 
-    logger.info("update_individuals_iban_from_xlsx_task start")
     uploaded_by = User.objects.get(id=uploaded_by_id)
     try:
         xlsx_update_file = XlsxUpdateFile.objects.get(id=xlsx_update_file_id)
@@ -93,5 +92,3 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
         IndividualsIBANXlsxUpdate.send_error_email(
             error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
         )
-
-    logger.info("update_individuals_iban_from_xlsx_task end")
