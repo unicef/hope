@@ -16,6 +16,7 @@ import {
   RegistrationDetailedFragment,
   useMergeRdiMutation,
 } from '../../../__generated__/graphql';
+import { LoadingButton } from '../../core/LoadingButton';
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;
@@ -27,7 +28,7 @@ export function MergeRegistrationDataImportDialog({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useMergeRdiMutation({
+  const [mutate, { loading }] = useMergeRdiMutation({
     variables: { id: registration.id },
   });
   const merge = async (): Promise<void> => {
@@ -75,14 +76,15 @@ export function MergeRegistrationDataImportDialog({
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-            <Button
+            <LoadingButton
+              loading={loading}
               type='submit'
               color='primary'
               variant='contained'
               onClick={merge}
             >
               {t('MERGE')}
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </DialogFooter>
       </Dialog>
