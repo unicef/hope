@@ -106,6 +106,8 @@ class TestAutomatingRDICreationTask(TestCase):
         "registration_datahub",
     ]
 
+    ### Current behaviour
+
     def test_successful_run_without_records_to_import(self):
         result = automate_rdi_creation_task(registration_id=123, page_size=1)
         assert result == "No records to import"
@@ -131,7 +133,9 @@ class TestAutomatingRDICreationTask(TestCase):
         assert len(result) == 2
         assert result[1] == 1 # 1 record was there
 
+    ### Expected behaviour
+
     def test_expected_behaviour(self):
         create_ukraine_business_area()
         create_imported_document_types(country_code="UA")
-        # TODO
+        # TODO - to be explained
