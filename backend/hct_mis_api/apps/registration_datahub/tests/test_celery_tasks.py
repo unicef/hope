@@ -105,11 +105,9 @@ class TestAutomatingRDICreationTask(TestCase):
         "registration_datahub",
     ]
 
-    ### Current behaviour
-
     def test_successful_run_without_records_to_import(self):
         result = automate_rdi_creation_task(registration_id=123, page_size=1)
-        assert result == "No records to import"
+        assert result is None
 
     def test_not_running_with_record_status_not_to_import(self):
         create_ukraine_business_area()
@@ -122,28 +120,31 @@ class TestAutomatingRDICreationTask(TestCase):
         result = automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
-        assert result == "No records to import"
+        assert result is None
 
     def test_successful_run_with_records_to_import(self):
         create_ukraine_business_area()
         create_imported_document_types(country_code="UA")
-        record = create_record(registration=234, status=Record.STATUS_TO_IMPORT)
 
-        page_size = 1
+        registration = 345
+        amount_of_records = 10
+        page_size = 3
+
+        for _ in range(amount_of_records):
+            create_record(registration=registration, status=Record.STATUS_TO_IMPORT)
+
+        assert Record.objects.count() == amount_of_records
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
-        result = automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
-        assert RegistrationDataImport.objects.count() == 1
-        assert ImportedIndividual.objects.count() == 1
 
-        assert isinstance(result, list)
-        assert len(result) == 2
-        assert result[0].startswith("ukraine rdi")
-        assert result[1] == 1  # 1 record was there
+        result = automate_rdi_creation_task(
+            registration_id=registration, page_size=page_size, template="some template {date} {records}"
+        )
 
-    ### Expected behaviour
-
-    def test_expected_behaviour(self):
-        create_ukraine_business_area()
-        create_imported_document_types(country_code="UA")
-        # TODO - to be explained
+        assert RegistrationDataImport.objects.count() == 4  # or math.ceil(amount_of_records / page_size)
+        assert ImportedIndividual.objects.count() == amount_of_records
+        assert result[0][0].startswith("some template")
+        assert result[0][1] == page_size
+        assert result[1][1] == page_size
+        assert result[2][1] == page_size
+        assert result[3][1] == amount_of_records - 3 * page_size

@@ -298,14 +298,19 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
             try:
                 service = FlexRegistrationService()
 
-                records_ids = (
+                all_records_ids = (
                     Record.objects.filter(registration=registration_id, **filters)
                     .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
-                    .values_list("id", flat=True)[:page_size]
+                    .values_list("id", flat=True)
                 )
-                if len(records_ids) == 0:
-                    return "No records to import"
-                if records_ids:
+                if len(all_records_ids) == 0:
+                    return None
+
+                splitted_record_ids = [
+                    all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
+                ]
+                output = []
+                for records_ids in splitted_record_ids:
                     rdi_name = template.format(
                         date=datetime.datetime.now(),
                         registration_id=registration_id,
@@ -314,7 +319,8 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
                     )
                     rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
                     service.process_records(rdi_id=rdi.id, records_ids=records_ids)
-                    return [rdi_name, len(records_ids)]
+                    output.append([rdi_name, len(records_ids)])
+                return output
             except Exception as e:
                 logger.exception(e)
     except LockError as e:
