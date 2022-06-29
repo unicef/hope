@@ -25,8 +25,8 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
     @staticmethod
     def _pre_test_commands():
         create_afghanistan()
-        call_command("generatedocumenttypes")
         call_command("loadcountries")
+        call_command("generatedocumenttypes")
         call_command("loadcountrycodes")
         business_area_with_data_sharing = BusinessArea.objects.first()
         business_area_with_data_sharing.has_data_sharing_agreement = True

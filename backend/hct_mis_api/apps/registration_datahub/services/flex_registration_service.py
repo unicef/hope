@@ -10,6 +10,8 @@ from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
 
+from django_countries.fields import Country
+
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.geo import models as geo_models
@@ -273,8 +275,8 @@ class FlexRegistrationService:
             registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
-            country_origin=geo_models.Country.objects.filter(iso_code2="UA").first(),
-            country=geo_models.Country.objects.filter(iso_code2="UA").first(),
+            country_origin=Country(code="UA"),
+            country=Country(code="UA"),
             consent=True,
             collect_individual_data=YES,
         )
