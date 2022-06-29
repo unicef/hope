@@ -221,17 +221,17 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.country.name
 
     def resolve_admin1(parent, info):
-        return parent.admin1_new
+        return parent.admin1
 
     def resolve_admin2(parent, info):
-        return parent.admin2_new
+        return parent.admin2
 
     def resolve_admin_area(parent, info):
-        return parent.admin_area_new
+        return parent.admin_area
 
     def resolve_admin_area_title(parent, info):
-        if parent.admin_area_new:
-            return parent.admin_area_new.name
+        if parent.admin_area:
+            return parent.admin_area.name
         return ""
 
     def resolve_programs_with_delivered_quantity(parent, info):

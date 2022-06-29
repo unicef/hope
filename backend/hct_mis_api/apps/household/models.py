@@ -15,7 +15,6 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
-from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
@@ -25,6 +24,7 @@ from django.contrib.postgres.search import SearchVectorField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -342,8 +342,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     size = models.PositiveIntegerField(db_index=True)
     address = CICharField(max_length=1024, blank=True)
     """location contains lowest administrative area info"""
-    admin_area = models.ForeignKey("core.AdminArea", null=True, on_delete=models.SET_NULL, blank=True)
-    admin_area_new = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
+    admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -463,44 +462,24 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
 
     @property
     def admin_area_title(self):
-        return self.admin_area.title
+        return self.admin_area.name
 
     @property
     def admin1(self):
         if self.admin_area is None:
             return None
-        if self.admin_area.level == 0:
+        if self.admin_area.area_type.area_level == 0:
             return None
         current_admin = self.admin_area
-        while current_admin.level != 1:
-            current_admin = current_admin.parent
-        return current_admin
-
-    @property
-    def admin2(self):
-        if not self.admin_area or self.admin_area.level in (0, 1):
-            return None
-        current_admin = self.admin_area
-        while current_admin.level != 2:
-            current_admin = current_admin.parent
-        return current_admin
-
-    @property
-    def admin1_new(self):
-        if self.admin_area_new is None:
-            return None
-        if self.admin_area_new.area_type.area_level == 0:
-            return None
-        current_admin = self.admin_area_new
         while current_admin.area_type.area_level != 1:
             current_admin = current_admin.parent
         return current_admin
 
     @property
-    def admin2_new(self):
-        if not self.admin_area_new or self.admin_area_new.area_type.area_level in (0, 1):
+    def admin2(self):
+        if not self.admin_area or self.admin_area.area_type.area_level in (0, 1):
             return None
-        current_admin = self.admin_area_new
+        current_admin = self.admin_area
         while current_admin.area_type.area_level != 2:
             current_admin = current_admin.parent
         return current_admin

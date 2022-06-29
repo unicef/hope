@@ -6,7 +6,6 @@ from django.utils.translation import gettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
-from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 
@@ -14,7 +13,6 @@ import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
 from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
-from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
 
@@ -142,161 +140,6 @@ class BusinessArea(TimeStampedUUIDModel):
         return default
 
 
-class AdminAreaLevelManager(models.Manager):
-    def get_countries(self):
-        return self.filter(admin_level=0).order_by("country_name").values_list("id", "country_name")
-
-
-class AdminAreaLevel(TimeStampedUUIDModel):
-    """
-    Represents an Admin Type in location-related models.
-    """
-
-    name = models.CharField(max_length=64, verbose_name=_("Name"))
-    display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
-    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"), blank=True, null=True)
-    business_area = models.ForeignKey(
-        "BusinessArea",
-        on_delete=models.SET_NULL,
-        related_name="admin_area_level",
-        null=True,
-        blank=True,
-    )
-    area_code = models.CharField(max_length=8, blank=True, null=True)
-    country_name = models.CharField(max_length=100, blank=True, null=True)
-    country = models.ForeignKey(
-        "self",
-        blank=True,
-        null=True,
-        limit_choices_to={"admin_level": 0},
-        on_delete=models.CASCADE,
-    )
-    datamart_id = models.CharField(max_length=8, blank=True, null=True, unique=True)
-    objects = AdminAreaLevelManager()
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = "Admin Area Level"
-        unique_together = ("country", "admin_level")
-        permissions = (
-            ("load_from_datamart", "Load data from Datamart"),
-            ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
-            ("can_upload_to_kobo", "Can upload users to Kobo"),
-        )
-
-    def __str__(self):
-        if self.admin_level == 0:
-            return self.country_name or ""
-        return f"{self.area_code} - {self.name}"
-
-
-class AdminAreaManager(TreeManager):
-    def get_queryset(self):
-        return super().get_queryset().order_by("title").select_related("admin_area_level")
-
-
-class AdminArea(MPTTModel, TimeStampedUUIDModel):
-    """
-    AdminArea model define place where agents are working.
-    The background of the location can be:
-    BussinesArea > State > Province > City > District/Point.
-    Either a point or geospatial object.
-    related models:
-        indicator.Reportable (ForeignKey): "reportable"
-        core.AdminArea (ForeignKey): "self"
-        core.AdminAreaLevel: "type of admin area state/city"
-    """
-
-    external_id = models.CharField(
-        help_text="An ID representing this instance in  datamart",
-        blank=True,
-        null=True,
-        max_length=32,
-    )
-
-    title = models.CharField(max_length=255)
-
-    admin_area_level = models.ForeignKey(
-        "AdminAreaLevel",
-        verbose_name="Location Type",
-        related_name="admin_areas",
-        on_delete=models.CASCADE,
-    )
-
-    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="P Code")
-
-    parent = TreeForeignKey(
-        "self",
-        verbose_name=_("Parent"),
-        null=True,
-        blank=True,
-        related_name="children",
-        db_index=True,
-        on_delete=models.CASCADE,
-    )
-    geom = models.MultiPolygonField(null=True, blank=True)
-    point = models.PointField(null=True, blank=True)
-    objects = AdminAreaManager()
-
-    class Meta:
-        unique_together = ("title", "p_code")
-        ordering = ["title"]
-        permissions = (
-            ("import_from_csv", "Import AdminAreas from CSV file"),
-            ("load_from_datamart", "Load data from Datamart"),
-        )
-
-    def __str__(self):
-        level_name = self.admin_area_level.name if self.admin_area_level else ""
-        if self.p_code:
-            code_type = "CERD" if level_name == "School" else "PCode"
-            pcode_string = f"{code_type}: {self.p_code or ''}"
-            return f"{self.title} ({level_name} {pcode_string})"
-        return self.title
-
-    def country(self):
-        try:
-            return AdminArea.objects.get(tree_id=self.tree_id, parent=None)
-        except Exception:
-            return None
-
-    @property
-    def geo_point(self):
-        return self.point if self.point else self.geom.point_on_surface if self.geom else ""
-
-    @property
-    def point_lat_long(self):
-        return f"Lat: {self.point.y}, Long: {self.point.x}"
-
-    @classmethod
-    def get_admin_areas_as_choices(cls, admin_level, business_area=None):
-        queryset = cls.objects.filter(level=admin_level)
-        if business_area is not None:
-            queryset.filter(admin_area_level__business_area=business_area)
-        queryset = queryset.order_by("title")
-        return [
-            {
-                "label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"},
-                "value": admin_area.p_code,
-            }
-            for admin_area in queryset
-        ]
-
-    @classmethod
-    def get_admin_areas(cls, business_area=None):
-        queryset = cls.objects.filter(level__gt=0)
-        if business_area is not None:
-            queryset.filter(admin_area_level__business_area=business_area)
-        queryset = queryset.order_by("title")
-        return [
-            {
-                "label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"},
-                "value": admin_area.p_code,
-            }
-            for admin_area in queryset
-        ]
-
-
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     ASSOCIATED_WITH_HOUSEHOLD = 0
     ASSOCIATED_WITH_INDIVIDUAL = 1
@@ -377,7 +220,6 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
         return f"list name: {self.list_name}, name: {self.name}"
 
 
-mptt.register(AdminArea, order_insertion_by=["title"])
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 
