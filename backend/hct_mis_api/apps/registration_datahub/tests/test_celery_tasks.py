@@ -7,7 +7,8 @@ from pathlib import Path
 from django.conf import settings
 from django_countries.fields import Country
 
-from hct_mis_api.apps.registration_datahub.models import ImportedDocumentType, Record
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import ImportedDocumentType, Record, ImportedIndividual
 from hct_mis_api.apps.registration_datahub.celery_tasks import automate_rdi_creation_task
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
@@ -116,7 +117,11 @@ class TestAutomatingRDICreationTask(TestCase):
         record = create_record(registration=234, status=Record.STATUS_ERROR)
 
         page_size = 1
+        assert RegistrationDataImport.objects.count() == 0
+        assert ImportedIndividual.objects.count() == 0
         result = automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
+        assert RegistrationDataImport.objects.count() == 0
+        assert ImportedIndividual.objects.count() == 0
         assert result == "No records to import"
 
     def test_successful_run_with_records_to_import(self):
@@ -125,7 +130,12 @@ class TestAutomatingRDICreationTask(TestCase):
         record = create_record(registration=234, status=Record.STATUS_TO_IMPORT)
 
         page_size = 1
+        assert RegistrationDataImport.objects.count() == 0
+        assert ImportedIndividual.objects.count() == 0
         result = automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
+        assert RegistrationDataImport.objects.count() == 1
+        assert ImportedIndividual.objects.count() == 1
+
         assert isinstance(result, list)
         assert len(result) == 2
         assert result[0].startswith("ukraine rdi")

@@ -312,8 +312,8 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
                         page_size=page_size,
                         records=len(records_ids),
                     )
-                    rdi = service.create_rdi(None, rdi_name)
-                    service.process_records(rdi.id, records_ids)
+                    rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
+                    service.process_records(rdi_id=rdi.id, records_ids=records_ids)
                     return [rdi_name, len(records_ids)]
             except Exception as e:
                 logger.exception(e)
