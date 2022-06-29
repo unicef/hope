@@ -80,9 +80,7 @@ def create_record(registration, status):
 
 def create_imported_document_types(country_code):
     for document_type_string, _ in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
-        ImportedDocumentType.objects.create(
-            country=Country(code=country_code), type=document_type_string
-        )
+        ImportedDocumentType.objects.create(country=Country(code=country_code), type=document_type_string)
 
 
 def create_ukraine_business_area():
@@ -121,7 +119,6 @@ class TestAutomatingRDICreationTask(TestCase):
         result = automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
         assert result == "No records to import"
 
-
     def test_successful_run_with_records_to_import(self):
         create_ukraine_business_area()
         create_imported_document_types(country_code="UA")
@@ -131,7 +128,8 @@ class TestAutomatingRDICreationTask(TestCase):
         result = automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
         assert isinstance(result, list)
         assert len(result) == 2
-        assert result[1] == 1 # 1 record was there
+        assert result[0].startswith("ukraine rdi")
+        assert result[1] == 1  # 1 record was there
 
     ### Expected behaviour
 
