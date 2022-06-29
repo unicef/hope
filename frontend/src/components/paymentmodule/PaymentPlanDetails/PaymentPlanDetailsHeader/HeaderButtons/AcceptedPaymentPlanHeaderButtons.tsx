@@ -43,9 +43,13 @@ export function AcceptedPaymentPlanHeaderButtons({
     <div>
       {canLock && (
         <ButtonContainer>
-          <ErrorButton onClick={() => setOpenApprove(true)}>
+          <Button
+            variant='contained'
+            color='primary'
+            onClick={() => setOpenApprove(true)}
+          >
             {t('Download XLSX')}
-          </ErrorButton>
+          </Button>
         </ButtonContainer>
       )}
       {canLock && (

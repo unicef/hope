@@ -217,14 +217,6 @@ export function Entitlement({
             USD <Missing />
           </BigValue>
         </LabelizedField>
-        <Button
-          color='primary'
-          variant='contained'
-          component={Link}
-          to={`/${businessArea}/payment-module/payment-plans/${id}/setup-fsp`}
-        >
-          {t('Set up FSP')}
-        </Button>
       </ContainerColumnWithBorder>
     </Box>
   );
