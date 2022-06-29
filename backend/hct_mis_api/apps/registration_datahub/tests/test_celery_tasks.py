@@ -99,6 +99,24 @@ class TestAutomatingRDICreationTask(TestCase):
         result = automate_rdi_creation_task(registration_id=123, page_size=1)
         assert result == "No records to import"
 
+    def test_not_running_with_record_status_not_to_import(self):
+        BusinessArea.objects.create(
+            slug="ukraine",
+            code="1234",
+            name="Ukraine",
+            long_name="the long name of ukraine",
+            region_code="3245",
+            region_name="UA",
+            has_data_sharing_agreement=True,
+        )
+        create_imported_document_types(country_code="UA")
+        record = create_record(registration=234, status=Record.STATUS_ERROR)
+
+        page_size = 1
+        result = automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
+        assert result == "No records to import"
+
+
     def test_successful_run_with_records_to_import(self):
         BusinessArea.objects.create(
             slug="ukraine",
