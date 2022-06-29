@@ -4,17 +4,12 @@ from unittest import mock
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
-from django_countries.fields import Country
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -83,14 +78,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
 
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-        area_type = AdminAreaLevelFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=cls.business_area,
-        )
-        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="dffgh565556")
-        AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="fggtyjyj")
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(

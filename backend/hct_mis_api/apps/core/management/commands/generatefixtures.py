@@ -12,7 +12,7 @@ from hct_mis_api.apps.cash_assist_datahub import (
     fixtures as cash_assist_datahub_fixtures,
 )
 from hct_mis_api.apps.cash_assist_datahub.models import Programme, Session
-from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceComplaintTicketWithoutExtrasFactory,
@@ -141,12 +141,7 @@ class Command(BaseCommand):
                     {
                         "registration_data_import": registration_data_import,
                         "business_area": business_area,
-                        "admin_area": AdminArea.objects.filter(admin_area_level__business_area=business_area)
-                        .order_by("?")
-                        .first(),
-                        "admin_area_new": Area.objects.filter(area_type__business_area=business_area)
-                        .order_by("?")
-                        .first(),
+                        "admin_area": Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
                     },
                     {"registration_data_import": registration_data_import},
                 )
@@ -175,16 +170,10 @@ class Command(BaseCommand):
                     should_contain_payment_record = random.choice((True, False))
                     switch_dict = {
                         "feedback": lambda: GrievanceTicketFactory(
-                            admin2=AdminArea.objects.filter(admin_area_level__business_area=business_area, level=2)
+                            admin2=Area.objects.filter(area_type__business_area=business_area, area_type__area_level=2)
                             .order_by("?")
                             .first()
-                            .title,
-                            admin2_new=Area.objects.filter(
-                                area_type__business_area=business_area, area_type__area_level=2
-                            )
-                            .order_by("?")
-                            .first()
-                            .title,
+                            .name,
                         ),
                         "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
                             household=household,

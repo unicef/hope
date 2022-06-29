@@ -2,12 +2,10 @@ from django.core.management import call_command
 from django.test import TestCase
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
-from hct_mis_api.apps.core.fixtures import (
-    AdminAreaFactory,
-    AdminAreaLevelFactory,
-    create_afghanistan,
-)
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
@@ -63,12 +61,14 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()
-        state_area_type = AdminAreaLevelFactory(
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
             name="State",
-            business_area=business_area_with_data_sharing,
-            admin_level=1,
+            country=country,
+            area_level=1,
         )
-        admin_area = AdminAreaFactory(admin_area_level=state_area_type)
+        admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         cls.program_individual_data_needed_true = ProgramFactory(
             individual_data_needed=True,

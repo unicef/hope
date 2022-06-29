@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
@@ -144,19 +143,13 @@ class RdiMergeTask:
         admin2 = imported_household.admin2
         try:
             if admin2:
-                admin_area = AdminArea.objects.filter(p_code=admin2).first()
-                admin_area_new = Area.objects.filter(p_code=admin2).first()
+                admin_area = Area.objects.filter(p_code=admin2).first()
                 household.admin_area = admin_area
-                household.admin_area_new = admin_area_new
                 return
             if admin1:
-                admin_area = AdminArea.objects.filter(p_code=admin1).first()
-                admin_area_new = Area.objects.filter(p_code=admin1).first()
+                admin_area = Area.objects.filter(p_code=admin1).first()
                 household.admin_area = admin_area
-                household.admin_area_new = admin_area_new
                 return
-        except AdminArea.DoesNotExist as e:
-            logger.exception(e)
         except Area.DoesNotExist as e:
             logger.exception(e)
 
