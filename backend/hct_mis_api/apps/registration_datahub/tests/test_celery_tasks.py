@@ -1,8 +1,10 @@
 import base64
 import datetime
 import json
+from contextlib import contextmanager
 from django.test import TestCase
 from pathlib import Path
+from unittest.mock import patch
 
 from django.conf import settings
 from django_countries.fields import Country
@@ -96,6 +98,21 @@ def create_ukraine_business_area():
     )
 
 
+def run_automate_rdi_creation_task(*args, **kwargs):
+    @contextmanager
+    def do_nothing_cache(*_args, **_kwargs):
+        try:
+            yield
+        finally:
+            pass
+
+    with patch(
+        "hct_mis_api.apps.registration_datahub.celery_tasks.locked_cache",
+        do_nothing_cache,
+    ):
+        return automate_rdi_creation_task(*args, **kwargs)
+
+
 class TestAutomatingRDICreationTask(TestCase):
     databases = [
         "default",
@@ -106,7 +123,7 @@ class TestAutomatingRDICreationTask(TestCase):
     ]
 
     def test_successful_run_without_records_to_import(self):
-        result = automate_rdi_creation_task(registration_id=123, page_size=1)
+        result = run_automate_rdi_creation_task(registration_id=123, page_size=1)
         assert result is None
 
     def test_not_running_with_record_status_not_to_import(self):
@@ -117,7 +134,7 @@ class TestAutomatingRDICreationTask(TestCase):
         page_size = 1
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
-        result = automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
+        result = run_automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
         assert result is None
@@ -137,7 +154,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
 
-        result = automate_rdi_creation_task(
+        result = run_automate_rdi_creation_task(
             registration_id=registration, page_size=page_size, template="some template {date} {records}"
         )
 
