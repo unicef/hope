@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def locked_cache(key):
     try:
         if not hasattr(cache, "lock"):
-            yield # a little hack for the sake of tests that use LocMemCache that does not have `lock` attr
+            yield  # a little hack for the sake of tests that use LocMemCache that does not have `lock` attr
         else:
             with cache.lock(key, blocking_timeout=2, timeout=85400):
                 yield
