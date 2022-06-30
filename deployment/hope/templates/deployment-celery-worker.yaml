@@ -29,7 +29,7 @@ spec:
         {{- toYaml .Values.celery.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}-celery-worker-low-priority
-          command: ["celery", "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info", "--max-tasks-per-child=4", "-Q",  "default"]
+          command: ["celery", "-n", "low-priority-$HOSTNAME",  "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info", "--max-tasks-per-child=4", "-Q",  "default"]
           securityContext:
             {{- toYaml .Values.celery.securityContext | nindent 12 }}
           image: "{{ .Values.celery.image }}"
@@ -42,7 +42,7 @@ spec:
           resources:
             {{- toYaml .Values.celery.resources | nindent 12 }}
         - name: {{ .Chart.Name }}-celery-worker-high-priority
-          command: [ "celery", "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info", "--max-tasks-per-child=4", "-Q",  "priority" ]
+          command: [ "celery", "-n", "high-priority-$HOSTNAME", "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info", "--max-tasks-per-child=4", "-Q",  "priority" ]
           securityContext:
             {{- toYaml .Values.celery.securityContext | nindent 12 }}
           image: "{{ .Values.celery.image }}"
