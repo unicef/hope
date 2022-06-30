@@ -27,6 +27,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedAgency,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -50,13 +51,25 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     that registration data import instance.
     """
 
-    image_loader = None
-    business_area = None
-    households = None
-    individuals = None
-    documents = None
-    identities = None
-    collectors = None
+    def __init__(self):
+        self.image_loader = None
+        self.business_area = None
+        self.households = {}
+        self.documents = {}
+        self.identities = {}
+        self.household_identities = {}
+        self.individuals = []
+        self.collectors = defaultdict(list)
+        self.bank_accounts = defaultdict(dict)
+
+    def _handle_bank_account_fields(self, value, header, row_num, individual, *args, **kwargs):
+        if value is None:
+            return
+
+        name = header.replace("_i_c", "")
+
+        self.bank_accounts[f"individual_{row_num}"]["individual"] = individual
+        self.bank_accounts[f"individual_{row_num}"][name] = value
 
     def _handle_document_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
@@ -251,6 +264,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
             self.collectors[hh_id].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
 
+    def _create_bank_accounts_infos(self):
+        bank_accounts_infos_to_create = [
+            ImportedBankAccountInfo(**bank_account_info) for bank_account_info in self.bank_accounts.values()
+        ]
+
+        ImportedBankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
+
     def _create_documents(self):
         docs_to_create = []
         for document_data in self.documents.values():
@@ -340,6 +360,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "pregnant_i_c": self._handle_bool_field,
                 "fchild_hoh_i_c": self._handle_bool_field,
                 "child_hoh_i_c": self._handle_bool_field,
+                "bank_name_i_c": self._handle_bank_account_fields,
+                "bank_account_number_i_c": self._handle_bank_account_fields,
+                "debit_card_number_i_c": self._handle_bank_account_fields,
             },
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
@@ -489,16 +512,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_documents()
             self._create_identities()
             self._create_collectors()
+            self._create_bank_accounts_infos()
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     def execute(self, registration_data_import_id, import_data_id, business_area_id):
-        self.households = {}
-        self.documents = {}
-        self.identities = {}
-        self.household_identities = {}
-        self.individuals = []
-        self.collectors = defaultdict(list)
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
@@ -510,7 +528,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         wb = openpyxl.load_workbook(import_data.file, data_only=True)
 
-        # households objects have to be create first
+        # households objects have to be creat first
         worksheets = (wb["Households"], wb["Individuals"])
         for sheet in worksheets:
             self.image_loader = SheetImageLoader(sheet)
