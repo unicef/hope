@@ -58,3 +58,8 @@ class UpdateByXlsxStage2Form(forms.Form):
         if not len(columns_not_found):
             return data
         raise ValidationError("Unicef Id columns have to be selected")
+
+
+class UpdateIndividualsIBANFromXlsxForm(forms.Form):
+    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all())
+    file = forms.FileField()
