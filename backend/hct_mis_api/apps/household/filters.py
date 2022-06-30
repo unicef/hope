@@ -13,7 +13,6 @@ from django_filters import (
     MultipleChoiceFilter,
 )
 
-from hct_mis_api.apps.account.admin import BusinessAreaFilter
 from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
     DateRangeFilter,
@@ -94,7 +93,6 @@ class HouseholdFilter(FilterSet):
         es_ids = [x.meta["id"] for x in es_response]
 
         split_values_list = value.split(" ")
-        record_id_query = []
         inner_query = Q()
         for split_value in split_values_list:
             striped_value = split_value.strip(",")
@@ -106,7 +104,7 @@ class HouseholdFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def search_filter(self, qs, name, value):
-        if config.USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH:
+        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
 
@@ -149,6 +147,7 @@ class HouseholdFilter(FilterSet):
             values = value.split(" ")
         q_obj = Q()
         for value in values:
+            value = value.strip(",")
             inner_query = Q()
             inner_query |= Q(head_of_household__full_name__istartswith=value)
             inner_query |= Q(head_of_household__given_name__istartswith=value)
@@ -507,5 +506,4 @@ def get_elasticsearch_query_for_households(value, business_area):
     }
     if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:
         query["query"]["bool"]["filter"] = ({"term": {"business_area": business_area}},)
-    print(json.dumps(query))
     return query
