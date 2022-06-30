@@ -3,9 +3,6 @@ import logging
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
-    KOBO_ONLY_HOUSEHOLD_FIELDS,
-    KOBO_ONLY_INDIVIDUAL_FIELDS,
     TYPE_BOOL,
     TYPE_DATE,
     TYPE_DECIMAL,
@@ -15,6 +12,8 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
     TYPE_STRING,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
 from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
@@ -149,9 +148,6 @@ class KoboTemplateValidator:
         NOT_PROVIDED,
         RELATIONSHIP_UNKNOWN,
     )
-    ALL_CORE_FIELDS = (
-        CORE_FIELDS_ATTRIBUTES + list(KOBO_ONLY_HOUSEHOLD_FIELDS.values()) + list(KOBO_ONLY_INDIVIDUAL_FIELDS.values())
-    )
 
     @classmethod
     def _map_columns_numbers(cls, first_row):
@@ -207,13 +203,14 @@ class KoboTemplateValidator:
 
     @classmethod
     def _get_core_fields_from_db(cls):
+        all_core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT).apply_business_area(None)
         return {
             core_field_data["xlsx_field"]: {
                 "type": core_field_data["type"],
                 "required": core_field_data["required"],
                 "choices": core_field_data["choices"],
             }
-            for core_field_data in cls.ALL_CORE_FIELDS
+            for core_field_data in all_core_fields
             if core_field_data["xlsx_field"].endswith("_c")
         }
 
