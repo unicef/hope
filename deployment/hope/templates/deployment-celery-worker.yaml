@@ -30,7 +30,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-celery-worker-low-priority
           args: 
-            - celery  -A hct_mis_api.apps.core.celery worker -n low-priority-$(HOSTNAME) -E -l info --max-tasks-per-child=4 -Q  default
+            - celery  -A hct_mis_api.apps.core.celery worker -n low-priority-$HOSTNAME -E -l info --max-tasks-per-child=4 -Q  default
           command:
             - sh
             - -c
