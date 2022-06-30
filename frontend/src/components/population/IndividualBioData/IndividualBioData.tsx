@@ -17,6 +17,7 @@ import { LabelizedField } from '../../core/LabelizedField';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
+import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -92,10 +93,10 @@ export function IndividualBioData({
       <LabelizedField label={t('Linked Households')}>
         {individual.householdsAndRoles.length
           ? individual.householdsAndRoles?.map((item) => (
-              <Box key={item.id}>
-                {item.household.unicefId} - {roleChoicesDict[item.role]}
-              </Box>
-            ))
+            <Box key={item.id}>
+              {item.household.unicefId} - {roleChoicesDict[item.role]}
+            </Box>
+          ))
           : '-'}
       </LabelizedField>
     </Grid>
@@ -107,7 +108,7 @@ export function IndividualBioData({
     }
     return <>
       <Grid item xs={12}>
-        <BorderBox/>
+        <BorderBox />
       </Grid>
       <Grid item xs={3}>
         <LabelizedField label={t('Bank name')}>
@@ -255,7 +256,7 @@ export function IndividualBioData({
           </LabelizedField>
         </Grid>
         {!mappedIndividualDocuments.length &&
-        !mappedIdentities.length ? null : (
+          !mappedIdentities.length ? null : (
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
@@ -286,6 +287,9 @@ export function IndividualBioData({
               {individual.sanctionListLastCheck}
             </UniversalMoment>
           </LabelizedField>
+        </Grid>
+        <Grid item xs={6} >
+          {individual.household?.unicefId && <LinkedGrievancesModal household={individual.household} businessArea={businessArea} />}
         </Grid>
         {renderBankAccountInfo()}
       </Grid>
