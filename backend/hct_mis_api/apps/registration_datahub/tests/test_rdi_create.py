@@ -1,6 +1,5 @@
 import json
 import secrets
-
 from datetime import date
 from io import BytesIO
 from pathlib import Path
@@ -8,8 +7,8 @@ from unittest import mock
 
 from django.conf import settings
 from django.contrib.gis.geos import Point
-from django.core.files import File
 from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 
@@ -32,12 +31,13 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    DiiaHousehold,
     ImportData,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
-    DiiaHousehold,
 )
 
 
@@ -63,14 +63,18 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/new_reg_data_import.xlsx"
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
         business_area = BusinessArea.objects.first()
@@ -345,6 +349,19 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         [self.assertTrue(household.row_id in [3, 4, 5]) for household in households]
         [self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8]) for individual in individuals]
 
+    def test_create_bank_account(self):
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+
+        bank_account_info = ImportedBankAccountInfo.objects.filter(individual__row_id=6).first()
+        self.assertEqual(bank_account_info.bank_name, "Bank testowy")
+        self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
+        self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
+
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
@@ -358,8 +375,12 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import RdiKoboCreateTask
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -787,5 +808,3 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             "w+",
         ) as json_file:
             json_file.write(json.dumps(result))
-
-
