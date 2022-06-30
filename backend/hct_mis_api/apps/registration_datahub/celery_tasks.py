@@ -1,5 +1,6 @@
 import datetime
 import logging
+from contextlib import contextmanager
 
 from django.core.cache import cache
 
@@ -10,6 +11,15 @@ from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def locked_cache(key):
+    try:
+        with cache.lock(key, blocking_timeout=2, timeout=85400):
+            yield
+    finally:
+        pass
 
 
 @app.task
@@ -284,7 +294,7 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
     )
 
     try:
-        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=85400):
+        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
             try:
                 service = FlexRegistrationService()
 
@@ -327,7 +337,7 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
     )
 
     try:
-        with cache.lock("automate_rdi_diia_creation_task", blocking_timeout=2, timeout=85400):
+        with locked_cache(key="automate_rdi_diia_creation_task"):
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
@@ -355,7 +365,7 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
     )
 
     try:
-        with cache.lock("registration_diia_import_task", blocking_timeout=2, timeout=85400):
+        with locked_cache(key="registration_diia_import_task"):
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
