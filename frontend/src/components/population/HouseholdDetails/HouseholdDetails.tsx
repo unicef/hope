@@ -15,6 +15,7 @@ import {
   BigValue,
   BigValueContainer,
 } from '../../rdi/details/RegistrationDetails/RegistrationDetails';
+import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 
 const Container = styled.div`
   display: flex;
@@ -156,6 +157,9 @@ export function HouseholdDetails({
               <LabelizedField label={t('IS THIS A RETURNEE HOUSEHOLD?')}>
                 {household.returnee ? t('Yes') : t('No')}
               </LabelizedField>
+            </Grid>
+            <Grid item xs={6} >
+              {household.unicefId && <LinkedGrievancesModal household={household} businessArea={businessArea} />}
             </Grid>
           </Grid>
         </Overview>
