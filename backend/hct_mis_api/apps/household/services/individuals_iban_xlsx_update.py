@@ -32,8 +32,6 @@ class IndividualsIBANXlsxUpdate:
         self.wb = openpyxl.load_workbook(xlsx_update_file.file, data_only=True)
         self.individuals_ws = self.wb[self.SPREADSHEET_NAME]
 
-        self.validate()
-
     def _build_helpers(self):
         first_row = self.individuals_ws[1]
         self.columns_names_index_dict = {cell.value: cell.col_idx for cell in first_row}
@@ -68,8 +66,8 @@ class IndividualsIBANXlsxUpdate:
             self.validation_errors.append(f"No {self.UPDATE_COLUMN} column in provided file")
 
     def _get_matching_report_for_single_row(self, row):
-        value_filter = row[self.matching_column_index - 1].value
-        individuals = self._get_queryset().filter(**{self.MATCHING_COLUMN.lower(): value_filter})
+        filter_value = row[self.matching_column_index - 1].value
+        individuals = self._get_queryset().filter(**{self.MATCHING_COLUMN.lower(): filter_value})
         if not individuals.count():
             return self.STATUS_NO_MATCH, self._row_report_data(row)
         elif individuals.count() > 1:
@@ -103,7 +101,7 @@ class IndividualsIBANXlsxUpdate:
             row = self.individuals_ws[row_num]
             new_value = row[self.update_column_index - 1].value
 
-            for bank_account_info in individual.bank_account_info.all():  # TODO all()?
+            for bank_account_info in individual.bank_account_info.all():
                 bank_account_info.bank_account_number = new_value
                 updated_bank_accounts.append(bank_account_info)
 
@@ -115,7 +113,7 @@ class IndividualsIBANXlsxUpdate:
             "last_name": self.xlsx_update_file.uploaded_by.last_name,
             "email": self.xlsx_update_file.uploaded_by.email,
             "message": message,
-            "upload_file_id": self.xlsx_update_file.id,
+            "upload_file_id": str(self.xlsx_update_file.id),
         }
 
     def send_failure_email(self):
