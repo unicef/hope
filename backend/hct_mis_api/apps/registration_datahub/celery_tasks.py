@@ -16,8 +16,11 @@ logger = logging.getLogger(__name__)
 @contextmanager
 def locked_cache(key):
     try:
-        with cache.lock(key, blocking_timeout=2, timeout=85400):
-            yield
+        if not hasattr(cache, "lock"):
+            yield # a little hack for the sake of tests that use LocMemCache that does not have `lock` attr
+        else:
+            with cache.lock(key, blocking_timeout=2, timeout=85400):
+                yield
     finally:
         pass
 
