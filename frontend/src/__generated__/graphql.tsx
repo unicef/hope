@@ -294,6 +294,7 @@ export type BusinessAreaNode = Node & {
   hasDataSharingAgreement: Scalars['Boolean'],
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
+  postponeDeduplication: Scalars['Boolean'],
   deduplicationDuplicateScore: Scalars['Float'],
   deduplicationPossibleDuplicateScore: Scalars['Float'],
   deduplicationBatchDuplicatesPercentage: Scalars['Int'],
@@ -301,6 +302,7 @@ export type BusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int'],
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
+  deduplicationIgnoreWithdraw: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -1528,7 +1530,8 @@ export type HouseholdUpdateDataObjectType = {
 export enum ImportDataDataType {
   Xlsx = 'XLSX',
   Json = 'JSON',
-  Flex = 'FLEX'
+  Flex = 'FLEX',
+  Diia = 'DIIA'
 }
 
 export type ImportDataNode = Node & {
@@ -2171,6 +2174,7 @@ export enum ImportedIndividualDeduplicationGoldenRecordStatus {
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
   NotProcessed = 'NOT_PROCESSED',
+  Postpone = 'POSTPONE',
   Unique = 'UNIQUE'
 }
 
@@ -2326,6 +2330,7 @@ export enum IndividualDeduplicationGoldenRecordStatus {
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
   NotProcessed = 'NOT_PROCESSED',
+  Postpone = 'POSTPONE',
   Unique = 'UNIQUE'
 }
 
@@ -3736,6 +3741,7 @@ export type QueryAllGrievanceTicketArgs = {
   issueType?: Maybe<Scalars['String']>,
   scoreMin?: Maybe<Scalars['String']>,
   scoreMax?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5704,6 +5710,7 @@ export type UserBusinessAreaNode = Node & {
   hasDataSharingAgreement: Scalars['Boolean'],
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
+  postponeDeduplication: Scalars['Boolean'],
   deduplicationDuplicateScore: Scalars['Float'],
   deduplicationPossibleDuplicateScore: Scalars['Float'],
   deduplicationBatchDuplicatesPercentage: Scalars['Int'],
@@ -5711,6 +5718,7 @@ export type UserBusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int'],
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
+  deduplicationIgnoreWithdraw: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -7794,7 +7802,8 @@ export type AllGrievanceTicketQueryVariables = {
   assignedTo?: Maybe<Scalars['ID']>,
   cashPlan?: Maybe<Scalars['String']>,
   scoreMin?: Maybe<Scalars['String']>,
-  scoreMax?: Maybe<Scalars['String']>
+  scoreMax?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['String']>
 };
 
 
@@ -14144,8 +14153,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household) {
     totalCount
     pageInfo {
       startCursor
@@ -14239,6 +14248,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      cashPlan: // value for 'cashPlan'
  *      scoreMin: // value for 'scoreMin'
  *      scoreMax: // value for 'scoreMax'
+ *      household: // value for 'household'
  *   },
  * });
  */
@@ -19979,6 +19989,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  postponeDeduplication?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationBatchDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -19986,6 +19997,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
@@ -22206,6 +22218,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  postponeDeduplication?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationBatchDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -22213,6 +22226,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentrecordSetArgs>,
