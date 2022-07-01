@@ -29,6 +29,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import is_right_phone_number_format
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -282,3 +283,52 @@ class TestRapidProVerificationTask(TestCase):
                 payment_record_verification.received_amount,
                 payment_record_verification.payment_record.delivered_quantity,
             )
+
+    @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
+    def test_wrong_phone_number(self, mock_parent_init):
+        mock_parent_init.return_value = None
+        payment_record_verification = (
+            TestRapidProVerificationTask.verification.payment_record_verifications.prefetch_related(
+                "payment_record__head_of_household"
+            )
+            .order_by("?")
+            .first()
+        )
+        self.assertEqual(
+            payment_record_verification.status,
+            PaymentVerification.STATUS_PENDING,
+        )
+        fake_data_to_return_from_rapid_pro_api = [
+            {
+                "phone_number": "123-not-really-a-phone-number",
+                "received": True,
+                "received_amount": payment_record_verification.payment_record.delivered_quantity,
+            }
+        ]
+        mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
+        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+            task = CheckRapidProVerificationTask()
+            task.execute()
+            mock.assert_called()
+            payment_record_verification.refresh_from_db()
+
+            # TODO: and what now ?
+
+            # self.assertEqual(
+            #     payment_record_verification.status,
+            #     PaymentVerification.STATUS_RECEIVED,
+            # )
+            # self.assertEqual(
+            #     payment_record_verification.received_amount,
+            #     payment_record_verification.payment_record.delivered_quantity,
+            # )
+
+
+class TestPhoneNumberVerification(TestCase):
+    def test_good_phone_number(self):
+        phone_number = "+40032215789"
+        assert is_right_phone_number_format(phone_number)
+
+    def test_bad_phone_number(self):
+        phone_number = "123-not-really-a-phone-number"
+        assert not is_right_phone_number_format(phone_number)

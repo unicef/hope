@@ -1,4 +1,5 @@
 import logging
+import phonenumbers
 
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -8,6 +9,15 @@ from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
 
 logger = logging.getLogger(__name__)
+
+
+def is_right_phone_number_format(phone_number):
+    try:
+        parsed = phonenumbers.parse(phone_number)
+    except Exception:
+        return False
+    return phonenumbers.is_possible_number(parsed)
+
 
 
 class CheckRapidProVerificationTask:
@@ -49,7 +59,7 @@ class CheckRapidProVerificationTask:
         received = rapid_pro_result.get("received")
         received_amount = rapid_pro_result.get("received_amount")
         phone_number = rapid_pro_result.get("phone_number")
-        if not phone_number:
+        if not phone_number or not is_right_phone_number_format(phone_number):
             return None
         payment_record_verification = payment_record_verifications_phone_number_dict.get(phone_number)
         if not payment_record_verification:
