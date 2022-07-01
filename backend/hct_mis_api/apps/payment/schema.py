@@ -26,12 +26,12 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
+from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Individual
 from hct_mis_api.apps.payment.filters import (
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter
+    CashPlanPaymentVerificationFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -51,6 +51,7 @@ from hct_mis_api.apps.utils.schema import (
     SectionTotalNode,
     TableTotalCashTransferred,
 )
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import is_right_phone_number_format
 
 
 class RapidProFlowResult(graphene.ObjectType):
@@ -261,7 +262,20 @@ class Query(graphene.ObjectType):
             payment_verification_plan = get_object_or_404(CashPlanPaymentVerification, id=payment_verification_plan_id)
 
         payment_records = cash_plan.available_payment_records(payment_verification_plan)
-        sampling = Sampling(input, cash_plan, payment_records)
+        valid_payment_records = [
+            payment_record
+            for payment_record in payment_records
+            if is_right_phone_number_format(
+                str(Individual.objects.get(pk=payment_record.head_of_household.pk).phone_no)
+            )
+        ]
+        if not valid_payment_records:
+            return {
+                "sample_size": 0,
+                "payment_record_count": 0,
+            }
+
+        sampling = Sampling(input, cash_plan, valid_payment_records)
         payment_record_count, payment_records_sample_count = sampling.generate_sampling()
 
         return {

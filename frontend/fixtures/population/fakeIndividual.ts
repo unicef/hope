@@ -11,7 +11,7 @@ export const fakeIndividual = {
   unicefId: 'IND-88-0000.0004',
   birthDate: '1901-01-10',
   maritalStatus: 'MARRIED',
-  phoneNo: '0048734123423',
+  phoneNo: '+48734123423',
   sanctionListPossibleMatch: false,
   sanctionListConfirmedMatch: false,
   deduplicationGoldenRecordStatus: 'DUPLICATE',
