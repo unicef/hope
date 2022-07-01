@@ -22,6 +22,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
+    IDENTIFICATION_TYPE_TAX_ID,
     DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -31,7 +32,6 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.registration_datahub.models import (
-    DiiaHousehold,
     ImportData,
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -55,6 +55,11 @@ class CellMock:
     def __init__(self, value, coordinate):
         self.value = value
         self.coordinate = coordinate
+
+
+def create_document_image():
+    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+    return File(BytesIO(content), name="image.png")
 
 
 class TestRdiCreateTask(BaseElasticSearchTestCase):
@@ -94,6 +99,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
         cls.business_area = BusinessArea.objects.first()
+        ImportedDocumentType.objects.create(
+            country=Country("AFG"),
+            label="Tax Number Identification",
+            type=IDENTIFICATION_TYPE_TAX_ID,
+        )
 
     def test_execute(self):
         task = self.RdiXlsxCreateTask()
@@ -278,8 +288,6 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     def test_create_documents(self):
         task = self.RdiXlsxCreateTask()
         individual = ImportedIndividualFactory()
-        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
-        image = File(BytesIO(content), name="image.png")
         task.business_area = self.business_area
         doc_type = ImportedDocumentType.objects.create(
             country=Country("AFG"),
@@ -293,7 +301,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
                 "type": "BIRTH_CERTIFICATE",
                 "value": "CD1247246Q12W",
                 "issuing_country": Country("AFG"),
-                "photo": image,
+                "photo": create_document_image(),
             }
         }
         task._create_documents()
@@ -361,6 +369,18 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(bank_account_info.bank_name, "Bank testowy")
         self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
         self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
+
+    def test_create_tax_id_document(self):
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+
+        document = ImportedDocument.objects.filter(individual__row_id=5).first()
+        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_TAX_ID)
+        self.assertEqual(document.document_number, "CD1247246Q12W")
 
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
