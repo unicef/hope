@@ -567,6 +567,11 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         "Use business area during elastic search for households search",
         bool,
     ),
+    "AUTO_MERGE_AFTER_AUTO_RDI_IMPORT": (
+        False,
+        "Automatically merge the population after server-triggered RDI import",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)

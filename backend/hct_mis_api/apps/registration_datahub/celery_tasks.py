@@ -2,6 +2,7 @@ import datetime
 import logging
 from contextlib import contextmanager
 
+from constance import config
 from django.core.cache import cache
 
 from redis.exceptions import LockError
@@ -287,8 +288,7 @@ def fresh_extract_records_task(records_ids=None):
     logger.info("fresh_extract_records_task end")
 
 
-@app.task
-def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}", **filters):
+def process_all_records(registration_id: int, page_size: int, template: str, **filters):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
@@ -326,6 +326,14 @@ def automate_rdi_creation_task(registration_id: int, page_size: int, template="u
     except LockError as e:
         logger.exception(e)
     return None
+
+
+@app.task
+def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}", **filters):
+    result = process_all_records(registration_id=registration_id, page_size=page_size, template=template, **filters)
+    if config.AUTO_MERGE_AFTER_AUTO_RDI_IMPORT is True:
+        merge_registration_data_import_task.delay(registration_id)
+    return result
 
 
 @app.task
