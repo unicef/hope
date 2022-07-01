@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
+    IDENTIFICATION_TYPE_TAX_ID,
     UNHCR,
     WFP,
 )
@@ -69,6 +70,10 @@ def get_birth_certificate_document_number_query(_, args):
     return get_documents_number_query(IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, args[0])
 
 
+def get_tax_id_document_number_query(_, args):
+    return get_documents_number_query(IDENTIFICATION_TYPE_TAX_ID, args[0])
+
+
 def get_drivers_license_document_number_query(_, args):
     return get_documents_number_query(IDENTIFICATION_TYPE_DRIVERS_LICENSE, args[0])
 
@@ -95,6 +100,10 @@ def get_documents_number_query(document_type, number):
 
 def get_birth_certificate_issuer_query(_, args):
     return get_documents_issuer_query(IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, args[0])
+
+
+def get_tax_id_issuer_query(_, args):
+    return get_documents_issuer_query(IDENTIFICATION_TYPE_TAX_ID, args[0])
 
 
 def get_drivers_licensee_issuer_query(_, args):
