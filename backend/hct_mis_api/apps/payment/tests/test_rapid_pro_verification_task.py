@@ -195,6 +195,10 @@ class TestRapidProVerificationTask(TestCase):
             payment_record_verification.status,
             PaymentVerification.STATUS_PENDING,
         )
+
+        # mr_head = payment_record_verification.payment_record.head_of_household
+        # print("\nXXX", mr_head.phone_no, mr_head.household.country, "\n")
+
         fake_data_to_return_from_rapid_pro_api = [
             {
                 "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),

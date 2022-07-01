@@ -12,11 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 def is_right_phone_number_format(phone_number):
+    # from phonenumbers.parse method description:
+    # This method will throw a NumberParseException if the number is not
+    # considered to be a possible number.
+    #
+    # so if `parse` does not throw, we may assume it's ok
     try:
-        parsed = phonenumbers.parse(phone_number)
-    except Exception:
+        phonenumbers.parse(phone_number)
+    except phonenumbers.NumberParseException:
+        print(f"\nPhone number {phone_number} is not in the right format.")
         return False
-    return phonenumbers.is_possible_number(parsed)
+    return True
 
 
 
