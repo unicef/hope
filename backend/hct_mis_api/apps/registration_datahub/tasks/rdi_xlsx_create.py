@@ -329,6 +329,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _create_objects(self, sheet, registration_data_import):
         complex_fields = {
             "individuals": {
+                "tax_id_no_i_c": self._handle_document_fields,
+                "tax_id_photo_i_c": self._handle_document_photo_fields,
+                "tax_id_issuer_i_c": self._handle_document_issuing_country_fields,
                 "birth_certificate_no_i_c": self._handle_document_fields,
                 "birth_certificate_photo_i_c": self._handle_document_photo_fields,
                 "birth_certificate_issuer_i_c": self._handle_document_issuing_country_fields,
