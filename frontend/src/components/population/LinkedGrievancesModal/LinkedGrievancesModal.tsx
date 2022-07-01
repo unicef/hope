@@ -8,9 +8,9 @@ import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { grievanceTicketStatusToColor, reduceChoices } from '../../../utils/utils';
 import {
+  GrievancesChoiceDataQuery,
   HouseholdNode,
   useAllGrievanceTicketQuery,
-  useGrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { BlackLink } from '../../core/BlackLink';
 import { ContentLink } from '../../core/ContentLink';
@@ -39,11 +39,13 @@ const Bold = styled.span`
 interface LinkedGrievancesModalProps {
   household: HouseholdNode;
   businessArea: string;
+  grievancesChoices: GrievancesChoiceDataQuery;
 }
 
 export const LinkedGrievancesModal = ({
   household,
   businessArea,
+  grievancesChoices
 }: LinkedGrievancesModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const history = useHistory();
@@ -57,17 +59,13 @@ export const LinkedGrievancesModal = ({
     fetchPolicy: 'network-only',
   });
 
-  const {
-    data: grievancesChoicesData,
-  } = useGrievancesChoiceDataQuery();
-
   const statusChoices: {
     [id: number]: string;
-  } = reduceChoices(grievancesChoicesData.grievanceTicketStatusChoices);
+  } = reduceChoices(grievancesChoices.grievanceTicketStatusChoices);
 
   const categoryChoices: {
     [id: number]: string;
-  } = reduceChoices(grievancesChoicesData.grievanceTicketCategoryChoices);
+  } = reduceChoices(grievancesChoices.grievanceTicketCategoryChoices);
 
   const renderRow = (row): React.ReactElement => {
 
