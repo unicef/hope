@@ -106,6 +106,6 @@ class FullListSampling(BaseSampling):
         self.payment_records = [
             record
             for record in payment_records
-            if record.household.admin_area.id not in self.excluded_admin_areas_decoded
+            if record.household.admin_area and (record.household.admin_area.id not in self.excluded_admin_areas_decoded)
         ]
         self.sample_size = self.calc_sample_size(len(payment_records))
