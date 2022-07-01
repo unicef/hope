@@ -9,6 +9,7 @@ import {
   sexToCapitalize,
 } from '../../../utils/utils';
 import {
+  GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
   IndividualNode,
 } from '../../../__generated__/graphql';
@@ -32,11 +33,13 @@ interface IndividualBioDataProps {
   individual: IndividualNode;
   businessArea: string;
   choicesData: HouseholdChoiceDataQuery;
+  grievancesChoices: GrievancesChoiceDataQuery;
 }
 export function IndividualBioData({
   individual,
   businessArea,
   choicesData,
+  grievancesChoices,
 }: IndividualBioDataProps): React.ReactElement {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
@@ -289,7 +292,7 @@ export function IndividualBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={6} >
-          {individual.household?.unicefId && <LinkedGrievancesModal household={individual.household} businessArea={businessArea} />}
+          {individual.household?.unicefId && <LinkedGrievancesModal household={individual.household} businessArea={businessArea} grievancesChoices={grievancesChoices} />}
         </Grid>
         {renderBankAccountInfo()}
       </Grid>
