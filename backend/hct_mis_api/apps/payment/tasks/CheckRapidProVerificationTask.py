@@ -1,4 +1,5 @@
 import logging
+from backend.hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 import phonenumbers
 
 from hct_mis_api.apps.payment.models import (
@@ -20,10 +21,9 @@ def is_right_phone_number_format(phone_number):
     try:
         phonenumbers.parse(phone_number)
     except phonenumbers.NumberParseException:
-        print(f"\nPhone number {phone_number} is not in the right format.")
+        logging.warning(f"'{phone_number}' is not a valid phone number")
         return False
     return True
-
 
 
 class CheckRapidProVerificationTask:
@@ -49,15 +49,22 @@ class CheckRapidProVerificationTask:
         }
         api = RapidProAPI(business_area.slug)
         rapid_pro_results = api.get_mapped_flow_runs(cashplan_payment_verification.rapid_pro_flow_start_uuid)
-        for rapid_pro_result in rapid_pro_results:
-            payment_record_verification = self._rapid_pro_results_to_payment_record_verification(
-                payment_record_verifications_phone_number_dict, rapid_pro_result
-            )
-            if payment_record_verification:
-                payment_record_verification_to_update.append(payment_record_verification)
+        payment_record_verification_to_update = self._get_payment_record_verification_to_update(
+            rapid_pro_results, payment_record_verifications_phone_number_dict
+        )
         PaymentVerification.objects.bulk_update(payment_record_verification_to_update, ("status", "received_amount"))
         calculate_counts(cashplan_payment_verification)
         cashplan_payment_verification.save()
+
+    def _get_payment_record_verification_to_update(self, results, phone_numbers):
+        output = []
+        for rapid_pro_result in results:
+            payment_record_verification = self._rapid_pro_results_to_payment_record_verification(
+                phone_numbers, rapid_pro_result
+            )
+            if payment_record_verification:
+                output.append(payment_record_verification)
+        return output
 
     def _rapid_pro_results_to_payment_record_verification(
         self, payment_record_verifications_phone_number_dict, rapid_pro_result

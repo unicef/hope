@@ -196,9 +196,6 @@ class TestRapidProVerificationTask(TestCase):
             PaymentVerification.STATUS_PENDING,
         )
 
-        # mr_head = payment_record_verification.payment_record.head_of_household
-        # print("\nXXX", mr_head.phone_no, mr_head.household.country, "\n")
-
         fake_data_to_return_from_rapid_pro_api = [
             {
                 "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
@@ -314,18 +311,13 @@ class TestRapidProVerificationTask(TestCase):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
+
             payment_record_verification.refresh_from_db()
-
-            # TODO: and what now ?
-
-            # self.assertEqual(
-            #     payment_record_verification.status,
-            #     PaymentVerification.STATUS_RECEIVED,
-            # )
-            # self.assertEqual(
-            #     payment_record_verification.received_amount,
-            #     payment_record_verification.payment_record.delivered_quantity,
-            # )
+            # verification is still pending, so it was not considered within the verification plan
+            self.assertEqual(
+                payment_record_verification.status,
+                PaymentVerification.STATUS_PENDING,
+            )
 
 
 class TestPhoneNumberVerification(TestCase):
