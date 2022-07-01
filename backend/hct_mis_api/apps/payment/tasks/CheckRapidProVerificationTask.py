@@ -1,5 +1,4 @@
 import logging
-from backend.hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 import phonenumbers
 
 from hct_mis_api.apps.payment.models import (
@@ -7,7 +6,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
+from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status, get_payment_records_for_dashboard
 
 logger = logging.getLogger(__name__)
 

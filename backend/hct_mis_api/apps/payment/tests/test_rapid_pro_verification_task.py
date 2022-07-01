@@ -322,9 +322,7 @@ class TestRapidProVerificationTask(TestCase):
 
 class TestPhoneNumberVerification(TestCase):
     def test_good_phone_number(self):
-        phone_number = "+40032215789"
-        assert is_right_phone_number_format(phone_number)
+        assert is_right_phone_number_format("+40032215789")
 
     def test_bad_phone_number(self):
-        phone_number = "123-not-really-a-phone-number"
-        assert not is_right_phone_number_format(phone_number)
+        assert not is_right_phone_number_format("123-not-really-a-phone-number")
