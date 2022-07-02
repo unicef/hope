@@ -266,7 +266,7 @@ class Query(graphene.ObjectType):
             payment_record
             for payment_record in payment_records
             if is_right_phone_number_format(
-                str(Individual.objects.get(pk=payment_record.head_of_household.pk).phone_no)
+                str(payment_record.head_of_household.phone_no)
             )
         ]
         if not valid_payment_records:
