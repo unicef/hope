@@ -23705,7 +23705,7 @@
     "birth_date": "1991-11-18",
     "estimated_birth_date": false,
     "marital_status": "MARRIED",
-    "phone_no": "+48605899014",
+    "phone_no": "+48invalid605899014",
     "phone_no_alternative": "",
     "relationship": "HEAD",
     "household": "960f7eee-d45a-478a-b4b4-82d0e8e80add",
