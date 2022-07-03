@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
+from collections import defaultdict
 
 
 class Command(BaseCommand):
@@ -115,11 +116,9 @@ class Command(BaseCommand):
             "delete": "All Models Can DELETE",
         }
 
-        view_perms = []
-        add_perms = []
-        change_perms = []
-        delete_perms = []
-        perms_list_map = {"view": view_perms, "add": add_perms, "change": change_perms, "delete": delete_perms}
+        view_perms, add_perms, change_perms, delete_perms = list(), list(), list(), list()
+        perms_list_map = defaultdict(list)
+        perms_list_map.update({"view": view_perms, "add": add_perms, "change": change_perms, "delete": delete_perms})
 
         for action in actions:
             for app, models in app_model_map.items():
@@ -129,13 +128,13 @@ class Command(BaseCommand):
 
                     if not ct:
                         print(f"Not found ContentType for {app} {model}")
-                        return
+                        continue
 
                     perm_codename = action + "_" + model
                     perm = ct.permission_set.filter(codename=perm_codename).first()
                     if not perm:
                         print(f"Not found Permission with codename {perm_codename}")
-                        return
+                        continue
 
                     # use in general groups
                     perms_list_map.get(action).append(perm)
