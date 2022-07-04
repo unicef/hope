@@ -331,7 +331,7 @@ def process_all_records(registration_id: int, page_size: int, template: str, **f
 @app.task
 def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}", **filters):
     result = process_all_records(registration_id=registration_id, page_size=page_size, template=template, **filters)
-    if config.AUTO_MERGE_AFTER_AUTO_RDI_IMPORT is True:
+    if config.AUTO_MERGE_AFTER_AUTO_RDI_IMPORT:
         merge_registration_data_import_task.delay(registration_id)
     return result
 
