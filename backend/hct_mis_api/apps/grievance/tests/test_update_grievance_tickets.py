@@ -315,6 +315,13 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "number": "2222",
                                 }
                             ],
+                            "paymentChannel": [
+                                {
+                                    "type": "BANK_TRANSFER",
+                                    "bankName": "privatbank",
+                                    "bankAccountNumber": 2356789789789789,
+                                },
+                            ],
                         }
                     }
                 },
@@ -327,7 +334,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.add_individual_grievance_ticket.refresh_from_db()
         result = self.add_individual_grievance_ticket.add_individual_ticket_details.individual_data
-        expected_result = None
         if name == "with_permission":
             expected_result = {
                 "sex": "MALE",
@@ -340,6 +346,13 @@ class TestUpdateGrievanceTickets(APITestCase):
                         "photo": "test_file_name.jpg",
                         "photoraw": "test_file_name.jpg",
                     }
+                ],
+                "payment_channel": [
+                    {
+                        "type": "BANK_TRANSFER",
+                        "bank_name": "privatbank",
+                        "bank_account_number": "2356789789789789",
+                    },
                 ],
                 "identities": [{"agency": "UNHCR", "country": "POL", "number": "2222"}],
                 "full_name": "John Example",
