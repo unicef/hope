@@ -27,13 +27,16 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     handle_add_document,
     handle_add_identity,
+    handle_add_payment_channel,
     handle_document,
     handle_documents,
     handle_edit_document,
     handle_edit_identity,
     handle_role,
+    handle_update_payment_channel,
     prepare_edit_documents,
     prepare_edit_identities,
+    prepare_edit_payment_channel,
     prepare_previous_documents,
     prepare_previous_identities,
     reassign_roles_on_update,
@@ -41,13 +44,12 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     verify_flex_fields,
     withdraw_individual_and_reassign_roles,
 )
-from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
     ROLE_NO_ROLE,
+    BankAccountInfo,
     Document,
     Household,
     Individual,
@@ -55,6 +57,10 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
+from hct_mis_api.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.utils.schema import Arg
 
 
@@ -135,6 +141,19 @@ class EditIndividualIdentityObjectType(graphene.InputObjectType):
     number = graphene.String(required=True)
 
 
+class BankTransferObjectType(graphene.InputObjectType):
+    type = graphene.String(required=True)
+    bank_name = graphene.String(required=True)
+    bank_account_number = graphene.String(required=True)
+
+
+class EditBankTransferObjectType(graphene.InputObjectType):
+    id = graphene.Field(graphene.ID, required=True)
+    type = graphene.String(required=True)
+    bank_name = graphene.String(required=True)
+    bank_account_number = graphene.String(required=True)
+
+
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
     status = graphene.String()
     full_name = graphene.String()
@@ -169,6 +188,9 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     identities = graphene.List(IndividualIdentityObjectType)
     identities_to_remove = graphene.List(graphene.ID)
     identities_to_edit = graphene.List(EditIndividualIdentityObjectType)
+    payment_channel = graphene.List(BankTransferObjectType)
+    payment_channel_to_edit = graphene.List(EditBankTransferObjectType)
+    payment_channel_to_remove = graphene.List(graphene.ID)
     flex_fields = Arg()
 
 
@@ -201,6 +223,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     role = graphene.String(required=True)
     documents = graphene.List(IndividualDocumentObjectType)
     identities = graphene.List(IndividualIdentityObjectType)
+    payment_channel = graphene.List(BankTransferObjectType)
     business_area = graphene.String()
     flex_fields = Arg()
 
@@ -364,6 +387,10 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     identities_to_remove = individual_data.pop("identities_to_remove", [])
     identities_to_edit = individual_data.pop("identities_to_edit", [])
 
+    payment_channel = individual_data.pop("payment_channel", [])
+    payment_channel_to_remove = individual_data.pop("payment_channel_to_remove", [])
+    payment_channel_to_edit = individual_data.pop("payment_channel_to_edit", [])
+
     to_phone_number_str(individual_data, "phone_no")
     to_phone_number_str(individual_data, "phone_no_alternative")
     to_date_string(individual_data, "birth_date")
@@ -394,6 +421,12 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     identities_to_remove_with_approve_status = [
         {"value": identity_id, "approve_status": False} for identity_id in identities_to_remove
     ]
+
+    payment_channel_with_approve_status = [{"value": pc, "approve_status": False} for pc in payment_channel]
+    payment_channel_to_remove_with_approve_status = [
+        {"value": payment_channel_id, "approve_status": False} for payment_channel_id in payment_channel_to_remove
+    ]
+
     flex_fields_with_approve_status = {
         field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
         for field, value in flex_fields.items()
@@ -406,6 +439,12 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_data_with_approve_status["identities"] = identities_with_approve_status
     individual_data_with_approve_status["identities_to_remove"] = identities_to_remove_with_approve_status
     individual_data_with_approve_status["identities_to_edit"] = prepare_edit_identities(identities_to_edit)
+
+    individual_data_with_approve_status["payment_channel"] = payment_channel_with_approve_status
+    individual_data_with_approve_status["payment_channel_to_remove"] = payment_channel_to_remove_with_approve_status
+    individual_data_with_approve_status["payment_channel_to_edit"] = prepare_edit_payment_channel(
+        payment_channel_to_edit
+    )
 
     individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
 
@@ -441,6 +480,10 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     identities_to_remove = new_individual_data.pop("identities_to_remove", [])
     identities_to_edit = new_individual_data.pop("identities_to_edit", [])
 
+    payment_channel = new_individual_data.pop("payment_channel", [])
+    payment_channel_to_remove = new_individual_data.pop("payment_channel_to_remove", [])
+    payment_channel_to_edit = new_individual_data.pop("payment_channel_to_edit", [])
+
     flex_fields = {to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()}
 
     to_phone_number_str(new_individual_data, "phone_no")
@@ -473,6 +516,12 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     identities_to_remove_with_approve_status = [
         {"value": identity_id, "approve_status": False} for identity_id in identities_to_remove
     ]
+
+    payment_channel_with_approve_status = [{"value": pc, "approve_status": False} for pc in payment_channel]
+    payment_channel_to_remove_with_approve_status = [
+        {"value": payment_channel_id, "approve_status": False} for payment_channel_id in payment_channel_to_remove
+    ]
+
     flex_fields_with_approve_status = {
         field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
         for field, value in flex_fields.items()
@@ -490,6 +539,12 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     individual_data_with_approve_status["identities_to_edit"] = prepare_edit_identities(identities_to_edit)
     individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
         identities_to_remove_with_approve_status
+    )
+
+    individual_data_with_approve_status["payment_channel"] = payment_channel_with_approve_status
+    individual_data_with_approve_status["payment_channel_to_remove"] = payment_channel_to_remove_with_approve_status
+    individual_data_with_approve_status["payment_channel_to_edit"] = prepare_edit_payment_channel(
+        payment_channel_to_edit
     )
 
     individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
@@ -599,6 +654,7 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     individual_data = ticket_details.individual_data
     documents = individual_data.pop("documents", [])
     identities = individual_data.pop("identities", [])
+    payment_channel = individual_data.pop("payment_channel", [])
     role = individual_data.pop("role", ROLE_NO_ROLE)
     first_registration_date = timezone.now()
     individual = Individual(
@@ -611,6 +667,7 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
 
     documents_to_create = [handle_add_document(document, individual) for document in documents]
     identities_to_create = [handle_add_identity(identity, individual) for identity in identities]
+    payment_channel_to_create = [handle_add_payment_channel(pc, individual) for pc in payment_channel]
 
     relationship_to_head_of_household = individual_data.get("relationship")
     if household:
@@ -629,6 +686,7 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
 
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
+    BankAccountInfo.objects.bulk_create(payment_channel_to_create)
 
     if individual.household:
         recalculate_data(individual.household)
@@ -682,6 +740,11 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     ]
     identities_to_edit = individual_data.pop("identities_to_edit", [])
 
+    payment_channel = individual_data.pop("payment_channel", [])
+    payment_channel_to_remove_encoded = individual_data.pop("payment_channel_to_remove", [])
+    payment_channel_to_remove = [data["value"] for data in payment_channel_to_remove_encoded if is_approved(data)]
+    payment_channel_to_edit = individual_data.pop("payment_channel_to_edit", [])
+
     only_approved_data = {
         field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
         for field, value_and_approve_status in individual_data.items()
@@ -732,6 +795,14 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         handle_edit_identity(identity_data) for identity_data in identities_to_edit if is_approved(identity_data)
     ]
 
+    payment_channel_to_create = [
+        handle_add_payment_channel(data["value"], individual) for data in payment_channel if is_approved(data)
+    ]
+
+    payment_channel_to_update = [
+        handle_update_payment_channel(data["value"]) for data in payment_channel_to_edit if is_approved(data)
+    ]
+
     Document.objects.bulk_create(documents_to_create)
     Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo"])
     Document.objects.filter(id__in=documents_to_remove).delete()
@@ -739,6 +810,10 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     IndividualIdentity.objects.bulk_create(identities_to_create)
     IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "agency"])
     IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
+
+    BankAccountInfo.objects.bulk_create(payment_channel_to_create)
+    BankAccountInfo.objects.bulk_update(payment_channel_to_update, ["bank_name", "bank_account_number"])
+    BankAccountInfo.objects.filter(id__in=payment_channel_to_remove).delete()
 
     new_individual.refresh_from_db()
 
