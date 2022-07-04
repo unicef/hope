@@ -7,6 +7,7 @@ export const REPORT_QUERY = gql`
       status
       reportType
       createdAt
+      updatedAt
       dateFrom
       dateTo
       fileUrl
