@@ -9,7 +9,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Starting create/update Groups...")
-        actions = ["view", "add", "change", "delete"]
+        actions = ("view", "add", "change", "delete")
         app_model_map = {
             "account": ["incompatibleroles", "partner", "role", "userrole", "user"],
             "activity_log": ["logentry"],
