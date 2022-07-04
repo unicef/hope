@@ -490,7 +490,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             class="sc-bwzfXH eoWrid"
             color="textSecondary"
           >
-            LINKED GRIEVANCES
+            Linked Grievances
           </span>
           <div>
             <span
