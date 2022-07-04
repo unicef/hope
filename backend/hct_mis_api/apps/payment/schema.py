@@ -51,7 +51,6 @@ from hct_mis_api.apps.utils.schema import (
     SectionTotalNode,
     TableTotalCashTransferred,
 )
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import does_payment_record_have_right_hoh_phone_number
 
 
 class RapidProFlowResult(graphene.ObjectType):
@@ -262,20 +261,13 @@ class Query(graphene.ObjectType):
             payment_verification_plan = get_object_or_404(CashPlanPaymentVerification, id=payment_verification_plan_id)
 
         payment_records = cash_plan.available_payment_records(payment_verification_plan)
-        valid_payment_records = [
-            payment_record
-            for payment_record in payment_records
-            if does_payment_record_have_right_hoh_phone_number(payment_record)
-        ]
-        if not valid_payment_records:
+        if not payment_records:
             return {
                 "sample_size": 0,
                 "payment_record_count": 0,
             }
 
-        sampling = Sampling(
-            input, cash_plan, PaymentRecord.objects.filter(pk__in=[obj.pk for obj in valid_payment_records])
-        )
+        sampling = Sampling(input, cash_plan, payment_records)
         payment_record_count, payment_records_sample_count = sampling.generate_sampling()
 
         return {
