@@ -2807,6 +2807,7 @@ export type MergeRegistrationDataImportMutation = {
 export type Mutations = {
    __typename?: 'Mutations',
   createReport?: Maybe<CreateReport>,
+  restartCreateReport?: Maybe<RestartCreateReport>,
   createDashboardReport?: Maybe<CreateDashboardReport>,
   createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
   updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>,
@@ -2855,6 +2856,11 @@ export type Mutations = {
 
 export type MutationsCreateReportArgs = {
   reportData: CreateReportInput
+};
+
+
+export type MutationsRestartCreateReportArgs = {
+  reportData: RestartCreateReportInput
 };
 
 
@@ -4587,6 +4593,16 @@ export type ReportNodeEdge = {
    __typename?: 'ReportNodeEdge',
   node?: Maybe<ReportNode>,
   cursor: Scalars['String'],
+};
+
+export type RestartCreateReport = {
+   __typename?: 'RestartCreateReport',
+  report?: Maybe<ReportNode>,
+};
+
+export type RestartCreateReportInput = {
+  reportId: Scalars['ID'],
+  businessAreaSlug: Scalars['String'],
 };
 
 export type RoleNode = {
@@ -9429,7 +9445,7 @@ export type AllReportsQuery = (
       & Pick<ReportNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ReportNode' }
-        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'fileUrl' | 'numberOfRecords'>
+        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'updatedAt' | 'fileUrl' | 'numberOfRecords'>
         & { createdBy: (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'firstName' | 'lastName'>
@@ -9448,7 +9464,7 @@ export type ReportQuery = (
   { __typename?: 'Query' }
   & { report: Maybe<(
     { __typename?: 'ReportNode' }
-    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl' | 'numberOfRecords'>
+    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'updatedAt' | 'dateFrom' | 'dateTo' | 'fileUrl' | 'numberOfRecords'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
@@ -18004,6 +18020,7 @@ export const AllReportsDocument = gql`
         dateTo
         status
         createdAt
+        updatedAt
         createdBy {
           firstName
           lastName
@@ -18075,6 +18092,7 @@ export const ReportDocument = gql`
     status
     reportType
     createdAt
+    updatedAt
     dateFrom
     dateTo
     fileUrl
@@ -19400,6 +19418,8 @@ export type ResolversTypes = {
   Mutations: ResolverTypeWrapper<{}>,
   CreateReportInput: CreateReportInput,
   CreateReport: ResolverTypeWrapper<CreateReport>,
+  RestartCreateReportInput: RestartCreateReportInput,
+  RestartCreateReport: ResolverTypeWrapper<RestartCreateReport>,
   CreateDashboardReportInput: CreateDashboardReportInput,
   CreateDashboardReport: ResolverTypeWrapper<CreateDashboardReport>,
   CreateGrievanceTicketInput: CreateGrievanceTicketInput,
@@ -19768,6 +19788,8 @@ export type ResolversParentTypes = {
   Mutations: {},
   CreateReportInput: CreateReportInput,
   CreateReport: CreateReport,
+  RestartCreateReportInput: RestartCreateReportInput,
+  RestartCreateReport: RestartCreateReport,
   CreateDashboardReportInput: CreateDashboardReportInput,
   CreateDashboardReport: CreateDashboardReport,
   CreateGrievanceTicketInput: CreateGrievanceTicketInput,
@@ -21002,6 +21024,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
+  restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>,
   createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
   createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
   updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>,
@@ -21487,6 +21510,10 @@ export type ReportNodeConnectionResolvers<ContextType = any, ParentType extends 
 export type ReportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeEdge'] = ResolversParentTypes['ReportNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type RestartCreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['RestartCreateReport'] = ResolversParentTypes['RestartCreateReport']> = {
+  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
 };
 
 export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleNode'] = ResolversParentTypes['RoleNode']> = {
@@ -22472,6 +22499,7 @@ export type Resolvers<ContextType = any> = {
   ReportNode?: ReportNodeResolvers<ContextType>,
   ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>,
   ReportNodeEdge?: ReportNodeEdgeResolvers<ContextType>,
+  RestartCreateReport?: RestartCreateReportResolvers<ContextType>,
   RoleNode?: RoleNodeResolvers<ContextType>,
   RuleCommitNode?: RuleCommitNodeResolvers<ContextType>,
   RuleCommitNodeConnection?: RuleCommitNodeConnectionResolvers<ContextType>,

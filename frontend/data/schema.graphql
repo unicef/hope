@@ -2091,6 +2091,7 @@ type MergeRegistrationDataImportMutation {
 
 type Mutations {
   createReport(reportData: CreateReportInput!): CreateReport
+  restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
@@ -2710,6 +2711,15 @@ type ReportNodeConnection {
 type ReportNodeEdge {
   node: ReportNode
   cursor: String!
+}
+
+type RestartCreateReport {
+  report: ReportNode
+}
+
+input RestartCreateReportInput {
+  reportId: ID!
+  businessAreaSlug: String!
 }
 
 type RoleNode {
