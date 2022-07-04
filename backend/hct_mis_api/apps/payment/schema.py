@@ -51,7 +51,7 @@ from hct_mis_api.apps.utils.schema import (
     SectionTotalNode,
     TableTotalCashTransferred,
 )
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import is_right_phone_number_format
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import does_payment_record_have_right_hoh_phone_number
 
 
 class RapidProFlowResult(graphene.ObjectType):
@@ -265,7 +265,7 @@ class Query(graphene.ObjectType):
         valid_payment_records = [
             payment_record
             for payment_record in payment_records
-            if is_right_phone_number_format(str(payment_record.head_of_household.phone_no))
+            if does_payment_record_have_right_hoh_phone_number(payment_record)
         ]
         if not valid_payment_records:
             return {

@@ -25,6 +25,18 @@ def is_right_phone_number_format(phone_number):
     return True
 
 
+def does_payment_record_have_right_hoh_phone_number(record):
+    hoh = record.head_of_household
+    if not hoh:
+        logging.warning("Payment record has no head of household")
+        return False
+    number = hoh.phone_no
+    if not number:
+        logging.warning("Head of household has no phone number")
+        return False
+    return is_right_phone_number_format(str(number))
+
+
 class CheckRapidProVerificationTask:
     def execute(self):
         active_rapidpro_verifications = CashPlanPaymentVerification.objects.filter(
