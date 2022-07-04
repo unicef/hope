@@ -31,9 +31,7 @@ export function PaymentModulePage(): React.ReactElement {
 
   return (
     <>
-      <PageHeader title={t('Payment Module')} />
-      <PaymentPlansFilters filter={planfilter} onFilterChange={setPlanFilter} />
-      <Box p={6} width='100%' display='flex' justifyContent='flex-end'>
+      <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PAYMENT_MODULE_CREATE, permissions) && (
           <Button
             variant='contained'
@@ -44,7 +42,9 @@ export function PaymentModulePage(): React.ReactElement {
             {t('NEW PAYMENT PLAN')}
           </Button>
         )}
-      </Box>
+      </PageHeader>
+      <PaymentPlansFilters filter={planfilter} onFilterChange={setPlanFilter} />
+
       <TableWrapper>
         <PaymentPlansTable
           filter={debouncedPlanFilter}
