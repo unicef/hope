@@ -114,11 +114,11 @@ export const LinkedGrievancesModal = ({
 
   const renderLink = (): React.ReactElement => {
     if (allGrievances.length === 0) {
-      return <LabelizedField label={t('LINKED GRIEVANCES')} value={<span>-</span>} />;
+      return <LabelizedField label={t('Linked Grievances')} value={<span>-</span>} />;
     }
     return (
       <>
-        <LabelizedField label={t('LINKED GRIEVANCES')} value={renderGrievances().slice(0, 3)} />
+        <LabelizedField label={t('Linked Grievances')} value={renderGrievances().slice(0, 3)} />
         {allGrievances.length > 3 && <StyledLink
           onClick={(e) => {
             e.stopPropagation();
@@ -152,7 +152,7 @@ export const LinkedGrievancesModal = ({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            {t('LINKED GRIEVANCES')}
+            {t('Linked Grievances')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
