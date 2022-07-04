@@ -7,12 +7,14 @@ from typing import Optional, Union
 
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN, BankAccountInfo
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +94,30 @@ def handle_edit_document(document_data: dict):
     document.type = document_type
     document.photo = photo
     return document
+
+
+def handle_add_payment_channel(payment_channel, individual):
+    payment_channel_type = payment_channel.get("type")
+    if payment_channel_type == "BANK_TRANSFER":
+        bank_name = payment_channel.get("bank_name")
+        bank_account_number = payment_channel.get("bank_account_number")
+        return BankAccountInfo(
+            individual=individual,
+            bank_name=bank_name,
+            bank_account_number=bank_account_number,
+        )
+
+
+def handle_update_payment_channel(payment_channel):
+    payment_channel_type = payment_channel.get("type")
+    payment_channel_id = decode_id_string(payment_channel.get("id"))
+
+    if payment_channel_type == "BANK_TRANSFER":
+        bank_account_info = get_object_or_404(BankAccountInfo, id=payment_channel_id)
+        print("bank_account_info", bank_account_info)
+        bank_account_info.bank_name = payment_channel.get("bank_name")
+        bank_account_info.bank_account_number = payment_channel.get("bank_account_number")
+        return bank_account_info
 
 
 def handle_add_identity(identity, individual):
@@ -233,7 +259,7 @@ def prepare_edit_documents(documents_to_edit):
 def prepare_previous_identities(identities_to_remove_with_approve_status):
     from django.shortcuts import get_object_or_404
 
-    from hct_mis_api.apps.core.utils import encode_id_base64, decode_id_string
+    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
     from hct_mis_api.apps.household.models import IndividualIdentity
 
     previous_identities = {}
@@ -287,6 +313,49 @@ def prepare_edit_identities(identities):
             }
         )
     return edited_identities
+
+
+def prepare_edit_payment_channel(payment_channel):
+    items = []
+
+    handlers = {
+        "BANK_TRANSFER": handle_bank_transfer_payment_method,
+    }
+
+    for pc in payment_channel:
+        handler = handlers.get(pc.get("type"))
+        items.append(handler(pc))
+    return items
+
+
+def handle_bank_transfer_payment_method(pc):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+    from hct_mis_api.apps.household.models import BankAccountInfo
+
+    bank_account_number = pc.get("bank_account_number")
+    bank_name = pc.get("bank_name")
+    encoded_id = pc.get("id")
+    payment_channel_type = pc.get("type")
+    bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(encoded_id))
+    return {
+        "approve_status": False,
+        "value": {
+            "id": encoded_id,
+            "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
+            "bank_account_number": bank_account_number,
+            "bank_name": bank_name,
+            "type": payment_channel_type,
+        },
+        "previous_value": {
+            "id": encoded_id,
+            "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
+            "bank_account_number": bank_account_info.bank_account_number,
+            "bank_name": bank_account_info.bank_name,
+            "type": payment_channel_type,
+        },
+    }
 
 
 def verify_required_arguments(input_data, field_name, options):
