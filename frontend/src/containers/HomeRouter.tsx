@@ -38,12 +38,12 @@ import { TargetPopulationDetailsPage } from './pages/targeting/TargetPopulationD
 import { TargetPopulationsPage } from './pages/targeting/TargetPopulationsPage';
 import { PaymentModulePage } from './pages/paymentmodule/PaymentModulePage';
 import { CreatePaymentPlanPage } from './pages/paymentmodule/CreatePaymentPlanPage';
-import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
 import { CreateFspPage } from './pages/paymentmodule/CreateFspPage';
 import { EditFspPage } from './pages/paymentmodule/EditFspPage';
 import { CreateSetUpFspPage } from './pages/paymentmodule/CreateSetUpFspPage';
 import { EditSetUpFspPage } from './pages/paymentmodule/EditSetUpFspPage';
-import { SetUpFspPage } from './pages/paymentmodule/SetupFspPage';
+import { PaymentPlanDetailsPage } from './pages/paymentmodule/PaymentPlanDetailsPage';
+import { SetUpFspPage } from './pages/paymentmodule/SetUpFspPage';
 
 const Root = styled.div`
   display: flex;
