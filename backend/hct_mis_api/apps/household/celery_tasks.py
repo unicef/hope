@@ -6,7 +6,6 @@ from concurrency.api import disable_concurrency
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -69,3 +68,27 @@ def calculate_children_fields_for_not_collected_individual_data():
         + F("male_age_group_6_11_disabled_count")
         + F("male_age_group_12_17_disabled_count"),
     )
+
+
+@app.task()
+def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_by_id: UUID):
+    from hct_mis_api.apps.household.models import XlsxUpdateFile
+    from hct_mis_api.apps.household.services.individuals_iban_xlsx_update import IndividualsIBANXlsxUpdate
+    from hct_mis_api.apps.account.models import User
+
+    uploaded_by = User.objects.get(id=uploaded_by_id)
+    try:
+        xlsx_update_file = XlsxUpdateFile.objects.get(id=xlsx_update_file_id)
+        updater = IndividualsIBANXlsxUpdate(xlsx_update_file)
+        updater.validate()
+        if updater.validation_errors:
+            updater.send_failure_email()
+            return
+
+        updater.update()
+        updater.send_success_email()
+
+    except Exception as e:
+        IndividualsIBANXlsxUpdate.send_error_email(
+            error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
+        )
