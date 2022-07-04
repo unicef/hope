@@ -37,6 +37,7 @@ input AddIndividualDataObjectType {
   role: String!
   documents: [IndividualDocumentObjectType]
   identities: [IndividualIdentityObjectType]
+  paymentChannel: [BankTransferObjectType]
   businessArea: String
   flexFields: Arg
 }
@@ -143,6 +144,21 @@ type AreaTypeNodeEdge {
 scalar Arg
 
 type BankAccountInfoNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
+  lastSyncAt: DateTime
+  individual: IndividualNode!
+  bankName: String!
+  bankAccountNumber: String!
+  debitCardNumber: String!
+  type: String
+}
+
+input BankTransferObjectType {
+  type: String!
   bankName: String!
   bankAccountNumber: String!
 }
@@ -642,6 +658,13 @@ enum DocumentTypeType {
   TAX_ID
   RESIDENCE_PERMIT_NO
   OTHER
+}
+
+input EditBankTransferObjectType {
+  id: ID!
+  type: String!
+  bankName: String!
+  bankAccountNumber: String!
 }
 
 input EditCashPlanPaymentVerificationInput {
@@ -1895,6 +1918,7 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
+  paymentChannel: [BankAccountInfoNode]
 }
 
 type IndividualNodeConnection {
@@ -1983,6 +2007,9 @@ input IndividualUpdateDataObjectType {
   identities: [IndividualIdentityObjectType]
   identitiesToRemove: [ID]
   identitiesToEdit: [EditIndividualIdentityObjectType]
+  paymentChannel: [BankTransferObjectType]
+  paymentChannelToEdit: [EditBankTransferObjectType]
+  paymentChannelToRemove: [ID]
   flexFields: Arg
 }
 

@@ -107,6 +107,11 @@ export const AllIndividuals = gql`
               }
             }
           }
+          paymentChannel {
+            id
+            bankName
+            bankAccountNumber
+          }
         }
       }
     }

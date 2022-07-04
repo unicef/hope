@@ -81,6 +81,7 @@ export type AddIndividualDataObjectType = {
   role: Scalars['String'],
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
+  paymentChannel?: Maybe<Array<Maybe<BankTransferObjectType>>>,
   businessArea?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
@@ -271,6 +272,21 @@ export type AreaTypeNodeEdge = {
 
 export type BankAccountInfoNode = {
    __typename?: 'BankAccountInfoNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  removedDate?: Maybe<Scalars['DateTime']>,
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
+  individual: IndividualNode,
+  bankName: Scalars['String'],
+  bankAccountNumber: Scalars['String'],
+  debitCardNumber: Scalars['String'],
+  type?: Maybe<Scalars['String']>,
+};
+
+export type BankTransferObjectType = {
+  type: Scalars['String'],
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
 };
@@ -981,6 +997,13 @@ export enum DocumentTypeType {
   ResidencePermitNo = 'RESIDENCE_PERMIT_NO',
   Other = 'OTHER'
 }
+
+export type EditBankTransferObjectType = {
+  id: Scalars['ID'],
+  type: Scalars['String'],
+  bankName: Scalars['String'],
+  bankAccountNumber: Scalars['String'],
+};
 
 export type EditCashPlanPaymentVerificationInput = {
   cashPlanPaymentVerificationId: Scalars['ID'],
@@ -2471,6 +2494,7 @@ export type IndividualNode = Node & {
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
+  paymentChannel?: Maybe<Array<Maybe<BankAccountInfoNode>>>,
 };
 
 
@@ -2688,6 +2712,9 @@ export type IndividualUpdateDataObjectType = {
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
   identitiesToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   identitiesToEdit?: Maybe<Array<Maybe<EditIndividualIdentityObjectType>>>,
+  paymentChannel?: Maybe<Array<Maybe<BankTransferObjectType>>>,
+  paymentChannelToEdit?: Maybe<Array<Maybe<EditBankTransferObjectType>>>,
+  paymentChannelToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
@@ -8924,7 +8951,10 @@ export type AllIndividualsQuery = (
               ) }
             )> }
           )>> }
-        ) }
+        ), paymentChannel: Maybe<Array<Maybe<(
+          { __typename?: 'BankAccountInfoNode' }
+          & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
+        )>>> }
       )> }
     )>> }
   )> }
@@ -16559,6 +16589,11 @@ export const AllIndividualsDocument = gql`
             }
           }
         }
+        paymentChannel {
+          id
+          bankName
+          bankAccountNumber
+        }
       }
     }
   }
@@ -19425,6 +19460,8 @@ export type ResolversTypes = {
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
   IndividualIdentityObjectType: IndividualIdentityObjectType,
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
+  BankTransferObjectType: BankTransferObjectType,
+  EditBankTransferObjectType: EditBankTransferObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
@@ -19793,6 +19830,8 @@ export type ResolversParentTypes = {
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
   IndividualIdentityObjectType: IndividualIdentityObjectType,
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
+  BankTransferObjectType: BankTransferObjectType,
+  EditBankTransferObjectType: EditBankTransferObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
@@ -19970,8 +20009,17 @@ export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
 }
 
 export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BankAccountInfoNode'] = ResolversParentTypes['BankAccountInfoNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   bankName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   bankAccountNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  debitCardNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
@@ -20892,6 +20940,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  paymentChannel?: Resolver<Maybe<Array<Maybe<ResolversTypes['BankAccountInfoNode']>>>, ParentType, ContextType>,
 };
 
 export type IndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeConnection'] = ResolversParentTypes['IndividualNodeConnection']> = {
