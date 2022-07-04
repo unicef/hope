@@ -1,6 +1,10 @@
+import logging
+import datetime
+
 from django.shortcuts import get_object_or_404
 
 import graphene
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
@@ -24,6 +28,14 @@ class CreateReportInput(graphene.InputObjectType):
     date_to = graphene.Date(required=True)
     admin_area = graphene.List(graphene.ID)
     program = graphene.ID()
+
+
+logger = logging.getLogger(__name__)
+
+
+class RestartCreateReportInput(graphene.InputObjectType):
+    report_id = graphene.ID(required=True)
+    business_area_slug = graphene.String(required=True)
 
 
 class CreateReport(ReportValidator, PermissionMutation):
@@ -76,6 +88,35 @@ class CreateReport(ReportValidator, PermissionMutation):
         return CreateReport(report)
 
 
+class RestartCreateReport(PermissionMutation):
+    report = graphene.Field(ReportNode)
+
+    class Arguments:
+        report_data = RestartCreateReportInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, report_data):
+        business_area = BusinessArea.objects.get(slug=report_data.get("business_area_slug"))
+        cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
+        report = Report.objects.filter(pk=decode_id_string(report_data.get("report_id"))).first()
+        if not report:
+            msg = f"Not Found Report with id {report_data.get('report_id')}"
+            logger.error(msg)
+            raise GraphQLError(msg)
+
+        if report.status is not Report.IN_PROGRESS and report.updated_at > datetime.datetime.now() - datetime.timedelta(
+            minutes=30
+        ):
+            msg = "Not impossible restart now because status must be 'Processing' and less than 30 minutes have passed since the last running task for this report"
+            logger.error(msg)
+            raise GraphQLError(msg)
+        else:
+            report_export_task.delay(report_id=str(report.id))
+            report.refresh_from_db()
+        return RestartCreateReport(report)
+
+
 class CreateDashboardReportInput(graphene.InputObjectType):
     report_types = graphene.List(graphene.String, required=True)
     business_area_slug = graphene.String(required=True)
@@ -126,4 +167,5 @@ class CreateDashboardReport(PermissionMutation):
 
 class Mutations(graphene.ObjectType):
     create_report = CreateReport.Field()
+    restart_create_report = RestartCreateReport.Field()
     create_dashboard_report = CreateDashboardReport.Field()
