@@ -42,7 +42,7 @@ class Sampling:
         return cash_plan_verification, self.payment_records
 
     def generate_sampling(self) -> Tuple[int, int]:
-        payment_record_count = len(self.payment_records)
+        payment_record_count = self.payment_records.count()
         sampling = self._get_sampling()
         sampling.sampling(self.payment_records)
 
@@ -103,9 +103,7 @@ class RandomSampling(BaseSampling):
 
 class FullListSampling(BaseSampling):
     def sampling(self, payment_records: QuerySet):
-        self.payment_records = [
-            record
-            for record in payment_records
-            if record.household.admin_area and (record.household.admin_area.id not in self.excluded_admin_areas_decoded)
-        ]
-        self.sample_size = self.calc_sample_size(len(payment_records))
+        self.payment_records = payment_records.filter(
+            ~(Q(household__admin_area__id__in=self.excluded_admin_areas_decoded))
+        )
+        self.sample_size = self.calc_sample_size(payment_records.count())
