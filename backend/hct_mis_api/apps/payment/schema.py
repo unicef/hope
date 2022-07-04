@@ -265,9 +265,7 @@ class Query(graphene.ObjectType):
         valid_payment_records = [
             payment_record
             for payment_record in payment_records
-            if is_right_phone_number_format(
-                str(payment_record.head_of_household.phone_no)
-            )
+            if is_right_phone_number_format(str(payment_record.head_of_household.phone_no))
         ]
         if not valid_payment_records:
             return {
@@ -275,7 +273,9 @@ class Query(graphene.ObjectType):
                 "payment_record_count": 0,
             }
 
-        sampling = Sampling(input, cash_plan, PaymentRecord.objects.filter(pk__in=[obj.pk for obj in valid_payment_records]))
+        sampling = Sampling(
+            input, cash_plan, PaymentRecord.objects.filter(pk__in=[obj.pk for obj in valid_payment_records])
+        )
         payment_record_count, payment_records_sample_count = sampling.generate_sampling()
 
         return {

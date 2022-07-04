@@ -12,7 +12,6 @@ from hct_mis_api.apps.payment.services.verifiers import (
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import is_right_phone_number_format
 
 
-
 class VerificationPlanCrudServices:
     @classmethod
     def create(cls, cash_plan, input_data) -> CashPlanPaymentVerification:
@@ -28,9 +27,7 @@ class VerificationPlanCrudServices:
         valid_payment_records_list = [
             payment_record.pk
             for payment_record in payment_records
-            if is_right_phone_number_format(
-                str(payment_record.head_of_household.phone_no)
-            )
+            if is_right_phone_number_format(str(payment_record.head_of_household.phone_no))
         ]
         valid_payment_records = PaymentRecord.objects.filter(pk__in=valid_payment_records_list)
 
