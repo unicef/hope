@@ -950,6 +950,16 @@
                 "defaultValue": null
               },
               {
+                "name": "household",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -10726,6 +10736,22 @@
             "deprecationReason": null
           },
           {
+            "name": "postponeDeduplication",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "deduplicationDuplicateScore",
             "description": null,
             "args": [],
@@ -10823,6 +10849,22 @@
           },
           {
             "name": "screenBeneficiary",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deduplicationIgnoreWithdraw",
             "description": null,
             "args": [],
             "type": {
@@ -19936,6 +19978,12 @@
           },
           {
             "name": "NOT_PROCESSED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "POSTPONE",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -34272,6 +34320,22 @@
             "deprecationReason": null
           },
           {
+            "name": "postponeDeduplication",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "deduplicationDuplicateScore",
             "description": null,
             "args": [],
@@ -34369,6 +34433,22 @@
           },
           {
             "name": "screenBeneficiary",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "deduplicationIgnoreWithdraw",
             "description": null,
             "args": [],
             "type": {
@@ -38525,6 +38605,12 @@
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "DIIA",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -39197,6 +39283,12 @@
           },
           {
             "name": "NOT_PROCESSED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "POSTPONE",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
