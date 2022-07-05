@@ -16,6 +16,8 @@ import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
+import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
+import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -153,6 +155,17 @@ export const EditIndividualDataChange = ({
           values={values}
           addIndividualFieldsData={addIndividualFieldsData}
         />
+      </Box>
+      <Box mt={3}>
+        <Title>
+          <Typography variant='h6'>{t('Payment Channel')}</Typography>
+        </Title>
+        <ExistingPaymentChannelFieldArray
+          values={values}
+          setFieldValue={setFieldValue}
+          individual={individual}
+        />
+        <NewPaymentChannelFieldArray values={values} />
       </Box>
     </>
   );

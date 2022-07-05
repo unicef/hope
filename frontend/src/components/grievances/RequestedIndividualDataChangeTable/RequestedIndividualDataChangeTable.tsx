@@ -12,6 +12,9 @@ import { EntriesTable } from './EntriesTable';
 import { IdentitiesTable } from './IdentitiesTable';
 import { IdentitiesToEditTable } from './IdentitiesToEditTable';
 import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
+import { PaymentChannelsTable } from './PaymentChannelsTable';
+import { PaymentChannelsToEditTable } from './PaymentChannelsToEditTable';
+import { PaymentChannelsToRemoveTable } from './PaymentChannelsToRemoveTable';
 
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -30,25 +33,23 @@ export function RequestedIndividualDataChangeTable({
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
   };
-  const documents = individualData?.documents;
-  const previousDocuments = individualData.previous_documents;
-  const documentsToRemove = individualData.documents_to_remove;
-  const documentsToEdit = individualData.documents_to_edit;
-  const identities = individualData?.identities;
-  const previousIdentities = individualData.previous_identities;
-  const identitiesToRemove = individualData.identities_to_remove;
-  const identitiesToEdit = individualData.identities_to_edit;
-  const flexFields = individualData.flex_fields;
-  delete individualData.documents;
-  delete individualData.documents_to_remove;
-  delete individualData.previous_documents;
-  delete individualData.documents_to_edit;
-  delete individualData.identities;
-  delete individualData.identities_to_remove;
-  delete individualData.identities_to_edit;
-  delete individualData.previous_identities;
-  delete individualData.flex_fields;
-  const entries = Object.entries(individualData);
+  const {
+    documents,
+    identities,
+    previous_documents: previousDocuments,
+    documents_to_remove: documentsToRemove,
+    documents_to_edit: documentsToEdit,
+    previous_identities: previousIdentities,
+    identities_to_remove: identitiesToRemove,
+    identities_to_edit: identitiesToEdit,
+    payment_channels: paymentChannels,
+    payment_channels_to_remove: paymentChannelsToRemove,
+    payment_channels_to_edit: paymentChannelsToEdit,
+    previous_payment_channels: previousPaymentChannels,
+    flex_fields: flexFields,
+    ...restIndividualData
+  } = individualData;
+  const entries = Object.entries(restIndividualData);
   const entriesFlexFields = Object.entries(flexFields);
   const fieldsDict = useArrayToDict(
     data?.allAddIndividualsFieldsAttributes,
@@ -144,6 +145,29 @@ export function RequestedIndividualDataChangeTable({
             );
           })
         : null}
+      {paymentChannels?.length ? (
+        <PaymentChannelsTable
+          values={values}
+          isEdit={isEdit}
+          ticket={ticket}
+          setFieldValue={setFieldValue}
+          paymentChannels={paymentChannels}
+        />
+      ) : null}
+      {paymentChannelsToEdit?.length
+        ? paymentChannelsToEdit.map((paymentChannel, index) => {
+            return (
+              <PaymentChannelsToEditTable
+                values={values}
+                isEdit={isEdit}
+                ticket={ticket}
+                setFieldValue={setFieldValue}
+                index={index}
+                paymentChannel={paymentChannel}
+              />
+            );
+          })
+        : null}
       {documentsToRemove?.length ? (
         <DocumentsToRemoveTable
           values={values}
@@ -164,6 +188,16 @@ export function RequestedIndividualDataChangeTable({
           countriesDict={countriesDict}
           identitiesToRemove={identitiesToRemove}
           previousIdentities={previousIdentities}
+        />
+      ) : null}
+      {paymentChannelsToRemove?.length ? (
+        <PaymentChannelsToRemoveTable
+          values={values}
+          isEdit={isEdit}
+          ticket={ticket}
+          setFieldValue={setFieldValue}
+          paymentChannelsToRemove={paymentChannelsToRemove}
+          previousPaymentChannels={previousPaymentChannels}
         />
       ) : null}
     </div>
