@@ -7,6 +7,7 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 from model_utils import Choices
 
@@ -175,7 +176,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
             "confidence_interval",
             "margin_of_error",
             "rapid_pro_flow_id",
-            "rapid_pro_flow_start_uuid",
+            "rapid_pro_flow_start_uuids",
             "age_filter",
             "excluded_admin_areas_filter",
             "sex_filter",
@@ -221,7 +222,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     confidence_interval = models.FloatField(null=True)
     margin_of_error = models.FloatField(null=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
-    rapid_pro_flow_start_uuid = models.CharField(max_length=255, blank=True)
+    rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
     age_filter = JSONField(null=True)
     excluded_admin_areas_filter = JSONField(null=True)
     sex_filter = models.CharField(null=True, max_length=10)
@@ -247,7 +248,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         self.not_received_count = None
         self.received_with_problems_count = None
         self.activation_date = None
-        self.rapid_pro_flow_start_uuid = ""
+        self.rapid_pro_flow_start_uuids = []
 
 
 def build_summary(cash_plan):
