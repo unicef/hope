@@ -276,6 +276,27 @@ def prepare_previous_identities(identities_to_remove_with_approve_status):
     return previous_identities
 
 
+def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+    from hct_mis_api.apps.household.models import BankAccountInfo
+
+    previous_payment_channels = {}
+    for payment_channel_data in payment_channels_to_remove_with_approve_status:
+        payment_channel_id = payment_channel_data.get("value")
+        bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(payment_channel_id))
+        previous_payment_channels[payment_channel_id] = {
+            "id": payment_channel_id,
+            "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
+            "bank_name": bank_account_info.bank_name,
+            "bank_account_number": bank_account_info.bank_account_number,
+            "type": "BANK_TRANSFER",
+        }
+
+    return previous_payment_channels
+
+
 def prepare_edit_identities(identities):
     from django.shortcuts import get_object_or_404
 

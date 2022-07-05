@@ -259,7 +259,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "number": "2222",
                                     }
                                 ],
-                                "paymentChannel": [
+                                "paymentChannels": [
                                     {
                                         "type": "BANK_TRANSFER",
                                         "bankName": "privatbank",
@@ -380,7 +380,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                         "individualDataUpdateIssueTypeExtras": {
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                             "individualData": {
-                                "paymentChannel": [
+                                "paymentChannels": [
                                     {
                                         "type": "BANK_TRANSFER",
                                         "bankName": "privatbank",
@@ -432,7 +432,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                         "individualDataUpdateIssueTypeExtras": {
                             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                             "individualData": {
-                                "paymentChannelToEdit": [
+                                "paymentChannelsToEdit": [
                                     {
                                         "id": self.id_to_base64(bank_account.id, "BankAccountInfoNode"),
                                         "type": "BANK_TRANSFER",
