@@ -1002,13 +1002,14 @@ class ReassignRoleMutation(graphene.Mutation):
         household_id = graphene.Argument(graphene.ID, required=True)
         household_version = BigInt(required=False)
         individual_id = graphene.Argument(graphene.ID, required=True)
+        new_individual_id = graphene.Argument(graphene.ID, required=False)
         individual_version = BigInt(required=False)
         role = graphene.String(required=True)
         version = BigInt(required=False)
 
     @classmethod
     def verify_role_choices(cls, role):
-        if role not in [ROLE_PRIMARY, ROLE_ALTERNATE, HEAD]:
+        if role not in (ROLE_PRIMARY, ROLE_ALTERNATE, HEAD):
             logger.error("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
             raise GraphQLError("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
@@ -1053,7 +1054,10 @@ class ReassignRoleMutation(graphene.Mutation):
 
         ticket_details = grievance_ticket.ticket_details
         if grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
-            ticket_individual = ticket_details.selected_individual
+            if ticket_details.is_multiple_duplicates_version:
+                ticket_individual = individual
+            else:
+                ticket_individual = ticket_details.selected_individual
         elif grievance_ticket.category == GrievanceTicket.CATEGORY_SYSTEM_FLAGGING:
             ticket_individual = ticket_details.golden_records_individual
         else:
@@ -1076,6 +1080,10 @@ class ReassignRoleMutation(graphene.Mutation):
             "household": household_id,
             "individual": individual_id,
         }
+
+        if getattr(ticket_details, "is_multiple_duplicates_version", False):
+            new_individual_id = kwargs.get("new_individual_id")
+            ticket_details.role_reassign_data[role_data_key]["new_individual"] = new_individual_id
         ticket_details.save()
 
         return cls(household=household, individual=individual)
