@@ -1,5 +1,5 @@
 import logging
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -139,7 +139,10 @@ class RapidProAPI:
             received = received_variable.get("value").upper() == variable_received_positive_string
         received_amount_variable = values.get(variable_amount_name)
         if received_amount_variable is not None:
-            received_amount = Decimal(received_amount_variable.get("value", 0))
+            try:
+                received_amount = Decimal(received_amount_variable.get("value", 0))
+            except InvalidOperation:
+                received_amount = 0
         return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 
     def create_group(self, name):
