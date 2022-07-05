@@ -93,11 +93,10 @@ class RapidProAPI:
 
         def _start_flow(data):
             try:
-                response = self._handle_post_request(
+                return self._handle_post_request(
                     RapidProAPI.FLOW_STARTS_ENDPOINT,
                     data,
                 )
-                return response
             except requests.exceptions.HTTPError as e:
                 errors = self._parse_json_urns_error(e, phone_numbers)
                 if errors:

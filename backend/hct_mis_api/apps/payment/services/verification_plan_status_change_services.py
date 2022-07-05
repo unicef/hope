@@ -89,7 +89,7 @@ class VerificationPlanStatusChangeServices:
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
                 business_area=cashplan_payment_verification.cash_plan.business_area,
             )
-            for _ in list(range(0, verifications.count()))
+            for _ in list(range(verifications.count()))
         ]
         grievance_ticket_objs = GrievanceTicket.objects.bulk_create(grievance_ticket_list)
 

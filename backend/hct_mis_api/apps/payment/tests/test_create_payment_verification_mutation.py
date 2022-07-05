@@ -26,7 +26,6 @@ class TestCreatePaymentVerificationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.maxDiff = None
         cls.user = UserFactory.create()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
