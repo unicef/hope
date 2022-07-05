@@ -62,7 +62,7 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
     resource_class = QueryResource
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_superuser or obj.owner == request.user
+        return request.user.is_superuser or (obj and obj.owner == request.user)
 
     def status(self, obj):
         return obj.ready and not obj.error
@@ -252,7 +252,7 @@ class ReportAdmin(ImportExportMixin, ExtraButtonsMixin, AdminFiltersMixin, Model
     change_list_template = None
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_superuser or obj.owner == request.user
+        return request.user.is_superuser or (obj and obj.owner == request.user)
 
     def get_changeform_initial_data(self, request):
         kwargs = {"owner": request.user}
