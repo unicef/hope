@@ -2958,6 +2958,7 @@ export type MutationsReassignRoleArgs = {
   householdVersion?: Maybe<Scalars['BigInt']>,
   individualId: Scalars['ID'],
   individualVersion?: Maybe<Scalars['BigInt']>,
+  newIndividualId?: Maybe<Scalars['ID']>,
   role: Scalars['String'],
   version?: Maybe<Scalars['BigInt']>
 };
@@ -6778,6 +6779,7 @@ export type ReassignRoleGrievanceMutationVariables = {
   grievanceTicketId: Scalars['ID'],
   householdId: Scalars['ID'],
   individualId: Scalars['ID'],
+  newIndividualId?: Maybe<Scalars['ID']>,
   role: Scalars['String']
 };
 
@@ -7913,7 +7915,7 @@ export type GrievanceTicketQuery = (
         & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
         & { individual: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'unicefId'>
+          & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
         ), household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -8130,7 +8132,7 @@ export type GrievanceTicketQuery = (
           & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
           & { individual: (
             { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'id' | 'unicefId'>
+            & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
           ), household: (
             { __typename?: 'HouseholdNode' }
             & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -8147,7 +8149,7 @@ export type GrievanceTicketQuery = (
           & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
           & { individual: (
             { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'id' | 'unicefId'>
+            & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
           ), household: (
             { __typename?: 'HouseholdNode' }
             & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -11242,8 +11244,8 @@ export type GrievanceTicketStatusChangeMutationHookResult = ReturnType<typeof us
 export type GrievanceTicketStatusChangeMutationResult = ApolloReactCommon.MutationResult<GrievanceTicketStatusChangeMutation>;
 export type GrievanceTicketStatusChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>;
 export const ReassignRoleGrievanceDocument = gql`
-    mutation ReassignRoleGrievance($grievanceTicketId: ID!, $householdId: ID!, $individualId: ID!, $role: String!) {
-  reassignRole(grievanceTicketId: $grievanceTicketId, householdId: $householdId, individualId: $individualId, role: $role) {
+    mutation ReassignRoleGrievance($grievanceTicketId: ID!, $householdId: ID!, $individualId: ID!, $newIndividualId: ID, $role: String!) {
+  reassignRole(grievanceTicketId: $grievanceTicketId, householdId: $householdId, individualId: $individualId, newIndividualId: $newIndividualId, role: $role) {
     household {
       id
       unicefId
@@ -11290,6 +11292,7 @@ export function withReassignRoleGrievance<TProps, TChildProps = {}>(operationOpt
  *      grievanceTicketId: // value for 'grievanceTicketId'
  *      householdId: // value for 'householdId'
  *      individualId: // value for 'individualId'
+ *      newIndividualId: // value for 'newIndividualId'
  *      role: // value for 'role'
  *   },
  * });
@@ -14390,6 +14393,7 @@ export const GrievanceTicketDocument = gql`
         individual {
           id
           unicefId
+          fullName
         }
         household {
           id
@@ -14652,6 +14656,7 @@ export const GrievanceTicketDocument = gql`
           individual {
             id
             unicefId
+            fullName
           }
           household {
             id
@@ -14670,6 +14675,7 @@ export const GrievanceTicketDocument = gql`
           individual {
             id
             unicefId
+            fullName
           }
           household {
             id
