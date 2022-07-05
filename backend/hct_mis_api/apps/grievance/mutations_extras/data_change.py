@@ -39,6 +39,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     prepare_edit_payment_channel,
     prepare_previous_documents,
     prepare_previous_identities,
+    prepare_previous_payment_channels,
     reassign_roles_on_update,
     save_images,
     verify_flex_fields,
@@ -454,6 +455,9 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
         identities_to_remove_with_approve_status
     )
+    individual_data_with_approve_status["previous_payment_channels"] = prepare_previous_payment_channels(
+        payment_channels_to_remove_with_approve_status
+    )
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
         individual_data=individual_data_with_approve_status,
         individual=individual,
@@ -545,6 +549,9 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     individual_data_with_approve_status["payment_channels_to_remove"] = payment_channels_to_remove_with_approve_status
     individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
         payment_channels_to_edit
+    )
+    individual_data_with_approve_status["previous_payment_channels"] = prepare_previous_payment_channels(
+        payment_channels_to_remove_with_approve_status
     )
 
     individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
@@ -742,7 +749,9 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
 
     payment_channels = individual_data.pop("payment_channels", [])
     payment_channels_to_remove_encoded = individual_data.pop("payment_channels_to_remove", [])
-    payment_channels_to_remove = [data["value"] for data in payment_channels_to_remove_encoded if is_approved(data)]
+    payment_channels_to_remove = [
+        decode_id_string(data["value"]) for data in payment_channels_to_remove_encoded if is_approved(data)
+    ]
     payment_channels_to_edit = individual_data.pop("payment_channels_to_edit", [])
 
     only_approved_data = {
