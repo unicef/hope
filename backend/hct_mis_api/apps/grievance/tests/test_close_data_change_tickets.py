@@ -194,7 +194,7 @@ class TestCloseDataChangeTickets(APITestCase):
                         "photoraw": "test_file_name.jpg",
                     }
                 ],
-                "payment_channel": [
+                "payment_channels": [
                     {
                         "type": "BANK_TRANSFER",
                         "bank_name": "privatbank",
@@ -579,7 +579,7 @@ class TestCloseDataChangeTickets(APITestCase):
             ticket=ticket,
             individual=self.individuals[0],
             individual_data={
-                "payment_channel": [
+                "payment_channels": [
                     {
                         "value": {
                             "type": "BANK_TRANSFER",
@@ -631,7 +631,7 @@ class TestCloseDataChangeTickets(APITestCase):
             ticket=ticket,
             individual=self.individuals[0],
             individual_data={
-                "payment_channel_to_edit": [
+                "payment_channels_to_edit": [
                     {
                         "approve_status": True,
                         "previous_value": {

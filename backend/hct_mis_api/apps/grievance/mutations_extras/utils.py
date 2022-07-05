@@ -114,7 +114,6 @@ def handle_update_payment_channel(payment_channel):
 
     if payment_channel_type == "BANK_TRANSFER":
         bank_account_info = get_object_or_404(BankAccountInfo, id=payment_channel_id)
-        print("bank_account_info", bank_account_info)
         bank_account_info.bank_name = payment_channel.get("bank_name")
         bank_account_info.bank_account_number = payment_channel.get("bank_account_number")
         return bank_account_info
@@ -315,14 +314,14 @@ def prepare_edit_identities(identities):
     return edited_identities
 
 
-def prepare_edit_payment_channel(payment_channel):
+def prepare_edit_payment_channel(payment_channels):
     items = []
 
     handlers = {
         "BANK_TRANSFER": handle_bank_transfer_payment_method,
     }
 
-    for pc in payment_channel:
+    for pc in payment_channels:
         handler = handlers.get(pc.get("type"))
         items.append(handler(pc))
     return items

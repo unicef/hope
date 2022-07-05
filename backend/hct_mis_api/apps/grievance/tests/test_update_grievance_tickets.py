@@ -347,7 +347,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                         "photoraw": "test_file_name.jpg",
                     }
                 ],
-                "payment_channel": [
+                "payment_channels": [
                     {
                         "type": "BANK_TRANSFER",
                         "bank_name": "privatbank",
