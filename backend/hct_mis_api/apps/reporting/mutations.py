@@ -97,15 +97,10 @@ class RestartCreateReport(PermissionMutation):
     def mutate(cls, root, info, report_data):
         business_area = BusinessArea.objects.get(slug=report_data.get("business_area_slug"))
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
-        report = Report.objects.filter(pk=decode_id_string(report_data.get("report_id"))).first()
-        if not report:
-            msg = f"Not Found Report with id {report_data.get('report_id')}"
-            logger.error(msg)
-            raise GraphQLError(msg)
+        report = get_object_or_404(Report, id=decode_id_string(report_data.get("report_id")))
 
-        if report.status is not Report.IN_PROGRESS and report.updated_at > datetime.datetime.now() - datetime.timedelta(
-            minutes=30
-        ):
+        delta30 = datetime.datetime.now() - datetime.timedelta(minutes=30)
+        if report.status is not Report.IN_PROGRESS and report.updated_at > delta30:
             msg = "Impossible restart now. Status must be 'Processing' and more than 30 mins after last running."
             logger.error(msg)
             raise GraphQLError(msg)
