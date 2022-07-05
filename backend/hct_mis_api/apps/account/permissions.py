@@ -73,6 +73,11 @@ class Permissions(Enum):
     PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS = auto()
     PAYMENT_VERIFICATION_DELETE = auto()
 
+    # Payment Module
+    PAYMENT_MODULE_VIEW_LIST = auto()
+    PAYMENT_MODULE_CREATE = auto()
+    PAYMENT_MODULE_VIEW_DETAILS = auto()
+
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
 
