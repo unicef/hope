@@ -315,7 +315,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "number": "2222",
                                 }
                             ],
-                            "paymentChannel": [
+                            "paymentChannels": [
                                 {
                                     "type": "BANK_TRANSFER",
                                     "bankName": "privatbank",
@@ -508,6 +508,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
                 "flex_fields": {},
                 "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
+                "payment_channels": [],
+                "payment_channels_to_edit": [],
+                "payment_channels_to_remove": [],
+                "previous_payment_channels": {},
                 "documents_to_edit": [],
                 "previous_documents": {},
                 "documents_to_remove": [],

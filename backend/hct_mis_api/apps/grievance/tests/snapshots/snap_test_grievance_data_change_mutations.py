@@ -51,7 +51,9 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                             'previous_documents': {
                             },
                             'previous_identities': {
-                            }
+                            },
+                            'previous_payment_channels': {
+                            },
                         }
                     },
                     'issueType': 14,
@@ -136,7 +138,9 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             'previous_documents': {
                             },
                             'previous_identities': {
-                            }
+                            },
+                            'previous_payment_channels': {
+                            },
                         }
                     },
                     'issueType': 14,
@@ -493,6 +497,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             'previous_documents': {
                             },
                             'previous_identities': {
+                            },
+                            'previous_payment_channels': {
                             },
                             'sex': {
                                 'approve_status': False,
