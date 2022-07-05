@@ -2,7 +2,6 @@ import uuid
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
-from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -29,7 +28,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import is_right_phone_number_format
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 
 class TestRapidProVerificationTask(TestCase):

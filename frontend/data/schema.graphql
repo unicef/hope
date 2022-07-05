@@ -1895,6 +1895,8 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
+  phoneNoValid: Boolean
+  phoneNoAlternativeValid: Boolean
 }
 
 type IndividualNodeConnection {

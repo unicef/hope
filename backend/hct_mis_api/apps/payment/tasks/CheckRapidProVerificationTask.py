@@ -1,28 +1,13 @@
 import logging
-import phonenumbers
 
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentVerification,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status, get_payment_records_for_dashboard
+from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status, is_right_phone_number_format
 
 logger = logging.getLogger(__name__)
-
-
-def is_right_phone_number_format(phone_number):
-    # from phonenumbers.parse method description:
-    # This method will throw a NumberParseException if the number is not
-    # considered to be a possible number.
-    #
-    # so if `parse` does not throw, we may assume it's ok
-    try:
-        phonenumbers.parse(phone_number)
-    except phonenumbers.NumberParseException:
-        logging.warning(f"'{phone_number}' is not a valid phone number")
-        return False
-    return True
 
 
 def does_payment_record_have_right_hoh_phone_number(record):
@@ -30,11 +15,7 @@ def does_payment_record_have_right_hoh_phone_number(record):
     if not hoh:
         logging.warning("Payment record has no head of household")
         return False
-    number = hoh.phone_no
-    if not number:
-        logging.warning("Head of household has no phone number")
-        return False
-    return is_right_phone_number_format(str(number))
+    return hoh.phone_no_valid or hoh.phone_no_alternative_valid
 
 
 class CheckRapidProVerificationTask:
