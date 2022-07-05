@@ -6,12 +6,12 @@ import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 
 interface DeliveryMechanismRowProps {
   index: number;
-  baseName: string;
+  activeStep: number;
 }
 
 export const DeliveryMechanismRow = ({
   index,
-  baseName,
+  activeStep,
 }: DeliveryMechanismRowProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -19,7 +19,7 @@ export const DeliveryMechanismRow = ({
     <Box flexDirection='column'>
       <Grid container>
         <Grid item xs={3}>
-          <Grid item xs={6}>
+          <Grid item xs={9}>
             <Box display='flex' alignItems='center'>
               <Box mr={4}>{index + 1}</Box>
               <Field
@@ -33,27 +33,27 @@ export const DeliveryMechanismRow = ({
                   { name: 'Mobile Money', value: 'mobile_money' },
                   { name: 'Cash', value: 'cash' },
                 ]}
-                fullwidth
               />
             </Box>
           </Grid>
         </Grid>
-        <Grid item xs={3}>
-          <Grid item xs={6}>
-            <Field
-              name={`deliveryMechanisms[${index}].fsp`}
-              variant='outlined'
-              label={t('FSP')}
-              component={FormikSelectField}
-              choices={[
-                { name: 'City Group', value: 'city_group' },
-                { name: 'Bank Of America', value: 'bank_of_america' },
-                { name: 'Chase Bank', value: 'chase_bank' },
-              ]}
-              fullwidth
-            />
+        {activeStep === 1 && (
+          <Grid item xs={3}>
+            <Grid item xs={9}>
+              <Field
+                name={`deliveryMechanisms[${index}].fsp`}
+                variant='outlined'
+                label={t('FSP')}
+                component={FormikSelectField}
+                choices={[
+                  { name: 'City Group', value: 'city_group' },
+                  { name: 'Bank Of America', value: 'bank_of_america' },
+                  { name: 'Chase Bank', value: 'chase_bank' },
+                ]}
+              />
+            </Grid>
           </Grid>
-        </Grid>
+        )}
       </Grid>
     </Box>
   );

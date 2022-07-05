@@ -1,13 +1,13 @@
 import { Box, Button, Grid } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Form, Formik } from 'formik';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { DividerLine } from '../../../components/core/DividerLine';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { DeliveryMechanismRow } from '../../../components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow';
+import { DeliveryMechanismStepper } from '../../../components/paymentmodule/CreateSetUpFsp/DeliveryMechanismStepper';
 import { EditSetUpFspHeader } from '../../../components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -18,6 +18,7 @@ import { handleValidationErrors } from '../../../utils/utils';
 import { useCreateTpMutation } from '../../../__generated__/graphql';
 
 export const EditSetUpFspPage = (): React.ReactElement => {
+  const [activeStep, setActiveStep] = useState(0);
   const { t } = useTranslation();
   const initialValues = {
     deliveryMechanisms: [
@@ -85,39 +86,44 @@ export const EditSetUpFspPage = (): React.ReactElement => {
             />
             <Box m={5}>
               <ContainerColumnWithBorder>
-                <FieldArray
-                  name='deliveryMechanisms'
-                  render={(arrayHelpers) => {
-                    return (
-                      <>
-                        {values.deliveryMechanisms.map((item, index) => (
-                          <DeliveryMechanismRow
-                            baseName='mobileMoney'
-                            index={index}
-                          />
-                        ))}
-                        <Grid container>
-                          <Grid item xs={12}>
-                            <Box>
-                              <Button
-                                color='primary'
-                                startIcon={<AddCircleOutline />}
-                                onClick={() => {
-                                  arrayHelpers.push({
-                                    deliveryMechanism: '',
-                                    fsp: '',
-                                  });
-                                }}
-                              >
-                                {t('Add Delivery Mechanism')}
-                              </Button>
-                            </Box>
+                <DeliveryMechanismStepper
+                  activeStep={activeStep}
+                  setActiveStep={setActiveStep}
+                >
+                  <FieldArray
+                    name='deliveryMechanisms'
+                    render={(arrayHelpers) => {
+                      return (
+                        <>
+                          {values.deliveryMechanisms.map((item, index) => (
+                            <DeliveryMechanismRow
+                              activeStep={activeStep}
+                              index={index}
+                            />
+                          ))}
+                          <Grid container>
+                            <Grid item xs={12}>
+                              <Box>
+                                <Button
+                                  color='primary'
+                                  startIcon={<AddCircleOutline />}
+                                  onClick={() => {
+                                    arrayHelpers.push({
+                                      deliveryMechanism: '',
+                                      fsp: '',
+                                    });
+                                  }}
+                                >
+                                  {t('Add Delivery Mechanism')}
+                                </Button>
+                              </Box>
+                            </Grid>
                           </Grid>
-                        </Grid>
-                      </>
-                    );
-                  }}
-                />
+                        </>
+                      );
+                    }}
+                  />
+                </DeliveryMechanismStepper>
               </ContainerColumnWithBorder>
             </Box>
           </Form>
