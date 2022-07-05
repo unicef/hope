@@ -3755,6 +3755,20 @@
                 "defaultValue": null
               },
               {
+                "name": "criteriaFitRange",
+                "description": null,
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "offset",
                 "description": null,
                 "type": {

@@ -11,13 +11,15 @@ const StyledWarning = styled(WarningIcon)`
 interface WarningTooltipProps {
   confirmed?: boolean;
   message?: string;
+  handleClick?: (e) => void;
 }
 export const WarningTooltip = ({
   confirmed,
   message = '',
+  handleClick,
 }: WarningTooltipProps): React.ReactElement => {
   return (
-    <Tooltip title={message}>
+    <Tooltip onClick={handleClick} title={message}>
       <StyledWarning confirmed={confirmed} />
     </Tooltip>
   );
