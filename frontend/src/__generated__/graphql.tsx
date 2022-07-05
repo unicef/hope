@@ -81,7 +81,7 @@ export type AddIndividualDataObjectType = {
   role: Scalars['String'],
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
-  paymentChannel?: Maybe<Array<Maybe<BankTransferObjectType>>>,
+  paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
   businessArea?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
@@ -270,9 +270,9 @@ export type AreaTypeNodeEdge = {
 };
 
 
-export type BankAccountInfoNode = {
+export type BankAccountInfoNode = Node & {
    __typename?: 'BankAccountInfoNode',
-  id: Scalars['UUID'],
+  id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
@@ -281,7 +281,6 @@ export type BankAccountInfoNode = {
   individual: IndividualNode,
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
-  debitCardNumber: Scalars['String'],
   type?: Maybe<Scalars['String']>,
 };
 
@@ -2494,7 +2493,7 @@ export type IndividualNode = Node & {
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
-  paymentChannel?: Maybe<Array<Maybe<BankAccountInfoNode>>>,
+  paymentChannels?: Maybe<Array<Maybe<BankAccountInfoNode>>>,
 };
 
 
@@ -2712,9 +2711,9 @@ export type IndividualUpdateDataObjectType = {
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
   identitiesToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   identitiesToEdit?: Maybe<Array<Maybe<EditIndividualIdentityObjectType>>>,
-  paymentChannel?: Maybe<Array<Maybe<BankTransferObjectType>>>,
-  paymentChannelToEdit?: Maybe<Array<Maybe<EditBankTransferObjectType>>>,
-  paymentChannelToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
+  paymentChannelsToEdit?: Maybe<Array<Maybe<EditBankTransferObjectType>>>,
+  paymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
@@ -2921,6 +2920,9 @@ export type MutationsApproveIndividualDataChangeArgs = {
   approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
   flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   grievanceTicketId: Scalars['ID'],
   individualApproveData?: Maybe<Scalars['JSONString']>,
@@ -6650,7 +6652,10 @@ export type ApproveIndividualDataChangeMutationVariables = {
   approvedDocumentsToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
-  approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
+  approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
 };
 
 
@@ -8951,7 +8956,7 @@ export type AllIndividualsQuery = (
               ) }
             )> }
           )>> }
-        ), paymentChannel: Maybe<Array<Maybe<(
+        ), paymentChannels: Maybe<Array<Maybe<(
           { __typename?: 'BankAccountInfoNode' }
           & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
         )>>> }
@@ -10820,8 +10825,8 @@ export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof use
 export type ApproveHouseholdDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export const ApproveIndividualDataChangeDocument = gql`
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int]) {
-  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove, approvedDocumentsToEdit: $approvedDocumentsToEdit, approvedIdentitiesToCreate: $approvedIdentitiesToCreate, approvedIdentitiesToEdit: $approvedIdentitiesToEdit, approvedIdentitiesToRemove: $approvedIdentitiesToRemove) {
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int], $approvedPaymentChannelsToCreate: [Int], $approvedPaymentChannelsToEdit: [Int], $approvedPaymentChannelsToRemove: [Int]) {
+  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove, approvedDocumentsToEdit: $approvedDocumentsToEdit, approvedIdentitiesToCreate: $approvedIdentitiesToCreate, approvedIdentitiesToEdit: $approvedIdentitiesToEdit, approvedIdentitiesToRemove: $approvedIdentitiesToRemove, approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate, approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit, approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove) {
     grievanceTicket {
       id
       status
@@ -10877,6 +10882,9 @@ export function withApproveIndividualDataChange<TProps, TChildProps = {}>(operat
  *      approvedIdentitiesToCreate: // value for 'approvedIdentitiesToCreate'
  *      approvedIdentitiesToEdit: // value for 'approvedIdentitiesToEdit'
  *      approvedIdentitiesToRemove: // value for 'approvedIdentitiesToRemove'
+ *      approvedPaymentChannelsToCreate: // value for 'approvedPaymentChannelsToCreate'
+ *      approvedPaymentChannelsToEdit: // value for 'approvedPaymentChannelsToEdit'
+ *      approvedPaymentChannelsToRemove: // value for 'approvedPaymentChannelsToRemove'
  *   },
  * });
  */
@@ -16589,7 +16597,7 @@ export const AllIndividualsDocument = gql`
             }
           }
         }
-        paymentChannel {
+        paymentChannels {
           id
           bankName
           bankAccountNumber
@@ -20009,7 +20017,7 @@ export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
 }
 
 export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BankAccountInfoNode'] = ResolversParentTypes['BankAccountInfoNode']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
@@ -20018,7 +20026,6 @@ export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends R
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   bankName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   bankAccountNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  debitCardNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -20940,7 +20947,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  paymentChannel?: Resolver<Maybe<Array<Maybe<ResolversTypes['BankAccountInfoNode']>>>, ParentType, ContextType>,
+  paymentChannels?: Resolver<Maybe<Array<Maybe<ResolversTypes['BankAccountInfoNode']>>>, ParentType, ContextType>,
 };
 
 export type IndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeConnection'] = ResolversParentTypes['IndividualNodeConnection']> = {
@@ -21107,7 +21114,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketNoteNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketNoteNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 

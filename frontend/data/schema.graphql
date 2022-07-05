@@ -37,7 +37,7 @@ input AddIndividualDataObjectType {
   role: String!
   documents: [IndividualDocumentObjectType]
   identities: [IndividualIdentityObjectType]
-  paymentChannel: [BankTransferObjectType]
+  paymentChannels: [BankTransferObjectType]
   businessArea: String
   flexFields: Arg
 }
@@ -143,8 +143,8 @@ type AreaTypeNodeEdge {
 
 scalar Arg
 
-type BankAccountInfoNode {
-  id: UUID!
+type BankAccountInfoNode implements Node {
+  id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   isRemoved: Boolean!
@@ -153,7 +153,6 @@ type BankAccountInfoNode {
   individual: IndividualNode!
   bankName: String!
   bankAccountNumber: String!
-  debitCardNumber: String!
   type: String
 }
 
@@ -1918,7 +1917,7 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
-  paymentChannel: [BankAccountInfoNode]
+  paymentChannels: [BankAccountInfoNode]
 }
 
 type IndividualNodeConnection {
@@ -2007,9 +2006,9 @@ input IndividualUpdateDataObjectType {
   identities: [IndividualIdentityObjectType]
   identitiesToRemove: [ID]
   identitiesToEdit: [EditIndividualIdentityObjectType]
-  paymentChannel: [BankTransferObjectType]
-  paymentChannelToEdit: [EditBankTransferObjectType]
-  paymentChannelToRemove: [ID]
+  paymentChannels: [BankTransferObjectType]
+  paymentChannelsToEdit: [EditBankTransferObjectType]
+  paymentChannelsToRemove: [ID]
   flexFields: Arg
 }
 
@@ -2123,7 +2122,7 @@ type Mutations {
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
