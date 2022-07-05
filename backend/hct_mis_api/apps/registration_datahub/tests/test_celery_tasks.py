@@ -4,7 +4,8 @@ import json
 from contextlib import contextmanager
 from django.test import TestCase
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
+from constance import config
 
 from django.conf import settings
 from django_countries.fields import Country
@@ -165,3 +166,28 @@ class TestAutomatingRDICreationTask(TestCase):
         assert result[1][1] == page_size
         assert result[2][1] == page_size
         assert result[3][1] == amount_of_records - 3 * page_size
+
+    def test_successful_run_and_automatic_merge(self):
+        create_ukraine_business_area()
+        create_imported_document_types(country_code="UA")
+
+        registration = 345
+        amount_of_records = 10
+        page_size = 3
+
+        for _ in range(amount_of_records):
+            create_record(registration=registration, status=Record.STATUS_TO_IMPORT)
+
+        assert Record.objects.count() == amount_of_records
+        assert RegistrationDataImport.objects.count() == 0
+        assert ImportedIndividual.objects.count() == 0
+
+        with patch("hct_mis_api.apps.registration_datahub.celery_tasks.config",) as mocked_config, patch(
+            "hct_mis_api.apps.registration_datahub.celery_tasks.merge_registration_data_import_task.delay"
+        ) as merge_task_mock:
+            mocked_config.AUTO_MERGE_AFTER_AUTO_RDI_IMPORT = True
+            result = run_automate_rdi_creation_task(
+                registration_id=registration, page_size=page_size, template="some template {date} {records}"
+            )
+            assert len(result) == 4
+            assert merge_task_mock.called
