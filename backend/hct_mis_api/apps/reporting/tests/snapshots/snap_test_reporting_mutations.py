@@ -122,7 +122,7 @@ snapshots['TestReportingMutation::test_restart_create_report_invalid_status_upda
                     'line': 3
                 }
             ],
-            'message': "Not impossible restart now because status must be 'Processing' and less than 30 minutes have passed since the last running task for this report",
+            'message': "Impossible restart now. Status must be 'Processing' and more than 30 mins after last running.",
             'path': [
                 'restartCreateReport'
             ]
@@ -142,7 +142,7 @@ snapshots['TestReportingMutation::test_restart_create_report_invalid_status_upda
                     'line': 3
                 }
             ],
-            'message': "Not impossible restart now because status must be 'Processing' and less than 30 minutes have passed since the last running task for this report",
+            'message': "Impossible restart now. Status must be 'Processing' and more than 30 mins after last running.",
             'path': [
                 'restartCreateReport'
             ]
