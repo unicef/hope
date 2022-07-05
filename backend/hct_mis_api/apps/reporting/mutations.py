@@ -1,9 +1,8 @@
 import logging
 import datetime
+import graphene
 
 from django.shortcuts import get_object_or_404
-
-import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -20,6 +19,8 @@ from hct_mis_api.apps.reporting.models import DashboardReport, Report
 from hct_mis_api.apps.reporting.schema import ReportNode
 from hct_mis_api.apps.reporting.validators import ReportValidator
 
+logger = logging.getLogger(__name__)
+
 
 class CreateReportInput(graphene.InputObjectType):
     report_type = graphene.Int(required=True)
@@ -28,14 +29,6 @@ class CreateReportInput(graphene.InputObjectType):
     date_to = graphene.Date(required=True)
     admin_area = graphene.List(graphene.ID)
     program = graphene.ID()
-
-
-logger = logging.getLogger(__name__)
-
-
-class RestartCreateReportInput(graphene.InputObjectType):
-    report_id = graphene.ID(required=True)
-    business_area_slug = graphene.String(required=True)
 
 
 class CreateReport(ReportValidator, PermissionMutation):
@@ -86,6 +79,11 @@ class CreateReport(ReportValidator, PermissionMutation):
         report_export_task.delay(report_id=str(report.id))
 
         return CreateReport(report)
+
+
+class RestartCreateReportInput(graphene.InputObjectType):
+    report_id = graphene.ID(required=True)
+    business_area_slug = graphene.String(required=True)
 
 
 class RestartCreateReport(PermissionMutation):
