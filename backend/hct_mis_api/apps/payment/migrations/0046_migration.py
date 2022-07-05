@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
             model_name="cashplanpaymentverification",
             name="rapid_pro_flow_start_uuids",
             field=django.contrib.postgres.fields.ArrayField(
-                base_field=models.CharField(blank=True, max_length=255), default=[], size=None
+                base_field=models.CharField(blank=True, max_length=255), default=list, size=None
             ),
             preserve_default=False,
         ),

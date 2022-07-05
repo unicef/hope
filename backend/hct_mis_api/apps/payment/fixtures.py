@@ -112,7 +112,7 @@ class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
     received_count = fuzzy.FuzzyInteger(30, 70)
     not_received_count = fuzzy.FuzzyInteger(0, 10)
     received_with_problems_count = fuzzy.FuzzyInteger(0, 10)
-    rapid_pro_flow_start_uuids = []
+    rapid_pro_flow_start_uuids = factory.LazyFunction(list)
 
     class Meta:
         model = CashPlanPaymentVerification

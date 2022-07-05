@@ -222,7 +222,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     confidence_interval = models.FloatField(null=True)
     margin_of_error = models.FloatField(null=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
-    rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True))
+    rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
     age_filter = JSONField(null=True)
     excluded_admin_areas_filter = JSONField(null=True)
     sex_filter = models.CharField(null=True, max_length=10)
