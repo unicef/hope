@@ -34,7 +34,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                             ],
                             'identities_to_remove': [
                             ],
-                            'payment_channel': [
+                            'payment_channels': [
                                 {
                                     'approve_status': False,
                                     'value': {
@@ -44,9 +44,9 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                                     }
                                 }
                             ],
-                            'payment_channel_to_edit': [
+                            'payment_channels_to_edit': [
                             ],
-                            'payment_channel_to_remove': [
+                            'payment_channels_to_remove': [
                             ],
                             'previous_documents': {
                             },
@@ -110,9 +110,9 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             ],
                             'identities_to_remove': [
                             ],
-                            'payment_channel': [
+                            'payment_channels': [
                             ],
-                            'payment_channel_to_edit': [
+                            'payment_channels_to_edit': [
                                 {
                                     'approve_status': False,
                                     'previous_value': {
@@ -131,7 +131,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                                     }
                                 }
                             ],
-                            'payment_channel_to_remove': [
+                            'payment_channels_to_remove': [
                             ],
                             'previous_documents': {
                             },
@@ -201,7 +201,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                                 }
                             ],
                             'marital_status': 'SINGLE',
-                            'payment_channel': [
+                            'payment_channels': [
                                 {
                                     'bank_account_number': '2356789789789789',
                                     'bank_name': 'privatbank',
@@ -484,11 +484,11 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'previous_value': 'WIDOWED',
                                 'value': 'SINGLE'
                             },
-                            'payment_channel': [
+                            'payment_channels': [
                             ],
-                            'payment_channel_to_edit': [
+                            'payment_channels_to_edit': [
                             ],
-                            'payment_channel_to_remove': [
+                            'payment_channels_to_remove': [
                             ],
                             'previous_documents': {
                             },

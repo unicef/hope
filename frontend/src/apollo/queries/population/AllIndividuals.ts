@@ -107,7 +107,7 @@ export const AllIndividuals = gql`
               }
             }
           }
-          paymentChannel {
+          paymentChannels {
             id
             bankName
             bankAccountNumber

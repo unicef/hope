@@ -307,7 +307,9 @@ class BankAccountInfoNode(DjangoObjectType):
 
     class Meta:
         model = BankAccountInfo
-        exclude = ("debit_card",)
+        exclude = ("debit_card_number",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -332,10 +334,10 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     age = graphene.Int()
     bank_account_info = graphene.Field(BankAccountInfoNode, required=False)
     sanction_list_last_check = graphene.DateTime()
-    payment_channel = graphene.List(BankAccountInfoNode)
+    payment_channels = graphene.List(BankAccountInfoNode)
 
     @staticmethod
-    def resolve_payment_channel(parent: Individual, info):
+    def resolve_payment_channels(parent: Individual, info):
         return BankAccountInfo.objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
 
     def resolve_bank_account_info(parent, info):
