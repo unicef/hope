@@ -136,7 +136,7 @@ class RapidProAPI:
             return {"phone_number": phone_number, "received": None, "received_amount": None}
         received_variable = values.get(variable_received_name)
         if received_variable is not None:
-            received = received_variable.get("value").upper() == variable_received_positive_string
+            received = received_variable.get("category").upper() == variable_received_positive_string
         received_amount_variable = values.get(variable_amount_name)
         if received_amount_variable is not None:
             try:
