@@ -531,7 +531,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         wb = openpyxl.load_workbook(import_data.file, data_only=True)
 
-        # households objects have to be creat first
+        # households objects have to be created first
         worksheets = (wb["Households"], wb["Individuals"])
         for sheet in worksheets:
             self.image_loader = SheetImageLoader(sheet)
