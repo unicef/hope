@@ -37,6 +37,7 @@ export const GrievanceTicket = gql`
           individual {
             id
             unicefId
+            fullName
           }
           household {
             id
@@ -300,6 +301,7 @@ export const GrievanceTicket = gql`
             individual {
               id
               unicefId
+              fullName
             }
             household {
               id
@@ -318,6 +320,7 @@ export const GrievanceTicket = gql`
             individual {
               id
               unicefId
+              fullName
             }
             household {
               id

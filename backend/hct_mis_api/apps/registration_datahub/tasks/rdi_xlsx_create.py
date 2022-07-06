@@ -14,7 +14,6 @@ import openpyxl
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.core_fields_attributes import COLLECTORS_FIELDS
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader
 from hct_mis_api.apps.household.models import (
@@ -380,7 +379,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 for cell, header_cell in zip(row, first_row):
                     try:
                         header = header_cell.value
-                        combined_fields = {**self.COMBINED_FIELDS, **COLLECTORS_FIELDS}
+                        combined_fields = self.COMBINED_FIELDS
                         current_field = combined_fields.get(header)
 
                         if not current_field:
