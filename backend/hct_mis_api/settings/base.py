@@ -157,6 +157,11 @@ DATABASES = {
     "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
     "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
 }
+DATABASES["default"].update(
+    {
+        "CONN_MAX_AGE": 60
+    }
+)
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
