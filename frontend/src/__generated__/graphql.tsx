@@ -81,6 +81,7 @@ export type AddIndividualDataObjectType = {
   role: Scalars['String'],
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
+  paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
   businessArea?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
@@ -269,8 +270,22 @@ export type AreaTypeNodeEdge = {
 };
 
 
-export type BankAccountInfoNode = {
+export type BankAccountInfoNode = Node & {
    __typename?: 'BankAccountInfoNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  removedDate?: Maybe<Scalars['DateTime']>,
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
+  individual: IndividualNode,
+  bankName: Scalars['String'],
+  bankAccountNumber: Scalars['String'],
+  type?: Maybe<Scalars['String']>,
+};
+
+export type BankTransferObjectType = {
+  type: Scalars['String'],
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
 };
@@ -294,6 +309,7 @@ export type BusinessAreaNode = Node & {
   hasDataSharingAgreement: Scalars['Boolean'],
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
+  postponeDeduplication: Scalars['Boolean'],
   deduplicationDuplicateScore: Scalars['Float'],
   deduplicationPossibleDuplicateScore: Scalars['Float'],
   deduplicationBatchDuplicatesPercentage: Scalars['Int'],
@@ -301,6 +317,7 @@ export type BusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int'],
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
+  deduplicationIgnoreWithdraw: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -980,6 +997,13 @@ export enum DocumentTypeType {
   Other = 'OTHER'
 }
 
+export type EditBankTransferObjectType = {
+  id: Scalars['ID'],
+  type: Scalars['String'],
+  bankName: Scalars['String'],
+  bankAccountNumber: Scalars['String'],
+};
+
 export type EditCashPlanPaymentVerificationInput = {
   cashPlanPaymentVerificationId: Scalars['ID'],
   sampling: Scalars['String'],
@@ -1528,7 +1552,8 @@ export type HouseholdUpdateDataObjectType = {
 export enum ImportDataDataType {
   Xlsx = 'XLSX',
   Json = 'JSON',
-  Flex = 'FLEX'
+  Flex = 'FLEX',
+  Diia = 'DIIA'
 }
 
 export type ImportDataNode = Node & {
@@ -2171,6 +2196,7 @@ export enum ImportedIndividualDeduplicationGoldenRecordStatus {
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
   NotProcessed = 'NOT_PROCESSED',
+  Postpone = 'POSTPONE',
   Unique = 'UNIQUE'
 }
 
@@ -2326,6 +2352,7 @@ export enum IndividualDeduplicationGoldenRecordStatus {
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
   NotProcessed = 'NOT_PROCESSED',
+  Postpone = 'POSTPONE',
   Unique = 'UNIQUE'
 }
 
@@ -2466,6 +2493,7 @@ export type IndividualNode = Node & {
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
+  paymentChannels?: Maybe<Array<Maybe<BankAccountInfoNode>>>,
 };
 
 
@@ -2683,6 +2711,9 @@ export type IndividualUpdateDataObjectType = {
   identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
   identitiesToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   identitiesToEdit?: Maybe<Array<Maybe<EditIndividualIdentityObjectType>>>,
+  paymentChannels?: Maybe<Array<Maybe<BankTransferObjectType>>>,
+  paymentChannelsToEdit?: Maybe<Array<Maybe<EditBankTransferObjectType>>>,
+  paymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
@@ -2889,6 +2920,9 @@ export type MutationsApproveIndividualDataChangeArgs = {
   approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
   flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   grievanceTicketId: Scalars['ID'],
   individualApproveData?: Maybe<Scalars['JSONString']>,
@@ -2953,6 +2987,7 @@ export type MutationsReassignRoleArgs = {
   householdVersion?: Maybe<Scalars['BigInt']>,
   individualId: Scalars['ID'],
   individualVersion?: Maybe<Scalars['BigInt']>,
+  newIndividualId?: Maybe<Scalars['ID']>,
   role: Scalars['String'],
   version?: Maybe<Scalars['BigInt']>
 };
@@ -3736,6 +3771,7 @@ export type QueryAllGrievanceTicketArgs = {
   issueType?: Maybe<Scalars['String']>,
   scoreMin?: Maybe<Scalars['String']>,
   scoreMax?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5704,6 +5740,7 @@ export type UserBusinessAreaNode = Node & {
   hasDataSharingAgreement: Scalars['Boolean'],
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
+  postponeDeduplication: Scalars['Boolean'],
   deduplicationDuplicateScore: Scalars['Float'],
   deduplicationPossibleDuplicateScore: Scalars['Float'],
   deduplicationBatchDuplicatesPercentage: Scalars['Int'],
@@ -5711,6 +5748,7 @@ export type UserBusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int'],
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
+  deduplicationIgnoreWithdraw: Scalars['Boolean'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -6614,7 +6652,10 @@ export type ApproveIndividualDataChangeMutationVariables = {
   approvedDocumentsToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedIdentitiesToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
-  approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
+  approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToEdit?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedPaymentChannelsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
 };
 
 
@@ -6770,6 +6811,7 @@ export type ReassignRoleGrievanceMutationVariables = {
   grievanceTicketId: Scalars['ID'],
   householdId: Scalars['ID'],
   individualId: Scalars['ID'],
+  newIndividualId?: Maybe<Scalars['ID']>,
   role: Scalars['String']
 };
 
@@ -7794,7 +7836,8 @@ export type AllGrievanceTicketQueryVariables = {
   assignedTo?: Maybe<Scalars['ID']>,
   cashPlan?: Maybe<Scalars['String']>,
   scoreMin?: Maybe<Scalars['String']>,
-  scoreMax?: Maybe<Scalars['String']>
+  scoreMax?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['String']>
 };
 
 
@@ -7904,7 +7947,7 @@ export type GrievanceTicketQuery = (
         & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
         & { individual: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'unicefId'>
+          & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
         ), household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -8121,7 +8164,7 @@ export type GrievanceTicketQuery = (
           & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
           & { individual: (
             { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'id' | 'unicefId'>
+            & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
           ), household: (
             { __typename?: 'HouseholdNode' }
             & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -8138,7 +8181,7 @@ export type GrievanceTicketQuery = (
           & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
           & { individual: (
             { __typename?: 'IndividualNode' }
-            & Pick<IndividualNode, 'id' | 'unicefId'>
+            & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName'>
           ), household: (
             { __typename?: 'HouseholdNode' }
             & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -8913,7 +8956,10 @@ export type AllIndividualsQuery = (
               ) }
             )> }
           )>> }
-        ) }
+        ), paymentChannels: Maybe<Array<Maybe<(
+          { __typename?: 'BankAccountInfoNode' }
+          & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
+        )>>> }
       )> }
     )>> }
   )> }
@@ -10779,8 +10825,8 @@ export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof use
 export type ApproveHouseholdDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export const ApproveIndividualDataChangeDocument = gql`
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int]) {
-  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove, approvedDocumentsToEdit: $approvedDocumentsToEdit, approvedIdentitiesToCreate: $approvedIdentitiesToCreate, approvedIdentitiesToEdit: $approvedIdentitiesToEdit, approvedIdentitiesToRemove: $approvedIdentitiesToRemove) {
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int], $approvedPaymentChannelsToCreate: [Int], $approvedPaymentChannelsToEdit: [Int], $approvedPaymentChannelsToRemove: [Int]) {
+  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove, approvedDocumentsToEdit: $approvedDocumentsToEdit, approvedIdentitiesToCreate: $approvedIdentitiesToCreate, approvedIdentitiesToEdit: $approvedIdentitiesToEdit, approvedIdentitiesToRemove: $approvedIdentitiesToRemove, approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate, approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit, approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove) {
     grievanceTicket {
       id
       status
@@ -10836,6 +10882,9 @@ export function withApproveIndividualDataChange<TProps, TChildProps = {}>(operat
  *      approvedIdentitiesToCreate: // value for 'approvedIdentitiesToCreate'
  *      approvedIdentitiesToEdit: // value for 'approvedIdentitiesToEdit'
  *      approvedIdentitiesToRemove: // value for 'approvedIdentitiesToRemove'
+ *      approvedPaymentChannelsToCreate: // value for 'approvedPaymentChannelsToCreate'
+ *      approvedPaymentChannelsToEdit: // value for 'approvedPaymentChannelsToEdit'
+ *      approvedPaymentChannelsToRemove: // value for 'approvedPaymentChannelsToRemove'
  *   },
  * });
  */
@@ -11233,8 +11282,8 @@ export type GrievanceTicketStatusChangeMutationHookResult = ReturnType<typeof us
 export type GrievanceTicketStatusChangeMutationResult = ApolloReactCommon.MutationResult<GrievanceTicketStatusChangeMutation>;
 export type GrievanceTicketStatusChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>;
 export const ReassignRoleGrievanceDocument = gql`
-    mutation ReassignRoleGrievance($grievanceTicketId: ID!, $householdId: ID!, $individualId: ID!, $role: String!) {
-  reassignRole(grievanceTicketId: $grievanceTicketId, householdId: $householdId, individualId: $individualId, role: $role) {
+    mutation ReassignRoleGrievance($grievanceTicketId: ID!, $householdId: ID!, $individualId: ID!, $newIndividualId: ID, $role: String!) {
+  reassignRole(grievanceTicketId: $grievanceTicketId, householdId: $householdId, individualId: $individualId, newIndividualId: $newIndividualId, role: $role) {
     household {
       id
       unicefId
@@ -11281,6 +11330,7 @@ export function withReassignRoleGrievance<TProps, TChildProps = {}>(operationOpt
  *      grievanceTicketId: // value for 'grievanceTicketId'
  *      householdId: // value for 'householdId'
  *      individualId: // value for 'individualId'
+ *      newIndividualId: // value for 'newIndividualId'
  *      role: // value for 'role'
  *   },
  * });
@@ -14144,8 +14194,8 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household) {
     totalCount
     pageInfo {
       startCursor
@@ -14239,6 +14289,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      cashPlan: // value for 'cashPlan'
  *      scoreMin: // value for 'scoreMin'
  *      scoreMax: // value for 'scoreMax'
+ *      household: // value for 'household'
  *   },
  * });
  */
@@ -14380,6 +14431,7 @@ export const GrievanceTicketDocument = gql`
         individual {
           id
           unicefId
+          fullName
         }
         household {
           id
@@ -14642,6 +14694,7 @@ export const GrievanceTicketDocument = gql`
           individual {
             id
             unicefId
+            fullName
           }
           household {
             id
@@ -14660,6 +14713,7 @@ export const GrievanceTicketDocument = gql`
           individual {
             id
             unicefId
+            fullName
           }
           household {
             id
@@ -16542,6 +16596,11 @@ export const AllIndividualsDocument = gql`
               number
             }
           }
+        }
+        paymentChannels {
+          id
+          bankName
+          bankAccountNumber
         }
       }
     }
@@ -19409,6 +19468,8 @@ export type ResolversTypes = {
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
   IndividualIdentityObjectType: IndividualIdentityObjectType,
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
+  BankTransferObjectType: BankTransferObjectType,
+  EditBankTransferObjectType: EditBankTransferObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
@@ -19777,6 +19838,8 @@ export type ResolversParentTypes = {
   EditIndividualDocumentObjectType: EditIndividualDocumentObjectType,
   IndividualIdentityObjectType: IndividualIdentityObjectType,
   EditIndividualIdentityObjectType: EditIndividualIdentityObjectType,
+  BankTransferObjectType: BankTransferObjectType,
+  EditBankTransferObjectType: EditBankTransferObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
@@ -19954,8 +20017,16 @@ export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
 }
 
 export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BankAccountInfoNode'] = ResolversParentTypes['BankAccountInfoNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   bankName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   bankAccountNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
@@ -19979,6 +20050,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  postponeDeduplication?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationBatchDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -19986,6 +20058,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
@@ -20874,6 +20947,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  paymentChannels?: Resolver<Maybe<Array<Maybe<ResolversTypes['BankAccountInfoNode']>>>, ParentType, ContextType>,
 };
 
 export type IndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeConnection'] = ResolversParentTypes['IndividualNodeConnection']> = {
@@ -21040,7 +21114,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketNoteNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'BankAccountInfoNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketNoteNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -22206,6 +22280,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  postponeDeduplication?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deduplicationBatchDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -22213,6 +22288,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentrecordSetArgs>,
