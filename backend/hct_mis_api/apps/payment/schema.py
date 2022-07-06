@@ -26,12 +26,12 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
+from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Individual
 from hct_mis_api.apps.payment.filters import (
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter
+    CashPlanPaymentVerificationFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -261,6 +261,12 @@ class Query(graphene.ObjectType):
             payment_verification_plan = get_object_or_404(CashPlanPaymentVerification, id=payment_verification_plan_id)
 
         payment_records = cash_plan.available_payment_records(payment_verification_plan)
+        if not payment_records:
+            return {
+                "sample_size": 0,
+                "payment_record_count": 0,
+            }
+
         sampling = Sampling(input, cash_plan, payment_records)
         payment_record_count, payment_records_sample_count = sampling.generate_sampling()
 

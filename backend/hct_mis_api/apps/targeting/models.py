@@ -28,10 +28,11 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
-    TARGETING_CORE_FIELDS,
     TYPE_DECIMAL,
     TYPE_INTEGER,
     TYPE_SELECT_MANY,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import (
@@ -796,8 +797,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
     """
 
     def get_core_fields(self):
-        core_fields = TARGETING_CORE_FIELDS
-        return [c for c in core_fields if c.get("associated_with") == _HOUSEHOLD]
+        return FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.TARGETING]).associated_with_household()
 
     comparision_method = models.CharField(
         max_length=20,
@@ -826,8 +826,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     """
 
     def get_core_fields(self):
-        core_fields = TARGETING_CORE_FIELDS
-        return [c for c in core_fields if c.get("associated_with") == _INDIVIDUAL]
+        return FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.TARGETING]).associated_with_individual()
 
     comparision_method = models.CharField(
         max_length=20,

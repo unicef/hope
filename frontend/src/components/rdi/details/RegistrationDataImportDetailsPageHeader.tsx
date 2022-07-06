@@ -3,14 +3,15 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { BreadCrumbsItem } from '../../core/BreadCrumbs';
-import { PageHeader } from '../../core/PageHeader';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
   useRefuseRdiMutation,
 } from '../../../__generated__/graphql';
+import { BreadCrumbsItem } from '../../core/BreadCrumbs';
+import { LoadingButton } from '../../core/LoadingButton';
+import { PageHeader } from '../../core/PageHeader';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 
@@ -35,7 +36,7 @@ export function RegistrationDataImportDetailsPageHeader({
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const [mutate] = useRefuseRdiMutation();
+  const [mutate, { loading }] = useRefuseRdiMutation();
   let buttons = null;
   // eslint-disable-next-line default-case
   switch (registration?.status) {
@@ -43,7 +44,8 @@ export function RegistrationDataImportDetailsPageHeader({
       buttons = (
         <div>
           {canMerge && canRefuse && (
-            <Button
+            <LoadingButton
+              loading={loading}
               onClick={() =>
                 mutate({
                   variables: { id: registration.id },
@@ -53,7 +55,7 @@ export function RegistrationDataImportDetailsPageHeader({
               color='primary'
             >
               {t('Refuse Import')}
-            </Button>
+            </LoadingButton>
           )}
           {canMerge && (
             <MergeButtonContainer>

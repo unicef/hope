@@ -595,5 +595,10 @@
   "Bank name": "Bank name",
   "Linked Tickets": "Linked Tickets",
   "Registration Data Import": "Registration Data Import",
-  "Assigned programme is not ACTIVE": "Assigned programme is not ACTIVE"
+  "Assigned programme is not ACTIVE": "Assigned programme is not ACTIVE",
+  "Linked Grievances": "Linked Grievances",
+  "Payment Channel": "Payment Channel",
+  "Payment channel item": "Payment channel item",
+  "Add Payment Channel": "Add Payment Channel",
+  "Payment channels to be added": "Payment channels to be added"
 }
