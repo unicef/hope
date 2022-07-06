@@ -135,6 +135,7 @@ class HouseholdAdmin(
         ("size", MaxMinFilter),
         "org_enumerator",
         "last_registration_date",
+        QueryStringFilter,
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
