@@ -25,6 +25,7 @@ class TestIndividualQuery(APITestCase):
             givenName
             familyName
             phoneNo
+            phoneNoValid
             birthDate
           }
         }
@@ -68,6 +69,7 @@ class TestIndividualQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.maxDiff = None
         cached_business_areas_slug_id_dict.cache_clear()
         create_afghanistan()
         cls.user = UserFactory()

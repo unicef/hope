@@ -23706,7 +23706,7 @@
     "estimated_birth_date": false,
     "marital_status": "MARRIED",
     "phone_no": "+48invalid605899014",
-    "phone_no_alternative": "",
+    "phone_no_alternative": "+48also-invalid",
     "relationship": "HEAD",
     "household": "960f7eee-d45a-478a-b4b4-82d0e8e80add",
     "registration_data_import": "04992dce-154b-4938-8e47-74341541ebcf",
