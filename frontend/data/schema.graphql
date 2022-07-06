@@ -290,7 +290,7 @@ type CashPlanPaymentVerificationNode implements Node {
   confidenceInterval: Float
   marginOfError: Float
   rapidProFlowId: String!
-  rapidProFlowStartUuid: String!
+  rapidProFlowStartUuids: [String!]!
   ageFilter: AgeFilterObject
   excludedAdminAreasFilter: [String]
   sexFilter: String
@@ -1917,6 +1917,8 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
+  phoneNoValid: Boolean
+  phoneNoAlternativeValid: Boolean
   paymentChannels: [BankAccountInfoNode]
 }
 
