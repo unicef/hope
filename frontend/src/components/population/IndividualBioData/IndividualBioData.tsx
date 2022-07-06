@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import {
   choicesToDict,
   formatAge,
+  getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
 } from '../../../utils/utils';
@@ -96,10 +97,10 @@ export function IndividualBioData({
       <LabelizedField label={t('Linked Households')}>
         {individual.householdsAndRoles.length
           ? individual.householdsAndRoles?.map((item) => (
-            <Box key={item.id}>
-              {item.household.unicefId} - {roleChoicesDict[item.role]}
-            </Box>
-          ))
+              <Box key={item.id}>
+                {item.household.unicefId} - {roleChoicesDict[item.role]}
+              </Box>
+            ))
           : '-'}
       </LabelizedField>
     </Grid>
@@ -107,24 +108,26 @@ export function IndividualBioData({
 
   const renderBankAccountInfo = (): React.ReactNode => {
     if (!individual.bankAccountInfo) {
-      return null
+      return null;
     }
-    return <>
-      <Grid item xs={12}>
-        <BorderBox />
-      </Grid>
-      <Grid item xs={3}>
-        <LabelizedField label={t('Bank name')}>
-          {individual.bankAccountInfo.bankName}
-        </LabelizedField>
-      </Grid>
-      <Grid item xs={3}>
-        <LabelizedField label={t('Bank account number')}>
-          {individual.bankAccountInfo.bankAccountNumber}
-        </LabelizedField>
-      </Grid>
-    </>;
-  }
+    return (
+      <>
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Bank name')}>
+            {individual.bankAccountInfo.bankName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Bank account number')}>
+            {individual.bankAccountInfo.bankAccountNumber}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
 
   return (
     <Overview>
@@ -259,7 +262,7 @@ export function IndividualBioData({
           </LabelizedField>
         </Grid>
         {!mappedIndividualDocuments.length &&
-          !mappedIdentities.length ? null : (
+        !mappedIdentities.length ? null : (
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
@@ -271,12 +274,15 @@ export function IndividualBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Phone Number')}>
-            {individual.phoneNo}
+            {getPhoneNoLabel(individual.phoneNo, individual.phoneNoValid)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Alternative Phone Number')}>
-            {individual.phoneNoAlternative}
+            {getPhoneNoLabel(
+              individual.phoneNoAlternative,
+              individual.phoneNoAlternativeValid,
+            )}
           </LabelizedField>
         </Grid>
         <Grid item xs={12}>
@@ -291,8 +297,14 @@ export function IndividualBioData({
             </UniversalMoment>
           </LabelizedField>
         </Grid>
-        <Grid item xs={6} >
-          {individual.household?.unicefId && <LinkedGrievancesModal household={individual.household} businessArea={businessArea} grievancesChoices={grievancesChoices} />}
+        <Grid item xs={6}>
+          {individual.household?.unicefId && (
+            <LinkedGrievancesModal
+              household={individual.household}
+              businessArea={businessArea}
+              grievancesChoices={grievancesChoices}
+            />
+          )}
         </Grid>
         {renderBankAccountInfo()}
       </Grid>
