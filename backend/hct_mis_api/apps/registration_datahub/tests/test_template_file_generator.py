@@ -1,5 +1,3 @@
-from unittest import  mock
-
 from django.test import TestCase
 
 from hct_mis_api.apps.registration_datahub.template_generator import (
@@ -34,76 +32,16 @@ class TestTemplateFileGenerator(TestCase):
         )
         self.assertEqual(expected, result)
 
-    @mock.patch(
-        "hct_mis_api.apps.registration_datahub.template_generator.serialize_flex_attributes",
-        new=lambda: {
-            "households": {
-                "test_h_f": {
-                    "label": {"English(EN)": "Flex Test Label"},
-                    "required": False,
-                    "type": "STRING",
-                    "choices": [],
-                }
-            },
-            "individuals": {
-                "test_i_f": {
-                    "label": {"English(EN)": "Flex Test Label 2"},
-                    "required": True,
-                    "type": "STRING",
-                    "choices": [],
-                }
-            },
-        },
-    )
-    @mock.patch.dict(
-        "hct_mis_api.apps.core.core_fields_attributes.CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY",
-        {
-            "households": {
-                "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": []}
-            },
-            "individuals": {
-                "test2": {
-                    "label": {"English(EN)": "My Test Label 2"},
-                    "required": False,
-                    "type": "STRING",
-                    "choices": [],
-                }
-            },
-        },
-        clear=True,
-    )
     def test_add_template_columns(self):
         wb = TemplateFileGenerator._create_workbook()
         result_wb = TemplateFileGenerator._add_template_columns(wb)
 
-        expected_households_rows = (
-            (
-                "test",
-                "test_h_f",
-            ),
-            (
-                "My Test Label - STRING - required",
-                "Flex Test Label - STRING",
-            ),
-        )
         households_rows = tuple(result_wb["Households"].iter_rows(values_only=True))
 
-        self.assertEqual(expected_households_rows, households_rows)
+        self.assertEqual("residence_status_h_c", households_rows[0][0])
+        self.assertEqual("Residence status - SELECT_ONE", households_rows[1][0])
 
-        expected_individuals_rows = (
-            (
-                "test2",
-                "primary_collector_id",
-                "alternate_collector_id",
-                "test_i_f",
-            ),
-            (
-                "My Test Label 2 - STRING",
-                "List of primary collectors ids, separated by a semicolon - LIST_OF_IDS - required",
-                "List of alternate collectors ids, separated by a semicolon - LIST_OF_IDS - required",
-                "Flex Test Label 2 - STRING - required",
-            ),
-        )
         individuals_rows = tuple(result_wb["Individuals"].iter_rows(values_only=True))
 
-        self.assertEqual(expected_individuals_rows, individuals_rows)
+        self.assertEqual("age", individuals_rows[0][0])
+        self.assertEqual("Age (calculated) - INTEGER", individuals_rows[1][0])

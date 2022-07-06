@@ -3,6 +3,7 @@ import random
 import factory
 from factory import enums, fuzzy
 from pytz import utc
+from faker import Faker
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.household.models import (
@@ -26,6 +27,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+
+faker = Faker()
 
 
 def flex_field_households(o):
@@ -144,7 +147,7 @@ class IndividualFactory(factory.DjangoModelFactory):
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.Faker("phone_number")
+    phone_no = factory.LazyAttribute(lambda _: f"{faker.country_calling_code()} {faker.msisdn()[3:]}")
     phone_no_alternative = ""
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
@@ -162,7 +165,7 @@ class BankAccountInfoFactory(factory.DjangoModelFactory):
 
     individual = factory.SubFactory(IndividualFactory)
     bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
-    bank_account_number = random.randint(10 ** 26, 10 ** 27 - 1)
+    bank_account_number = random.randint(10**26, 10**27 - 1)
 
 
 class DocumentFactory(factory.DjangoModelFactory):

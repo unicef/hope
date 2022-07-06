@@ -102,6 +102,9 @@
             "name": "IndividualIdentityNode"
           },
           {
+            "name": "BankAccountInfoNode"
+          },
+          {
             "name": "TicketHouseholdDataUpdateDetailsNode"
           },
           {

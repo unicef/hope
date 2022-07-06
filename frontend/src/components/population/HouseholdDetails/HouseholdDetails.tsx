@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
 import {
+  GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../__generated__/graphql';
@@ -15,6 +16,7 @@ import {
   BigValue,
   BigValueContainer,
 } from '../../rdi/details/RegistrationDetails/RegistrationDetails';
+import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 
 const Container = styled.div`
   display: flex;
@@ -52,11 +54,13 @@ interface HouseholdDetailsProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
   businessArea: string;
+  grievancesChoices: GrievancesChoiceDataQuery;
 }
 export function HouseholdDetails({
   household,
   choicesData,
   businessArea,
+  grievancesChoices,
 }: HouseholdDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const residenceChoicesDict = choicesToDict(
@@ -156,6 +160,9 @@ export function HouseholdDetails({
               <LabelizedField label={t('IS THIS A RETURNEE HOUSEHOLD?')}>
                 {household.returnee ? t('Yes') : t('No')}
               </LabelizedField>
+            </Grid>
+            <Grid item xs={6} >
+              {household.unicefId && <LinkedGrievancesModal household={household} businessArea={businessArea} grievancesChoices={grievancesChoices} />}
             </Grid>
           </Grid>
         </Overview>
