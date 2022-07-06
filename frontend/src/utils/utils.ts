@@ -426,6 +426,7 @@ export const getPhoneNoLabel = (
   phoneNo: string,
   phoneNoValid: boolean,
 ): string => {
+  if (!phoneNo) return '-';
   if (phoneNoValid) {
     return phoneNo;
   }
