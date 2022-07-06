@@ -99,6 +99,7 @@ export const CreateSetUpFspPage = (): React.ReactElement => {
                         <>
                           {values.deliveryMechanisms.map((item, index) => (
                             <DeliveryMechanismRow
+                              key={activeStep}
                               activeStep={activeStep}
                               index={index}
                             />
