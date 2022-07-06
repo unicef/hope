@@ -29,6 +29,7 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import does_payment_record_have_right_hoh_phone_number
 
 
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
@@ -297,7 +298,14 @@ class CashPlan(TimeStampedUUIDModel):
         else:
             params &= Q(verification__isnull=True)
 
-        return self.payment_records.filter(params).distinct()
+        payment_records = self.payment_records.filter(params).distinct()
+
+        valid_payment_records_list = [
+            payment_record.pk
+            for payment_record in payment_records
+            if does_payment_record_have_right_hoh_phone_number(payment_record)
+        ]
+        return PaymentRecord.objects.filter(pk__in=valid_payment_records_list)
 
     class Meta:
         verbose_name = "Cash Plan"

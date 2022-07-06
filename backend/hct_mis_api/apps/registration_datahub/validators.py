@@ -1,4 +1,3 @@
-import copy
 import logging
 import re
 from collections import Counter, defaultdict
@@ -7,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -18,13 +17,10 @@ from dateutil import parser
 from openpyxl import load_workbook
 
 from hct_mis_api.apps.core.core_fields_attributes import (
-    COLLECTORS_FIELDS,
-    CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
-    KOBO_ONLY_HOUSEHOLD_FIELDS,
-    KOBO_ONLY_INDIVIDUAL_FIELDS,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
-    core_fields_to_separated_dict,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
@@ -241,22 +237,20 @@ class ImportDataInstanceValidator:
         "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
     }
 
-    def get_combined_attributes(self):
-        from hct_mis_api.apps.core.core_fields_attributes import (
-            CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
-        )
+    def __init__(self):
+        self.all_fields = self.get_all_fields()
 
-        core_fields_dict = copy.deepcopy(CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY)
-        for field in core_fields_dict["individuals"].values():
-            field["choices"] = [x.get("value") for x in field["choices"]]
-        for field in core_fields_dict["households"].values():
+    def get_combined_attributes(self):
+        fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID]).apply_business_area(None)
+
+        for field in fields:
             field["choices"] = [x.get("value") for x in field["choices"]]
 
         flex_attrs = self.serialize_flex_attributes()
         return {
-            **core_fields_dict["individuals"],
+            **fields.associated_with_household().to_dict_by("xlsx_field"),
             **flex_attrs["individuals"],
-            **core_fields_dict["households"],
+            **fields.associated_with_individual().to_dict_by("xlsx_field"),
             **flex_attrs["households"],
         }
 
@@ -401,27 +395,25 @@ class ImportDataInstanceValidator:
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
-    household_ids = []
-
-    def get_core_fields(self):
-        try:
-            return CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    def get_flex_fields(self):
-        try:
-            return serialize_flex_attributes()
-        except Exception as e:
-            logger.exception(e)
-            raise
-
     def __init__(self):
+        super().__init__()
         self.head_of_household_count = defaultdict(int)
-        self.core_fields = self.get_core_fields()
-        self.flex_fields = self.get_flex_fields()
-        self.all_fields = self.get_all_fields()
+        self.combined_fields = self.get_combined_fields()
+        self.household_ids = []
+
+    def get_combined_fields(self):
+        core_fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
+        flex_fields = serialize_flex_attributes()
+        return {
+            "households": {
+                **core_fields.associated_with_household().to_dict_by("xlsx_field"),
+                **flex_fields["households"],
+            },
+            "individuals": {
+                **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                **flex_fields["individuals"],
+            },
+        }
 
     def string_validator(self, value, header, *args, **kwargs):
         try:
@@ -608,8 +600,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             first_row = sheet[1]
             combined_fields = {
-                **self.core_fields[sheet.title.lower()],
-                **self.flex_fields[sheet.title.lower()],
+                **self.combined_fields[sheet.title.lower()],
             }
 
             switch_dict = {
@@ -777,17 +768,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     def validate_file_with_template(self, wb):
         try:
             errors = []
-            core_fields = {**self.core_fields}
-            core_fields["individuals"] = {
-                **core_fields["individuals"],
-                **COLLECTORS_FIELDS,
-            }
+            combined_fields = self.combined_fields
 
-            for name, fields in core_fields.items():
+            for name, fields in combined_fields.items():
                 sheet = wb[name.capitalize()]
                 first_row = sheet[1]
 
-                all_fields = list(fields.values()) + list(self.flex_fields[name].values())
+                all_fields = list(fields.values())
 
                 required_fields = {field["xlsx_field"] for field in all_fields if field["required"]}
 
@@ -984,68 +971,35 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
 class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def __init__(self):
-        self.core_fields = self.get_core_fields()
-        self.flex_fields = self.get_flex_fields()
-        self.all_fields = self.get_all_fields()
-        self.expected_household_core_fields = self.get_expected_household_core_fields()
-        self.expected_households_flex_fields = self.get_expected_households_flex_fields()
-        self.expected_individuals_core_fields = self.get_expected_individuals_core_fields()
-        self.expected_individuals_flex_fields = self.get_expected_individuals_flex_fields()
+        super().__init__()
+        self.combined_fields = self.get_combined_fields()
         self.expected_household_fields = self.get_expected_household_fields()
         self.expected_individuals_fields = self.get_expected_individuals_fields()
 
-    def get_core_fields(self):
-        try:
-            return core_fields_to_separated_dict(append_household_id=False, append_xlsx=False)
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    def get_flex_fields(self):
-        try:
-            return serialize_flex_attributes()
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    def get_expected_household_core_fields(self):
-        try:
-            return {field["xlsx_field"] for field in self.core_fields["households"].values() if field["required"]}
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    def get_expected_households_flex_fields(self):
-        try:
-            return {field["xlsx_field"] for field in self.flex_fields["households"].values() if field["required"]}
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    def get_expected_individuals_core_fields(self):
-        try:
-            return {field["xlsx_field"] for field in self.core_fields["individuals"].values() if field["required"]}
-        except Exception as e:
-            logger.exception(e)
-            raise
-
-    def get_expected_individuals_flex_fields(self):
-        try:
-            return {field["xlsx_field"] for field in self.flex_fields["individuals"].values() if field["required"]}
-        except Exception as e:
-            logger.exception(e)
-            raise
+    def get_combined_fields(self):
+        core_fields = FieldFactory.from_scope(Scope.KOBO_IMPORT)
+        flex_fields = serialize_flex_attributes()
+        return {
+            "households": {
+                **core_fields.associated_with_household().to_dict_by("xlsx_field"),
+                **flex_fields["households"],
+            },
+            "individuals": {
+                **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                **flex_fields["individuals"],
+            },
+        }
 
     def get_expected_household_fields(self):
         try:
-            return self.expected_household_core_fields.union(self.expected_households_flex_fields)
+            return {field["xlsx_field"] for field in self.combined_fields["households"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
 
     def get_expected_individuals_fields(self):
         try:
-            return self.expected_individuals_core_fields.union(self.expected_individuals_flex_fields)
+            return {field["xlsx_field"] for field in self.combined_fields["individuals"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
@@ -1301,7 +1255,9 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 head_of_hh_counter = 0
                 primary_collector_counter = 0
                 alternate_collector_counter = 0
-                expected_hh_fields = {*self.expected_household_fields, *KOBO_ONLY_HOUSEHOLD_FIELDS.keys()}
+                expected_hh_fields = {
+                    *self.expected_household_fields,
+                }
                 attachments = household.get("_attachments", [])
                 for hh_field, hh_value in household.items():
                     expected_hh_fields.discard(hh_field)
@@ -1309,7 +1265,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         for individual in hh_value:
                             expected_i_fields = {
                                 *self.expected_individuals_fields,
-                                *KOBO_ONLY_INDIVIDUAL_FIELDS,
                             }
                             current_individual_docs_and_identities = defaultdict(dict)
                             for i_field, i_value in individual.items():

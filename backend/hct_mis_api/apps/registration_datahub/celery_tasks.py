@@ -1,6 +1,8 @@
 import datetime
 import logging
+from contextlib import contextmanager
 
+from constance import config
 from django.core.cache import cache
 
 from redis.exceptions import LockError
@@ -10,6 +12,15 @@ from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def locked_cache(key):
+    try:
+        with cache.lock(key, blocking_timeout=2, timeout=85400):
+            yield
+    finally:
+        pass
 
 
 @app.task
@@ -277,39 +288,52 @@ def fresh_extract_records_task(records_ids=None):
     logger.info("fresh_extract_records_task end")
 
 
-@app.task
-def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}", **filters):
+def process_all_records(registration_id: int, page_size: int, template: str, **filters):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
 
     try:
-        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=85400):
+        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
             try:
                 service = FlexRegistrationService()
 
-                records_ids = (
+                all_records_ids = (
                     Record.objects.filter(registration=registration_id, **filters)
                     .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
-                    .values_list("id", flat=True)[:page_size]
+                    .values_list("id", flat=True)
                 )
-                if len(records_ids) == 0:
-                    return "No records to import"
-                if records_ids:
+                if len(all_records_ids) == 0:
+                    return None
+
+                splitted_record_ids = [
+                    all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
+                ]
+                output = []
+                for records_ids in splitted_record_ids:
                     rdi_name = template.format(
                         date=datetime.datetime.now(),
                         registration_id=registration_id,
                         page_size=page_size,
                         records=len(records_ids),
                     )
-                    rdi = service.create_rdi(None, rdi_name)
-                    service.process_records(rdi.id, records_ids)
-                    return [rdi_name, len(records_ids)]
+                    rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
+                    service.process_records(rdi_id=rdi.id, records_ids=records_ids)
+                    output.append([rdi_name, len(records_ids)])
+                return output
             except Exception as e:
                 logger.exception(e)
     except LockError as e:
         logger.exception(e)
-        return []
+    return None
+
+
+@app.task
+def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}", **filters):
+    result = process_all_records(registration_id=registration_id, page_size=page_size, template=template, **filters)
+    if config.AUTO_MERGE_AFTER_AUTO_RDI_IMPORT:
+        merge_registration_data_import_task.delay(registration_id)
+    return result
 
 
 @app.task
@@ -321,7 +345,7 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
     )
 
     try:
-        with cache.lock(f"automate_rdi_diia_creation_task", blocking_timeout=2, timeout=85400):
+        with locked_cache(key="automate_rdi_diia_creation_task"):
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
@@ -349,7 +373,7 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
     )
 
     try:
-        with cache.lock(f"registration_diia_import_task", blocking_timeout=2, timeout=85400):
+        with locked_cache(key="registration_diia_import_task"):
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(

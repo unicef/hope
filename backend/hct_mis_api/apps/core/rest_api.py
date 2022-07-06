@@ -1,15 +1,13 @@
 import logging
 
 from django.core.cache import cache
+
+from rest_framework import serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import serializers
-
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice
-from hct_mis_api.apps.core.schema import sort_by_attr, get_fields_attr_generators
-from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
-
+from hct_mis_api.apps.core.schema import get_fields_attr_generators, sort_by_attr
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +22,7 @@ def dict_resolver(attname, default_value, obj):
 
 def _custom_dict_or_attr_resolver(attname, default_value, obj):
     resolver = attr_resolver
-    if isinstance(obj, (dict, LazyEvalMethodsDict)):
+    if isinstance(obj, dict):
         resolver = dict_resolver
     return resolver(attname, default_value, obj)
 
