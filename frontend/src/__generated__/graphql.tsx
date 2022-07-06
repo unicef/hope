@@ -571,7 +571,7 @@ export type CashPlanPaymentVerificationNode = Node & {
   confidenceInterval?: Maybe<Scalars['Float']>,
   marginOfError?: Maybe<Scalars['Float']>,
   rapidProFlowId: Scalars['String'],
-  rapidProFlowStartUuid: Scalars['String'],
+  rapidProFlowStartUuids: Array<Scalars['String']>,
   ageFilter?: Maybe<AgeFilterObject>,
   excludedAdminAreasFilter?: Maybe<Array<Maybe<Scalars['String']>>>,
   sexFilter?: Maybe<Scalars['String']>,
@@ -2286,6 +2286,8 @@ export type ImportedIndividualNode = Node & {
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
   importId?: Maybe<Scalars['String']>,
+  phoneNoValid?: Maybe<Scalars['Boolean']>,
+  phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -2493,6 +2495,8 @@ export type IndividualNode = Node & {
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
+  phoneNoValid?: Maybe<Scalars['Boolean']>,
+  phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
   paymentChannels?: Maybe<Array<Maybe<BankAccountInfoNode>>>,
 };
 
@@ -6246,7 +6250,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
+  & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'phoneNoValid' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -6297,7 +6301,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -6431,7 +6435,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8538,7 +8542,7 @@ export type PaymentRecordQuery = (
       & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
       & { headOfHousehold: (
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
+        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
       ) }
     ), targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
@@ -8724,7 +8728,7 @@ export type PaymentRecordVerificationQuery = (
         & Pick<HouseholdNode, 'status' | 'unicefId' | 'id' | 'size'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
+          & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
         ) }
       ), targetPopulation: (
         { __typename?: 'TargetPopulationNode' }
@@ -9954,6 +9958,7 @@ export const IndividualMinimalFragmentDoc = gql`
   birthDate
   maritalStatus
   phoneNo
+  phoneNoValid
   sanctionListPossibleMatch
   sanctionListConfirmedMatch
   deduplicationGoldenRecordStatus
@@ -10144,6 +10149,7 @@ export const IndividualDetailedFragmentDoc = gql`
   middleName
   whoAnswersPhone
   phoneNoAlternative
+  phoneNoAlternativeValid
   hearingDisability
   observedDisability
   individualId
@@ -10420,6 +10426,8 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   }
   phoneNo
   phoneNoAlternative
+  phoneNoValid
+  phoneNoAlternativeValid
 }
     ${ImportedIndividualMinimalFragmentDoc}`;
 export const TargetPopulationMinimalFragmentDoc = gql`
@@ -15588,6 +15596,8 @@ export const PaymentRecordDocument = gql`
         id
         phoneNo
         phoneNoAlternative
+        phoneNoValid
+        phoneNoAlternativeValid
       }
     }
     fullName
@@ -15644,6 +15654,8 @@ export const PaymentRecordDocument = gql`
         id
         phoneNo
         phoneNoAlternative
+        phoneNoValid
+        phoneNoAlternativeValid
       }
     }
     fullName
@@ -16104,6 +16116,8 @@ export const PaymentRecordVerificationDocument = gql`
           id
           phoneNo
           phoneNoAlternative
+          phoneNoValid
+          phoneNoAlternativeValid
         }
       }
       fullName
@@ -20181,7 +20195,7 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   confidenceInterval?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  rapidProFlowStartUuid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  rapidProFlowStartUuids?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
   ageFilter?: Resolver<Maybe<ResolversTypes['AgeFilterObject']>, ParentType, ContextType>,
   excludedAdminAreasFilter?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -20845,6 +20859,8 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']> = {
@@ -20969,6 +20985,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentChannels?: Resolver<Maybe<Array<Maybe<ResolversTypes['BankAccountInfoNode']>>>, ParentType, ContextType>,
 };
 
