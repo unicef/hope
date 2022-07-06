@@ -37,6 +37,7 @@ input AddIndividualDataObjectType {
   role: String!
   documents: [IndividualDocumentObjectType]
   identities: [IndividualIdentityObjectType]
+  paymentChannels: [BankTransferObjectType]
   businessArea: String
   flexFields: Arg
 }
@@ -142,7 +143,21 @@ type AreaTypeNodeEdge {
 
 scalar Arg
 
-type BankAccountInfoNode {
+type BankAccountInfoNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
+  lastSyncAt: DateTime
+  individual: IndividualNode!
+  bankName: String!
+  bankAccountNumber: String!
+  type: String
+}
+
+input BankTransferObjectType {
+  type: String!
   bankName: String!
   bankAccountNumber: String!
 }
@@ -275,7 +290,7 @@ type CashPlanPaymentVerificationNode implements Node {
   confidenceInterval: Float
   marginOfError: Float
   rapidProFlowId: String!
-  rapidProFlowStartUuid: String!
+  rapidProFlowStartUuids: [String!]!
   ageFilter: AgeFilterObject
   excludedAdminAreasFilter: [String]
   sexFilter: String
@@ -642,6 +657,13 @@ enum DocumentTypeType {
   TAX_ID
   RESIDENCE_PERMIT_NO
   OTHER
+}
+
+input EditBankTransferObjectType {
+  id: ID!
+  type: String!
+  bankName: String!
+  bankAccountNumber: String!
 }
 
 input EditCashPlanPaymentVerificationInput {
@@ -1897,6 +1919,7 @@ type IndividualNode implements Node {
   sanctionListLastCheck: DateTime
   phoneNoValid: Boolean
   phoneNoAlternativeValid: Boolean
+  paymentChannels: [BankAccountInfoNode]
 }
 
 type IndividualNodeConnection {
@@ -1985,6 +2008,9 @@ input IndividualUpdateDataObjectType {
   identities: [IndividualIdentityObjectType]
   identitiesToRemove: [ID]
   identitiesToEdit: [EditIndividualIdentityObjectType]
+  paymentChannels: [BankTransferObjectType]
+  paymentChannelsToEdit: [EditBankTransferObjectType]
+  paymentChannelsToRemove: [ID]
   flexFields: Arg
 }
 
@@ -2098,7 +2124,7 @@ type Mutations {
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation

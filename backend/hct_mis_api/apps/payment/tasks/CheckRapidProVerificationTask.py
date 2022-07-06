@@ -40,7 +40,7 @@ class CheckRapidProVerificationTask:
             str(x.payment_record.head_of_household.phone_no): x for x in payment_record_verifications
         }
         api = RapidProAPI(business_area.slug)
-        rapid_pro_results = api.get_mapped_flow_runs(cashplan_payment_verification.rapid_pro_flow_start_uuid)
+        rapid_pro_results = api.get_mapped_flow_runs(cashplan_payment_verification.rapid_pro_flow_start_uuids)
         payment_record_verification_to_update = self._get_payment_record_verification_to_update(
             rapid_pro_results, payment_record_verifications_phone_number_dict
         )
