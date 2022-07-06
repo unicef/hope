@@ -9,6 +9,7 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { CreateSetUpFspHeader } from '../../../components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader';
 import { DeliveryMechanismRow } from '../../../components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow/DeliveryMechanismRow';
 import { DeliveryMechanismStepper } from '../../../components/paymentmodule/CreateSetUpFsp/DeliveryMechanismStepper';
+import { DeliveryMechanismWarning } from '../../../components/paymentmodule/CreateSetUpFsp/DeliveryMechanismWarning';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -86,6 +87,7 @@ export const CreateSetUpFspPage = (): React.ReactElement => {
             />
             <Box m={5}>
               <ContainerColumnWithBorder>
+                <DeliveryMechanismWarning text='Selected delivery mechanisms are not sufficient to serve all beneficiaries. Please add Cash and Mobile Money to move to the next step.' />
                 <DeliveryMechanismStepper
                   activeStep={activeStep}
                   setActiveStep={setActiveStep}
