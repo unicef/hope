@@ -571,7 +571,7 @@ export type CashPlanPaymentVerificationNode = Node & {
   confidenceInterval?: Maybe<Scalars['Float']>,
   marginOfError?: Maybe<Scalars['Float']>,
   rapidProFlowId: Scalars['String'],
-  rapidProFlowStartUuid: Scalars['String'],
+  rapidProFlowStartUuids: Array<Scalars['String']>,
   ageFilter?: Maybe<AgeFilterObject>,
   excludedAdminAreasFilter?: Maybe<Array<Maybe<Scalars['String']>>>,
   sexFilter?: Maybe<Scalars['String']>,
@@ -2286,6 +2286,8 @@ export type ImportedIndividualNode = Node & {
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
   importId?: Maybe<Scalars['String']>,
+  phoneNoValid?: Maybe<Scalars['Boolean']>,
+  phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -2493,6 +2495,8 @@ export type IndividualNode = Node & {
   role?: Maybe<Scalars['String']>,
   age?: Maybe<Scalars['Int']>,
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
+  phoneNoValid?: Maybe<Scalars['Boolean']>,
+  phoneNoAlternativeValid?: Maybe<Scalars['Boolean']>,
   paymentChannels?: Maybe<Array<Maybe<BankAccountInfoNode>>>,
 };
 
@@ -2833,6 +2837,7 @@ export type MergeRegistrationDataImportMutation = {
 export type Mutations = {
    __typename?: 'Mutations',
   createReport?: Maybe<CreateReport>,
+  restartCreateReport?: Maybe<RestartCreateReport>,
   createDashboardReport?: Maybe<CreateDashboardReport>,
   createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
   updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>,
@@ -2881,6 +2886,11 @@ export type Mutations = {
 
 export type MutationsCreateReportArgs = {
   reportData: CreateReportInput
+};
+
+
+export type MutationsRestartCreateReportArgs = {
+  reportData: RestartCreateReportInput
 };
 
 
@@ -4619,6 +4629,16 @@ export type ReportNodeEdge = {
   cursor: Scalars['String'],
 };
 
+export type RestartCreateReport = {
+   __typename?: 'RestartCreateReport',
+  report?: Maybe<ReportNode>,
+};
+
+export type RestartCreateReportInput = {
+  reportId: Scalars['ID'],
+  businessAreaSlug: Scalars['String'],
+};
+
 export type RoleNode = {
    __typename?: 'RoleNode',
   createdAt: Scalars['DateTime'],
@@ -6230,7 +6250,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
+  & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'phoneNoValid' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -6281,7 +6301,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -6415,7 +6435,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'photo' | 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8522,7 +8542,7 @@ export type PaymentRecordQuery = (
       & Pick<HouseholdNode, 'id' | 'status' | 'size' | 'unicefId'>
       & { headOfHousehold: (
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
+        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
       ) }
     ), targetPopulation: (
       { __typename?: 'TargetPopulationNode' }
@@ -8708,7 +8728,7 @@ export type PaymentRecordVerificationQuery = (
         & Pick<HouseholdNode, 'status' | 'unicefId' | 'id' | 'size'>
         & { headOfHousehold: (
           { __typename?: 'IndividualNode' }
-          & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
+          & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative' | 'phoneNoValid' | 'phoneNoAlternativeValid'>
         ) }
       ), targetPopulation: (
         { __typename?: 'TargetPopulationNode' }
@@ -9466,7 +9486,7 @@ export type AllReportsQuery = (
       & Pick<ReportNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ReportNode' }
-        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'fileUrl' | 'numberOfRecords'>
+        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'updatedAt' | 'fileUrl' | 'numberOfRecords'>
         & { createdBy: (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'firstName' | 'lastName'>
@@ -9485,7 +9505,7 @@ export type ReportQuery = (
   { __typename?: 'Query' }
   & { report: Maybe<(
     { __typename?: 'ReportNode' }
-    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl' | 'numberOfRecords'>
+    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'updatedAt' | 'dateFrom' | 'dateTo' | 'fileUrl' | 'numberOfRecords'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
@@ -9938,6 +9958,7 @@ export const IndividualMinimalFragmentDoc = gql`
   birthDate
   maritalStatus
   phoneNo
+  phoneNoValid
   sanctionListPossibleMatch
   sanctionListConfirmedMatch
   deduplicationGoldenRecordStatus
@@ -10128,6 +10149,7 @@ export const IndividualDetailedFragmentDoc = gql`
   middleName
   whoAnswersPhone
   phoneNoAlternative
+  phoneNoAlternativeValid
   hearingDisability
   observedDisability
   individualId
@@ -10404,6 +10426,8 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   }
   phoneNo
   phoneNoAlternative
+  phoneNoValid
+  phoneNoAlternativeValid
 }
     ${ImportedIndividualMinimalFragmentDoc}`;
 export const TargetPopulationMinimalFragmentDoc = gql`
@@ -15572,6 +15596,8 @@ export const PaymentRecordDocument = gql`
         id
         phoneNo
         phoneNoAlternative
+        phoneNoValid
+        phoneNoAlternativeValid
       }
     }
     fullName
@@ -15628,6 +15654,8 @@ export const PaymentRecordDocument = gql`
         id
         phoneNo
         phoneNoAlternative
+        phoneNoValid
+        phoneNoAlternativeValid
       }
     }
     fullName
@@ -16088,6 +16116,8 @@ export const PaymentRecordVerificationDocument = gql`
           id
           phoneNo
           phoneNoAlternative
+          phoneNoValid
+          phoneNoAlternativeValid
         }
       }
       fullName
@@ -18053,6 +18083,7 @@ export const AllReportsDocument = gql`
         dateTo
         status
         createdAt
+        updatedAt
         createdBy {
           firstName
           lastName
@@ -18124,6 +18155,7 @@ export const ReportDocument = gql`
     status
     reportType
     createdAt
+    updatedAt
     dateFrom
     dateTo
     fileUrl
@@ -19449,6 +19481,8 @@ export type ResolversTypes = {
   Mutations: ResolverTypeWrapper<{}>,
   CreateReportInput: CreateReportInput,
   CreateReport: ResolverTypeWrapper<CreateReport>,
+  RestartCreateReportInput: RestartCreateReportInput,
+  RestartCreateReport: ResolverTypeWrapper<RestartCreateReport>,
   CreateDashboardReportInput: CreateDashboardReportInput,
   CreateDashboardReport: ResolverTypeWrapper<CreateDashboardReport>,
   CreateGrievanceTicketInput: CreateGrievanceTicketInput,
@@ -19819,6 +19853,8 @@ export type ResolversParentTypes = {
   Mutations: {},
   CreateReportInput: CreateReportInput,
   CreateReport: CreateReport,
+  RestartCreateReportInput: RestartCreateReportInput,
+  RestartCreateReport: RestartCreateReport,
   CreateDashboardReportInput: CreateDashboardReportInput,
   CreateDashboardReport: CreateDashboardReport,
   CreateGrievanceTicketInput: CreateGrievanceTicketInput,
@@ -20159,7 +20195,7 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   confidenceInterval?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  rapidProFlowStartUuid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  rapidProFlowStartUuids?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
   ageFilter?: Resolver<Maybe<ResolversTypes['AgeFilterObject']>, ParentType, ContextType>,
   excludedAdminAreasFilter?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -20823,6 +20859,8 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']> = {
@@ -20947,6 +20985,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  phoneNoValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  phoneNoAlternativeValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   paymentChannels?: Resolver<Maybe<Array<Maybe<ResolversTypes['BankAccountInfoNode']>>>, ParentType, ContextType>,
 };
 
@@ -21064,6 +21104,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
+  restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>,
   createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
   createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
   updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>,
@@ -21549,6 +21590,10 @@ export type ReportNodeConnectionResolvers<ContextType = any, ParentType extends 
 export type ReportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeEdge'] = ResolversParentTypes['ReportNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type RestartCreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['RestartCreateReport'] = ResolversParentTypes['RestartCreateReport']> = {
+  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
 };
 
 export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleNode'] = ResolversParentTypes['RoleNode']> = {
@@ -22534,6 +22579,7 @@ export type Resolvers<ContextType = any> = {
   ReportNode?: ReportNodeResolvers<ContextType>,
   ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>,
   ReportNodeEdge?: ReportNodeEdgeResolvers<ContextType>,
+  RestartCreateReport?: RestartCreateReportResolvers<ContextType>,
   RoleNode?: RoleNodeResolvers<ContextType>,
   RuleCommitNode?: RuleCommitNodeResolvers<ContextType>,
   RuleCommitNodeConnection?: RuleCommitNodeConnectionResolvers<ContextType>,

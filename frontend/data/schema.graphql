@@ -290,7 +290,7 @@ type CashPlanPaymentVerificationNode implements Node {
   confidenceInterval: Float
   marginOfError: Float
   rapidProFlowId: String!
-  rapidProFlowStartUuid: String!
+  rapidProFlowStartUuids: [String!]!
   ageFilter: AgeFilterObject
   excludedAdminAreasFilter: [String]
   sexFilter: String
@@ -1741,6 +1741,8 @@ type ImportedIndividualNode implements Node {
   role: String
   age: Int
   importId: String
+  phoneNoValid: Boolean
+  phoneNoAlternativeValid: Boolean
 }
 
 type ImportedIndividualNodeConnection {
@@ -1917,6 +1919,8 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
+  phoneNoValid: Boolean
+  phoneNoAlternativeValid: Boolean
   paymentChannels: [BankAccountInfoNode]
 }
 
@@ -2117,6 +2121,7 @@ type MergeRegistrationDataImportMutation {
 
 type Mutations {
   createReport(reportData: CreateReportInput!): CreateReport
+  restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
@@ -2736,6 +2741,15 @@ type ReportNodeConnection {
 type ReportNodeEdge {
   node: ReportNode
   cursor: String!
+}
+
+type RestartCreateReport {
+  report: ReportNode
+}
+
+input RestartCreateReportInput {
+  reportId: ID!
+  businessAreaSlug: String!
 }
 
 type RoleNode {

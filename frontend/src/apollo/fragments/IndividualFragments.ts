@@ -13,6 +13,7 @@ export const individualMinimal = gql`
     birthDate
     maritalStatus
     phoneNo
+    phoneNoValid
     sanctionListPossibleMatch
     sanctionListConfirmedMatch
     deduplicationGoldenRecordStatus
@@ -97,6 +98,7 @@ export const individualDetailed = gql`
     middleName
     whoAnswersPhone
     phoneNoAlternative
+    phoneNoAlternativeValid
     hearingDisability
     observedDisability
     individualId
