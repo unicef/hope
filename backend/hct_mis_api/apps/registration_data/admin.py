@@ -15,8 +15,6 @@ from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
-    RelatedFieldComboFilter,
-    ValueFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
@@ -261,3 +259,8 @@ class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, 
         except Exception as e:
             logger.exception(e)
             self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
+
+    @button()
+    def households(self, request, pk):
+        url = reverse("admin:household_household_changelist")
+        return HttpResponseRedirect(f"{url}?&registration_data_import__exact={pk}")
