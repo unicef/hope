@@ -16,8 +16,11 @@ logger = logging.getLogger(__name__)
 
 @contextmanager
 def locked_cache(key):
-    with cache.lock(key, blocking_timeout=2, timeout=85400) as lock:
-        yield lock
+    try:
+        with cache.lock(key, blocking_timeout=2, timeout=85400) as lock:
+            yield
+    finally:
+        lock.release()
 
 
 @app.task
@@ -77,7 +80,7 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
             from sentry_sdk import capture_exception
 
             err = capture_exception(e)
-        except:
+        except Exception:
             err = "N/A"
 
         RegistrationDataImportDatahub.objects.filter(
@@ -299,7 +302,7 @@ def automate_rdi_creation_task(
     )
 
     try:
-        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}") as lock:
+        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
             try:
                 service = FlexRegistrationService()
 
@@ -331,10 +334,8 @@ def automate_rdi_creation_task(
 
                 output.append([rdi_name, len(records_ids)])
                 return output
-            except Exception as e:
+            except Exception:
                 raise
-            finally:
-                lock.release()
     except LockError as e:
         logger.exception(e)
     return None
@@ -365,7 +366,7 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
     )
 
     try:
-        with locked_cache(key="automate_rdi_diia_creation_task") as lock:
+        with locked_cache(key="automate_rdi_diia_creation_task"):
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
@@ -375,10 +376,8 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
                 rdi = service.create_rdi(None, rdi_name)
                 service.execute(rdi.id, diia_hh_count=page_size)
                 return [rdi_name, page_size]
-            except Exception as e:
+            except Exception:
                 raise
-            finally:
-                lock.release()
     except LockError as e:
         logger.exception(e)
         return []
@@ -391,7 +390,7 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
     )
 
     try:
-        with locked_cache(key="registration_diia_import_task") as lock:
+        with locked_cache(key="registration_diia_import_task"):
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
@@ -401,10 +400,8 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
                 rdi = service.create_rdi(None, rdi_name)
                 service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
                 return [rdi_name, len(diia_hh_ids)]
-            except Exception as e:
+            except Exception:
                 raise
-            finally:
-                lock.release()
     except LockError as e:
         logger.exception(e)
         return []
