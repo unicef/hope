@@ -129,7 +129,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     def test_successful_run_without_records_to_import(self):
         result = run_automate_rdi_creation_task(registration_id=123, page_size=1)
-        assert result is None
+        assert result[0] == "No Records found"
 
     def test_not_running_with_record_status_not_to_import(self):
         create_ukraine_business_area()
@@ -142,7 +142,7 @@ class TestAutomatingRDICreationTask(TestCase):
         result = run_automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
-        assert result is None
+        assert result[0] == "No Records found"
 
     def test_successful_run_with_records_to_import(self):
         create_ukraine_business_area()

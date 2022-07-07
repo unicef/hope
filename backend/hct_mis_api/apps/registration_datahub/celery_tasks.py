@@ -329,10 +329,10 @@ def automate_rdi_creation_task(
                     )
                     rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
                     service.process_records(rdi_id=rdi.id, records_ids=records_ids)
+                    output.append([rdi_name, len(records_ids)])
                     if auto_merge:
                         merge_registration_data_import_task.delay(rdi.id)
 
-                output.append([rdi_name, len(records_ids)])
                 return output
             except Exception:
                 raise
