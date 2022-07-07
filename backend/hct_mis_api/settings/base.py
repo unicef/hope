@@ -37,6 +37,7 @@ SITE_ID = 1
 TIME_ZONE = "UTC"
 LANGUAGE_CODE = "en-us"
 USE_I18N = True
+USE_TZ = True
 SECRET_KEY = env("SECRET_KEY")
 DEFAULT_CHARSET = "utf-8"
 ROOT_URLCONF = "hct_mis_api.urls"
