@@ -42,6 +42,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
@@ -255,6 +256,14 @@ class ImportedIndividual(TimeStampedUUIDModel):
     @property
     def business_area(self):
         return self.registration_data_import.business_area
+
+    @property
+    def phone_no_valid(self):
+        return is_right_phone_number_format(str(self.phone_no))
+
+    @property
+    def phone_no_alternative_valid(self):
+        return is_right_phone_number_format(str(self.phone_no_alternative))
 
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
