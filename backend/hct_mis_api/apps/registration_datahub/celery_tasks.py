@@ -341,7 +341,7 @@ def automate_rdi_creation_task(
 
 
 def check_and_set_taxid(queryset):
-    qs = queryset.filter(unique_field__inull=True)
+    qs = queryset.filter(unique_field__isnull=True)
     results = {"updated": [], "processed": []}
     for record in qs.all():
         try:
