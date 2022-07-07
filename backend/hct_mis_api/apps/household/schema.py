@@ -334,6 +334,8 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     age = graphene.Int()
     bank_account_info = graphene.Field(BankAccountInfoNode, required=False)
     sanction_list_last_check = graphene.DateTime()
+    phone_no_valid = graphene.Boolean()
+    phone_no_alternative_valid = graphene.Boolean()
     payment_channels = graphene.List(BankAccountInfoNode)
 
     @staticmethod
@@ -381,6 +383,13 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_sanction_list_last_check(parent, info):
         return parent.sanction_list_last_check
+
+    def resolve_phone_no_valid(parent, info):
+        return parent.phone_no_valid
+
+    def resolve_phone_no_alternative_valid(parent, info):
+        return parent.phone_no_alternative_valid
+
 
     @classmethod
     def check_node_permission(cls, info, object_instance):

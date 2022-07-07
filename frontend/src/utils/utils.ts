@@ -422,6 +422,17 @@ export function renderUserName(user): string {
     : `${user?.email}`;
 }
 
+export const getPhoneNoLabel = (
+  phoneNo: string,
+  phoneNoValid: boolean,
+): string => {
+  if (!phoneNo) return '-';
+  if (phoneNoValid) {
+    return phoneNo;
+  }
+  return 'Invalid Phone Number';
+};
+
 const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
   [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
   [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,

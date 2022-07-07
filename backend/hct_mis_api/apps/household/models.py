@@ -22,14 +22,13 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import AdminArea
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
 )
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 BLANK = ""
 IDP = "IDP"
@@ -788,6 +787,14 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
     disability_certificate_picture = models.ImageField(blank=True, null=True)
+
+    @property
+    def phone_no_valid(self):
+        return is_right_phone_number_format(self.phone_no)
+
+    @property
+    def phone_no_alternative_valid(self):
+        return is_right_phone_number_format(self.phone_no_alternative)
 
     @property
     def age(self):
