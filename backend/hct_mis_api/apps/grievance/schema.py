@@ -16,7 +16,6 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import (
-    _HOUSEHOLD,
     TYPE_IMAGE,
     FieldFactory,
     Scope,
