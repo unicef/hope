@@ -287,7 +287,12 @@ def fresh_extract_records_task(records_ids=None):
 
 @app.task
 def automate_rdi_creation_task(
-    registration_id: int, page_size: int, template: str, auto_merge=False, fix_tax_id=False, **filters
+    registration_id: int,
+    page_size: int,
+    template: str = "ukraine rdi {date}",
+    auto_merge=False,
+    fix_tax_id=False,
+    **filters,
 ):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
