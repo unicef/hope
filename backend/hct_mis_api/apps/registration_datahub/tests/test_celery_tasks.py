@@ -223,5 +223,5 @@ class TestAutomatingRDICreationTask(TestCase):
                 fix_tax_id=True,
             )
         assert len(result) == 4
-        assert merge_task_mock.called
+        assert not merge_task_mock.called  # auto_merge was not set ; defaults to false
         assert set(Record.objects.values_list("unique_field", flat=True)) == {"123123123"}
