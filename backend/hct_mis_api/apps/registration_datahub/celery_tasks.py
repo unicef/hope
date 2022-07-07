@@ -14,13 +14,10 @@ from hct_mis_api.apps.registration_datahub.services.extract_record import extrac
 logger = logging.getLogger(__name__)
 
 
-# @contextmanager
-# def locked_cache(key):
-#     try:
-#         with cache.lock(key, blocking_timeout=2, timeout=85400) as lock:
-#             yield lock
-#     finally:
-#         pass
+@contextmanager
+def locked_cache(key):
+    with cache.lock(key, blocking_timeout=2, timeout=85400) as lock:
+        yield lock
 
 
 @app.task
@@ -297,8 +294,7 @@ def automate_rdi_creation_task(
     )
 
     try:
-        # with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
-        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=86400) as lock:
+        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}") as lock:
             try:
                 service = FlexRegistrationService()
 
@@ -306,7 +302,7 @@ def automate_rdi_creation_task(
                     status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
                 )
                 if fix_tax_id:
-                    fix_tax_id(qs)
+                    check_and_set_taxid(qs)
                 all_records_ids = qs.values_list("id", flat=True)
                 if len(all_records_ids) == 0:
                     return ["No Records found", 0]
@@ -339,7 +335,7 @@ def automate_rdi_creation_task(
     return None
 
 
-def fix_tax_id(queryset):
+def check_and_set_taxid(queryset):
     qs = queryset.filter(unique_field__inull=True)
     results = {"updated": [], "processed": []}
     for record in qs.all():
@@ -364,8 +360,7 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
     )
 
     try:
-        # with locked_cache(key="automate_rdi_diia_creation_task"):
-        with cache.lock(f"automate_rdi_diia_creation_task", blocking_timeout=2, timeout=86400) as lock:
+        with locked_cache(key="automate_rdi_diia_creation_task") as lock:
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
@@ -391,8 +386,7 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
     )
 
     try:
-        # with locked_cache(key="registration_diia_import_task"):
-        with cache.lock(f"registration_diia_import_task", blocking_timeout=2, timeout=86400) as lock:
+        with locked_cache(key="registration_diia_import_task") as lock:
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
