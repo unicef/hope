@@ -162,11 +162,10 @@ export const ReportingDetailsPage = (): React.ReactElement => {
           { query: ALL_REPORTS_QUERY, variables: { businessArea } },
         ],
       });
-      // add t()
       if (!response.errors && response.data.restartCreateReport) {
-          showMessage('Re-Generating Report');
+        showMessage(t('Re-Generating Report'));
       } else {
-          showMessage('Re-Generating Report action failed.');
+        showMessage(t('Re-Generating Report action failed.'));
       }
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -195,14 +194,18 @@ export const ReportingDetailsPage = (): React.ReactElement => {
           </Button>
           }
           {report.status !== 2 && minutes > 30 &&
-          <LoadingButton
-            color='primary'
-            variant='contained'
-            loading={restartReportLoading}
-            onClick={() => { reGenerateReport() }}
-          >
-            {t('Re-Generate Report')}
-          </LoadingButton>
+            <>
+              <span>{t("Report is in processing status for over 30 min.")}<br />{t("Please wait or re-generate report.")}</span>
+              &emsp;
+              <LoadingButton
+                color='primary'
+                variant='contained'
+                loading={restartReportLoading}
+                onClick={() => { reGenerateReport() }}
+              >
+                {t('Re-Generate Report')}
+              </LoadingButton>
+            </>
           }
         </>
       </PageHeader>
