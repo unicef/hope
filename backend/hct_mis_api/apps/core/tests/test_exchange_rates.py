@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta
+from django.utils import timezone
 from decimal import Decimal
 from unittest import mock
 
@@ -192,7 +193,7 @@ class TestExchangeRates(TestCase):
             ("xeu_out_of_range_date", "XEU", datetime(1994, 3, 1), None),
             ("xeu_historical_date_1", "XEU", datetime(1998, 2, 7), 0.926),
             ("xeu_historical_date_2", "XEU", datetime(1998, 3, 1), 0.909),
-            ("cup1_future_date", "CUP1", datetime.now() + timedelta(weeks=200), 24),
+            ("cup1_future_date", "CUP1", timezone.now() + timedelta(weeks=200), 24),
         ]
     )
     def test_get_exchange_rate_for_currency_code(self, _, currency_code, dispersion_date, expected_result):
