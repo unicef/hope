@@ -1,4 +1,5 @@
 import datetime
+from django.utils import timezone
 import json
 
 from django.test import TestCase
@@ -94,7 +95,7 @@ class TestUkrainianRegistrationService(TestCase):
         }
         defaults = {
             "registration": 1,
-            "timestamp": datetime.datetime(2022, 4, 1),
+            "timestamp": timezone.make_aware(datetime.datetime(2022, 4, 1)),
         }
 
         files = {
@@ -136,7 +137,7 @@ class TestUkrainianRegistrationService(TestCase):
 
     def test_import_data_to_datahub(self):
         service = FlexRegistrationService()
-        rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
+        rdi = service.create_rdi(self.user, f"ukraine rdi {timezone.now()}")
 
         service.process_records(rdi.id, [x.id for x in self.records])
         self.records[2].refresh_from_db()
@@ -145,14 +146,14 @@ class TestUkrainianRegistrationService(TestCase):
 
     def test_import_data_to_datahub_retry(self):
         service = FlexRegistrationService()
-        rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
+        rdi = service.create_rdi(self.user, f"ukraine rdi {timezone.now()}")
 
         service.process_records(rdi.id, [x.id for x in self.records])
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
         service = FlexRegistrationService()
-        rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
+        rdi = service.create_rdi(self.user, f"ukraine rdi {timezone.now()}")
 
         service.process_records(rdi.id, [x.id for x in self.records[:2]])
         self.assertEqual(Record.objects.filter(ignored=False).count(), 4)
