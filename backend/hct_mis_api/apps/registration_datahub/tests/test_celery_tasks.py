@@ -1,5 +1,5 @@
 import base64
-import datetime
+from django.utils import timezone
 import json
 from contextlib import contextmanager
 from django.test import TestCase
@@ -74,7 +74,7 @@ def create_record(registration, status):
     return Record.objects.create(
         registration=registration,
         status=status,
-        timestamp=datetime.datetime.now(),
+        timestamp=timezone.now(),
         data=None,
         source_id=1,
         fields=fields,

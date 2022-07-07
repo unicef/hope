@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from django.utils import timezone
 from decimal import Decimal
 
 from django.core.management import call_command
@@ -134,12 +135,12 @@ class TestDataSendTpToDatahub(TestCase):
             "ca_hash_id": str(self.program.ca_hash_id),
             "ca_id": self.program.ca_id,
             "description": self.program.description,
-            "end_date": datetime.combine(self.program.end_date, datetime.min.time()),
+            "end_date": timezone.make_aware(datetime.combine(self.program.end_date, datetime.min.time())),
             "individual_data_needed": True,
             "mis_id": self.program.id,
             "name": self.program.name,
             "scope": self.program.scope,
-            "start_date": datetime.combine(self.program.start_date, datetime.min.time()),
+            "start_date": timezone.make_aware(datetime.combine(self.program.start_date, datetime.min.time())),
         }
         dh_program_dict = dh_models.Program.objects.first().__dict__
         dh_program_dict.pop("_state")

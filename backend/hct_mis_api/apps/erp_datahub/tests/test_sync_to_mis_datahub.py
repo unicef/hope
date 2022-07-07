@@ -1,4 +1,4 @@
-from datetime import datetime
+from django.utils import timezone
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -60,7 +60,7 @@ class TestSyncToMisDatahubTask(TestCase):
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
             currency_code="USD",
-            posting_date=datetime.now(),
+            posting_date=timezone.now(),
             created_by="johniak",
         )
         task = SyncToMisDatahubTask()
@@ -87,7 +87,7 @@ class TestSyncToMisDatahubTask(TestCase):
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
             currency_code="USD",
-            posting_date=datetime.now(),
+            posting_date=timezone.now(),
             created_by="johniak",
             business_office_code=self.herzegovina.code,
         )
@@ -114,7 +114,7 @@ class TestSyncToMisDatahubTask(TestCase):
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
             currency_code="USD",
-            posting_date=datetime.now(),
+            posting_date=timezone.now(),
             created_by="johniak",
         )
         task = SyncToMisDatahubTask()
@@ -142,7 +142,7 @@ class TestSyncToMisDatahubTask(TestCase):
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
             currency_code="USD",
-            posting_date=datetime.now(),
+            posting_date=timezone.now(),
             created_by="johniak",
             business_office_code=self.herzegovina.code,
             mis_sync_flag=True,
@@ -171,7 +171,7 @@ class TestSyncToMisDatahubTask(TestCase):
             total_down_payment_amount_local=1000.00,
             total_down_payment_amount_usd=1000.00,
             currency_code="USD",
-            posting_date=datetime.now(),
+            posting_date=timezone.now(),
             created_by="johniak",
             mis_sync_flag=True,
         )
