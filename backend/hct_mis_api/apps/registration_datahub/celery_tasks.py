@@ -2,9 +2,9 @@ import datetime
 import logging
 from contextlib import contextmanager
 
-from constance import config
 from django.core.cache import cache
 
+from constance import config
 from redis.exceptions import LockError
 
 from hct_mis_api.apps.core.celery import app
@@ -14,13 +14,13 @@ from hct_mis_api.apps.registration_datahub.services.extract_record import extrac
 logger = logging.getLogger(__name__)
 
 
-@contextmanager
-def locked_cache(key):
-    try:
-        with cache.lock(key, blocking_timeout=2, timeout=85400):
-            yield
-    finally:
-        pass
+# @contextmanager
+# def locked_cache(key):
+#     try:
+#         with cache.lock(key, blocking_timeout=2, timeout=85400) as lock:
+#             yield lock
+#     finally:
+#         pass
 
 
 @app.task
@@ -288,30 +288,36 @@ def fresh_extract_records_task(records_ids=None):
     logger.info("fresh_extract_records_task end")
 
 
-def process_all_records(registration_id: int, page_size: int, template: str, **filters):
+@app.task
+def automate_rdi_creation_task(
+    registration_id: int, page_size: int, template: str, auto_merge=False, fix_tax_id=False, **filters
+):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
 
     try:
-        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
+        # with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
+        with cache.lock(f"automate_rdi_creation_task-{registration_id}", blocking_timeout=2, timeout=86400) as lock:
             try:
                 service = FlexRegistrationService()
 
-                all_records_ids = (
-                    Record.objects.filter(registration=registration_id, **filters)
-                    .exclude(status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR])
-                    .values_list("id", flat=True)
+                qs = Record.objects.filter(registration=registration_id, **filters).exclude(
+                    status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
                 )
+                if fix_tax_id:
+                    fix_tax_id(qs)
+                all_records_ids = qs.values_list("id", flat=True)
                 if len(all_records_ids) == 0:
-                    return None
+                    return ["No Records found", 0]
 
                 splitted_record_ids = [
                     all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
                 ]
                 output = []
-                for records_ids in splitted_record_ids:
+                for page, records_ids in enumerate(splitted_record_ids, 1):
                     rdi_name = template.format(
+                        page=page,
                         date=datetime.datetime.now(),
                         registration_id=registration_id,
                         page_size=page_size,
@@ -319,33 +325,47 @@ def process_all_records(registration_id: int, page_size: int, template: str, **f
                     )
                     rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
                     service.process_records(rdi_id=rdi.id, records_ids=records_ids)
-                    output.append([rdi_name, len(records_ids)])
+                    if auto_merge:
+                        merge_registration_data_import_task.delay(rdi.id)
+
+                output.append([rdi_name, len(records_ids)])
                 return output
             except Exception as e:
-                logger.exception(e)
+                raise
+            finally:
+                lock.release()
     except LockError as e:
         logger.exception(e)
     return None
 
 
-@app.task
-def automate_rdi_creation_task(registration_id: int, page_size: int, template="ukraine rdi {date}", **filters):
-    result = process_all_records(registration_id=registration_id, page_size=page_size, template=template, **filters)
-    if config.AUTO_MERGE_AFTER_AUTO_RDI_IMPORT:
-        merge_registration_data_import_task.delay(registration_id)
-    return result
+def fix_tax_id(queryset):
+    qs = queryset.filter(unique_field__inull=True)
+    results = {"updated": [], "processed": []}
+    for record in qs.all():
+        try:
+            for individual in record.fields["individuals"]:
+                if individual["role_i_c"] == "y":
+                    record.unique_field = individual["tax_id_no_i_c"]
+                    record.save()
+                    results["updated"].append(record.pk)
+                    break
+            results["processed"].append(record.pk)
+
+        except Exception as e:
+            results[record.pk] = f"{e.__class__.__name__}: {str(e)}"
+    return results
 
 
 @app.task
 def automate_registration_diia_import_task(page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters):
-    logger.info("automate_registration_diia_import_task start")
-
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
 
     try:
-        with locked_cache(key="automate_rdi_diia_creation_task"):
+        # with locked_cache(key="automate_rdi_diia_creation_task"):
+        with cache.lock(f"automate_rdi_diia_creation_task", blocking_timeout=2, timeout=86400) as lock:
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
@@ -356,24 +376,23 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
                 service.execute(rdi.id, diia_hh_count=page_size)
                 return [rdi_name, page_size]
             except Exception as e:
-                logger.exception(e)
+                raise
+            finally:
+                lock.release()
     except LockError as e:
         logger.exception(e)
         return []
 
-    logger.info("automate_registration_diia_import_task end")
-
 
 @app.task
 def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters):
-    logger.info("registration_diia_import_task start")
-
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
 
     try:
-        with locked_cache(key="registration_diia_import_task"):
+        # with locked_cache(key="registration_diia_import_task"):
+        with cache.lock(f"registration_diia_import_task", blocking_timeout=2, timeout=86400) as lock:
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
@@ -384,9 +403,9 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
                 service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
                 return [rdi_name, len(diia_hh_ids)]
             except Exception as e:
-                logger.exception(e)
+                raise
+            finally:
+                lock.release()
     except LockError as e:
         logger.exception(e)
         return []
-
-    logger.info("registration_diia_import_task end")
