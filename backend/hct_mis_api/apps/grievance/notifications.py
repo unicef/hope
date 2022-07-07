@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from django.utils import timezone
 from enum import auto
 
 from django.conf import settings
@@ -110,14 +110,14 @@ class GrievanceNotification:
 
     def _prepare_sensitive_reminder_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
-        context["hours_ago"] = (datetime.now() - self.grievance_ticket.created_at).days * 24
+        context["hours_ago"] = (timezone.now() - self.grievance_ticket.created_at).days * 24
         text_body = render_to_string("sensitive_reminder_notification_email.txt", context=context)
         html_body = render_to_string("sensitive_reminder_notification_email.html", context=context)
         return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"
 
     def _prepare_overdue_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
-        context["days_ago"] = (datetime.now() - self.grievance_ticket.created_at).days
+        context["days_ago"] = (timezone.now() - self.grievance_ticket.created_at).days
         text_body = render_to_string("overdue_notification_email.txt", context=context)
         html_body = render_to_string("overdue_notification_email.html", context=context)
         return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"

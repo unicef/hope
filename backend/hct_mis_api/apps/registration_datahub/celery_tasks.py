@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 import logging
 from contextlib import contextmanager
 
@@ -312,7 +312,7 @@ def process_all_records(registration_id: int, page_size: int, template: str, **f
                 output = []
                 for records_ids in splitted_record_ids:
                     rdi_name = template.format(
-                        date=datetime.datetime.now(),
+                        date=timezone.now(),
                         registration_id=registration_id,
                         page_size=page_size,
                         records=len(records_ids),
@@ -349,7 +349,7 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
-                    date=datetime.datetime.now(),
+                    date=timezone.now(),
                     page_size=page_size,
                 )
                 rdi = service.create_rdi(None, rdi_name)
@@ -377,7 +377,7 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
             try:
                 service = RdiDiiaCreateTask()
                 rdi_name = template.format(
-                    date=datetime.datetime.now(),
+                    date=timezone.now(),
                     page_size=len(diia_hh_ids),
                 )
                 rdi = service.create_rdi(None, rdi_name)
