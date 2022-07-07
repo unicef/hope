@@ -10,6 +10,7 @@ import adminactions.actions as actions
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
+import hct_mis_api.apps.household.views
 import hct_mis_api.apps.payment.views
 import hct_mis_api.apps.registration_datahub.views
 import hct_mis_api.apps.sanction_list.views
@@ -75,6 +76,7 @@ api_patterns = [
         include("hct_mis_api.apps.power_query.urls"),
     ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
+    path("individual", hct_mis_api.apps.household.views.IndividualView.as_view())
 ]
 
 urlpatterns = [
