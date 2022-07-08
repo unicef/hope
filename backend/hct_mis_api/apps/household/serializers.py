@@ -20,12 +20,9 @@ def get_household_status(household):
             return "targeted", timezone.now()
 
         return "merged to population", household.created_at
-    else:
-        imported_households = ImportedHousehold.objects.filter(head_of_household__individual_id=household.head_of_household.id)
-        if imported_households.exists():
-            return "imported", imported_households.first().updated_at
 
-    return "not imported", timezone.now()
+    # if is not Household, then must be ImportedHousehold, so it was imported
+    return "imported", household.updated_at
 
 
 def get_individual_info(individual, tax_id):
@@ -38,10 +35,7 @@ def get_individual_info(individual, tax_id):
 
 def get_household_info(household, individual=None, tax_id=None):
     status, date = get_household_status(household)
-    output = {
-        "status": status,
-        "date": date
-    }
+    output = {"status": status, "date": date}
     if individual:
         output["individual"] = get_individual_info(individual, tax_id=tax_id)
     return output
@@ -68,7 +62,9 @@ class ImportedIndividualSerializer(serializers.ModelSerializer):
 
     def get_info(self, imported_individual):
         tax_id = self.context["tax_id"]
-        return get_household_info(household=imported_individual.household, individual=imported_individual.individual, tax_id=tax_id)
+        return get_household_info(
+            household=imported_individual.household, individual=imported_individual, tax_id=tax_id
+        )
 
 
 class HouseholdStatusSerializer(serializers.ModelSerializer):
@@ -90,5 +86,6 @@ class ImportedHouseholdSerializer(serializers.ModelSerializer):
     info = serializers.SerializerMethodField()
 
     def get_info(self, imported_household):
-        tax_id = self.context["tax_id"]
-        return get_household_info(household=imported_household.household, individual=imported_household.head_of_household, tax_id=tax_id)
+        return get_household_info(
+            household=imported_household.household,
+        )

@@ -1,13 +1,16 @@
 from django.test import TestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedDocumentFactory, ImportedDocumentTypeFactory
 from rest_framework.test import APIClient
 
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory, ImportedHouseholdFactory
-from hct_mis_api.apps.account.fixtures import UserFactory, BusinessAreaFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividualRoleInHousehold
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    ImportedDocumentFactory,
+    ImportedDocumentTypeFactory,
+    ImportedIndividualFactory,
+    ImportedHouseholdFactory,
+)
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, HEAD, ROLE_NO_ROLE
 from hct_mis_api.apps.household.fixtures import DocumentFactory, DocumentTypeFactory, create_household
 
@@ -37,16 +40,18 @@ class TestDetails(TestCase):
 
     def test_getting_individual_with_status_imported(self):
         imported_household = ImportedHouseholdFactory()
-        imported_individual = ImportedIndividualFactory(household=imported_household)
+        imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
         imported_household.head_of_household = imported_individual
         imported_household.save()
+        ImportedIndividualRoleInHousehold.objects.create(
+            individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
+        )
 
         imported_document_type = ImportedDocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
         imported_document = ImportedDocumentFactory(individual=imported_individual, type=imported_document_type)
         tax_id = imported_document.document_number
 
         response = self.api_client.get(f"/api/details?tax_id={tax_id}")
-        print(response.json())
         self.assertEqual(response.status_code, 200)
         data = response.json()
         info = data["info"]
@@ -57,7 +62,7 @@ class TestDetails(TestCase):
         self.assertIsNotNone(individual)
         self.assertEqual(individual["relationship"], HEAD)
         self.assertEqual(individual["role"], ROLE_NO_ROLE)
-        self.assertEqual(individual["tax_id"], self.tax_id)
+        self.assertEqual(individual["tax_id"], tax_id)
 
     def test_getting_individual_with_status_merged_to_population(self):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})

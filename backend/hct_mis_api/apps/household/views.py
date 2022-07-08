@@ -25,7 +25,7 @@ def get_individual(tax_id):
     ).distinct()
     if imported_documents.count() > 1:
         raise Exception(f"Multiple imported documents ({imported_documents.count()}) with given tax_id found")
-    if documents.count() == 0:
+    if imported_documents.count() == 0:
         raise Exception("Document with given tax_id not found")
     return imported_documents.first().individual
 
