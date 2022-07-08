@@ -34,13 +34,13 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'budget': '20000000',
                 'cashPlus': True,
                 'description': 'my description of program',
-                'endDate': '2021-12-20',
+                'endDate': '2021-12-20T00:00:00+00:00',
                 'frequencyOfPayments': 'REGULAR',
                 'name': 'Test',
                 'populationGoal': 150000,
                 'scope': 'UNICEF',
                 'sector': 'EDUCATION',
-                'startDate': '2019-12-20',
+                'startDate': '2019-12-20T00:00:00+00:00',
                 'status': 'DRAFT'
             },
             'validationErrors': None
