@@ -13,7 +13,7 @@ class IndividualStatusSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
 
     def get_status(self, individual):
-        if PaymentRecord.objects.filter(head_of_household=individual).exists():
+        if PaymentRecord.objects.filter(household__head_of_household=individual).exists():
             return "paid"
 
         # if targeting to cash assits

@@ -1,6 +1,7 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory
 from hct_mis_api.apps.account.fixtures import UserFactory, BusinessAreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -61,16 +62,40 @@ class TestDetails(TestCase):
         self.assertEqual(individual["status"], "imported")
 
     def test_getting_individual_with_status_merged_to_population(self):
-        pass  # TODO
+        # TODO: create some objs in db
+        response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNotNone(data["individual"])
+        individual = data["individual"]
+        self.assertEqual(individual["status"], "merged to population")
 
     def test_getting_individual_with_status_targeted(self):
-        pass  # TODO
+        # TODO: create some objs in db
+        response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNotNone(data["individual"])
+        individual = data["individual"]
+        self.assertEqual(individual["status"], "targeted")
 
     def test_getting_individual_with_status_sent_to_cash_assist(self):
-        pass  # TODO
+        # TODO: create some objs in db
+        response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNotNone(data["individual"])
+        individual = data["individual"]
+        self.assertEqual(individual["status"], "sent to cash assist")
 
     def test_getting_individual_with_status_paid(self):
-        pass  # TODO
+        PaymentRecordFactory(household=self.household)
+        response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNotNone(data["individual"])
+        individual = data["individual"]
+        self.assertEqual(individual["status"], "paid")
 
     def test_getting_non_existend_household(self):
         self.assertEqual(self.api_client.get("/api/details?registration_id=non-existent").status_code, 400)
