@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory
+from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory, ImportedHouseholdFactory
 from hct_mis_api.apps.account.fixtures import UserFactory, BusinessAreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, HEAD, ROLE_NO_ROLE
@@ -58,7 +58,11 @@ class TestDetails(TestCase):
         self.assertEqual(individual["tax_id"], self.tax_id)
 
     def test_getting_individual_with_status_imported(self):
-        ImportedIndividualFactory(individual_id=self.individual.id)
+        imported_household = ImportedHouseholdFactory()
+        imported_individual = ImportedIndividualFactory(household=imported_household, individual_id=self.individual.id)
+        imported_household.head_of_household = imported_individual
+        imported_household.save()
+
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
