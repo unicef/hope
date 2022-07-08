@@ -22,6 +22,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { REPORTING_STATES } from '../../../utils/constants';
 import { reduceChoices, reportStatusToColor } from '../../../utils/utils';
 import {
   useReportChoiceDataQuery,
@@ -193,7 +194,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
             {t('DOWNLOAD REPORT')}
           </Button>
           }
-          {report.status !== 2 && minutes > 30 &&
+          {report.status === REPORTING_STATES.PROCESSING && minutes > 30 &&
             <>
               <span>{t("Report is in processing status for over 30 min.")}<br />{t("Please wait or re-generate report.")}</span>
               &emsp;
