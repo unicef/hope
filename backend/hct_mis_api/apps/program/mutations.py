@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 
 import graphene
 
@@ -69,8 +70,8 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
         cls.validate(
-            start_date=program_data.get("start_date"),
-            end_date=program_data.get("end_date"),
+            start_date=timezone.make_aware(program_data.get("start_date")),
+            end_date=timezone.make_aware(program_data.get("end_date")),
         )
 
         program = Program(

@@ -1,11 +1,11 @@
 import os
 from datetime import datetime, timedelta
-from django.utils import timezone
 from decimal import Decimal
 from unittest import mock
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 
 import requests_mock
 from parameterized import parameterized
@@ -226,9 +226,18 @@ class TestFixExchangeRatesCommand(TestCase):
         ServiceProviderFactory.create_batch(3)
         program = RealProgramFactory()
         cash_plans_with_currency = (
-            ("PLN", RealCashPlanFactory(program=program, dispersion_date=datetime(2021, 4, 4))),  # x_rate == 3.973
-            ("AFN", RealCashPlanFactory(program=program, dispersion_date=datetime(2020, 3, 3))),  # x_rate == 76.55
-            ("USD", RealCashPlanFactory(program=program, dispersion_date=datetime(2020, 3, 3))),  # x_rate ==  1
+            (
+                "PLN",
+                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2021, 4, 4))),
+            ),  # x_rate == 3.973
+            (
+                "AFN",
+                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2020, 3, 3))),
+            ),  # x_rate == 76.55
+            (
+                "USD",
+                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2020, 3, 3))),
+            ),  # x_rate ==  1
         )
         for currency, cash_plan in cash_plans_with_currency:
             RealPaymentRecordFactory(
