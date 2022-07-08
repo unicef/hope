@@ -59,8 +59,8 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(
         RegistrationDataImportDatahubFactory,
     )
-    first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
-    last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
     admin1 = ""
     admin2 = ""
     geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
@@ -85,7 +85,7 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     male_age_group_12_17_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
     male_age_group_18_59_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
     male_age_group_60_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
-    start = factory.Faker("date_this_month", before_today=True, after_today=False)
+    start = factory.Faker("date_time_this_month", before_now=True, after_now=False, tzinfo=utc)
     deviceid = factory.Faker("md5")
     name_enumerator = factory.Faker("name")
     org_enumerator = factory.fuzzy.FuzzyChoice(
@@ -119,8 +119,8 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = False
     household = factory.SubFactory(ImportedHouseholdFactory)
-    first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
-    last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
 
 
 def create_imported_household(household_args=None, individual_args=None):
