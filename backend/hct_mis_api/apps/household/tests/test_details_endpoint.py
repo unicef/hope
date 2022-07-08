@@ -1,6 +1,8 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 
+from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividualRoleInHousehold
@@ -79,14 +81,24 @@ class TestDetails(TestCase):
         self.assertEqual(info["date"], str(household.created_at).replace(" ", "T"))
 
     def test_getting_individual_with_status_targeted(self):
-        # TODO: create some objs in db
-        # response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
-        # self.assertEqual(response.status_code, 200)
-        # data = response.json()
-        # info = data["info"]
-        # self.assertEqual(info["status"], "targeted")
-        # TODO: date of targeting
-        pass
+        household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
+        individual = individuals[0]
+        document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
+        document = DocumentFactory(individual=individual, type=document_type)
+        tax_id = document.document_number
+
+        target_popuplation = TargetPopulationFactory(
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        target_popuplation.households.add(household)
+
+        response = self.api_client.get(f"/api/details?tax_id={tax_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        info = data["info"]
+        self.assertEqual(info["status"], "targeted")
+        self.assertEqual(info["date"], str(HouseholdSelection.objects.first().updated_at).replace(" ", "T"))
 
     def test_getting_individual_with_status_sent_to_cash_assist(self):
         # TODO: create some objs in db

@@ -1,7 +1,7 @@
-from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
 from rest_framework import serializers
 from django.utils import timezone
 
+from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual, ImportedHousehold
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.household.models import Individual, Household
@@ -16,8 +16,9 @@ def get_household_status(household):
         if False:  # TODO
             return "sent to cash assist", timezone.now()
 
-        if False:  # TODO
-            return "targeted", timezone.now()
+        selections = HouseholdSelection.objects.filter(household=household)
+        if selections.exists():
+            return "targeted", selections.order_by("updated_at").first().updated_at
 
         return "merged to population", household.created_at
 
