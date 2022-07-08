@@ -5,7 +5,7 @@ from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory
 from hct_mis_api.apps.account.fixtures import UserFactory, BusinessAreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
+from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, HEAD, ROLE_NO_ROLE
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -47,18 +47,21 @@ class TestDetails(TestCase):
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["info"])
         info = data["info"]
+        self.assertIsNotNone(data["info"])
         self.assertEqual(info["status"], "not imported")
         self.assertIsNotNone(info["date"])
-        # TODO: relationship & role in household
+        individual = info["individual"]
+        self.assertIsNotNone(individual)
+        self.assertEqual(individual["relationship"], HEAD)
+        self.assertEqual(individual["role"], ROLE_NO_ROLE)
+        self.assertEqual(individual["tax_id"], self.tax_id)
 
     def test_getting_individual_with_status_imported(self):
         ImportedIndividualFactory(individual_id=self.individual.id)
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["info"])
         info = data["info"]
         self.assertEqual(info["status"], "imported")
         # TODO: date of import
@@ -68,7 +71,6 @@ class TestDetails(TestCase):
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["info"])
         info = data["info"]
         self.assertEqual(info["status"], "merged to population")
         # TODO: date of merge
@@ -78,7 +80,6 @@ class TestDetails(TestCase):
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["info"])
         info = data["info"]
         self.assertEqual(info["status"], "targeted")
         # TODO: date of targeting

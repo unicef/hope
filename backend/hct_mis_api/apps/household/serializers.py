@@ -28,13 +28,10 @@ def get_household_status(household):
     return "not imported", timezone.now()
 
 
-def get_individual_info(individual, household, tax_id):
-    # TODO
-    role = "collector"
-    relationship = "son"
+def get_individual_info(individual, tax_id):
     return {
-        "role": role,
-        "relationship": relationship,
+        "role": individual.role,
+        "relationship": individual.relationship,
         "tax_id": tax_id,
     }
 
@@ -46,7 +43,7 @@ def get_household_info(household, individual=None, tax_id=None):
         "date": date
     }
     if individual:
-        output["individual"] = get_individual_info(individual, household, tax_id=tax_id)
+        output["individual"] = get_individual_info(individual, tax_id=tax_id)
     return output
 
 
