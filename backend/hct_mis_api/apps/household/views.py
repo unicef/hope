@@ -33,10 +33,10 @@ def get_household_or_individual(tax_id, registration_id):
         raise Exception("tax_id or registration_id is required")
 
     if tax_id:
-        return {"individual": IndividualStatusSerializer(get_individual(tax_id), many=False).data}
+        return IndividualStatusSerializer(get_individual(tax_id), many=False, context={"tax_id": tax_id}).data
 
     if registration_id:
-        return {"household": HouseholdStatusSerializer(get_household(registration_id), many=False).data}
+        return HouseholdStatusSerializer(get_household(registration_id), many=False).data
 
 
 class DetailsView(APIView):

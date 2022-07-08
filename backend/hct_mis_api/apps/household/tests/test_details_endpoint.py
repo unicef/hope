@@ -45,57 +45,64 @@ class TestDetails(TestCase):
 
     def test_getting_individual_with_status_not_imported(self):
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
+        print("NI", response.json())
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["individual"])
-        individual = data["individual"]
-        self.assertEqual(individual["status"], "not imported")
-        # TODO: what about date here? just today's timestamp?
+        self.assertIsNotNone(data["info"])
+        info = data["info"]
+        self.assertEqual(info["status"], "not imported")
+        # TODO: current date
+        # TODO: relationship & role in household
 
     def test_getting_individual_with_status_imported(self):
         ImportedIndividualFactory(individual_id=self.individual.id)
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["individual"])
-        individual = data["individual"]
-        self.assertEqual(individual["status"], "imported")
+        self.assertIsNotNone(data["info"])
+        info = data["info"]
+        self.assertEqual(info["status"], "imported")
+        # TODO: date of import
 
     def test_getting_individual_with_status_merged_to_population(self):
         # TODO: create some objs in db
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["individual"])
-        individual = data["individual"]
-        self.assertEqual(individual["status"], "merged to population")
+        self.assertIsNotNone(data["info"])
+        info = data["info"]
+        self.assertEqual(info["status"], "merged to population")
+        # TODO: date of merge
 
     def test_getting_individual_with_status_targeted(self):
         # TODO: create some objs in db
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["individual"])
-        individual = data["individual"]
-        self.assertEqual(individual["status"], "targeted")
+        self.assertIsNotNone(data["info"])
+        info = data["info"]
+        self.assertEqual(info["status"], "targeted")
+        # TODO: date of targeting
 
     def test_getting_individual_with_status_sent_to_cash_assist(self):
         # TODO: create some objs in db
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["individual"])
-        individual = data["individual"]
-        self.assertEqual(individual["status"], "sent to cash assist")
+        self.assertIsNotNone(data["info"])
+        info = data["info"]
+        self.assertEqual(info["status"], "sent to cash assist")
+        # TODO: date of sending to cash assist
 
     def test_getting_individual_with_status_paid(self):
         PaymentRecordFactory(household=self.household)
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["individual"])
-        individual = data["individual"]
-        self.assertEqual(individual["status"], "paid")
+        self.assertIsNotNone(data["info"])
+        info = data["info"]
+        self.assertEqual(info["status"], "paid")
+        # TODO: date of payment
 
     def test_getting_non_existend_household(self):
         self.assertEqual(self.api_client.get("/api/details?registration_id=non-existent").status_code, 400)
@@ -104,7 +111,7 @@ class TestDetails(TestCase):
         response = self.api_client.get(f"/api/details?registration_id={self.registration_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIsNotNone(data["household"])
-        household = data["household"]
-        # TODO: what info here? not described in task
+        self.assertIsNotNone(data["info"])
+        info = data["info"]
+        # TODO: expect to see status and date
 
