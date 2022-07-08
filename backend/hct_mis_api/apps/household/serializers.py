@@ -16,8 +16,14 @@ class IndividualStatusSerializer(serializers.ModelSerializer):
         if PaymentRecord.objects.filter(household__head_of_household=individual).exists():
             return "paid"
 
-        # if targeting to cash assits
-        # 
+        if False:  # TODO
+            return "sent to cash assist"
+
+        if False:  # TODO
+            return "targeted"
+
+        if False:  # TODO
+            return "merged to population"
 
         if ImportedIndividual.objects.filter(individual_id=individual.id).exists():
             return "imported"
