@@ -24,10 +24,10 @@
   "model": "registration_datahub.registrationdataimportdatahub",
   "pk": "c57848bf-a5df-154b-4938-f30b6b29aaab",
   "fields": {
-    "created_at": "2022-03-30T09:22:14.856",
-    "updated_at": "2022-03-30T09:22:16.791",
+    "created_at": "2022-03-30T09:22:14.856+00:00",
+    "updated_at": "2022-03-30T09:22:16.791+00:00",
     "name": "Test Diia",
-    "import_date": "2022-03-30T09:22:14.856",
+    "import_date": "2022-03-30T09:22:14.856+00:00",
     "hct_id": "04992dce-8e47-154b-4938-743415412dce",
     "import_data": "e38f6f0c-36e9-a1f0-4b73-84742f7d025d",
     "import_done": "NOT_STARTED",
