@@ -35,17 +35,20 @@ class TestDetails(TestCase):
         self.client.force_authenticate(user=self.user)
 
     def tearDown(self):
+        # due to --keepdb, with each run, there are more households
+        # which causes the search to fail on finding multiple objects
         Household.objects.all().delete()
 
     def test_getting_individual(self):
         tax_id = self.document.document_number
         self.assertEqual(self.client.get("/api/details?tax_id=non-existent").status_code, 400)
         response = self.client.get(f"/api/details?tax_id={tax_id}")
-        print(response.json())
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIsNotNone(data["individual"])
-
+        individual = data["individual"]
+        # TODO: what about status here?
+        # TODO: what about date here? just today's timestamp?
 
     def test_getting_household(self):
         registration_id = "HOPE-202253186077"
@@ -53,8 +56,9 @@ class TestDetails(TestCase):
         self.household.save()
         self.assertEqual(self.client.get("/api/details?registration_id=non-existent").status_code, 400)
         response = self.client.get(f"/api/details?registration_id={registration_id}")
-        print(response.json())
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIsNotNone(data["household"])
+        household = data["household"]
+        # TODO: what info here? not described in task
 

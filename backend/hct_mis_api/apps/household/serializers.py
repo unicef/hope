@@ -8,6 +8,7 @@ class IndividualSerializer(serializers.ModelSerializer):
         model = Individual
         fields = "__all__"  # TODO
 
+
 class HouseholdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Household
