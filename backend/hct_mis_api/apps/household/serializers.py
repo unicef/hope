@@ -3,13 +3,18 @@ from rest_framework import serializers
 from hct_mis_api.apps.household.models import Individual, Household
 
 
-class IndividualSerializer(serializers.ModelSerializer):
+class IndividualStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Individual
-        fields = "__all__"  # TODO
+        fields = ("status",)
+
+    status = serializers.SerializerMethodField()
+
+    def get_status(self, obj):
+        return "hello"
 
 
-class HouseholdSerializer(serializers.ModelSerializer):
+class HouseholdStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Household
         fields = "__all__"  # TODO

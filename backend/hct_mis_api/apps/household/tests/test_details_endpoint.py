@@ -40,7 +40,7 @@ class TestDetails(TestCase):
         data = response.json()
         self.assertIsNotNone(data["individual"])
         individual = data["individual"]
-        # TODO: what about status here?
+        self.assertEqual(individual["status"], "not imported")
         # TODO: what about date here? just today's timestamp?
 
     def test_getting_household(self):

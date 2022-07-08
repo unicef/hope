@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from hct_mis_api.apps.household.models import Individual, IDENTIFICATION_TYPE_TAX_ID, Document, Household
-from hct_mis_api.apps.household.serializers import IndividualSerializer, HouseholdSerializer
+from hct_mis_api.apps.household.serializers import IndividualStatusSerializer, HouseholdStatusSerializer
 from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
 from rest_framework.response import Response
 
@@ -33,10 +33,10 @@ def get_household_or_individual(tax_id, registration_id):
         raise Exception("tax_id or registration_id is required")
 
     if tax_id:
-        return {"individual": IndividualSerializer(get_individual(tax_id), many=False).data}
+        return {"individual": IndividualStatusSerializer(get_individual(tax_id), many=False).data}
 
     if registration_id:
-        return {"household": HouseholdSerializer(get_household(registration_id), many=False).data}
+        return {"household": HouseholdStatusSerializer(get_household(registration_id), many=False).data}
 
 
 class DetailsView(APIView):
