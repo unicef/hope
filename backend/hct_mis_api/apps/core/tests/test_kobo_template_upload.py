@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
-from django.test import Client, RequestFactory, TestCase
+from django.test import Client, RequestFactory
 from django.urls import reverse
 
 import requests

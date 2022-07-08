@@ -16,7 +16,6 @@ import hct_mis_api.apps.registration_datahub.views
 import hct_mis_api.apps.sanction_list.views
 import hct_mis_api.apps.targeting.views
 from hct_mis_api.apps.core.views import (
-    call_command_view,
     homepage,
     hope_redirect,
     logout_view,
@@ -76,11 +75,11 @@ api_patterns = [
         include("hct_mis_api.apps.power_query.urls"),
     ),
     path(f"{settings.ADMIN_PANEL_URL}/", admin.site.urls),
-    path("individual", hct_mis_api.apps.household.views.IndividualView.as_view())
+    path("details", hct_mis_api.apps.household.views.DetailsView.as_view()),
 ]
 
-urlpatterns = [
-    path("", homepage),
-    path("_health", homepage),
-    path("api/", include(api_patterns))
-] + staticfiles_urlpatterns() + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns = (
+    [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]
+    + staticfiles_urlpatterns()
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+)
