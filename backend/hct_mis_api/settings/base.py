@@ -787,3 +787,9 @@ IMPERSONATE = {
 POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
 
 CONCURRENCY_ENABLED = False
+
+# import warnings
+# warnings.filterwarnings(
+#     'error', r"DateTimeField .* received a naive datetime",
+#     RuntimeWarning, r'django\.db\.models\.fields',
+# )
