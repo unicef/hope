@@ -1,6 +1,7 @@
 import csv
 import logging
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.contrib.admin import FieldListFilter, ListFilter, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
 from django.forms import TextInput
@@ -18,8 +19,9 @@ from .utils import initialise_area_types, initialise_areas, initialise_countries
 
 logger = logging.getLogger(__name__)
 
+
 class ImportCSVForm(forms.Form):
-    file = forms.FileField()
+    file = forms.FileField(widget=forms.FileInput(attrs={'accept':'text/csv'}))
 
 
 class ActiveRecordFilter(ListFilter):
@@ -183,41 +185,37 @@ class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEMode
     @button()
     def import_areas(self, request):
         context = self.get_common_context(request, processed=False)
-        if request.method == "GET":
-            form = ImportCSVForm()
-            context["form"] = form
-        else:
+        if request.method == "POST":
             form = ImportCSVForm(data=request.POST, files=request.FILES)
             if form.is_valid():
-                try:
-                    csv_file = form.cleaned_data["file"]
-                    data_set = csv_file.read().decode("utf-8-sig").splitlines()
-                    reader = csv.DictReader(data_set)
-                    country = None
-                    for row in reader:
-                        try:
-                            d = len(row) // 2
-                            area_types = [*row][:d]
-                            admin_area = [*row][d:]
-                            for idx, x in enumerate(area_types):
-                                country = Country.objects.get(short_name=row["Country"])
-                                if idx > 0:
-                                    art, created = AreaType.objects.get_or_create(name=x, country=country, area_level=idx)
-                                    area, created = Area.objects.get_or_create(name=row[x], p_code=row[admin_area[idx]], area_type=art)
-                                    ids = idx - 1
-                                    if ids > 0 :
-                                        art.parent= AreaType.objects.get(country=country, area_level=ids)
-                                        art.save()
-                                        area.parent = Area.objects.get(area_type__country=country, p_code=row[admin_area[ids]])
-                                        area.save()
-                        except Exception as e:
-                            self.message_user(request, f"Unable to load those areas")
-                            raise e
-                    else:
-                        self.message_user(request, f"Updated all areas for {country}")
-
-
-                except Exception as e:
-                    logger.exception(e)
-                    raise
+                csv_file = form.cleaned_data["file"]
+                data_set = csv_file.read().decode("utf-8-sig").splitlines()
+                reader = csv.DictReader(data_set)
+                country = None
+                for row in reader:
+                    try:
+                        d = len(row) // 2
+                        area_types = [*row][:d]
+                        admin_area = [*row][d:]
+                        country = Country.objects.get(short_name=row["Country"])
+                        for idx, x in enumerate(area_types):
+                            if idx > 0:
+                                art, created = AreaType.objects.get_or_create(name=x, country=country, area_level=idx)
+                                area, created = Area.objects.get_or_create(name=row[x], p_code=row[admin_area[idx]], area_type=art)
+                                ids = idx - 1
+                                if ids > 0:
+                                    art.parent = AreaType.objects.get(country=country, area_level=ids, name=area_types[ids])
+                                    art.save()
+                                    area.parent = Area.objects.get(p_code=row[admin_area[ids]], name=row[area_types[ids]])
+                                    area.save()
+                    except Exception as e:
+                        self.message_user(request, f"Unable to load those areas")
+                        raise 
+                
+                self.message_user(request, f"Updated all areas for {country}")
+                return redirect("admin:geo_area_changelist")
+        else:
+            form = ImportCSVForm()
+            context["form"] = form
+        context["form"] = form
         return TemplateResponse(request, "admin/geo/import_area_csv.html", context)
