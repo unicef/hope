@@ -45,13 +45,12 @@ class TestDetails(TestCase):
 
     def test_getting_individual_with_status_not_imported(self):
         response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
-        print("NI", response.json())
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIsNotNone(data["info"])
         info = data["info"]
         self.assertEqual(info["status"], "not imported")
-        # TODO: current date
+        self.assertIsNotNone(info["date"])
         # TODO: relationship & role in household
 
     def test_getting_individual_with_status_imported(self):
@@ -113,5 +112,6 @@ class TestDetails(TestCase):
         data = response.json()
         self.assertIsNotNone(data["info"])
         info = data["info"]
-        # TODO: expect to see status and date
+        self.assertIsNotNone(info["date"])
+        self.assertIsNotNone(info["status"])
 
