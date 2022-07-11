@@ -21,7 +21,7 @@ class BusinessAreaFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = BusinessArea
-        django_get_or_create = ("name", "code",)
+        django_get_or_create = ("name",)
 
 
 class UserFactory(factory.DjangoModelFactory):
