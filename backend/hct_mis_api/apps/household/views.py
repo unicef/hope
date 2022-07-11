@@ -1,14 +1,8 @@
-import traceback
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from hct_mis_api.apps.registration_datahub.models import ImportedDocument, ImportedHousehold, ImportedIndividual
-from hct_mis_api.apps.household.models import Individual, IDENTIFICATION_TYPE_TAX_ID, Document, Household
-from hct_mis_api.apps.household.serializers import (
-    IndividualStatusSerializer,
-    HouseholdStatusSerializer,
-    ImportedIndividualSerializer,
-    ImportedHouseholdSerializer,
-)
+from hct_mis_api.apps.registration_datahub.models import ImportedDocument, ImportedHousehold
+from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, Document, Household
+from hct_mis_api.apps.household.serializers import serialize_by_household, serialize_by_individual
 from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
 from rest_framework.response import Response
 
@@ -48,22 +42,6 @@ def get_household(registration_id):
     raise Exception("Household with given registration_id not found")
 
 
-def get_individual_serializer(individual):
-    if isinstance(individual, Individual):
-        return IndividualStatusSerializer
-    if isinstance(individual, ImportedIndividual):
-        return ImportedIndividualSerializer
-    raise Exception("Wrong Individual class provided")
-
-
-def get_household_serializer(household):
-    if isinstance(household, Household):
-        return HouseholdStatusSerializer
-    if isinstance(household, ImportedHousehold):
-        return ImportedHouseholdSerializer
-    raise Exception("Wrong Household class provided")
-
-
 def get_household_or_individual(tax_id, registration_id):
     if tax_id and registration_id:
         raise Exception("tax_id and registration_id are mutually exclusive")
@@ -73,13 +51,11 @@ def get_household_or_individual(tax_id, registration_id):
 
     if tax_id:
         individual = get_individual(tax_id)
-        serializer = get_individual_serializer(individual)
-        return serializer(individual, many=False, context={"tax_id": tax_id}).data
+        return serialize_by_individual(individual, tax_id)
 
     if registration_id:
         household = get_household(registration_id)
-        serializer = get_household_serializer(household)
-        return serializer(household, many=False).data
+        return serialize_by_household(household)
 
 
 class DetailsView(APIView):

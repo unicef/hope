@@ -39,54 +39,12 @@ def get_household_info(household, individual=None, tax_id=None):
     output = {"status": status, "date": date}
     if individual:
         output["individual"] = get_individual_info(individual, tax_id=tax_id)
-    return output
+    return {"info": output}
 
 
-class IndividualStatusSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Individual
-        fields = ("info",)
-
-    info = serializers.SerializerMethodField()
-
-    def get_info(self, individual):
-        tax_id = self.context["tax_id"]
-        return get_household_info(household=individual.household, individual=individual, tax_id=tax_id)
+def serialize_by_individual(individual, tax_id):
+    return get_household_info(individual.household, individual, tax_id)
 
 
-class ImportedIndividualSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ImportedIndividual
-        fields = ("info",)
-
-    info = serializers.SerializerMethodField()
-
-    def get_info(self, imported_individual):
-        tax_id = self.context["tax_id"]
-        return get_household_info(
-            household=imported_individual.household, individual=imported_individual, tax_id=tax_id
-        )
-
-
-class HouseholdStatusSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Household
-        fields = ("info",)
-
-    info = serializers.SerializerMethodField()
-
-    def get_info(self, household):
-        return get_household_info(household=household)
-
-
-class ImportedHouseholdSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ImportedHousehold
-        fields = ("info",)
-
-    info = serializers.SerializerMethodField()
-
-    def get_info(self, imported_household):
-        return get_household_info(
-            household=imported_household,
-        )
+def serialize_by_household(household):
+    return get_household_info(household)
