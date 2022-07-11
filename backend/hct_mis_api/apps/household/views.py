@@ -25,9 +25,9 @@ def get_individual(tax_id):
     ).distinct()
     if imported_documents.count() > 1:
         raise Exception(f"Multiple imported documents ({imported_documents.count()}) with given tax_id found")
-    if imported_documents.count() == 0:
-        raise Exception("Document with given tax_id not found")
-    return imported_documents.first().individual
+    if imported_documents.count() == 1:
+        return imported_documents.first().individual
+    raise Exception("Document with given tax_id not found")
 
 
 def get_household(registration_id):
@@ -43,9 +43,9 @@ def get_household(registration_id):
         raise Exception(
             f"Multiple imported households ({imported_households.count()}) with given registration_id found"
         )
-    if households.count() == 0:
-        raise Exception("Household with given registration_id not found")
-    return imported_households.first()
+    if imported_households.count() == 1:
+        return imported_households.first()
+    raise Exception("Household with given registration_id not found")
 
 
 def get_household_or_individual(tax_id, registration_id):
@@ -56,13 +56,13 @@ def get_household_or_individual(tax_id, registration_id):
         raise Exception("tax_id or registration_id is required")
 
     if tax_id:
-        individual = get_individual(tax_id)
+        individual = get_individual(tax_id)  # may be Imported- or just Individual
         return (IndividualStatusSerializer if isinstance(individual, Individual) else ImportedIndividualSerializer)(
             individual, many=False, context={"tax_id": tax_id}
         ).data
 
     if registration_id:
-        household = get_household(registration_id)
+        household = get_household(registration_id)  # as above ; may be Imported- or just Household
         return (HouseholdStatusSerializer if isinstance(household, Household) else ImportedHouseholdSerializer)(
             household, many=False
         ).data

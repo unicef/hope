@@ -1,7 +1,7 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.core.models import BusinessArea
@@ -101,15 +101,26 @@ class TestDetails(TestCase):
         self.assertEqual(info["date"], str(HouseholdSelection.objects.first().updated_at).replace(" ", "T"))
 
     def test_getting_individual_with_status_sent_to_cash_assist(self):
-        # TODO: create some objs in db
-        # response = self.api_client.get(f"/api/details?tax_id={self.tax_id}")
-        # self.assertEqual(response.status_code, 200)
-        # data = response.json()
-        # self.assertIsNotNone(data["info"])
-        # info = data["info"]
-        # self.assertEqual(info["status"], "sent to cash assist")
-        # TODO: date of sending to cash assist
-        pass
+        household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
+        individual = individuals[0]
+        document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
+        document = DocumentFactory(individual=individual, type=document_type)
+        tax_id = document.document_number
+
+        target_popuplation = TargetPopulationFactory(
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        target_popuplation.households.add(household)
+        target_popuplation.status = TargetPopulation.STATUS_PROCESSING
+        target_popuplation.save()
+
+        response = self.api_client.get(f"/api/details?tax_id={tax_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsNotNone(data["info"])
+        info = data["info"]
+        self.assertEqual(info["status"], "sent to cash assist")
 
     def test_getting_individual_with_status_paid(self):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -132,12 +143,23 @@ class TestDetails(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["status"], "not found")
 
-    # TODO: test households
-    # def test_getting_household(self):
-    #     response = self.api_client.get(f"/api/details?registration_id={self.registration_id}")
-    #     self.assertEqual(response.status_code, 200)
-    #     data = response.json()
-    #     self.assertIsNotNone(data["info"])
-    #     info = data["info"]
-    #     self.assertIsNotNone(info["date"])
-    #     self.assertIsNotNone(info["status"])
+    def test_getting_household_with_status_imported(self):
+        imported_household = ImportedHouseholdFactory()
+        imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
+        imported_household.head_of_household = imported_individual
+        suffix = "2022530111222"
+        imported_household.kobo_asset_id = f"HOPE-{suffix}"
+        imported_household.save()
+        ImportedIndividualRoleInHousehold.objects.create(
+            individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
+        )
+
+        registration_id = suffix
+
+        response = self.api_client.get(f"/api/details?registration_id={registration_id}")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        info = data["info"]
+        self.assertEqual(info["status"], "imported")
+        self.assertEqual(info["date"], str(imported_household.updated_at).replace(" ", "T"))
+        self.assertNotContains(info, "individual")
