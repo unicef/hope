@@ -1,7 +1,7 @@
 import logging
 
 import graphene
-from django.db.models import Case, CharField, Count, When, Value
+from django.db.models import Case, CharField, Count, When, Value, Q, Avg
 from django.utils.encoding import force_str
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -12,6 +12,17 @@ logger = logging.getLogger(__name__)
 def display_value(choices, field):
     options = [When(**{field: k, "then": Value(v)}) for k, v in choices]
     return Case(*options, output_field=CharField())
+
+
+def create_little_query():
+    user_generated, system_generated = Q(), Q()
+    for category in GrievanceTicket.CATEGORY_CHOICES:
+        category_num, category_str = category
+        if category_num in GrievanceTicket.MANUAL_CATEGORIES:
+            user_generated |= Q(category_name=force_str(category_str))
+        else:
+            system_generated |= Q(category_name=force_str(category_str))
+    return user_generated, system_generated
 
 
 class BusinessAreaInput(graphene.InputObjectType):
@@ -100,3 +111,26 @@ class Query(graphene.ObjectType):
             else:
                 results.append({"location": location, "categories": [category_item]})
         return results
+
+    def resolve_tickets_by_type(self, info, **kwargs):
+        user_generated, system_generated = create_little_query()
+
+        return (
+            GrievanceTicket.objects.annotate(
+                category_name=Case(
+                    *[When(category=i, then=Value(force_str(j))) for (i, j) in GrievanceTicket.CATEGORY_CHOICES],
+                    default=Value("XXX"),
+                    output_field=CharField()
+                )
+            )
+            .annotate(days_diff=F("updated_at__day") - F("created_at__day"))
+            .values_list("category_name", "days_diff")
+            .aggregate(
+                user_generated_count=Count("category_name", filter=user_generated),
+                system_generated_count=Count("category_name", filter=system_generated),
+                closed_user_generated_count=Count("category_name", filter=user_generated & Q(status=6)),
+                closed_system_generated_count=Count("category_name", filter=system_generated & Q(status=6)),
+                user_generated_avg_resolution=Avg("days_diff", filter=user_generated),
+                system_generated_avg_resolution=Avg("days_diff", filter=system_generated),
+            )
+        )
