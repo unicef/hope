@@ -1,12 +1,8 @@
-import logging
-
 import graphene
 from django.db.models import Case, CharField, Count, When, Value, Q, Avg, F
 from django.utils.encoding import force_str
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-
-logger = logging.getLogger(__name__)
 
 
 def display_value(choices, field, default_field=None):
@@ -14,7 +10,7 @@ def display_value(choices, field, default_field=None):
     return Case(*options, default=default_field, output_field=CharField())
 
 
-def create_little_query():
+def create_type_generated_queries():
     user_generated, system_generated = Q(), Q()
     for category in GrievanceTicket.CATEGORY_CHOICES:
         category_num, category_str = category
@@ -58,18 +54,20 @@ class TicketByLocationAndCategory(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    tickets_by_type = graphene.Field(TicketByType)
-    tickets_by_category = graphene.List(TicketByCategory, business_area=graphene.String(required=True))
-    tickets_by_status = graphene.List(TicketByStatus, business_area=graphene.String(required=True))
+    tickets_by_type = graphene.Field(TicketByType, business_area_slug=graphene.String(required=True))
+    tickets_by_category = graphene.List(TicketByCategory, business_area_slug=graphene.String(required=True))
+    tickets_by_status = graphene.List(TicketByStatus, business_area_slug=graphene.String(required=True))
     tickets_by_location_and_category = graphene.List(
-        TicketByLocationAndCategory, business_area=graphene.String(required=True)
+        TicketByLocationAndCategory, business_area_slug=graphene.String(required=True)
     )
 
     def resolve_tickets_by_type(self, info, **kwargs):
-        user_generated, system_generated = create_little_query()
+        user_generated, system_generated = create_type_generated_queries()
 
         return (
-            GrievanceTicket.objects.annotate(
+            GrievanceTicket.objects
+            .filter(business_area__slug=kwargs.get("business_area_slug"))
+            .annotate(
                 category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
                 days_diff=F("updated_at__day") - F("created_at__day"),
             )
@@ -86,7 +84,8 @@ class Query(graphene.ObjectType):
 
     def resolve_tickets_by_category(self, info, **kwargs):
         return (
-            GrievanceTicket.objects.filter(business_area=kwargs["business_area"])
+            GrievanceTicket.objects
+            .filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
             .values("category_name")
             .annotate(count=Count("category"))
@@ -95,7 +94,8 @@ class Query(graphene.ObjectType):
 
     def resolve_tickets_by_status(self, info, **kwargs):
         return (
-            GrievanceTicket.objects.filter(business_area=kwargs["business_area"])
+            GrievanceTicket.objects
+            .filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(status_name=display_value(GrievanceTicket.STATUS_CHOICES, "status"))
             .values("status_name")
             .annotate(count=Count("status"))
@@ -105,7 +105,7 @@ class Query(graphene.ObjectType):
     def resolve_tickets_by_location_and_category(self, info, **kwargs):
         qs = (
             GrievanceTicket.objects.select_related("admin2")
-            .filter(business_area=kwargs["business_area"])
+            .filter(business_area__slug=kwargs.get("business_area_slug"))
             .values_list("admin2__title", "category")
             .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
             .annotate(count=Count("category"))
