@@ -9,9 +9,9 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 logger = logging.getLogger(__name__)
 
 
-def display_value(choices, field):
-    options = [When(**{field: k, "then": Value(v)}) for k, v in choices]
-    return Case(*options, output_field=CharField())
+def display_value(choices, field, default_field=None):
+    options = [When(**{field: k, "then": Value(force_str(v))}) for k, v in choices]
+    return Case(*options, default=default_field, output_field=CharField())
 
 
 def create_little_query():
@@ -70,13 +70,9 @@ class Query(graphene.ObjectType):
 
         return (
             GrievanceTicket.objects.annotate(
-                category_name=Case(
-                    *[When(category=i, then=Value(force_str(j))) for (i, j) in GrievanceTicket.CATEGORY_CHOICES],
-                    default=Value("XXX"),
-                    output_field=CharField()
-                )
+                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
+                days_diff=F("updated_at__day") - F("created_at__day"),
             )
-            .annotate(days_diff=F("updated_at__day") - F("created_at__day"))
             .values_list("category_name", "days_diff")
             .aggregate(
                 user_generated_count=Count("category_name", filter=user_generated),
@@ -89,50 +85,31 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_tickets_by_category(self, info, **kwargs):
-        logger.info(kwargs)
         return (
             GrievanceTicket.objects.filter(business_area=kwargs["business_area"])
-                .annotate(
-                category_name=Case(
-                    *[When(category=i, then=Value(force_str(j))) for (i, j) in GrievanceTicket.CATEGORY_CHOICES],
-                    default=Value("XXX"),
-                    output_field=CharField()
-                )
-            )
-                .values("category_name")
-                .annotate(count=Count("category"))
-                .order_by("-count")
+            .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
+            .values("category_name")
+            .annotate(count=Count("category"))
+            .order_by("-count")
         )
 
     def resolve_tickets_by_status(self, info, **kwargs):
         return (
             GrievanceTicket.objects.filter(business_area=kwargs["business_area"])
-                .annotate(
-                status_name=Case(
-                    *[When(status=i, then=Value(force_str(j))) for (i, j) in GrievanceTicket.STATUS_CHOICES],
-                    default=Value("XXX"),
-                    output_field=CharField()
-                )
-            )
-                .values("status_name")
-                .annotate(count=Count("status"))
-                .order_by("-count")
+            .annotate(status_name=display_value(GrievanceTicket.STATUS_CHOICES, "status"))
+            .values("status_name")
+            .annotate(count=Count("status"))
+            .order_by("-count")
         )
 
     def resolve_tickets_by_location_and_category(self, info, **kwargs):
         qs = (
             GrievanceTicket.objects.select_related("admin2")
-                .filter(business_area=kwargs["business_area"])
-                .values_list("admin2__title", "category")
-                .annotate(
-                category_name=Case(
-                    *[When(category=i, then=Value(force_str(j))) for (i, j) in GrievanceTicket.CATEGORY_CHOICES],
-                    default=Value("XXX"),
-                    output_field=CharField()
-                )
-            )
-                .annotate(count=Count("category"))
-                .order_by("admin2__title", "-count")
+            .filter(business_area=kwargs["business_area"])
+            .values_list("admin2__title", "category")
+            .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
+            .annotate(count=Count("category"))
+            .order_by("admin2__title", "-count")
         )
 
         results = []
