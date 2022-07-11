@@ -17,6 +17,11 @@ from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, HEAD, 
 from hct_mis_api.apps.household.fixtures import DocumentFactory, DocumentTypeFactory, create_household
 
 
+# used for ease of assertions, so it imitates serializer's behaviour
+def _time(some_time):
+    return str(some_time).replace(" ", "T")
+
+
 class TestDetails(TestCase):
     databases = "__all__"
 
@@ -58,7 +63,7 @@ class TestDetails(TestCase):
         data = response.json()
         info = data["info"]
         self.assertEqual(info["status"], "imported")
-        self.assertEqual(info["date"], str(imported_household.updated_at).replace(" ", "T"))
+        self.assertEqual(info["date"], _time(imported_household.updated_at))
 
         individual = info["individual"]
         self.assertIsNotNone(individual)
@@ -78,7 +83,7 @@ class TestDetails(TestCase):
         data = response.json()
         info = data["info"]
         self.assertEqual(info["status"], "merged to population")
-        self.assertEqual(info["date"], str(household.created_at).replace(" ", "T"))
+        self.assertEqual(info["date"], _time(household.created_at))
 
     def test_getting_individual_with_status_targeted(self):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -98,7 +103,7 @@ class TestDetails(TestCase):
         data = response.json()
         info = data["info"]
         self.assertEqual(info["status"], "targeted")
-        self.assertEqual(info["date"], str(HouseholdSelection.objects.first().updated_at).replace(" ", "T"))
+        self.assertEqual(info["date"], _time(HouseholdSelection.objects.first().updated_at))
 
     def test_getting_individual_with_status_sent_to_cash_assist(self):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -136,7 +141,7 @@ class TestDetails(TestCase):
         self.assertIsNotNone(data["info"])
         info = data["info"]
         self.assertEqual(info["status"], "paid")
-        self.assertEqual(info["date"], str(payment_record.updated_at).replace(" ", "T"))
+        self.assertEqual(info["date"], _time(payment_record.updated_at))
 
     def test_getting_non_existent_household(self):
         response = self.api_client.get("/api/details?registration_id=non-existent")
@@ -160,5 +165,5 @@ class TestDetails(TestCase):
         data = response.json()
         info = data["info"]
         self.assertEqual(info["status"], "imported")
-        self.assertEqual(info["date"], str(imported_household.updated_at).replace(" ", "T"))
+        self.assertEqual(info["date"], _time(imported_household.updated_at))
         self.assertTrue("individual" not in info)
