@@ -147,14 +147,13 @@ class TestDetails(TestCase):
         imported_household = ImportedHouseholdFactory()
         imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
         imported_household.head_of_household = imported_individual
-        suffix = "2022530111222"
-        imported_household.kobo_asset_id = f"HOPE-{suffix}"
+        imported_household.kobo_asset_id = "HOPE-2022530111222"
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
             individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
         )
 
-        registration_id = suffix
+        registration_id = imported_household.kobo_asset_id
 
         response = self.api_client.get(f"/api/details?registration_id={registration_id}")
         self.assertEqual(response.status_code, 200)
@@ -162,4 +161,4 @@ class TestDetails(TestCase):
         info = data["info"]
         self.assertEqual(info["status"], "imported")
         self.assertEqual(info["date"], str(imported_household.updated_at).replace(" ", "T"))
-        self.assertNotContains(info, "individual")
+        self.assertTrue("individual" not in info)

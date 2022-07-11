@@ -1,7 +1,7 @@
 import traceback
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from hct_mis_api.apps.registration_datahub.models import ImportedDocument, ImportedHousehold
+from hct_mis_api.apps.registration_datahub.models import ImportedDocument, ImportedHousehold, ImportedIndividual
 from hct_mis_api.apps.household.models import Individual, IDENTIFICATION_TYPE_TAX_ID, Document, Household
 from hct_mis_api.apps.household.serializers import (
     IndividualStatusSerializer,
@@ -48,6 +48,22 @@ def get_household(registration_id):
     raise Exception("Household with given registration_id not found")
 
 
+def get_individual_serializer(individual):
+    if isinstance(individual, Individual):
+        return IndividualStatusSerializer
+    if isinstance(individual, ImportedIndividual):
+        return ImportedIndividualSerializer
+    raise Exception("Wrong Individual class provided")
+
+
+def get_household_serializer(household):
+    if isinstance(household, Household):
+        return HouseholdStatusSerializer
+    if isinstance(household, ImportedHousehold):
+        return ImportedHouseholdSerializer
+    raise Exception("Wrong Household class provided")
+
+
 def get_household_or_individual(tax_id, registration_id):
     if tax_id and registration_id:
         raise Exception("tax_id and registration_id are mutually exclusive")
@@ -56,16 +72,14 @@ def get_household_or_individual(tax_id, registration_id):
         raise Exception("tax_id or registration_id is required")
 
     if tax_id:
-        individual = get_individual(tax_id)  # may be Imported- or just Individual
-        return (IndividualStatusSerializer if isinstance(individual, Individual) else ImportedIndividualSerializer)(
-            individual, many=False, context={"tax_id": tax_id}
-        ).data
+        individual = get_individual(tax_id)
+        serializer = get_individual_serializer(individual)
+        return serializer(individual, many=False, context={"tax_id": tax_id}).data
 
     if registration_id:
-        household = get_household(registration_id)  # as above ; may be Imported- or just Household
-        return (HouseholdStatusSerializer if isinstance(household, Household) else ImportedHouseholdSerializer)(
-            household, many=False
-        ).data
+        household = get_household(registration_id)
+        serializer = get_household_serializer(household)
+        return serializer(household, many=False).data
 
 
 class DetailsView(APIView):

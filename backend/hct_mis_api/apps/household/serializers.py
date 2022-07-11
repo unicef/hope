@@ -88,5 +88,5 @@ class ImportedHouseholdSerializer(serializers.ModelSerializer):
 
     def get_info(self, imported_household):
         return get_household_info(
-            household=imported_household.household,
+            household=imported_household,
         )
