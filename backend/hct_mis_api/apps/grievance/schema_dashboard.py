@@ -3,6 +3,22 @@ from django.db.models import Case, CharField, Count, When, Value, Q, Avg, F
 from django.utils.encoding import force_str
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.utils.schema import ChartDatasetNode
+
+
+def transform_to_chart_dataset(qs):
+    labels, data = [], []
+    for q in qs:
+        label, value = q
+        labels.append(label)
+        data.append(value)
+
+    return {
+        "labels": labels,
+        "datasets": [
+            {"data": data}
+        ]
+    }
 
 
 def display_value(choices, field, default_field=None):
@@ -55,8 +71,8 @@ class TicketByLocationAndCategory(graphene.ObjectType):
 
 class Query(graphene.ObjectType):
     tickets_by_type = graphene.Field(TicketByType, business_area_slug=graphene.String(required=True))
-    tickets_by_category = graphene.List(TicketByCategory, business_area_slug=graphene.String(required=True))
-    tickets_by_status = graphene.List(TicketByStatus, business_area_slug=graphene.String(required=True))
+    tickets_by_category = graphene.Field(ChartDatasetNode, business_area_slug=graphene.String(required=True))
+    tickets_by_status = graphene.Field(ChartDatasetNode, business_area_slug=graphene.String(required=True))
     tickets_by_location_and_category = graphene.List(
         TicketByLocationAndCategory, business_area_slug=graphene.String(required=True)
     )
@@ -83,32 +99,40 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_tickets_by_category(self, info, **kwargs):
-        return (
+        qs = (
             GrievanceTicket.objects
             .filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
             .values("category_name")
             .annotate(count=Count("category"))
+            .values_list("category_name", "count")
             .order_by("-count")
         )
 
+        return transform_to_chart_dataset(qs)
+
     def resolve_tickets_by_status(self, info, **kwargs):
-        return (
+        qs = (
             GrievanceTicket.objects
             .filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(status_name=display_value(GrievanceTicket.STATUS_CHOICES, "status"))
             .values("status_name")
             .annotate(count=Count("status"))
+            .values_list("status_name", "count")
             .order_by("-count")
         )
+
+        return transform_to_chart_dataset(qs)
 
     def resolve_tickets_by_location_and_category(self, info, **kwargs):
         qs = (
             GrievanceTicket.objects.select_related("admin2")
             .filter(business_area__slug=kwargs.get("business_area_slug"))
             .values_list("admin2__title", "category")
-            .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
-            .annotate(count=Count("category"))
+            .annotate(
+                category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
+                count=Count("category")
+            )
             .order_by("admin2__title", "-count")
         )
 
