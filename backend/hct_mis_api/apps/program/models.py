@@ -111,8 +111,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         db_index=True,
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
-    start_date = models.DateTimeField(db_index=True)
-    end_date = models.DateTimeField(db_index=True)
+    start_date = models.DateField(db_index=True)
+    end_date = models.DateField(db_index=True)
     description = models.CharField(
         blank=True,
         max_length=255,
