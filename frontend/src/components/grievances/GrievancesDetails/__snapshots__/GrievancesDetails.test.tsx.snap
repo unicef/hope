@@ -211,7 +211,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
           >
             <div>
               <span
@@ -222,6 +222,21 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               </span>
               <div>
                 dwdw
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                PRIORITY
+              </span>
+              <div>
+                -
               </div>
             </div>
           </div>

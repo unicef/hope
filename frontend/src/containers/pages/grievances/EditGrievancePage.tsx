@@ -71,7 +71,7 @@ const BoxWithBorders = styled.div`
   padding: 15px 0;
 `;
 
-export function EditGrievancePage(): React.ReactElement {
+export const EditGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -447,4 +447,4 @@ export function EditGrievancePage(): React.ReactElement {
       }}
     </Formik>
   );
-}
+};

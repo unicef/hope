@@ -74,7 +74,7 @@ export const dataChangeComponentDict = {
   },
 };
 
-export function CreateGrievancePage(): React.ReactElement {
+export const CreateGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -97,6 +97,7 @@ export function CreateGrievancePage(): React.ReactElement {
     selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
+    priority: 1,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
@@ -421,4 +422,4 @@ export function CreateGrievancePage(): React.ReactElement {
       }}
     </Formik>
   );
-}
+};
