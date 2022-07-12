@@ -97,13 +97,13 @@ export const CreateGrievancePage = (): React.ReactElement => {
     selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
-    priority: null,
+    priority: 4,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
 
-  const mappedPriorities = Array.from(Array(10).keys()).map((i) => ({
+  const mappedPriorities = Array.from(Array(4).keys()).map((i) => ({
     name: (i + 1).toString(),
     value: i + 1,
   }));
