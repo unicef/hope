@@ -7877,7 +7877,7 @@ export type AllGrievanceTicketQuery = (
       & Pick<GrievanceTicketNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'GrievanceTicketNode' }
-        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'createdAt' | 'userModified' | 'admin' | 'unicefId'>
+        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'createdAt' | 'userModified' | 'admin' | 'unicefId' | 'priority'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -14262,6 +14262,7 @@ export const AllGrievanceTicketDocument = gql`
           issueType
           unicefId
         }
+        priority
       }
     }
   }

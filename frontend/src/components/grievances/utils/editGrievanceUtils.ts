@@ -457,6 +457,7 @@ export function prepareVariables(businessArea, values, ticket) {
     area: values.area,
     household: values.selectedHousehold?.id,
     individual: values.selectedIndividual?.id,
+    priority: values.priority,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,
