@@ -72,7 +72,6 @@ class TestGrievanceDashboardQuery(APITestCase):
     def setUpTestData(cls):
         create_afghanistan()
         cls.user = UserFactory.create()
-        cls.user2 = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
@@ -80,7 +79,6 @@ class TestGrievanceDashboardQuery(APITestCase):
             business_area=cls.business_area,
         )
         cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
-        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
 
         country = Country.objects.first()
         area_type_new = AreaTypeFactory(
@@ -92,13 +90,6 @@ class TestGrievanceDashboardQuery(APITestCase):
         cls.admin_area_1_new = AreaFactory(
             name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
         )
-        cls.admin_area_2_new = AreaFactory(
-            name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
-        )
-
-        _, individuals = create_household({"size": 2})
-        cls.individual_1 = individuals[0]
-        cls.individual_2 = individuals[1]
 
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
@@ -124,8 +115,8 @@ class TestGrievanceDashboardQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": cls.business_area,
-                    "admin2": cls.admin_area_2,
-                    "admin2_new": cls.admin_area_2_new,
+                    "admin2": cls.admin_area_1,
+                    "admin2_new": cls.admin_area_1_new,
                     "language": "English",
                     "consent": True,
                     "description": "Just random description",
@@ -138,8 +129,8 @@ class TestGrievanceDashboardQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": cls.business_area,
-                    "admin2": cls.admin_area_2,
-                    "admin2_new": cls.admin_area_2_new,
+                    "admin2": cls.admin_area_1,
+                    "admin2_new": cls.admin_area_1_new,
                     "language": "Polish, English",
                     "consent": True,
                     "description": "Just random description",
@@ -152,8 +143,8 @@ class TestGrievanceDashboardQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": cls.business_area,
-                    "admin2": cls.admin_area_2,
-                    "admin2_new": cls.admin_area_2_new,
+                    "admin2": cls.admin_area_1,
+                    "admin2_new": cls.admin_area_1_new,
                     "language": "Polish, English",
                     "consent": True,
                     "description": "Just random description",
@@ -166,8 +157,8 @@ class TestGrievanceDashboardQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": cls.business_area,
-                    "admin2": cls.admin_area_2,
-                    "admin2_new": cls.admin_area_2_new,
+                    "admin2": cls.admin_area_1,
+                    "admin2_new": cls.admin_area_1_new,
                     "language": "Polish, English",
                     "consent": True,
                     "description": "Just random description",
@@ -180,8 +171,8 @@ class TestGrievanceDashboardQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": cls.business_area,
-                    "admin2": cls.admin_area_2,
-                    "admin2_new": cls.admin_area_2_new,
+                    "admin2": cls.admin_area_1,
+                    "admin2_new": cls.admin_area_1_new,
                     "language": "Polish, English",
                     "consent": True,
                     "description": "Just random description",

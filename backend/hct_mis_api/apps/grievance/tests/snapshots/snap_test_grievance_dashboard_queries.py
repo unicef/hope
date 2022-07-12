@@ -56,7 +56,7 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_location_0_with_
                 'categories': [
                     {
                         'categoryName': 'Positive Feedback',
-                        'count': 2
+                        'count': 3
                     },
                     {
                         'categoryName': 'Needs Adjudication',
@@ -67,17 +67,7 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_location_0_with_
                         'count': 1
                     }
                 ],
-                'count': 5,
-                'location': 'City Example'
-            },
-            {
-                'categories': [
-                    {
-                        'categoryName': 'Positive Feedback',
-                        'count': 1
-                    }
-                ],
-                'count': 1,
+                'count': 6,
                 'location': 'City Test'
             }
         ]
@@ -91,7 +81,7 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_location_1_witho
                 'categories': [
                     {
                         'categoryName': 'Positive Feedback',
-                        'count': 2
+                        'count': 3
                     },
                     {
                         'categoryName': 'Needs Adjudication',
@@ -102,17 +92,7 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_location_1_witho
                         'count': 1
                     }
                 ],
-                'count': 5,
-                'location': 'City Example'
-            },
-            {
-                'categories': [
-                    {
-                        'categoryName': 'Positive Feedback',
-                        'count': 1
-                    }
-                ],
-                'count': 1,
+                'count': 6,
                 'location': 'City Test'
             }
         ]
