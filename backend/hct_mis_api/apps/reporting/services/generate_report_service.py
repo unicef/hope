@@ -23,12 +23,13 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
-from hct_mis_api.apps.program.models import (
+from hct_mis_api.apps.payment.models import (
     CashPlan,
     CashPlanPaymentVerification,
-    Program,
+    PaymentRecord,
+    PaymentVerification
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import Report
 
 logger = logging.getLogger(__name__)

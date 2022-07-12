@@ -2,6 +2,7 @@ from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.template.response import TemplateResponse
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
@@ -15,6 +16,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
+    CashPlan,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -138,3 +140,27 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     list_display = ("full_name", "short_name", "country")
     search_fields = ("full_name", "vision_id", "short_name")
     list_filter = (("business_area", AutoCompleteFilter),)
+
+
+@admin.register(CashPlan)
+class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
+    list_display = ("name", "program", "delivery_type", "status", "verification_status", "ca_id")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("delivery_type", ChoicesFieldComboFilter),
+        ("cash_plan_payment_verification_summary__status", ChoicesFieldComboFilter),
+        ("program__id", ValueFilter),
+        ("vision_id", ValueFilter),
+    )
+    raw_id_fields = ("business_area", "program", "service_provider")
+    search_fields = ("name",)
+
+    def verification_status(self, obj):
+        return obj.cash_plan_payment_verification_summary.status
+
+    @button()
+    def payments(self, request, pk):
+        context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
+
+        return TemplateResponse(request, "admin/cashplan/payments.html", context)
