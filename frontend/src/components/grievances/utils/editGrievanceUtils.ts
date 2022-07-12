@@ -11,6 +11,7 @@ import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndivi
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
 
 interface EditValuesTypes {
+  priority?: number;
   description?: string;
   assignedTo?: string;
   issueType?: string | number;
@@ -175,6 +176,7 @@ export function prepareInitialValues(
 ): EditValuesTypes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {
+    priority: ticket.priority,
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
