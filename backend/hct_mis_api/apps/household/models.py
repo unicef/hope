@@ -790,11 +790,11 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     @property
     def phone_no_valid(self):
-        return is_right_phone_number_format(str(self.phone_no))
+        return is_right_phone_number_format(self.phone_no)
 
     @property
     def phone_no_alternative_valid(self):
-        return is_right_phone_number_format(str(self.phone_no_alternative))
+        return is_right_phone_number_format(self.phone_no_alternative)
 
     @property
     def age(self):

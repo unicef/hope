@@ -184,6 +184,11 @@ export function EditGrievancePage(): React.ReactElement {
     value: edge.node.id,
   }));
 
+  const mappedPriorities = Array.from(Array(10).keys()).map((i) => ({
+    name: (i + 1).toString(),
+    value: i + 1,
+  }));
+
   const issueTypeDict = choicesData.grievanceTicketIssueTypeChoices.reduce(
     (prev, curr) => {
       // eslint-disable-next-line no-param-reassign
@@ -394,6 +399,18 @@ export function EditGrievancePage(): React.ReactElement {
                             variant='outlined'
                             label={t('Languages Spoken')}
                             component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='priority'
+                            multiline
+                            fullWidth
+                            disabled={Boolean(ticket.priority)}
+                            variant='outlined'
+                            label={t('Priority')}
+                            choices={mappedPriorities}
+                            component={FormikSelectField}
                           />
                         </Grid>
                       </Grid>

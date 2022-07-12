@@ -12,7 +12,6 @@ import {
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
-import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.oragne};
