@@ -204,3 +204,15 @@ class ConcurrencyModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class UnicefIdentifiedModel(models.Model):
+    unicef_id = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.refresh_from_db()
+        super().save(*args, **kwargs)
