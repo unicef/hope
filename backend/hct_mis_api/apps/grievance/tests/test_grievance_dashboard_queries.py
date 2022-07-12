@@ -149,12 +149,55 @@ class TestGrievanceDashboardQuery(APITestCase):
                     "assigned_to": cls.user,
                 }
             ),
+            GrievanceTicket(
+                **{
+                    "business_area": cls.business_area,
+                    "admin2": cls.admin_area_2,
+                    "admin2_new": cls.admin_area_2_new,
+                    "language": "Polish, English",
+                    "consent": True,
+                    "description": "Just random description",
+                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                    "status": GrievanceTicket.STATUS_CLOSED,
+                    "created_by": cls.user,
+                    "assigned_to": cls.user,
+                }
+            ),
+            GrievanceTicket(
+                **{
+                    "business_area": cls.business_area,
+                    "admin2": cls.admin_area_2,
+                    "admin2_new": cls.admin_area_2_new,
+                    "language": "Polish, English",
+                    "consent": True,
+                    "description": "Just random description",
+                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                    "status": GrievanceTicket.STATUS_CLOSED,
+                    "created_by": cls.user,
+                    "assigned_to": cls.user,
+                }
+            ),
+            GrievanceTicket(
+                **{
+                    "business_area": cls.business_area,
+                    "admin2": cls.admin_area_2,
+                    "admin2_new": cls.admin_area_2_new,
+                    "language": "Polish, English",
+                    "consent": True,
+                    "description": "Just random description",
+                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                    "status": GrievanceTicket.STATUS_CLOSED,
+                    "created_by": cls.user,
+                    "assigned_to": cls.user,
+                }
+            ),
         )
         GrievanceTicket.objects.bulk_create(grievances_to_create)
 
         for status, date in created_at_dates_to_set.items():
             gt = GrievanceTicket.objects.get(status=status)
             gt.created_at = date
+            gt.updated_at = datetime.now()
             gt.save()
 
     @parameterized.expand(
