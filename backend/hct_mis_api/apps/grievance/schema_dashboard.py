@@ -50,16 +50,6 @@ class TicketByType(graphene.ObjectType):
     system_generated_avg_resolution = graphene.Float()
 
 
-class TicketByCategory(graphene.ObjectType):
-    category_name = graphene.String()
-    count = graphene.Int()
-
-
-class TicketByStatus(graphene.ObjectType):
-    status_name = graphene.String()
-    count = graphene.Int()
-
-
 class TicketByLocationAndCategory(graphene.ObjectType):
     location = graphene.String()
     count = graphene.Int()
