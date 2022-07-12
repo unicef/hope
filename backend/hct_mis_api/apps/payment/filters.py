@@ -6,7 +6,10 @@ from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, CashPlanPaymentVerification
+from hct_mis_api.apps.activity_log.schema import LogEntryFilter
 from hct_mis_api.apps.payment.models import (
+    CashPlan,
     CashPlanPaymentVerification,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxReport,
@@ -14,7 +17,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
 )
-from hct_mis_api.apps.program.models import CashPlan
 
 
 class PaymentRecordFilter(FilterSet):

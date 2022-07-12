@@ -10,10 +10,6 @@ from hct_mis_api.apps.cash_assist_datahub.models import Session
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict
-from hct_mis_api.apps.erp_datahub.utils import (
-    get_exchange_rate_for_cash_plan,
-    get_payment_record_delivered_quantity_in_usd,
-)
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerificationSummary,
     PaymentRecord,
@@ -22,7 +18,8 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
-from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 logger = logging.getLogger(__name__)
@@ -158,7 +155,14 @@ class PullFromDatahubTask:
 
             if not cash_plan.exchange_rate:
                 try:
-                    cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, self.exchange_rates_client)
+                    cash_plan.update_exchange_rate(self.exchange_rates_client)
+                    # TODO MB UPDATE USD VALUES
+                    # payment_record.delivered_quantity_usd = payment_record.get_quantity_in_usd(
+                    #     payment_record.delivered_quantity
+                    # )
+                    # payment_record.entitlement_quantity_usd = payment_record.get_quantity_in_usd(
+                    #     payment_record.entitlement_quantity
+                    # )
                     cash_plan.save(update_fields=["exchange_rate"])
                 except Exception as e:
                     logger.exception(e)
@@ -191,10 +195,13 @@ class PullFromDatahubTask:
                 created,
             ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
             try:
-                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
-                    payment_record, self.exchange_rates_client
+                payment_record.delivered_quantity_usd = payment_record.get_quantity_in_usd(
+                    payment_record.delivered_quantity, self.exchange_rates_client
                 )
-                payment_record.save(update_fields=["delivered_quantity_usd"])
+                payment_record.entitlement_quantity_usd = payment_record.get_quantity_in_usd(
+                    payment_record.entitlement_quantity, self.exchange_rates_client
+                )
+                payment_record.save(update_fields=["delivered_quantity_usd", "entitlement_quantity_usd"])
             except Exception as e:
                 logger.exception(e)
             household_ids.append(payment_record.household_id)

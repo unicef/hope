@@ -1,21 +1,92 @@
 from decimal import Decimal
+from functools import cached_property
+from typing import Optional
 
 from django.conf import settings
+from django.contrib.postgres.fields import CICharField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import JSONField, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django_fsm import FSMField, transition
+
 from model_utils import Choices
+from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.core.exchange_rates import ExchangeRates
+from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 
 
-class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
+class GenericPaymentPlan(TimeStampedUUIDModel):
+    # TODO MB pull_from_datahub update
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    status_date = models.DateTimeField()
+    name = models.CharField(max_length=255, db_index=True)
+    start_date = models.DateTimeField(db_index=True)
+    end_date = models.DateTimeField(db_index=True)
+    program = models.ForeignKey("program.Program", on_delete=models.CASCADE)
+    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
+
+    total_entitled_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        db_index=True,
+        null=True,
+    )
+    total_entitled_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+    )
+    total_entitled_quantity_revised = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        db_index=True,
+        null=True,
+    )
+    total_entitled_quantity_revised_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+    )
+    total_delivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        db_index=True,
+        null=True,
+    )
+    total_delivered_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+    )
+    total_undelivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        db_index=True,
+        null=True,
+    )
+    total_undelivered_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+    )
+
+    class Meta:
+        abstract = True
+
+    def update_exchange_rate(self, exchange_rates_client=None):
+        if exchange_rates_client is None:
+            exchange_rates_client = ExchangeRates()
+
+        self.exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
+            self.currency, self.currency_exchange_date
+        )
+
+
+class GenericPayment(TimeStampedUUIDModel):
     STATUS_SUCCESS = "Transaction Successful"
     STATUS_ERROR = "Transaction Erroneous"
     STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
@@ -26,12 +97,6 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),
         (STATUS_SUCCESS, _("Transaction Successful")),
         (STATUS_ERROR, _("Transaction Erroneous")),
-    )
-    ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
-    ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
-    ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
-        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
-        (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
 
     DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
@@ -79,27 +144,298 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
         (DELIVERY_TYPE_VOUCHER, _("Voucher")),
     )
+
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status = models.CharField(
         max_length=255,
         choices=STATUS_CHOICE,
     )
     status_date = models.DateTimeField()
+    household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)  # collector
+    delivery_type = models.CharField(
+        choices=DELIVERY_TYPE_CHOICE,
+        max_length=24,
+    )
+    currency = models.CharField(
+        max_length=4,
+    )
+    entitlement_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    entitlement_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+    )
+    delivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    delivered_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+    )
+    delivery_date = models.DateTimeField(null=True, blank=True)
+    transaction_reference_id = models.CharField(max_length=255, null=True)  # transaction_id
+    service_provider = models.ForeignKey(
+        "payment.ServiceProvider",
+        on_delete=models.CASCADE,
+        related_name="payment_records",
+    )  # financial_service_provider
+
+    class Meta:
+        abstract = True
+
+    @property
+    def _parent(self):
+        raise NotImplemented()
+
+    def get_quantity_in_usd(self, amount: Decimal, exchange_rates_client=None):
+        # TODO MB double check exchange rate dates
+        if not amount:
+            return None
+
+        exchange_rate = self._parent.exchange_rate
+
+        if not exchange_rate:
+            if exchange_rates_client is None:
+                exchange_rates_client = ExchangeRates()
+
+                exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
+                    self.currency, self._parent.currency_exchange_date
+                )
+
+        if exchange_rate is None:
+            return None
+
+        return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
+
+
+class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
+    # TODO MB
+    # - ADMIN
+    # - store *count fields on create, update on lock/unlock
+    # - update on household/targeting update?
+
+    class Status(models.TextChoices):
+        OPEN = "OPEN"
+        LOCKED = "LOCKED"
+        IN_APPROVAL = "IN_APPROVAL"
+        IN_AUTHORIZATION = "IN_AUTHORIZATION"
+        IN_REVIEW = "IN_REVIEW"
+        ACCEPTED = "ACCEPTED"
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="created_payment_plans",
+    )
+    status = FSMField(default=Status.OPEN, protected=False, db_index=True)
+    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
+    target_population = models.ForeignKey(
+        TargetPopulation,
+        on_delete=models.CASCADE,
+        related_name="payment_plans",
+    )
+    currency = models.CharField(
+        max_length=4,
+    )
+    dispersion_start_date = models.DateTimeField()
+    dispersion_end_date = models.DateTimeField()
+    female_children_count = models.PositiveSmallIntegerField(default=0)
+    male_children_count = models.PositiveSmallIntegerField(default=0)
+    female_adults_count = models.PositiveSmallIntegerField(default=0)
+    male_adult_count = models.PositiveSmallIntegerField(default=0)
+    total_households_count = models.PositiveSmallIntegerField(default=0)
+    total_individuals_count = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Payment Plan"
+        ordering = ["created_at"]
+
+    @transition(
+        field=status,
+        source=Status.OPEN,
+        target=Status.LOCKED,
+    )
+    def status_lock(self):
+        # TODO MB additional actions
+        # - set/unset excluded on parent lock
+        # udpte numbers
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.LOCKED,
+        target=Status.OPEN,
+    )
+    def status_unlock(self):
+        # TODO MB additional actions
+        # - set/unset excluded on parent lock
+        # udpte numbers
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.LOCKED,
+        target=Status.IN_APPROVAL,
+    )
+    def status_send_to_approval(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=[Status.IN_APPROVAL, Status.IN_AUTHORIZATION, Status.IN_REVIEW],
+        target=Status.LOCKED,
+    )
+    def status_reject(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.IN_AUTHORIZATION,
+        target=Status.IN_REVIEW,
+    )
+    def status_authorize(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.IN_REVIEW,
+        target=Status.ACCEPTED,
+    )
+    def status_mark_as_reviewed(self):
+        self.status_date = timezone.now()
+
+    @property
+    def currency_exchange_date(self):
+        return self.dispersion_end_date
+
+
+class CashPlan(GenericPaymentPlan):
+    DISTRIBUTION_COMPLETED = "Distribution Completed"
+    DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
+    TRANSACTION_COMPLETED = "Transaction Completed"
+    TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
+
+    STATUS_CHOICE = (
+        (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
+        (
+            DISTRIBUTION_COMPLETED_WITH_ERRORS,
+            _("Distribution Completed with Errors"),
+        ),
+        (TRANSACTION_COMPLETED, _("Transaction Completed")),
+        (
+            TRANSACTION_COMPLETED_WITH_ERRORS,
+            _("Transaction Completed with Errors"),
+        ),
+    )
+    ca_id = models.CharField(max_length=255, null=True, db_index=True)
+    ca_hash_id = models.UUIDField(unique=True, null=True)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE, db_index=True)
+    distribution_level = models.CharField(max_length=255)
+    dispersion_date = models.DateTimeField()
+    coverage_duration = models.PositiveIntegerField()
+    coverage_unit = models.CharField(max_length=255)
+    comments = models.CharField(max_length=255, null=True)
+    delivery_type = models.CharField(
+        choices=GenericPayment.DELIVERY_TYPE_CHOICE,
+        max_length=24,
+        null=True,
+        db_index=True,
+    )
+    assistance_measurement = models.CharField(max_length=255, db_index=True)
+    assistance_through = models.CharField(max_length=255, db_index=True)
+    service_provider = models.ForeignKey(
+        "payment.ServiceProvider",
+        null=True,
+        related_name="cash_plans",
+        on_delete=models.CASCADE,
+    )
+    vision_id = models.CharField(max_length=255, null=True)
+    funds_commitment = models.CharField(max_length=255, null=True)
+    down_payment = models.CharField(max_length=255, null=True)
+    validation_alerts_count = models.IntegerField()
+    total_persons_covered = models.IntegerField(db_index=True)
+    total_persons_covered_revised = models.IntegerField(db_index=True)
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def payment_records_count(self):
+        return self.payment_records.count()
+
+    @property
+    def bank_reconciliation_success(self):
+        return self.payment_records.filter(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION).count()
+
+    @property
+    def bank_reconciliation_error(self):
+        return self.payment_records.filter(status=PaymentRecord.STATUS_ERROR).count()
+
+    @cached_property
+    def total_number_of_households(self):
+        # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/84040
+        return self.payment_records.count()
+
+    @property
+    def currency(self):
+        payment_record = self.payment_records.first()
+        return payment_record.currency if payment_record else None
+
+    @property
+    def currency_exchange_date(self):
+        return self.dispersion_date
+
+    @property
+    def can_create_payment_verification_plan(self):
+        return self.available_payment_records().count() > 0
+
+    def available_payment_records(self, payment_verification_plan: Optional["CashPlanPaymentVerification"] = None):
+        from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+            does_payment_record_have_right_hoh_phone_number,
+        )
+
+        params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
+
+        if payment_verification_plan:
+            params &= Q(
+                Q(verification__isnull=True) | Q(verification__cash_plan_payment_verification=payment_verification_plan)
+            )
+        else:
+            params &= Q(verification__isnull=True)
+
+        payment_records = self.payment_records.filter(params).distinct()
+
+        valid_payment_records_list = [
+            payment_record.pk
+            for payment_record in payment_records
+            if does_payment_record_have_right_hoh_phone_number(payment_record)
+        ]
+        return PaymentRecord.objects.filter(pk__in=valid_payment_records_list)
+
+    class Meta:
+        verbose_name = "Cash Plan"
+        ordering = ["created_at"]
+
+
+class PaymentRecord(ConcurrencyModel, GenericPayment):
+    ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
+    ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
+    ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
+        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
+        (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
+    )
+
     ca_id = models.CharField(max_length=255, null=True, db_index=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
     cash_plan = models.ForeignKey(
-        "program.CashPlan",
+        CashPlan,
         on_delete=models.CASCADE,
         related_name="payment_records",
         null=True,
-    )
-    household = models.ForeignKey(
-        "household.Household",
-        on_delete=models.CASCADE,
-        related_name="payment_records",
-    )
-    head_of_household = models.ForeignKey(
-        "household.Individual", on_delete=models.CASCADE, related_name="payment_records", null=True
     )
 
     full_name = models.CharField(max_length=255)
@@ -118,35 +454,29 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20, null=True
     )
     entitlement_card_issue_date = models.DateField(null=True)
-    delivery_type = models.CharField(
-        choices=DELIVERY_TYPE_CHOICE,
-        max_length=24,
-    )
-    currency = models.CharField(
-        max_length=4,
-    )
-    entitlement_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-    )
-    delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-    )
-    delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
-    )
-    delivery_date = models.DateTimeField(null=True, blank=True)
-    service_provider = models.ForeignKey(
-        "payment.ServiceProvider",
-        on_delete=models.CASCADE,
-        related_name="payment_records",
-    )
-    transaction_reference_id = models.CharField(max_length=255, null=True)
     vision_id = models.CharField(max_length=255, null=True)
     registration_ca_id = models.CharField(max_length=255, null=True)
+
+    @property
+    def _parent(self):
+        return self.cash_plan
+
+
+class Payment(SoftDeletableModel, GenericPaymentPlan):
+    # TODO MB
+    # - ADMIN
+    payment_plan = models.ForeignKey(
+        PaymentPlan,
+        on_delete=models.CASCADE,
+        related_name="payments",
+        null=True,
+    )
+    excluded = models.BooleanField(default=False)
+    entitlement_date = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def _parent(self):
+        return self.payment_plan
 
 
 class ServiceProvider(TimeStampedUUIDModel):
@@ -208,7 +538,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     cash_plan = models.ForeignKey(
-        "program.CashPlan",
+        CashPlan,
         on_delete=models.CASCADE,
         related_name="verifications",
     )
@@ -313,12 +643,12 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
     cash_plan_payment_verification = models.ForeignKey(
-        "CashPlanPaymentVerification",
+        CashPlanPaymentVerification,
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
     )
     payment_record = models.OneToOneField(
-        "payment.PaymentRecord", related_name="verification", on_delete=models.CASCADE, null=True, blank=True
+        PaymentRecord, related_name="verification", on_delete=models.CASCADE, null=True, blank=True
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True)
@@ -332,8 +662,8 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     @property
     def is_manually_editable(self):
         if (
-                self.cash_plan_payment_verification.verification_channel
-                != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+            self.cash_plan_payment_verification.verification_channel
+            != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         ):
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
@@ -364,7 +694,7 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     cash_plan = models.OneToOneField(
-        "program.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
+        CashPlan, on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
     )
 
 

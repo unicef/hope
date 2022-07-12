@@ -50,7 +50,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,

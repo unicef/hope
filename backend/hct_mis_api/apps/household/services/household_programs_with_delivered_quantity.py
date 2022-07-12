@@ -4,8 +4,9 @@ from hct_mis_api.apps.household.models import Household
 
 
 def programs_with_delivered_quantity(household: Household):
+    # TODO MB include paymentPlans
     programs = (
-        household.payment_records.all()
+        household.paymentrecord_set.all()
         .annotate(program=F("cash_plan__program"))
         .values("program")
         .annotate(

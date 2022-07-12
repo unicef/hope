@@ -37,7 +37,7 @@ from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_st
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 

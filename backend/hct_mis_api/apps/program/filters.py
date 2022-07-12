@@ -12,7 +12,8 @@ from django_filters import (
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.payment.models import PaymentRecord, CashPlanPaymentVerification
-from hct_mis_api.apps.program.models import Program, CashPlan
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.payment.models import CashPlan
 
 
 class ProgramFilter(FilterSet):
@@ -45,8 +46,8 @@ class ProgramFilter(FilterSet):
     def filter_queryset(self, queryset):
         queryset = queryset.annotate(
             total_hh_count=Count(
-                "cash_plans__payment_records__household",
-                filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
+                "cashplan__payment_records__household",
+                filter=Q(cashplan__payment_records__delivered_quantity__gte=0),
                 distinct=True,
             )
         )
