@@ -1,6 +1,9 @@
 from datetime import datetime
 
+from parameterized import parameterized
+
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -10,8 +13,10 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.fixtures import create_household
 
 
 class TestGrievanceDashboardQuery(APITestCase):
@@ -67,7 +72,7 @@ class TestGrievanceDashboardQuery(APITestCase):
     def setUpTestData(cls):
         create_afghanistan()
         cls.user = UserFactory.create()
-
+        cls.user2 = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
@@ -75,6 +80,7 @@ class TestGrievanceDashboardQuery(APITestCase):
             business_area=cls.business_area,
         )
         cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
+        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
 
         country = Country.objects.first()
         area_type_new = AreaTypeFactory(
@@ -86,6 +92,13 @@ class TestGrievanceDashboardQuery(APITestCase):
         cls.admin_area_1_new = AreaFactory(
             name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
         )
+        cls.admin_area_2_new = AreaFactory(
+            name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
+        )
+
+        _, individuals = create_household({"size": 2})
+        cls.individual_1 = individuals[0]
+        cls.individual_2 = individuals[1]
 
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
@@ -111,8 +124,8 @@ class TestGrievanceDashboardQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1,
+                    "admin2": cls.admin_area_2,
+                    "admin2_new": cls.admin_area_2_new,
                     "language": "English",
                     "consent": True,
                     "description": "Just random description",
@@ -125,40 +138,12 @@ class TestGrievanceDashboardQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1,
+                    "admin2": cls.admin_area_2,
+                    "admin2_new": cls.admin_area_2_new,
                     "language": "Polish, English",
                     "consent": True,
                     "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                }
-            ),
-            GrievanceTicket(
-                **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1_new,
-                    "language": "Polish",
-                    "consent": True,
-                    "description": "Just random description",
-                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                    "status": GrievanceTicket.STATUS_NEW,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                }
-            ),
-            GrievanceTicket(
-                **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1_new,
-                    "language": "Polish",
-                    "consent": True,
-                    "description": "Just random description",
-                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": cls.user,
                     "assigned_to": cls.user,
@@ -170,7 +155,85 @@ class TestGrievanceDashboardQuery(APITestCase):
         for status, date in created_at_dates_to_set.items():
             gt = GrievanceTicket.objects.get(status=status)
             gt.created_at = date
-            gt.updated_at = datetime.now()
             gt.save()
 
+    @parameterized.expand(
+        [
+            (
+                    "with_permission",
+                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_query_by_type(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.TICKETS_BY_TYPE_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessAreaSlug": "afghanistan"
+            }
+        )
+
+    @parameterized.expand(
+        [
+            (
+                    "with_permission",
+                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_query_by_category(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.TICKETS_BY_CATEGORY,
+            context={"user": self.user},
+            variables={
+                "businessAreaSlug": "afghanistan"
+            }
+        )
+
+    @parameterized.expand(
+        [
+            (
+                    "with_permission",
+                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_query_by_status(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.TICKETS_BY_STATUS,
+            context={"user": self.user},
+            variables={
+                "businessAreaSlug": "afghanistan"
+            }
+        )
+
+    @parameterized.expand(
+        [
+            (
+                    "with_permission",
+                    [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_query_by_location(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.TICKETS_BY_LOCATION,
+            context={"user": self.user},
+            variables={
+                "businessAreaSlug": "afghanistan"
+            }
+        )
 
