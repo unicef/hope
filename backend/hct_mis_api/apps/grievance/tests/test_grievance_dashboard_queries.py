@@ -100,89 +100,52 @@ class TestGrievanceDashboardQuery(APITestCase):
         grievances_to_create = (
             GrievanceTicket(
                 **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1_new,
-                    "language": "Polish",
-                    "consent": True,
-                    "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_NEW,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
                 }
             ),
             GrievanceTicket(
                 **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1_new,
-                    "language": "English",
-                    "consent": True,
-                    "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_ON_HOLD,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
                 }
             ),
             GrievanceTicket(
                 **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1_new,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
                 }
             ),
             GrievanceTicket(
                 **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1_new,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
                     "status": GrievanceTicket.STATUS_CLOSED,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
                 }
             ),
             GrievanceTicket(
                 **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1_new,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
                     "status": GrievanceTicket.STATUS_CLOSED,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
                 }
             ),
             GrievanceTicket(
                 **{
-                    "business_area": cls.business_area,
-                    "admin2": cls.admin_area_1,
-                    "admin2_new": cls.admin_area_1_new,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Just random description",
                     "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
                     "status": GrievanceTicket.STATUS_CLOSED,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
                 }
             ),
         )
+
+        for grievance_ticket in grievances_to_create:
+            grievance_ticket.created_at = cls.user
+            grievance_ticket.assigned_to = cls.user
+            grievance_ticket.business_area = cls.business_area
+            grievance_ticket.admin2 = cls.admin_area_1
+            grievance_ticket.admin2_new = cls.admin_area_1_new
+            grievance_ticket.consent = True
+            grievance_ticket.language = "Polish, English"
+            grievance_ticket.description = "Just random description"
+
         GrievanceTicket.objects.bulk_create(grievances_to_create)
 
         for status, date in created_at_dates_to_set.items():
