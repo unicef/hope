@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class GrievanceTicketManager(models.Manager):
         )
 
 
-class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
+class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "user_modified",
@@ -304,6 +304,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         blank=True,
         on_delete=models.CASCADE,
     )
+    unicef_id = models.CharField(max_length=250, blank=True, default="")
     extras = JSONField(blank=True, default=dict)
     ignored = models.BooleanField(default=False, db_index=True)
     household_unicef_id = models.CharField(max_length=250, blank=True, null=True)
