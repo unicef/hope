@@ -97,7 +97,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
-    priority: 1,
+    priority: null,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
