@@ -55,3 +55,12 @@ class GetCashplanVerificationSampleSizeInput(graphene.InputObjectType):
     full_list_arguments = FullListArguments()
     random_sampling_arguments = RandomSamplingArguments()
     rapid_pro_arguments = RapidProArguments()
+
+
+class CreateFinancialServiceProviderInput(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    vision_vendor_number = graphene.String(required=True)
+    delivery_mechanisms = graphene.String(required=True)
+    distrubution_limit = graphene.Decimal()
+    communication_channel = graphene.String(required=True)
+    fsp_xlsx_template_id = graphene.ID(required=True)

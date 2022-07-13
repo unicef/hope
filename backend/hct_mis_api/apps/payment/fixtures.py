@@ -12,6 +12,9 @@ from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    FinancialServiceProviderXlsxReport,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
@@ -34,6 +37,43 @@ class ServiceProviderFactory(factory.DjangoModelFactory):
     short_name = factory.LazyAttribute(lambda o: o.full_name[0:3])
     country = factory.Faker("country_code")
     vision_id = factory.fuzzy.FuzzyInteger(1342342, 9999999932)
+
+
+class FinancialServiceProviderXlsxTemplateFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = FinancialServiceProviderXlsxTemplate
+
+    columns = fuzzy.FuzzyChoice(
+        FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS,
+        getter=lambda c: c[0],
+    )
+
+
+class FinancialServiceProviderFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = FinancialServiceProvider
+
+    name = factory.Faker("company")
+    vision_vendor_number = fuzzy.FuzzyInteger(1342342, 9999999932)
+    delivery_mechanisms = factory.Faker(
+        "sentence",
+        nb_words=10,
+        variable_nb_words=True,
+        ext_word_list=None,
+    )
+    distrubution_limit = fuzzy.FuzzyDecimal(100.0, 1000.0)
+    communication_channel = fuzzy.FuzzyChoice(
+        FinancialServiceProvider.COMMUNICATION_CHANNEL_CHOICES, getter=lambda c: c[0]
+    )
+    data_transfer_configuration = factory.Faker("json")
+    fsp_xlsx_template = factory.SubFactory(FinancialServiceProviderXlsxTemplateFactory)
+
+
+class FinancialServiceProviderXlsxReportFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = FinancialServiceProviderXlsxReport
+
+    financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
 
 
 class PaymentRecordFactory(factory.DjangoModelFactory):
@@ -339,7 +379,11 @@ def generate_real_cash_plans_for_households(households):
     cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
     for cash_plan in cash_plans:
         for hh in households:
-            RealPaymentRecordFactory(cash_plan=cash_plan, household=hh, business_area=hh.business_area,)
+            RealPaymentRecordFactory(
+                cash_plan=cash_plan,
+                household=hh,
+                business_area=hh.business_area,
+            )
     program.households.set(
         PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
         .filter(cash_plan__in=cash_plans)

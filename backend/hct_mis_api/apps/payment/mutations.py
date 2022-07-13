@@ -22,9 +22,11 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
+    CreateFinancialServiceProviderInput,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.payment.schema import PaymentVerificationNode
+from hct_mis_api.apps.payment.celery_tasks import fsp_generate_xlsx_report_task
+from hct_mis_api.apps.payment.models import PaymentVerification, FinancialServiceProviderXlsxTemplate, FinancialServiceProvider
+from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
 )
@@ -465,8 +467,77 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
         return ImportXlsxCashPlanVerification(cashplan_payment_verification.cash_plan, import_service.errors)
 
 
+class CreateFinancialServiceProviderMutation(PermissionMutation):
+    financial_service_provider = graphene.Field(FinancialServiceProviderNode)
+
+    class Arguments:
+        business_area_slug = graphene.String(required=True)
+        input = CreateFinancialServiceProviderInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, business_area_slug, input):
+        cls.has_permission(info, Permissions.FINANCIAL_SERVICE_PROVIDER_CREATE, business_area_slug)
+
+        fsp_xlsx_template_id = decode_id_string(input["fsp_xlsx_template_id"])
+        fsp_xlsx_template = get_object_or_404(FinancialServiceProviderXlsxTemplate, id=fsp_xlsx_template_id)
+
+        # TODO: Move this to a service class
+        fsp = FinancialServiceProvider(
+            name=input["name"],
+            vision_vendor_number=input["vision_vendor_number"],
+            delivery_mechanisms=input["delivery_mechanisms"],
+            distribution_limit=input["distribution_limit"],
+            communication_channel=input["communication_channel"],
+            fsp_xlsx_template=fsp_xlsx_template,
+            created_by=info.context.user,
+        )
+        fsp.save()
+
+        fsp_generate_xlsx_report_task.delay(fsp.id)
+
+        return cls(financial_service_provider=fsp)
+
+
+class EditFinancialServiceProviderMutation(PermissionMutation):
+    financial_service_provider = graphene.Field(FinancialServiceProviderNode)
+
+    class Arguments:
+        business_area_slug = graphene.String(required=True)
+        financial_service_provider_id = graphene.ID(required=True)
+        input = CreateFinancialServiceProviderInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, business_area_slug, financial_service_provider_id, input):
+        cls.has_permission(info, Permissions.FINANCIAL_SERVICE_PROVIDER_UPDATE, business_area_slug)
+
+        fsp_id = decode_id_string(financial_service_provider_id)
+        fsp_xlsx_template_id = decode_id_string(input["fsp_xlsx_template_id"])
+
+        fsp = get_object_or_404(FinancialServiceProvider, id=fsp_id)
+        fsp_xlsx_template = get_object_or_404(FinancialServiceProviderXlsxTemplate, id=fsp_xlsx_template_id)
+
+        # TODO: Move this to a service class
+        fsp.name = input["name"]
+        fsp.vision_vendor_number = input["vision_vendor_number"]
+        fsp.delivery_mechanisms = input["delivery_mechanisms"]
+        fsp.distrubution_limit = input["distribution_limit"]
+        fsp.communication_channel = input["communication_channel"]
+        fsp.fsp_xlsx_template = fsp_xlsx_template
+        fsp.save()
+
+        fsp_generate_xlsx_report_task.delay(fsp.id)
+
+        return cls(financial_service_provider=fsp)
+
+
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
+    create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
+    edit_financial_service_provider = EditFinancialServiceProviderMutation.Field()
     edit_cash_plan_payment_verification = EditPaymentVerificationMutation.Field()
     import_xlsx_cash_plan_verification = ImportXlsxCashPlanVerification.Field()
     activate_cash_plan_payment_verification = ActivateCashPlanVerificationMutation.Field()
