@@ -89,6 +89,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     description = graphene.String(required=True)
     assigned_to = graphene.GlobalID(node=UserNode, required=True)
     category = graphene.Int(required=True)
+    sub_category = graphene.Int()
     issue_type = graphene.Int()
     admin = graphene.String()
     area = graphene.String()
