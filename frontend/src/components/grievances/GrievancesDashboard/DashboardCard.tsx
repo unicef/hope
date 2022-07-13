@@ -7,7 +7,6 @@ interface DashboardCardProps {
   children: React.ReactNode;
 }
 export const CardTitle = styled.div`
-  text-transform: capitalize;
   color: #6f6f6f;
   font-weight: 500;
   font-size: 12px;
@@ -43,7 +42,6 @@ export const IconContainer = styled.div`
   font-size: 24px;
 `;
 export const CardAmountSmaller = styled.div`
-  text-transform: capitalize;
   color: rgba(0, 0, 0, 0.87);
   font-weight: 600;
   font-size: 20px;

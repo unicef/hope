@@ -3567,6 +3567,10 @@ export type Query = {
   dashboardYearsChoices?: Maybe<Array<Maybe<Scalars['String']>>>,
   sanctionListIndividual?: Maybe<SanctionListIndividualNode>,
   allSanctionListIndividuals?: Maybe<SanctionListIndividualNodeConnection>,
+  ticketsByType?: Maybe<TicketByType>,
+  ticketsByCategory?: Maybe<ChartDatasetNode>,
+  ticketsByStatus?: Maybe<ChartDatasetNode>,
+  ticketsByLocationAndCategory?: Maybe<Array<Maybe<TicketByLocationAndCategory>>>,
   grievanceTicket?: Maybe<GrievanceTicketNode>,
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>,
   existingGrievanceTickets?: Maybe<GrievanceTicketNodeConnection>,
@@ -3749,6 +3753,26 @@ export type QueryAllSanctionListIndividualsArgs = {
   fullName_Startswith?: Maybe<Scalars['String']>,
   referenceNumber?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryTicketsByTypeArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type QueryTicketsByCategoryArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type QueryTicketsByStatusArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type QueryTicketsByLocationAndCategoryArgs = {
+  businessAreaSlug: Scalars['String']
 };
 
 
@@ -5284,6 +5308,29 @@ export type TicketAddIndividualDetailsNodeEdge = {
    __typename?: 'TicketAddIndividualDetailsNodeEdge',
   node?: Maybe<TicketAddIndividualDetailsNode>,
   cursor: Scalars['String'],
+};
+
+export type TicketByCategory = {
+   __typename?: 'TicketByCategory',
+  categoryName?: Maybe<Scalars['String']>,
+  count?: Maybe<Scalars['Int']>,
+};
+
+export type TicketByLocationAndCategory = {
+   __typename?: 'TicketByLocationAndCategory',
+  location?: Maybe<Scalars['String']>,
+  count?: Maybe<Scalars['Int']>,
+  categories?: Maybe<Array<Maybe<TicketByCategory>>>,
+};
+
+export type TicketByType = {
+   __typename?: 'TicketByType',
+  userGeneratedCount?: Maybe<Scalars['Int']>,
+  systemGeneratedCount?: Maybe<Scalars['Int']>,
+  closedUserGeneratedCount?: Maybe<Scalars['Int']>,
+  closedSystemGeneratedCount?: Maybe<Scalars['Int']>,
+  userGeneratedAvgResolution?: Maybe<Scalars['Float']>,
+  systemGeneratedAvgResolution?: Maybe<Scalars['Float']>,
 };
 
 export type TicketComplaintDetailsNode = Node & {
@@ -7833,6 +7880,40 @@ export type ImportedIndividualFieldsQuery = (
         { __typename?: 'LabelNode' }
         & Pick<LabelNode, 'label' | 'language'>
       )>>> }
+    )>>> }
+  )>>> }
+);
+
+export type AllGrievanceDashboardChartsQueryVariables = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type AllGrievanceDashboardChartsQuery = (
+  { __typename?: 'Query' }
+  & { ticketsByType: Maybe<(
+    { __typename?: 'TicketByType' }
+    & Pick<TicketByType, 'userGeneratedCount' | 'systemGeneratedCount' | 'closedUserGeneratedCount' | 'closedSystemGeneratedCount' | 'userGeneratedAvgResolution' | 'systemGeneratedAvgResolution'>
+  )>, ticketsByStatus: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, ticketsByCategory: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, ticketsByLocationAndCategory: Maybe<Array<Maybe<(
+    { __typename?: 'TicketByLocationAndCategory' }
+    & Pick<TicketByLocationAndCategory, 'location' | 'count'>
+    & { categories: Maybe<Array<Maybe<(
+      { __typename?: 'TicketByCategory' }
+      & Pick<TicketByCategory, 'categoryName' | 'count'>
     )>>> }
   )>>> }
 );
@@ -14217,6 +14298,81 @@ export function useImportedIndividualFieldsLazyQuery(baseOptions?: ApolloReactHo
 export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFieldsQuery>;
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
+export const AllGrievanceDashboardChartsDocument = gql`
+    query AllGrievanceDashboardCharts($businessAreaSlug: String!) {
+  ticketsByType(businessAreaSlug: $businessAreaSlug) {
+    userGeneratedCount
+    systemGeneratedCount
+    closedUserGeneratedCount
+    closedSystemGeneratedCount
+    userGeneratedAvgResolution
+    systemGeneratedAvgResolution
+  }
+  ticketsByStatus(businessAreaSlug: $businessAreaSlug) {
+    datasets {
+      data
+    }
+    labels
+  }
+  ticketsByCategory(businessAreaSlug: $businessAreaSlug) {
+    datasets {
+      data
+    }
+    labels
+  }
+  ticketsByLocationAndCategory(businessAreaSlug: $businessAreaSlug) {
+    location
+    count
+    categories {
+      categoryName
+      count
+    }
+  }
+}
+    `;
+export type AllGrievanceDashboardChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>, 'query'> & ({ variables: AllGrievanceDashboardChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllGrievanceDashboardChartsComponent = (props: AllGrievanceDashboardChartsComponentProps) => (
+      <ApolloReactComponents.Query<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables> query={AllGrievanceDashboardChartsDocument} {...props} />
+    );
+    
+export type AllGrievanceDashboardChartsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables> & TChildProps;
+export function withAllGrievanceDashboardCharts<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllGrievanceDashboardChartsQuery,
+  AllGrievanceDashboardChartsQueryVariables,
+  AllGrievanceDashboardChartsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables, AllGrievanceDashboardChartsProps<TChildProps>>(AllGrievanceDashboardChartsDocument, {
+      alias: 'allGrievanceDashboardCharts',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllGrievanceDashboardChartsQuery__
+ *
+ * To run a query within a React component, call `useAllGrievanceDashboardChartsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllGrievanceDashboardChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllGrievanceDashboardChartsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useAllGrievanceDashboardChartsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, baseOptions);
+      }
+export function useAllGrievanceDashboardChartsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, baseOptions);
+        }
+export type AllGrievanceDashboardChartsQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsQuery>;
+export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsLazyQuery>;
+export type AllGrievanceDashboardChartsQueryResult = ApolloReactCommon.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
     query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String) {
   allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household) {
@@ -19408,14 +19564,17 @@ export type ResolversTypes = {
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   SanctionListIndividualNodeConnection: ResolverTypeWrapper<SanctionListIndividualNodeConnection>,
   SanctionListIndividualNodeEdge: ResolverTypeWrapper<SanctionListIndividualNodeEdge>,
-  ChartGrievanceTicketsNode: ResolverTypeWrapper<ChartGrievanceTicketsNode>,
+  TicketByType: ResolverTypeWrapper<TicketByType>,
+  ChartDatasetNode: ResolverTypeWrapper<ChartDatasetNode>,
   _DatasetsNode: ResolverTypeWrapper<_DatasetsNode>,
+  TicketByLocationAndCategory: ResolverTypeWrapper<TicketByLocationAndCategory>,
+  TicketByCategory: ResolverTypeWrapper<TicketByCategory>,
+  ChartGrievanceTicketsNode: ResolverTypeWrapper<ChartGrievanceTicketsNode>,
   IssueTypesObject: ResolverTypeWrapper<IssueTypesObject>,
   SteficonRuleNodeConnection: ResolverTypeWrapper<SteficonRuleNodeConnection>,
   SteficonRuleNodeEdge: ResolverTypeWrapper<SteficonRuleNodeEdge>,
   ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>,
   _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
-  ChartDatasetNode: ResolverTypeWrapper<ChartDatasetNode>,
   SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>,
   TableTotalCashTransferred: ResolverTypeWrapper<TableTotalCashTransferred>,
   _TableTotalCashTransferredDataNode: ResolverTypeWrapper<_TableTotalCashTransferredDataNode>,
@@ -19780,14 +19939,17 @@ export type ResolversParentTypes = {
   ChoiceObject: ChoiceObject,
   SanctionListIndividualNodeConnection: SanctionListIndividualNodeConnection,
   SanctionListIndividualNodeEdge: SanctionListIndividualNodeEdge,
-  ChartGrievanceTicketsNode: ChartGrievanceTicketsNode,
+  TicketByType: TicketByType,
+  ChartDatasetNode: ChartDatasetNode,
   _DatasetsNode: _DatasetsNode,
+  TicketByLocationAndCategory: TicketByLocationAndCategory,
+  TicketByCategory: TicketByCategory,
+  ChartGrievanceTicketsNode: ChartGrievanceTicketsNode,
   IssueTypesObject: IssueTypesObject,
   SteficonRuleNodeConnection: SteficonRuleNodeConnection,
   SteficonRuleNodeEdge: SteficonRuleNodeEdge,
   ChartPaymentVerification: ChartPaymentVerification,
   _DetailedDatasetsNode: _DetailedDatasetsNode,
-  ChartDatasetNode: ChartDatasetNode,
   SectionTotalNode: SectionTotalNode,
   TableTotalCashTransferred: TableTotalCashTransferred,
   _TableTotalCashTransferredDataNode: _TableTotalCashTransferredDataNode,
@@ -21342,6 +21504,10 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   dashboardYearsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType, RequireFields<QueryDashboardYearsChoicesArgs, 'businessAreaSlug'>>,
   sanctionListIndividual?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNode']>, ParentType, ContextType, RequireFields<QuerySanctionListIndividualArgs, 'id'>>,
   allSanctionListIndividuals?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNodeConnection']>, ParentType, ContextType, QueryAllSanctionListIndividualsArgs>,
+  ticketsByType?: Resolver<Maybe<ResolversTypes['TicketByType']>, ParentType, ContextType, RequireFields<QueryTicketsByTypeArgs, 'businessAreaSlug'>>,
+  ticketsByCategory?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryTicketsByCategoryArgs, 'businessAreaSlug'>>,
+  ticketsByStatus?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryTicketsByStatusArgs, 'businessAreaSlug'>>,
+  ticketsByLocationAndCategory?: Resolver<Maybe<Array<Maybe<ResolversTypes['TicketByLocationAndCategory']>>>, ParentType, ContextType, RequireFields<QueryTicketsByLocationAndCategoryArgs, 'businessAreaSlug'>>,
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>,
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
   existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea'>>,
@@ -21985,6 +22151,26 @@ export type TicketAddIndividualDetailsNodeEdgeResolvers<ContextType = any, Paren
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
+export type TicketByCategoryResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketByCategory'] = ResolversParentTypes['TicketByCategory']> = {
+  categoryName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketByLocationAndCategoryResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketByLocationAndCategory'] = ResolversParentTypes['TicketByLocationAndCategory']> = {
+  location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  categories?: Resolver<Maybe<Array<Maybe<ResolversTypes['TicketByCategory']>>>, ParentType, ContextType>,
+};
+
+export type TicketByTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketByType'] = ResolversParentTypes['TicketByType']> = {
+  userGeneratedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  systemGeneratedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  closedUserGeneratedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  closedSystemGeneratedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  userGeneratedAvgResolution?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  systemGeneratedAvgResolution?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+};
+
 export type TicketComplaintDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketComplaintDetailsNode'] = ResolversParentTypes['TicketComplaintDetailsNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -22625,6 +22811,9 @@ export type Resolvers<ContextType = any> = {
   TicketAddIndividualDetailsNode?: TicketAddIndividualDetailsNodeResolvers<ContextType>,
   TicketAddIndividualDetailsNodeConnection?: TicketAddIndividualDetailsNodeConnectionResolvers<ContextType>,
   TicketAddIndividualDetailsNodeEdge?: TicketAddIndividualDetailsNodeEdgeResolvers<ContextType>,
+  TicketByCategory?: TicketByCategoryResolvers<ContextType>,
+  TicketByLocationAndCategory?: TicketByLocationAndCategoryResolvers<ContextType>,
+  TicketByType?: TicketByTypeResolvers<ContextType>,
   TicketComplaintDetailsNode?: TicketComplaintDetailsNodeResolvers<ContextType>,
   TicketComplaintDetailsNodeConnection?: TicketComplaintDetailsNodeConnectionResolvers<ContextType>,
   TicketComplaintDetailsNodeEdge?: TicketComplaintDetailsNodeEdgeResolvers<ContextType>,

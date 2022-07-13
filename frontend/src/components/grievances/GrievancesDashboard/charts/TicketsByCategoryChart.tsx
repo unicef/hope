@@ -1,10 +1,10 @@
 import React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import { formatThousands } from '../../../../utils/utils';
-import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
 
 interface TicketsByCategoryChartProps {
-  data?: AllChartsQuery['chartProgrammesBySector'];
+  data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
 }
 export const TicketsByCategoryChart = ({
   data,
@@ -17,17 +17,8 @@ export const TicketsByCategoryChart = ({
       {
         categoryPercentage: 0.5,
         maxBarThickness: 20,
-        label: data.datasets[0]?.label,
-        backgroundColor: '#00A9FB',
+        backgroundColor: '#00867B',
         data: [...data.datasets[0]?.data],
-        stack: 2,
-      },
-      {
-        categoryPercentage: 0.5,
-        maxBarThickness: 20,
-        label: data.datasets[1]?.label,
-        backgroundColor: '#023F90',
-        data: [...data.datasets[1]?.data],
         stack: 2,
       },
     ],
@@ -37,10 +28,7 @@ export const TicketsByCategoryChart = ({
     responsive: true,
     maintainAspectRatio: false,
     legend: {
-      position: 'bottom',
-      labels: {
-        padding: 40,
-      },
+      display: false,
     },
     tooltips: {
       mode: 'point',
@@ -53,7 +41,7 @@ export const TicketsByCategoryChart = ({
             beginAtZero: true,
             stepSize: 1,
             callback: formatThousands,
-            suggestedMax: Math.max(...data.datasets[2].data) + 1,
+            suggestedMax: Math.max(...data.datasets[0].data) + 1,
           },
         },
       ],

@@ -1,9 +1,10 @@
+import { Box } from '@material-ui/core';
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
 
 interface TicketsByStatusChartProps {
-  data: AllChartsQuery['chartIndividualsReachedByAgeAndGender'];
+  data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
 }
 
 export const TicketsByStatusChart = ({
@@ -16,16 +17,12 @@ export const TicketsByStatusChart = ({
     datasets: [
       {
         backgroundColor: [
-          '#5F02CF',
-          '#9F66E2',
-          '#BF99EB',
-          '#DFCCF5',
-          '#EFE4F9',
-          '#1D6A64',
-          '#8DB4B1',
-          '#3BBAB2',
-          '#B1E3E0',
-          '#D2E0E0',
+          '#F5801A',
+          '#023E90',
+          '#13CB17',
+          '#FF0200',
+          '#6D4C41',
+          '#4F616B',
         ],
         data: [...data.datasets[0]?.data],
       },
@@ -36,13 +33,17 @@ export const TicketsByStatusChart = ({
     responsive: true,
     maintainAspectRatio: false,
     legend: {
-      position: 'right',
-      align: 'start',
+      position: 'bottom',
+      align: 'center',
       labels: {
         usePointStyle: true,
       },
     },
   };
 
-  return <Doughnut data={chartData} options={options} />;
+  return (
+    <Box mt={6} height='300px'>
+      <Doughnut data={chartData} options={options} />
+    </Box>
+  );
 };
