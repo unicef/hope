@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/grievances/GrievancesDashboard/TicketsByCategorySection should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root sc-bdVaJa hYpqnM MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="MuiBox-root MuiBox-root-1"
+    >
+      Tickets by Category
+    </div>
+    <canvas
+      class="chartjs-render-monitor"
+      height="0"
+      style="display: block; width: 0px; height: 0px;"
+      width="0"
+    />
+  </div>
+</div>
+`;

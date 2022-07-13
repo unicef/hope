@@ -1,24 +1,37 @@
 import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievanceDashboardCard } from '../../../components/grievances/GrievancesDashboard/GrievanceDashboardCard';
 import { TicketsByCategorySection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByCategorySection/TicketsByCategorySection';
-import { TicketsByCategoryAndLocationSection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByCateogryAndLocationSection/TicketsByCategoryAndLocationSection';
+import { TicketsByLocationAndCategorySection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
 import { TicketsByStatusSection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useAllGrievanceDashboardChartsQuery } from '../../../__generated__/graphql';
 
 export const GrievancesDashboardPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
+  const { data, loading } = useAllGrievanceDashboardChartsQuery({
+    variables: { businessAreaSlug: businessArea },
+    fetchPolicy: 'network-only',
+  });
 
-  if (permissions === null) return null;
+  if (!data || permissions === null) return null;
+  if (loading) return <LoadingComponent />;
   if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
     return <PermissionDenied />;
+  const {
+    ticketsByCategory,
+    ticketsByLocationAndCategory,
+    ticketsByStatus,
+    ticketsByType,
+  } = data;
 
   return (
     <>
@@ -28,37 +41,46 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
           <Box p={3}>
             <GrievanceDashboardCard
               topLabel={t('TOTAL NUMBER OF TICKETS')}
-              topNumber={0}
-              systemGenerated={0}
-              userGenerated={0}
+              topNumber={
+                ticketsByType.systemGeneratedCount +
+                ticketsByType.userGeneratedCount
+              }
+              systemGenerated={ticketsByType.systemGeneratedCount}
+              userGenerated={ticketsByType.userGeneratedCount}
             />
           </Box>
           <Box p={3}>
             <GrievanceDashboardCard
               topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
-              topNumber={0}
-              systemGenerated={0}
-              userGenerated={0}
+              topNumber={
+                ticketsByType.closedSystemGeneratedCount +
+                ticketsByType.closedUserGeneratedCount
+              }
+              systemGenerated={ticketsByType.closedSystemGeneratedCount}
+              userGenerated={ticketsByType.closedUserGeneratedCount}
             />
           </Box>
           <Box p={3}>
             <GrievanceDashboardCard
               topLabel={t('TICKETS AVERAGE RESOLUTION')}
-              topNumber={0}
-              systemGenerated={0}
-              userGenerated={0}
+              topNumber={`${ticketsByType.systemGeneratedAvgResolution +
+                ticketsByType.userGeneratedAvgResolution} days`}
+              systemGenerated={`${ticketsByType.systemGeneratedAvgResolution} days`}
+              userGenerated={`${ticketsByType.userGeneratedAvgResolution} days`}
             />
           </Box>
           <Box p={3}>
-            <TicketsByStatusSection data={null} />
+            <TicketsByStatusSection data={ticketsByStatus} />
           </Box>
         </Grid>
         <Grid item xs={8}>
           <Box p={3}>
-            <TicketsByCategorySection data={null} />
+            <TicketsByCategorySection data={ticketsByCategory} />
           </Box>
           <Box p={3}>
-            <TicketsByCategoryAndLocationSection data={null} />
+            <TicketsByLocationAndCategorySection
+              data={ticketsByLocationAndCategory}
+            />
           </Box>
         </Grid>
       </Grid>

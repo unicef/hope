@@ -6,9 +6,9 @@ import { DashboardCard, CardTitle, CardAmountSmaller } from './DashboardCard';
 
 interface GrievanceDashboardCardProps {
   topLabel: string;
-  topNumber: number;
-  systemGenerated: number;
-  userGenerated: number;
+  topNumber: number | string;
+  systemGenerated: number | string;
+  userGenerated: number | string;
 }
 
 export const GrievanceDashboardCard = ({
