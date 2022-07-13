@@ -84,6 +84,7 @@ export const AllGrievanceTicket = gql`
             issueType
             unicefId
           }
+          priority
         }
       }
     }
