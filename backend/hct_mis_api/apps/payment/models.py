@@ -181,7 +181,6 @@ class GenericPayment(TimeStampedUUIDModel):
     service_provider = models.ForeignKey(
         "payment.ServiceProvider",
         on_delete=models.CASCADE,
-        related_name="payment_records",
     )  # financial_service_provider
 
     class Meta:
@@ -462,7 +461,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
         return self.cash_plan
 
 
-class Payment(SoftDeletableModel, GenericPaymentPlan):
+class Payment(SoftDeletableModel, GenericPayment):
     # TODO MB
     # - ADMIN
     payment_plan = models.ForeignKey(

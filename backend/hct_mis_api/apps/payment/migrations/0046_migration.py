@@ -394,42 +394,51 @@ class Migration(migrations.Migration):
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Distribution Successful", "Distribution Successful"),
+                            ("Not Distributed", "Not Distributed"),
+                            ("Transaction Successful", "Transaction Successful"),
+                            ("Transaction Erroneous", "Transaction Erroneous"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
                 ("status_date", models.DateTimeField()),
-                ("name", models.CharField(db_index=True, max_length=255)),
-                ("start_date", models.DateTimeField(db_index=True)),
-                ("end_date", models.DateTimeField(db_index=True)),
-                ("exchange_rate", models.DecimalField(blank=True, decimal_places=8, max_digits=12, null=True)),
                 (
-                    "total_entitled_quantity",
+                    "delivery_type",
+                    models.CharField(
+                        choices=[
+                            ("Cardless cash withdrawal", "Cardless cash withdrawal"),
+                            ("Cash", "Cash"),
+                            ("Cash by FSP", "Cash by FSP"),
+                            ("Cheque", "Cheque"),
+                            ("Deposit to Card", "Deposit to Card"),
+                            ("In Kind", "In Kind"),
+                            ("Mobile Money", "Mobile Money"),
+                            ("Other", "Other"),
+                            ("Pre-paid card", "Pre-paid card"),
+                            ("Referral", "Referral"),
+                            ("Transfer", "Transfer"),
+                            ("Transfer to Account", "Transfer to Account"),
+                            ("Voucher", "Voucher"),
+                        ],
+                        max_length=24,
+                    ),
+                ),
+                ("currency", models.CharField(max_length=4)),
+                (
+                    "entitlement_quantity",
                     models.DecimalField(
-                        db_index=True,
                         decimal_places=2,
                         max_digits=12,
-                        null=True,
                         validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
                     ),
                 ),
                 (
-                    "total_entitled_quantity_usd",
-                    models.DecimalField(
-                        decimal_places=2,
-                        max_digits=12,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
-                    ),
-                ),
-                (
-                    "total_entitled_quantity_revised",
-                    models.DecimalField(
-                        db_index=True,
-                        decimal_places=2,
-                        max_digits=12,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
-                    ),
-                ),
-                (
-                    "total_entitled_quantity_revised_usd",
+                    "entitlement_quantity_usd",
                     models.DecimalField(
                         decimal_places=2,
                         max_digits=12,
@@ -438,17 +447,15 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "total_delivered_quantity",
+                    "delivered_quantity",
                     models.DecimalField(
-                        db_index=True,
                         decimal_places=2,
                         max_digits=12,
-                        null=True,
                         validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
                     ),
                 ),
                 (
-                    "total_delivered_quantity_usd",
+                    "delivered_quantity_usd",
                     models.DecimalField(
                         decimal_places=2,
                         max_digits=12,
@@ -456,31 +463,21 @@ class Migration(migrations.Migration):
                         validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
                     ),
                 ),
-                (
-                    "total_undelivered_quantity",
-                    models.DecimalField(
-                        db_index=True,
-                        decimal_places=2,
-                        max_digits=12,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
-                    ),
-                ),
-                (
-                    "total_undelivered_quantity_usd",
-                    models.DecimalField(
-                        decimal_places=2,
-                        max_digits=12,
-                        null=True,
-                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
-                    ),
-                ),
+                ("delivery_date", models.DateTimeField(blank=True, null=True)),
+                ("transaction_reference_id", models.CharField(max_length=255, null=True)),
                 ("excluded", models.BooleanField(default=False)),
                 ("entitlement_date", models.DateTimeField(blank=True, null=True)),
                 (
                     "business_area",
                     models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.businessarea"),
                 ),
+                (
+                    "head_of_household",
+                    models.ForeignKey(
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="household.individual"
+                    ),
+                ),
+                ("household", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="household.household")),
                 (
                     "payment_plan",
                     models.ForeignKey(
@@ -490,7 +487,10 @@ class Migration(migrations.Migration):
                         to="payment.paymentplan",
                     ),
                 ),
-                ("program", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="program.program")),
+                (
+                    "service_provider",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.serviceprovider"),
+                ),
             ],
             options={
                 "abstract": False,
@@ -540,6 +540,11 @@ class Migration(migrations.Migration):
             model_name="cashplan",
             name="program",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="program.program"),
+        ),
+        migrations.AlterField(
+            model_name="paymentrecord",
+            name="service_provider",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.serviceprovider"),
         ),
         migrations.RunPython(populate_existing_payment_record_usd_amount, migrations.RunPython.noop),
         migrations.RunPython(populate_existing_cash_plan_usd_amount, migrations.RunPython.noop),
