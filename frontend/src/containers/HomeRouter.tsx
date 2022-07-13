@@ -115,11 +115,14 @@ export function HomeRouter(): React.ReactElement {
           <SentryRoute path='/:businessArea/grievance-and-feedback/payment-verification/:cashPlanId'>
             <GrievancesTablePage key='verificationId' />
           </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/tickets'>
+            <GrievancesTablePage key='all' />
+          </SentryRoute>
+          <SentryRoute path='/:businessArea/grievance-and-feedback/dashboard'>
+            <GrievancesTablePage key='all' />
+          </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/:id'>
             <GrievancesDetailsPage />
-          </SentryRoute>
-          <SentryRoute path='/:businessArea/grievance-and-feedback'>
-            <GrievancesTablePage key='all' />
           </SentryRoute>
           <SentryRoute path='/:businessArea/population/household'>
             <PopulationHouseholdPage />
