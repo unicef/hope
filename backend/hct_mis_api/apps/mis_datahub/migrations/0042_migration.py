@@ -6,12 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('grievance', '0044_migration'),
+        ('mis_datahub', '0041_migration'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='grievanceticket',
+            model_name='household',
+            name='unicef_id',
+            field=models.CharField(blank=True, max_length=255, null=True),
+        ),
+        migrations.AlterField(
+            model_name='individual',
             name='unicef_id',
             field=models.CharField(blank=True, max_length=255, null=True),
         ),

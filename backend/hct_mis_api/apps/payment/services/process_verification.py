@@ -11,4 +11,3 @@ class ProcessVerification:
         if verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_RAPIDPRO:
             flow_id = self.input_data["rapid_pro_arguments"]["flow_id"]
             self.cash_plan_payment_verification.rapid_pro_flow_id = flow_id
-            self.cash_plan_payment_verification.save()
