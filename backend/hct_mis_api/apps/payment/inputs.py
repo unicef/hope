@@ -61,6 +61,6 @@ class CreateFinancialServiceProviderInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     vision_vendor_number = graphene.String(required=True)
     delivery_mechanisms = graphene.String(required=True)
-    distrubution_limit = graphene.Decimal()
+    distribution_limit = graphene.Decimal()
     communication_channel = graphene.String(required=True)
     fsp_xlsx_template_id = graphene.ID(required=True)

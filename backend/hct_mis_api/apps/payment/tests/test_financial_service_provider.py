@@ -2,7 +2,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
+from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory, FinancialServiceProviderXlsxTemplateFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 
 
@@ -55,6 +55,10 @@ class TestAllFinancialServiceProviders(APITestCase):
             financialServiceProvider {
                 id
                 name
+                visionVendorNumber
+                deliveryMechanisms
+                communicationChannel
+                distributionLimit
             }
         }
     }
@@ -88,26 +92,19 @@ class TestAllFinancialServiceProviders(APITestCase):
         )
     
     def test_create_financial_service_provider(self):
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
         self.snapshot_graphql_request(
             request_string=self.MUTATION_CREATE_FSP,
             context={"user": self.user},
             variables={
                 "businessAreaSlug": "afghanistan",
                 "input": {
-                    "name": "FSP Name",
-                    "visionVendorNumber": "123456789",
+                    "name": "XYZ Bank",
+                    "visionVendorNumber": "XYZB-123456789",
+                    "delivery_mechanisms": "email",
                     "distributionLimit": "123456789",
-                    "communicationChannel": "email",
-                    "dataTransferConfiguration": {
-                        "dataTransferType": "ftp",
-                        "ftpConfiguration": {
-                            "host": "ftp.example.com",
-                            "username": "username",
-                            "password": "password",
-                            "port": 21,
-                            "directory": "/",
-                        },
-                    },
+                    "communicationChannel": "XLSX",
+                    "fspXlsxTemplateId": fsp_xlsx_template.id,
                 },
             },
         )

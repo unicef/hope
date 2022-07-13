@@ -174,7 +174,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "name",
         "created_by",
         "vision_vendor_number",
-        "distrubution_limit",
+        "distribution_limit",
         "communication_channel",
     )
     search_fields = ("name",)
@@ -183,7 +183,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     list_select_related = ("created_by", "fsp_xlsx_template")
     fields = (
         ("name", "vision_vendor_number"),
-        ("delivery_mechanisms", "distrubution_limit"),
+        ("delivery_mechanisms", "distribution_limit"),
         ("communication_channel", "fsp_xlsx_template"),
         ("data_transfer_configuration",),
     )

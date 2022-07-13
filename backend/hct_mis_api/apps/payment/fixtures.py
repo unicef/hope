@@ -61,7 +61,7 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    distrubution_limit = fuzzy.FuzzyDecimal(100.0, 1000.0)
+    distribution_limit = fuzzy.FuzzyDecimal(100.0, 1000.0)
     communication_channel = fuzzy.FuzzyChoice(
         FinancialServiceProvider.COMMUNICATION_CHANNEL_CHOICES, getter=lambda c: c[0]
     )

@@ -432,7 +432,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
     delivery_mechanisms = models.CharField(max_length=100)
-    distrubution_limit = models.DecimalField(
+    distribution_limit = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],

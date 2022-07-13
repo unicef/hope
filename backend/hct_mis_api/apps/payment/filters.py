@@ -140,7 +140,7 @@ class FinancialServiceProviderFilter(FilterSet):
             "name",
             "vision_vendor_number",
             "delivery_mechanisms",
-            "distrubution_limit",
+            "distribution_limit",
             "communication_channel",
             "fsp_xlsx_template",
         )
@@ -152,7 +152,7 @@ class FinancialServiceProviderFilter(FilterSet):
             Lower("name"),
             "vision_vendor_number",
             "delivery_mechanisms",
-            "distrubution_limit",
+            "distribution_limit",
             "communication_channel",
         )
     )

@@ -524,7 +524,7 @@ class EditFinancialServiceProviderMutation(PermissionMutation):
         fsp.name = input["name"]
         fsp.vision_vendor_number = input["vision_vendor_number"]
         fsp.delivery_mechanisms = input["delivery_mechanisms"]
-        fsp.distrubution_limit = input["distribution_limit"]
+        fsp.distribution_limit = input["distribution_limit"]
         fsp.communication_channel = input["communication_channel"]
         fsp.fsp_xlsx_template = fsp_xlsx_template
         fsp.save()
