@@ -215,4 +215,5 @@ class UnicefIdentifiedModel(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self._state.adding:
-            self.refresh_from_db()
+            # due to existence of "CREATE TRIGGER" in migrations
+            self.refresh_from_db(fields=("unicef_id",))
