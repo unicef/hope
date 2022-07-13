@@ -13,7 +13,7 @@ export const TicketsByStatusSection = ({
 }: TicketsByStatusSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   return (
-    <DashboardPaper title={t('Tickets by Status')}>
+    <DashboardPaper noMarginTop title={t('Tickets by Status')}>
       <TicketsByStatusChart data={data} />
     </DashboardPaper>
   );
