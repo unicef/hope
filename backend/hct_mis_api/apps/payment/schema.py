@@ -31,7 +31,7 @@ from hct_mis_api.apps.payment.filters import (
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter,
+    CashPlanPaymentVerificationFilter, PaymentPlanFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -41,12 +41,12 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     ServiceProvider,
     ApprovalProcess,
-    Approval,
+    Approval, PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -178,8 +178,6 @@ class AcceptanceProcessNode(DjangoObjectType):
 
     class Meta:
         model = ApprovalProcess
-        # interfaces = (relay.Node,)
-        # connection_class = ExtendedConnection
 
     def resolve_approvals(self, info):
         qs = self.approvals.all()
@@ -190,18 +188,22 @@ class AcceptanceProcessNode(DjangoObjectType):
             res.append(obj)
         return res
 
-    # TODO: will add per business area
     def resolve_approval_number(self, info):
-        # self.payment_plan.bussines_area.approval_number
-        return 2
+        return self.payment_plan.bussines_area.approval_number
 
     def resolve_authorization_number(self, info):
-        # self.payment_plan.bussines_area.authorization_number
-        return 3
+        return self.payment_plan.bussines_area.authorization_number
 
     def resolve_finance_review_number(self, info):
-        # self.payment_plan.bussines_area.finance_review_number
-        return 3
+        return self.payment_plan.bussines_area.finance_review_number
+
+
+class PaymentPlanNode(DjangoObjectType):
+
+    class Meta:
+        model = PaymentPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):
@@ -286,6 +288,12 @@ class Query(graphene.ObjectType):
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
+    )
+    # TODO: add perms
+    all_payment_plans = DjangoPermissionFilterConnectionField(
+        PaymentPlanNode,
+        filterset_class=PaymentPlanFilter,
+        permission_classes=(),
     )
     acceptance_process = graphene.Field(AcceptanceProcessNode)
 
@@ -523,5 +531,5 @@ class Query(graphene.ObjectType):
 
         return {"labels": labels, "datasets": datasets}
 
-    def resolve_acceptance_process(self, info):
-        return ApprovalProcess.objects.all().first()
+    def resolve_all_payment_plans(self, info):
+        return PaymentPlan.objects.all()

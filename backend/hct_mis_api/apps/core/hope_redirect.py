@@ -7,7 +7,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.payment.models import CashPlan
+
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 User = get_user_model()

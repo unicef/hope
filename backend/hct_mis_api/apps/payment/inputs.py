@@ -62,3 +62,4 @@ class CreateAcceptanceProcessInput(graphene.InputObjectType):
     stage = graphene.Int(required=True)
     acceptance_process_type = graphene.String(required=True)
     comment = graphene.String()
+    test = graphene.Decimal()

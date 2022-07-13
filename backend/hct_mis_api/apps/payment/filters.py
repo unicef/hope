@@ -6,9 +6,9 @@ from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter
 
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, CashPlanPaymentVerification, PaymentPlan
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.models import CashPlan
 
 
 class PaymentRecordFilter(FilterSet):
@@ -101,3 +101,21 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
         cash_plan = CashPlan.objects.get(pk=value)
         verifications_ids = cash_plan.verifications.all().values_list("pk", flat=True)
         return qs.filter(object_id__in=verifications_ids)
+
+
+class PaymentPlanFilter(FilterSet):
+
+    class Meta:
+        fields = (
+            "status",
+            "unicef_id",
+        )
+        model = PaymentPlan
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "created_at",
+            "unicef_id",
+            "status",
+        )
+    )

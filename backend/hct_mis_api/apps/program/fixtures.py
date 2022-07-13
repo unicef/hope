@@ -11,7 +11,8 @@ from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerificationSummary,
     PaymentRecord,
 )
-from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.payment.models import CashPlan
 
 
 class ProgramFactory(factory.DjangoModelFactory):

@@ -34,7 +34,9 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter, CashPlanFilter
-from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.payment.models import CashPlan
+
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
@@ -153,7 +155,7 @@ class Query(graphene.ObjectType):
                 )
             )
             .annotate(
-                households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
+                households_count=Coalesce(Sum("cashplan__total_persons_covered"), 0, output_field=IntegerField())
             )
             .order_by("custom_order", "start_date")
         )
@@ -197,7 +199,7 @@ class Query(graphene.ObjectType):
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
         valid_payment_records = get_payment_records_for_dashboard(year, business_area_slug, filters, True)
-        programs = Program.objects.filter(cash_plans__payment_records__in=valid_payment_records).distinct()
+        programs = Program.objects.filter(cashplan__payment_records__in=valid_payment_records).distinct()
 
         programmes_by_sector = (
             programs.values("sector")

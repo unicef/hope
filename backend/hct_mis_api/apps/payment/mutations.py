@@ -25,7 +25,7 @@ from hct_mis_api.apps.payment.inputs import (
     EditCashPlanPaymentVerificationInput,
     CreateAcceptanceProcessInput,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, ApprovalProcess, Approval
+from hct_mis_api.apps.payment.models import PaymentVerification, ApprovalProcess, Approval, PaymentPlan
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode, AcceptanceProcessNode
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
@@ -37,7 +37,7 @@ from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_st
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
 )
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode, CashPlanPaymentVerification
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -534,23 +534,17 @@ class CreateAcceptanceProcessMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        # payment_plan_id = decode_id_string(input.get("payment_plan_id"))
-        # payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-        # old_payment_plan = copy_model_object(payment_plan)
-        # acceptance_process = payment_plan.acceptance_process
-        # business_area = payment_plan.business_area
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        old_payment_plan = copy_model_object(payment_plan)
+        acceptance_process = payment_plan.acceptance_process
+        business_area = payment_plan.business_area
 
-        # cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, business_area)
-
-        # if payment_plan.state == LOCK:
-        #     raise GraphQLError("Can't update acceptance process for Payment Plan with LOCK state")
-
-        # TODO: only for tests
-        acceptance_process = ApprovalProcess.objects.get(pk=input.get("payment_plan_id"))
-        business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, business_area)
 
         stage, approval_type = input.get("stage"), input.get("acceptance_process_type")
 
+        cls.validate_approval_type_and_payment_plan_status(payment_plan, approval_type)
         cls.validate_stage_and_approval_type(acceptance_process, business_area, stage, approval_type)
 
         data = {
