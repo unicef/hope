@@ -516,7 +516,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                     },
                     'issueType': 14,
                     'sensitiveTicketDetails': None,
-                    'subCategory': None
+                    'subCategory': 3
                 }
             ]
         }

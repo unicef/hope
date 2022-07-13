@@ -300,6 +300,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
                 "issueType": 14,
                 "category": 2,
+                "subCategory": 3,
                 "consent": True,
                 "language": "PL",
                 "extras": {
