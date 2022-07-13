@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_for_individual_0_with_permission 1'] = {
@@ -53,11 +54,12 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                             'previous_identities': {
                             },
                             'previous_payment_channels': {
-                            },
+                            }
                         }
                     },
                     'issueType': 14,
-                    'sensitiveTicketDetails': None
+                    'sensitiveTicketDetails': None,
+                    'subCategory': None
                 }
             ]
         }
@@ -140,11 +142,12 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             'previous_identities': {
                             },
                             'previous_payment_channels': {
-                            },
+                            }
                         }
                     },
                     'issueType': 14,
-                    'sensitiveTicketDetails': None
+                    'sensitiveTicketDetails': None,
+                    'subCategory': None
                 }
             ]
         }
@@ -222,7 +225,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                     'householdDataUpdateTicketDetails': None,
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 16,
-                    'sensitiveTicketDetails': None
+                    'sensitiveTicketDetails': None,
+                    'subCategory': 1
                 }
             ]
         }
@@ -260,7 +264,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_househol
                     'householdDataUpdateTicketDetails': None,
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 17,
-                    'sensitiveTicketDetails': None
+                    'sensitiveTicketDetails': None,
+                    'subCategory': None
                 }
             ]
         }
@@ -298,7 +303,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_individu
                     'householdDataUpdateTicketDetails': None,
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 15,
-                    'sensitiveTicketDetails': None
+                    'sensitiveTicketDetails': None,
+                    'subCategory': None
                 }
             ]
         }
@@ -359,7 +365,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                     },
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 13,
-                    'sensitiveTicketDetails': None
+                    'sensitiveTicketDetails': None,
+                    'subCategory': None
                 }
             ]
         }
@@ -508,7 +515,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                         }
                     },
                     'issueType': 14,
-                    'sensitiveTicketDetails': None
+                    'sensitiveTicketDetails': None,
+                    'subCategory': None
                 }
             ]
         }
