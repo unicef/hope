@@ -97,6 +97,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     business_area = graphene.GlobalID(node=BusinessAreaNode, required=True)
     linked_tickets = graphene.List(graphene.ID)
     extras = CreateGrievanceTicketExtrasInput()
+    priority = graphene.Int(required=False)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -110,6 +111,7 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     household = graphene.GlobalID(node=HouseholdNode, required=False)
     individual = graphene.GlobalID(node=IndividualNode, required=False)
     extras = UpdateGrievanceTicketExtrasInput()
+    priority = graphene.Int(required=False)
 
 
 class CreateTicketNoteInput(graphene.InputObjectType):
