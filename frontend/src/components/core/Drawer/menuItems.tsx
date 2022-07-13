@@ -94,23 +94,27 @@ export const menuItems = [
     ],
   },
   {
-    name: 'Grievance and Feedback',
-    href: '/grievance-and-feedback',
-    selectedRegexp: /^\/grievance-and-feedback.*$/,
+    name: 'Grievance',
+    href: '/grievance-and-feedback/tickets',
+    selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
     icon: <Feedback />,
-    permissions: [
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
-      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+    collapsable: true,
+    permissionModule: 'POPULATION',
+    secondaryActions: [
+      {
+        name: 'Grievance Tickets',
+        href: '/grievance-and-feedback/tickets',
+        selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
+        icon: <></>,
+        permissionModule: 'HOUSEHOLDS'
+      },
+      {
+        name: 'Grievance Dashboard',
+        href: '/grievance-and-feedback/dashboard',
+        selectedRegexp: /^\/grievance-and-feedback\/dashboard.*$/,
+        icon: <></>,
+        permissionModule: 'INDIVIDUALS'
+      }
     ],
   },
   {
