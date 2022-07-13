@@ -7,156 +7,148 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestAllFinancialServiceProviders::test_create_financial_service_provider 1'] = {
-    'errors': [
-        {
-            'message': 'Object of type UUID is not JSON serializable'
-        }
-    ]
-}
-
 snapshots['TestAllFinancialServiceProviders::test_fetch_all_financial_service_providers 1'] = {
     'data': {
         'allFinancialServiceProviders': {
             'edges': [
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.408716',
+                        'createdAt': '2022-07-13T13:21:57.679257',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTpiZDVjZDVjNS02ZjQyLTQ1ZWQtYWU4Mi1iMTMwMTFjYjNkMDI=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTozNmQ5YjIxNi0xMjNkLTQ0MjMtYTgwNS01ZjExMjUzM2RhMmQ=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo2OThmMGJhYy1iYTE3LTQ4NTAtOTI5Yi0yZWRjNTY1MTVkYjY='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo4NGY0ZGU3Mi02MzY0LTRmZDQtYjk1My0yZDFjMmQ2Mzg4Y2I='
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.414979',
+                        'createdAt': '2022-07-13T13:21:57.686281',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTpkZmEwZDIxZS1kMTllLTRkYmYtYmMwMC04YjQ1MmE1YTU5ZTI=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo1M2M0Yjk2OS0wZTMzLTQ3MTQtODAwMy03ZmJmYjdjMWY5ZDM=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowODUyNTg3Yy02MmE2LTQxZWMtYWY0YS1kZTc3NTBkM2M1NWQ='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo5NzY4ZDQxZS0xODhiLTQ4Y2ItODBjYS1jOGQyYTU2MzJmNzY='
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.421658',
+                        'createdAt': '2022-07-13T13:21:57.693356',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZToyNTM2MmFjMS1lZjYyLTQ4MzItYTU5Yy04M2NmMWUxZmM2YWE=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTpmN2U2ZGViOS1jYmY3LTQ3OWYtOWNiYy0wZmMxNDI4ODhiMWM=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo5ZTNjODhkYi03MjM5LTQ4NTItYjlkZi01NDhiMDQzMWNlNWY='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTozMGUyZGNlNi0xMzg4LTQ2OTktYjI2Mi04MDJiZjg3OWUwYzU='
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.429365',
+                        'createdAt': '2022-07-13T13:21:57.700315',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo3NzU0YzNlMC03NDlmLTQ1OTYtYTc1NC01MWRlM2U0YmRlNmU=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTphMTM1MTQwZC1lYWYyLTQ2NTUtYTU5OS1kZjE4NTUzNzJiMmM=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo4OTAwOWI1Zi1lMTg1LTRlOTItYjQxMS05ZTM2N2E0N2RlMmI='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTplMDgwMGY2Ny1kODlhLTQwODItYTllMS04ZjI1N2VkY2NjMGU='
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.436485',
+                        'createdAt': '2022-07-13T13:21:57.707396',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZToxZGNjZWRhMC1jMzIyLTQ4ZGMtYmQ3Mi00YzcwODI1OTY3YTk=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTpjYWMzNDRjMC1lZTIxLTQ2OTQtOTczMS05ZDA4MzhlYTBmYjM=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTpiZGU2YzdhOS05MTFmLTQzMTQtYTM3ZC01OTI5NDdjZTY5NjA='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo3YTZhNmVlYS0xYTQ5LTQyODUtYTJiNy03YTI1MTM2YjIwNDc='
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.444103',
+                        'createdAt': '2022-07-13T13:21:57.713877',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo0YjkxMTdkMS1kOTc3LTQwOGEtOWRlYi1jZDc1MmM3YTEwMTI=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo0MzlmNjBkNi1iMTA3LTRmZWUtYTM1OS03NDNmMzZiNzk3N2E=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo3ZGViOTgzYy1lNzQ3LTRmODgtOThlMS04ZGVkNDdlOGIyMDE='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTpiN2IxNmE1YS00YmZiLTQ4NDEtYjBhYS04M2UxMjE2OWM5N2U='
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.451614',
+                        'createdAt': '2022-07-13T13:21:57.719374',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo0YWFiZGI2ZC1kMDUwLTQ2ZWYtOGEwNC04NzA0NDA2ODdkMzQ=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTphMDM0YTNiMS1iNTcyLTQwNTQtYTZmYi0zNWZlZDgxNWI2YjU=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo0Mjg2ZjAxMS1hMDRkLTRiYmItYjdiYi03ZjQ1MzgxMGRhMTg='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo1NTE3YWRiYS0yOWNkLTQ1ZWEtYjBmNi0yMWQ3N2I1YzBjNDQ='
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.458951',
+                        'createdAt': '2022-07-13T13:21:57.724502',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTpiM2RmZTMzMS1hYmMyLTQ0MDctYWRmOC0yZGYyOTBkM2ZhMWI=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo1ZjhlMTNjZS0wOTYxLTQ4NTAtYWUyYS1lMjVhYjg5NDE3NmE=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTpmYjJhM2RiZi1hMjQ3LTQzZjktOGUwZi01NTM4YmQ0YjI1MzE='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo2MTM4NWQwZC03ZWQwLTQ1YjItYTY3Yi02MzRmZTAwMzgxNjU='
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.466381',
+                        'createdAt': '2022-07-13T13:21:57.730115',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo4ZGEwMGI1MC04NjVjLTQ0YmUtODQwNy0wNGM2ZjkyOTY4MDE=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo3ZGUyZjZhMy0yYzY0LTRjODYtYjExZC1kZTc2NTk0NDkzYjM=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo3ZDhhMDNhMS0zMGNlLTQwMTQtYTc2OS00MGQ0NWUzNTlhNzA='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTo2MGEzNjU2ZC1lM2RkLTRiN2QtYTdjMi00MWNjODc1OTBhMWI='
                     }
                 },
                 {
                     'node': {
-                        'createdAt': '2022-07-13T13:16:48.472870',
+                        'createdAt': '2022-07-13T13:21:57.735365',
                         'financialserviceproviderxlsxreportSet': {
                             'edges': [
                             ]
                         },
                         'fspXlsxTemplate': {
-                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo0YWNlNWRkNC05NWU2LTQ5ZjMtYjEwNS05NTM2ODUxMGZiZTk=',
+                            'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyWGxzeFRlbXBsYXRlTm9kZTo4ZDdjYjI0Zi00MDA4LTQ2NDQtOTI0Ny1mNzk4N2M2NGZkN2U=',
                             'name': ''
                         },
-                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZToxYmViYzViNC1jMjhhLTQwOWEtOTNjMy02MGRlMDJlNDY2MWE='
+                        'id': 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTplNThhYjY1ZC05MTU5LTRlNDgtODdjNC0zYTE1NGM0YzhiYmI='
                     }
                 }
             ]

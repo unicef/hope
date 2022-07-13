@@ -1,9 +1,13 @@
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory, FinancialServiceProviderXlsxTemplateFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+)
 
 
 class TestAllFinancialServiceProviders(APITestCase):
@@ -77,18 +81,12 @@ class TestAllFinancialServiceProviders(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.QUERY_COUNT_ALL_FSP_QUERY,
             context={"user": self.user},
-            variables={
-                # "businessArea": "afghanistan",
-            },
         )
 
     def test_fetch_all_financial_service_providers(self):
         self.snapshot_graphql_request(
             request_string=self.QUERY_LIST_ALL_FSP_QUERY,
             context={"user": self.user},
-            variables={
-                # "businessArea": "afghanistan",
-            },
         )
     
     def test_create_financial_service_provider(self):
@@ -104,7 +102,7 @@ class TestAllFinancialServiceProviders(APITestCase):
                     "delivery_mechanisms": "email",
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
-                    "fspXlsxTemplateId": fsp_xlsx_template.id,
+                    "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id),
                 },
             },
         )
