@@ -13,6 +13,7 @@ import { UsersPage } from './pages/core/UsersPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { CreateGrievancePage } from './pages/grievances/CreateGrievancePage';
 import { EditGrievancePage } from './pages/grievances/EditGrievancePage';
+import { GrievancesDashboardPage } from './pages/grievances/GrievancesDashboardPage';
 import { GrievancesDetailsPage } from './pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from './pages/grievances/GrievancesTablePage';
 import { CashPlanDetailsPage } from './pages/payments/CashPlanDetailsPage';
@@ -119,7 +120,7 @@ export function HomeRouter(): React.ReactElement {
             <GrievancesTablePage key='all' />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/dashboard'>
-            <GrievancesTablePage key='all' />
+            <GrievancesDashboardPage key='all' />
           </SentryRoute>
           <SentryRoute path='/:businessArea/grievance-and-feedback/:id'>
             <GrievancesDetailsPage />
