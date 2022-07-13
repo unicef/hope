@@ -213,6 +213,6 @@ class UnicefIdentifiedModel(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         if self._state.adding:
             self.refresh_from_db()
-        super().save(*args, **kwargs)
