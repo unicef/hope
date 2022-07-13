@@ -7,6 +7,7 @@ export const GrievanceTicket = gql`
       unicefId
       status
       category
+      subCategory
       consent
       createdBy {
         id

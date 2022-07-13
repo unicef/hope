@@ -278,6 +278,7 @@ type CashPlanPaymentVerificationNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   version: BigInt!
+  unicefId: String
   status: CashPlanPaymentVerificationStatus!
   cashPlan: CashPlanNode!
   sampling: CashPlanPaymentVerificationSampling!
@@ -296,7 +297,6 @@ type CashPlanPaymentVerificationNode implements Node {
   sexFilter: String
   activationDate: DateTime
   completionDate: DateTime
-  unicefId: String!
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
@@ -453,6 +453,7 @@ input CreateGrievanceTicketInput {
   description: String!
   assignedTo: ID!
   category: Int!
+  subCategory: Int
   issueType: Int
   admin: String
   area: String
@@ -756,12 +757,14 @@ type GrievanceTicketNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   version: BigInt!
+  unicefId: String
   userModified: DateTime
   lastNotificationSent: DateTime
   createdBy: UserNode
   assignedTo: UserNode
   status: Int!
   category: Int!
+  subCategory: Int
   issueType: Int
   description: String!
   admin2: AreaNode
@@ -772,7 +775,6 @@ type GrievanceTicketNode implements Node {
   businessArea: UserBusinessAreaNode!
   linkedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   registrationDataImport: RegistrationDataImportNode
-  unicefId: String!
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
@@ -2445,6 +2447,7 @@ type Query {
   allEditHouseholdFieldsAttributes: [FieldAttributeNode]
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
+  grievanceTicketSubCategoryChoices: [ChoiceObject]
   grievanceTicketManualCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection

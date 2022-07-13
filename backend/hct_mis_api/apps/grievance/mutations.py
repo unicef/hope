@@ -110,6 +110,7 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     linked_tickets = graphene.List(graphene.ID)
     household = graphene.GlobalID(node=HouseholdNode, required=False)
     individual = graphene.GlobalID(node=IndividualNode, required=False)
+    sub_category = graphene.Int()
     extras = UpdateGrievanceTicketExtrasInput()
 
 

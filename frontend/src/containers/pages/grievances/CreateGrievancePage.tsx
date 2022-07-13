@@ -97,21 +97,26 @@ export function CreateGrievancePage(): React.ReactElement {
     selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
+    subCategory: null,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+  const {
+    data: householdFieldsData,
+    loading: householdFieldsLoading,
+  } = useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -282,6 +287,7 @@ export function CreateGrievancePage(): React.ReactElement {
                           onChange={(e) => {
                             setFieldValue('category', e.target.value);
                             setFieldValue('issueType', null);
+                            setFieldValue('subCategory', null);
                           }}
                           variant='outlined'
                           choices={
@@ -305,6 +311,23 @@ export function CreateGrievancePage(): React.ReactElement {
                           />
                         </Grid>
                       ) : null}
+                      {values.category ===
+                        GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && (
+                        <Grid item xs={6}>
+                          <Field
+                            name='subCategory'
+                            label={t('Sub Category')}
+                            onChange={(e) => {
+                              setFieldValue('subCategory', e.target.value);
+                            }}
+                            variant='outlined'
+                            choices={
+                              choicesData.grievanceTicketSubCategoryChoices
+                            }
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                      )}
                     </Grid>
                     <BoxWithBorders>
                       <Box display='flex' flexDirection='column'>
