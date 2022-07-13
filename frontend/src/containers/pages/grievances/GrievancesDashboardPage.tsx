@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { TableWrapper } from '../../../components/core/TableWrapper';
 import { GrievanceDashboardCard } from '../../../components/grievances/GrievancesDashboard/GrievanceDashboardCard';
 import { TicketsByCategorySection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByCategorySection/TicketsByCategorySection';
 import { TicketsByLocationAndCategorySection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
@@ -36,54 +37,56 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title={t('Grievance Dashboard')} />
-      <Grid container spacing={3}>
-        <Grid item xs={4}>
-          <Box p={3}>
-            <GrievanceDashboardCard
-              topLabel={t('TOTAL NUMBER OF TICKETS')}
-              topNumber={
-                ticketsByType.systemGeneratedCount +
-                ticketsByType.userGeneratedCount
-              }
-              systemGenerated={ticketsByType.systemGeneratedCount}
-              userGenerated={ticketsByType.userGeneratedCount}
-            />
-          </Box>
-          <Box p={3}>
-            <GrievanceDashboardCard
-              topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
-              topNumber={
-                ticketsByType.closedSystemGeneratedCount +
-                ticketsByType.closedUserGeneratedCount
-              }
-              systemGenerated={ticketsByType.closedSystemGeneratedCount}
-              userGenerated={ticketsByType.closedUserGeneratedCount}
-            />
-          </Box>
-          <Box p={3}>
-            <GrievanceDashboardCard
-              topLabel={t('TICKETS AVERAGE RESOLUTION')}
-              topNumber={`${ticketsByType.systemGeneratedAvgResolution +
-                ticketsByType.userGeneratedAvgResolution} days`}
-              systemGenerated={`${ticketsByType.systemGeneratedAvgResolution} days`}
-              userGenerated={`${ticketsByType.userGeneratedAvgResolution} days`}
-            />
-          </Box>
-          <Box p={3}>
-            <TicketsByStatusSection data={ticketsByStatus} />
-          </Box>
+      <TableWrapper>
+        <Grid container spacing={3}>
+          <Grid item xs={4}>
+            <Box>
+              <GrievanceDashboardCard
+                topLabel={t('TOTAL NUMBER OF TICKETS')}
+                topNumber={
+                  ticketsByType.systemGeneratedCount +
+                  ticketsByType.userGeneratedCount
+                }
+                systemGenerated={ticketsByType.systemGeneratedCount}
+                userGenerated={ticketsByType.userGeneratedCount}
+              />
+            </Box>
+            <Box mt={6}>
+              <GrievanceDashboardCard
+                topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
+                topNumber={
+                  ticketsByType.closedSystemGeneratedCount +
+                  ticketsByType.closedUserGeneratedCount
+                }
+                systemGenerated={ticketsByType.closedSystemGeneratedCount}
+                userGenerated={ticketsByType.closedUserGeneratedCount}
+              />
+            </Box>
+            <Box mt={6}>
+              <GrievanceDashboardCard
+                topLabel={t('TICKETS AVERAGE RESOLUTION')}
+                topNumber={`${ticketsByType.systemGeneratedAvgResolution +
+                  ticketsByType.userGeneratedAvgResolution} days`}
+                systemGenerated={`${ticketsByType.systemGeneratedAvgResolution} days`}
+                userGenerated={`${ticketsByType.userGeneratedAvgResolution} days`}
+              />
+            </Box>
+            <Box mt={6}>
+              <TicketsByStatusSection data={ticketsByStatus} />
+            </Box>
+          </Grid>
+          <Grid item xs={8}>
+            <Box ml={3}>
+              <TicketsByCategorySection data={ticketsByCategory} />
+            </Box>
+            <Box ml={3} mt={6}>
+              <TicketsByLocationAndCategorySection
+                data={ticketsByLocationAndCategory}
+              />
+            </Box>
+          </Grid>
         </Grid>
-        <Grid item xs={8}>
-          <Box p={3}>
-            <TicketsByCategorySection data={ticketsByCategory} />
-          </Box>
-          <Box p={3}>
-            <TicketsByLocationAndCategorySection
-              data={ticketsByLocationAndCategory}
-            />
-          </Box>
-        </Grid>
-      </Grid>
+      </TableWrapper>
     </>
   );
 };
