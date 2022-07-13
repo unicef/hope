@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AllChartsQuery } from '../../../../../__generated__/graphql';
+import { AllGrievanceDashboardChartsQuery } from '../../../../../__generated__/graphql';
 import { TicketsByStatusChart } from '../../charts/TicketsByStatusChart';
 import { DashboardPaper } from '../../DashboardPaper';
 
 interface TicketsByStatusSectionProps {
-  data: AllChartsQuery['chartIndividualsReachedByAgeAndGender'];
+  data: AllGrievanceDashboardChartsQuery['ticketsByStatus'];
 }
 
 export const TicketsByStatusSection = ({
