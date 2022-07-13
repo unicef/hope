@@ -10,6 +10,7 @@ import graphene
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -22,9 +23,10 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
+    CreateAcceptanceProcessInput,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.payment.schema import PaymentVerificationNode
+from hct_mis_api.apps.payment.models import PaymentVerification, ApprovalProcess, Approval
+from hct_mis_api.apps.payment.schema import PaymentVerificationNode, AcceptanceProcessNode
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
 )
@@ -465,6 +467,115 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
         return ImportXlsxCashPlanVerification(cashplan_payment_verification.cash_plan, import_service.errors)
 
 
+class CreateAcceptanceProcessMutation(PermissionMutation):
+    acceptance_process = graphene.Field(AcceptanceProcessNode)
+
+    class Arguments:
+        input = CreateAcceptanceProcessInput(required=True)
+
+    @classmethod
+    def validate_stage_and_approval_type(cls, acceptance_process, business_area, stage, approval_type):
+        if approval_type not in (Approval.APPROVAL, Approval.AUTHORIZATION, Approval.FINANCE_REVIEW, Approval.REJECT):
+            msg = "Acceptance_Process_Type must be one of Approval, Authorization, Finance Review or Reject"
+            raise GraphQLError(msg)
+
+        approvals_qs = acceptance_process.approvals
+        current_stage_approval_qs = approvals_qs.filter(stage=stage)
+
+        if stage > 0:
+            prev_stage_approval_qs = approvals_qs.filter(stage=stage - 1)
+            if not prev_stage_approval_qs or not prev_stage_approval_qs.filter(type=Approval.REJECT).exists():
+                raise GraphQLError("Previous stage in Acceptance Process is not rejected or stage not exists")
+
+            if (
+                prev_stage_approval_qs.filter(type=Approval.FINANCE_REVIEW).count()
+                >= business_area.finance_review_number
+            ):
+                raise GraphQLError("Finance Review step finished for this stage")
+
+        if current_stage_approval_qs.filter(type=Approval.REJECT).exists():
+            raise GraphQLError(f"Stage {stage} is Rejected")
+
+        approval_count_map = {
+            Approval.APPROVAL: business_area.approval_number,
+            Approval.AUTHORIZATION: business_area.authorization_number,
+            Approval.FINANCE_REVIEW: business_area.finance_review_number,
+            Approval.REJECT: 1,
+        }
+
+        if current_stage_approval_qs.filter(type=approval_type).count() >= approval_count_map.get(approval_type):
+            raise GraphQLError(
+                f"Acceptance Process can't has more than {approval_count_map.get(approval_type)} {approval_type} for this stage"
+            )
+
+        # check if previous step finished
+        if (
+            approval_type in (Approval.AUTHORIZATION, Approval.FINANCE_REVIEW)
+            and current_stage_approval_qs.filter(type=Approval.APPROVAL).count() < business_area.approval_number
+        ):
+            raise GraphQLError("Approve step not finished yet for this stage")
+
+        if (
+            approval_type == Approval.FINANCE_REVIEW
+            and current_stage_approval_qs.filter(type=Approval.AUTHORIZATION).count()
+            < business_area.authorization_number
+        ):
+            raise GraphQLError("Authorization step not finished yet for this stage")
+
+        # case if 3/3 FINANCE_REVIEW and approval_type Reject
+        if (
+            approval_type == Approval.REJECT
+            and current_stage_approval_qs.filter(type=Approval.FINANCE_REVIEW).count()
+            >= business_area.finance_review_number
+        ):
+            raise GraphQLError("Finance Review step finished for this stage")
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        # payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        # payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        # old_payment_plan = copy_model_object(payment_plan)
+        # acceptance_process = payment_plan.acceptance_process
+        # business_area = payment_plan.business_area
+
+        # cls.has_permission(info, Permissions.PAYMENT_MODULE_CREATE, business_area)
+
+        # if payment_plan.state == LOCK:
+        #     raise GraphQLError("Can't update acceptance process for Payment Plan with LOCK state")
+
+        # TODO: only for tests
+        acceptance_process = ApprovalProcess.objects.get(pk=input.get("payment_plan_id"))
+        business_area = BusinessArea.objects.get(slug="afghanistan")
+
+        stage, approval_type = input.get("stage"), input.get("acceptance_process_type")
+
+        cls.validate_stage_and_approval_type(acceptance_process, business_area, stage, approval_type)
+
+        data = {
+            "approval_process": acceptance_process,
+            "created_by": info.context.user,
+            "stage": stage,
+            "type": approval_type,
+            "comment": input.get("comment"),
+        }
+        Approval.objects.create(**data)
+
+        # if approval_type == Approval.REJECT:
+        #     payment_plan.state = LOCK
+        #     payment_plan.save()
+
+        # log_create(
+        #     PaymentPlan.ACTIVITY_LOG_MAPPING,
+        #     "business_area",
+        #     info.context.user,
+        #     old_payment_plan,
+        #     payment_plan,
+        # )
+        return cls(acceptance_process=acceptance_process)
+
+
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
     edit_cash_plan_payment_verification = EditPaymentVerificationMutation.Field()
@@ -477,3 +588,4 @@ class Mutations(graphene.ObjectType):
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
     )
+    create_acceptance_process = CreateAcceptanceProcessMutation.Field()

@@ -40,6 +40,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
+    ApprovalProcess,
+    Approval,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -152,6 +154,56 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
+class ApprovalNode(DjangoObjectType):
+    info = graphene.String()
+
+    class Meta:
+        model = Approval
+        fields = ("stage", "type", "created_at", "comment")
+
+    def resolve_info(self, info):
+        return self.info
+
+
+class ApprovalSortedByStageNode(graphene.ObjectType):
+    stage = graphene.Int()
+    objs = graphene.List(ApprovalNode)
+
+
+class AcceptanceProcessNode(DjangoObjectType):
+    approvals = graphene.List(ApprovalSortedByStageNode)
+    approval_number = graphene.Int()
+    authorization_number = graphene.Int()
+    finance_review_number = graphene.Int()
+
+    class Meta:
+        model = ApprovalProcess
+        # interfaces = (relay.Node,)
+        # connection_class = ExtendedConnection
+
+    def resolve_approvals(self, info):
+        qs = self.approvals.all()
+        res = list()
+        number_of_stages = qs.values_list("stage", flat=True)
+        for n in set(number_of_stages):
+            obj = {"stage": n, "objs": qs.filter(stage=n)}
+            res.append(obj)
+        return res
+
+    # TODO: will add per business area
+    def resolve_approval_number(self, info):
+        # self.payment_plan.bussines_area.approval_number
+        return 2
+
+    def resolve_authorization_number(self, info):
+        # self.payment_plan.bussines_area.authorization_number
+        return 3
+
+    def resolve_finance_review_number(self, info):
+        # self.payment_plan.bussines_area.finance_review_number
+        return 3
+
+
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     payment_record_verification = relay.Node.Field(PaymentVerificationNode)
@@ -235,6 +287,7 @@ class Query(graphene.ObjectType):
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
     )
+    acceptance_process = graphene.Field(AcceptanceProcessNode)
 
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (
@@ -469,3 +522,6 @@ class Query(graphene.ObjectType):
         ]
 
         return {"labels": labels, "datasets": datasets}
+
+    def resolve_acceptance_process(self, info):
+        return ApprovalProcess.objects.all().first()

@@ -138,3 +138,19 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     list_display = ("full_name", "short_name", "country")
     search_fields = ("full_name", "vision_id", "short_name")
     list_filter = (("business_area", AutoCompleteFilter),)
+
+
+# TODO: added only for testing locally
+from hct_mis_api.apps.payment.models import ApprovalProcess, Approval
+class ApproveInline(admin.TabularInline):
+    model = Approval
+    extra = 0
+
+
+@admin.register(ApprovalProcess)
+class ApprovalProcessAdmin(admin.ModelAdmin):
+    raw_id_fields = ("approved_by", "authorized_by", "finance_review_by")
+    search_fields = ("approved_by", "authorized_by", "finance_review_by")
+    list_display = ("id", "created_at", "approve_date", "authorization_date", "finance_review_date")
+    list_filter = ("approve_date", "authorization_date", "finance_review_date")
+    inlines = (ApproveInline,)
