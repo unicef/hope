@@ -152,7 +152,7 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_type_0_with_perm
             'closedUserGeneratedCount': 1,
             'systemGeneratedAvgResolution': 0.0,
             'systemGeneratedCount': 2,
-            'userGeneratedAvgResolution': -2.5,
+            'userGeneratedAvgResolution': -1.0,
             'userGeneratedCount': 4
         }
     }
@@ -165,7 +165,7 @@ snapshots['TestGrievanceDashboardQuery::test_grievance_query_by_type_1_without_p
             'closedUserGeneratedCount': 1,
             'systemGeneratedAvgResolution': 0.0,
             'systemGeneratedCount': 2,
-            'userGeneratedAvgResolution': -2.5,
+            'userGeneratedAvgResolution': -1.0,
             'userGeneratedCount': 4
         }
     }
