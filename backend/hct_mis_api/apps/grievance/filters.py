@@ -94,6 +94,7 @@ class GrievanceTicketFilter(FilterSet):
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
     score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
     household = CharFilter(field_name="household_unicef_id")
+    priority = ChoiceFilter(field_name="priority", choices=GrievanceTicket.PRIORITY_CHOICES)
 
     class Meta:
         fields = {
@@ -116,6 +117,7 @@ class GrievanceTicketFilter(FilterSet):
             "user_modified",
             "household_unicef_id",
             "issue_type",
+            "priority",
         )
     )
 
