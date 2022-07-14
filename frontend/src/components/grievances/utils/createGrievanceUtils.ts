@@ -72,6 +72,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         linkedTickets: values.selectedRelatedTickets,
+        subCategory: values.subCategory,
         extras: {
           category: {
             grievanceComplaintTicketExtras: {
