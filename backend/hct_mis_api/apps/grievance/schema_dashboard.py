@@ -1,9 +1,35 @@
+import itertools
+
 import graphene
 from django.db.models import Case, CharField, Count, When, Value, Q, Avg, F
 from django.utils.encoding import force_str
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.utils.schema import ChartDatasetNode
+from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode
+
+TICKET_ORDERING_KEYS = [
+    "Data Change",
+    "Grievance Complaint",
+    "Needs Adjudication",
+    "Negative Feedback",
+    "Payment Verification",
+    "Positive Feedback",
+    "Referral",
+    "Sensitive Grievance",
+    "System Flagging"
+]
+
+TICKET_ORDERING = {
+    "Data Change": 0,
+    "Grievance Complaint": 1,
+    "Needs Adjudication": 2,
+    "Negative Feedback": 3,
+    "Payment Verification": 4,
+    "Positive Feedback": 5,
+    "Referral": 6,
+    "Sensitive Grievance": 7,
+    "System Flagging": 8
+}
 
 
 def transform_to_chart_dataset(qs):
@@ -73,8 +99,8 @@ class Query(graphene.ObjectType):
     tickets_by_type = graphene.Field(TicketByType, business_area_slug=graphene.String(required=True))
     tickets_by_category = graphene.Field(ChartDatasetNode, business_area_slug=graphene.String(required=True))
     tickets_by_status = graphene.Field(ChartDatasetNode, business_area_slug=graphene.String(required=True))
-    tickets_by_location_and_category = graphene.List(
-        TicketByLocationAndCategory, business_area_slug=graphene.String(required=True)
+    tickets_by_location_and_category = graphene.Field(
+        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True)
     )
 
     def resolve_tickets_by_type(self, info, **kwargs):
@@ -137,11 +163,21 @@ class Query(graphene.ObjectType):
         )
 
         results = []
-        for item in qs:
-            location, _, category_name, count = item
-            category_item = {"category_name": category_name, "count": count}
-            if results and results[-1]["location"] == location:
-                results[-1]["categories"].append(category_item)
-            else:
-                results.append({"location": location, "categories": [category_item]})
-        return results
+        labels = []
+        totals = []
+
+        for key, group in itertools.groupby(qs, lambda x: x[0]):
+            labels.append(key)
+            ticket_horizontal_counts = [0 for _ in range(9)]
+
+            for item in group:
+                _, _, ticket_name, ticket_count = item
+                idx = TICKET_ORDERING[ticket_name]
+                ticket_horizontal_counts[idx] = ticket_count
+            results.append(ticket_horizontal_counts)
+        ticket_vertical_counts = list(zip(*results))
+
+        for key, value in enumerate(ticket_vertical_counts):
+            totals.append({"label": TICKET_ORDERING_KEYS[key], "data": list(value)})
+
+        return {"labels": labels, "datasets": totals}
