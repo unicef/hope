@@ -34,6 +34,7 @@ from hct_mis_api.apps.household.models import (
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
+    ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     UNIQUE,
@@ -264,6 +265,11 @@ class ImportedIndividual(TimeStampedUUIDModel):
     @property
     def phone_no_alternative_valid(self):
         return is_right_phone_number_format(str(self.phone_no_alternative))
+
+    @property
+    def role(self):
+        role = self.households_and_roles.first()
+        return role.role if role is not None else ROLE_NO_ROLE
 
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
