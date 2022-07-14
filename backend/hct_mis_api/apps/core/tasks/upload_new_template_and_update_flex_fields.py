@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from django.utils import timezone
 from io import BytesIO
 
 import requests
@@ -68,7 +68,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                 xlsx_kobo_template_object.status = XLSXKoboTemplate.CONNECTION_FAILED
                 xlsx_kobo_template_object.message = str(e)
                 if xlsx_kobo_template_object.first_connection_failed_time is None:
-                    xlsx_kobo_template_object.first_connection_failed_time = datetime.now()
+                    xlsx_kobo_template_object.first_connection_failed_time = timezone.now()
                 xlsx_kobo_template_object.save()
                 raise KoboRetriableError(xlsx_kobo_template_object)
         except Exception as e:

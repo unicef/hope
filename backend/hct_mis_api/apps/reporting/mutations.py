@@ -1,5 +1,6 @@
 import logging
 import datetime
+from django.utils import timezone
 import graphene
 
 from django.shortcuts import get_object_or_404
@@ -99,7 +100,7 @@ class RestartCreateReport(PermissionMutation):
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
         report = get_object_or_404(Report, id=decode_id_string(report_data.get("report_id")))
 
-        delta30 = datetime.datetime.now() - datetime.timedelta(minutes=30)
+        delta30 = timezone.now() - datetime.timedelta(minutes=30)
         if report.status is not Report.IN_PROGRESS and report.updated_at > delta30:
             msg = "Impossible restart now. Status must be 'Processing' and more than 30 mins after last running."
             logger.error(msg)
