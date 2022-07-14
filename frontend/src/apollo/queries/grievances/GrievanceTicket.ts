@@ -350,6 +350,7 @@ export const GrievanceTicket = gql`
           }
         }
       }
+      priority
     }
   }
 `;

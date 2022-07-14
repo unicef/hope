@@ -462,6 +462,7 @@ input CreateGrievanceTicketInput {
   businessArea: ID!
   linkedTickets: [ID]
   extras: CreateGrievanceTicketExtrasInput
+  priority: Int
 }
 
 type CreateGrievanceTicketMutation {
@@ -778,6 +779,7 @@ type GrievanceTicketNode implements Node {
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
+  priority: Int
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -2438,8 +2440,12 @@ type Query {
   dashboardYearsChoices(businessAreaSlug: String!): [String]
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
+  ticketsByType(businessAreaSlug: String!): TicketByType
+  ticketsByCategory(businessAreaSlug: String!): ChartDatasetNode
+  ticketsByStatus(businessAreaSlug: String!): ChartDatasetNode
+  ticketsByLocationAndCategory(businessAreaSlug: String!): [TicketByLocationAndCategory]
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, priority: String, orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
@@ -3230,6 +3236,26 @@ type TicketAddIndividualDetailsNodeEdge {
   cursor: String!
 }
 
+type TicketByCategory {
+  categoryName: String
+  count: Int
+}
+
+type TicketByLocationAndCategory {
+  location: String
+  count: Int
+  categories: [TicketByCategory]
+}
+
+type TicketByType {
+  userGeneratedCount: Int
+  systemGeneratedCount: Int
+  closedUserGeneratedCount: Int
+  closedSystemGeneratedCount: Int
+  userGeneratedAvgResolution: Float
+  systemGeneratedAvgResolution: Float
+}
+
 type TicketComplaintDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -3565,7 +3591,9 @@ input UpdateGrievanceTicketInput {
   linkedTickets: [ID]
   household: ID
   individual: ID
+  subCategory: Int
   extras: UpdateGrievanceTicketExtrasInput
+  priority: Int
 }
 
 type UpdateGrievanceTicketMutation {

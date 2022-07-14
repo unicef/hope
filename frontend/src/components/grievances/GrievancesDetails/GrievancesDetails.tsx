@@ -172,7 +172,12 @@ export const GrievancesDetails = ({
               {
                 label: t('DESCRIPTION'),
                 value: ticket.description,
-                size: 6,
+                size: 3,
+              },
+              {
+                label: t('PRIORITY'),
+                value: ticket.priority,
+                size: 3,
               },
               {
                 label: t('ASSIGNED TO'),

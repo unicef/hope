@@ -74,7 +74,7 @@ export const dataChangeComponentDict = {
   },
 };
 
-export function CreateGrievancePage(): React.ReactElement {
+export const CreateGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -98,10 +98,16 @@ export function CreateGrievancePage(): React.ReactElement {
     identityVerified: false,
     issueType: null,
     subCategory: null,
+    priority: 4,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
+
+  const mappedPriorities = Array.from(Array(4).keys()).map((i) => ({
+    name: (i + 1).toString(),
+    value: i + 1,
+  }));
 
   const {
     data: choicesData,
@@ -398,6 +404,17 @@ export function CreateGrievancePage(): React.ReactElement {
                             component={FormikTextField}
                           />
                         </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='priority'
+                            multiline
+                            fullWidth
+                            variant='outlined'
+                            label={t('Priority')}
+                            choices={mappedPriorities}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
                       </Grid>
                     </BoxPadding>
                     <BoxPadding>
@@ -424,4 +441,4 @@ export function CreateGrievancePage(): React.ReactElement {
       }}
     </Formik>
   );
-}
+};

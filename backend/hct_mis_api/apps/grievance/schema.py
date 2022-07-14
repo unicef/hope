@@ -16,7 +16,6 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import (
-    _HOUSEHOLD,
     TYPE_IMAGE,
     FieldFactory,
     Scope,
@@ -80,6 +79,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
+    priority = graphene.Int()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -142,6 +142,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
             .filter(household_unicef_id=grievance_ticket.household_unicef_id)
             .exclude(pk=grievance_ticket.pk)
         )
+
+    @staticmethod
+    def resolve_priority(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.priority
 
 
 class TicketNoteNode(DjangoObjectType):
