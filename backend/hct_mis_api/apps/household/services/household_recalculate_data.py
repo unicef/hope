@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
 from django.db.models import Q, Count
@@ -11,10 +12,10 @@ def recalculate_data(household: Household) -> None:
         return
     for individual in household.individuals.all():
         individual.recalculate_data()
-    date_6_years_ago = datetime.now() - relativedelta(years=+6)
-    date_12_years_ago = datetime.now() - relativedelta(years=+12)
-    date_18_years_ago = datetime.now() - relativedelta(years=+18)
-    date_60_years_ago = datetime.now() - relativedelta(years=+60)
+    date_6_years_ago = timezone.now() - relativedelta(years=+6)
+    date_12_years_ago = timezone.now() - relativedelta(years=+12)
+    date_18_years_ago = timezone.now() - relativedelta(years=+18)
+    date_60_years_ago = timezone.now() - relativedelta(years=+60)
 
     is_beneficiary = ~Q(relationship=NON_BENEFICIARY)
     active_beneficiary = Q(withdrawn=False, duplicate=False)

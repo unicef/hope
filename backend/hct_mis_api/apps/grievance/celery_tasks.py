@@ -1,5 +1,6 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 
 from django.db.models import Q
 
@@ -35,7 +36,7 @@ def deduplicate_and_check_against_sanctions_list_task(
 
 @app.task
 def periodic_grievances_notifications():
-    sensitive_tickets_one_day_date = datetime.now() - timedelta(days=1)
+    sensitive_tickets_one_day_date = timezone.now() - timedelta(days=1)
     sensitive_tickets_to_notify = (
         GrievanceTicket.objects.exclude(status=GrievanceTicket.STATUS_CLOSED)
         .filter(
@@ -45,7 +46,7 @@ def periodic_grievances_notifications():
         .filter(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
     )
 
-    other_tickets_30_days_date = datetime.now() - timedelta(days=30)
+    other_tickets_30_days_date = timezone.now() - timedelta(days=30)
     other_tickets_to_notify = (
         GrievanceTicket.objects.exclude(status=GrievanceTicket.STATUS_CLOSED)
         .filter(
@@ -59,7 +60,7 @@ def periodic_grievances_notifications():
             scope.set_tag("business_area", ticket.business_area)
             notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
             notification.send_email_notification()
-            ticket.last_notification_sent = datetime.now()
+            ticket.last_notification_sent = timezone.now()
             ticket.save()
 
     for ticket in other_tickets_to_notify:
@@ -67,5 +68,5 @@ def periodic_grievances_notifications():
             scope.set_tag("business_area", ticket.business_area)
             notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
             notification.send_email_notification()
-            ticket.last_notification_sent = datetime.now()
+            ticket.last_notification_sent = timezone.now()
             ticket.save()
