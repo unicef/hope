@@ -26,6 +26,7 @@ interface EditValuesTypes {
   selectedRelatedTickets: string[];
   individualData?;
   householdDataUpdateFields?;
+  subCategory?;
 }
 
 function prepareInitialValueAddIndividual(
@@ -180,6 +181,7 @@ export function prepareInitialValues(
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
+    subCategory: ticket.subCategory,
     language: ticket.language || '',
     admin: ticket.admin2 ? { node: ticket.admin2 } : null,
     area: ticket.area || '',
@@ -280,6 +282,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
     variables: {
       input: {
         ...requiredVariables,
+        subCategory: values.subCategory,
         linkedTickets: values.selectedRelatedTickets,
       },
     },

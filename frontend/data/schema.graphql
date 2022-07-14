@@ -453,6 +453,7 @@ input CreateGrievanceTicketInput {
   description: String!
   assignedTo: ID!
   category: Int!
+  subCategory: Int
   issueType: Int
   admin: String
   area: String
@@ -763,6 +764,7 @@ type GrievanceTicketNode implements Node {
   assignedTo: UserNode
   status: Int!
   category: Int!
+  subCategory: Int
   issueType: Int
   description: String!
   admin2: AreaNode
@@ -2443,7 +2445,7 @@ type Query {
   ticketsByStatus(businessAreaSlug: String!): ChartDatasetNode
   ticketsByLocationAndCategory(businessAreaSlug: String!): [TicketByLocationAndCategory]
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, priority: String, orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
@@ -2451,6 +2453,7 @@ type Query {
   allEditHouseholdFieldsAttributes: [FieldAttributeNode]
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
+  grievanceTicketSubCategoryChoices: [ChoiceObject]
   grievanceTicketManualCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
@@ -3588,6 +3591,7 @@ input UpdateGrievanceTicketInput {
   linkedTickets: [ID]
   household: ID
   individual: ID
+  subCategory: Int
   extras: UpdateGrievanceTicketExtrasInput
   priority: Int
 }
