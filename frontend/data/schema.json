@@ -773,13 +773,9 @@
               }
             ],
             "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "TicketByLocationAndCategory",
-                "ofType": null
-              }
+              "kind": "OBJECT",
+              "name": "ChartDetailedDatasetsNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -33441,35 +33437,27 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TicketByLocationAndCategory",
+        "name": "ChartDetailedDatasetsNode",
         "description": null,
         "fields": [
           {
-            "name": "location",
+            "name": "labels",
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "count",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "categories",
+            "name": "datasets",
             "description": null,
             "args": [],
             "type": {
@@ -33477,7 +33465,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TicketByCategory",
+                "name": "_DetailedDatasetsNode",
                 "ofType": null
               }
             },
@@ -33492,11 +33480,11 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TicketByCategory",
+        "name": "_DetailedDatasetsNode",
         "description": null,
         "fields": [
           {
-            "name": "categoryName",
+            "name": "label",
             "description": null,
             "args": [],
             "type": {
@@ -33508,13 +33496,17 @@
             "deprecationReason": null
           },
           {
-            "name": "count",
+            "name": "data",
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -33834,45 +33826,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "_DetailedDatasetsNode",
-        "description": null,
-        "fields": [
-          {
-            "name": "label",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "data",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "SectionTotalNode",
         "description": null,
         "fields": [
@@ -33970,49 +33923,6 @@
               "kind": "SCALAR",
               "name": "Int",
               "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "ChartDetailedDatasetsNode",
-        "description": null,
-        "fields": [
-          {
-            "name": "labels",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "datasets",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "_DetailedDatasetsNode",
-                "ofType": null
-              }
             },
             "isDeprecated": false,
             "deprecationReason": null
