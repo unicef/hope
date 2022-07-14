@@ -37,6 +37,5 @@ def fsp_generate_xlsx_report_task(fsp_id):
         service.generate_report()
     except Exception as e:
         logger.exception(e)
-        raise
 
     logger.info("fsp_generate_xlsx_report_task end")

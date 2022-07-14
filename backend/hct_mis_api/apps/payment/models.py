@@ -1,16 +1,15 @@
 from decimal import Decimal
-from django.conf import settings
 
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField
-from multiselectfield import MultiSelectField
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
 from model_utils import Choices
+from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
@@ -333,8 +332,8 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     @property
     def is_manually_editable(self):
         if (
-            self.cash_plan_payment_verification.verification_channel
-            != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+                self.cash_plan_payment_verification.verification_channel
+                != CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         ):
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
@@ -438,8 +437,9 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
         help_text="The maximum amount of money that can be distributed or unlimited if 0",
+        db_index=True,
     )
-    communication_channel = models.CharField(max_length=6, choices=COMMUNICATION_CHANNEL_CHOICES)
+    communication_channel = models.CharField(max_length=6, choices=COMMUNICATION_CHANNEL_CHOICES, db_index=True)
     data_transfer_configuration = models.JSONField(
         help_text="JSON configuration for the data transfer mechanism",
         null=True,
@@ -473,7 +473,7 @@ class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
         verbose_name=_("Financial Service Provider"),
     )
     file = models.FileField(blank=True, null=True, editable=False)
-    status = models.IntegerField(choices=STATUSES, blank=True, null=True, editable=False)
+    status = models.IntegerField(choices=STATUSES, blank=True, null=True, editable=False, db_index=True)
 
     def __str__(self):
         return f"{self.template.name} ({self.status})"

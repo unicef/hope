@@ -1,3 +1,5 @@
+from parameterized import parameterized
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -46,15 +48,15 @@ class TestAllFinancialServiceProviders(APITestCase):
         }
     }
     """
-    
+
     MUTATION_CREATE_FSP = """
     mutation CreateFSP(
         $businessAreaSlug: String!
-        $input: CreateFinancialServiceProviderInput!
+        $inputs: CreateFinancialServiceProviderInput!
     ) {
         createFinancialServiceProvider(
             businessAreaSlug: $businessAreaSlug
-            input: $input
+            inputs: $inputs
         ) {
             financialServiceProvider {
                 id
@@ -63,18 +65,67 @@ class TestAllFinancialServiceProviders(APITestCase):
                 deliveryMechanisms
                 communicationChannel
                 distributionLimit
+                fspXlsxTemplate {
+                    id
+                    name
+                    createdAt
+                    createdBy {
+                        id
+                        username
+                        firstName
+                    }
+                }
             }
         }
     }
     """
 
+    MUTATION_UPDATE_FSP = """
+    mutation UpdateFSP (
+        $financialServiceProviderId: ID!
+        $businessAreaSlug: String!
+        $inputs: CreateFinancialServiceProviderInput!
+    ) {
+        editFinancialServiceProvider (
+            financialServiceProviderId: $financialServiceProviderId
+            businessAreaSlug: $businessAreaSlug
+            inputs: $inputs
+        ) {
+            financialServiceProvider {
+                id
+                name
+                visionVendorNumber
+                deliveryMechanisms
+                communicationChannel
+                distributionLimit
+                fspXlsxTemplate {
+                    id
+                    name
+                    createdAt
+                    createdBy {
+                        id
+                        username
+                        firstName
+                    }
+                }
+            }
+        }
+    }
+    """
+
+    BUSINESS_AREA_SLUG = "afghanistan"
+
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
         cls.user = UserFactory.create()
-        cls.create_user_role_with_permissions(
-            cls.user, [Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS], BusinessArea.objects.get(slug="afghanistan")
-        )
+        permissions = [
+            Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS,
+            Permissions.FINANCIAL_SERVICE_PROVIDER_CREATE,
+            Permissions.FINANCIAL_SERVICE_PROVIDER_UPDATE,
+        ]
+        cls.create_user_role_with_permissions(cls.user, permissions,
+                                              BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG))
         FinancialServiceProviderFactory.create_batch(10)
 
     def test_fetch_count_financial_service_providers(self):
@@ -88,21 +139,41 @@ class TestAllFinancialServiceProviders(APITestCase):
             request_string=self.QUERY_LIST_ALL_FSP_QUERY,
             context={"user": self.user},
         )
-    
+
     def test_create_financial_service_provider(self):
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
         self.snapshot_graphql_request(
             request_string=self.MUTATION_CREATE_FSP,
             context={"user": self.user},
             variables={
-                "businessAreaSlug": "afghanistan",
-                "input": {
-                    "name": "XYZ Bank",
+                "businessAreaSlug": self.BUSINESS_AREA_SLUG,
+                "inputs": {
+                    "name": "Web3 Bank",
                     "visionVendorNumber": "XYZB-123456789",
-                    "delivery_mechanisms": "email",
+                    "deliveryMechanisms": "email",
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
-                    "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id),
+                    "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),
+                },
+            },
+        )
+
+    def test_update_financial_service_provider(self):
+        fsp = FinancialServiceProviderFactory.create()
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
+        self.snapshot_graphql_request(
+            request_string=self.MUTATION_UPDATE_FSP,
+            context={"user": self.user},
+            variables={
+                "financialServiceProviderId": encode_id_base64(fsp.id, "FinancialServiceProvider"),
+                "businessAreaSlug": self.BUSINESS_AREA_SLUG,
+                "inputs": {
+                    "name": "New Gen Bank",
+                    "visionVendorNumber": "XYZB-123456789",
+                    "deliveryMechanisms": "email",
+                    "distributionLimit": "123456789",
+                    "communicationChannel": "XLSX",
+                    "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),
                 },
             },
         )

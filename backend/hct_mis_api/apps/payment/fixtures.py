@@ -54,12 +54,9 @@ class FinancialServiceProviderFactory(factory.DjangoModelFactory):
         model = FinancialServiceProvider
 
     name = factory.Faker("company")
-    vision_vendor_number = fuzzy.FuzzyInteger(1342342, 9999999932)
+    vision_vendor_number = factory.Faker("ssn")
     delivery_mechanisms = factory.Faker(
-        "sentence",
-        nb_words=10,
-        variable_nb_words=True,
-        ext_word_list=None,
+        "random_element", elements=["email", "phone", "mail"]
     )
     distribution_limit = fuzzy.FuzzyDecimal(100.0, 1000.0)
     communication_channel = fuzzy.FuzzyChoice(
