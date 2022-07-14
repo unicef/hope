@@ -4,16 +4,14 @@ import logging
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Q
-from django.db.models.functions import Lower
 from django.utils.encoding import force_str
 from django.utils.functional import Promise
 
 import graphene
-from django_filters import CharFilter, FilterSet, MultipleChoiceFilter
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from hct_mis_api.apps.account.filters import UsersFilter
 from hct_mis_api.apps.account.models import (
     USER_STATUS_CHOICES,
     Partner,
@@ -26,12 +24,11 @@ from hct_mis_api.apps.account.permissions import (
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
-    hopePermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, to_choice_object
+from hct_mis_api.apps.core.utils import to_choice_object
 
 logger = logging.getLogger(__name__)
 
@@ -43,62 +40,6 @@ def permissions_resolver(user_roles):
         if user_role.role and user_role.role.permissions:
             permissions_set.update(user_role.role.permissions)
     return permissions_set
-
-
-class UsersFilter(FilterSet):
-    business_area = CharFilter(required=True, method="business_area_filter")
-    search = CharFilter(method="search_filter")
-    status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
-    partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices(), method="partners_filter")
-    roles = MultipleChoiceFilter(choices=Role.get_roles_as_choices(), method="roles_filter")
-
-    class Meta:
-        model = get_user_model()
-        fields = {
-            "search": ["exact", "startswith"],
-            "status": ["exact"],
-            "partner": ["exact"],
-            "roles": ["exact"],
-        }
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            Lower("first_name"),
-            Lower("last_name"),
-            "last_login",
-            "status",
-            "partner",
-            "email",
-        )
-    )
-
-    def search_filter(self, qs, name, value):
-        values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(first_name__startswith=value)
-            q_obj |= Q(last_name__startswith=value)
-            q_obj |= Q(email__startswith=value)
-        return qs.filter(q_obj)
-
-    def business_area_filter(self, qs, name, value):
-        return qs.filter(user_roles__business_area__slug=value)
-
-    def partners_filter(self, qs, name, values):
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(partner__id=value)
-        return qs.filter(q_obj)
-
-    def roles_filter(self, qs, name, values):
-        business_area_slug = self.data.get("business_area")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(
-                user_roles__role__id=value,
-                user_roles__business_area__slug=business_area_slug,
-            )
-        return qs.filter(q_obj)
 
 
 class UserRoleNode(DjangoObjectType):
@@ -194,22 +135,12 @@ class Query(graphene.ObjectType):
         permission_classes=(
             hopeOneOfPermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
-        max_limit=1000
+        max_limit=1000,
     )
-    # all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
     user_roles_choices = graphene.List(ChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
-
-    # def resolve_all_log_entries(self, info, **kwargs):
-    #     object_id = kwargs.get('object_id')
-    #     queryset = LogEntry.objects
-    #     if object_id:
-    #         id = decode_id_string(object_id)
-    #         queryset = queryset.filter(~Q(action=0))
-    #         queryset = queryset.filter(object_pk=id)
-    #     return queryset.all()
 
     def resolve_all_users(self, info, **kwargs):
         return User.objects.all().distinct()
@@ -232,10 +163,6 @@ class Query(graphene.ObjectType):
         return (
             get_user_model()
             .objects.prefetch_related("user_roles")
-            .filter(
-                available_for_export=True,
-                is_superuser=False,
-                user_roles__business_area__slug=business_area_slug,
-            )
+            .filter(available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug)
             .exists()
         )

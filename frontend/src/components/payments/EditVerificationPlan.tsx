@@ -15,6 +15,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { DialogContainer } from '../../containers/dialogs/DialogContainer';
+import { DialogFooter } from '../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -32,18 +35,8 @@ import {
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
 import { FormikEffect } from '../core/FormikEffect';
+import { LoadingButton } from '../core/LoadingButton';
 import { TabPanel } from '../core/TabPanel';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -52,9 +45,6 @@ const StyledTabs = styled(Tabs)`
 `;
 const TabsContainer = styled.div`
   border-bottom: 1px solid #e8e8e8;
-`;
-const DialogContainer = styled.div`
-  width: 700px;
 `;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -120,7 +110,7 @@ export function EditVerificationPlan({
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate] = useEditCashPlanPaymentVerificationMutation();
+  const [mutate, { loading }] = useEditCashPlanPaymentVerificationMutation();
   const businessArea = useBusinessArea();
   const {
     data: { cashPlan },
@@ -206,7 +196,7 @@ export function EditVerificationPlan({
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
     ? data.allAdminAreas.edges.map((el) => ({
         value: el.node.id,
-        name: el.node.title,
+        name: el.node.name,
       }))
     : [];
 
@@ -216,9 +206,11 @@ export function EditVerificationPlan({
 
   const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
-        sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100})%`;
+      return ` (${
+        (sampleSizesData?.sampleSize?.sampleSize /
+          sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100
+      })%`;
     }
     return ` (0%)`;
   };
@@ -455,7 +447,8 @@ export function EditVerificationPlan({
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   type='submit'
                   color='primary'
                   variant='contained'
@@ -463,7 +456,7 @@ export function EditVerificationPlan({
                   data-cy='button-submit'
                 >
                   {t('SAVE')}
-                </Button>
+                </LoadingButton>
               </DialogActions>
             </DialogFooter>
           </Dialog>

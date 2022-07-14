@@ -53,6 +53,7 @@ import {
 } from '../../../components/grievances/utils/editGrievanceUtils';
 import { validate } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchema } from '../../../components/grievances/utils/validationSchema';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -85,6 +86,7 @@ export function EditGrievancePage(): React.ReactElement {
     variables: {
       id,
     },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: currentUserData,
@@ -100,7 +102,7 @@ export function EditGrievancePage(): React.ReactElement {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  const [mutate] = useUpdateGrievanceMutation();
+  const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
   const {
     data: allAddIndividualFieldsData,
@@ -198,6 +200,8 @@ export function EditGrievancePage(): React.ReactElement {
       'individualDataUpdateFieldsIdentities',
       'individualDataUpdateDocumentsToEdit',
       'individualDataUpdateIdentitiesToEdit',
+      'individualDataUpdateFieldsPaymentChannels',
+      'individualDataUpdatePaymentChannelsToEdit',
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (
@@ -265,13 +269,14 @@ export function EditGrievancePage(): React.ReactElement {
                     {t('Cancel')}
                   </Button>
                 </Box>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   color='primary'
                   variant='contained'
                   onClick={submitForm}
                 >
                   {t('Save')}
-                </Button>
+                </LoadingButton>
               </Box>
             </PageHeader>
             <Grid container spacing={3}>

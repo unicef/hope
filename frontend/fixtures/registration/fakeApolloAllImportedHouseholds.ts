@@ -29,6 +29,7 @@ export const fakeApolloAllImportedHouseholds = [
               node: {
                 id:
                   'SW1wb3J0ZWRIb3VzZWhvbGROb2RlOjNlYjE5Y2RiLTBjZTYtNDgwZS1iZTI5LTczYjY0ZWI1ZjI3Mg==',
+                importId: null,
                 headOfHousehold: {
                   id:
                     'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0NTM0MzY3MS1hOTFiLTQyYTUtOTNmZC00MmUwMGQxZmE2NDg=',
@@ -43,6 +44,8 @@ export const fakeApolloAllImportedHouseholds = [
                 flexFields: { RCSI_h_f: 14 },
                 deviceid: '',
                 start: null,
+                koboAssetId: '',
+                rowId: null,
                 firstRegistrationDate: '2021-01-11T00:00:00',
                 lastRegistrationDate: '2021-01-11T00:00:00',
                 hasDuplicates: false,

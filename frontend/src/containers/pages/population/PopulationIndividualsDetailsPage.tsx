@@ -21,6 +21,7 @@ import {
   useHouseholdChoiceDataQuery,
   useIndividualQuery,
   useAllIndividualsFlexFieldsAttributesQuery,
+  useGrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 
@@ -43,6 +44,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     variables: {
       id,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   const {
@@ -54,6 +56,10 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     data: flexFieldsData,
     loading: flexFieldsDataLoading,
   } = useAllIndividualsFlexFieldsAttributesQuery();
+
+  const {
+    data: grievancesChoices,
+  } = useGrievancesChoiceDataQuery();
 
   if (loading || choicesLoading || flexFieldsDataLoading)
     return <LoadingComponent />;
@@ -123,8 +129,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         <IndividualBioData
           businessArea={businessArea}
           individual={individual as IndividualNode}
-          choicesData={choicesData}
-        />
+          choicesData={choicesData} grievancesChoices={grievancesChoices} />
         <IndividualVulnerabilities
           flexFieldsData={flexFieldsData}
           individual={individual as IndividualNode}

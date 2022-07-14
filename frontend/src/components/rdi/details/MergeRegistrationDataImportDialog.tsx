@@ -4,34 +4,19 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography,
 } from '@material-ui/core';
 import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
+import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   RegistrationDetailedFragment,
   useMergeRdiMutation,
 } from '../../../__generated__/graphql';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
+import { LoadingButton } from '../../core/LoadingButton';
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;
@@ -43,7 +28,7 @@ export function MergeRegistrationDataImportDialog({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useMergeRdiMutation({
+  const [mutate, { loading }] = useMergeRdiMutation({
     variables: { id: registration.id },
   });
   const merge = async (): Promise<void> => {
@@ -72,7 +57,7 @@ export function MergeRegistrationDataImportDialog({
       >
         <DialogTitleWrapper>
           <DialogTitle id='scroll-dialog-title'>
-            <Typography variant='h6'>{t('Merge Import')}</Typography>
+            {t('Merge Import')}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
@@ -91,14 +76,15 @@ export function MergeRegistrationDataImportDialog({
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-            <Button
+            <LoadingButton
+              loading={loading}
               type='submit'
               color='primary'
               variant='contained'
               onClick={merge}
             >
               {t('MERGE')}
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </DialogFooter>
       </Dialog>

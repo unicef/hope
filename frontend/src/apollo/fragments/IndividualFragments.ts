@@ -13,6 +13,7 @@ export const individualMinimal = gql`
     birthDate
     maritalStatus
     phoneNo
+    phoneNoValid
     sanctionListPossibleMatch
     sanctionListConfirmedMatch
     deduplicationGoldenRecordStatus
@@ -56,13 +57,13 @@ export const individualMinimal = gql`
       status
       admin1 {
         id
-        title
+        name
         level
         pCode
       }
       admin2 {
         id
-        title
+        name
         level
         pCode
       }
@@ -97,6 +98,7 @@ export const individualDetailed = gql`
     middleName
     whoAnswersPhone
     phoneNoAlternative
+    phoneNoAlternativeValid
     hearingDisability
     observedDisability
     individualId
@@ -151,7 +153,7 @@ export const individualDetailed = gql`
       countryOrigin
       adminArea {
         id
-        title
+        name
         level
       }
     }
@@ -174,6 +176,10 @@ export const individualDetailed = gql`
         id
         unicefId
       }
+    }
+    bankAccountInfo {
+      bankName
+      bankAccountNumber
     }
   }
 `;

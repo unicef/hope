@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   choicesToDict,
-  decodeIdString,
   formatAge,
+  getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
 } from '../../../../../utils/utils';
@@ -155,7 +155,7 @@ export function RegistrationIndividualBioData({
               <ContentLink
                 href={`/${businessArea}/registration-data-import/household/${individual?.household?.id}`}
               >
-                {decodeIdString(individual?.household?.id)}
+                {individual?.household.importId}
               </ContentLink>
             ) : (
               '-'
@@ -232,12 +232,15 @@ export function RegistrationIndividualBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Phone Number')}>
-            {individual.phoneNo}
+            {getPhoneNoLabel(individual.phoneNo, individual.phoneNoValid)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Alternate Phone Number')}>
-            {individual.phoneNoAlternative}
+            {getPhoneNoLabel(
+              individual.phoneNoAlternative,
+              individual.phoneNoAlternativeValid,
+            )}
           </LabelizedField>
         </Grid>
       </Grid>

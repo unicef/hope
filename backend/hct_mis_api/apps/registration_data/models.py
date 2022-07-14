@@ -55,10 +55,12 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     )
     XLS = "XLS"
     KOBO = "KOBO"
+    DIIA = "DIIA"
     FLEX_REGISTRATION = "FLEX_REGISTRATION"
     DATA_SOURCE_CHOICE = (
         (XLS, "Excel"),
         (KOBO, "KoBo"),
+        (DIIA, "DIIA"),
         (FLEX_REGISTRATION, "Flex Registration"),
     )
     name = CICharField(
@@ -79,6 +81,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         settings.AUTH_USER_MODEL,
         related_name="registration_data_imports",
         on_delete=models.CASCADE,
+        null=True,
     )
     data_source = models.CharField(
         max_length=255,

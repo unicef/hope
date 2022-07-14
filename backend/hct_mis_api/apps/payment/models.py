@@ -7,6 +7,7 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 from model_utils import Choices
 
@@ -175,7 +176,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
             "confidence_interval",
             "margin_of_error",
             "rapid_pro_flow_id",
-            "rapid_pro_flow_start_uuid",
+            "rapid_pro_flow_start_uuids",
             "age_filter",
             "excluded_admin_areas_filter",
             "sex_filter",
@@ -192,18 +193,18 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     VERIFICATION_CHANNEL_XLSX = "XLSX"
     VERIFICATION_CHANNEL_MANUAL = "MANUAL"
     STATUS_CHOICES = (
-        (STATUS_PENDING, "Pending"),
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
+        (STATUS_PENDING, "Pending"),
     )
     SAMPLING_CHOICES = (
         (SAMPLING_FULL_LIST, "Full list"),
         (SAMPLING_RANDOM, "Random sampling"),
     )
     VERIFICATION_CHANNEL_CHOICES = (
+        (VERIFICATION_CHANNEL_MANUAL, "MANUAL"),
         (VERIFICATION_CHANNEL_RAPIDPRO, "RAPIDPRO"),
         (VERIFICATION_CHANNEL_XLSX, "XLSX"),
-        (VERIFICATION_CHANNEL_MANUAL, "MANUAL"),
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     cash_plan = models.ForeignKey(
@@ -221,7 +222,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     confidence_interval = models.FloatField(null=True)
     margin_of_error = models.FloatField(null=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
-    rapid_pro_flow_start_uuid = models.CharField(max_length=255, blank=True)
+    rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
     age_filter = JSONField(null=True)
     excluded_admin_areas_filter = JSONField(null=True)
     sex_filter = models.CharField(null=True, max_length=10)
@@ -247,7 +248,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         self.not_received_count = None
         self.received_with_problems_count = None
         self.activation_date = None
-        self.rapid_pro_flow_start_uuid = ""
+        self.rapid_pro_flow_start_uuids = []
 
 
 def build_summary(cash_plan):
@@ -306,9 +307,9 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_NOT_RECEIVED = "NOT_RECEIVED"
     STATUS_RECEIVED_WITH_ISSUES = "RECEIVED_WITH_ISSUES"
     STATUS_CHOICES = (
+        (STATUS_NOT_RECEIVED, "NOT RECEIVED"),
         (STATUS_PENDING, "PENDING"),
         (STATUS_RECEIVED, "RECEIVED"),
-        (STATUS_NOT_RECEIVED, "NOT RECEIVED"),
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
     cash_plan_payment_verification = models.ForeignKey(
@@ -353,9 +354,9 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
     STATUS_CHOICES = (
-        (STATUS_PENDING, "Pending"),
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
+        (STATUS_PENDING, "Pending"),
     )
     status = models.CharField(
         max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, verbose_name="Verification status", db_index=True

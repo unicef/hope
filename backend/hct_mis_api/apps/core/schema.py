@@ -2,10 +2,10 @@ import logging
 from collections import Iterable
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 
 import graphene
 from constance import config
-from django_filters import CharFilter, FilterSet
 from graphene import Boolean, Connection, ConnectionField, DateTime, String, relay
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
@@ -13,63 +13,26 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.core_fields_attributes import (
-    FILTERABLE_CORE_FIELDS_ATTRIBUTES,
-    RDI_FILTER,
-    ROLE_FIELD,
-    XLSX_ONLY_FIELDS,
-    convert_choices,
+    FILTERABLE_TYPES,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.models import (
-    AdminArea,
-    AdminAreaLevel,
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
 )
-from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
 
 logger = logging.getLogger(__name__)
-
-
-class AdminAreaFilter(FilterSet):
-    business_area = CharFilter(
-        field_name="admin_area_level__country__business_area__slug",
-    )
-    level = IntegerFilter(
-        field_name="level",
-    )
-
-    class Meta:
-        model = AdminArea
-        fields = {
-            "title": ["exact", "istartswith"],
-        }
 
 
 class ChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
-
-
-class AdminAreaNode(DjangoObjectType):
-    class Meta:
-        model = AdminArea
-        exclude_fields = ["geom", "point"]
-        filter_fields = ["title"]
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class AdminAreaTypeNode(DjangoObjectType):
-    class Meta:
-        model = AdminAreaLevel
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 class BusinessAreaNode(DjangoObjectType):
@@ -146,7 +109,7 @@ class CoreFieldChoiceObject(graphene.ObjectType):
 
 def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
     resolver = attr_resolver
-    if isinstance(root, (dict, LazyEvalMethodsDict)):
+    if isinstance(root, dict):
         resolver = dict_resolver
     return resolver(attname, default_value, root, info, **args)
 
@@ -176,12 +139,16 @@ class FieldAttributeNode(graphene.ObjectType):
     is_flex_field = graphene.Boolean()
 
     def resolve_choices(parent, info):
+        choices = _custom_dict_or_attr_resolver("choices", None, parent, info)
+
+        if callable(choices) and not isinstance(choices, models.Manager):
+            choices = choices()
         if isinstance(
-            _custom_dict_or_attr_resolver("choices", None, parent, info),
+            choices,
             Iterable,
         ):
-            return sorted(parent["choices"], key=lambda elem: elem["label"]["English(EN)"])
-        return _custom_dict_or_attr_resolver("choices", None, parent, info).order_by("name").all()
+            return sorted(choices, key=lambda elem: elem["label"]["English(EN)"])
+        return choices.order_by("name").all()
 
     def resolve_is_flex_field(self, info):
         if isinstance(self, FlexibleAttribute):
@@ -249,10 +216,9 @@ def get_fields_attr_generators(flex_field, business_area_slug=None):
     if flex_field is not False:
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
-        yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
-        yield from XLSX_ONLY_FIELDS
-        yield ROLE_FIELD
-        yield convert_choices(RDI_FILTER, business_area_slug)
+        yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
+            business_area_slug
+        )
 
 
 def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
@@ -275,13 +241,11 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
 
 
 class Query(graphene.ObjectType):
-    admin_area = relay.Node.Field(AdminAreaNode)
     business_area = graphene.Field(
         BusinessAreaNode,
         business_area_slug=graphene.String(required=True, description="The business area slug"),
         description="Single business area",
     )
-    all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
     all_fields_attributes = graphene.List(
         FieldAttributeNode,

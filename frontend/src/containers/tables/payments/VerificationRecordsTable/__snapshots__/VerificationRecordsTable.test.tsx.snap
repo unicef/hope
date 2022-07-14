@@ -353,10 +353,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-EHOje gFjtOh"
+                  class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-ifAKCX ilSJSk"
+                    class="sc-EHOje eEdtvm"
                     data-cy="status-container"
                   >
                     PENDING
@@ -372,10 +372,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <div
-                  class="sc-EHOje gFjtOh"
+                  class="sc-ifAKCX iPKgts"
                 >
                   <div
-                    class="sc-ifAKCX PznGL"
+                    class="sc-EHOje eoikBB"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -395,7 +395,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                0048875012932
+                +48875012932
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"

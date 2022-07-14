@@ -2,9 +2,7 @@ import logging
 
 from django.core.exceptions import ValidationError
 
-from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES_DICTIONARY,
-)
+from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.core.validators import BaseValidator
@@ -58,7 +56,7 @@ class TargetingCriteriaRuleFilterInputValidator:
     def validate(rule_filter):
         is_flex_field = rule_filter.is_flex_field
         if not is_flex_field:
-            attributes = CORE_FIELDS_ATTRIBUTES_DICTIONARY
+            attributes = FieldFactory.from_scope(Scope.TARGETING).to_dict_by("name")
             attribute = attributes.get(rule_filter.field_name)
             if attribute is None:
                 logger.error(f"Can't find any core field attribute associated with {rule_filter.field_name} field name")

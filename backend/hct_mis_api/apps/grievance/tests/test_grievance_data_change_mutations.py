@@ -10,11 +10,17 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -31,7 +37,6 @@ from hct_mis_api.apps.household.models import (
     WIDOWED,
     Agency,
     DocumentType,
-    IndividualIdentity,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -78,13 +83,24 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
 
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
             business_area=cls.business_area,
         )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="dffgh565556")
-        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="fggtyjyj")
+        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="dffgh565556")
+        AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="fggtyjyj")
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
+            name="Admin type one",
+            country=country,
+            area_level=2,
+        )
+        AreaFactory(name="City Test", area_type=area_type, p_code="dffgh565556")
+        AreaFactory(name="City Example", area_type=area_type, p_code="fggtyjyj")
+
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -243,6 +259,13 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "number": "2222",
                                     }
                                 ],
+                                "paymentChannels": [
+                                    {
+                                        "type": "BANK_TRANSFER",
+                                        "bankName": "privatbank",
+                                        "bankAccountNumber": 2356789789789789,
+                                    },
+                                ],
                             },
                         }
                     }
@@ -318,6 +341,104 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "country": "POL",
                                         "number": "3333",
                                     }
+                                ],
+                            },
+                        }
+                    }
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_create_payment_channel_for_individual(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        variables = {
+            "input": {
+                "description": "Test",
+                "businessArea": "afghanistan",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "issueType": 14,
+                "category": 2,
+                "consent": True,
+                "language": "PL",
+                "extras": {
+                    "issueType": {
+                        "individualDataUpdateIssueTypeExtras": {
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "individualData": {
+                                "paymentChannels": [
+                                    {
+                                        "type": "BANK_TRANSFER",
+                                        "bankName": "privatbank",
+                                        "bankAccountNumber": 2356789789789789,
+                                    },
+                                ],
+                            },
+                        }
+                    }
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_edit_payment_channel_for_individual(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        bank_account = BankAccountInfoFactory(
+            id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
+            individual=self.individuals[0],
+            bank_name="privatbank",
+            bank_account_number=2356789789789789,
+        )
+
+        variables = {
+            "input": {
+                "description": "Test",
+                "businessArea": "afghanistan",
+                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
+                "issueType": 14,
+                "category": 2,
+                "consent": True,
+                "language": "PL",
+                "extras": {
+                    "issueType": {
+                        "individualDataUpdateIssueTypeExtras": {
+                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "individualData": {
+                                "paymentChannelsToEdit": [
+                                    {
+                                        "id": self.id_to_base64(bank_account.id, "BankAccountInfoNode"),
+                                        "type": "BANK_TRANSFER",
+                                        "bankName": "privatbank",
+                                        "bankAccountNumber": 1111222233334444,
+                                    },
                                 ],
                             },
                         }

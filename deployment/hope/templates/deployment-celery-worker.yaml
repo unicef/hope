@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "hope.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.celery.replicaCount }}
+  replicas: {{ int (.Values.celery.replicaCount) }}
   selector:
     matchLabels:
       {{- include "hope.selectorLabels" . | nindent 6 }}
@@ -28,8 +28,29 @@ spec:
       securityContext:
         {{- toYaml .Values.celery.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}-celery-worker
-          command: ["celery", "-A", "hct_mis_api.apps.core.celery", "worker", "-E", "-l", "info", "--max-tasks-per-child=4"]
+        - name: {{ .Chart.Name }}-celery-worker-low-priority
+          args: 
+            - celery  -A hct_mis_api.apps.core.celery worker -n low-priority-$HOSTNAME -E -l info --max-tasks-per-child=4 -Q  default
+          command:
+            - sh
+            - -c
+          securityContext:
+            {{- toYaml .Values.celery.securityContext | nindent 12 }}
+          image: "{{ .Values.celery.image }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          envFrom:
+          - secretRef:
+              name: {{ include "hope.fullname" . }}-backend
+          - configMapRef:
+              name: {{ include "hope.fullname" . }}-backend
+          resources:
+            {{- toYaml .Values.celery.resources | nindent 12 }}
+        - name: {{ .Chart.Name }}-celery-worker-high-priority
+          args:
+            - celery -A hct_mis_api.apps.core.celery worker  -n high-priority-$HOSTNAME  -E -l info --max-tasks-per-child=4 -Q  priority
+          command:
+            - sh
+            - -c
           securityContext:
             {{- toYaml .Values.celery.securityContext | nindent 12 }}
           image: "{{ .Values.celery.image }}"

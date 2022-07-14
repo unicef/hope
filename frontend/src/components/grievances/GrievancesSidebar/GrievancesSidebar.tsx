@@ -8,6 +8,7 @@ import {
 } from '../../../utils/constants';
 import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
+import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
 
 export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
@@ -60,21 +61,28 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
     return (isHeadOfHousehold || hasRolesToReassign) && isProperDataChange;
   };
 
+  const shouldShowReassignMultipleBoxDataChange = (): boolean =>
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+    ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion;
+
   const renderRightSection = (): React.ReactElement => {
     if (
       ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     )
       return (
         <Box display='flex' flexDirection='column'>
-          <Box mt={6}>
-            <PaymentIds
-              verifications={
-                ticket.paymentVerificationTicketDetails?.paymentVerifications
-                  ?.edges
-              }
-            />
+          <Box mt={3}>
+            {ticket.paymentVerificationTicketDetails
+              ?.hasMultiplePaymentVerifications ? (
+              <PaymentIds
+                verifications={
+                  ticket.paymentVerificationTicketDetails?.paymentVerifications
+                    ?.edges
+                }
+              />
+            ) : null}
           </Box>
-          <Box mt={6}>
+          <Box mt={3}>
             <OtherRelatedTickets
               ticket={ticket}
               linkedTickets={ticket.relatedTickets}
@@ -93,6 +101,16 @@ export const GrievancesSidebar = ({ ticket }): React.ReactElement => {
               }
               ticket={ticket}
             />
+          </Box>
+        </Box>
+      );
+    }
+
+    if (shouldShowReassignMultipleBoxDataChange()) {
+      return (
+        <Box p={3}>
+          <Box display='flex' flexDirection='column'>
+            <ReassignMultipleRoleBox ticket={ticket} />
           </Box>
         </Box>
       );

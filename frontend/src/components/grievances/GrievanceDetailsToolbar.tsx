@@ -21,6 +21,7 @@ import { BreadCrumbsItem } from '../core/BreadCrumbs';
 import { PageHeader } from '../core/PageHeader';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { ButtonDialog } from '../core/ButtonDialog';
+import { LoadingButton } from '../core/LoadingButton';
 
 const Separator = styled.div`
   width: 1px;
@@ -77,7 +78,7 @@ export const GrievanceDetailsToolbar = ({
       to: `/${businessArea}/grievance-and-feedback/`,
     },
   ];
-  const [mutate] = useGrievanceTicketStatusChangeMutation();
+  const [mutate, { loading }] = useGrievanceTicketStatusChangeMutation();
 
   const isNew = ticket.status === GRIEVANCE_TICKET_STATES.NEW;
   const isAssigned = ticket.status === GRIEVANCE_TICKET_STATES.ASSIGNED;
@@ -92,38 +93,39 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
-  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange = (): string => {
-    const householdData =
-      ticket.householdDataUpdateTicketDetails?.householdData || {};
-    const individualData =
-      ticket.individualDataUpdateTicketDetails?.individualData || {};
-    const allData = {
-      ...householdData,
-      ...individualData,
-      ...householdData?.flex_fields,
-      ...individualData?.flex_fields,
-    };
-    delete allData.previous_documents;
-    delete allData.previous_identities;
-    delete allData.flex_fields;
+  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
+    (): string => {
+      const householdData =
+        ticket.householdDataUpdateTicketDetails?.householdData || {};
+      const individualData =
+        ticket.individualDataUpdateTicketDetails?.individualData || {};
+      const allData = {
+        ...householdData,
+        ...individualData,
+        ...householdData?.flex_fields,
+        ...individualData?.flex_fields,
+      };
+      delete allData.previous_documents;
+      delete allData.previous_identities;
+      delete allData.flex_fields;
 
-    const { approved, notApproved } = countApprovedAndUnapproved(
-      Object.values(allData),
-    );
-    // all changes were approved
-    if (!notApproved) return '';
-
-    // no changes were approved
-    if (!approved)
-      return t(
-        `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
+      const { approved, notApproved } = countApprovedAndUnapproved(
+        Object.values(allData),
       );
+      // all changes were approved
+      if (!notApproved) return '';
 
-    // some changes were approved
-    return `You approved ${approved} change${
-      approved > 1 ? 's' : ''
-    }. Remaining change requests (${notApproved}) will be automatically rejected.`;
-  };
+      // no changes were approved
+      if (!approved)
+        return t(
+          `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
+        );
+
+      // some changes were approved
+      return `You approved ${approved} change${
+        approved > 1 ? 's' : ''
+      }. Remaining change requests (${notApproved}) will be automatically rejected.`;
+    };
 
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
     const hasApproveOption =
@@ -150,7 +152,13 @@ export const GrievanceDetailsToolbar = ({
 
     const noDuplicatesFound =
       ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-      !ticket.needsAdjudicationTicketDetails?.selectedIndividual;
+      !ticket.needsAdjudicationTicketDetails?.selectedIndividual &&
+      !ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
+
+    const noDuplicatesFoundMultiple =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+      ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
+      !ticket.needsAdjudicationTicketDetails?.selectedIndividuals.length;
 
     // added msg handling for
     let confirmationMessage = '';
@@ -166,8 +174,11 @@ export const GrievanceDetailsToolbar = ({
       confirmationMessage = t(
         'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
       );
+    } else if (noDuplicatesFoundMultiple) {
+      confirmationMessage = t(
+        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
+      );
     }
-
     return confirmationMessage;
   };
 
@@ -255,7 +266,25 @@ export const GrievanceDetailsToolbar = ({
   if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
     ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
-    !ticket?.needsAdjudicationTicketDetails?.selectedIndividual
+    !ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
+    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividual
+  ) {
+    closeButton = (
+      <ButtonDialog
+        title={t('Duplicate Document Conflict')}
+        buttonText={t('Close Ticket')}
+        message={t(
+          'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
+        )}
+      />
+    );
+  }
+
+  if (
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
+    ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
+    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividuals.length
   ) {
     closeButton = (
       <ButtonDialog
@@ -290,42 +319,46 @@ export const GrievanceDetailsToolbar = ({
         {isNew && canEdit && canAssign && <Separator />}
         {isNew && canEdit && canAssign && (
           <>
-            <Button
+            <LoadingButton
+              loading={loading}
               color='primary'
               variant='contained'
               onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
             >
               {t('ASSIGN TO ME')}
-            </Button>
+            </LoadingButton>
           </>
         )}
         {isAssigned && canSetInProgress && (
           <Box mr={3}>
-            <Button
+            <LoadingButton
+              loading={loading}
               color='primary'
               variant='contained'
               onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
             >
               {t('Set to in progress')}
-            </Button>
+            </LoadingButton>
           </Box>
         )}
         {isInProgress && (
           <>
             {canSetOnHold && (
               <Box mr={3}>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   color='primary'
                   variant='outlined'
                   onClick={() => changeState(GRIEVANCE_TICKET_STATES.ON_HOLD)}
                 >
                   {t('Set On Hold')}
-                </Button>
+                </LoadingButton>
               </Box>
             )}
             {canSendForApproval && (
               <Box mr={3}>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   color='primary'
                   variant='contained'
                   onClick={() =>
@@ -333,7 +366,7 @@ export const GrievanceDetailsToolbar = ({
                   }
                 >
                   {t('Send For Approval')}
-                </Button>
+                </LoadingButton>
               </Box>
             )}
             {isFeedbackType && canClose && (
@@ -356,7 +389,8 @@ export const GrievanceDetailsToolbar = ({
           <>
             {canSetInProgress && (
               <Box mr={3}>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   color='primary'
                   variant='contained'
                   onClick={() =>
@@ -364,12 +398,13 @@ export const GrievanceDetailsToolbar = ({
                   }
                 >
                   {t('Set to in progress')}
-                </Button>
+                </LoadingButton>
               </Box>
             )}
             {canSendForApproval && (
               <Box mr={3}>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   color='primary'
                   variant='contained'
                   onClick={() =>
@@ -377,7 +412,7 @@ export const GrievanceDetailsToolbar = ({
                   }
                 >
                   {t('Send For Approval')}
-                </Button>
+                </LoadingButton>
               </Box>
             )}
             {isFeedbackType && canClose && (
@@ -400,7 +435,8 @@ export const GrievanceDetailsToolbar = ({
           <>
             {canSendBack && (
               <Box mr={3}>
-                <Button
+                <LoadingButton
+                  loading={loading}
                   color='primary'
                   variant='contained'
                   onClick={() =>
@@ -408,7 +444,7 @@ export const GrievanceDetailsToolbar = ({
                   }
                 >
                   {t('Send Back')}
-                </Button>
+                </LoadingButton>
               </Box>
             )}
             {canClose && closeButton}

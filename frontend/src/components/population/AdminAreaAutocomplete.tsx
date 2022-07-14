@@ -10,7 +10,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import TextField from '../../shared/TextField';
 import {
-  AdminAreaNodeEdge,
+  AreaNodeEdge,
   AllAdminAreasQuery,
   useAllAdminAreasLazyQuery,
 } from '../../__generated__/graphql';
@@ -33,7 +33,7 @@ export function AdminAreaAutocomplete({
   fullWidth?: boolean;
   onFilterChange;
   name: string;
-  value?: AdminAreaNodeEdge;
+  value?: AreaNodeEdge;
 }): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -43,16 +43,17 @@ export function AdminAreaAutocomplete({
   const businessArea = useBusinessArea();
   const [loadAdminAreas, { data, loading }] = useAllAdminAreasLazyQuery({
     variables: {
-      first: 50,
-      title: debouncedInputText,
+      first: 20,
+      name: debouncedInputText,
       businessArea,
       level: 2,
     },
   });
   useEffect(() => {
-    loadAdminAreas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedInputText]);
+    if (open) {
+      loadAdminAreas();
+    }
+  }, [open, debouncedInputText, loadAdminAreas]);
 
   const onChangeMiddleware = (e, selectedValue): void => {
     onFilterChange((filters) => ({
@@ -82,7 +83,7 @@ export function AdminAreaAutocomplete({
         if (!option.node) {
           return '';
         }
-        return `${option.node.title}`;
+        return `${option.node.name}`;
       }}
       disabled={disabled}
       options={get(data, 'allAdminAreas.edges', [])}

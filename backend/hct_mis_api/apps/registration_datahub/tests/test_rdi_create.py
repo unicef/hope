@@ -1,8 +1,5 @@
 import json
-import os
 import secrets
-import time
-import unittest
 from datetime import date
 from io import BytesIO
 from pathlib import Path
@@ -10,21 +7,22 @@ from unittest import mock
 
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
-from django.test import TestCase
 
 from django_countries.fields import Country
 from PIL import Image
 
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel, BusinessArea
+from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_CHOICE,
+    IDENTIFICATION_TYPE_TAX_ID,
     DocumentType,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -35,6 +33,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
@@ -58,14 +57,21 @@ class CellMock:
         self.coordinate = coordinate
 
 
+def create_document_image():
+    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+    return File(BytesIO(content), name="image.png")
+
+
 class TestRdiCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
@@ -73,7 +79,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/new_reg_data_import.xlsx"
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
         business_area = BusinessArea.objects.first()
@@ -93,6 +99,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
         cls.business_area = BusinessArea.objects.first()
+        ImportedDocumentType.objects.create(
+            country=Country("AFG"),
+            label="Tax Number Identification",
+            type=IDENTIFICATION_TYPE_TAX_ID,
+        )
 
     def test_execute(self):
         task = self.RdiXlsxCreateTask()
@@ -214,11 +225,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(task.documents, expected)
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.SheetImageLoader",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.SheetImageLoader",
         ImageLoaderMock,
     )
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.timezone.now",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.timezone.now",
         lambda: "2020-06-22 12:00",
     )
     def test_handle_document_photo_fields(self):
@@ -277,8 +288,6 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
     def test_create_documents(self):
         task = self.RdiXlsxCreateTask()
         individual = ImportedIndividualFactory()
-        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
-        image = File(BytesIO(content), name="image.png")
         task.business_area = self.business_area
         doc_type = ImportedDocumentType.objects.create(
             country=Country("AFG"),
@@ -292,7 +301,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
                 "type": "BIRTH_CERTIFICATE",
                 "value": "CD1247246Q12W",
                 "issuing_country": Country("AFG"),
-                "photo": image,
+                "photo": create_document_image(),
             }
         }
         task._create_documents()
@@ -348,6 +357,31 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         [self.assertTrue(household.row_id in [3, 4, 5]) for household in households]
         [self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8]) for individual in individuals]
 
+    def test_create_bank_account(self):
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+
+        bank_account_info = ImportedBankAccountInfo.objects.filter(individual__row_id=6).first()
+        self.assertEqual(bank_account_info.bank_name, "Bank testowy")
+        self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
+        self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
+
+    def test_create_tax_id_document(self):
+        task = self.RdiXlsxCreateTask()
+        task.execute(
+            self.registration_data_import.id,
+            self.import_data.id,
+            self.business_area.id,
+        )
+
+        document = ImportedDocument.objects.filter(individual__row_id=5).first()
+        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_TAX_ID)
+        self.assertEqual(document.document_number, "CD1247246Q12W")
+
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     databases = "__all__"
@@ -361,8 +395,10 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
         )
 
@@ -403,7 +439,23 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         admin1 = AdminArea.objects.create(p_code="SO25", title="SO25", admin_area_level=admin1_level)
 
         admin2_level = AdminAreaLevel.objects.create(name="Ceel Barde", admin_level=2, business_area=cls.business_area)
-        AdminArea.objects.create(p_code="SO2502", title="SO2502", parent=admin1, admin_area_level=admin2_level)
+        admin2 = AdminArea.objects.create(p_code="SO2502", title="SO2502", parent=admin1, admin_area_level=admin2_level)
+
+        country = geo_models.Country.objects.first()
+
+        admin1_type = geo_models.AreaType.objects.create(
+            name="Bakool", area_level=1, country=country, original_id=admin1_level.id
+        )
+        admin1_new = geo_models.Area.objects.create(
+            p_code="SO25", name="SO25", area_type=admin1_type, original_id=admin1.id
+        )
+
+        admin2_type = geo_models.AreaType.objects.create(
+            name="Ceel Barde", area_level=2, country=country, original_id=admin2_level.id
+        )
+        geo_models.Area.objects.create(
+            p_code="SO2502", name="SO2502", parent=admin1_new, area_type=admin2_type, original_id=admin2.id
+        )
 
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug
@@ -417,7 +469,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import.save()
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute(self):
@@ -456,7 +508,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(household_obj_data, expected)
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute_multiple_collectors(self):
@@ -481,7 +533,9 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         first_household = households.get(size=3)
         second_household = households.get(size=2)
 
-        first_household_collectors = first_household.individuals_and_roles.order_by('individual__full_name').values_list("individual__full_name", "role")
+        first_household_collectors = first_household.individuals_and_roles.order_by(
+            "individual__full_name"
+        ).values_list("individual__full_name", "role")
         self.assertEqual(
             list(first_household_collectors),
             [("Tesa Testowski", "ALTERNATE"), ("Test Testowski", "PRIMARY")],
@@ -495,7 +549,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         )
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_image_field(self):
@@ -544,7 +598,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         pass
 
     @mock.patch(
-        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_documents_and_identities(self):

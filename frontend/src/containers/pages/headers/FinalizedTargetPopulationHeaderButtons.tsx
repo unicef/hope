@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import { FileCopy } from '@material-ui/icons';
 import {
@@ -21,25 +21,23 @@ const IconContainer = styled.span`
   }
 `;
 
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
-
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
   canDuplicate: boolean;
 }
 
-export function FinalizedTargetPopulationHeaderButtons({
+export const FinalizedTargetPopulationHeaderButtons = ({
   targetPopulation,
   canDuplicate,
-}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const { data, loading } = useCashAssistUrlPrefixQuery();
+  const { data, loading } = useCashAssistUrlPrefixQuery({
+    fetchPolicy: 'cache-first',
+  });
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canDuplicate && (
         <IconContainer>
           <Button onClick={() => setOpenDuplicate(true)}>
@@ -47,24 +45,24 @@ export function FinalizedTargetPopulationHeaderButtons({
           </Button>
         </IconContainer>
       )}
-      <ButtonContainer>
+      <Box m={2}>
         <Button
           variant='contained'
           color='primary'
           component='a'
           disabled={!targetPopulation.caHashId}
-          target="_blank"
+          target='_blank'
           href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
           Open in CashAssist
         </Button>
-      </ButtonContainer>
+      </Box>
       <DuplicateTargetPopulation
         open={openDuplicate}
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-    </div>
+    </Box>
   );
-}
+};

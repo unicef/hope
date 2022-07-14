@@ -16,15 +16,13 @@ import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
+import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
+import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
-`;
-
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
 `;
 
 export interface EditIndividualDataChangeProps {
@@ -117,8 +115,8 @@ export const EditIndividualDataChange = ({
                     onClick={() => {
                       arrayHelpers.push({ fieldName: null, fieldValue: '' });
                     }}
+                    startIcon={<AddCircleOutline />}
                   >
-                    <AddIcon />
                     {t('Add new field')}
                   </Button>
                 </Grid>
@@ -157,6 +155,17 @@ export const EditIndividualDataChange = ({
           values={values}
           addIndividualFieldsData={addIndividualFieldsData}
         />
+      </Box>
+      <Box mt={3}>
+        <Title>
+          <Typography variant='h6'>{t('Payment Channel')}</Typography>
+        </Title>
+        <ExistingPaymentChannelFieldArray
+          values={values}
+          setFieldValue={setFieldValue}
+          individual={individual}
+        />
+        <NewPaymentChannelFieldArray values={values} />
       </Box>
     </>
   );

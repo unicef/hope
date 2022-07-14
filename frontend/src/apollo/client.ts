@@ -1,9 +1,12 @@
 import ApolloClient from 'apollo-client';
 import { createUploadLink } from 'apollo-upload-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
+import { persistCache } from 'apollo-cache-persist';
+import localForage from 'localforage';
 import { GRAPHQL_URL } from '../config';
+import { clearCache } from '../utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
@@ -55,9 +58,17 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
         response: { headers },
       } = context;
       if (headers) {
+        const backendVersion = headers.get('X-Hope-Backend-Version');
+        const oldBackendVersion =
+          localStorage.getItem('backend-version') || '0';
+        if (backendVersion !== oldBackendVersion) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          clearCache();
+          localStorage.setItem('backend-version', backendVersion);
+        }
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         client.writeData({
-          data: { backendVersion: headers.get('X-Hope-Backend-Version') },
+          data: { backendVersion },
         });
       }
     }
@@ -75,13 +86,52 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
     return response;
   });
 });
+
+const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
+  operation.setContext({
+    headers: {
+      'Business-Area': window.location.pathname.split('/')[1],
+    },
+  });
+  return forward(operation);
+});
+
 const link = ApolloLink.from([
+  addBusinessAreaHeaderMiddleware,
   validationErrorMiddleware,
   errorLink,
   createUploadLink({ uri: GRAPHQL_URL }),
 ]);
-
-export const client = new ApolloClient({
-  cache: new InMemoryCache(),
-  link,
-});
+let client;
+export async function getClient(): Promise<
+  ApolloClient<NormalizedCacheObject>
+> {
+  if (client) {
+    return client;
+  }
+  const cacheInitializedTimestamp =
+    Number.parseInt(localStorage.getItem('cache-initialized-timestamp'), 10) ||
+    0;
+  const cacheTtl = 2 * 24 * 60 * 60 * 1000;
+  if (Date.now() - cacheInitializedTimestamp > cacheTtl) {
+    await clearCache();
+    setTimeout(() => {
+      localStorage.setItem(
+        'cache-initialized-timestamp',
+        Date.now().toString(),
+      );
+    }, 1000);
+  }
+  const cache = new InMemoryCache();
+  await persistCache({
+    cache,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    storage: localForage,
+  });
+  client = new ApolloClient({
+    cache,
+    link,
+  });
+  return client;
+}

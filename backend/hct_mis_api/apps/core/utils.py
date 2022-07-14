@@ -4,7 +4,6 @@ import itertools
 import logging
 import string
 from collections import MutableMapping, OrderedDict
-from typing import List
 
 from django.db.models import QuerySet
 
@@ -18,31 +17,6 @@ logger = logging.getLogger(__name__)
 class CaseInsensitiveTuple(tuple):
     def __contains__(self, key, *args, **kwargs):
         return key.casefold() in (element.casefold() for element in self)
-
-
-class LazyEvalMethodsDict(MutableMapping):
-    def __init__(self, *args, **kwargs):
-        self._ignored_method_fields = kwargs.pop("ignored_method_fields", [])
-        self._dict = dict(*args, **kwargs)
-
-    def __getitem__(self, k):
-        v = self._dict.__getitem__(k)
-        if callable(v) and k not in self._ignored_method_fields:
-            v = v()
-            self.__setitem__(k, v)
-        return v
-
-    def __setitem__(self, key, value):
-        self._dict[key] = value
-
-    def __delitem__(self, key):
-        return self._dict[key]
-
-    def __iter__(self):
-        return iter(self._dict)
-
-    def __len__(self):
-        return len(self._dict)
 
 
 def decode_id_string(id_string):
@@ -123,11 +97,11 @@ def _slug_strip(value, separator="-"):
     if separator == "-" or not separator:
         re_sep = "-"
     else:
-        re_sep = "(?:-|%s)" % re.escape(separator)
+        re_sep = "(?:-|{})".format(re.escape(separator))
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("%s+" % re_sep, separator, value)
+        value = re.sub("{}+".format(re_sep, separator, value))
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
@@ -213,15 +187,14 @@ def serialize_flex_attributes():
 
 
 def get_combined_attributes():
-    from hct_mis_api.apps.core.core_fields_attributes import (
-        CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
-    )
+    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
     flex_attrs = serialize_flex_attributes()
     return {
-        **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY["individuals"],
+        **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
+        .apply_business_area(None)
+        .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
-        **CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY["households"],
         **flex_attrs["households"],
     }
 
@@ -337,17 +310,11 @@ def to_dict(instance, fields=None, dict_fields=None):
 
 
 def build_arg_dict(model_object, mapping_dict):
-    args = {}
-    for key in mapping_dict:
-        args[key] = nested_getattr(model_object, mapping_dict[key], None)
-    return args
+    return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
 def build_arg_dict_from_dict(data_dict, mapping_dict):
-    args = {}
-    for key, value in mapping_dict.items():
-        args[key] = data_dict.get(value)
-    return args
+    return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
 
 class CustomOrderingFilter(OrderingFilter):
@@ -474,7 +441,7 @@ def update_labels_mapping(csv_file):
 
     from django.conf import settings
 
-    from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+    from hct_mis_api.apps.core.core_fields_attributes import FieldFactory, Scope
 
     with open(csv_file, newline="") as csv_file:
         reader = csv.reader(csv_file)
@@ -486,7 +453,7 @@ def update_labels_mapping(csv_file):
             "old": core_field_data["label"],
             "new": {"English(EN)": fields_mapping.get(core_field_data["xlsx_field"], "")},
         }
-        for core_field_data in CORE_FIELDS_ATTRIBUTES
+        for core_field_data in FieldFactory.from_scope(Scope.GLOBAL)
         if core_field_data["label"].get("English(EN)", "") != fields_mapping.get(core_field_data["xlsx_field"], "")
     }
 
@@ -604,24 +571,10 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
         filter_query.update(
             {
                 f"{administrative_area_path}__id": filters.get("administrative_area"),
-                f"{administrative_area_path}__level": 2,
+                f"{administrative_area_path}__area_type__area_level": 2,
             }
         )
     return filter_query
-
-
-def admin_area1_query(comparision_method, args):
-    from django.db.models import Q
-
-    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__level=1)) | Q(
-        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__level=1)
-    )
-
-
-def registration_data_import_query(comparison_method, args):
-    from django.db.models import Q
-
-    return Q(registration_data_import__pk__in=args)
 
 
 class CaIdIterator:
@@ -727,3 +680,10 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
     ).values_list("unicef_id", flat=True)
     excluded_household_ids_array.extend(excluded_household_ids_from_individuals_array)
     return excluded_household_ids_array
+
+
+@functools.lru_cache(maxsize=None)
+def cached_business_areas_slug_id_dict():
+    from hct_mis_api.apps.core.models import BusinessArea
+
+    return {str(ba.slug): ba.id for ba in BusinessArea.objects.only("slug")}

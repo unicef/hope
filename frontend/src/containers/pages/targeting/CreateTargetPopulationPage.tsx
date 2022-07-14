@@ -21,7 +21,7 @@ import {
   handleValidationErrors,
 } from '../../../utils/utils';
 import {
-  useAllProgramsQuery,
+  useAllProgramsForChoicesQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
 import { CreateTable } from '../../tables/targeting/TargetPopulation/Create';
@@ -35,17 +35,16 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     excludedIds: '',
     exclusionReason: '',
   };
-  const [mutate] = useCreateTpMutation();
+  const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-  });
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, status: ['ACTIVE'] },
+      fetchPolicy: 'cache-and-network',
+    });
 
   if (loadingPrograms) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -53,9 +52,7 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .min(2, t('Too short'))
-      .max(255, t('Too long')),
+    name: Yup.string().min(2, t('Too short')).max(255, t('Too long')),
     excludedIds: Yup.string().test(
       'testName',
       'ID is not in the correct format',
@@ -113,6 +110,7 @@ export function CreateTargetPopulationPage(): React.ReactElement {
         <Form>
           <CreateTargetPopulationHeader
             handleSubmit={submitForm}
+            loading={loading}
             values={values}
             businessArea={businessArea}
             permissions={permissions}

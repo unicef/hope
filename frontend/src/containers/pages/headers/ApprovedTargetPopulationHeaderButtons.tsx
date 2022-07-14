@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { Button, Tooltip } from '@material-ui/core';
+import { Box, Button, Tooltip } from '@material-ui/core';
 import { FileCopy } from '@material-ui/icons';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { LoadingButton } from '../../../components/core/LoadingButton';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   TargetPopulationNode,
   useUnapproveTpMutation,
 } from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
-import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const IconContainer = styled.span`
   button {
@@ -21,10 +23,6 @@ const IconContainer = styled.span`
   }
 `;
 
-const ButtonContainer = styled.span`
-  margin: 0 ${({ theme }) => theme.spacing(2)}px;
-`;
-
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
   canUnlock: boolean;
@@ -32,19 +30,20 @@ export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   canSend: boolean;
 }
 
-export function ApprovedTargetPopulationHeaderButtons({
+export const ApprovedTargetPopulationHeaderButtons = ({
   targetPopulation,
   canSend,
   canDuplicate,
   canUnlock,
-}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
+  const { t } = useTranslation();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useUnapproveTpMutation();
+  const [mutate, { loading }] = useUnapproveTpMutation();
 
   return (
-    <div>
+    <Box display='flex' alignItems='center'>
       {canDuplicate && (
         <IconContainer>
           <Button onClick={() => setOpenDuplicate(true)}>
@@ -53,8 +52,9 @@ export function ApprovedTargetPopulationHeaderButtons({
         </IconContainer>
       )}
       {canUnlock && (
-        <ButtonContainer>
-          <Button
+        <Box m={2}>
+          <LoadingButton
+            loading={loading}
             color='primary'
             variant='outlined'
             onClick={() => {
@@ -67,16 +67,16 @@ export function ApprovedTargetPopulationHeaderButtons({
             data-cy='button-target-population-unlocked'
           >
             Unlock
-          </Button>
-        </ButtonContainer>
+          </LoadingButton>
+        </Box>
       )}
       {canSend && (
-        <ButtonContainer>
+        <Box m={2}>
           <Tooltip
             title={
               targetPopulation.program.status !== 'ACTIVE'
-                ? 'Assigned programme is not ACTIVE'
-                : 'Send to cash assist'
+                ? t('Assigned programme is not ACTIVE')
+                : t('Send to Cash Assist')
             }
           >
             <span>
@@ -87,11 +87,11 @@ export function ApprovedTargetPopulationHeaderButtons({
                 onClick={() => setOpenFinalize(true)}
                 data-cy='button-target-population-send-to-cash-assist'
               >
-                Send to cash assist
+                {t('Send to Cash Assist')}
               </Button>
             </span>
           </Tooltip>
-        </ButtonContainer>
+        </Box>
       )}
       <DuplicateTargetPopulation
         open={openDuplicate}
@@ -104,6 +104,6 @@ export function ApprovedTargetPopulationHeaderButtons({
         targetPopulationId={targetPopulation.id}
         totalHouseholds={targetPopulation.finalListTotalHouseholds}
       />
-    </div>
+    </Box>
   );
-}
+};

@@ -27,20 +27,32 @@ def fqn(o):
     else:
         parts.append(cls.__name__)
     if not parts:
-        raise ValueError("Invalid argument `%s`" % o)
+        raise ValueError("Invalid argument `{}`".format(o))
     return ".".join(parts)
 
 
 def to_dataset(result):
     if isinstance(result, QuerySet):
         data = tablib.Dataset()
-        fields = [field.name for field in result.model._meta.fields]
+        fields = result.__dict__["_fields"]
+        if not fields:
+            fields = [field.name for field in result.model._meta.get_fields()]
         data.headers = fields
-        for obj in result.all():
-            data.append([getattr(obj, f) for f in fields])
-    elif isinstance(result, tablib.Dataset):
-        data = result
-    elif isinstance(result, dict):
+        try :
+            for obj in result.all():
+                data.append([obj[f] if isinstance(obj, dict) else str(getattr(obj, f)) for f in fields])
+        except Exception as e:
+            raise ValueError("Results can't be rendered as a tablib Dataset")
+    elif isinstance(result, (list, tuple)):
+        data = tablib.Dataset()
+        fields = set().union(*(d.keys() for d in list(result)))
+        data.headers = fields
+        try :
+            for obj in result:
+                data.append([obj[f] for f in fields])
+        except Exception as e:
+            raise ValueError("Results can't be rendered as a tablib Dataset")
+    elif isinstance(result, (tablib.Dataset, dict)):
         data = result
     else:
         raise ValueError(f"{result} ({type(result)}")

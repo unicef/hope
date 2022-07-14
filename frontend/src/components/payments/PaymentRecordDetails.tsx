@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import {
   formatCurrencyWithSymbol,
+  getPhoneNoLabel,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
@@ -24,17 +25,6 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
 `;
 
-const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px;
-  padding-bottom: 0;
-`;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 interface VerificationRecordDetailsProps {
   paymentRecord: PaymentRecordNode;
   canViewActivityLog: boolean;
@@ -58,12 +48,10 @@ export function PaymentRecordDetails({
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField label={t('STATUS')}>
-              <StatusContainer>
-                <StatusBox
-                  status={paymentRecord.status}
-                  statusToColor={paymentRecordStatusToColor}
-                />
-              </StatusContainer>
+              <StatusBox
+                status={paymentRecord.status}
+                statusToColor={paymentRecordStatusToColor}
+              />
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
@@ -94,12 +82,10 @@ export function PaymentRecordDetails({
           <Grid container spacing={3}>
             <Grid item xs={3}>
               <LabelizedField label={t('STATUS')}>
-                <StatusContainer>
-                  <StatusBox
-                    status={paymentVerification.status}
-                    statusToColor={verificationRecordsStatusToColor}
-                  />
-                </StatusContainer>
+                <StatusBox
+                  status={paymentVerification.status}
+                  statusToColor={verificationRecordsStatusToColor}
+                />
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
@@ -140,13 +126,19 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('PHONE NUMBER')}
-              value={paymentRecord.household.headOfHousehold.phoneNo}
+              value={getPhoneNoLabel(
+                paymentRecord.household.headOfHousehold.phoneNo,
+                paymentRecord.household.headOfHousehold.phoneNoValid,
+              )}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('ALT. PHONE NUMBER')}
-              value={paymentRecord.household.headOfHousehold.phoneNoAlternative}
+              value={getPhoneNoLabel(
+                paymentRecord.household.headOfHousehold.phoneNoAlternative,
+                paymentRecord.household.headOfHousehold.phoneNoAlternativeValid,
+              )}
             />
           </Grid>
         </Grid>
@@ -219,9 +211,7 @@ export function PaymentRecordDetails({
         </Grid>
       </Overview>
       {paymentVerification != null && canViewActivityLog ? (
-        <TableWrapper>
-          <UniversalActivityLogTable objectId={paymentVerification.id} />
-        </TableWrapper>
+        <UniversalActivityLogTable objectId={paymentVerification.id} />
       ) : null}
     </>
   );

@@ -1,11 +1,14 @@
 import logging
+from decimal import Decimal
 from itertools import chain
-from time import time
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField, Q
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -46,7 +49,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "created_by",
             "assigned_to",
             "description",
-            "admin",
+            "admin2",
             "area",
             "language",
             "consent",
@@ -214,43 +217,6 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "golden_records_individual": "golden_records_individual",
         },
     }
-    FIELD_TICKET_TYPES_LOOKUPS = {
-        "complaint_ticket_details": (
-            "individual",
-            "household",
-            "payment_record",
-        ),
-        "sensitive_ticket_details": (
-            "individual",
-            "household",
-            "payment_record",
-        ),
-        "positive_feedback_ticket_details": (
-            "individual",
-            "household",
-        ),
-        "negative_feedback_ticket_details": (
-            "individual",
-            "household",
-        ),
-        "referral_ticket_details": (
-            "individual",
-            "household",
-        ),
-        "individual_data_update_ticket_details": ("individual", "household"),
-        "add_individual_ticket_details": ("household",),
-        "household_data_update_ticket_details": ("household",),
-        "delete_individual_ticket_details": ("individual",),
-        "delete_household_ticket_details": ("household",),
-        "system_flagging_ticket_details": (
-            {"individual": "golden_records_individual"},
-            {"household": "golden_records_individual.household"},
-        ),
-        "needs_adjudication_ticket_details": (
-            {"individual": "golden_records_individual"},
-            {"household": "golden_records_individual.household"},
-        ),
-    }
 
     TICKET_DETAILS_NAME_MAPPING = {
         CATEGORY_DATA_CHANGE: {
@@ -274,7 +240,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             ISSUE_TYPE_SEXUAL_HARASSMENT: "sensitive_ticket_details",
             ISSUE_TYPE_MISCELLANEOUS: "sensitive_ticket_details",
         },
-        CATEGORY_PAYMENT_VERIFICATION: "",
+        CATEGORY_PAYMENT_VERIFICATION: "payment_verification_ticket_details",
         CATEGORY_GRIEVANCE_COMPLAINT: "complaint_ticket_details",
         CATEGORY_NEGATIVE_FEEDBACK: "negative_feedback_ticket_details",
         CATEGORY_REFERRAL: "referral_ticket_details",
@@ -340,6 +306,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     )
     unicef_id = models.CharField(max_length=250, blank=True, default="")
     extras = JSONField(blank=True, default=dict)
+    ignored = models.BooleanField(default=False, db_index=True)
+    household_unicef_id = models.CharField(max_length=250, blank=True, null=True)
 
     objects = GrievanceTicketManager()
 
@@ -348,9 +316,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
     @property
     def related_tickets(self):
-        all_through_objects = GrievanceTicketThrough.objects.filter(Q(linked_ticket=self) | Q(main_ticket=self)).values_list(
-            "main_ticket", "linked_ticket"
-        )
+        all_through_objects = GrievanceTicketThrough.objects.filter(
+            Q(linked_ticket=self) | Q(main_ticket=self)
+        ).values_list("main_ticket", "linked_ticket")
         ids = set(self.flatten(all_through_objects))
         ids.discard(self.id)
         return GrievanceTicket.objects.filter(id__in=ids)
@@ -412,6 +380,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
     def __str__(self):
         return self.description or str(self.pk)
+
+    def get_issue_type(self):
+        return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
 
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):
@@ -599,6 +570,14 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
     approve_status = models.BooleanField(default=False)
     role_reassign_data = JSONField(default=dict)
 
+    @property
+    def household(self):
+        return self.golden_records_individual.household
+
+    @property
+    def individual(self):
+        return self.golden_records_individual
+
 
 class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
@@ -607,18 +586,48 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
     golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
-    possible_duplicate = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
+    is_multiple_duplicates_version = models.BooleanField(default=False)
+    possible_duplicate = models.ForeignKey(
+        "household.Individual", related_name="+", on_delete=models.CASCADE
+    )  # this field will be deprecated
+    possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
     selected_individual = models.ForeignKey(
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
-    )
+    )  # this field will be deprecated
+    selected_individuals = models.ManyToManyField("household.Individual", related_name="ticket_selected")
     role_reassign_data = JSONField(default=dict)
     extra_data = JSONField(default=dict)
+    score_min = models.FloatField(default=0.0)
+    score_max = models.FloatField(default=0.0)
 
     @property
     def has_duplicated_document(self):
-        documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
-        documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
-        return bool(set(documents1) & set(documents2))
+        if not self.is_multiple_duplicates_version:
+            documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
+            documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
+            return bool(set(documents1) & set(documents2))
+        else:
+            possible_duplicates = [self.golden_records_individual, *self.possible_duplicates.all()]
+            selected_individuals = self.selected_individuals.all()
+
+            unselected_individuals = [
+                individual for individual in possible_duplicates if individual not in selected_individuals
+            ]
+
+            if unselected_individuals and len(unselected_individuals) > 1:
+                documents = []
+                for individual in unselected_individuals:
+                    documents.append(set([f"{x.document_number}--{x.type_id}" for x in individual.documents.all()]))
+                return bool(set.intersection(*documents))
+            return False
+
+    @property
+    def household(self):
+        return self.golden_records_individual.household
+
+    @property
+    def individual(self):
+        return self.golden_records_individual
 
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
@@ -627,11 +636,39 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         related_name="payment_verification_ticket_details",
         on_delete=models.CASCADE,
     )
+    # deprecated for future use fk payment_verification
     payment_verifications = models.ManyToManyField("payment.PaymentVerification", related_name="ticket_details")
     payment_verification_status = models.CharField(
         max_length=50,
         choices=PaymentVerification.STATUS_CHOICES,
     )
+    payment_verification = models.ForeignKey(
+        "payment.PaymentVerification", related_name="ticket_detail", on_delete=models.SET_NULL, null=True
+    )
+    new_status = models.CharField(max_length=50, choices=PaymentVerification.STATUS_CHOICES, default=None, null=True)
+    new_received_amount = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
+    )
+    approve_status = models.BooleanField(default=False)
+
+    @property
+    def has_multiple_payment_verifications(self):
+        return bool(self.payment_verifications.count())
+
+    @property
+    def household(self):
+        return self.payment_verification.payment_record.household
+
+    @property
+    def individual(self):
+        return self.payment_verification.payment_record.head_of_household
+
+    @property
+    def payment_record(self):
+        return self.payment_verification.payment_record
 
 
 class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
@@ -692,3 +729,21 @@ class TicketReferralDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+
+
+@receiver(post_save, sender=TicketComplaintDetails)
+@receiver(post_save, sender=TicketSensitiveDetails)
+@receiver(post_save, sender=TicketPositiveFeedbackDetails)
+@receiver(post_save, sender=TicketNegativeFeedbackDetails)
+@receiver(post_save, sender=TicketReferralDetails)
+@receiver(post_save, sender=TicketIndividualDataUpdateDetails)
+@receiver(post_save, sender=TicketAddIndividualDetails)
+@receiver(post_save, sender=TicketHouseholdDataUpdateDetails)
+@receiver(post_save, sender=TicketDeleteIndividualDetails)
+@receiver(post_save, sender=TicketDeleteHouseholdDetails)
+@receiver(post_save, sender=TicketSystemFlaggingDetails)
+@receiver(post_save, sender=TicketNeedsAdjudicationDetails)
+@receiver(post_save, sender=TicketPaymentVerificationDetails)
+def update_household_unicef_id(sender, instance, *args, **kwargs):
+    instance.ticket.household_unicef_id = getattr(instance.household, "unicef_id", None)
+    instance.ticket.save(update_fields=("household_unicef_id",))

@@ -1,9 +1,7 @@
 import { Grid, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import {
-  decodeIdString,
   grievanceTicketStatusToColor,
   reduceChoices,
   renderUserName,
@@ -20,11 +18,6 @@ import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
-
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   choicesData: GrievancesChoiceDataQuery;
@@ -33,13 +26,13 @@ interface GrievancesDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export function GrievancesDetails({
+export const GrievancesDetails = ({
   ticket,
   choicesData,
   businessArea,
   canViewHouseholdDetails,
   canViewIndividualDetails,
-}: GrievancesDetailsProps): React.ReactElement {
+}: GrievancesDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const statusChoices: {
     [id: number]: string;
@@ -69,12 +62,10 @@ export function GrievancesDetails({
               {
                 label: t('STATUS'),
                 value: (
-                  <StatusContainer>
-                    <StatusBox
-                      status={statusChoices[ticket.status]}
-                      statusToColor={grievanceTicketStatusToColor}
-                    />
-                  </StatusContainer>
+                  <StatusBox
+                    status={statusChoices[ticket.status]}
+                    statusToColor={grievanceTicketStatusToColor}
+                  />
                 ),
                 size: 3,
               },
@@ -134,11 +125,11 @@ export function GrievancesDetails({
                 label: t('PAYMENT ID'),
                 value: (
                   <span>
-                    {ticket.paymentRecord?.id ? (
+                    {ticket.paymentRecord?.caId ? (
                       <ContentLink
                         href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
                       >
-                        {decodeIdString(ticket.paymentRecord.id)}
+                        {ticket.paymentRecord.caId}
                       </ContentLink>
                     ) : (
                       '-'
@@ -149,12 +140,12 @@ export function GrievancesDetails({
               },
               {
                 label: t('CONSENT'),
-                value: <span>{ticket.consent ? 'Yes' : 'No'}</span>,
+                value: ticket.consent ? 'Yes' : 'No',
                 size: 3,
               },
               {
                 label: t('CREATED BY'),
-                value: <span>{renderUserName(ticket.createdBy)}</span>,
+                value: renderUserName(ticket.createdBy),
                 size: 3,
               },
               {
@@ -169,27 +160,27 @@ export function GrievancesDetails({
               },
               {
                 label: t('DESCRIPTION'),
-                value: <span>{ticket.description || '-'}</span>,
+                value: ticket.description,
                 size: 6,
               },
               {
                 label: t('ASSIGNED TO'),
-                value: <span>{renderUserName(ticket.assignedTo) || '-'}</span>,
+                value: renderUserName(ticket.assignedTo),
                 size: 6,
               },
               {
                 label: t('ADMINISTRATIVE LEVEL 2'),
-                value: <span>{ticket.admin}</span>,
+                value: ticket.admin,
                 size: 3,
               },
               {
                 label: t('AREA / VILLAGE / PAY POINT'),
-                value: <span>{ticket.area}</span>,
+                value: ticket.area,
                 size: 3,
               },
               {
                 label: t('LANGUAGES SPOKEN'),
-                value: <span>{ticket.language || '-'}</span>,
+                value: ticket.language,
                 size: 3,
               },
             ].map((el) => (
@@ -202,4 +193,4 @@ export function GrievancesDetails({
       </ContainerColumnWithBorder>
     </Grid>
   );
-}
+};

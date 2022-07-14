@@ -2,6 +2,7 @@ import logging
 
 from django.db import transaction
 from django.forms import model_to_dict
+from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -10,7 +11,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
-from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.documents import IndividualDocument, HouseholdDocument
 from hct_mis_api.apps.household.elasticsearch_utils import (
     populate_index,
     remove_elasticsearch_documents_by_matching_ids,
@@ -271,12 +272,24 @@ class RdiMergeTask:
             role = BankAccountInfo(
                 individual=individuals_dict.get(imported_bank_account_info.individual.id),
                 bank_name=imported_bank_account_info.bank_name,
-                bank_account_number=imported_bank_account_info.bank_account_number,
-                debit_card_number=imported_bank_account_info.debit_card_number,
+                bank_account_number=imported_bank_account_info.bank_account_number.replace(" ", ""),
+                debit_card_number=imported_bank_account_info.debit_card_number.replace(" ", ""),
             )
             roles_to_create.append(role)
 
         return roles_to_create
+
+    def _update_individuals_and_households(self, individual_ids):
+        # update mis_unicef_id for ImportedIndividual
+        individual_qs = Individual.objects.filter(id__in=individual_ids)
+        for individual in individual_qs:
+            imported_individual = get_object_or_404(ImportedIndividual, id=individual.imported_individual_id)
+            imported_individual.mis_unicef_id = individual.unicef_id
+            imported_individual.save()
+
+            if individual.household and imported_individual.household:
+                imported_individual.household.mis_unicef_id = individual.household.unicef_id
+                imported_individual.household.save()
 
     def execute(self, registration_data_import_id):
         individual_ids = []
@@ -325,7 +338,7 @@ class RdiMergeTask:
                     individual_ids = [str(individual.id) for individual in individuals_dict.values()]
                     household_ids = [str(household.id) for household in households_dict.values()]
 
-                    recalculate_population_fields_task.delay(household_ids)
+                    recalculate_population_fields_task(household_ids)
 
                     kobo_submissions = []
                     for imported_household in imported_households:
@@ -347,27 +360,31 @@ class RdiMergeTask:
                     # DEDUPLICATION
 
                     populate_index(Individual.objects.filter(registration_data_import=obj_hct), IndividualDocument)
+                    populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
+                    if not obj_hct.business_area.postpone_deduplication:
+                        DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
 
-                    DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
+                        golden_record_duplicates = Individual.objects.filter(
+                            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+                        )
 
-                    golden_record_duplicates = Individual.objects.filter(
-                        registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
-                    )
+                        create_needs_adjudication_tickets(
+                            golden_record_duplicates,
+                            "duplicates",
+                            obj_hct.business_area,
+                            registration_data_import=obj_hct
+                        )
 
-                    create_needs_adjudication_tickets(
-                        golden_record_duplicates, "duplicates", obj_hct.business_area, registration_data_import=obj_hct
-                    )
+                        needs_adjudication = Individual.objects.filter(
+                            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+                        )
 
-                    needs_adjudication = Individual.objects.filter(
-                        registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
-                    )
-
-                    create_needs_adjudication_tickets(
-                        needs_adjudication,
-                        "possible_duplicates",
-                        obj_hct.business_area,
-                        registration_data_import=obj_hct,
-                    )
+                        create_needs_adjudication_tickets(
+                            needs_adjudication,
+                            "possible_duplicates",
+                            obj_hct.business_area,
+                            registration_data_import=obj_hct,
+                        )
 
                     # SANCTION LIST CHECK
                     if obj_hct.should_check_against_sanction_list():
@@ -377,6 +394,9 @@ class RdiMergeTask:
                     obj_hct.save()
                     DeduplicateTask.hard_deduplicate_documents(documents_to_create, registration_data_import=obj_hct)
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
+
+            self._update_individuals_and_households(individual_ids)
+
         except:
             remove_elasticsearch_documents_by_matching_ids(individual_ids, IndividualDocument)
             raise

@@ -6,17 +6,17 @@ import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { HouseholdDetails } from '../../../components/rdi/details/households/HouseholdDetails/HouseholdDetails';
+import { RegistrationDetails } from '../../../components/rdi/details/households/RegistrationDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { decodeIdString, isPermissionDeniedError } from '../../../utils/utils';
+import { isPermissionDeniedError } from '../../../utils/utils';
 import {
   useHouseholdChoiceDataQuery,
   useImportedHouseholdQuery,
 } from '../../../__generated__/graphql';
 import { HouseholdImportedIndividualsTable } from '../../tables/rdi/HouseholdImportedIndividualsTable/HouseholdImportedIndividualsTable';
-import { HouseholdDetails } from '../../../components/rdi/details/households/HouseholdDetails/HouseholdDetails';
-import { RegistrationDetails } from '../../../components/rdi/details/households/RegistrationDetails';
 
 const Container = styled.div`
   padding: 20px;
@@ -34,6 +34,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const permissions = usePermissions();
   const { data, loading, error } = useImportedHouseholdQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   });
   const {
     data: choicesData,
@@ -66,7 +67,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`${'Household ID'}: ${decodeIdString(id)}`}
+        title={`${'Household ID'}: ${importedHousehold.importId}`}
         breadCrumbs={breadCrumbsItems}
       />
       <HouseholdDetails
@@ -84,6 +85,8 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
           registrationDate={importedHousehold.firstRegistrationDate}
           deviceid={importedHousehold.deviceid}
           start={importedHousehold.start}
+          koboAssetId={importedHousehold.koboAssetId}
+          rowId={importedHousehold.rowId}
         />
       </Container>
     </div>

@@ -62,7 +62,7 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
     resource_class = QueryResource
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_superuser or obj.owner == request.user
+        return request.user.is_superuser or (obj and obj.owner == request.user)
 
     def status(self, obj):
         return obj.ready and not obj.error
@@ -102,19 +102,18 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
         obj: Query = self.get_object(request, pk)
         try:
             context = self.get_common_context(request, pk, title="Results")
-            ret = obj.execute(persist=False)
+            ret, info = obj.execute(persist=False)
             context["type"] = type(ret).__name__
             context["raw"] = ret
+            context["info"] = info
             context["title"] = f"Result of {obj.name} ({type(ret).__name__})"
             if isinstance(ret, QuerySet):
                 ret = ret[:100]
                 context["queryset"] = ret
             elif isinstance(ret, tablib.Dataset):
-                context["dataset"] = ret
-            elif isinstance(ret, dict):
-                context["result"] = ret
-            elif isinstance(ret, list):
-                context["result"] = ret
+                context["dataset"] = ret[:100]
+            elif isinstance(ret, (dict, list, tuple)):
+                context["result"] = ret[:100]
             else:
                 self.message_user(request, f"Query does not returns a valid result. It returned {type(ret)}")
             return render(request, "admin/power_query/query/preview.html", context)
@@ -158,8 +157,13 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
                         "query": obj.query,
                     }
                     output = formatter.render(report_context)
+                    if formatter.content_type == 'xls':
+                        response = HttpResponse(output, content_type=formatter.content_type)
+                        response['Content-Disposition'] = f'attachment; filename=Dataset Report.xls'
+                        return response
                     return HttpResponse(output)
             else:
+                context["extra_buttons"] = ''
                 form = ExportForm()
             context["form"] = form
             return render(request, "admin/power_query/dataset/export.html", context)
@@ -174,7 +178,7 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
             context = self.get_common_context(request, pk, title="Results")
             data = pickle.loads(obj.result)
             context["dataset"] = to_dataset(data)
-            return render(request, "power_query/preview.html", context)
+            return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
@@ -202,7 +206,6 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
     @button(visible=lambda btn: "change" in btn.context["request"].path)
     def test(self, request, pk):
         context = self.get_common_context(request, pk)
-        # obj = self.get_object(request, pk)
         form = FormatterTestForm()
         try:
             if request.method == "POST":
@@ -213,7 +216,13 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
                         "dataset": form.cleaned_data["query"].dataset,
                         "report": "None",
                     }
-                    context["results"] = str(obj.render(ctx))
+                    if obj.content_type == 'xls':
+                        output = obj.render(ctx)
+                        response = HttpResponse(output, content_type=obj.content_type)
+                        response['Content-Disposition'] = 'attachment; filename=Report.xls'
+                        return response
+                    else:    
+                        context["results"] = str(obj.render(ctx))
                 else:
                     form = FormatterTestForm()
         except Exception as e:
@@ -243,7 +252,7 @@ class ReportAdmin(ImportExportMixin, ExtraButtonsMixin, AdminFiltersMixin, Model
     change_list_template = None
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_superuser or obj.owner == request.user
+        return request.user.is_superuser or (obj and obj.owner == request.user)
 
     def get_changeform_initial_data(self, request):
         kwargs = {"owner": request.user}

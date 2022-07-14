@@ -55,6 +55,7 @@ export const registrationDetailed = gql`
 export const importedHouseholdMinimal = gql`
   fragment importedHouseholdMinimal on ImportedHouseholdNode {
     id
+    importId
     headOfHousehold {
       id
       fullName
@@ -67,6 +68,8 @@ export const importedHouseholdMinimal = gql`
     flexFields
     deviceid
     start
+    koboAssetId
+    rowId
     firstRegistrationDate
     lastRegistrationDate
     hasDuplicates
@@ -77,7 +80,6 @@ export const importedHouseholdMinimal = gql`
 export const importedHouseholdDetailed = gql`
   fragment importedHouseholdDetailed on ImportedHouseholdNode {
     ...importedHouseholdMinimal
-
     residenceStatus
     country
     countryOrigin
@@ -99,6 +101,7 @@ export const importedHouseholdDetailed = gql`
 export const importedIndividualMinimal = gql`
   fragment importedIndividualMinimal on ImportedIndividualNode {
     id
+    importId
     age
     fullName
     birthDate
@@ -178,6 +181,7 @@ export const importedIndividualDetailed = gql`
     relationship
     household {
       id
+      importId
       admin1
       admin2
       address
@@ -189,5 +193,7 @@ export const importedIndividualDetailed = gql`
     }
     phoneNo
     phoneNoAlternative
+    phoneNoValid
+    phoneNoAlternativeValid
   }
 `;

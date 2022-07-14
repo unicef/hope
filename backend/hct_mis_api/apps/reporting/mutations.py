@@ -1,6 +1,9 @@
-from django.shortcuts import get_object_or_404
-
+import logging
+import datetime
 import graphene
+
+from django.shortcuts import get_object_or_404
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
@@ -15,6 +18,8 @@ from hct_mis_api.apps.reporting.celery_tasks import (
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
 from hct_mis_api.apps.reporting.schema import ReportNode
 from hct_mis_api.apps.reporting.validators import ReportValidator
+
+logger = logging.getLogger(__name__)
 
 
 class CreateReportInput(graphene.InputObjectType):
@@ -60,19 +65,49 @@ class CreateReport(ReportValidator, PermissionMutation):
 
         if admin_area_ids:
             admin_areas = [
-                get_object_or_404(
-                    AdminArea, id=decode_id_string(admin_area_id), admin_area_level__business_area=business_area
-                )
+                get_object_or_404(Area, id=decode_id_string(admin_area_id), area_type__country__name=business_area.name)
                 for admin_area_id in admin_area_ids
             ]
 
         report = Report.objects.create(**report_vars)
         if admin_areas:
-            report.admin_area.set(admin_areas)
+            report.admin_area_new.set(admin_areas)
+            admin_areas_original_id = [area.original_id for area in admin_areas]
+            admin_areas_old = AdminArea.objects.filter(pk__in=admin_areas_original_id)
+            report.admin_area.set(admin_areas_old)
 
         report_export_task.delay(report_id=str(report.id))
 
         return CreateReport(report)
+
+
+class RestartCreateReportInput(graphene.InputObjectType):
+    report_id = graphene.ID(required=True)
+    business_area_slug = graphene.String(required=True)
+
+
+class RestartCreateReport(PermissionMutation):
+    report = graphene.Field(ReportNode)
+
+    class Arguments:
+        report_data = RestartCreateReportInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, report_data):
+        business_area = BusinessArea.objects.get(slug=report_data.get("business_area_slug"))
+        cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
+        report = get_object_or_404(Report, id=decode_id_string(report_data.get("report_id")))
+
+        delta30 = datetime.datetime.now() - datetime.timedelta(minutes=30)
+        if report.status is not Report.IN_PROGRESS and report.updated_at > delta30:
+            msg = "Impossible restart now. Status must be 'Processing' and more than 30 mins after last running."
+            logger.error(msg)
+            raise GraphQLError(msg)
+        else:
+            report_export_task.delay(report_id=str(report.id))
+            report.refresh_from_db()
+        return RestartCreateReport(report)
 
 
 class CreateDashboardReportInput(graphene.InputObjectType):
@@ -110,10 +145,11 @@ class CreateDashboardReport(PermissionMutation):
             report_vars["program"] = program
 
         if admin_area_id and business_area.slug != "global":
-            admin_area = get_object_or_404(AdminArea, id=decode_id_string(admin_area_id))
-            report_vars["admin_area"] = admin_area
-            admin_area_new = get_object_or_404(Area, original_id=decode_id_string(admin_area_id))
+            admin_area_new = get_object_or_404(Area, id=decode_id_string(admin_area_id))
             report_vars["admin_area_new"] = admin_area_new
+
+            admin_area = get_object_or_404(AdminArea, id=admin_area_new.original_id)
+            report_vars["admin_area"] = admin_area
 
         report = DashboardReport.objects.create(**report_vars)
 
@@ -124,4 +160,5 @@ class CreateDashboardReport(PermissionMutation):
 
 class Mutations(graphene.ObjectType):
     create_report = CreateReport.Field()
+    restart_create_report = RestartCreateReport.Field()
     create_dashboard_report = CreateDashboardReport.Field()

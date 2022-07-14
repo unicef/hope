@@ -25,10 +25,6 @@ import {
   useReportQuery,
 } from '../../../__generated__/graphql';
 
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 const IconContainer = styled.div`
   color: #d1d1d1;
   font-size: 90px;
@@ -86,24 +82,22 @@ export const ReportingDetailsPage = (): React.ReactElement => {
 
   const FieldsArray: {
     label: string;
-    value: React.ReactElement;
+    value: React.ReactElement | string;
     size: boolean | 3 | 6 | 8 | 11 | 'auto' | 1 | 2 | 4 | 5 | 7 | 9 | 10 | 12;
   }[] = [
     {
       label: t('STATUS'),
       value: (
-        <StatusContainer>
-          <StatusBox
-            status={statusChoices[report.status]}
-            statusToColor={reportStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={statusChoices[report.status]}
+          statusToColor={reportStatusToColor}
+        />
       ),
       size: 3,
     },
     {
       label: t('Report Type'),
-      value: <span>{typeChoices[report.reportType]}</span>,
+      value: typeChoices[report.reportType],
       size: 3,
     },
     {
@@ -118,11 +112,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
     },
     {
       label: t('Creation Date'),
-      value: (
-        <span>
-          <UniversalMoment>{report.createdAt}</UniversalMoment>
-        </span>
-      ),
+      value: <UniversalMoment>{report.createdAt}</UniversalMoment>,
       size: 3,
     },
     {
@@ -136,14 +126,14 @@ export const ReportingDetailsPage = (): React.ReactElement => {
     },
     {
       label: t('Programme'),
-      value: <span>{report.program?.name || '-'}</span>,
+      value: report.program?.name,
       size: 3,
     },
     {
       label: t('Administrative Level 2'),
       value: (
         <span>
-          {report.adminArea?.edges.map((edge) => edge.node.title).join(', ') ||
+          {report.adminArea?.edges.map((edge) => edge.node.name).join(', ') ||
             '-'}
         </span>
       ),

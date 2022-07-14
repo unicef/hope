@@ -8,6 +8,7 @@ export const AllGrievanceTicket = gql`
     $last: Int
     $id: UUID
     $category: String
+    $issueType: String
     $businessArea: String!
     $search: String
     $status: [String]
@@ -18,6 +19,9 @@ export const AllGrievanceTicket = gql`
     $registrationDataImport: ID
     $assignedTo: ID
     $cashPlan: String
+    $scoreMin: String
+    $scoreMax: String
+    $household: String
   ) {
     allGrievanceTicket(
       before: $before
@@ -26,6 +30,7 @@ export const AllGrievanceTicket = gql`
       last: $last
       id: $id
       category: $category
+      issueType: $issueType
       businessArea: $businessArea
       search: $search
       status: $status
@@ -36,6 +41,9 @@ export const AllGrievanceTicket = gql`
       registrationDataImport: $registrationDataImport
       assignedTo: $assignedTo
       cashPlan: $cashPlan
+      scoreMin: $scoreMin
+      scoreMax: $scoreMax
+      household: $household
     ) {
       totalCount
       pageInfo {
@@ -57,6 +65,7 @@ export const AllGrievanceTicket = gql`
             id
           }
           category
+          issueType
           createdAt
           userModified
           admin
@@ -65,6 +74,16 @@ export const AllGrievanceTicket = gql`
             id
           }
           unicefId
+          existingTickets {
+            id
+          }
+          relatedTickets {
+            id
+            status
+            category
+            issueType
+            unicefId
+          }
         }
       }
     }

@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import localForage from 'localforage';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
@@ -421,6 +422,17 @@ export function renderUserName(user): string {
     : `${user?.email}`;
 }
 
+export const getPhoneNoLabel = (
+  phoneNo: string,
+  phoneNoValid: boolean,
+): string => {
+  if (!phoneNo) return '-';
+  if (phoneNoValid) {
+    return phoneNo;
+  }
+  return 'Invalid Phone Number';
+};
+
 const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
   [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
   [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,
@@ -548,8 +560,11 @@ export const formatAge = (age): string | number => {
 };
 
 export const renderIndividualName = (individual): string => {
-  if (individual?.givenName && individual?.familyName) {
-    return `${individual.givenName} ${individual.familyName}`;
-  }
   return individual?.fullName;
 };
+
+export async function clearCache(apolloClient = null): Promise<void> {
+  if (apolloClient) apolloClient.resetStore();
+  localStorage.clear();
+  await localForage.clear();
+}

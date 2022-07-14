@@ -3,10 +3,10 @@
 exports[`containers/tables/population/IndividualsListTable should render loading 1`] = `
 <div>
   <div
-    class="sc-gzVnrw dRZkta"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
-      class="sc-bdVaJa iMXEqU"
+      class="sc-bwzfXH iIRzZu"
       data-cy="loading-container"
     >
       <div
@@ -36,7 +36,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
 exports[`containers/tables/population/IndividualsListTable should render with data 1`] = `
 <div>
   <div
-    class="sc-gzVnrw dRZkta"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
       class="makeStyles-root-1"
@@ -81,7 +81,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -105,7 +105,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -129,7 +129,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -153,7 +153,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -177,7 +177,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -201,7 +201,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -225,7 +225,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -249,7 +249,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -272,7 +272,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-EHOje eQYihx MuiTableRow-hover"
+                class="MuiTableRow-root sc-bZQynM IAXmQ MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
@@ -280,7 +280,19 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                 >
                   <div
                     class="MuiBox-root MuiBox-root-13"
-                  />
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root sc-gzVnrw ehdClQ"
+                      focusable="false"
+                      title="Possible Duplicate"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+                      />
+                    </svg>
+                  </div>
                   <div
                     class="MuiBox-root MuiBox-root-14"
                   />
@@ -292,33 +304,37 @@ exports[`containers/tables/population/IndividualsListTable should render with da
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-bxivhb iRvpKE"
-                    href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZmU5MTQzZDUtYzJjMC00ODQ2LTlmZWMtMDU0Y2I4N2Q5MDc0"
+                    class="sc-ifAKCX hQSvGu"
+                    href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2VkZDRiNDktNTRlMC00NDA4LThmZDItMTAzMGYwNWE3YTZh"
                   >
-                    IND-42-0000.0001
+                    IND-74-0000.0006
                   </a>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                />
+                >
+                  HH-20-0000.0002
+                </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Not a Family Member. Can only act as a recipient.
+                  Head of household (self)
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
                 >
-                  80
+                  30
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Female
+                  Male
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                />
+                >
+                  Abband
+                </td>
               </tr>
               <tr
                 class="MuiTableRow-root"
@@ -343,7 +359,7 @@ exports[`containers/tables/population/IndividualsListTable should render with da
             />
             <p
               class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
-              id="mui-5806"
+              id="mui-82186"
             >
               Rows per page:
             </p>
@@ -352,9 +368,9 @@ exports[`containers/tables/population/IndividualsListTable should render with da
             >
               <div
                 aria-haspopup="listbox"
-                aria-labelledby="mui-5806 mui-73230"
+                aria-labelledby="mui-82186 mui-5806"
                 class="MuiSelect-root MuiSelect-select MuiTablePagination-select MuiSelect-selectMenu MuiInputBase-input"
-                id="mui-73230"
+                id="mui-5806"
                 role="button"
                 tabindex="0"
               >

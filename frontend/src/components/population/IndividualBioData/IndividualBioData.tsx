@@ -5,10 +5,12 @@ import styled from 'styled-components';
 import {
   choicesToDict,
   formatAge,
+  getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
 } from '../../../utils/utils';
 import {
+  GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
   IndividualNode,
 } from '../../../__generated__/graphql';
@@ -17,6 +19,7 @@ import { LabelizedField } from '../../core/LabelizedField';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
 import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
+import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -31,11 +34,13 @@ interface IndividualBioDataProps {
   individual: IndividualNode;
   businessArea: string;
   choicesData: HouseholdChoiceDataQuery;
+  grievancesChoices: GrievancesChoiceDataQuery;
 }
 export function IndividualBioData({
   individual,
   businessArea,
   choicesData,
+  grievancesChoices,
 }: IndividualBioDataProps): React.ReactElement {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
@@ -100,6 +105,29 @@ export function IndividualBioData({
       </LabelizedField>
     </Grid>
   );
+
+  const renderBankAccountInfo = (): React.ReactNode => {
+    if (!individual.bankAccountInfo) {
+      return null;
+    }
+    return (
+      <>
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Bank name')}>
+            {individual.bankAccountInfo.bankName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Bank account number')}>
+            {individual.bankAccountInfo.bankAccountNumber}
+          </LabelizedField>
+        </Grid>
+      </>
+    );
+  };
 
   return (
     <Overview>
@@ -246,12 +274,15 @@ export function IndividualBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Phone Number')}>
-            {individual.phoneNo}
+            {getPhoneNoLabel(individual.phoneNo, individual.phoneNoValid)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label={t('Alternative Phone Number')}>
-            {individual.phoneNoAlternative}
+            {getPhoneNoLabel(
+              individual.phoneNoAlternative,
+              individual.phoneNoAlternativeValid,
+            )}
           </LabelizedField>
         </Grid>
         <Grid item xs={12}>
@@ -266,6 +297,16 @@ export function IndividualBioData({
             </UniversalMoment>
           </LabelizedField>
         </Grid>
+        <Grid item xs={6}>
+          {individual.household?.unicefId && (
+            <LinkedGrievancesModal
+              household={individual.household}
+              businessArea={businessArea}
+              grievancesChoices={grievancesChoices}
+            />
+          )}
+        </Grid>
+        {renderBankAccountInfo()}
       </Grid>
     </Overview>
   );

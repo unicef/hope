@@ -22,23 +22,9 @@ import {
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { DialogActions } from '../dialogs/DialogActions';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
+import { DialogDescription } from '../dialogs/DialogDescription';
+import { DialogFooter } from '../dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 
 const DateFields = styled.div`
   display: flex;
@@ -69,14 +55,14 @@ interface ProgramFormPropTypes {
   title: string;
 }
 
-export function ProgramForm({
+export const ProgramForm = ({
   program = null,
   onSubmit,
   renderSubmit,
   open,
   onClose,
   title,
-}: ProgramFormPropTypes): ReactElement {
+}: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
 
@@ -109,18 +95,12 @@ export function ProgramForm({
       .required(t('Sector is required'))
       .min(2, t('Too short'))
       .max(50, t('Too long')),
-    budget: Yup.number()
-      .min(0)
-      .max(99999999, t('Number is too big')),
+    budget: Yup.number().min(0).max(99999999, t('Number is too big')),
     administrativeAreasOfImplementation: Yup.string()
       .min(2, t('Too short'))
       .max(255, t('Too long')),
-    description: Yup.string()
-      .min(2, t('Too short'))
-      .max(255, t('Too long')),
-    populationGoal: Yup.number()
-      .min(0)
-      .max(99999999, t('Number is too big')),
+    description: Yup.string().min(2, t('Too short')).max(255, t('Too long')),
+    populationGoal: Yup.number().min(0).max(99999999, t('Number is too big')),
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -328,4 +308,4 @@ export function ProgramForm({
       </Dialog>
     </DialogContainer>
   );
-}
+};

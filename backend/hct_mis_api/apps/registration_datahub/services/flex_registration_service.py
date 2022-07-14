@@ -1,13 +1,14 @@
 import base64
-import json
+import hashlib
+import logging
 import uuid
 from typing import List
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db import transaction
 from django.db.transaction import atomic
 from django.forms import modelform_factory
-
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
@@ -39,6 +40,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     Record,
     RegistrationDataImportDatahub,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class FlexRegistrationService:
@@ -76,10 +79,10 @@ class FlexRegistrationService:
 
     @atomic("default")
     @atomic("registration_datahub")
-    def create_rdi(self, imported_by, records_ids, rdi_name="rdi_name"):
+    def create_rdi(self, imported_by, rdi_name="rdi_name"):
         business_area = BusinessArea.objects.get(slug="ukraine")
         number_of_individuals = 0
-        number_of_households = len(records_ids)
+        number_of_households = 0
 
         rdi = RegistrationDataImport.objects.create(
             name=rdi_name,
@@ -97,7 +100,7 @@ class FlexRegistrationService:
             data_type=ImportData.FLEX_REGISTRATION,
             number_of_individuals=number_of_individuals,
             number_of_households=number_of_households,
-            created_by_id=imported_by.id,
+            created_by_id=imported_by.id if imported_by else None,
         )
         rdi_datahub = RegistrationDataImportDatahub.objects.create(
             name=rdi_name,
@@ -118,32 +121,67 @@ class FlexRegistrationService:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
         import_data = rdi_datahub.import_data
-        number_of_individuals = 0
 
+        records_ids_to_import = (
+            Record.objects.filter(id__in=records_ids)
+            .exclude(status=Record.STATUS_IMPORTED)
+            .exclude(ignored=True)
+            .values_list("id", flat=True)
+        )
+        imported_records_ids = []
         try:
-            with atomic("default"):
-                with atomic("registration_datahub"):
-                    for record_id in records_ids:
-                        try:
+            for record_id in records_ids_to_import:
+                try:
+                    with atomic("default"):
+                        with atomic("registration_datahub"):
                             record = Record.objects.defer("data").get(id=record_id)
-                            number_of_individuals += self.create_household_for_rdi_household(record, rdi_datahub)
-                        except ValidationError as e:
-                            raise ValidationError({f"Record id: {record_id}": [str(e)]})
+                            self.create_household_for_rdi_household(record, rdi_datahub)
+                            imported_records_ids.append(record_id)
+                except ValidationError as e:
+                    logger.exception(e)
+                    record.mark_as_invalid(str(e))
 
-                    rdi.number_of_individuals = number_of_individuals
-                    import_data.number_of_individuals = number_of_individuals
-                    rdi.status = RegistrationDataImport.DEDUPLICATION
-                    rdi.save()
-                    rdi_deduplication_task.delay(rdi_datahub.id)
-                    import_data.save(update_fields=("number_of_individuals",))
-        except ValidationError as e:
+            number_of_individuals = ImportedIndividual.objects.filter(registration_data_import=rdi_datahub).count()
+            number_of_households = ImportedHousehold.objects.filter(registration_data_import=rdi_datahub).count()
+
+            import_data.number_of_individuals = number_of_individuals
+            rdi.number_of_individuals = number_of_individuals
+            import_data.number_of_households = number_of_households
+            rdi.number_of_households = number_of_households
+            rdi.status = RegistrationDataImport.DEDUPLICATION
+
+            rdi.save(
+                update_fields=(
+                    "number_of_individuals",
+                    "number_of_households",
+                    "status",
+                )
+            )
+            import_data.save(
+                update_fields=(
+                    "number_of_individuals",
+                    "number_of_households",
+                )
+            )
+
+            Record.objects.filter(id__in=imported_records_ids).update(
+                status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
+            )
+            if not rdi.business_area.postpone_deduplication:
+                transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
+            else:
+                rdi.status = RegistrationDataImport.IN_REVIEW
+                rdi.save()
+        except Exception as e:
+            logger.exception(e)
             rdi.status = RegistrationDataImport.IMPORT_ERROR
             rdi.error_message = str(e)
-            rdi.save()
-            raise
-        except Exception:
-            rdi.status = RegistrationDataImport.IMPORT_ERROR
-            rdi.save()
+            rdi.save(
+                update_fields=(
+                    "status",
+                    "error_message",
+                )
+            )
             raise
 
     def create_household_for_rdi_household(
@@ -151,7 +189,7 @@ class FlexRegistrationService:
     ):
         individuals: List[ImportedIndividual] = []
         documents: List[ImportedDocument] = []
-        record_data_dict = json.loads(record.storage.tobytes().decode("utf-8"))
+        record_data_dict = record.get_data()
         household_dict = record_data_dict.get("household", [])[0]
         individuals_array = record_data_dict.get("individuals", [])
 
@@ -168,7 +206,14 @@ class FlexRegistrationService:
             household.admin1_title = admin_area1.title
         if admin_area2:
             household.admin2_title = admin_area2.title
-        household.save()
+        household.kobo_asset_id = record.source_id
+        household.save(
+            update_fields=(
+                "admin1_title",
+                "admin2_title",
+                "kobo_asset_id",
+            )
+        )
         for index, individual_dict in enumerate(individuals_array):
             try:
                 individual_data = self._prepare_individual_data(individual_dict, household, registration_data_import)
@@ -178,6 +223,7 @@ class FlexRegistrationService:
                 individual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
+                individual.kobo_asset_id = record.source_id
                 individual.save()
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
@@ -191,12 +237,9 @@ class FlexRegistrationService:
                     household.save(update_fields=("head_of_household",))
                 documents.extend(self._prepare_documents(individual_dict, individual))
             except ValidationError as e:
-                raise ValidationError({f"individual nr {index+1}": [str(e)]})
+                raise ValidationError({f"individual nr {index+1}": [str(e)]}) from e
 
-        record.registration_data_import = registration_data_import
-        record.save(update_fields=("registration_data_import",))
         ImportedDocument.objects.bulk_create(documents)
-        return len(individuals)
 
     def _set_default_head_of_household(self, individuals_array):
         for individual_data in individuals_array:
@@ -255,7 +298,8 @@ class FlexRegistrationService:
             last_registration_date=household.last_registration_date,
         )
         disability = individual_data.get("disability", "n")
-        if disability == "y":
+        disability_certificate_picture = individual_data.get("disability_certificate_picture")
+        if disability == "y" or disability_certificate_picture:
             individual_data["disability"] = DISABLED
         else:
             individual_data["disability"] = NOT_DISABLED
@@ -270,8 +314,10 @@ class FlexRegistrationService:
                 phone_no = phone_no[1:]
             if not phone_no.startswith("+380"):
                 individual_data["phone_no"] = f"+380{phone_no}"
+        else:
+            individual_data["phone_no"] = ""
 
-        if disability_certificate_picture := individual_data.get("disability_certificate_picture"):
+        if disability_certificate_picture:
             certificate_picture = f"CERTIFICATE_PICTURE_{uuid.uuid4()}"
             disability_certificate_picture = self._prepare_picture_from_base64(
                 disability_certificate_picture, certificate_picture
@@ -317,9 +363,8 @@ class FlexRegistrationService:
     def _prepare_picture_from_base64(self, certificate_picture, document_number):
         if certificate_picture:
             format_image = "jpg"
-            certificate_picture = ContentFile(
-                base64.b64decode(certificate_picture), name=f"{document_number}.{format_image}"
-            )
+            name = hashlib.md5(document_number.encode()).hexdigest()
+            certificate_picture = ContentFile(base64.b64decode(certificate_picture), name=f"{name}.{format_image}")
         return certificate_picture
 
     def _prepare_bank_account_info(self, individual_dict: dict, individual: ImportedIndividual):
@@ -332,9 +377,9 @@ class FlexRegistrationService:
         if not bank_name:
             bank_name = other_bank_name
         bank_account_info_data = {
-            "bank_account_number": individual_dict.get("bank_account_number", ""),
+            "bank_account_number": individual_dict.get("bank_account_number", "").replace(" ", ""),
             "bank_name": bank_name,
-            "debit_card_number": individual_dict.get("bank_account_number", ""),
+            "debit_card_number": individual_dict.get("bank_account_number", "").replace(" ", ""),
             "individual": individual,
         }
         return bank_account_info_data

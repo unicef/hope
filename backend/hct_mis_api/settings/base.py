@@ -4,14 +4,9 @@ import sys
 from pathlib import Path
 from uuid import uuid4
 
-####
-# Change per project
-####
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from graphql import GraphQLError
 
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
@@ -162,6 +157,11 @@ DATABASES = {
     "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
     "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
 }
+DATABASES["default"].update(
+    {
+        "CONN_MAX_AGE": 60
+    }
+)
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
@@ -183,7 +183,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
-    "author.middlewares.AuthorDefaultBackendMiddleware",
 ]
 
 TEMPLATES = [
@@ -219,8 +218,6 @@ PROJECT_APPS = [
     "hct_mis_api.apps.core.apps.CoreConfig",
     "hct_mis_api.apps.grievance",
     "hct_mis_api.apps.household",
-    "hct_mis_api.apps.id_management",
-    "hct_mis_api.apps.intervention",
     "hct_mis_api.apps.payment",
     "hct_mis_api.apps.program",
     "hct_mis_api.apps.power_query.apps.Config",
@@ -279,7 +276,7 @@ OTHER_APPS = [
     "django_celery_beat",
     "explorer",
     "import_export",
-    "import_export_celery",
+    "rest_framework",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -450,12 +447,13 @@ SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = env("ELASTICSEARCH_HOST")
+ELASTICSEARCH_INDEX_PREFIX = ""
 
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
 # DJANGO CONSTANCE settings
 CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
-
+CONSTANCE_REDIS_CACHE_TIMEOUT = 1
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
         "django.forms.fields.IntegerField",
@@ -559,6 +557,26 @@ Azure,https://unicef.visualstudio.com/ICTD-HCT-MIS/;
         "",
         str,
     ),
+    "USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH": (
+        False,
+        "Use elastic search for individuals search",
+        bool,
+    ),
+    "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH": (
+        False,
+        "Use elastic search for households search",
+        bool,
+    ),
+    "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA": (
+        False,
+        "Use business area during elastic search for households search",
+        bool,
+    ),
+    "AUTO_MERGE_AFTER_AUTO_RDI_IMPORT": (
+        False,
+        "Automatically merge the population after server-triggered RDI import",
+        bool,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)
@@ -590,7 +608,7 @@ SENTRY_URL = env("SENTRY_URL")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.logging import LoggingIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
 
     from hct_mis_api import get_full_version
 
@@ -601,16 +619,12 @@ if SENTRY_DSN:
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[
-            DjangoIntegration(transaction_style="url"),
-            sentry_logging,
-            CeleryIntegration()
-            # RedisIntegration(),
-        ],
+        integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
+        traces_sample_rate=1.0,
         send_default_pii=True,
-        ignore_errors=[ValidationError, GraphQLError],
     )
+    ignore_logger("graphql.execution.utils")
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
@@ -621,7 +635,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_INSTANCE}/0"
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 240 * 60
+CELERY_TASK_TIME_LIMIT = 360 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
 
@@ -776,19 +790,4 @@ IMPERSONATE = {
 
 POWER_QUERY_DB_ALIAS = env("POWER_QUERY_DB_ALIAS")
 
-IMPORT_EXPORT_CELERY_INIT_MODULE = "hct_mis_api.apps.core.celery"
-
-
-def resource():  # Optional
-    from hct_mis_api.apps.core.admin import AdminAreaResource
-
-    return AdminAreaResource
-
-
-IMPORT_EXPORT_CELERY_MODELS = {
-    "AdminArea": {
-        "app_label": "core",
-        "model_name": "AdminArea",
-        "resource": resource,  # Optional
-    }
-}
+CONCURRENCY_ENABLED = False

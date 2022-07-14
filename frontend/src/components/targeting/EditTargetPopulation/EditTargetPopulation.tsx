@@ -50,16 +50,15 @@ export function EditTargetPopulation({
     targetPopulationCriterias:
       targetPopulation.finalListTargetingCriteria?.rules || [],
   };
-  const [mutate] = useUpdateTpMutation();
+  const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
   const businessArea = useBusinessArea();
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-  });
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsQuery({
+      variables: { businessArea, status: ['ACTIVE'] },
+      fetchPolicy: 'cache-and-network',
+    });
 
   const handleValidate = (values): { candidateListCriterias?: string } => {
     const { candidateListCriterias } = values;
@@ -72,9 +71,7 @@ export function EditTargetPopulation({
     return errors;
   };
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .min(2, 'Too short')
-      .max(255, 'Too long'),
+    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
     excludedIds: Yup.string().test(
       'testName',
       'ID is not in the correct format',
@@ -155,6 +152,7 @@ export function EditTargetPopulation({
             handleSubmit={submitForm}
             cancelEdit={cancelEdit}
             values={values}
+            loading={loading}
             businessArea={businessArea}
             targetPopulation={targetPopulation}
           />

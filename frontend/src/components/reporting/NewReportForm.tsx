@@ -12,11 +12,12 @@ import get from 'lodash/get';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import * as Yup from 'yup';
 import { ALL_REPORTS_QUERY } from '../../apollo/queries/reporting/AllReports';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { DialogFooter } from '../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
@@ -29,18 +30,8 @@ import {
   useReportChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { FieldLabel } from '../core/FieldLabel';
+import { LoadingButton } from '../core/LoadingButton';
 import { LoadingComponent } from '../core/LoadingComponent';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
 
 export const NewReportForm = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -66,17 +57,14 @@ export const NewReportForm = (): React.ReactElement => {
       .required(t('Date To is required')),
   });
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-  });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useReportChoiceDataQuery();
-  const [mutate] = useCreateReportMutation();
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsQuery({
+      variables: { businessArea, status: ['ACTIVE'] },
+      fetchPolicy: 'cache-and-network',
+    });
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
+  const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
   const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
@@ -333,7 +321,8 @@ export const NewReportForm = (): React.ReactElement => {
                   <Button onClick={() => setDialogOpen(false)}>
                     {t('CANCEL')}
                   </Button>
-                  <Button
+                  <LoadingButton
+                    loading={loading}
                     type='submit'
                     color='primary'
                     variant='contained'
@@ -341,7 +330,7 @@ export const NewReportForm = (): React.ReactElement => {
                     data-cy='button-submit'
                   >
                     {t('GENERATE')}
-                  </Button>
+                  </LoadingButton>
                 </DialogActions>
               </DialogFooter>
             </>

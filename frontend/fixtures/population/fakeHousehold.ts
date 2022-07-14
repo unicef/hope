@@ -22,17 +22,17 @@ export const fakeHousehold = {
   adminAreaTitle: 'Achin',
   admin1: {
     id: 'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-    title: 'Nangarhar',
+    name: 'Nangarhar',
     level: 1,
     pCode: 'AF06',
-    __typename: 'AdminAreaNode',
+    __typename: 'AreaNode',
   },
   admin2: {
     id: 'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-    title: 'Achin',
+    name: 'Achin',
     level: 2,
     pCode: 'AF0617',
-    __typename: 'AdminAreaNode',
+    __typename: 'AreaNode',
   },
   headOfHousehold: {
     id: 'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
@@ -59,7 +59,7 @@ export const fakeHousehold = {
           unicefId: 'IND-42-0000.0001',
           birthDate: '1941-08-26',
           maritalStatus: 'MARRIED',
-          phoneNo: '0048503123555',
+          phoneNo: '+48503123555',
           sanctionListPossibleMatch: false,
           sanctionListConfirmedMatch: false,
           deduplicationGoldenRecordStatus: 'UNIQUE',
@@ -112,7 +112,7 @@ export const fakeHousehold = {
           unicefId: 'IND-88-0000.0005',
           birthDate: '1964-01-10',
           maritalStatus: 'SINGLE',
-          phoneNo: '0048875012932',
+          phoneNo: '+48875012932',
           sanctionListPossibleMatch: false,
           sanctionListConfirmedMatch: false,
           deduplicationGoldenRecordStatus: 'UNIQUE',
@@ -155,18 +155,18 @@ export const fakeHousehold = {
             admin1: {
               id:
                 'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-              title: 'Nangarhar',
+              name: 'Nangarhar',
               level: 1,
               pCode: 'AF06',
-              __typename: 'AdminAreaNode',
+              __typename: 'AreaNode',
             },
             admin2: {
               id:
                 'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-              title: 'Achin',
+              name: 'Achin',
               level: 2,
               pCode: 'AF0617',
-              __typename: 'AdminAreaNode',
+              __typename: 'AreaNode',
             },
             programs: {
               edges: [
@@ -202,7 +202,7 @@ export const fakeHousehold = {
           unicefId: 'IND-88-0000.0006',
           birthDate: '2000-01-10',
           maritalStatus: 'SINGLE',
-          phoneNo: '0048724467321',
+          phoneNo: '+48724467321',
           sanctionListPossibleMatch: false,
           sanctionListConfirmedMatch: false,
           deduplicationGoldenRecordStatus: 'UNIQUE',
@@ -245,18 +245,18 @@ export const fakeHousehold = {
             admin1: {
               id:
                 'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-              title: 'Nangarhar',
+              name: 'Nangarhar',
               level: 1,
               pCode: 'AF06',
-              __typename: 'AdminAreaNode',
+              __typename: 'AreaNode',
             },
             admin2: {
               id:
                 'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-              title: 'Achin',
+              name: 'Achin',
               level: 2,
               pCode: 'AF0617',
-              __typename: 'AdminAreaNode',
+              __typename: 'AreaNode',
             },
             programs: {
               edges: [

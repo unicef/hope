@@ -18,34 +18,19 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "LogEntryNode"
+            "name": "AreaNode"
           },
           {
-            "name": "PaymentVerificationLogEntryNode"
+            "name": "AreaTypeNode"
+          },
+          {
+            "name": "GrievanceTicketNode"
           },
           {
             "name": "UserNode"
           },
           {
             "name": "UserBusinessAreaNode"
-          },
-          {
-            "name": "AdminAreaTypeNode"
-          },
-          {
-            "name": "AdminAreaNode"
-          },
-          {
-            "name": "GrievanceTicketNode"
-          },
-          {
-            "name": "RegistrationDataImportNode"
-          },
-          {
-            "name": "HouseholdNode"
-          },
-          {
-            "name": "IndividualNode"
           },
           {
             "name": "PaymentRecordNode"
@@ -57,31 +42,13 @@
             "name": "ProgramNode"
           },
           {
-            "name": "TargetPopulationNode"
+            "name": "HouseholdNode"
           },
           {
-            "name": "RuleCommitNode"
+            "name": "IndividualNode"
           },
           {
-            "name": "SteficonRuleNode"
-          },
-          {
-            "name": "ReportNode"
-          },
-          {
-            "name": "ServiceProviderNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
-          },
-          {
-            "name": "PaymentVerificationNode"
-          },
-          {
-            "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationSummaryNode"
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "TicketComplaintDetailsNode"
@@ -117,6 +84,9 @@
             "name": "SanctionListIndividualDateOfBirthNode"
           },
           {
+            "name": "TicketNeedsAdjudicationDetailsNode"
+          },
+          {
             "name": "TicketPositiveFeedbackDetailsNode"
           },
           {
@@ -132,6 +102,9 @@
             "name": "IndividualIdentityNode"
           },
           {
+            "name": "BankAccountInfoNode"
+          },
+          {
             "name": "TicketHouseholdDataUpdateDetailsNode"
           },
           {
@@ -141,10 +114,40 @@
             "name": "TicketDeleteHouseholdDetailsNode"
           },
           {
+            "name": "TargetPopulationNode"
+          },
+          {
+            "name": "RuleCommitNode"
+          },
+          {
+            "name": "SteficonRuleNode"
+          },
+          {
+            "name": "ReportNode"
+          },
+          {
+            "name": "ServiceProviderNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationNode"
+          },
+          {
+            "name": "PaymentVerificationNode"
+          },
+          {
+            "name": "TicketPaymentVerificationDetailsNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationSummaryNode"
+          },
+          {
+            "name": "PaymentVerificationLogEntryNode"
+          },
+          {
             "name": "TicketNoteNode"
           },
           {
-            "name": "TicketNeedsAdjudicationDetailsNode"
+            "name": "LogEntryNode"
           },
           {
             "name": "BusinessAreaNode"

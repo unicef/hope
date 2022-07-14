@@ -6,45 +6,31 @@ import {
 } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useFinalizeTpMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
+import { DialogDescription } from '../DialogDescription';
+import { DialogFooter } from '../DialogFooter';
+import { DialogTitleWrapper } from '../DialogTitleWrapper';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
   setOpen: Function;
 }
 
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
-
-export function FinalizeTargetPopulation({
+export const FinalizeTargetPopulation = ({
   open,
   setOpen,
   totalHouseholds,
   targetPopulationId,
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const [mutate, loading] = useFinalizeTpMutation();
+  const [mutate, { loading }] = useFinalizeTpMutation();
   const onSubmit = (id: string): void => {
     mutate({
       variables: {
@@ -81,17 +67,18 @@ export function FinalizeTargetPopulation({
       <DialogFooter>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-          <Button
+          <LoadingButton
             onClick={() => onSubmit(targetPopulationId)}
             color='primary'
             variant='contained'
-            disabled={!loading || !totalHouseholds}
+            loading={loading}
+            disabled={loading || !totalHouseholds}
             data-cy='button-target-population-send-to-cash-assist'
           >
             {t('Send to cash assist')}
-          </Button>
+          </LoadingButton>
         </DialogActions>
       </DialogFooter>
     </Dialog>
   );
-}
+};

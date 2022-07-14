@@ -3,14 +3,17 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { IndividualsListTable } from '.';
-import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
-import { fakeApolloAllIndividuals } from '../../../../../fixtures/population/fakeApolloAllIndividuals';
+import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
 import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
+import { fakeApolloAllIndividualsForPopulationTable } from '../../../../../fixtures/population/fakeApolloAllIndividualsForPopulationTable';
 
 describe('containers/tables/population/IndividualsListTable', () => {
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider addTypename={false} mocks={fakeApolloAllIndividuals}>
+      <MockedProvider
+        addTypename={false}
+        mocks={fakeApolloAllIndividualsForPopulationTable}
+      >
         <IndividualsListTable
           businessArea='afghanistan'
           filter={{}}
@@ -29,7 +32,7 @@ describe('containers/tables/population/IndividualsListTable', () => {
       <MockedProvider
         link={new ApolloLoadingLink()}
         addTypename={false}
-        mocks={fakeApolloAllIndividuals}
+        mocks={fakeApolloAllIndividualsForPopulationTable}
       >
         <IndividualsListTable
           businessArea='afghanistan'

@@ -34,6 +34,8 @@ class BusinessArea(TimeStampedUUIDModel):
     </BusinessArea>
     """
 
+    code_to_cash_assist_mapping = {"575RE00000": "SLVK"}
+    cash_assist_to_code_mapping = {v: k for k, v in code_to_cash_assist_mapping.items()}
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=255)
     long_name = models.CharField(max_length=255)
@@ -65,6 +67,7 @@ class BusinessArea(TimeStampedUUIDModel):
         limit_choices_to={"admin_level": 0},
         related_name="business_areas",
     )
+    postpone_deduplication = models.BooleanField(default=False)
     countries_new = models.ManyToManyField("geo.Country", related_name="business_areas")
     deduplication_duplicate_score = models.FloatField(
         default=6.0,
@@ -94,6 +97,7 @@ class BusinessArea(TimeStampedUUIDModel):
         help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
     screen_beneficiary = models.BooleanField(default=False)
+    deduplication_ignore_withdraw = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
@@ -115,6 +119,14 @@ class BusinessArea(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.name
+
+    @property
+    def cash_assist_code(self):
+        return self.code_to_cash_assist_mapping.get(self.code, self.code)
+
+    @cash_assist_code.setter
+    def cash_assist_code(self,value):
+        self.code = self.cash_assist_to_code_mapping.get(value,value)
 
     @property
     def can_import_ocha_response_plans(self):

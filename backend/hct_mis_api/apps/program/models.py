@@ -18,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -28,6 +29,7 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import does_payment_record_have_right_hoh_phone_number
 
 
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
@@ -159,6 +161,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             self.cash_plans.filter(payment_records__delivered_quantity__gt=0)
             .distinct("payment_records__household__unicef_id")
             .values_list("payment_records__household__unicef_id", flat=True)
+            .order_by("payment_records__household__unicef_id")
             .count()
         )
 
@@ -295,7 +298,15 @@ class CashPlan(TimeStampedUUIDModel):
         else:
             params &= Q(verification__isnull=True)
 
-        return self.payment_records.filter(params).distinct()
+        payment_records = self.payment_records.filter(params).distinct()
+
+        valid_payment_records_list = [
+            payment_record.pk
+            for payment_record in payment_records
+            if does_payment_record_have_right_hoh_phone_number(payment_record)
+        ]
+        return PaymentRecord.objects.filter(pk__in=valid_payment_records_list)
 
     class Meta:
         verbose_name = "Cash Plan"
+        ordering = ["created_at"]

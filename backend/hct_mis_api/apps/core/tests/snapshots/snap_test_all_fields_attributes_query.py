@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
@@ -11477,6 +11476,57 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'recent_illness_child_h_f',
                 'required': False,
                 'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Has phone number?',
+                'labels': [
+                    {
+                        'label': 'Has phone number?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'has_phone_number',
+                'required': False,
+                'type': 'BOOL'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Has tax ID number?',
+                'labels': [
+                    {
+                        'label': 'Has tax ID number?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'has_tax_id_number',
+                'required': False,
+                'type': 'BOOL'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Has the bank account number?',
+                'labels': [
+                    {
+                        'label': 'Has the bank account number?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'has_the_bank_account_number',
+                'required': False,
+                'type': 'BOOL'
             },
             {
                 'associatedWith': 'Household',

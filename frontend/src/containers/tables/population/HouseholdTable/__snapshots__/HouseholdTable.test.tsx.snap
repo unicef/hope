@@ -3,10 +3,10 @@
 exports[`containers/tables/population/HouseholdTable should render loading 1`] = `
 <div>
   <div
-    class="sc-dnqmqq kxrgar"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
-      class="sc-bdVaJa iMXEqU"
+      class="sc-bwzfXH iIRzZu"
       data-cy="loading-container"
     >
       <div
@@ -36,7 +36,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
 exports[`containers/tables/population/HouseholdTable should render with data 1`] = `
 <div>
   <div
-    class="sc-dnqmqq kxrgar"
+    class="sc-bdVaJa ksQzqc"
   >
     <div
       class="makeStyles-root-1"
@@ -81,7 +81,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -105,7 +105,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -129,7 +129,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -153,7 +153,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -177,7 +177,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -201,7 +201,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -225,7 +225,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -249,7 +249,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -273,7 +273,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bwzfXH ewWbE"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-htpNat bmdvNd"
                     role="button"
                     tabindex="0"
                   >
@@ -296,7 +296,7 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
               class="MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-bZQynM IAXmQ MuiTableRow-hover"
+                class="MuiTableRow-root sc-htoDjs ehUDZT MuiTableRow-hover"
                 role="checkbox"
               >
                 <td
@@ -316,8 +316,8 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <a
-                    class="sc-bxivhb iRvpKE"
-                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTo4MmI2MTA3ZC1hYzg5LTQ2NTctYmVjYi1lOTY4ODdjNTU0ZWQ="
+                    class="sc-ifAKCX hQSvGu"
+                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTowOWI4YWE2ZC1hOTViLTQ5NWEtYTM0ZS1kMGM0YmQyNWE4Njc="
                   >
                     HH-20-0000.0001
                   </a>
@@ -326,10 +326,10 @@ exports[`containers/tables/population/HouseholdTable should render with data 1`]
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <div
-                    class="sc-htoDjs koRFFa"
+                    class="sc-bZQynM hTcAyj"
                   >
                     <div
-                      class="sc-EHOje eoikBB"
+                      class="sc-gzVnrw dubIBG"
                       data-cy="status-container"
                     >
                       ACTIVE

@@ -7,9 +7,9 @@ import {
 } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
+import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { programCompare } from '../../../utils/utils';
@@ -20,23 +20,9 @@ import {
   useUpdateProgramMutation,
 } from '../../../__generated__/graphql';
 import { DialogActions } from '../DialogActions';
-
-const DialogTitleWrapper = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const DialogDescription = styled.div`
-  margin: 20px 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
-`;
+import { DialogDescription } from '../DialogDescription';
+import { DialogFooter } from '../DialogFooter';
+import { DialogTitleWrapper } from '../DialogTitleWrapper';
 
 interface FinishProgramProps {
   program: ProgramNode;
@@ -49,7 +35,7 @@ export function FinishProgram({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const [mutate] = useUpdateProgramMutation({
+  const [mutate, { loading }] = useUpdateProgramMutation({
     update(cache, { data: { updateProgram } }) {
       cache.writeQuery({
         query: PROGRAM_QUERY,
@@ -120,7 +106,8 @@ export function FinishProgram({
         <DialogFooter>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-            <Button
+            <LoadingButton
+              loading={loading}
               type='submit'
               color='primary'
               variant='contained'
@@ -128,7 +115,7 @@ export function FinishProgram({
               data-cy='button-finish-program'
             >
               {t('FINISH')}
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </DialogFooter>
       </Dialog>

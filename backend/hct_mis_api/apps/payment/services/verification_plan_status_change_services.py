@@ -61,11 +61,13 @@ class VerificationPlanStatusChangeServices:
         pv_id = self.cash_plan_verification.id
         phone_numbers = list(
             Individual.objects.filter(
-                heading_household__payment_records__verifications__cash_plan_payment_verification=pv_id
+                heading_household__payment_records__verification__cash_plan_payment_verification=pv_id
             ).values_list("phone_no", flat=True)
         )
-        flow_start_info = api.start_flow(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
-        self.cash_plan_verification.rapid_pro_flow_start_uuid = flow_start_info.get("uuid")
+        flow_start_info_list = api.start_flow(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
+        self.cash_plan_verification.rapid_pro_flow_start_uuids = [
+            flow_start_info.get("uuid") for flow_start_info in flow_start_info_list
+        ]
 
     def finish(self) -> CashPlanPaymentVerification:
         self.cash_plan_verification.status = CashPlanPaymentVerification.STATUS_FINISHED
@@ -81,20 +83,29 @@ class VerificationPlanStatusChangeServices:
         verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
         if verifications.count() == 0:
             return
-        grievance_ticket = GrievanceTicket.objects.create(
-            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-            business_area=cashplan_payment_verification.cash_plan.business_area,
-        )
 
-        GrievanceNotification.send_all_notifications(
-            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
-        )
-        details = TicketPaymentVerificationDetails(
-            ticket=grievance_ticket,
-            payment_verification_status=status,
-        )
-        details.payment_verifications.set(verifications)
-        details.save()
+        grievance_ticket_list = [
+            GrievanceTicket(
+                category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                business_area=cashplan_payment_verification.cash_plan.business_area,
+            )
+            for _ in list(range(verifications.count()))
+        ]
+        grievance_ticket_objs = GrievanceTicket.objects.bulk_create(grievance_ticket_list)
+
+        ticket_payment_verification_details_list = []
+        for verification, grievance_ticket in zip(verifications, grievance_ticket_objs):
+
+            GrievanceNotification.send_all_notifications(
+                GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+            )
+
+            ticket_payment_verification_details = TicketPaymentVerificationDetails(
+                ticket=grievance_ticket, payment_verification_status=status, payment_verification=verification
+            )
+            ticket_payment_verification_details_list.append(ticket_payment_verification_details)
+
+        TicketPaymentVerificationDetails.objects.bulk_create(ticket_payment_verification_details_list)
 
     def _create_grievance_tickets(self, cashplan_payment_verification):
         self._create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)

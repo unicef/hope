@@ -1,17 +1,20 @@
 import json
 from datetime import date
 
-from django.core.management import call_command
-
 from django_countries.fields import Country
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
@@ -57,7 +60,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
       $approvedDocumentsToRemove: [Int],
       $approvedIdentitiesToCreate: [Int], 
       $approvedIdentitiesToEdit: [Int], 
-      $approvedIdentitiesToRemove: [Int]
+      $approvedIdentitiesToRemove: [Int],
+      $approvedPaymentChannelsToCreate: [Int], 
+      $approvedPaymentChannelsToEdit: [Int], 
+      $approvedPaymentChannelsToRemove: [Int]
     ) {
       approveIndividualDataChange(
         grievanceTicketId: $grievanceTicketId, 
@@ -68,7 +74,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         approvedDocumentsToRemove: $approvedDocumentsToRemove,
         approvedIdentitiesToCreate: $approvedIdentitiesToCreate, 
         approvedIdentitiesToEdit: $approvedIdentitiesToEdit, 
-        approvedIdentitiesToRemove: $approvedIdentitiesToRemove
+        approvedIdentitiesToRemove: $approvedIdentitiesToRemove,
+        approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate, 
+        approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit, 
+        approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove
       ) {
         grievanceTicket {
           id
@@ -107,6 +116,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
@@ -114,6 +124,16 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         )
         cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdsdf334")
         cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="jghhrrr")
+
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
+            name="Admin type one",
+            country=country,
+            area_level=2,
+        )
+        cls.admin_area_1_new = AreaFactory(name="City Test", area_type=area_type, p_code="asdsdf334")
+        cls.admin_area_2_new = AreaFactory(name="City Example", area_type=area_type, p_code="jghhrrr")
+
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -171,6 +191,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
             admin2=cls.admin_area_1,
+            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
         )
         TicketAddIndividualDetailsFactory(
@@ -204,6 +225,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
+            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
         )
         TicketIndividualDataUpdateDetailsFactory(
@@ -253,7 +275,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             id="72ee7d98-6108-4ef0-85bd-2ef20e1d5410",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            admin2=cls.admin_area_1,
+            admin2_new=cls.admin_area_1_new,
             business_area=cls.business_area,
         )
         TicketHouseholdDataUpdateDetailsFactory(
@@ -313,6 +335,9 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "approvedIdentitiesToCreate": [],
                 "approvedIdentitiesToEdit": [],
                 "approvedIdentitiesToRemove": [],
+                "approvedPaymentChannelsToCreate": [],
+                "approvedPaymentChannelsToEdit": [],
+                "approvedPaymentChannelsToRemove": [],
                 "flexFieldsApproveData": json.dumps({}),
             },
         )

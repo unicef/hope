@@ -1,19 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
   IndividualNode,
   AllIndividualsQueryVariables,
-  useAllIndividualsQuery,
   HouseholdChoiceDataQuery,
+  useAllIndividualsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
-
-const TableWrapper = styled.div`
-  padding: 20px;
-`;
 
 interface IndividualsListTableProps {
   filter;
@@ -44,11 +40,9 @@ export const IndividualsListTable = ({
         title={t('Individuals')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllIndividualsQuery}
+        query={useAllIndividualsForPopulationTableQuery}
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
-        defaultOrderBy='unicef_id'
-        defaultOrderDirection='desc'
         renderRow={(row) => (
           <IndividualsListTableRow
             key={row.id}

@@ -1,15 +1,17 @@
-import unittest
-
-from django.core.management import call_command
-
+from constance import config
+from elasticsearch.helpers.test import ElasticsearchTestCase
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
+from hct_mis_api.apps.household.documents import IndividualDocument, HouseholdDocument
+from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.models import Individual, Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -23,6 +25,7 @@ class TestIndividualQuery(APITestCase):
             givenName
             familyName
             phoneNo
+            phoneNoValid
             birthDate
           }
         }
@@ -66,6 +69,8 @@ class TestIndividualQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.maxDiff = None
+        cached_business_areas_slug_id_dict.cache_clear()
         create_afghanistan()
         cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -191,7 +196,6 @@ class TestIndividualQuery(APITestCase):
     )
     def test_query_individuals_by_search_filter(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},

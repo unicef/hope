@@ -28,10 +28,11 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import (
     _HOUSEHOLD,
     _INDIVIDUAL,
-    TARGETING_CORE_FIELDS,
     TYPE_DECIMAL,
     TYPE_INTEGER,
     TYPE_SELECT_MANY,
+    FieldFactory,
+    Scope,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import (
@@ -399,16 +400,13 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.sent_to_datahub = True
 
     def is_finalized(self):
-        return self.status in [
-            self.STATUS_PROCESSING,
-            self.STATUS_READY_FOR_CASH_ASSIST,
-        ]
+        return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
 
     def is_locked(self):
         return self.status == self.STATUS_LOCKED
 
     def is_approved(self):
-        return self.status in [self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED]
+        return self.status in (self.STATUS_LOCKED, self.STATUS_STEFICON_COMPLETED)
 
     def __str__(self):
         return self.name
@@ -483,12 +481,7 @@ class TargetingCriteriaQueryingMixin:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self):
-        return (
-            Q(size__gt=0)
-            & Q(withdrawn=False)
-            & ~Q(unicef_id__in=self.excluded_household_ids)
-            & ~Q(individuals__documents__status=Document.STATUS_INVALID)
-        )
+        return Q(size__gt=0) & Q(withdrawn=False) & ~Q(unicef_id__in=self.excluded_household_ids)
 
     def get_query(self):
         query = Q()
@@ -740,7 +733,7 @@ class TargetingCriteriaFilterMixin:
                 query = Q()
                 for arg in argument:
                     # This regular expression can found the only exact word
-                    query &= Q(**{f"{lookup}__iregex": f"{arg}\\y"})
+                    query &= Q(**{f"{lookup}__contains": arg})
             else:
                 query = Q(**{f"{lookup}__contains": argument})
         else:
@@ -804,8 +797,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
     """
 
     def get_core_fields(self):
-        core_fields = TARGETING_CORE_FIELDS
-        return [c for c in core_fields if c.get("associated_with") == _HOUSEHOLD]
+        return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
 
     comparision_method = models.CharField(
         max_length=20,
@@ -834,8 +826,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     """
 
     def get_core_fields(self):
-        core_fields = TARGETING_CORE_FIELDS
-        return [c for c in core_fields if c.get("associated_with") == _INDIVIDUAL]
+        return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
     comparision_method = models.CharField(
         max_length=20,
