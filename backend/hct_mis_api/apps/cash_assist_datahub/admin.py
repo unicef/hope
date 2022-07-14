@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 import logging
 
 from django.conf import settings
@@ -60,7 +60,7 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     def run_time(self, obj):
         if obj.status in (obj.STATUS_PROCESSING, obj.STATUS_LOADING):
-            elapsed = datetime.datetime.now() - obj.timestamp
+            elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= HOUR:
                 return elapsed
 
@@ -154,7 +154,7 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         elif obj.status == obj.STATUS_FAILED:
             warnings.append([messages.ERROR, f"Session is failed"])
         elif obj.status == obj.STATUS_PROCESSING:
-            elapsed = datetime.datetime.now() - obj.timestamp
+            elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= DAY:
                 warnings.append([messages.ERROR, f"Session is running more than {elapsed}"])
             elif elapsed.total_seconds() >= HOUR:

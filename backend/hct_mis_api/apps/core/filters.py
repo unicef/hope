@@ -1,5 +1,6 @@
 import json
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
+from django.utils import timezone
 
 from django.forms import DateField, DateTimeField, DecimalField, Field, IntegerField, CharField
 
@@ -81,7 +82,7 @@ class DecimalRangeFilter(BaseRangeFilter):
 
 
 def filter_age(field_name, qs, min, max):
-    current = datetime.now().date()
+    current = timezone.now().date()
     lookup_expr = "range"
     values = None
     if min is not None and max is not None:
@@ -129,7 +130,7 @@ class AgeRangeFilter(Filter):
         if values:
             min_value = values.get("min")  # 20
             max_value = values.get("max")  # 21
-            current = datetime.now().date()
+            current = timezone.now().date()
             if min_value is not None and max_value is not None:
                 self.lookup_expr = "range"
                 # min year +1 , day-1

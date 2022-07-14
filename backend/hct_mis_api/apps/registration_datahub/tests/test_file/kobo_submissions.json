@@ -118,7 +118,7 @@
         "monthly_income_questions/round_total_income_h_f": "0",
         "wash_questions/score_total": "40",
         "household_questions/m_adults_disability_h_c": "0",
-        "_submission_time": "2020-06-03T13:05:10",
+        "_submission_time": "2020-06-03T13:05:10+00:00",
         "household_questions/household_location/country_origin_h_c": "AFG",
         "_geolocation": [4.747176, 43.942756],
         "monthly_expenditures_questions/round_total_expense_h_f": "0",
