@@ -18,6 +18,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
     handle_total_cash_in_specific_households,
 )
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -153,17 +154,22 @@ class PullFromDatahubTask:
             if created:
                 CashPlanPaymentVerificationSummary.objects.create(cash_plan=cash_plan)
 
-            if not cash_plan.exchange_rate:
                 try:
-                    cash_plan.update_exchange_rate(self.exchange_rates_client)
-                    # TODO MB UPDATE USD VALUES
-                    # payment_record.delivered_quantity_usd = payment_record.get_quantity_in_usd(
-                    #     payment_record.delivered_quantity
-                    # )
-                    # payment_record.entitlement_quantity_usd = payment_record.get_quantity_in_usd(
-                    #     payment_record.entitlement_quantity
-                    # )
-                    cash_plan.save(update_fields=["exchange_rate"])
+                    if not cash_plan.exchange_rate:
+                        cash_plan.exchange_rate = cash_plan.get_exchange_rate(self.exchange_rates_client)
+                        cash_plan.save(update_fields=["exchange_rate"])
+                    for usd_field in CashPlan.usd_fields:
+                        setattr(
+                            cash_plan,
+                            usd_field,
+                            get_quantity_in_usd(
+                                amount=getattr(cash_plan, usd_field.removesuffix("_usd")),
+                                currency=cash_plan.currency,
+                                exchange_rate=cash_plan.exchange_rate,
+                                currency_exchange_date=cash_plan.currency_exchange_date,
+                            ),
+                        )
+                    cash_plan.save(update_fields=CashPlan.usd_fields)
                 except Exception as e:
                     logger.exception(e)
 
@@ -195,13 +201,19 @@ class PullFromDatahubTask:
                 created,
             ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
             try:
-                payment_record.delivered_quantity_usd = payment_record.get_quantity_in_usd(
-                    payment_record.delivered_quantity, self.exchange_rates_client
-                )
-                payment_record.entitlement_quantity_usd = payment_record.get_quantity_in_usd(
-                    payment_record.entitlement_quantity, self.exchange_rates_client
-                )
-                payment_record.save(update_fields=["delivered_quantity_usd", "entitlement_quantity_usd"])
+                for usd_field in PaymentRecord.usd_fields:
+                    setattr(
+                        payment_record,
+                        usd_field,
+                        get_quantity_in_usd(
+                            amount=getattr(payment_record, usd_field.removesuffix("_usd")),
+                            currency=payment_record.currency,
+                            exchange_rate=payment_record.cash_plan.exchange_rate,
+                            currency_exchange_date=payment_record.cash_plan.currency_exchange_date,
+                            exchange_rates_client=self.exchange_rates_client,
+                        ),
+                    )
+                payment_record.save(update_fields=PaymentRecord.usd_fields)
             except Exception as e:
                 logger.exception(e)
             household_ids.append(payment_record.household_id)

@@ -24,7 +24,13 @@ from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
-    # TODO MB pull_from_datahub update
+    usd_fields = [
+        "total_entitled_quantity_usd",
+        "total_entitled_quantity_revised_usd",
+        "total_delivered_quantity_usd",
+        "total_undelivered_quantity_usd",
+    ]
+
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status_date = models.DateTimeField()
     name = models.CharField(max_length=255, db_index=True)
@@ -77,16 +83,16 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
     class Meta:
         abstract = True
 
-    def update_exchange_rate(self, exchange_rates_client=None):
+    def get_exchange_rate(self, exchange_rates_client=None):
         if exchange_rates_client is None:
             exchange_rates_client = ExchangeRates()
 
-        self.exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
-            self.currency, self.currency_exchange_date
-        )
+        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
 
 
 class GenericPayment(TimeStampedUUIDModel):
+    usd_fields = ["delivered_quantity_usd", "entitlement_quantity_usd"]
+
     STATUS_SUCCESS = "Transaction Successful"
     STATUS_ERROR = "Transaction Erroneous"
     STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
@@ -185,30 +191,6 @@ class GenericPayment(TimeStampedUUIDModel):
 
     class Meta:
         abstract = True
-
-    @property
-    def _parent(self):
-        raise NotImplemented()
-
-    def get_quantity_in_usd(self, amount: Decimal, exchange_rates_client=None):
-        # TODO MB double check exchange rate dates
-        if not amount:
-            return None
-
-        exchange_rate = self._parent.exchange_rate
-
-        if not exchange_rate:
-            if exchange_rates_client is None:
-                exchange_rates_client = ExchangeRates()
-
-                exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
-                    self.currency, self._parent.currency_exchange_date
-                )
-
-        if exchange_rate is None:
-            return None
-
-        return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
 
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
@@ -456,10 +438,6 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     vision_id = models.CharField(max_length=255, null=True)
     registration_ca_id = models.CharField(max_length=255, null=True)
 
-    @property
-    def _parent(self):
-        return self.cash_plan
-
 
 class Payment(SoftDeletableModel, GenericPayment):
     # TODO MB
@@ -472,10 +450,6 @@ class Payment(SoftDeletableModel, GenericPayment):
     )
     excluded = models.BooleanField(default=False)
     entitlement_date = models.DateTimeField(null=True, blank=True)
-
-    @property
-    def _parent(self):
-        return self.payment_plan
 
 
 class ServiceProvider(TimeStampedUUIDModel):
