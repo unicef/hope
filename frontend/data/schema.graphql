@@ -461,6 +461,7 @@ input CreateGrievanceTicketInput {
   businessArea: ID!
   linkedTickets: [ID]
   extras: CreateGrievanceTicketExtrasInput
+  priority: Int
 }
 
 type CreateGrievanceTicketMutation {
@@ -776,6 +777,7 @@ type GrievanceTicketNode implements Node {
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
+  priority: Int
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -3587,6 +3589,7 @@ input UpdateGrievanceTicketInput {
   household: ID
   individual: ID
   extras: UpdateGrievanceTicketExtrasInput
+  priority: Int
 }
 
 type UpdateGrievanceTicketMutation {

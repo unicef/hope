@@ -309,6 +309,7 @@ export function prepareVariables(businessArea, values) {
     language: values.language,
     admin: values?.admin?.node?.pCode,
     area: values.area,
+    priority: values.priority,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,

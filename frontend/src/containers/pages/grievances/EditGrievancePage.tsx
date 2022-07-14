@@ -71,7 +71,7 @@ const BoxWithBorders = styled.div`
   padding: 15px 0;
 `;
 
-export function EditGrievancePage(): React.ReactElement {
+export const EditGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
@@ -182,6 +182,11 @@ export function EditGrievancePage(): React.ReactElement {
   const mappedIndividuals = userData.allUsers.edges.map((edge) => ({
     name: renderUserName(edge.node),
     value: edge.node.id,
+  }));
+
+  const mappedPriorities = Array.from(Array(10).keys()).map((i) => ({
+    name: (i + 1).toString(),
+    value: i + 1,
   }));
 
   const issueTypeDict = choicesData.grievanceTicketIssueTypeChoices.reduce(
@@ -396,6 +401,18 @@ export function EditGrievancePage(): React.ReactElement {
                             component={FormikTextField}
                           />
                         </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='priority'
+                            multiline
+                            fullWidth
+                            disabled={Boolean(ticket.priority)}
+                            variant='outlined'
+                            label={t('Priority')}
+                            choices={mappedPriorities}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
                       </Grid>
                     </BoxPadding>
                     {hasCreatorOrOwnerPermissions(
@@ -430,4 +447,4 @@ export function EditGrievancePage(): React.ReactElement {
       }}
     </Formik>
   );
-}
+};
