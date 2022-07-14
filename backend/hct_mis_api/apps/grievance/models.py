@@ -106,6 +106,11 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     CATEGORY_NEEDS_ADJUDICATION = 8
     CATEGORY_SYSTEM_FLAGGING = 9
 
+    SUB_CATEGORY_PAYMENT_COMPLAINT = 1
+    SUB_CATEGORY_FSP_COMPLAINT = 2
+    SUB_CATEGORY_REGISTRATION_COMPLAINT = 3
+    SUB_CATEGORY_OTHER_COMPLAINT = 4
+
     ISSUE_TYPE_DATA_BREACH = 1
     ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK = 2
     ISSUE_TYPE_FRAUD_FORGERY = 3
@@ -168,6 +173,14 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         (CATEGORY_SENSITIVE_GRIEVANCE, _("Sensitive Grievance")),
         (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
+
+    SUB_CATEGORY_CHOICES = (
+        (SUB_CATEGORY_PAYMENT_COMPLAINT, _("Payment Related Complaint")),
+        (SUB_CATEGORY_FSP_COMPLAINT, _("FSP Related Complaint")),
+        (SUB_CATEGORY_REGISTRATION_COMPLAINT, _("Registration Related Complaint")),
+        (SUB_CATEGORY_OTHER_COMPLAINT, _("Other Complaint")),
+    )
+
     MANUAL_CATEGORIES = (
         CATEGORY_DATA_CHANGE,
         CATEGORY_GRIEVANCE_COMPLAINT,
@@ -293,6 +306,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     )
     status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_NEW)
     category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
+    sub_category = models.IntegerField(verbose_name=_("Sub Category"), choices=SUB_CATEGORY_CHOICES, null=True, blank=True)
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
     description = models.TextField(
         verbose_name=_("Description"),
