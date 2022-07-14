@@ -1,6 +1,10 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 
+from datetime import datetime
+from dateutil.parser import parse
+from django.utils import timezone
+
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
@@ -19,7 +23,7 @@ from hct_mis_api.apps.household.fixtures import DocumentFactory, DocumentTypeFac
 
 # used for ease of assertions, so it imitates serializer's behaviour
 def _time(some_time):
-    return str(some_time).replace(" ", "T")
+    return str(some_time).replace(" ", "T").replace("+00:00", "Z")
 
 
 class TestDetails(TestCase):
