@@ -297,12 +297,31 @@ export const EditGrievancePage = (): React.ReactElement => {
                           onChange={(e) => {
                             setFieldValue('category', e.target.value);
                             setFieldValue('issueType', null);
+                            setFieldValue('subCategory', null);
                           }}
                           variant='outlined'
                           choices={choicesData.grievanceTicketCategoryChoices}
                           component={FormikSelectField}
                         />
                       </Grid>
+                      {values.category.toString() ===
+                        GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT && (
+                        <Grid item xs={6}>
+                          <Field
+                            name='subCategory'
+                            label={t('Sub Category')}
+                            disabled={Boolean(ticket.subCategory)}
+                            onChange={(e) => {
+                              setFieldValue('subCategory', e.target.value);
+                            }}
+                            variant='outlined'
+                            choices={
+                              choicesData.grievanceTicketSubCategoryChoices
+                            }
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                      )}
                       {values.category.toString() ===
                         GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
                       values.category.toString() ===
