@@ -249,6 +249,18 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         CATEGORY_SYSTEM_FLAGGING: "system_flagging_ticket_details",
     }
 
+    PRIORITY_CRITICAL = 1
+    PRIORITY_HIGH = 2
+    PRIORITY_MEDIUM = 3
+    PRIORITY_LOW = 4
+
+    PRIORITY_CHOICES = (
+        (PRIORITY_CRITICAL, _("Critical")),
+        (PRIORITY_HIGH, _("High")),
+        (PRIORITY_MEDIUM, _("Medium")),
+        (PRIORITY_LOW, _("Low")),
+    )
+
     user_modified = models.DateTimeField(
         verbose_name=_("Modified"),
         null=True,
@@ -308,6 +320,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     extras = JSONField(blank=True, default=dict)
     ignored = models.BooleanField(default=False, db_index=True)
     household_unicef_id = models.CharField(max_length=250, blank=True, null=True)
+    priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_LOW)
 
     objects = GrievanceTicketManager()
 
