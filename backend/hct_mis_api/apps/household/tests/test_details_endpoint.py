@@ -1,10 +1,6 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from datetime import datetime
-from dateutil.parser import parse
-from django.utils import timezone
-
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
