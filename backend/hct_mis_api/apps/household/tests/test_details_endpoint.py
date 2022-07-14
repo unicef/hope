@@ -19,7 +19,7 @@ from hct_mis_api.apps.household.fixtures import DocumentFactory, DocumentTypeFac
 
 # used for ease of assertions, so it imitates serializer's behaviour
 def _time(some_time):
-    return str(some_time).replace(" ", "T")
+    return str(some_time).replace(" ", "T").replace("+00:00", "Z")
 
 
 class TestDetails(TestCase):
