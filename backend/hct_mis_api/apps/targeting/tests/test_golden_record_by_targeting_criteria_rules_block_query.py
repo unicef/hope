@@ -50,7 +50,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                 {
                     "sex": "MALE",
                     "marital_status": "MARRIED",
-                    "observed_disability": ["SEEING", "HEARING", "WALKING", "MEMORY", "SELF", "COMMUNICATING"],
+                    "observed_disability": ["SEEING", "HEARING", "WALKING", "MEMORY", "SELF_CARE", "COMMUNICATING"],
                     "seeing_disability": "LOT_DIFFICULTY",
                     "hearing_disability": "SOME_DIFFICULTY",
                     "physical_disability": "SOME_DIFFICULTY",
