@@ -42,6 +42,10 @@ export const GrievancesDetails = ({
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
+  const subCategoryChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.grievanceTicketSubCategoryChoices);
+
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -75,9 +79,16 @@ export const GrievancesDetails = ({
                 size: 3,
               },
               {
+                label: t('SUB CATEGORY'),
+                value: (
+                  <span>{subCategoryChoices[ticket.subCategory] || '-'}</span>
+                ),
+                size: 3,
+              },
+              {
                 label: t('Issue Type'),
                 value: <span>{issueType}</span>,
-                size: 6,
+                size: 3,
               },
               {
                 label: t('HOUSEHOLD ID'),
@@ -161,12 +172,7 @@ export const GrievancesDetails = ({
               {
                 label: t('DESCRIPTION'),
                 value: ticket.description,
-                size: 3,
-              },
-              {
-                label: t('PRIORITY'),
-                value: ticket.priority,
-                size: 3,
+                size: 6,
               },
               {
                 label: t('ASSIGNED TO'),

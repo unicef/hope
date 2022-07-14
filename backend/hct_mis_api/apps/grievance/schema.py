@@ -437,6 +437,7 @@ class Query(graphene.ObjectType):
     all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
+    grievance_ticket_sub_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
@@ -448,6 +449,9 @@ class Query(graphene.ObjectType):
 
     def resolve_grievance_ticket_category_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
+
+    def resolve_grievance_ticket_sub_category_choices(self, info, **kwargs):
+        return to_choice_object(GrievanceTicket.SUB_CATEGORY_CHOICES)
 
     def resolve_grievance_ticket_manual_category_choices(self, info, **kwargs):
         return [
