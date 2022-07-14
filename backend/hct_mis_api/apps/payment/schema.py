@@ -165,45 +165,31 @@ class ApprovalNode(DjangoObjectType):
         return self.info
 
 
-class ApprovalSortedByStageNode(graphene.ObjectType):
-    stage = graphene.Int()
-    objs = graphene.List(ApprovalNode)
-
-
 class AcceptanceProcessNode(DjangoObjectType):
-    approvals = graphene.List(ApprovalSortedByStageNode)
+
+    class Meta:
+        model = ApprovalProcess
+
+
+class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
     approval_number = graphene.Int()
     authorization_number = graphene.Int()
     finance_review_number = graphene.Int()
 
     class Meta:
-        model = ApprovalProcess
-
-    def resolve_approvals(self, info):
-        qs = self.approvals.all()
-        res = list()
-        number_of_stages = qs.values_list("stage", flat=True)
-        for n in set(number_of_stages):
-            obj = {"stage": n, "objs": qs.filter(stage=n)}
-            res.append(obj)
-        return res
-
-    def resolve_approval_number(self, info):
-        return self.payment_plan.bussines_area.approval_number
-
-    def resolve_authorization_number(self, info):
-        return self.payment_plan.bussines_area.authorization_number
-
-    def resolve_finance_review_number(self, info):
-        return self.payment_plan.bussines_area.finance_review_number
-
-
-class PaymentPlanNode(DjangoObjectType):
-
-    class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_approval_number(self, info):
+        return self.business_area.approval_number
+
+    def resolve_authorization_number(self, info):
+        return self.business_area.authorization_number
+
+    def resolve_finance_review_number(self, info):
+        return self.business_area.finance_review_number
 
 
 class Query(graphene.ObjectType):
@@ -289,13 +275,11 @@ class Query(graphene.ObjectType):
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
     )
-    # TODO: add perms
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
-        permission_classes=(),
+        # permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
-    acceptance_process = graphene.Field(AcceptanceProcessNode)
 
     def resolve_all_payment_verifications(self, info, **kwargs):
         return (

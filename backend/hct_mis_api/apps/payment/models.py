@@ -212,6 +212,13 @@ class GenericPayment(TimeStampedUUIDModel):
 
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "status",
+            "status_date",
+        ]
+    )
+
     # TODO MB
     # - ADMIN
     # - store *count fields on create, update on lock/unlock
@@ -280,7 +287,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         source=Status.LOCKED,
         target=Status.IN_APPROVAL,
     )
-    def status_send_to_approval(self):
+    def status_send_to_approval(self, user):
+        ApprovalProcess.objects.create(
+            payment_plan=self,
+            approved_by=user,
+            approve_date=timezone.now()
+        )
         self.status_date = timezone.now()
 
     @transition(
@@ -293,10 +305,18 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
+        source=Status.IN_APPROVAL,
+        target=Status.IN_AUTHORIZATION,
+    )
+    def status_mark_as_approved(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
         source=Status.IN_AUTHORIZATION,
         target=Status.IN_REVIEW,
     )
-    def status_authorize(self):
+    def status_mark_as_authorized(self):
         self.status_date = timezone.now()
 
     @transition(
@@ -726,7 +746,7 @@ class Approval(TimeStampedUUIDModel):
     )
 
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=APPROVAL, verbose_name=_("Approval type"))
-    stage = models.PositiveIntegerField(default=0, verbose_name=_("Number of stage"))
+    stage = models.PositiveIntegerField(default=0, verbose_name=_("Number of stage"))  # TODO: remove it?
     comment = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     approval_process = models.ForeignKey(ApprovalProcess, on_delete=models.CASCADE, related_name="approvals")

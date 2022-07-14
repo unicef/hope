@@ -57,9 +57,7 @@ class GetCashplanVerificationSampleSizeInput(graphene.InputObjectType):
     rapid_pro_arguments = RapidProArguments()
 
 
-class CreateAcceptanceProcessInput(graphene.InputObjectType):
+class UpdatePaymentPlanStatusInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
-    stage = graphene.Int(required=True)
-    acceptance_process_type = graphene.String(required=True)
+    status = graphene.String()
     comment = graphene.String()
-    test = graphene.Decimal()
