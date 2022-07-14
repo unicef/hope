@@ -1,3 +1,4 @@
+import random
 import time
 
 from django.contrib.gis.geos import Point
@@ -19,6 +20,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,
+    ImportedDocument,
+    ImportedDocumentType,
 )
 
 faker = Faker()
@@ -149,3 +152,19 @@ def create_imported_household_and_individuals(household_data=None, individuals_d
     household.head_of_household = individuals[0]
     household.save()
     return household, individuals
+
+
+class ImportedDocumentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = ImportedDocument
+
+    document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
+    type = factory.LazyAttribute(lambda o: ImportedDocumentType.objects.order_by("?").first())
+    individual = factory.SubFactory(ImportedIndividualFactory)
+
+
+class ImportedDocumentTypeFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = ImportedDocumentType
+
+    type = random.choice(["BIRTH_CERTIFICATE", "TAX_ID", "DRIVERS_LICENSE"])
