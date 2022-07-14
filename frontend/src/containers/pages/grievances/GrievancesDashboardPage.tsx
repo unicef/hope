@@ -38,7 +38,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
     <>
       <PageHeader title={t('Grievance Dashboard')} />
       <TableWrapper>
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           <Grid item xs={4}>
             <Box>
               <GrievanceDashboardCard
@@ -51,7 +51,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 userGenerated={ticketsByType.userGeneratedCount}
               />
             </Box>
-            <Box mt={6}>
+            <Box mt={5}>
               <GrievanceDashboardCard
                 topLabel={t('TOTAL NUMBER OF CLOSED TICKETS')}
                 topNumber={
@@ -62,7 +62,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 userGenerated={ticketsByType.closedUserGeneratedCount}
               />
             </Box>
-            <Box mt={6}>
+            <Box mt={5}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
                 topNumber={`${ticketsByType.systemGeneratedAvgResolution +
@@ -71,7 +71,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 userGenerated={`${ticketsByType.userGeneratedAvgResolution} days`}
               />
             </Box>
-            <Box mt={6}>
+            <Box mt={5}>
               <TicketsByStatusSection data={ticketsByStatus} />
             </Box>
           </Grid>
@@ -79,7 +79,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
             <Box ml={3}>
               <TicketsByCategorySection data={ticketsByCategory} />
             </Box>
-            <Box ml={3} mt={6}>
+            <Box ml={3} mt={5}>
               <TicketsByLocationAndCategorySection
                 data={ticketsByLocationAndCategory}
               />
