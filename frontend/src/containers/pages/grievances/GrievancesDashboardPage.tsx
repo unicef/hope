@@ -27,6 +27,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
   if (loading) return <LoadingComponent />;
   if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
     return <PermissionDenied />;
+
   const {
     ticketsByCategory,
     ticketsByLocationAndCategory,

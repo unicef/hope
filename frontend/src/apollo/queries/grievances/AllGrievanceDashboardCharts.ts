@@ -24,12 +24,10 @@ export const AllGrievanceDashboardCharts = gql`
     }
 
     ticketsByLocationAndCategory(businessAreaSlug: $businessAreaSlug) {
-      location
-      count
-      categories {
-        categoryName
-        count
+      datasets {
+        data
       }
+      labels
     }
   }
 `;

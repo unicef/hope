@@ -22,6 +22,8 @@ export const TicketsByLocationAndCategoryChart = ({
   const { t } = useTranslation();
   if (!data) return null;
 
+  console.log('data', data);
+
   const matchDataSize = (
     dataToSlice: number[] | string[],
   ): number[] | string[] => {
@@ -37,44 +39,44 @@ export const TicketsByLocationAndCategoryChart = ({
   //   maxBarThickness: 15,
   // }));
 
-  // const chartData = {
-  //   labels: matchDataSize(data.labels),
-  //   datasets: mappedDatasets,
-  // };
+  const chartData = {
+    labels: matchDataSize(data.labels),
+    datasets: data.datasets,
+  };
 
-  // const options = {
-  //   legend: {
-  //     labels: {
-  //       padding: 40,
-  //     },
-  //   },
-  //   scales: {
-  //     xAxes: [
-  //       {
-  //         scaleLabel: {
-  //           display: false,
-  //         },
-  //         position: 'top',
-  //         ticks: {
-  //           beginAtZero: true,
-  //           callback: formatThousands,
-  //         },
-  //       },
-  //     ],
-  //     yAxes: [
-  //       {
-  //         position: 'left',
-  //         gridLines: {
-  //           display: false,
-  //         },
-  //       },
-  //     ],
-  //   },
-  // };
+  const options = {
+    legend: {
+      labels: {
+        padding: 40,
+      },
+    },
+    scales: {
+      xAxes: [
+        {
+          scaleLabel: {
+            display: false,
+          },
+          position: 'top',
+          ticks: {
+            beginAtZero: true,
+            callback: formatThousands,
+          },
+        },
+      ],
+      yAxes: [
+        {
+          position: 'left',
+          gridLines: {
+            display: false,
+          },
+        },
+      ],
+    },
+  };
 
   return (
     <Box flexDirection='column'>
-      {/* <HorizontalBar
+      <HorizontalBar
         data={chartData}
         options={options}
         plugins={[ChartDataLabels]}
@@ -90,7 +92,7 @@ export const TicketsByLocationAndCategoryChart = ({
             {showAll ? t('HIDE') : t('SHOW MORE LOCATIONS')}
           </Button>
         </Box>
-      ) : null} */}
+      ) : null}
     </Box>
   );
 };
