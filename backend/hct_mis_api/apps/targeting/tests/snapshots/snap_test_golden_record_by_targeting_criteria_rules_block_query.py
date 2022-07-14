@@ -140,6 +140,16 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
     'data': {
         'goldenRecordByTargetingCriteria': {
             'edges': [
+            ],
+            'totalCount': 0
+        }
+    }
+}
+
+snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_golden_record_by_targeting_criteria_observed_disability_with_invalid_argument 1'] = {
+    'data': {
+        'goldenRecordByTargetingCriteria': {
+            'edges': [
                 {
                     'node': {
                         'individuals': {
@@ -157,16 +167,6 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
                 }
             ],
             'totalCount': 1
-        }
-    }
-}
-
-snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_golden_record_by_targeting_criteria_observed_disability_with_invalid_argument 1'] = {
-    'data': {
-        'goldenRecordByTargetingCriteria': {
-            'edges': [
-            ],
-            'totalCount': 0
         }
     }
 }
