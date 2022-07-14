@@ -164,7 +164,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                                             "MEMORY",
                                             "SEEING",
                                             "WALKING",
-                                            "SELF",
+                                            "SELF_CARE",
                                         ],
                                         "fieldName": "observed_disability",
                                         "isFlexField": False,
