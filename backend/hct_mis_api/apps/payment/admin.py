@@ -17,7 +17,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     ServiceProvider,
     CashPlan,
-    PaymentPlan,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -165,24 +164,3 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
 
         return TemplateResponse(request, "admin/cashplan/payments.html", context)
-
-
-# TODO: added only for testing locally
-from hct_mis_api.apps.payment.models import ApprovalProcess, Approval
-class ApproveInline(admin.TabularInline):
-    model = Approval
-    extra = 0
-
-
-@admin.register(ApprovalProcess)
-class ApprovalProcessAdmin(admin.ModelAdmin):
-    raw_id_fields = ("approved_by", "authorized_by", "finance_review_by")
-    search_fields = ("approved_by", "authorized_by", "finance_review_by")
-    list_display = ("id", "created_at", "approve_date", "authorization_date", "finance_review_date")
-    list_filter = ("approve_date", "authorization_date", "finance_review_date")
-    inlines = (ApproveInline,)
-
-
-@admin.register(PaymentPlan)
-class PaymentPlanAdmin(admin.ModelAdmin):
-    pass

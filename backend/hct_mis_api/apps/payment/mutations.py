@@ -486,6 +486,8 @@ class LockPaymentPlanMutation(PermissionMutation):
         payment_plan.status_lock()
         payment_plan.save()
 
+        # TODO: add more logic here
+
         log_create(
             PaymentPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
