@@ -441,6 +441,7 @@ python-dateutil = "2.6.0"
 [package.source]
 type = "url"
 url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip"
+
 [[package]]
 name = "django-author"
 version = "1.2.0"
@@ -469,7 +470,7 @@ tzdata = "*"
 
 [[package]]
 name = "django-celery-results"
-version = "2.3.1"
+version = "2.4.0"
 description = "Celery result backends for Django."
 category = "main"
 optional = false
@@ -2114,7 +2115,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.12"
-content-hash = "bd8a9e03e74bbac00287c529d914c1d8c2e58681a4c4384bc1100de59ceebd05"
+content-hash = "2b1962545acba632db13eb2f97b70bf39aa38c956490d74e7930b5405cdb2821"
 
 [metadata.files]
 amqp = [
@@ -2345,8 +2346,8 @@ django-celery-beat = [
     {file = "django_celery_beat-2.3.0-py3-none-any.whl", hash = "sha256:ff694e1d30f84de3d2b78822c90005c6c7c1462768e845ae162af71a6a46f1eb"},
 ]
 django-celery-results = [
-    {file = "django_celery_results-2.3.1-py3-none-any.whl", hash = "sha256:b8c9416619dbcc38f13398e31bcb1f14a228cd1e8f65fb22d3b7fc68aaa5331a"},
-    {file = "django_celery_results-2.3.1.tar.gz", hash = "sha256:bf24ecc29c42e49cc7eb30b9b3739471331e2a0ca517cc88ca53a0cf3a2031d1"},
+    {file = "django_celery_results-2.4.0-py3-none-any.whl", hash = "sha256:be91307c02fbbf0dda21993c3001c60edb74595444ccd6ad696552fe3689e85b"},
+    {file = "django_celery_results-2.4.0.tar.gz", hash = "sha256:75aa51970db5691cbf242c6a0ff50c8cdf419e265cd0e9b772335d06436c4b99"},
 ]
 django-compressor = [
     {file = "django_compressor-4.0-py2.py3-none-any.whl", hash = "sha256:b4fe15cc23bf39420b37cb0030572bd0971104ca1ec3764f502c0f179e576dff"},

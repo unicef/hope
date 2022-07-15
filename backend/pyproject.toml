@@ -65,7 +65,7 @@ django-adminactions = "^1.15"
 django-adminfilters = "2.0.2"
 django-auditlog = { url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip" }
 django-celery-beat = "^2.3.0"
-django-celery-results = "^2.3.1"
+django-celery-results = "^2.4.0"
 django-concurrency = "^2.4"
 django-constance = { version = "2.9.0", extras = ["redis"] }
 django-cors-headers = "3.13.0"
