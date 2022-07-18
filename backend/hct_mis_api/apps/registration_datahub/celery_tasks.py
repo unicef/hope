@@ -17,10 +17,18 @@ logger = logging.getLogger(__name__)
 @contextmanager
 def locked_cache(key):
     try:
-        with cache.lock(key, blocking_timeout=2, timeout=85400) as lock:
+        # ``blocking_timeout`` indicates the maximum amount of time in seconds to
+        # spend trying to acquire the lock.
+        # ``timeout`` indicates a maximum life for the lock.
+        # some procedures here can take a few seconds
+        # 30s to try acquiring the lock should be enough
+        with cache.lock(key, blocking_timeout=30, timeout=60 * 60 * 24) as lock:
             yield
-    finally:
-        lock.release()
+    except LockError as e:
+        logger.exception(f"Couldn't lock cache for key '{key}'. Failed with: {e}")
+    else:
+        if lock.locked():
+            lock.release()
 
 
 @app.task
@@ -301,43 +309,40 @@ def automate_rdi_creation_task(
         FlexRegistrationService,
     )
 
-    try:
-        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
-            try:
-                service = FlexRegistrationService()
+    with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
+        try:
+            service = FlexRegistrationService()
 
-                qs = Record.objects.filter(registration=registration_id, **filters).exclude(
-                    status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
+            qs = Record.objects.filter(registration=registration_id, **filters).exclude(
+                status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
+            )
+            if fix_tax_id:
+                check_and_set_taxid(qs)
+            all_records_ids = qs.values_list("id", flat=True)
+            if len(all_records_ids) == 0:
+                return ["No Records found", 0]
+
+            splitted_record_ids = [
+                all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
+            ]
+            output = []
+            for page, records_ids in enumerate(splitted_record_ids, 1):
+                rdi_name = template.format(
+                    page=page,
+                    date=timezone.now(),
+                    registration_id=registration_id,
+                    page_size=page_size,
+                    records=len(records_ids),
                 )
-                if fix_tax_id:
-                    check_and_set_taxid(qs)
-                all_records_ids = qs.values_list("id", flat=True)
-                if len(all_records_ids) == 0:
-                    return ["No Records found", 0]
+                rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
+                service.process_records(rdi_id=rdi.id, records_ids=records_ids)
+                output.append([rdi_name, len(records_ids)])
+                if auto_merge:
+                    merge_registration_data_import_task.delay(rdi.id)
 
-                splitted_record_ids = [
-                    all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
-                ]
-                output = []
-                for page, records_ids in enumerate(splitted_record_ids, 1):
-                    rdi_name = template.format(
-                        page=page,
-                        date=timezone.now(),
-                        registration_id=registration_id,
-                        page_size=page_size,
-                        records=len(records_ids),
-                    )
-                    rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
-                    service.process_records(rdi_id=rdi.id, records_ids=records_ids)
-                    output.append([rdi_name, len(records_ids)])
-                    if auto_merge:
-                        merge_registration_data_import_task.delay(rdi.id)
-
-                return output
-            except Exception:
-                raise
-    except LockError as e:
-        logger.exception(e)
+            return output
+        except Exception:
+            raise
     return None
 
 
@@ -365,22 +370,18 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
         RdiDiiaCreateTask,
     )
 
-    try:
-        with locked_cache(key="automate_rdi_diia_creation_task"):
-            try:
-                service = RdiDiiaCreateTask()
-                rdi_name = template.format(
-                    date=timezone.now(),
-                    page_size=page_size,
-                )
-                rdi = service.create_rdi(None, rdi_name)
-                service.execute(rdi.id, diia_hh_count=page_size)
-                return [rdi_name, page_size]
-            except Exception:
-                raise
-    except LockError as e:
-        logger.exception(e)
-        return []
+    with locked_cache(key="automate_rdi_diia_creation_task"):
+        try:
+            service = RdiDiiaCreateTask()
+            rdi_name = template.format(
+                date=timezone.now(),
+                page_size=page_size,
+            )
+            rdi = service.create_rdi(None, rdi_name)
+            service.execute(rdi.id, diia_hh_count=page_size)
+            return [rdi_name, page_size]
+        except Exception:
+            raise
 
 
 @app.task
@@ -389,19 +390,15 @@ def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date}
         RdiDiiaCreateTask,
     )
 
-    try:
-        with locked_cache(key="registration_diia_import_task"):
-            try:
-                service = RdiDiiaCreateTask()
-                rdi_name = template.format(
-                    date=timezone.now(),
-                    page_size=len(diia_hh_ids),
-                )
-                rdi = service.create_rdi(None, rdi_name)
-                service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
-                return [rdi_name, len(diia_hh_ids)]
-            except Exception:
-                raise
-    except LockError as e:
-        logger.exception(e)
-        return []
+    with locked_cache(key="registration_diia_import_task"):
+        try:
+            service = RdiDiiaCreateTask()
+            rdi_name = template.format(
+                date=timezone.now(),
+                page_size=len(diia_hh_ids),
+            )
+            rdi = service.create_rdi(None, rdi_name)
+            service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
+            return [rdi_name, len(diia_hh_ids)]
+        except Exception:
+            raise
