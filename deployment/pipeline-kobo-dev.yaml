@@ -47,6 +47,9 @@ stages:
                 smtp.host=$(SMTP_HOST),\
                 smtp.email=kobo@unitst.org,\
                 ingress.host=$(DOMAIN),\
+                kpi.subdomain=kf-hope,\
+                kobocat.subdomain=kc-hope,\
+                enketo.subdomain=ek-hope,\
                 intgress.tlsSecret=aks-unitst-tls,\
                 ingress.scheme=https,\
                 ingress.tls=true,"
