@@ -5,14 +5,14 @@ from hct_mis_api.apps.core.models import XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
 )
+from hct_mis_api.apps.utils.logs import log_start_and_end
 
 logger = logging.getLogger(__name__)
 
 
+@log_start_and_end
 @app.task(bind=True, default_retry_delay=60)
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_kobo_template_id):
-    logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry start")
-
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -33,13 +33,10 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
         logger.exception(e)
         raise
 
-    logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry end")
 
-
+@log_start_and_end
 @app.task
 def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
-    logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry start")
-
     try:
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
@@ -51,5 +48,3 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
     except Exception as e:
         logger.exception(e)
         raise
-
-    logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry end")
