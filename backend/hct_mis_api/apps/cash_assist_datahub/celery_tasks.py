@@ -7,8 +7,8 @@ from hct_mis_api.apps.utils.logs import log_start_and_end
 logger = logging.getLogger(__name__)
 
 
-@log_start_and_end
 @app.task(queue="priority")
+@log_start_and_end
 def pull_from_cashassist_datahub_task():
     try:
         from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (

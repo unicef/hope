@@ -6,8 +6,8 @@ from hct_mis_api.apps.utils.logs import log_start_and_end
 logger = logging.getLogger(__name__)
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def report_export_task(report_id):
     try:
         from hct_mis_api.apps.reporting.services.generate_report_service import (
@@ -23,8 +23,8 @@ def report_export_task(report_id):
         raise
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def dashboard_report_export_task(dashboard_report_id):
     try:
         from hct_mis_api.apps.reporting.services.generate_dashboard_report_service import (

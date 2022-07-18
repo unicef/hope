@@ -6,8 +6,8 @@ from hct_mis_api.apps.utils.logs import log_start_and_end
 logger = logging.getLogger(__name__)
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def send_target_population_task(target_population_id):
     try:
         from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import (

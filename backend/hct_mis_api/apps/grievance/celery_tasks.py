@@ -14,8 +14,8 @@ from hct_mis_api.apps.utils.logs import log_start_and_end
 logger = logging.getLogger(__name__)
 
 
-@log_start_and_end
 @app.task(queue="priority")
+@log_start_and_end
 def deduplicate_and_check_against_sanctions_list_task(
     should_populate_index, registration_data_import_id, individuals_ids
 ):

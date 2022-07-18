@@ -22,8 +22,8 @@ def locked_cache(key):
         lock.release()
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -52,8 +52,8 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
         raise
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def registration_kobo_import_task(registration_data_import_id, import_data_id, business_area):
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
@@ -90,8 +90,8 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
         raise
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def registration_kobo_import_hourly_task():
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -120,8 +120,8 @@ def registration_kobo_import_hourly_task():
         raise
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def registration_xlsx_import_hourly_task():
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -150,8 +150,8 @@ def registration_xlsx_import_hourly_task():
         raise
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def merge_registration_data_import_task(registration_data_import_id):
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
@@ -167,8 +167,8 @@ def merge_registration_data_import_task(registration_data_import_id):
         raise
 
 
-@log_start_and_end
 @app.task(queue="priority")
+@log_start_and_end
 def rdi_deduplication_task(registration_data_import_id):
 
     try:
@@ -192,8 +192,8 @@ def rdi_deduplication_task(registration_data_import_id):
         raise
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def pull_kobo_submissions_task(import_data_id):
     from hct_mis_api.apps.registration_datahub.models import KoboImportData
 
@@ -214,8 +214,8 @@ def pull_kobo_submissions_task(import_data_id):
         raise
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def validate_xlsx_import_task(import_data_id):
     from hct_mis_api.apps.registration_datahub.models import ImportData
 
@@ -236,8 +236,8 @@ def validate_xlsx_import_task(import_data_id):
         raise
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def process_flex_records_task(rdi_id, records_ids):
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
@@ -246,23 +246,23 @@ def process_flex_records_task(rdi_id, records_ids):
     FlexRegistrationService().process_records(rdi_id, records_ids)
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def extract_records_task(max_records=500):
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     extract(records_ids)
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def fresh_extract_records_task(records_ids=None):
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def automate_rdi_creation_task(
     registration_id: int,
     page_size: int,

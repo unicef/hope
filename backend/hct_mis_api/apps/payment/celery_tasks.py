@@ -6,8 +6,8 @@ from hct_mis_api.apps.utils.logs import log_start_and_end
 logger = logging.getLogger(__name__)
 
 
-@log_start_and_end
 @app.task
+@log_start_and_end
 def get_sync_run_rapid_pro_task():
     try:
         from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
