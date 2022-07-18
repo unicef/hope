@@ -32,6 +32,9 @@ from hct_mis_api.apps.payment.filters import (
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
     CashPlanPaymentVerificationFilter,
+    FinancialServiceProviderXlsxTemplateFilter,
+    FinancialServiceProviderXlsxReportFilter,
+    FinancialServiceProviderFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -40,6 +43,9 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProvider,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -89,6 +95,39 @@ class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
 
     class Meta:
         model = PaymentRecord
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class FinancialServiceProviderXlsxTemplateNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATE_VIEW_LIST_AND_DETAILS),)
+
+    class Meta:
+        model = FinancialServiceProviderXlsxTemplate
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+
+    class Meta:
+        model = FinancialServiceProviderXlsxReport
+        exclude = ("file",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    report_url = graphene.String()
+
+    def resolve_report_url(self, info, **kwargs):
+        return self.file.url if self.file else ""
+
+
+class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.FINANCIAL_SERVICE_PROVIDER_VIEW_LIST_AND_DETAILS),)
+
+    class Meta:
+        model = FinancialServiceProvider
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -154,6 +193,21 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
 
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
+    financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
+    all_financial_service_provider_xlsx_templates = DjangoPermissionFilterConnectionField(
+        FinancialServiceProviderXlsxTemplateNode,
+        filterset_class=FinancialServiceProviderXlsxTemplateFilter,
+    )
+    financial_service_provider_xlsx_report = relay.Node.Field(FinancialServiceProviderXlsxReportNode)
+    all_financial_service_provider_xlsx_reports = DjangoPermissionFilterConnectionField(
+        FinancialServiceProviderXlsxReportNode,
+        filterset_class=FinancialServiceProviderXlsxReportFilter,
+    )
+    financial_service_provider = relay.Node.Field(FinancialServiceProviderNode)
+    all_financial_service_providers = DjangoPermissionFilterConnectionField(
+        FinancialServiceProviderNode,
+        filterset_class=FinancialServiceProviderFilter,
+    )
     payment_record_verification = relay.Node.Field(PaymentVerificationNode)
     cash_plan_payment_verification = relay.Node.Field(CashPlanPaymentVerificationNode)
     all_payment_records = DjangoPermissionFilterConnectionField(
