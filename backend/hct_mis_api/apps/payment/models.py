@@ -3,7 +3,7 @@ from functools import cached_property
 from typing import Optional
 
 from django.conf import settings
-from django.contrib.postgres.fields import CICharField
+from django.contrib.postgres.fields import CICharField, ArrayField
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField, Q
@@ -194,10 +194,7 @@ class GenericPayment(TimeStampedUUIDModel):
 
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
-    # TODO MB
-    # - ADMIN
-    # - store *count fields on create, update on lock/unlock
-    # - update on household/targeting update?
+    # TODO - store *count fields on create, update on lock/unlock
 
     class Status(models.TextChoices):
         OPEN = "OPEN"
@@ -218,7 +215,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         TargetPopulation,
         on_delete=models.CASCADE,
         related_name="payment_plans",
-    )
+    )  # TODO set program based on target_population.program
     currency = models.CharField(
         max_length=4,
     )
@@ -243,7 +240,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     def status_lock(self):
         # TODO MB additional actions
         # - set/unset excluded on parent lock
-        # udpte numbers
+        # - update *count fields numbers
         self.status_date = timezone.now()
 
     @transition(
@@ -254,7 +251,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     def status_unlock(self):
         # TODO MB additional actions
         # - set/unset excluded on parent lock
-        # udpte numbers
+        # - update *count fields numbers
         self.status_date = timezone.now()
 
     @transition(
@@ -292,6 +289,82 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     @property
     def currency_exchange_date(self):
         return self.dispersion_end_date
+
+
+class DeliveryMechanism(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    display_name = models.CharField(max_length=255, unique=True)
+    required_fields = ArrayField(models.CharField(max_length=250), default=list)  # TODO eg [iban, bank name]
+
+    def validate_delivery_data(self, delivery_data: dict):
+        # TODO MB PaymentChannel instance delivery data can be validated here based on required fields
+        pass
+
+
+class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
+    class Status(models.TextChoices):
+        NOT_SENT = "NOT_SENT"
+        SENT = "SENT"
+
+    payment_plan = models.ForeignKey(
+        PaymentPlan,
+        on_delete=models.CASCADE,
+        related_name="delivery_mechanisms",
+    )
+    # financial_service_provider = models.ForeignKey(
+    #     "payment.FinancialServiceProvider",
+    #     on_delete=models.CASCADE,
+    #     related_name="delivery_mechanisms",
+    # ) # TODO MB uncomment
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="created_delivery_mechanisms",
+    )
+    sent_date = models.DateTimeField()
+    sent_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="sent_delivery_mechanisms",
+    )
+    status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
+    delivery_mechanism = models.ForeignKey(DeliveryMechanism, on_delete=models.CASCADE)
+    delivery_mechanism_order = models.PositiveIntegerField()
+    entitlement_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        db_index=True,
+        null=True,
+    )  # TODO MB count from related payments per delivery mechanism
+    entitlement_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+    )  # TODO MB calculate
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["payment_plan", "delivery_mechanism"], name="unique payment_plan_delivery_mechanism"
+            ),
+            models.UniqueConstraint(
+                fields=["payment_plan", "delivery_mechanism_order"], name="unique payment_plan_delivery_mechanism_order"
+            ),
+        ]
+
+    @transition(
+        field=status,
+        source=Status.NOT_SENT,
+        target=Status.SENT,
+    )
+    def status_send(self, sent_by: settings.AUTH_USER_MODEL):
+        self.sent_date = timezone.now()
+        self.sent_by = sent_by
+
+
+class PaymentChannel(TimeStampedUUIDModel):
+    individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
+    delivery_mechanism = models.ForeignKey(DeliveryMechanism, on_delete=models.CASCADE)
+    delivery_data = JSONField(default=dict, blank=True)
 
 
 class CashPlan(GenericPaymentPlan):
@@ -440,8 +513,6 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
 
 
 class Payment(SoftDeletableModel, GenericPayment):
-    # TODO MB
-    # - ADMIN
     payment_plan = models.ForeignKey(
         PaymentPlan,
         on_delete=models.CASCADE,

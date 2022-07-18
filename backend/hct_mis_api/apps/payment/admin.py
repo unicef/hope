@@ -20,6 +20,11 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     ServiceProvider,
     CashPlan,
+    PaymentPlan,
+    Payment,
+    DeliveryMechanism,
+    DeliveryMechanismPerPaymentPlan,
+    PaymentChannel,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -167,6 +172,68 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
 
         return TemplateResponse(request, "admin/cashplan/payments.html", context)
+
+
+@admin.register(PaymentPlan)
+class PaymentPlanAdmin(HOPEModelAdminBase):
+    list_display = ("name", "program", "status", "target_population")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("program__id", ValueFilter),
+        ("target_population", AutoCompleteFilter),
+    )
+    raw_id_fields = ("business_area", "program", "target_population")
+    search_fields = ("name",)
+
+
+@admin.register(Payment)
+class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+    list_display = ("household", "status", "payment_plan_name")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
+        ("payment_plan", AutoCompleteFilter),
+        ("service_provider", AutoCompleteFilter),
+    )
+    advanced_filter_fields = (
+        "status",
+        "delivery_date",
+        ("service_provider__name", "Service Provider"),
+        ("payment_plan__name", "PaymentPlan"),
+    )
+    date_hierarchy = "updated_at"
+    raw_id_fields = (
+        "business_area",
+        "payment_plan",
+        "household",
+        "head_of_household",
+        "service_provider",
+    )
+
+    def payment_plan_name(self, obj):
+        return obj.payment_plan.name
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("household", "payment_plan", "business_area")
+
+
+@admin.register(DeliveryMechanism)
+class DeliveryMechanismAdmin(HOPEModelAdminBase):
+    list_display = ("display_name", "required_fields")
+
+
+@admin.register(DeliveryMechanismPerPaymentPlan)
+class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
+    list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
+
+
+@admin.register(PaymentChannel)
+class PaymentChannelAdmin(HOPEModelAdminBase):
+    list_display = ("individual", "delivery_mechanism_display_name")
+
+    def delivery_mechanism_display_name(self, obj):
+        return obj.delivery_mechanism.display_name
 
 
 @admin.register(FinancialServiceProviderXlsxTemplate)
