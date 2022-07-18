@@ -11,6 +11,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedDocumentTypeFactory,
     ImportedIndividualFactory,
     ImportedHouseholdFactory,
+    RegistrationDataImportDatahubFactory,
 )
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, HEAD, ROLE_NO_ROLE
@@ -40,22 +41,43 @@ class TestDetails(TestCase):
             has_data_sharing_agreement=True,
         )
 
-    def test_filtering_business_area_code(self):
+    def test_filtering_business_area_code_with_tax_id(self):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(type=IDENTIFICATION_TYPE_TAX_ID)
         document = DocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
 
-        response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}&business_area_code={self.business_area.code}")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        info = data["info"]
-        self.assertEqual(info["status"], "merged to population")
-        self.assertEqual(info["date"], _time(household.created_at))
+        response_ok = self.api_client.get(
+            f"/api/hh-status?tax_id={tax_id}&business_area_code={self.business_area.code}"
+        )
+        self.assertEqual(response_ok.status_code, 200)
 
-        response_filtered = self.api_client.get(f"/api/hh-status?tax_id={tax_id}&business_area_code=non-existent")
-        self.assertEqual(response_filtered.status_code, 404)
+        response_nok = self.api_client.get(f"/api/hh-status?tax_id={tax_id}&business_area_code=non-existent")
+        self.assertEqual(response_nok.status_code, 404)
+
+    def test_filtering_business_area_code_with_registration_id(self):
+        rdi_datahub = RegistrationDataImportDatahubFactory(business_area_slug=self.business_area.slug)
+        imported_household = ImportedHouseholdFactory(registration_data_import=rdi_datahub)
+        imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
+        imported_household.head_of_household = imported_individual
+        imported_household.kobo_asset_id = "HOPE-2022530111222"
+        imported_household.save()
+        ImportedIndividualRoleInHousehold.objects.create(
+            individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
+        )
+
+        registration_id = imported_household.kobo_asset_id
+
+        response_ok = self.api_client.get(
+            f"/api/hh-status?registration_id={registration_id}&business_area_code={self.business_area.code}"
+        )
+        self.assertEqual(response_ok.status_code, 200)
+
+        response_nok = self.api_client.get(
+            f"/api/hh-status?registration_id={registration_id}&business_area_code=non-existent"
+        )
+        self.assertEqual(response_nok.status_code, 404)
 
     def test_getting_non_existent_individual(self):
         response = self.api_client.get("/api/hh-status?tax_id=non-existent")
