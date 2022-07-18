@@ -25,7 +25,7 @@ def locked_cache(key):
         with cache.lock(key, blocking_timeout=30, timeout=60 * 60 * 24) as lock:
             yield
     except LockError as e:
-        logger.exception(e)
+        logger.exception(f"Couldn't lock cache for key '{key}'. Failed with: {e}")
     else:
         if lock.locked():
             lock.release()
