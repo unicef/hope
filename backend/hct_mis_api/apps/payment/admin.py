@@ -12,6 +12,9 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
     PaymentRecord,
     PaymentVerification,
     ServiceProvider,
@@ -138,3 +141,71 @@ class ServiceProviderAdmin(HOPEModelAdminBase):
     list_display = ("full_name", "short_name", "country")
     search_fields = ("full_name", "vision_id", "short_name")
     list_filter = (("business_area", AutoCompleteFilter),)
+
+
+@admin.register(FinancialServiceProviderXlsxTemplate)
+class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
+    list_display = (
+        "name",
+        "total_selected_columns",
+        "created_by",
+    )
+    list_filter = (("created_by", AutoCompleteFilter),)
+    search_fields = ("name",)
+    fields = (
+        "name",
+        "columns",
+    )
+
+    def total_selected_columns(self, obj):
+        return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_TO_CHOOSE)}"
+
+    total_selected_columns.short_description = "# of columns"
+
+    def save_model(self, request, obj: FinancialServiceProviderXlsxTemplate, form, change: bool) -> None:
+        if not change:
+            obj.created_by = request.user
+        return super().save_model(request, obj, form, change)
+
+
+@admin.register(FinancialServiceProvider)
+class FinancialServiceProviderAdmin(HOPEModelAdminBase):
+    list_display = (
+        "name",
+        "created_by",
+        "vision_vendor_number",
+        "distribution_limit",
+        "communication_channel",
+    )
+    search_fields = ("name",)
+    list_filter = ("delivery_mechanisms",)
+    autocomplete_fields = ("created_by", "fsp_xlsx_template")
+    list_select_related = ("created_by", "fsp_xlsx_template")
+    fields = (
+        ("name", "vision_vendor_number"),
+        ("delivery_mechanisms", "distribution_limit"),
+        ("communication_channel", "fsp_xlsx_template"),
+        ("data_transfer_configuration",),
+    )
+
+    def save_model(self, request, obj: FinancialServiceProvider, form, change: bool) -> None:
+        if not change:
+            obj.created_by = request.user
+        return super().save_model(request, obj, form, change)
+
+
+@admin.register(FinancialServiceProviderXlsxReport)
+class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
+    list_display = ("id", "status", "file")
+    list_filter = (
+        "status",
+    )
+    list_select_related = ("financial_service_provider",)
+    # search_fields = ("id",)
+    readonly_fields = ("file", "status", "financial_service_provider")
+
+    def has_add_permission(self, request) -> bool:
+        return False
+    
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False

@@ -3,11 +3,17 @@ from django.db.models.functions import Lower
 
 from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter
 
-
+from hct_mis_api.apps.activity_log.schema import LogEntryFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, CashPlanPaymentVerification
-from hct_mis_api.apps.activity_log.schema import LogEntryFilter
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxReport,
+    FinancialServiceProviderXlsxTemplate,
+    PaymentRecord,
+    PaymentVerification,
+)
 from hct_mis_api.apps.program.models import CashPlan
 
 
@@ -101,3 +107,52 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
         cash_plan = CashPlan.objects.get(pk=value)
         verifications_ids = cash_plan.verifications.all().values_list("pk", flat=True)
         return qs.filter(object_id__in=verifications_ids)
+
+
+class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
+    class Meta:
+        fields = (
+            "name",
+            "created_by",
+        )
+        model = FinancialServiceProviderXlsxTemplate
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            Lower("name"),
+            "created_by",
+        )
+    )
+
+
+class FinancialServiceProviderXlsxReportFilter(FilterSet):
+    class Meta:
+        fields = ("status",)
+        model = FinancialServiceProviderXlsxReport
+
+    order_by = CustomOrderingFilter(fields=("status",))
+
+
+class FinancialServiceProviderFilter(FilterSet):
+    class Meta:
+        fields = (
+            "created_by",
+            "name",
+            "vision_vendor_number",
+            "delivery_mechanisms",
+            "distribution_limit",
+            "communication_channel",
+            "fsp_xlsx_template",
+        )
+        model = FinancialServiceProvider
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "id",
+            Lower("name"),
+            "vision_vendor_number",
+            "delivery_mechanisms",
+            "distribution_limit",
+            "communication_channel",
+        )
+    )
