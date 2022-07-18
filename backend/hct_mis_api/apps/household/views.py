@@ -7,16 +7,24 @@ from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
 from rest_framework.response import Response
 
 
-def get_individual(tax_id):
-    documents = Document.objects.filter(type__type=IDENTIFICATION_TYPE_TAX_ID, document_number=tax_id).distinct()
+def get_individual(tax_id, business_area_code):
+    documents = (
+        Document.objects.all()
+        if not business_area_code
+        else Document.objects.filter(individual__household__business_area__code=business_area_code)
+    ).filter(type__type=IDENTIFICATION_TYPE_TAX_ID, document_number=tax_id)
     if documents.count() > 1:
         raise Exception(f"Multiple documents ({documents.count()}) with given tax_id found")
     if documents.count() == 1:
         return documents.first().individual
 
-    imported_documents = ImportedDocument.objects.filter(
-        type__type=IDENTIFICATION_TYPE_TAX_ID, document_number=tax_id
-    ).distinct()
+    imported_documents = (
+        ImportedDocument.objects.all()
+        if not business_area_code
+        else ImportedDocument.objects.filter(
+            individual__household__registration_data_import__business_area__code=business_area_code
+        )
+    ).filter(type__type=IDENTIFICATION_TYPE_TAX_ID, document_number=tax_id)
     if imported_documents.count() > 1:
         raise Exception(f"Multiple imported documents ({imported_documents.count()}) with given tax_id found")
     if imported_documents.count() == 1:
@@ -24,15 +32,23 @@ def get_individual(tax_id):
     raise Exception("Document with given tax_id not found")
 
 
-def get_household(registration_id):
+def get_household(registration_id, business_area_code):
     kobo_asset_value = _prepare_kobo_asset_id_value(registration_id)
-    households = Household.objects.filter(kobo_asset_id__endswith=kobo_asset_value).distinct()
+    households = (
+        Household.objects.all()
+        if not business_area_code
+        else Household.objects.filter(business_area__code=business_area_code)
+    ).filter(kobo_asset_id__endswith=kobo_asset_value)
     if households.count() > 1:
         raise Exception(f"Multiple households ({households.count()}) with given registration_id found")
     if households.count() == 1:
         return households.first()
 
-    imported_households = ImportedHousehold.objects.filter(kobo_asset_id__endswith=kobo_asset_value).distinct()
+    imported_households = (
+        ImportedHousehold.objects.all()
+        if not business_area_code
+        else ImportedHousehold.objects.filter(registration_data_import__business_area__code=business_area_code)
+    ).filter(kobo_asset_id__endswith=kobo_asset_value)
     if imported_households.count() > 1:
         raise Exception(
             f"Multiple imported households ({imported_households.count()}) with given registration_id found"
@@ -42,7 +58,7 @@ def get_household(registration_id):
     raise Exception("Household with given registration_id not found")
 
 
-def get_household_or_individual(tax_id, registration_id):
+def get_household_or_individual(tax_id, registration_id, business_area_code):
     if tax_id and registration_id:
         raise Exception("tax_id and registration_id are mutually exclusive")
 
@@ -50,25 +66,26 @@ def get_household_or_individual(tax_id, registration_id):
         raise Exception("tax_id or registration_id is required")
 
     if tax_id:
-        individual = get_individual(tax_id)
+        individual = get_individual(tax_id, business_area_code)
         return serialize_by_individual(individual, tax_id)
 
     if registration_id:
-        household = get_household(registration_id)
+        household = get_household(registration_id, business_area_code)
         return serialize_by_household(household)
 
 
-class DetailsView(APIView):
+class HouseholdStatusView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         query_params = request.query_params
 
-        tax_id = query_params.get("tax_id")
-        registration_id = query_params.get("registration_id")
+        tax_id = query_params.get("tax_id", None)
+        registration_id = query_params.get("registration_id", None)
+        business_area_code = query_params.get("business_area_code", None)
 
         try:
-            data = get_household_or_individual(tax_id, registration_id)
+            data = get_household_or_individual(tax_id, registration_id, business_area_code)
         except Exception as exception:
             return Response({"status": "not found", "error_message": str(exception)}, status=404)
 
