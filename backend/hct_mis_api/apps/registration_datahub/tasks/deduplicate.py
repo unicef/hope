@@ -607,7 +607,6 @@ class DeduplicateTask:
     def deduplicate_individuals_from_other_source(cls, individuals):
         cls._wait_until_health_green()
         cls.set_thresholds(individuals[0].registration_data_import)
-        # cls.business_area = individuals[0].business_area
 
         to_bulk_update_results = []
         for individual in individuals:
@@ -828,10 +827,9 @@ class DeduplicateTask:
                 RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
             )
 
-
     @classmethod
     def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
-        documents_to_dedup = [x for x in new_documents if  x.status != Document.STATUS_VALID]
+        documents_to_dedup = [x for x in new_documents if x.status != Document.STATUS_VALID]
         documents_numbers = [x.document_number for x in documents_to_dedup]
         new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]
         new_document_signatures_duplicated_in_batch = [

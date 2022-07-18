@@ -3,13 +3,12 @@ import logging
 from contextlib import contextmanager
 
 from django.core.cache import cache
-
-from constance import config
 from redis.exceptions import LockError
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.registration_datahub.models import Record
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
+from hct_mis_api.apps.utils.logs import log_start_and_end
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +31,8 @@ def locked_cache(key):
 
 
 @app.task
+@log_start_and_end
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
-    logger.info("registration_xlsx_import_task start")
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
@@ -60,13 +59,10 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
         ).update(status=RegistrationDataImport.IMPORT_ERROR)
         raise
 
-    logger.info("registration_xlsx_import_task end")
-
 
 @app.task
+@log_start_and_end
 def registration_kobo_import_task(registration_data_import_id, import_data_id, business_area):
-    logger.info("registration_kobo_import_task start")
-
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
@@ -101,13 +97,10 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
 
         raise
 
-    logger.info("registration_kobo_import_task end")
-
 
 @app.task
+@log_start_and_end
 def registration_kobo_import_hourly_task():
-    logger.info("registration_kobo_import_hourly_task start")
-
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
@@ -134,13 +127,10 @@ def registration_kobo_import_hourly_task():
         logger.exception(e)
         raise
 
-    logger.info("registration_kobo_import_hourly_task end")
-
 
 @app.task
+@log_start_and_end
 def registration_xlsx_import_hourly_task():
-    logger.info("registration_xlsx_import_hourly_task start")
-
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
@@ -167,13 +157,10 @@ def registration_xlsx_import_hourly_task():
         logger.exception(e)
         raise
 
-    logger.info("registration_xlsx_import_hourly_task end")
-
 
 @app.task
+@log_start_and_end
 def merge_registration_data_import_task(registration_data_import_id):
-    logger.info("merge_registration_data_import_task start")
-
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
@@ -187,12 +174,10 @@ def merge_registration_data_import_task(registration_data_import_id):
         ).update(status=RegistrationDataImport.MERGE_ERROR)
         raise
 
-    logger.info("merge_registration_data_import_task end")
-
 
 @app.task(queue="priority")
+@log_start_and_end
 def rdi_deduplication_task(registration_data_import_id):
-    logger.info("rdi_deduplication_task start")
 
     try:
         from hct_mis_api.apps.registration_datahub.models import (
@@ -214,12 +199,10 @@ def rdi_deduplication_task(registration_data_import_id):
         ).update(status=RegistrationDataImport.IMPORT_ERROR)
         raise
 
-    logger.info("rdi_deduplication_task end")
-
 
 @app.task
+@log_start_and_end
 def pull_kobo_submissions_task(import_data_id):
-    logger.info("pull_kobo_submissions_task start")
     from hct_mis_api.apps.registration_datahub.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
@@ -237,13 +220,11 @@ def pull_kobo_submissions_task(import_data_id):
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
         raise
-    finally:
-        logger.info("pull_kobo_submissions_task end")
 
 
 @app.task
+@log_start_and_end
 def validate_xlsx_import_task(import_data_id):
-    logger.info("validate_xlsx_import_task start")
     from hct_mis_api.apps.registration_datahub.models import ImportData
 
     import_data = ImportData.objects.get(id=import_data_id)
@@ -261,42 +242,40 @@ def validate_xlsx_import_task(import_data_id):
             id=import_data.id,
         ).update(status=ImportData.STATUS_ERROR, error=str(e))
         raise
-    finally:
-        logger.info("validate_xlsx_import_task end")
 
 
 @app.task
+@log_start_and_end
 def process_flex_records_task(rdi_id, records_ids):
-    logger.info("process_flex_records start")
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
 
     FlexRegistrationService().process_records(rdi_id, records_ids)
-    logger.info("process_flex_records end")
 
 
 @app.task
+@log_start_and_end
 def extract_records_task(max_records=500):
-    logger.info("extract_records_task start")
-
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     extract(records_ids)
-    logger.info("extract_records_task end")
 
 
 @app.task
+@log_start_and_end
 def fresh_extract_records_task(records_ids=None):
-    logger.info("fresh_extract_records_task start")
-
     if not records_ids:
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)
 
-    logger.info("fresh_extract_records_task end")
 
+<<<<<<< HEAD
 
 @app.task
+=======
+@app.task
+@log_start_and_end
+>>>>>>> 71f1737f9 (squash)
 def automate_rdi_creation_task(
     registration_id: int,
     page_size: int,
