@@ -269,13 +269,8 @@ def fresh_extract_records_task(records_ids=None):
     extract(records_ids)
 
 
-<<<<<<< HEAD
-
-@app.task
-=======
 @app.task
 @log_start_and_end
->>>>>>> 71f1737f9 (squash)
 def automate_rdi_creation_task(
     registration_id: int,
     page_size: int,
