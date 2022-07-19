@@ -80,6 +80,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     admin2 = graphene.Field(AreaNode)
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
     priority = graphene.Int()
+    urgency = graphene.Int()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -146,6 +147,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_priority(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.priority
+
+    @staticmethod
+    def resolve_urgency(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.urgency
 
 
 class TicketNoteNode(DjangoObjectType):

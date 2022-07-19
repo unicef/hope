@@ -776,6 +776,7 @@ export type CreateGrievanceTicketInput = {
   linkedTickets?: Maybe<Array<Maybe<Scalars['ID']>>>,
   extras?: Maybe<CreateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
+  urgency?: Maybe<Scalars['Int']>,
 };
 
 export type CreateGrievanceTicketMutation = {
@@ -1123,6 +1124,7 @@ export type GrievanceTicketNode = Node & {
   ignored: Scalars['Boolean'],
   householdUnicefId?: Maybe<Scalars['String']>,
   priority?: Maybe<Scalars['Int']>,
+  urgency?: Maybe<Scalars['Int']>,
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -3574,7 +3576,7 @@ export type Query = {
   ticketsByType?: Maybe<TicketByType>,
   ticketsByCategory?: Maybe<ChartDatasetNode>,
   ticketsByStatus?: Maybe<ChartDatasetNode>,
-  ticketsByLocationAndCategory?: Maybe<Array<Maybe<TicketByLocationAndCategory>>>,
+  ticketsByLocationAndCategory?: Maybe<ChartDetailedDatasetsNode>,
   grievanceTicket?: Maybe<GrievanceTicketNode>,
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>,
   existingGrievanceTickets?: Maybe<GrievanceTicketNodeConnection>,
@@ -5316,19 +5318,6 @@ export type TicketAddIndividualDetailsNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export type TicketByCategory = {
-   __typename?: 'TicketByCategory',
-  categoryName?: Maybe<Scalars['String']>,
-  count?: Maybe<Scalars['Int']>,
-};
-
-export type TicketByLocationAndCategory = {
-   __typename?: 'TicketByLocationAndCategory',
-  location?: Maybe<Scalars['String']>,
-  count?: Maybe<Scalars['Int']>,
-  categories?: Maybe<Array<Maybe<TicketByCategory>>>,
-};
-
 export type TicketByType = {
    __typename?: 'TicketByType',
   userGeneratedCount?: Maybe<Scalars['Int']>,
@@ -5725,6 +5714,7 @@ export type UpdateGrievanceTicketInput = {
   subCategory?: Maybe<Scalars['Int']>,
   extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
+  urgency?: Maybe<Scalars['Int']>,
 };
 
 export type UpdateGrievanceTicketMutation = {
@@ -7929,7 +7919,7 @@ export type AllGrievanceTicketQuery = (
       & Pick<GrievanceTicketNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'GrievanceTicketNode' }
-        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'createdAt' | 'userModified' | 'admin' | 'unicefId' | 'priority'>
+        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'createdAt' | 'userModified' | 'admin' | 'unicefId' | 'priority' | 'urgency'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -8005,7 +7995,7 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority'>
+    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -14318,6 +14308,7 @@ export const AllGrievanceTicketDocument = gql`
           unicefId
         }
         priority
+        urgency
       }
     }
   }
@@ -14827,6 +14818,7 @@ export const GrievanceTicketDocument = gql`
       }
     }
     priority
+    urgency
   }
 }
     ${IndividualDetailedFragmentDoc}
@@ -19476,18 +19468,16 @@ export type ResolversTypes = {
   TicketByType: ResolverTypeWrapper<TicketByType>,
   ChartDatasetNode: ResolverTypeWrapper<ChartDatasetNode>,
   _DatasetsNode: ResolverTypeWrapper<_DatasetsNode>,
-  TicketByLocationAndCategory: ResolverTypeWrapper<TicketByLocationAndCategory>,
-  TicketByCategory: ResolverTypeWrapper<TicketByCategory>,
+  ChartDetailedDatasetsNode: ResolverTypeWrapper<ChartDetailedDatasetsNode>,
+  _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
   ChartGrievanceTicketsNode: ResolverTypeWrapper<ChartGrievanceTicketsNode>,
   IssueTypesObject: ResolverTypeWrapper<IssueTypesObject>,
   SteficonRuleNodeConnection: ResolverTypeWrapper<SteficonRuleNodeConnection>,
   SteficonRuleNodeEdge: ResolverTypeWrapper<SteficonRuleNodeEdge>,
   ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>,
-  _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
   SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>,
   TableTotalCashTransferred: ResolverTypeWrapper<TableTotalCashTransferred>,
   _TableTotalCashTransferredDataNode: ResolverTypeWrapper<_TableTotalCashTransferredDataNode>,
-  ChartDetailedDatasetsNode: ResolverTypeWrapper<ChartDetailedDatasetsNode>,
   RapidProFlow: ResolverTypeWrapper<RapidProFlow>,
   RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>,
   RapidProFlowResult: ResolverTypeWrapper<RapidProFlowResult>,
@@ -19851,18 +19841,16 @@ export type ResolversParentTypes = {
   TicketByType: TicketByType,
   ChartDatasetNode: ChartDatasetNode,
   _DatasetsNode: _DatasetsNode,
-  TicketByLocationAndCategory: TicketByLocationAndCategory,
-  TicketByCategory: TicketByCategory,
+  ChartDetailedDatasetsNode: ChartDetailedDatasetsNode,
+  _DetailedDatasetsNode: _DetailedDatasetsNode,
   ChartGrievanceTicketsNode: ChartGrievanceTicketsNode,
   IssueTypesObject: IssueTypesObject,
   SteficonRuleNodeConnection: SteficonRuleNodeConnection,
   SteficonRuleNodeEdge: SteficonRuleNodeEdge,
   ChartPaymentVerification: ChartPaymentVerification,
-  _DetailedDatasetsNode: _DetailedDatasetsNode,
   SectionTotalNode: SectionTotalNode,
   TableTotalCashTransferred: TableTotalCashTransferred,
   _TableTotalCashTransferredDataNode: _TableTotalCashTransferredDataNode,
-  ChartDetailedDatasetsNode: ChartDetailedDatasetsNode,
   RapidProFlow: RapidProFlow,
   RapidProFlowRun: RapidProFlowRun,
   RapidProFlowResult: RapidProFlowResult,
@@ -20563,6 +20551,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   ignored?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   priority?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  urgency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
@@ -21418,7 +21407,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   ticketsByType?: Resolver<Maybe<ResolversTypes['TicketByType']>, ParentType, ContextType, RequireFields<QueryTicketsByTypeArgs, 'businessAreaSlug'>>,
   ticketsByCategory?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryTicketsByCategoryArgs, 'businessAreaSlug'>>,
   ticketsByStatus?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryTicketsByStatusArgs, 'businessAreaSlug'>>,
-  ticketsByLocationAndCategory?: Resolver<Maybe<Array<Maybe<ResolversTypes['TicketByLocationAndCategory']>>>, ParentType, ContextType, RequireFields<QueryTicketsByLocationAndCategoryArgs, 'businessAreaSlug'>>,
+  ticketsByLocationAndCategory?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryTicketsByLocationAndCategoryArgs, 'businessAreaSlug'>>,
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>,
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
   existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea'>>,
@@ -22061,17 +22050,6 @@ export type TicketAddIndividualDetailsNodeConnectionResolvers<ContextType = any,
 export type TicketAddIndividualDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNodeEdge'] = ResolversParentTypes['TicketAddIndividualDetailsNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['TicketAddIndividualDetailsNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type TicketByCategoryResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketByCategory'] = ResolversParentTypes['TicketByCategory']> = {
-  categoryName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type TicketByLocationAndCategoryResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketByLocationAndCategory'] = ResolversParentTypes['TicketByLocationAndCategory']> = {
-  location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  categories?: Resolver<Maybe<Array<Maybe<ResolversTypes['TicketByCategory']>>>, ParentType, ContextType>,
 };
 
 export type TicketByTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketByType'] = ResolversParentTypes['TicketByType']> = {
@@ -22723,8 +22701,6 @@ export type Resolvers<ContextType = any> = {
   TicketAddIndividualDetailsNode?: TicketAddIndividualDetailsNodeResolvers<ContextType>,
   TicketAddIndividualDetailsNodeConnection?: TicketAddIndividualDetailsNodeConnectionResolvers<ContextType>,
   TicketAddIndividualDetailsNodeEdge?: TicketAddIndividualDetailsNodeEdgeResolvers<ContextType>,
-  TicketByCategory?: TicketByCategoryResolvers<ContextType>,
-  TicketByLocationAndCategory?: TicketByLocationAndCategoryResolvers<ContextType>,
   TicketByType?: TicketByTypeResolvers<ContextType>,
   TicketComplaintDetailsNode?: TicketComplaintDetailsNodeResolvers<ContextType>,
   TicketComplaintDetailsNodeConnection?: TicketComplaintDetailsNodeConnectionResolvers<ContextType>,

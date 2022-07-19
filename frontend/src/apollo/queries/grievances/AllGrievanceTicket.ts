@@ -85,6 +85,7 @@ export const AllGrievanceTicket = gql`
             unicefId
           }
           priority
+          urgency
         }
       }
     }
