@@ -99,6 +99,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     linked_tickets = graphene.List(graphene.ID)
     extras = CreateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
+    urgency = graphene.Int(required=False)
 
 
 class UpdateGrievanceTicketInput(graphene.InputObjectType):
@@ -114,6 +115,7 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     sub_category = graphene.Int()
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
+    urgency = graphene.Int(required=False)
 
 
 class CreateTicketNoteInput(graphene.InputObjectType):

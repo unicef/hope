@@ -463,6 +463,7 @@ input CreateGrievanceTicketInput {
   linkedTickets: [ID]
   extras: CreateGrievanceTicketExtrasInput
   priority: Int
+  urgency: Int
 }
 
 type CreateGrievanceTicketMutation {
@@ -780,6 +781,7 @@ type GrievanceTicketNode implements Node {
   ignored: Boolean!
   householdUnicefId: String
   priority: Int
+  urgency: Int
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -2443,7 +2445,7 @@ type Query {
   ticketsByType(businessAreaSlug: String!): TicketByType
   ticketsByCategory(businessAreaSlug: String!): ChartDatasetNode
   ticketsByStatus(businessAreaSlug: String!): ChartDatasetNode
-  ticketsByLocationAndCategory(businessAreaSlug: String!): [TicketByLocationAndCategory]
+  ticketsByLocationAndCategory(businessAreaSlug: String!): ChartDetailedDatasetsNode
   grievanceTicket(id: ID!): GrievanceTicketNode
   allGrievanceTicket(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], cashPlan: String, createdAtRange: String, permissions: [String], issueType: String, scoreMin: String, scoreMax: String, household: String, priority: String, orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
@@ -3236,17 +3238,6 @@ type TicketAddIndividualDetailsNodeEdge {
   cursor: String!
 }
 
-type TicketByCategory {
-  categoryName: String
-  count: Int
-}
-
-type TicketByLocationAndCategory {
-  location: String
-  count: Int
-  categories: [TicketByCategory]
-}
-
 type TicketByType {
   userGeneratedCount: Int
   systemGeneratedCount: Int
@@ -3594,6 +3585,7 @@ input UpdateGrievanceTicketInput {
   subCategory: Int
   extras: UpdateGrievanceTicketExtrasInput
   priority: Int
+  urgency: Int
 }
 
 type UpdateGrievanceTicketMutation {
