@@ -1,3 +1,4 @@
+import logging
 from datetime import date, datetime
 from django.utils import timezone
 
@@ -64,6 +65,9 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 )
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.utils.schema import Arg
+
+
+logger = logging.getLogger(__name__)
 
 
 class HouseholdUpdateDataObjectType(graphene.InputObjectType):
@@ -701,6 +705,11 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     else:
         individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
+
+    logger.debug(f"Closing add individual grievance ticket {grievance_ticket.id}")
+    logger.info(getattr(grievance_ticket.registration_data_import, "pk", None))
+    logger.info(individual.id)
+
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
             should_populate_index=True,
