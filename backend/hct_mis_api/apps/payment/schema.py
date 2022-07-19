@@ -107,13 +107,16 @@ class AgeFilterObject(graphene.ObjectType):
 
 class CashPlanPaymentVerificationNode(DjangoObjectType):
     excluded_admin_areas_filter = graphene.List(graphene.String)
-
     age_filter = graphene.Field(AgeFilterObject)
+    file_was_downloaded = graphene.Boolean()
 
     class Meta:
         model = CashPlanPaymentVerification
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_file_was_downloaded(self, info):
+        return self.xlsx_cash_plan_payment_verification_file_was_downloaded
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):

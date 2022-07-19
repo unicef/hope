@@ -200,6 +200,38 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
         return cls(cash_plan=cash_plan_verification.cash_plan)
 
 
+class InvalidCashPlanVerificationMutation(PermissionMutation):
+    cash_plan = graphene.Field(CashPlanNode)
+
+    class Arguments:
+        cash_plan_verification_id = graphene.ID(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+        cash_plan_verification_id = decode_id_string(cash_plan_verification_id)
+        cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_verification_id)
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
+
+        old_cash_plan_verification = copy_model_object(cash_plan_verification)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_INVALID, cash_plan_verification.business_area)
+
+        cash_plan_verification = VerificationPlanStatusChangeServices(cash_plan_verification).mark_invalid()
+
+        log_create(
+            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_cash_plan_verification,
+            cash_plan_verification,
+        )
+        return cls(cash_plan=cash_plan_verification.cash_plan)
+
+
 class DeleteCashPlanVerificationMutation(PermissionMutation):
     cash_plan = graphene.Field(CashPlanNode)
 
@@ -472,6 +504,7 @@ class Mutations(graphene.ObjectType):
     activate_cash_plan_payment_verification = ActivateCashPlanVerificationMutation.Field()
     finish_cash_plan_payment_verification = FinishCashPlanVerificationMutation.Field()
     discard_cash_plan_payment_verification = DiscardCashPlanVerificationMutation.Field()
+    invalid_cash_plan_payment_verification = InvalidCashPlanVerificationMutation.Field()
     delete_cash_plan_payment_verification = DeleteCashPlanVerificationMutation.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     update_payment_verification_received_and_received_amount = (
