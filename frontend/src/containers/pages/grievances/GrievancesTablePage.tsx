@@ -38,6 +38,8 @@ export function GrievancesTablePage(): React.ReactElement {
     scoreMin: null,
     scoreMax: null,
     grievanceType: 'user',
+    priority: '',
+    urgency: '',
   });
   const [selectedTab, setSelectedTab] = useState(
     GRIEVANCE_TICKETS_TYPES.userGenerated,

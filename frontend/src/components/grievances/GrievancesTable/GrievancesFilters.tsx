@@ -195,6 +195,42 @@ export function GrievancesFilters({
             name='registrationDataImport'
           />
         </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'priority')}
+            label={t('Priority')}
+            value={filter.priority || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketPriorityChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'urgency')}
+            label={t('Urgency')}
+            value={filter.urgency || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketUrgencyChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
       </Grid>
     </ContainerWithBorder>
   );

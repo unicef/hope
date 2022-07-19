@@ -446,6 +446,8 @@ class Query(graphene.ObjectType):
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_system_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
+    grievance_ticket_priority_choices = graphene.List(ChoiceObject)
+    grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
@@ -482,6 +484,12 @@ class Query(graphene.ObjectType):
             {"category": key, "label": categories[key], "sub_categories": value}
             for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
         ]
+
+    def resolve_grievance_ticket_priority_choices(self, info, **kwargs):
+        return to_choice_object(GrievanceTicket.PRIORITY_CHOICES)
+
+    def resolve_grievance_ticket_urgency_choices(self, info, **kwargs):
+        return to_choice_object(GrievanceTicket.URGENCY_CHOICES)
 
     def resolve_all_add_individuals_fields_attributes(self, info, **kwargs):
         fields = FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()
