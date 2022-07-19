@@ -733,7 +733,7 @@ class TargetingCriteriaFilterMixin:
                 query = Q()
                 for arg in argument:
                     # This regular expression can found the only exact word
-                    query &= Q(**{f"{lookup}__iregex": f"{arg}\\y"})
+                    query &= Q(**{f"{lookup}__contains": arg})
             else:
                 query = Q(**{f"{lookup}__contains": argument})
         else:
