@@ -96,6 +96,7 @@ class GrievanceTicketFilter(FilterSet):
     score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
     household = CharFilter(field_name="household_unicef_id")
     priority = ChoiceFilter(field_name="priority", choices=GrievanceTicket.PRIORITY_CHOICES)
+    urgency = ChoiceFilter(field_name="urgency", choices=GrievanceTicket.URGENCY_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
 
     class Meta:
