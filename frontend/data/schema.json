@@ -8353,6 +8353,18 @@
             "deprecationReason": null
           },
           {
+            "name": "urgency",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "linkedTicketsRelated",
             "description": null,
             "args": [
@@ -45769,6 +45781,16 @@
               "ofType": null
             },
             "defaultValue": null
+          },
+          {
+            "name": "urgency",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -48068,6 +48090,16 @@
           },
           {
             "name": "priority",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "urgency",
             "description": null,
             "type": {
               "kind": "SCALAR",

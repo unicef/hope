@@ -463,6 +463,7 @@ input CreateGrievanceTicketInput {
   linkedTickets: [ID]
   extras: CreateGrievanceTicketExtrasInput
   priority: Int
+  urgency: Int
 }
 
 type CreateGrievanceTicketMutation {
@@ -780,6 +781,7 @@ type GrievanceTicketNode implements Node {
   ignored: Boolean!
   householdUnicefId: String
   priority: Int
+  urgency: Int
   linkedTicketsRelated(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -3584,6 +3586,7 @@ input UpdateGrievanceTicketInput {
   subCategory: Int
   extras: UpdateGrievanceTicketExtrasInput
   priority: Int
+  urgency: Int
 }
 
 type UpdateGrievanceTicketMutation {

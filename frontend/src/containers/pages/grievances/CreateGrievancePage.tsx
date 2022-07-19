@@ -97,14 +97,20 @@ export const CreateGrievancePage = (): React.ReactElement => {
     selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
-    priority: 4,
+    priority: 3,
+    urgency: 3,
     subCategory: null,
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
 
-  const mappedPriorities = Array.from(Array(4).keys()).map((i) => ({
+  const mappedPriorities = Array.from(Array(3).keys()).map((i) => ({
+    name: (i + 1).toString(),
+    value: i + 1,
+  }));
+
+  const mappedUrgencies = Array.from(Array(3).keys()).map((i) => ({
     name: (i + 1).toString(),
     value: i + 1,
   }));
@@ -412,6 +418,17 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             variant='outlined'
                             label={t('Priority')}
                             choices={mappedPriorities}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='urgency'
+                            multiline
+                            fullWidth
+                            variant='outlined'
+                            label={t('Urgency')}
+                            choices={mappedUrgencies}
                             component={FormikSelectField}
                           />
                         </Grid>
