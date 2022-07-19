@@ -23,6 +23,9 @@ class VerificationPlanStatusChangeServices:
         if self.cash_plan_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             raise GraphQLError("You can discard only ACTIVE verification")
 
+        if self.cash_plan_verification.xlsx_cash_plan_payment_verification_file_was_downloaded:
+            raise GraphQLError("You can discard if xlsx file was downloaded")
+
         self.cash_plan_verification.set_pending()
         self.cash_plan_verification.save()
 
@@ -34,6 +37,19 @@ class VerificationPlanStatusChangeServices:
         PaymentVerification.objects.bulk_update(
             payment_record_verifications, ["status_date", "status", "received_amount"]
         )
+
+        return self.cash_plan_verification
+
+    def mark_invalid(self) -> CashPlanPaymentVerification:
+        if self.cash_plan_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+            raise GraphQLError("You can mark invalid only ACTIVE verification")
+
+        if not self.cash_plan_verification.xlsx_cash_plan_payment_verification_file_was_downloaded:
+            # TODO: if file was uploaded
+            raise GraphQLError("You can mark invalid if xlsx file was downloaded but not uploaded")
+
+        self.cash_plan_verification.set_pending()
+        self.cash_plan_verification.save()
 
         return self.cash_plan_verification
 

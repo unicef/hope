@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField
@@ -236,6 +237,27 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     def business_area(self):
         return self.cash_plan.business_area
 
+    @property
+    def has_xlsx_cash_plan_payment_verification_file(self):
+        if all([
+            self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
+            getattr(self, 'xlsx_cashplan_payment_verification_file', None)
+        ]):
+            return True
+        return False
+
+    @property
+    def xlsx_cash_plan_payment_verification_file_link(self):
+        if self.has_xlsx_cash_plan_payment_verification_file:
+            return self.xlsx_cashplan_payment_verification_file.file.url
+        return None
+
+    @property
+    def xlsx_cash_plan_payment_verification_file_was_downloaded(self):
+        if self.has_xlsx_cash_plan_payment_verification_file:
+            return self.xlsx_cashplan_payment_verification_file.was_downloaded
+        return False
+
     def set_active(self):
         self.status = CashPlanPaymentVerification.STATUS_ACTIVE
         self.activation_date = timezone.now()
@@ -248,6 +270,15 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         self.received_with_problems_count = None
         self.activation_date = None
         self.rapid_pro_flow_start_uuids = []
+
+
+class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
+    file = models.FileField()
+    cash_plan_payment_verification = models.OneToOneField(
+        CashPlanPaymentVerification, related_name="xlsx_cashplan_payment_verification_file", on_delete=models.CASCADE
+    )
+    was_downloaded = models.BooleanField(default=False)
+    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
 
 
 def build_summary(cash_plan):
