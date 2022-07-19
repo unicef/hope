@@ -16,12 +16,7 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
-import { GRIEVANCE_TICKETS_TYPES } from '../../../utils/constants';
-
-const GrievancesType = {
-  0: 'user',
-  1: 'system',
-};
+import { GrievancesType, GRIEVANCE_TICKETS_TYPES } from '../../../utils/constants';
 
 export function GrievancesTablePage(): React.ReactElement {
   const { t } = useTranslation();
@@ -66,6 +61,7 @@ export function GrievancesTablePage(): React.ReactElement {
         setFilter({
           ...filter,
           grievanceType: GrievancesType[newValue],
+          category: '',
         });
       }}
       indicatorColor='primary'

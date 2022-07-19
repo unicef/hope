@@ -8321,6 +8321,9 @@ export type GrievancesChoiceDataQuery = (
   )>>>, grievanceTicketManualCategoryChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, grievanceTicketSystemCategoryChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, grievanceTicketIssueTypeChoices: Maybe<Array<Maybe<(
     { __typename?: 'IssueTypesObject' }
     & Pick<IssueTypesObject, 'category' | 'label'>
@@ -14989,6 +14992,10 @@ export const GrievancesChoiceDataDocument = gql`
     value
   }
   grievanceTicketManualCategoryChoices {
+    name
+    value
+  }
+  grievanceTicketSystemCategoryChoices {
     name
     value
   }
