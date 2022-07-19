@@ -776,6 +776,7 @@ export type CreateGrievanceTicketInput = {
   linkedTickets?: Maybe<Array<Maybe<Scalars['ID']>>>,
   extras?: Maybe<CreateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
+  urgency?: Maybe<Scalars['Int']>,
 };
 
 export type CreateGrievanceTicketMutation = {
@@ -1123,6 +1124,7 @@ export type GrievanceTicketNode = Node & {
   ignored: Scalars['Boolean'],
   householdUnicefId?: Maybe<Scalars['String']>,
   priority?: Maybe<Scalars['Int']>,
+  urgency?: Maybe<Scalars['Int']>,
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -5714,6 +5716,7 @@ export type UpdateGrievanceTicketInput = {
   subCategory?: Maybe<Scalars['Int']>,
   extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
   priority?: Maybe<Scalars['Int']>,
+  urgency?: Maybe<Scalars['Int']>,
 };
 
 export type UpdateGrievanceTicketMutation = {
@@ -7919,7 +7922,7 @@ export type AllGrievanceTicketQuery = (
       & Pick<GrievanceTicketNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'GrievanceTicketNode' }
-        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'createdAt' | 'userModified' | 'admin' | 'unicefId' | 'priority'>
+        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'issueType' | 'createdAt' | 'userModified' | 'admin' | 'unicefId' | 'priority' | 'urgency'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -7995,7 +7998,7 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority'>
+    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'subCategory' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'priority' | 'urgency'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -14311,6 +14314,7 @@ export const AllGrievanceTicketDocument = gql`
           unicefId
         }
         priority
+        urgency
       }
     }
   }
@@ -14821,6 +14825,7 @@ export const GrievanceTicketDocument = gql`
       }
     }
     priority
+    urgency
   }
 }
     ${IndividualDetailedFragmentDoc}
@@ -20557,6 +20562,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   ignored?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   priority?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  urgency?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,

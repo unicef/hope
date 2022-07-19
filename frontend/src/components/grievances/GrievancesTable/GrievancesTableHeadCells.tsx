@@ -55,6 +55,13 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
+    label: 'Urgency',
+    id: 'urgency',
+    numeric: false,
+    dataCy: 'urgency',
+  },
+  {
+    disablePadding: false,
     label: 'Linked Tickets',
     id: 'id',
     numeric: false,
