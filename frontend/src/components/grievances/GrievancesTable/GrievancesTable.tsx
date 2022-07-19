@@ -44,6 +44,7 @@ export const GrievancesTable = ({
     cashPlan: filter.cashPlan,
     scoreMin: filter.scoreMin,
     scoreMax: filter.scoreMax,
+    grievanceType: filter.grievanceType,
   };
 
   const {
