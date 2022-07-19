@@ -2,6 +2,7 @@ import contextlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
+from django.utils import timezone
 from typing import Any, Dict, Iterable, List, Set, Union
 from urllib.request import urlopen
 
@@ -86,7 +87,7 @@ class LoadSanctionListXMLTask:
         dates_of_birth = set()
         for date_of_birth_tag in date_of_birth_tags:
             type_of_date_tag = date_of_birth_tag.find("TYPE_OF_DATE")
-            default_datetime = datetime(year=2020, month=1, day=1)
+            default_datetime = timezone.make_aware(datetime(year=2020, month=1, day=1))
             if isinstance(type_of_date_tag, ET.Element) and type_of_date_tag.text:
                 type_of_date = type_of_date_tag.text
                 if type_of_date in ("EXACT", "APPROXIMATELY"):
@@ -382,12 +383,12 @@ class LoadSanctionListXMLTask:
             year, month, day, *time = value.split("-")
             if time:
                 hour, minute = time[0].split(":")
-                return datetime(
+                return timezone.make_aware(datetime(
                     year=int(year),
                     month=int(month),
                     day=int(day),
                     hour=int(hour),
-                    minute=int(minute),
+                    minute=int(minute)),
                 )
         if field.get_internal_type() == "DateField":
             year, month, day, *time = value.split("-")

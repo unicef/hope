@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 import uuid
 from io import BytesIO
 from pathlib import Path
@@ -76,6 +76,6 @@ class TestMarkSubmissions(TestCase):
             registration_data_import=registration_data_import_data_hub,
             kobo_submission_uuid=submission_uuid,
             kobo_asset_id="test",
-            kobo_submission_time=datetime.datetime.now(),
+            kobo_submission_time=timezone.now(),
             imported_household=imported_household,
         )

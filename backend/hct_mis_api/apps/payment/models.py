@@ -12,7 +12,7 @@ from django.contrib.postgres.fields import ArrayField
 from model_utils import Choices
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
 class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
@@ -161,7 +161,7 @@ class ServiceProvider(TimeStampedUUIDModel):
         return self.full_name
 
 
-class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
+class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -228,7 +228,6 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     sex_filter = models.CharField(null=True, max_length=10)
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
-    unicef_id = models.CharField(blank=True, max_length=250)
 
     class Meta:
         ordering = ("created_at",)
