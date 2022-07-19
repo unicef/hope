@@ -793,12 +793,6 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     vector_column = SearchVectorField(null=True)
 
-    def save(self, *args, **kwargs):
-        self.vector_column = (
-            SearchVector('observed_disability', weight='A') + SearchVector('full_name', weight='A')
-        )
-        super().save(*args, **kwargs)
-
     @property
     def phone_no_valid(self):
         return is_right_phone_number_format(self.phone_no)
