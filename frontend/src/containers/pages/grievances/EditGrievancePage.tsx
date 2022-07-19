@@ -184,7 +184,12 @@ export const EditGrievancePage = (): React.ReactElement => {
     value: edge.node.id,
   }));
 
-  const mappedPriorities = Array.from(Array(10).keys()).map((i) => ({
+  const mappedPriorities = Array.from(Array(3).keys()).map((i) => ({
+    name: (i + 1).toString(),
+    value: i + 1,
+  }));
+
+  const mappedUrgencies = Array.from(Array(3).keys()).map((i) => ({
     name: (i + 1).toString(),
     value: i + 1,
   }));
@@ -429,6 +434,18 @@ export const EditGrievancePage = (): React.ReactElement => {
                             variant='outlined'
                             label={t('Priority')}
                             choices={mappedPriorities}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='urgency'
+                            multiline
+                            fullWidth
+                            disabled={Boolean(ticket.urgency)}
+                            variant='outlined'
+                            label={t('Urgency')}
+                            choices={mappedUrgencies}
                             component={FormikSelectField}
                           />
                         </Grid>

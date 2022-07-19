@@ -12,6 +12,7 @@ import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHousehol
 
 interface EditValuesTypes {
   priority?: number;
+  urgency?: number;
   description?: string;
   assignedTo?: string;
   issueType?: string | number;
@@ -178,6 +179,7 @@ export function prepareInitialValues(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {
     priority: ticket.priority,
+    urgency: ticket.urgency,
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
@@ -461,6 +463,7 @@ export function prepareVariables(businessArea, values, ticket) {
     household: values.selectedHousehold?.id,
     individual: values.selectedIndividual?.id,
     priority: values.priority,
+    urgency: values.urgency,
   };
   const prepareFunction = thingForSpecificGrievanceType(
     values,
