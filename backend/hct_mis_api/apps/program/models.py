@@ -20,6 +20,9 @@ from model_utils.models import SoftDeletableModel
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+    does_payment_record_have_right_hoh_phone_number,
+)
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -29,7 +32,6 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import does_payment_record_have_right_hoh_phone_number
 
 
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):

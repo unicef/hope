@@ -1,4 +1,4 @@
-from datetime import datetime
+from django.utils import timezone
 
 from django.db.models import Q
 from django.db.transaction import atomic
@@ -57,7 +57,7 @@ class SyncToMisDatahubTask:
             funds_commitments_to_create.append(mis_funds_commitment)
         mis_models.DownPayment.objects.bulk_create(mis_down_payments_to_create)
         mis_models.FundsCommitment.objects.bulk_create(funds_commitments_to_create)
-        normal_down_payments_to_sent.update(mis_sync_flag=True, mis_sync_date=datetime.now())
-        normal_funds_commitments_to_sent.update(mis_sync_flag=True, mis_sync_date=datetime.now())
-        down_payments_from_split_business_areas.update(mis_sync_flag=True, mis_sync_date=datetime.now())
-        funds_commitments_from_split_business_areas.update(mis_sync_flag=True, mis_sync_date=datetime.now())
+        normal_down_payments_to_sent.update(mis_sync_flag=True, mis_sync_date=timezone.now())
+        normal_funds_commitments_to_sent.update(mis_sync_flag=True, mis_sync_date=timezone.now())
+        down_payments_from_split_business_areas.update(mis_sync_flag=True, mis_sync_date=timezone.now())
+        funds_commitments_from_split_business_areas.update(mis_sync_flag=True, mis_sync_date=timezone.now())
