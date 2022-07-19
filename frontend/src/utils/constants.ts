@@ -56,3 +56,8 @@ export const GRIEVANCE_TICKETS_TYPES = {
   userGenerated: 0,
   systemGenerated: 1,
 };
+
+export const GrievancesType = {
+  0: 'user',
+  1: 'system',
+};
