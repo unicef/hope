@@ -70,6 +70,7 @@ export function ProgramDetailsPage(): React.ReactElement {
   if (!data || !choices || permissions === null) return null;
 
   const program = data.program as ProgramNode;
+
   return (
     <div>
       <ProgramDetailsPageHeader

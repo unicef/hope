@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass, fields
 from time import sleep
+from typing import Union
 
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat
@@ -604,8 +605,10 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_individuals_from_other_source(cls, individuals):
+    def deduplicate_individuals_from_other_source(cls, individuals: list[Individual]):
         cls._wait_until_health_green()
+        # TODO: There could be a chance that RDI is not set for the individual
+        # Here is it mandatory to pass RDI but model Individual has nullable `registration_data_import` field
         cls.set_thresholds(individuals[0].registration_data_import)
         # cls.business_area = individuals[0].business_area
 
@@ -664,7 +667,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def set_thresholds(cls, registration_data):
+    def set_thresholds(cls, registration_data: Union[RegistrationDataImportDatahub, RegistrationDataImport]):
         # registration_data
         if isinstance(registration_data, RegistrationDataImportDatahub):
             cls.business_area = BusinessArea.objects.get(slug=registration_data.business_area_slug)
