@@ -39,6 +39,39 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program
 
 
+def _prepare_kobo_asset_id_value(code):
+    """
+    preparing value for filter by kobo_asset_id
+    value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
+    return asset_id number like 111222
+    """
+    if len(code) < 6:
+        return code
+
+    code = code[5:].split("/")[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
+    if code.startswith("20223"):
+        # month 3 day 25...31 id is 44...12067
+        code = code[7:]
+
+    if code.startswith("20224"):
+        # TODO: not sure if this one is correct?
+        # code[5] is the day of month (or the first digit of it)
+        # month 4 id is 12068..157380
+        if code[5] in [1, 2, 3] and len(code) == 12:
+            code = code[-5:]
+        else:
+            code = code[-6:]
+
+    if code.startswith("20225"):
+        # month 5 id is 157381...392136
+        code = code[-6:]
+
+    if code.startswith("20226"):
+        # month 6 id is 392137...
+        code = code[-6:]
+    return code
+
+
 class HouseholdFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
@@ -97,7 +130,7 @@ class HouseholdFilter(FilterSet):
         for split_value in split_values_list:
             striped_value = split_value.strip(",")
             if striped_value.startswith(("HOPE-", "KOBO-")):
-                _value = self._prepare_kobo_asset_id_value(value)
+                _value = _prepare_kobo_asset_id_value(value)
                 # if user put somethink like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
                 # will filter by '111222' like 111222 is ID
                 inner_query |= Q(kobo_asset_id__endswith=_value)
@@ -107,38 +140,6 @@ class HouseholdFilter(FilterSet):
         if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH:
             return self._search_es(qs, value)
         return self._search_db(qs, value)
-
-    def _prepare_kobo_asset_id_value(self, code):
-        """
-        preparing value for filter by kobo_asset_id
-        value examples KOBO-111222, HOPE-20220531-3/111222, HOPE-2022530111222
-        return asset_id number like 111222
-        """
-        if len(code) < 6:
-            return code
-
-        code = code[5:].split("/")[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
-        if code.startswith("20223"):
-            # month 3 day 25...31 id is 44...12067
-            code = code[7:]
-
-        if code.startswith("20224"):
-            # TODO: not sure if this one is correct?
-            # code[5] is the day of month (or the first digit of it)
-            # month 4 id is 12068..157380
-            if code[5] in [1, 2, 3] and len(code) == 12:
-                code = code[-5:]
-            else:
-                code = code[-6:]
-
-        if code.startswith("20225"):
-            # month 5 id is 157381...392136
-            code = code[-6:]
-
-        if code.startswith("20226"):
-            # month 6 id is 392137...
-            code = code[-6:]
-        return code
 
     def _search_db(self, qs, value):
         if re.match(r"([\"\']).+\1", value):

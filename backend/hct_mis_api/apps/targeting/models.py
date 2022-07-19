@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 import logging
 
 from django.conf import settings
@@ -319,7 +319,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         else:
             households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
-        date18ago = datetime.datetime.now() - delta18
+        date18ago = timezone.now() - delta18
         targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
             child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
             child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
@@ -362,7 +362,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         else:
             households_ids = self.final_list.values_list("id").distinct()
         delta18 = relativedelta(years=+18)
-        date18ago = datetime.datetime.now() - delta18
+        date18ago = timezone.now() - delta18
 
         targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
             child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),

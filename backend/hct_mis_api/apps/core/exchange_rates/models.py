@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils import timezone
 from typing import Dict, Optional
 
 from dateutil.parser import parse
@@ -55,7 +56,7 @@ class SingleExchangeRate:
         return f"SingleExchangeRate(currency_code: {self.currency_code}, ratio: {self.ratio}, x_rate: {self.x_rate})"
 
     def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> Optional[float]:
-        today = datetime.now()
+        today = timezone.now()
 
         dispersion_date_is_not_provided = dispersion_date is None
         if dispersion_date_is_not_provided:

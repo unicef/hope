@@ -4,27 +4,8 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-snapshots = Snapshot()
 
-snapshots['TestCreateProgram::test_create_program_not_authenticated 1'] = {
-    'data': {
-        'createProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "'AnonymousUser' object has no attribute 'email'",
-            'path': [
-                'createProgram'
-            ]
-        }
-    ]
-}
+snapshots = Snapshot()
 
 snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permission 1'] = {
     'data': {
@@ -81,6 +62,26 @@ snapshots['TestCreateProgram::test_create_program_authenticated_2_with_permissio
                 }
             ],
             'message': 'Start date cannot be greater than the end date.',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_not_authenticated 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "'AnonymousUser' object has no attribute 'email'",
             'path': [
                 'createProgram'
             ]

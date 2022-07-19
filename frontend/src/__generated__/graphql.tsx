@@ -7301,6 +7301,38 @@ export type CreateReportMutation = (
   )> }
 );
 
+export type RestartCreateReportMutationVariables = {
+  reportData: RestartCreateReportInput
+};
+
+
+export type RestartCreateReportMutation = (
+  { __typename?: 'Mutations' }
+  & { restartCreateReport: Maybe<(
+    { __typename?: 'RestartCreateReport' }
+    & { report: Maybe<(
+      { __typename?: 'ReportNode' }
+      & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl'>
+      & { createdBy: (
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'firstName' | 'lastName'>
+      ), adminArea: Maybe<(
+        { __typename?: 'AreaNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'AreaNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'AreaNode' }
+            & Pick<AreaNode, 'name'>
+          )> }
+        )>> }
+      )>, program: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'name'>
+      )> }
+    )> }
+  )> }
+);
+
 export type CreateTpMutationVariables = {
   input: CreateTargetPopulationInput
 };
@@ -12698,6 +12730,77 @@ export function useCreateReportMutation(baseOptions?: ApolloReactHooks.MutationH
 export type CreateReportMutationHookResult = ReturnType<typeof useCreateReportMutation>;
 export type CreateReportMutationResult = ApolloReactCommon.MutationResult<CreateReportMutation>;
 export type CreateReportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateReportMutation, CreateReportMutationVariables>;
+export const RestartCreateReportDocument = gql`
+    mutation RestartCreateReport($reportData: RestartCreateReportInput!) {
+  restartCreateReport(reportData: $reportData) {
+    report {
+      id
+      status
+      reportType
+      createdAt
+      dateFrom
+      dateTo
+      fileUrl
+      createdBy {
+        firstName
+        lastName
+      }
+      adminArea {
+        edges {
+          node {
+            name
+          }
+        }
+      }
+      program {
+        name
+      }
+    }
+  }
+}
+    `;
+export type RestartCreateReportMutationFn = ApolloReactCommon.MutationFunction<RestartCreateReportMutation, RestartCreateReportMutationVariables>;
+export type RestartCreateReportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<RestartCreateReportMutation, RestartCreateReportMutationVariables>, 'mutation'>;
+
+    export const RestartCreateReportComponent = (props: RestartCreateReportComponentProps) => (
+      <ApolloReactComponents.Mutation<RestartCreateReportMutation, RestartCreateReportMutationVariables> mutation={RestartCreateReportDocument} {...props} />
+    );
+    
+export type RestartCreateReportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<RestartCreateReportMutation, RestartCreateReportMutationVariables> & TChildProps;
+export function withRestartCreateReport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RestartCreateReportMutation,
+  RestartCreateReportMutationVariables,
+  RestartCreateReportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, RestartCreateReportMutation, RestartCreateReportMutationVariables, RestartCreateReportProps<TChildProps>>(RestartCreateReportDocument, {
+      alias: 'restartCreateReport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRestartCreateReportMutation__
+ *
+ * To run a mutation, you first call `useRestartCreateReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRestartCreateReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [restartCreateReportMutation, { data, loading, error }] = useRestartCreateReportMutation({
+ *   variables: {
+ *      reportData: // value for 'reportData'
+ *   },
+ * });
+ */
+export function useRestartCreateReportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RestartCreateReportMutation, RestartCreateReportMutationVariables>) {
+        return ApolloReactHooks.useMutation<RestartCreateReportMutation, RestartCreateReportMutationVariables>(RestartCreateReportDocument, baseOptions);
+      }
+export type RestartCreateReportMutationHookResult = ReturnType<typeof useRestartCreateReportMutation>;
+export type RestartCreateReportMutationResult = ApolloReactCommon.MutationResult<RestartCreateReportMutation>;
+export type RestartCreateReportMutationOptions = ApolloReactCommon.BaseMutationOptions<RestartCreateReportMutation, RestartCreateReportMutationVariables>;
 export const CreateTpDocument = gql`
     mutation CreateTP($input: CreateTargetPopulationInput!) {
   createTargetPopulation(input: $input) {
