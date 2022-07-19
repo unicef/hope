@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import {
+  GrievancesType,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
 } from '../../../utils/constants';
@@ -38,9 +39,9 @@ export function GrievancesFilters({
   );
 
   const categoryChoices = useMemo(() => {
-    return filter.grievanceType === GRIEVANCE_TICKETS_TYPES.userGenerated
+    return filter.grievanceType === GrievancesType[GRIEVANCE_TICKETS_TYPES.userGenerated]
       ? choicesData.grievanceTicketManualCategoryChoices
-      : choicesData.grievanceTicketCategoryChoices;
+      : choicesData.grievanceTicketSystemCategoryChoices;
   }, [choicesData, filter.grievanceType]);
 
   return (
