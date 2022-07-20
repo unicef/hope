@@ -71,7 +71,7 @@ services:
       - ./backend:/code/
       - backend-data:/data
     restart: always
-    command: "watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hct_mis_api.apps.core.celery worker -E -l info -Q default,priority"
+    command: "celery-worker"
     depends_on:
       - backend
       - db
@@ -90,7 +90,7 @@ services:
       - ./backend:/code/
       - backend-data:/data
     restart: always
-    command: "celery -A hct_mis_api.apps.core.celery beat -l INFO --scheduler hct_mis_api.apps.core.models:CustomDatabaseScheduler"
+    command: "celery-beat"
     depends_on:
       - backend
       - db
