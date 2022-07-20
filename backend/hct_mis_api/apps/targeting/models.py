@@ -3,7 +3,7 @@ import logging
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField, IntegerRangeField
-from django.contrib.postgres.search import SearchVector, SearchQuery
+from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
     RangeMinValueValidator,
@@ -608,12 +608,13 @@ class TargetingIndividualRuleFilterBlockMixin:
             # only filtering against heads of household
             individuals_query &= Q(heading_household__isnull=False)
 
-        households_id = (
-            Individual.objects
-                .filter(vector_column=search_query)
-                .filter(individuals_query)
-                .values_list("household_id", flat=True)
-        )
+        individual_query = Individual.objects
+        if isinstance(search_query, CombinedSearchQuery):
+            q = individual_query.filter(vector_column=search_query).filter(individuals_query)
+        else:
+            q = individual_query.filter(individuals_query)
+
+        households_id = q.values_list("household_id", flat=True)
         return Q(id__in=households_id)
 
 
@@ -746,7 +747,7 @@ class TargetingCriteriaFilterMixin:
                 query = Q()
                 for arg in argument:
                     # This regular expression can found the only exact word
-                    query &= Q(**{f"{lookup}__contains": arg})
+                    query &= Q(**{f"{lookup}__icontains": arg})
             else:
                 query = Q(**{f"{lookup}__contains": argument})
         else:
