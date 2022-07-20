@@ -14,6 +14,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     PaymentRecord,
     PaymentVerification,
+    PaymentPlan,
 )
 
 
@@ -154,5 +155,23 @@ class FinancialServiceProviderFilter(FilterSet):
             "delivery_mechanisms",
             "distribution_limit",
             "communication_channel",
+        )
+    )
+
+
+class PaymentPlanFilter(FilterSet):
+
+    class Meta:
+        fields = (
+            "status",
+            "unicef_id",
+        )
+        model = PaymentPlan
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "created_at",
+            "unicef_id",
+            "status",
         )
     )

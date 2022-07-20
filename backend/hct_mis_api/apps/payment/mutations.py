@@ -1,5 +1,6 @@
 import logging
 import math
+
 from decimal import Decimal
 
 import graphene
@@ -9,6 +10,7 @@ from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanServices
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -23,9 +25,10 @@ from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
     CreateFinancialServiceProviderInput,
+    UpdatePaymentPlanStatusInput,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentPlan
+from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode, PaymentPlanNode
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
@@ -508,6 +511,154 @@ class EditFinancialServiceProviderMutation(PermissionMutation):
         return cls(financial_service_provider=fsp)
 
 
+class LockPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_DETAILS, payment_plan.business_area)
+
+        payment_plan.status_lock()
+        payment_plan.save()
+
+        # TODO: add more logic here
+
+        log_create(
+            PaymentPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_payment_plan,
+            payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+
+class UnlockPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_DETAILS, payment_plan.business_area)
+
+        payment_plan.status_unlock()
+        payment_plan.save()
+
+        log_create(
+            PaymentPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_payment_plan,
+            payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+
+class SendForApprovalPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_DETAILS, payment_plan.business_area)
+
+        payment_plan.status_send_to_approval(info.context.user)
+        payment_plan.save()
+
+        log_create(
+            PaymentPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_payment_plan,
+            payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+
+class RejectPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+        comment = graphene.String()
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_DETAILS, payment_plan.business_area)
+
+        payment_plan.status_reject()
+        payment_plan.save()
+        PaymentPlanServices.create_reject_approval(payment_plan, input, info.context.user)
+
+        log_create(
+            PaymentPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_payment_plan,
+            payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+
+class UpdatePaymentPlanStatusMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = UpdatePaymentPlanStatusInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_DETAILS, payment_plan.business_area)
+
+        payment_plan = PaymentPlanServices.create_approval(payment_plan, input, info.context.user)
+
+        log_create(
+            PaymentPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_payment_plan,
+            payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
     create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
@@ -522,3 +673,9 @@ class Mutations(graphene.ObjectType):
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
     )
+    # new Payment Module
+    lock_payment_plan_mutation = LockPaymentPlanMutation.Field()
+    unlock_payment_plan_mutation = UnlockPaymentPlanMutation.Field()
+    send_for_approval_payment_plan_mutation = SendForApprovalPaymentPlanMutation.Field()
+    reject_payment_plan_mutation = RejectPaymentPlanMutation.Field()
+    update_status_payment_plan_mutation = UpdatePaymentPlanStatusMutation.Field()

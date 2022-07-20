@@ -64,3 +64,9 @@ class CreateFinancialServiceProviderInput(graphene.InputObjectType):
     distribution_limit = graphene.Decimal()
     communication_channel = graphene.String(required=True)
     fsp_xlsx_template_id = graphene.ID(required=True)
+
+
+class UpdatePaymentPlanStatusInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    status = graphene.String()
+    comment = graphene.String()

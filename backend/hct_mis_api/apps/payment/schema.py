@@ -26,7 +26,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Individual
+from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
     PaymentRecordFilter,
     PaymentVerificationFilter,
@@ -35,6 +35,7 @@ from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderXlsxTemplateFilter,
     FinancialServiceProviderXlsxReportFilter,
     FinancialServiceProviderFilter,
+    PaymentPlanFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -47,6 +48,9 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxReport,
     FinancialServiceProvider,
     DeliveryMechanism,
+    ApprovalProcess,
+    Approval,
+    PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -207,6 +211,46 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
+class ApprovalNode(DjangoObjectType):
+    info = graphene.String()
+
+    class Meta:
+        model = Approval
+        fields = ("stage", "type", "created_at", "comment")
+
+    def resolve_info(self, info):
+        return self.info
+
+
+class AcceptanceProcessNode(DjangoObjectType):
+
+    class Meta:
+        model = ApprovalProcess
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    approval_number = graphene.Int()
+    authorization_number = graphene.Int()
+    finance_review_number = graphene.Int()
+
+    class Meta:
+        model = PaymentPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_approval_number(self, info):
+        return self.business_area.approval_number
+
+    def resolve_authorization_number(self, info):
+        return self.business_area.authorization_number
+
+    def resolve_finance_review_number(self, info):
+        return self.business_area.finance_review_number
+
+
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
@@ -304,6 +348,13 @@ class Query(graphene.ObjectType):
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
+    )
+
+    all_payment_plans = DjangoPermissionFilterConnectionField(
+        PaymentPlanNode,
+        filterset_class=PaymentPlanFilter,
+        # TODO: add permissions here
+        # permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
 
     def resolve_all_payment_verifications(self, info, **kwargs):
@@ -539,3 +590,6 @@ class Query(graphene.ObjectType):
         ]
 
         return {"labels": labels, "datasets": datasets}
+
+    def resolve_all_payment_plans(self, info):
+        return PaymentPlan.objects.all()
