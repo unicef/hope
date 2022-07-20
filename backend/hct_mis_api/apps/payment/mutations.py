@@ -488,6 +488,9 @@ class ExportXlsxCashPlanVerification(PermissionMutation):
         if cashplan_payment_verification.xlsx_file_exporting:
             logger.error("Exporting xlsx file is already started. Please wait")
             raise GraphQLError("Exporting xlsx file is already started. Please wait")
+        if cashplan_payment_verification.has_xlsx_cash_plan_payment_verification_file:
+            logger.error("Xlsx file is already created")
+            raise GraphQLError("Xlsx file is already created")
 
         cashplan_payment_verification.xlsx_file_exporting = True
         cashplan_payment_verification.save()
