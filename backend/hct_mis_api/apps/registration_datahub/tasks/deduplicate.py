@@ -603,8 +603,6 @@ class DeduplicateTask:
     @classmethod
     def deduplicate_individuals_from_other_source(cls, individuals: list[Individual]):
         cls._wait_until_health_green()
-        # TODO: There could be a chance that RDI is not set for the individual
-        # Here is it mandatory to pass RDI but model Individual has nullable `registration_data_import` field
         cls.set_thresholds(individuals[0].business_area)
         # cls.business_area = individuals[0].business_area
 
