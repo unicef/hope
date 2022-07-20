@@ -224,12 +224,14 @@ export const VerificationPlanDetails = ({
                     )}
                   </>
                 )}
-                {canFinish && (
-                  <FinishVerificationPlan
-                    cashPlanVerificationId={verificationPlan.id}
-                    cashPlanId={cashPlan.id}
-                  />
-                )}
+                {canFinish &&
+                  verificationPlan.xlsxFileWasDownloaded &&
+                  verificationPlan.xlsxFileImported && (
+                    <FinishVerificationPlan
+                      cashPlanVerificationId={verificationPlan.id}
+                      cashPlanId={cashPlan.id}
+                    />
+                  )}
                 {canDiscard &&
                   (verificationPlan.xlsxFileWasDownloaded &&
                   !verificationPlan.xlsxFileImported ? (
@@ -250,10 +252,13 @@ export const VerificationPlanDetails = ({
                       </LoadingButton>
                     </Box>
                   ) : (
-                    <DiscardVerificationPlan
-                      cashPlanVerificationId={verificationPlan.id}
-                      cashPlanId={cashPlan.id}
-                    />
+                    verificationPlan.xlsxFileWasDownloaded &&
+                    verificationPlan.xlsxFileImported && (
+                      <DiscardVerificationPlan
+                        cashPlanVerificationId={verificationPlan.id}
+                        cashPlanId={cashPlan.id}
+                      />
+                    )
                   ))}
               </Box>
             )}
