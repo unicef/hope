@@ -67,9 +67,6 @@ from hct_mis_api.apps.household.services.household_withdraw import HouseholdWith
 from hct_mis_api.apps.utils.schema import Arg
 
 
-logger = logging.getLogger(__name__)
-
-
 class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     admin_area_title = graphene.String()
     status = graphene.String()
@@ -705,10 +702,6 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     else:
         individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
-
-    logger.debug(f"Closing add individual grievance ticket {grievance_ticket.id}")
-    logger.info(getattr(grievance_ticket.registration_data_import, "pk", None))
-    logger.info(individual.id)
 
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
