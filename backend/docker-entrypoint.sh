@@ -18,6 +18,9 @@ else
             waitforit -host=backend -port=8000 --timeout 300 && \
             celery -A hct_mis_api.apps.core.celery beat -l INFO --scheduler hct_mis_api.apps.core.models:CustomDatabaseScheduler
         ;;
+        "celery-worker")
+            watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hct_mis_api.apps.core.celery worker -E -l info -Q default,priority
+        ;;
         *)
             exec "$@"
         ;;
