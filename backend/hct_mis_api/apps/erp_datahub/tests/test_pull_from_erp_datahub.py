@@ -10,8 +10,7 @@ from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
     PullFromErpDatahubTask,
 )
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, CashPlanFactory
 
 from unittest.mock import patch
 

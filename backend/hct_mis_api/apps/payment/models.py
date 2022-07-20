@@ -19,7 +19,6 @@ from multiselectfield import MultiSelectField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 
 
@@ -212,7 +211,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     status = FSMField(default=Status.OPEN, protected=False, db_index=True)
     unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     target_population = models.ForeignKey(
-        TargetPopulation,
+        "targeting.TargetPopulation",
         on_delete=models.CASCADE,
         related_name="payment_plans",
     )  # TODO set program based on target_population.program
@@ -291,10 +290,125 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         return self.dispersion_end_date
 
 
+class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
+    # TODO: add/remove fields after finalizing the fields
+    COLUMNS_TO_CHOOSE = (
+        ("payment_id", _("Payment ID")),
+        ("household_id", _("Household ID")),
+        ("admin_leve_2", _("Admin Level 2")),
+        ("collector_name", _("Collector Name")),
+        ("payment_channel", _("Payment Channel (Delivery mechanism)")),
+        ("fsp_name", _("FSP Name")),
+        ("entitlement_quantity", _("Entitlement Quantity")),
+        ("tbd", _("TBD")),
+    )
+    DEFAULT_COLUMNS = [
+        "payment_id",
+        "household_id",
+        "admin_leve_2",
+        "collector_name",
+        "payment_channel",
+        "fsp_name",
+        "entitlement_quantity",
+    ]
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="created_financial_service_provider_xlsx_templates",
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+    )
+    name = models.CharField(max_length=120, verbose_name=_("Name"))
+    columns = MultiSelectField(
+        choices=COLUMNS_TO_CHOOSE,
+        default=DEFAULT_COLUMNS,
+        verbose_name=_("Columns"),
+        help_text=_("Select the columns to include in the report"),
+    )
+
+    def __str__(self):
+        return f"{self.name} ({len(self.columns)})"
+
+
+class FinancialServiceProvider(TimeStampedUUIDModel):
+    COMMUNICATION_CHANNEL_API = "API"
+    COMMUNICATION_CHANNEL_SFTP = "SFTP"
+    COMMUNICATION_CHANNEL_XLSX = "XLSX"
+    COMMUNICATION_CHANNEL_CHOICES = (
+        (COMMUNICATION_CHANNEL_API, "API"),
+        (COMMUNICATION_CHANNEL_SFTP, "SFTP"),
+        (COMMUNICATION_CHANNEL_XLSX, "XLSX"),
+    )
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="created_financial_service_providers",
+        null=True,
+        blank=True,
+        verbose_name=_("Created by"),
+    )
+    name = models.CharField(max_length=100, unique=True)
+    vision_vendor_number = models.CharField(max_length=100, unique=True)
+    delivery_mechanisms = models.ManyToManyField(
+        "payment.DeliveryMechanism",
+        related_name="financial_service_providers",
+        blank=True,
+    )
+    distribution_limit = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
+        help_text="The maximum amount of money that can be distributed or unlimited if 0",
+        db_index=True,
+    )
+    communication_channel = models.CharField(max_length=6, choices=COMMUNICATION_CHANNEL_CHOICES, db_index=True)
+    data_transfer_configuration = models.JSONField(
+        help_text="JSON configuration for the data transfer mechanism",
+        null=True,
+        blank=True,
+        default=dict,
+    )
+    fsp_xlsx_template = models.ForeignKey(
+        "payment.FinancialServiceProviderXlsxTemplate",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("XLSX Template"),
+    )
+
+    def __str__(self):
+        return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
+
+
+class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
+    IN_PROGRESS = 1
+    COMPLETED = 2
+    FAILED = 3
+    STATUSES = (
+        (IN_PROGRESS, _("Processing")),
+        (COMPLETED, _("Generated")),
+        (FAILED, _("Failed")),
+    )
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider",
+        on_delete=models.CASCADE,
+        verbose_name=_("Financial Service Provider"),
+    )
+    file = models.FileField(blank=True, null=True, editable=False)
+    status = models.IntegerField(choices=STATUSES, blank=True, null=True, editable=False, db_index=True)
+
+    def __str__(self):
+        return f"{self.template.name} ({self.status})"
+
+
 class DeliveryMechanism(models.Model):
     name = models.CharField(max_length=255, unique=True)
     display_name = models.CharField(max_length=255, unique=True)
-    required_fields = ArrayField(models.CharField(max_length=250), default=list)  # TODO eg [iban, bank name]
+    required_fields = ArrayField(models.CharField(max_length=250), default=list, blank=True)
 
     def validate_delivery_data(self, delivery_data: dict):
         # TODO MB PaymentChannel instance delivery data can be validated here based on required fields
@@ -307,15 +421,15 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         SENT = "SENT"
 
     payment_plan = models.ForeignKey(
-        PaymentPlan,
+        "payment.PaymentPlan",
         on_delete=models.CASCADE,
         related_name="delivery_mechanisms",
     )
-    # financial_service_provider = models.ForeignKey(
-    #     "payment.FinancialServiceProvider",
-    #     on_delete=models.CASCADE,
-    #     related_name="delivery_mechanisms",
-    # ) # TODO MB uncomment
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider",
+        on_delete=models.PROTECT,
+        related_name="delivery_mechanisms_per_payment_plan",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -328,7 +442,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         related_name="sent_delivery_mechanisms",
     )
     status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
-    delivery_mechanism = models.ForeignKey(DeliveryMechanism, on_delete=models.CASCADE)
+    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.CASCADE)
     delivery_mechanism_order = models.PositiveIntegerField()
     entitlement_quantity = models.DecimalField(
         decimal_places=2,
@@ -363,7 +477,7 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
 
 class PaymentChannel(TimeStampedUUIDModel):
     individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
-    delivery_mechanism = models.ForeignKey(DeliveryMechanism, on_delete=models.CASCADE)
+    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.CASCADE)
     delivery_data = JSONField(default=dict, blank=True)
 
 
@@ -486,7 +600,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
     ca_id = models.CharField(max_length=255, null=True, db_index=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
     cash_plan = models.ForeignKey(
-        CashPlan,
+        "payment.CashPlan",
         on_delete=models.CASCADE,
         related_name="payment_records",
         null=True,
@@ -514,7 +628,7 @@ class PaymentRecord(ConcurrencyModel, GenericPayment):
 
 class Payment(SoftDeletableModel, GenericPayment):
     payment_plan = models.ForeignKey(
-        PaymentPlan,
+        "payment.PaymentPlan",
         on_delete=models.CASCADE,
         related_name="payments",
         null=True,
@@ -582,7 +696,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     cash_plan = models.ForeignKey(
-        CashPlan,
+        "payment.CashPlan",
         on_delete=models.CASCADE,
         related_name="verifications",
     )
@@ -687,12 +801,12 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
     cash_plan_payment_verification = models.ForeignKey(
-        CashPlanPaymentVerification,
+        "payment.CashPlanPaymentVerification",
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
     )
     payment_record = models.OneToOneField(
-        PaymentRecord, related_name="verification", on_delete=models.CASCADE, null=True, blank=True
+        "payment.PaymentRecord", related_name="verification", on_delete=models.CASCADE, null=True, blank=True
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True)
@@ -738,116 +852,5 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     cash_plan = models.OneToOneField(
-        CashPlan, on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
+        "payment.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
     )
-
-
-class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
-    # TODO: add/remove fields after finalizing the fields
-    COLUMNS_TO_CHOOSE = (
-        ("payment_id", _("Payment ID")),
-        ("household_id", _("Household ID")),
-        ("admin_leve_2", _("Admin Level 2")),
-        ("collector_name", _("Collector Name")),
-        ("payment_channel", _("Payment Channel (Delivery mechanism)")),
-        ("fsp_name", _("FSP Name")),
-        ("entitlement_quantity", _("Entitlement Quantity")),
-        ("tbd", _("TBD")),
-    )
-    DEFAULT_COLUMNS = [
-        "payment_id",
-        "household_id",
-        "admin_leve_2",
-        "collector_name",
-        "payment_channel",
-        "fsp_name",
-        "entitlement_quantity",
-    ]
-
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="created_financial_service_provider_xlsx_templates",
-        null=True,
-        blank=True,
-        verbose_name=_("Created by"),
-    )
-    name = models.CharField(max_length=120, verbose_name=_("Name"))
-    columns = MultiSelectField(
-        choices=COLUMNS_TO_CHOOSE,
-        default=DEFAULT_COLUMNS,
-        verbose_name=_("Columns"),
-        help_text=_("Select the columns to include in the report"),
-    )
-
-    def __str__(self):
-        return f"{self.name} ({len(self.columns)})"
-
-
-class FinancialServiceProvider(TimeStampedUUIDModel):
-    COMMUNICATION_CHANNEL_API = "API"
-    COMMUNICATION_CHANNEL_SFTP = "SFTP"
-    COMMUNICATION_CHANNEL_XLSX = "XLSX"
-    COMMUNICATION_CHANNEL_CHOICES = (
-        (COMMUNICATION_CHANNEL_API, "API"),
-        (COMMUNICATION_CHANNEL_SFTP, "SFTP"),
-        (COMMUNICATION_CHANNEL_XLSX, "XLSX"),
-    )
-
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        related_name="created_financial_service_providers",
-        null=True,
-        blank=True,
-        verbose_name=_("Created by"),
-    )
-    name = models.CharField(max_length=100, unique=True)
-    vision_vendor_number = models.CharField(max_length=100, unique=True)
-    delivery_mechanisms = models.CharField(max_length=100)
-    distribution_limit = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        null=True,
-        help_text="The maximum amount of money that can be distributed or unlimited if 0",
-        db_index=True,
-    )
-    communication_channel = models.CharField(max_length=6, choices=COMMUNICATION_CHANNEL_CHOICES, db_index=True)
-    data_transfer_configuration = models.JSONField(
-        help_text="JSON configuration for the data transfer mechanism",
-        null=True,
-        blank=True,
-        default=dict,
-    )
-    fsp_xlsx_template = models.ForeignKey(
-        FinancialServiceProviderXlsxTemplate,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name=_("XLSX Template"),
-    )
-
-    def __str__(self):
-        return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
-
-
-class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
-    IN_PROGRESS = 1
-    COMPLETED = 2
-    FAILED = 3
-    STATUSES = (
-        (IN_PROGRESS, _("Processing")),
-        (COMPLETED, _("Generated")),
-        (FAILED, _("Failed")),
-    )
-    financial_service_provider = models.ForeignKey(
-        FinancialServiceProvider,
-        on_delete=models.CASCADE,
-        verbose_name=_("Financial Service Provider"),
-    )
-    file = models.FileField(blank=True, null=True, editable=False)
-    status = models.IntegerField(choices=STATUSES, blank=True, null=True, editable=False, db_index=True)
-
-    def __str__(self):
-        return f"{self.template.name} ({self.status})"

@@ -67,6 +67,43 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.CreateModel(
+            name="DeliveryMechanism",
+            fields=[
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=255, unique=True)),
+                ("display_name", models.CharField(max_length=255, unique=True)),
+                (
+                    "required_fields",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(max_length=250), default=list, size=None, blank=True
+                    ),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
+            name="PaymentChannel",
+            fields=[
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("delivery_data", models.JSONField(blank=True, default=dict)),
+                (
+                    "delivery_mechanism",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.deliverymechanism"),
+                ),
+                (
+                    "individual",
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="household.individual"),
+                ),
+            ],
+            options={
+                "abstract": False,
+            },
+        ),
         migrations.AddField(
             model_name="paymentrecord",
             name="entitlement_quantity_usd",
@@ -549,79 +586,159 @@ class Migration(migrations.Migration):
         migrations.RunPython(populate_existing_payment_record_usd_amount, migrations.RunPython.noop),
         migrations.RunPython(populate_existing_cash_plan_usd_amount, migrations.RunPython.noop),
         migrations.CreateModel(
-            name='FinancialServiceProvider',
+            name="FinancialServiceProvider",
             fields=[
-                ('id',
-                 model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('name', models.CharField(max_length=100, unique=True)),
-                ('vision_vendor_number', models.CharField(max_length=100, unique=True)),
-                ('delivery_mechanisms', models.CharField(max_length=100)),
-                ('distribution_limit', models.DecimalField(db_index=True, decimal_places=2,
-                                                           help_text='The maximum amount of money that can be distributed or unlimited if 0',
-                                                           max_digits=12, null=True, validators=[
-                        django.core.validators.MinValueValidator(Decimal('0.01'))])),
-                ('communication_channel',
-                 models.CharField(choices=[('API', 'API'), ('SFTP', 'SFTP'), ('XLSX', 'XLSX')], db_index=True,
-                                  max_length=6)),
-                ('data_transfer_configuration', models.JSONField(blank=True, default=dict,
-                                                                 help_text='JSON configuration for the data transfer mechanism',
-                                                                 null=True)),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
-                                                 related_name='created_financial_service_providers',
-                                                 to=settings.AUTH_USER_MODEL, verbose_name='Created by')),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("vision_vendor_number", models.CharField(max_length=100, unique=True)),
+                (
+                    "delivery_mechanisms",
+                    models.ManyToManyField(
+                        blank=True, related_name="financial_service_providers", to="payment.DeliveryMechanism"
+                    ),
+                ),
+                (
+                    "distribution_limit",
+                    models.DecimalField(
+                        db_index=True,
+                        decimal_places=2,
+                        help_text="The maximum amount of money that can be distributed or unlimited if 0",
+                        max_digits=12,
+                        null=True,
+                        validators=[django.core.validators.MinValueValidator(Decimal("0.01"))],
+                    ),
+                ),
+                (
+                    "communication_channel",
+                    models.CharField(
+                        choices=[("API", "API"), ("SFTP", "SFTP"), ("XLSX", "XLSX")], db_index=True, max_length=6
+                    ),
+                ),
+                (
+                    "data_transfer_configuration",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text="JSON configuration for the data transfer mechanism",
+                        null=True,
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="created_financial_service_providers",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Created by",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='FinancialServiceProviderXlsxTemplate',
+            name="FinancialServiceProviderXlsxTemplate",
             fields=[
-                ('id',
-                 model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('name', models.CharField(max_length=120, verbose_name='Name')),
-                ('columns', multiselectfield.db.fields.MultiSelectField(
-                    choices=[('payment_id', 'Payment ID'), ('household_id', 'Household ID'),
-                             ('admin_leve_2', 'Admin Level 2'), ('collector_name', 'Collector Name'),
-                             ('payment_channel', 'Payment Channel (Delivery mechanism)'), ('fsp_name', 'FSP Name'),
-                             ('entitlement_quantity', 'Entitlement Quantity'), ('tbd', 'TBD')],
-                    default=['payment_id', 'household_id', 'admin_leve_2', 'collector_name', 'payment_channel',
-                             'fsp_name', 'entitlement_quantity'],
-                    help_text='Select the columns to include in the report', max_length=101, verbose_name='Columns')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
-                                                 related_name='created_financial_service_provider_xlsx_templates',
-                                                 to=settings.AUTH_USER_MODEL, verbose_name='Created by')),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("name", models.CharField(max_length=120, verbose_name="Name")),
+                (
+                    "columns",
+                    multiselectfield.db.fields.MultiSelectField(
+                        choices=[
+                            ("payment_id", "Payment ID"),
+                            ("household_id", "Household ID"),
+                            ("admin_leve_2", "Admin Level 2"),
+                            ("collector_name", "Collector Name"),
+                            ("payment_channel", "Payment Channel (Delivery mechanism)"),
+                            ("fsp_name", "FSP Name"),
+                            ("entitlement_quantity", "Entitlement Quantity"),
+                            ("tbd", "TBD"),
+                        ],
+                        default=[
+                            "payment_id",
+                            "household_id",
+                            "admin_leve_2",
+                            "collector_name",
+                            "payment_channel",
+                            "fsp_name",
+                            "entitlement_quantity",
+                        ],
+                        help_text="Select the columns to include in the report",
+                        max_length=101,
+                        verbose_name="Columns",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="created_financial_service_provider_xlsx_templates",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Created by",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='FinancialServiceProviderXlsxReport',
+            name="FinancialServiceProviderXlsxReport",
             fields=[
-                ('id',
-                 model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('file', models.FileField(blank=True, editable=False, null=True, upload_to='')),
-                ('status', models.IntegerField(blank=True, choices=[(1, 'Processing'), (2, 'Generated'), (3, 'Failed')],
-                                               db_index=True, editable=False, null=True)),
-                ('financial_service_provider',
-                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='payment.financialserviceprovider',
-                                   verbose_name='Financial Service Provider')),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("file", models.FileField(blank=True, editable=False, null=True, upload_to="")),
+                (
+                    "status",
+                    models.IntegerField(
+                        blank=True,
+                        choices=[(1, "Processing"), (2, "Generated"), (3, "Failed")],
+                        db_index=True,
+                        editable=False,
+                        null=True,
+                    ),
+                ),
+                (
+                    "financial_service_provider",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="payment.financialserviceprovider",
+                        verbose_name="Financial Service Provider",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='financialserviceprovider',
-            name='fsp_xlsx_template',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
-                                    to='payment.financialserviceproviderxlsxtemplate', verbose_name='XLSX Template'),
+            model_name="financialserviceprovider",
+            name="fsp_xlsx_template",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="payment.financialserviceproviderxlsxtemplate",
+                verbose_name="XLSX Template",
+            ),
         ),
     ]

@@ -19,7 +19,8 @@ from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 
 

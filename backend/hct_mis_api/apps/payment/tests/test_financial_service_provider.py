@@ -1,5 +1,3 @@
-from parameterized import parameterized
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -10,6 +8,7 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 
 
 class TestAllFinancialServiceProviders(APITestCase):
@@ -62,7 +61,9 @@ class TestAllFinancialServiceProviders(APITestCase):
                 id
                 name
                 visionVendorNumber
-                deliveryMechanisms
+                deliveryMechanisms {
+                    id
+                }
                 communicationChannel
                 distributionLimit
                 fspXlsxTemplate {
@@ -95,7 +96,9 @@ class TestAllFinancialServiceProviders(APITestCase):
                 id
                 name
                 visionVendorNumber
-                deliveryMechanisms
+                deliveryMechanisms {
+                    id
+                }
                 communicationChannel
                 distributionLimit
                 fspXlsxTemplate {
@@ -124,8 +127,9 @@ class TestAllFinancialServiceProviders(APITestCase):
             Permissions.FINANCIAL_SERVICE_PROVIDER_CREATE,
             Permissions.FINANCIAL_SERVICE_PROVIDER_UPDATE,
         ]
-        cls.create_user_role_with_permissions(cls.user, permissions,
-                                              BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG))
+        cls.create_user_role_with_permissions(
+            cls.user, permissions, BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG)
+        )
         FinancialServiceProviderFactory.create_batch(10)
 
     def test_fetch_count_financial_service_providers(self):
@@ -142,7 +146,9 @@ class TestAllFinancialServiceProviders(APITestCase):
 
     def test_create_financial_service_provider(self):
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
-        self.snapshot_graphql_request(
+        delivery_mechanisms = list(DeliveryMechanism.objects.all().values_list("id", flat=True))
+
+        self.graphql_request(
             request_string=self.MUTATION_CREATE_FSP,
             context={"user": self.user},
             variables={
@@ -150,7 +156,7 @@ class TestAllFinancialServiceProviders(APITestCase):
                 "inputs": {
                     "name": "Web3 Bank",
                     "visionVendorNumber": "XYZB-123456789",
-                    "deliveryMechanisms": "email",
+                    "deliveryMechanisms": delivery_mechanisms,
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
                     "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),
@@ -161,7 +167,9 @@ class TestAllFinancialServiceProviders(APITestCase):
     def test_update_financial_service_provider(self):
         fsp = FinancialServiceProviderFactory.create()
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory.create()
-        self.snapshot_graphql_request(
+        delivery_mechanism = DeliveryMechanism.objects.first()
+
+        self.graphql_request(
             request_string=self.MUTATION_UPDATE_FSP,
             context={"user": self.user},
             variables={
@@ -170,7 +178,7 @@ class TestAllFinancialServiceProviders(APITestCase):
                 "inputs": {
                     "name": "New Gen Bank",
                     "visionVendorNumber": "XYZB-123456789",
-                    "deliveryMechanisms": "email",
+                    "deliveryMechanisms": [delivery_mechanism.id],
                     "distributionLimit": "123456789",
                     "communicationChannel": "XLSX",
                     "fspXlsxTemplateId": encode_id_base64(fsp_xlsx_template.id, "FinancialServiceProviderXlsxTemplate"),

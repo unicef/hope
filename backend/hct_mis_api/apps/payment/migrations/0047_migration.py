@@ -44,43 +44,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="DeliveryMechanism",
-            fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("name", models.CharField(max_length=255, unique=True)),
-                ("display_name", models.CharField(max_length=255, unique=True)),
-                (
-                    "required_fields",
-                    django.contrib.postgres.fields.ArrayField(
-                        base_field=models.CharField(max_length=250), default=list, size=None
-                    ),
-                ),
-            ],
-        ),
-        migrations.CreateModel(
-            name="PaymentChannel",
-            fields=[
-                (
-                    "id",
-                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
-                ),
-                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
-                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
-                ("delivery_data", models.JSONField(blank=True, default=dict)),
-                (
-                    "delivery_mechanism",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="payment.deliverymechanism"),
-                ),
-                (
-                    "individual",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="household.individual"),
-                ),
-            ],
-            options={
-                "abstract": False,
-            },
-        ),
-        migrations.CreateModel(
             name="DeliveryMechanismPerPaymentPlan",
             fields=[
                 (
@@ -137,6 +100,14 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.PROTECT,
                         related_name="sent_delivery_mechanisms",
                         to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "financial_service_provider",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="delivery_mechanisms_per_payment_plan",
+                        to="payment.financialserviceprovider",
                     ),
                 ),
             ],

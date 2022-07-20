@@ -221,6 +221,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 @admin.register(DeliveryMechanism)
 class DeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("display_name", "required_fields")
+    search_fields = ("name",)
 
 
 @admin.register(DeliveryMechanismPerPaymentPlan)
@@ -271,8 +272,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "communication_channel",
     )
     search_fields = ("name",)
-    list_filter = ("delivery_mechanisms",)
-    autocomplete_fields = ("created_by", "fsp_xlsx_template")
+    autocomplete_fields = ("created_by", "fsp_xlsx_template", "delivery_mechanisms")
     list_select_related = ("created_by", "fsp_xlsx_template")
     fields = (
         ("name", "vision_vendor_number"),
@@ -290,9 +290,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 @admin.register(FinancialServiceProviderXlsxReport)
 class FinancialServiceProviderXlsxReportAdmin(HOPEModelAdminBase):
     list_display = ("id", "status", "file")
-    list_filter = (
-        "status",
-    )
+    list_filter = ("status",)
     list_select_related = ("financial_service_provider",)
     # search_fields = ("id",)
     readonly_fields = ("file", "status", "financial_service_provider")
