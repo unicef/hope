@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -51,8 +49,6 @@ class TestDiscardVerificationMutation(APITestCase):
           }
         }
         """
-
-    # verification = None
 
     @classmethod
     def setUpTestData(cls):

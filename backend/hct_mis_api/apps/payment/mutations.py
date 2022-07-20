@@ -31,6 +31,7 @@ from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hct_mis_api.apps.payment.celery_tasks import create_cash_plan_payment_verification_xls
 from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import (
     XlsxVerificationImportService,
@@ -464,6 +465,36 @@ class XlsxErrorNode(graphene.ObjectType):
         return parent[2]
 
 
+class ExportXlsxCashPlanVerification(PermissionMutation):
+    cash_plan = graphene.Field(CashPlanNode)
+
+    class Arguments:
+        cash_plan_verification_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, cash_plan_verification_id):
+        pk = decode_id_string(cash_plan_verification_id)
+        cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=pk)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_EXPORT, cashplan_payment_verification.business_area)
+
+        if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+            logger.error("You can only export verification for active CashPlan verification")
+            raise GraphQLError("You can export verification for active CashPlan verification")
+        if cashplan_payment_verification.verification_channel != CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
+            logger.error("You can only export verification when XLSX channel is selected")
+            raise GraphQLError("You can export verification when XLSX channel is selected")
+        if cashplan_payment_verification.xlsx_file_exporting:
+            logger.error("Exporting xlsx file is already started. Please wait")
+            raise GraphQLError("Exporting xlsx file is already started. Please wait")
+
+        cashplan_payment_verification.xlsx_file_exporting = True
+        cashplan_payment_verification.save()
+        create_cash_plan_payment_verification_xls.delay(pk, info.context.user.pk)
+        return cls(cash_plan=cashplan_payment_verification.cash_plan)
+
+
 class ImportXlsxCashPlanVerification(PermissionMutation):
     cash_plan = graphene.Field(CashPlanNode)
     errors = graphene.List(XlsxErrorNode)
@@ -493,6 +524,7 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
             return ImportXlsxCashPlanVerification(None, import_service.errors)
         import_service.import_verifications()
         calculate_counts(cashplan_payment_verification)
+        cashplan_payment_verification.xlsx_file_imported = True
         cashplan_payment_verification.save()
         return ImportXlsxCashPlanVerification(cashplan_payment_verification.cash_plan, import_service.errors)
 
@@ -500,6 +532,7 @@ class ImportXlsxCashPlanVerification(PermissionMutation):
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
     edit_cash_plan_payment_verification = EditPaymentVerificationMutation.Field()
+    export_xlsx_cash_plan_verification = ExportXlsxCashPlanVerification.Field()
     import_xlsx_cash_plan_verification = ImportXlsxCashPlanVerification.Field()
     activate_cash_plan_payment_verification = ActivateCashPlanVerificationMutation.Field()
     finish_cash_plan_payment_verification = FinishCashPlanVerificationMutation.Field()

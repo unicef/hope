@@ -559,6 +559,7 @@ export type CashPlanPaymentVerificationNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   version: Scalars['BigInt'],
+  unicefId?: Maybe<Scalars['String']>,
   status: CashPlanPaymentVerificationStatus,
   cashPlan: CashPlanNode,
   sampling: CashPlanPaymentVerificationSampling,
@@ -577,8 +578,11 @@ export type CashPlanPaymentVerificationNode = Node & {
   sexFilter?: Maybe<Scalars['String']>,
   activationDate?: Maybe<Scalars['DateTime']>,
   completionDate?: Maybe<Scalars['DateTime']>,
-  unicefId: Scalars['String'],
+  xlsxFileExporting: Scalars['Boolean'],
+  xlsxFileImported: Scalars['Boolean'],
   paymentRecordVerifications: PaymentVerificationNodeConnection,
+  xlsxFileWasDownloaded?: Maybe<Scalars['Boolean']>,
+  hasXlsxFile?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -612,7 +616,8 @@ export enum CashPlanPaymentVerificationSampling {
 export enum CashPlanPaymentVerificationStatus {
   Active = 'ACTIVE',
   Finished = 'FINISHED',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
+  Invalid = 'INVALID'
 }
 
 export type CashPlanPaymentVerificationSummaryNode = Node & {
@@ -1035,6 +1040,11 @@ export type EditPaymentVerificationMutation = {
   cashPlan?: Maybe<CashPlanNode>,
 };
 
+export type ExportXlsxCashPlanVerification = {
+   __typename?: 'ExportXlsxCashPlanVerification',
+  cashPlan?: Maybe<CashPlanNode>,
+};
+
 export type FieldAttributeNode = {
    __typename?: 'FieldAttributeNode',
   id?: Maybe<Scalars['String']>,
@@ -1099,6 +1109,7 @@ export type GrievanceTicketNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   version: Scalars['BigInt'],
+  unicefId?: Maybe<Scalars['String']>,
   userModified?: Maybe<Scalars['DateTime']>,
   lastNotificationSent?: Maybe<Scalars['DateTime']>,
   createdBy?: Maybe<UserNode>,
@@ -1115,7 +1126,6 @@ export type GrievanceTicketNode = Node & {
   businessArea: UserBusinessAreaNode,
   linkedTickets: GrievanceTicketNodeConnection,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
-  unicefId: Scalars['String'],
   extras: Scalars['JSONString'],
   ignored: Scalars['Boolean'],
   householdUnicefId?: Maybe<Scalars['String']>,
@@ -2721,6 +2731,11 @@ export type IndividualUpdateDataObjectType = {
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
+export type InvalidCashPlanVerificationMutation = {
+   __typename?: 'InvalidCashPlanVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
+};
+
 export type IssueTypeExtrasInput = {
   householdDataUpdateIssueTypeExtras?: Maybe<HouseholdDataUpdateIssueTypeExtras>,
   individualDataUpdateIssueTypeExtras?: Maybe<IndividualDataUpdateIssueTypeExtras>,
@@ -2854,10 +2869,12 @@ export type Mutations = {
   reassignRole?: Maybe<ReassignRoleMutation>,
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
+  exportXlsxCashPlanVerification?: Maybe<ExportXlsxCashPlanVerification>,
   importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
   activateCashPlanPaymentVerification?: Maybe<ActivateCashPlanVerificationMutation>,
   finishCashPlanPaymentVerification?: Maybe<FinishCashPlanVerificationMutation>,
   discardCashPlanPaymentVerification?: Maybe<DiscardCashPlanVerificationMutation>,
+  invalidCashPlanPaymentVerification?: Maybe<InvalidCashPlanVerificationMutation>,
   deleteCashPlanPaymentVerification?: Maybe<DeleteCashPlanVerificationMutation>,
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>,
@@ -3014,6 +3031,11 @@ export type MutationsEditCashPlanPaymentVerificationArgs = {
 };
 
 
+export type MutationsExportXlsxCashPlanVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
 export type MutationsImportXlsxCashPlanVerificationArgs = {
   cashPlanVerificationId: Scalars['ID'],
   file: Scalars['Upload']
@@ -3033,6 +3055,12 @@ export type MutationsFinishCashPlanPaymentVerificationArgs = {
 
 
 export type MutationsDiscardCashPlanPaymentVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsInvalidCashPlanPaymentVerificationArgs = {
   cashPlanVerificationId: Scalars['ID'],
   version?: Maybe<Scalars['BigInt']>
 };
@@ -19632,12 +19660,14 @@ export type ResolversTypes = {
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
   EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
   EditPaymentVerificationMutation: ResolverTypeWrapper<EditPaymentVerificationMutation>,
+  ExportXlsxCashPlanVerification: ResolverTypeWrapper<ExportXlsxCashPlanVerification>,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
   ImportXlsxCashPlanVerification: ResolverTypeWrapper<ImportXlsxCashPlanVerification>,
   XlsxErrorNode: ResolverTypeWrapper<XlsxErrorNode>,
   ActivateCashPlanVerificationMutation: ResolverTypeWrapper<ActivateCashPlanVerificationMutation>,
   FinishCashPlanVerificationMutation: ResolverTypeWrapper<FinishCashPlanVerificationMutation>,
   DiscardCashPlanVerificationMutation: ResolverTypeWrapper<DiscardCashPlanVerificationMutation>,
+  InvalidCashPlanVerificationMutation: ResolverTypeWrapper<InvalidCashPlanVerificationMutation>,
   DeleteCashPlanVerificationMutation: ResolverTypeWrapper<DeleteCashPlanVerificationMutation>,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
@@ -20004,12 +20034,14 @@ export type ResolversParentTypes = {
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
   EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
   EditPaymentVerificationMutation: EditPaymentVerificationMutation,
+  ExportXlsxCashPlanVerification: ExportXlsxCashPlanVerification,
   Upload: Scalars['Upload'],
   ImportXlsxCashPlanVerification: ImportXlsxCashPlanVerification,
   XlsxErrorNode: XlsxErrorNode,
   ActivateCashPlanVerificationMutation: ActivateCashPlanVerificationMutation,
   FinishCashPlanVerificationMutation: FinishCashPlanVerificationMutation,
   DiscardCashPlanVerificationMutation: DiscardCashPlanVerificationMutation,
+  InvalidCashPlanVerificationMutation: InvalidCashPlanVerificationMutation,
   DeleteCashPlanVerificationMutation: DeleteCashPlanVerificationMutation,
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
@@ -20286,6 +20318,7 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['CashPlanPaymentVerificationStatus'], ParentType, ContextType>,
   cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
   sampling?: Resolver<ResolversTypes['CashPlanPaymentVerificationSampling'], ParentType, ContextType>,
@@ -20304,8 +20337,11 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  xlsxFileExporting?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  xlsxFileImported?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
+  xlsxFileWasDownloaded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasXlsxFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type CashPlanPaymentVerificationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeConnection'] = ResolversParentTypes['CashPlanPaymentVerificationNodeConnection']> = {
@@ -20530,6 +20566,10 @@ export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentTy
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
+export type ExportXlsxCashPlanVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ExportXlsxCashPlanVerification'] = ResolversParentTypes['ExportXlsxCashPlanVerification']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
 export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FieldAttributeNode'] = ResolversParentTypes['FieldAttributeNode']> = {
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -20573,6 +20613,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   userModified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   lastNotificationSent?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
@@ -20589,7 +20630,6 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   linkedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsArgs>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
-  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   extras?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   ignored?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   householdUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -21115,6 +21155,10 @@ export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType
   role?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>, ParentType, ContextType>,
 };
 
+export type InvalidCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['InvalidCashPlanVerificationMutation'] = ResolversParentTypes['InvalidCashPlanVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
 export type IssueTypesObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['IssueTypesObject'] = ResolversParentTypes['IssueTypesObject']> = {
   category?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -21224,10 +21268,12 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
+  exportXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ExportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsExportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId'>>,
   importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
   activateCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['ActivateCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsActivateCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   finishCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['FinishCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsFinishCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   discardCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DiscardCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDiscardCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
+  invalidCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['InvalidCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsInvalidCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   deleteCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DeleteCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDeleteCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
@@ -22594,6 +22640,7 @@ export type Resolvers<ContextType = any> = {
   DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
+  ExportXlsxCashPlanVerification?: ExportXlsxCashPlanVerificationResolvers<ContextType>,
   FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>,
   FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
   FinishCashPlanVerificationMutation?: FinishCashPlanVerificationMutationResolvers<ContextType>,
@@ -22633,6 +22680,7 @@ export type Resolvers<ContextType = any> = {
   IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
   IndividualRoleInHouseholdNode?: IndividualRoleInHouseholdNodeResolvers<ContextType>,
+  InvalidCashPlanVerificationMutation?: InvalidCashPlanVerificationMutationResolvers<ContextType>,
   IssueTypesObject?: IssueTypesObjectResolvers<ContextType>,
   JSONString?: GraphQLScalarType,
   KoboAssetObject?: KoboAssetObjectResolvers<ContextType>,
