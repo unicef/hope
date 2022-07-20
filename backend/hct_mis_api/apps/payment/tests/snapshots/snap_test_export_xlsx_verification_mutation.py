@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestXlsxVerificationImport::test_export_xlsx_cash_plan_payment_verification_0_with_permission 1'] = {
+snapshots['TestXlsxVerificationExport::test_export_xlsx_cash_plan_payment_verification_0_with_permission 1'] = {
     'data': {
         'exportXlsxCashPlanVerification': {
             'cashPlan': {
@@ -15,6 +15,7 @@ snapshots['TestXlsxVerificationImport::test_export_xlsx_cash_plan_payment_verifi
                     'edges': [
                         {
                             'node': {
+                                'hasXlsxFile': False,
                                 'status': 'ACTIVE',
                                 'xlsxFileExporting': True,
                                 'xlsxFileImported': False,
@@ -28,7 +29,7 @@ snapshots['TestXlsxVerificationImport::test_export_xlsx_cash_plan_payment_verifi
     }
 }
 
-snapshots['TestXlsxVerificationImport::test_export_xlsx_cash_plan_payment_verification_1_without_permission 1'] = {
+snapshots['TestXlsxVerificationExport::test_export_xlsx_cash_plan_payment_verification_1_without_permission 1'] = {
     'data': {
         'exportXlsxCashPlanVerification': None
     },

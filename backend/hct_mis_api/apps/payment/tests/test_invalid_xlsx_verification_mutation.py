@@ -1,4 +1,9 @@
+from io import BytesIO
+from pathlib import Path
+
 from parameterized import parameterized
+from django.conf import settings
+from django.core.files import File
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -9,15 +14,15 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
 )
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, XlsxCashPlanPaymentVerificationFile
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 
 
-class TestXlsxVerificationExport(APITestCase):
+class TestXlsxVerificationMarkAsInvalid(APITestCase):
 
-    EXPORT_MUTATION = """
-        mutation exportXlsxCashPlanVerification($cashPlanVerificationId: ID!) {
-          exportXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+    INVALID_MUTATION = """
+        mutation invalidCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
+          invalidCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
             cashPlan{
               verifications{
                 edges{
@@ -26,7 +31,6 @@ class TestXlsxVerificationExport(APITestCase):
                     xlsxFileImported
                     xlsxFileExporting
                     xlsxFileWasDownloaded
-                    hasXlsxFile
                   }
                 }
               }
@@ -52,19 +56,30 @@ class TestXlsxVerificationExport(APITestCase):
             cash_plan=cash_plan,
             verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX,
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
+
+        )
+        cls.content = Path(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_updated.xls").read_bytes()
+        cls.xlsx_file = XlsxCashPlanPaymentVerificationFile.objects.create(
+            file=File(BytesIO(cls.content), name="flex_updated.xls"),
+            cash_plan_payment_verification=cls.cash_plan_payment_verification,
+            was_downloaded=False,
+            created_by=None,
         )
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.PAYMENT_VERIFICATION_EXPORT]),
-            ("without_permission", []),
+            ("with_permission_was_downloaded_false", [Permissions.PAYMENT_VERIFICATION_INVALID], False),
+            ("with_permission_was_downloaded_true", [Permissions.PAYMENT_VERIFICATION_INVALID], True),
+            ("without_permission", [], True),
         ]
     )
-    def test_export_xlsx_cash_plan_payment_verification(self, _, permissions):
+    def test_export_xlsx_cash_plan_payment_verification(self, _, permissions, download_status):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.xlsx_file.was_downloaded = download_status
+        self.xlsx_file.save()
 
         self.snapshot_graphql_request(
-            request_string=self.EXPORT_MUTATION,
+            request_string=self.INVALID_MUTATION,
             context={"user": self.user},
             variables={
                 "cashPlanVerificationId": self.id_to_base64(
