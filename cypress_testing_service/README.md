@@ -18,7 +18,7 @@ docker-compose up -d --build
 When BE etc. is up, call
 
 ```
-docker exec -it hct-mis_backend_1 ./manage.py initempty
+docker exec -it hct-mis_backend_1 ./manage.py initcypress
 ```
 
 And turn on the FE in `frontend` directory:
