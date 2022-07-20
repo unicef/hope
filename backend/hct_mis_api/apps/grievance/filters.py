@@ -98,6 +98,7 @@ class GrievanceTicketFilter(FilterSet):
     priority = ChoiceFilter(field_name="priority", choices=GrievanceTicket.PRIORITY_CHOICES)
     urgency = ChoiceFilter(field_name="urgency", choices=GrievanceTicket.URGENCY_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
+    grievance_status = CharFilter(method="filter_grievance_status")
 
     class Meta:
         fields = {
@@ -209,6 +210,11 @@ class GrievanceTicketFilter(FilterSet):
             return qs.filter( category__in=user_generated )
         elif val == 'system':
             return qs.filter( ~Q(category__in=user_generated) )
+        return qs
+
+    def filter_grievance_status(self, qs, name, val):
+        if val == 'active':
+            return qs.filter(~Q(status= GrievanceTicket.STATUS_CLOSED))
         return qs
 
 
