@@ -599,7 +599,7 @@ class TargetingIndividualRuleFilterBlockMixin:
             filtered = True
             if ruleFilter.field_name in ("observed_disability", "full_name"):
                 for arg in ruleFilter.arguments:
-                    search_query |= SearchQuery(arg)
+                    search_query &= SearchQuery(arg)
             else:
                 individuals_query &= ruleFilter.get_query()
         if not filtered:
