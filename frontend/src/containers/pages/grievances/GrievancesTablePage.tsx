@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Box, Button, Tab, Tabs, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
@@ -16,6 +16,7 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
+import { GrievancesType, GRIEVANCE_TICKETS_TYPES } from '../../../utils/constants';
 
 export function GrievancesTablePage(): React.ReactElement {
   const { t } = useTranslation();
@@ -36,12 +37,44 @@ export function GrievancesTablePage(): React.ReactElement {
     cashPlan: cashPlanId,
     scoreMin: null,
     scoreMax: null,
+    grievanceType: 'user',
+    priority: '',
+    urgency: '',
   });
+  const [selectedTab, setSelectedTab] = useState(
+    GRIEVANCE_TICKETS_TYPES.userGenerated,
+  );
   const debouncedFilter = useDebounce(filter, 500);
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
+
+  const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
+
+  const mappedTabs = grievanceTicketsTypes.map((el) => (
+    <Tab key={el} label={el} />
+  ));
+  const tabs = (
+    <Tabs
+      value={selectedTab}
+      onChange={(event: React.ChangeEvent<{}>, newValue: number) => {
+        setSelectedTab(newValue);
+        setFilter({
+          ...filter,
+          grievanceType: GrievancesType[newValue],
+          category: '',
+        });
+      }}
+      indicatorColor='primary'
+      textColor='primary'
+      variant='scrollable'
+      scrollButtons='auto'
+      aria-label='tabs'
+    >
+      {mappedTabs}
+    </Tabs>
+  );
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -51,23 +84,31 @@ export function GrievancesTablePage(): React.ReactElement {
 
   return (
     <>
-      <PageHeader title='Grievance and Feedback'>
-        {hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-          <Button
-            variant='contained'
-            color='primary'
-            component={Link}
-            to={`/${businessArea}/grievance-and-feedback/new-ticket`}
-          >
-            {t('NEW TICKET')}
-          </Button>
-        )}
-      </PageHeader>
+      <PageHeader tabs={tabs} title='Grievance Tickets' />
       <GrievancesFilters
         choicesData={choicesData}
         filter={filter}
         onFilterChange={setFilter}
       />
+      <Box display='flex' alignItems='center' px={5} pt={5}>
+        <Typography color='textSecondary' variant='subtitle1'>
+          {t('ASSIGN TICKETS')}
+        </Typography>
+        <Box display='flex' ml='auto'>
+          {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
+            hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
+              <Button
+                alignItems='center'
+                variant='contained'
+                color='primary'
+                component={Link}
+                to={`/${businessArea}/grievance-and-feedback/new-ticket`}
+              >
+                {t('NEW TICKET')}
+              </Button>
+            )}
+        </Box>
+      </Box>
       <GrievancesTable filter={debouncedFilter} businessArea={businessArea} />
     </>
   );
