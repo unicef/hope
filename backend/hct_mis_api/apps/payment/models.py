@@ -255,6 +255,14 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
+        source=[Status.IN_APPROVAL, Status.IN_AUTHORIZATION, Status.IN_REVIEW],
+        target=Status.LOCKED,
+    )
+    def status_reject(self):
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
         source=Status.LOCKED,
         target=Status.IN_APPROVAL,
     )
@@ -263,10 +271,10 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
 
     @transition(
         field=status,
-        source=[Status.IN_APPROVAL, Status.IN_AUTHORIZATION, Status.IN_REVIEW],
-        target=Status.LOCKED,
+        source=Status.IN_APPROVAL,
+        target=Status.IN_AUTHORIZATION,
     )
-    def status_reject(self):
+    def status_approve(self):
         self.status_date = timezone.now()
 
     @transition(
