@@ -61,3 +61,8 @@ export const GrievancesType = {
   0: 'user',
   1: 'system',
 };
+
+export const GrievancesStauses = {
+  All: 'all',
+  Active: 'active',
+};
