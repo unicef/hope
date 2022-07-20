@@ -48,6 +48,10 @@ const StyledLink = styled.a`
   text-decoration: none;
 `;
 
+const StyledButton = styled(Button)`
+  width: 150px;
+`;
+
 export const VerificationPlanDetails = ({
   verificationPlan,
   samplingChoicesData,
@@ -137,13 +141,13 @@ export const VerificationPlanDetails = ({
                         download
                         href={`/api/download-cash-plan-payment-verification/${verificationPlan.id}`}
                       >
-                        <Button
+                        <StyledButton
                           color='primary'
                           variant='outlined'
                           startIcon={<GetApp />}
                         >
                           {t('Export XLSX')}
-                        </Button>
+                        </StyledButton>
                       </StyledLink>
                     </Box>
                   )}
