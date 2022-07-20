@@ -7008,6 +7008,32 @@ export type EditCashPlanPaymentVerificationMutation = (
   )> }
 );
 
+export type ExportXlsxCashPlanVerificationMutationVariables = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type ExportXlsxCashPlanVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { exportXlsxCashPlanVerification: Maybe<(
+    { __typename?: 'ExportXlsxCashPlanVerification' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'xlsxFileExporting' | 'hasXlsxFile' | 'xlsxFileWasDownloaded' | 'xlsxFileImported'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
 export type FinishCashPlanPaymentVerificationMutationVariables = {
   cashPlanVerificationId: Scalars['ID']
 };
@@ -7054,6 +7080,32 @@ export type ImportXlsxCashPlanVerificationMutation = (
       { __typename?: 'XlsxErrorNode' }
       & Pick<XlsxErrorNode, 'sheet' | 'coordinates' | 'message'>
     )>>> }
+  )> }
+);
+
+export type InvalidCashPlanPaymentVerificationMutationVariables = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type InvalidCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { invalidCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'InvalidCashPlanVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'xlsxFileExporting' | 'hasXlsxFile' | 'xlsxFileWasDownloaded' | 'xlsxFileImported'>
+          )> }
+        )>> }
+      ) }
+    )> }
   )> }
 );
 
@@ -8473,7 +8525,7 @@ export type CashPlanQuery = (
         { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
         & { node: Maybe<(
           { __typename?: 'CashPlanPaymentVerificationNode' }
-          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationChannel' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter'>
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'unicefId' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationChannel' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter' | 'xlsxFileExporting' | 'hasXlsxFile' | 'xlsxFileWasDownloaded' | 'xlsxFileImported'>
           & { ageFilter: Maybe<(
             { __typename?: 'AgeFilterObject' }
             & Pick<AgeFilterObject, 'min' | 'max'>
@@ -11781,6 +11833,68 @@ export function useEditCashPlanPaymentVerificationMutation(baseOptions?: ApolloR
 export type EditCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useEditCashPlanPaymentVerificationMutation>;
 export type EditCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<EditCashPlanPaymentVerificationMutation>;
 export type EditCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>;
+export const ExportXlsxCashPlanVerificationDocument = gql`
+    mutation ExportXlsxCashPlanVerification($cashPlanVerificationId: ID!) {
+  exportXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+    cashPlan {
+      id
+      verifications {
+        edges {
+          node {
+            id
+            xlsxFileExporting
+            hasXlsxFile
+            xlsxFileWasDownloaded
+            xlsxFileImported
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type ExportXlsxCashPlanVerificationMutationFn = ApolloReactCommon.MutationFunction<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>;
+export type ExportXlsxCashPlanVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>, 'mutation'>;
+
+    export const ExportXlsxCashPlanVerificationComponent = (props: ExportXlsxCashPlanVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables> mutation={ExportXlsxCashPlanVerificationDocument} {...props} />
+    );
+    
+export type ExportXlsxCashPlanVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables> & TChildProps;
+export function withExportXlsxCashPlanVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExportXlsxCashPlanVerificationMutation,
+  ExportXlsxCashPlanVerificationMutationVariables,
+  ExportXlsxCashPlanVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables, ExportXlsxCashPlanVerificationProps<TChildProps>>(ExportXlsxCashPlanVerificationDocument, {
+      alias: 'exportXlsxCashPlanVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExportXlsxCashPlanVerificationMutation__
+ *
+ * To run a mutation, you first call `useExportXlsxCashPlanVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExportXlsxCashPlanVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [exportXlsxCashPlanVerificationMutation, { data, loading, error }] = useExportXlsxCashPlanVerificationMutation({
+ *   variables: {
+ *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *   },
+ * });
+ */
+export function useExportXlsxCashPlanVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>(ExportXlsxCashPlanVerificationDocument, baseOptions);
+      }
+export type ExportXlsxCashPlanVerificationMutationHookResult = ReturnType<typeof useExportXlsxCashPlanVerificationMutation>;
+export type ExportXlsxCashPlanVerificationMutationResult = ApolloReactCommon.MutationResult<ExportXlsxCashPlanVerificationMutation>;
+export type ExportXlsxCashPlanVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ExportXlsxCashPlanVerificationMutation, ExportXlsxCashPlanVerificationMutationVariables>;
 export const FinishCashPlanPaymentVerificationDocument = gql`
     mutation FinishCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
   finishCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
@@ -11904,6 +12018,68 @@ export function useImportXlsxCashPlanVerificationMutation(baseOptions?: ApolloRe
 export type ImportXlsxCashPlanVerificationMutationHookResult = ReturnType<typeof useImportXlsxCashPlanVerificationMutation>;
 export type ImportXlsxCashPlanVerificationMutationResult = ApolloReactCommon.MutationResult<ImportXlsxCashPlanVerificationMutation>;
 export type ImportXlsxCashPlanVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
+export const InvalidCashPlanPaymentVerificationDocument = gql`
+    mutation InvalidCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
+  invalidCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+    cashPlan {
+      id
+      verifications {
+        edges {
+          node {
+            id
+            xlsxFileExporting
+            hasXlsxFile
+            xlsxFileWasDownloaded
+            xlsxFileImported
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type InvalidCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>;
+export type InvalidCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const InvalidCashPlanPaymentVerificationComponent = (props: InvalidCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables> mutation={InvalidCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type InvalidCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withInvalidCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  InvalidCashPlanPaymentVerificationMutation,
+  InvalidCashPlanPaymentVerificationMutationVariables,
+  InvalidCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables, InvalidCashPlanPaymentVerificationProps<TChildProps>>(InvalidCashPlanPaymentVerificationDocument, {
+      alias: 'invalidCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useInvalidCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useInvalidCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInvalidCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [invalidCashPlanPaymentVerificationMutation, { data, loading, error }] = useInvalidCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *   },
+ * });
+ */
+export function useInvalidCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>(InvalidCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type InvalidCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useInvalidCashPlanPaymentVerificationMutation>;
+export type InvalidCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<InvalidCashPlanPaymentVerificationMutation>;
+export type InvalidCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<InvalidCashPlanPaymentVerificationMutation, InvalidCashPlanPaymentVerificationMutationVariables>;
 export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
     mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, received: $received) {
@@ -15435,6 +15611,10 @@ export const CashPlanDocument = gql`
           }
           excludedAdminAreasFilter
           sexFilter
+          xlsxFileExporting
+          hasXlsxFile
+          xlsxFileWasDownloaded
+          xlsxFileImported
         }
       }
     }
