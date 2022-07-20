@@ -24,7 +24,7 @@ class VerificationPlanStatusChangeServices:
             raise GraphQLError("You can discard only ACTIVE verification")
 
         if self.cash_plan_verification.xlsx_cash_plan_payment_verification_file_was_downloaded:
-            raise GraphQLError("You can discard if xlsx file was downloaded")
+            raise GraphQLError("You can't discard if xlsx file was downloaded")
 
         self.cash_plan_verification.set_pending()
         self.cash_plan_verification.save()
