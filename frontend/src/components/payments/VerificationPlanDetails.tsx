@@ -1,10 +1,11 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Divider, Grid, Typography } from '@material-ui/core';
 import { GetApp } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useSnackbar } from '../../hooks/useSnackBar';
 import {
   choicesToDict,
   paymentVerificationStatusToColor,
@@ -12,8 +13,11 @@ import {
 import {
   CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
+  useExportXlsxCashPlanVerificationMutation,
+  useInvalidCashPlanPaymentVerificationMutation,
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../core/LabelizedField';
+import { LoadingButton } from '../core/LoadingButton';
 import { StatusBox } from '../core/StatusBox';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
@@ -44,12 +48,16 @@ const Container = styled.div`
   border-bottom-style: solid;
 `;
 
-const StyledLink = styled.a`
-  text-decoration: none;
+const StyledLoadingButton = styled(LoadingButton)`
+  width: 200px;
 `;
 
 const StyledButton = styled(Button)`
-  width: 150px;
+  width: 200px;
+`;
+
+const StyledLink = styled.a`
+  text-decoration: none;
 `;
 
 export const VerificationPlanDetails = ({
@@ -59,6 +67,18 @@ export const VerificationPlanDetails = ({
 }: VerificationPlanDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
+  const { showMessage } = useSnackbar();
+
+  const [
+    mutateExport,
+    { loading: loadingExport },
+  ] = useExportXlsxCashPlanVerificationMutation();
+
+  const [
+    mutateInvalid,
+    { loading: loadingInvalid },
+  ] = useInvalidCashPlanPaymentVerificationMutation();
+
   if (!verificationPlan || !samplingChoicesData || !permissions) return null;
 
   const canEditAndActivateAndDelete = verificationPlan.status === 'PENDING';
@@ -136,20 +156,61 @@ export const VerificationPlanDetails = ({
               {verificationPlan.verificationChannel === 'XLSX' && (
                 <>
                   {canExport && (
-                    <Box p={2}>
-                      <StyledLink
-                        download
-                        href={`/api/download-cash-plan-payment-verification/${verificationPlan.id}`}
-                      >
-                        <StyledButton
-                          color='primary'
-                          variant='outlined'
-                          startIcon={<GetApp />}
-                        >
-                          {t('Export XLSX')}
-                        </StyledButton>
-                      </StyledLink>
-                    </Box>
+                    <>
+                      {!verificationPlan.hasXlsxFile && (
+                        <Box p={2}>
+                          <StyledLoadingButton
+                            loading={loadingExport}
+                            disabled={
+                              loadingExport ||
+                              verificationPlan.xlsxFileExporting
+                            }
+                            color='primary'
+                            variant='outlined'
+                            startIcon={<GetApp />}
+                            onClick={async () => {
+                              try {
+                                await mutateExport({
+                                  variables: {
+                                    cashPlanVerificationId: verificationPlan.id,
+                                  },
+                                });
+                                showMessage(
+                                  t(
+                                    'Exporting XLSX started. Please check your email.',
+                                  ),
+                                );
+                              } catch (e) {
+                                e.graphQLErrors.map((x) =>
+                                  showMessage(x.message),
+                                );
+                              }
+                            }}
+                          >
+                            {verificationPlan.xlsxFileExporting
+                              ? t('Exporting...')
+                              : t('Export Xlsx')}
+                          </StyledLoadingButton>
+                        </Box>
+                      )}
+                      {!verificationPlan.xlsxFileExporting &&
+                        verificationPlan.hasXlsxFile && (
+                          <Box p={2}>
+                            <StyledLink
+                              download
+                              href={`/api/download-cash-plan-payment-verification/${verificationPlan.id}`}
+                            >
+                              <StyledButton
+                                color='primary'
+                                variant='outlined'
+                                startIcon={<GetApp />}
+                              >
+                                {t('Download Xlsx')}
+                              </StyledButton>
+                            </StyledLink>
+                          </Box>
+                        )}
+                    </>
                   )}
                   {canImport && (
                     <Box p={2}>
@@ -167,12 +228,29 @@ export const VerificationPlanDetails = ({
                   cashPlanId={cashPlan.id}
                 />
               )}
-              {canDiscard && (
-                <DiscardVerificationPlan
-                  cashPlanVerificationId={verificationPlan.id}
-                  cashPlanId={cashPlan.id}
-                />
-              )}
+              {canDiscard &&
+                (verificationPlan.xlsxFileWasDownloaded &&
+                !verificationPlan.xlsxFileImported ? (
+                  <StyledLoadingButton
+                    loading={loadingInvalid}
+                    color='primary'
+                    variant='outlined'
+                    onClick={() =>
+                      mutateInvalid({
+                        variables: {
+                          cashPlanVerificationId: verificationPlan.id,
+                        },
+                      })
+                    }
+                  >
+                    {t('Mark as Invalid')}
+                  </StyledLoadingButton>
+                ) : (
+                  <DiscardVerificationPlan
+                    cashPlanVerificationId={verificationPlan.id}
+                    cashPlanId={cashPlan.id}
+                  />
+                ))}
             </Box>
           )}
         </Box>
