@@ -68,8 +68,8 @@ def create_afghanistan():
             "region_name": "SAR",
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
-            "approval_number": 2,
-            "authorization_number": 2,
-            "finance_review_number": 3,
+            "approval_number_required": 2,
+            "authorization_number_required": 2,
+            "finance_review_number_required": 3,
         },
     )

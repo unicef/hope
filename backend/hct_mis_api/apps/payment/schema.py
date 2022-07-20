@@ -216,7 +216,7 @@ class ApprovalNode(DjangoObjectType):
 
     class Meta:
         model = Approval
-        fields = ("stage", "type", "created_at", "comment")
+        fields = ("type", "created_at", "comment")
 
     def resolve_info(self, info):
         return self.info
@@ -232,23 +232,23 @@ class AcceptanceProcessNode(DjangoObjectType):
 
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
-    approval_number = graphene.Int()
-    authorization_number = graphene.Int()
-    finance_review_number = graphene.Int()
+    approval_number_required = graphene.Int()
+    authorization_number_required = graphene.Int()
+    finance_review_number_required = graphene.Int()
 
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_approval_number(self, info):
-        return self.business_area.approval_number
+    def resolve_approval_number_required(self, info):
+        return self.business_area.approval_number_required
 
-    def resolve_authorization_number(self, info):
-        return self.business_area.authorization_number
+    def resolve_authorization_number_required(self, info):
+        return self.business_area.authorization_number_required
 
-    def resolve_finance_review_number(self, info):
-        return self.business_area.finance_review_number
+    def resolve_finance_review_number_required(self, info):
+        return self.business_area.finance_review_number_required
 
 
 class Query(graphene.ObjectType):

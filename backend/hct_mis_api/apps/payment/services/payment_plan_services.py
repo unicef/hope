@@ -3,74 +3,144 @@ import logging
 from django.utils import timezone
 from graphql import GraphQLError
 
-from hct_mis_api.apps.payment.models import PaymentPlan, Approval
+from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess
 
 
 class PaymentPlanServices:
-    @classmethod
-    def validate_payment_plan_status(cls, status):
-        if status not in (Approval.APPROVAL, Approval.AUTHORIZATION, Approval.FINANCE_REVIEW):
-            msg = f"PaymentPlan status must be one of {Approval.APPROVAL}, {Approval.AUTHORIZATION} or {Approval.FINANCE_REVIEW}"
-            raise GraphQLError(msg)
+    def __init__(self, payment_plan, action, info, input_data):
+        self.payment_plan = payment_plan
+        self.action = action
+        self.info = info
+        self.input_data = input_data
+        self.user = self.info.context.user
 
-    @classmethod
-    def payment_plan_update_status(cls, payment_plan, acceptance_process, status, user):
-        business_area = payment_plan.business_area
-
-        approval_count_map = {
-            Approval.APPROVAL: business_area.approval_number,
-            Approval.AUTHORIZATION: business_area.authorization_number,
-            Approval.FINANCE_REVIEW: business_area.finance_review_number,
+    def get_action_function(self):
+        action_map = {
+            "LOCK": self.lock,
+            "UNLOCK": self.unlock,
+            "SEND_FOR_APPROVAL": self.send_for_approval,
+            "REJECT": self.reject,
+            "ACCEPTANCE_PROCESS": self.acceptance_process_create,
         }
 
-        if acceptance_process.approvals.filter(type=status).count() >= approval_count_map.get(status):
-            if status == Approval.APPROVAL:
-                payment_plan.status_mark_as_approved()
-                acceptance_process.authorized_by = user
-                acceptance_process.authorization_date = timezone.now()
-                acceptance_process.save()
+        return action_map.get(self.action)
 
-            if status == Approval.AUTHORIZATION:
-                payment_plan.status_mark_as_authorized()
-                acceptance_process.finance_review_by = user
-                acceptance_process.finance_review_date = timezone.now()
-                acceptance_process.save()
+    def execute(self) -> PaymentPlan:
+        """Get function from get_action_function and execute it
+        return PaymentPlan object
+        """
 
-            if status == Approval.FINANCE_REVIEW:
-                payment_plan.status_mark_as_reviewed()
+        function_action = self.get_action_function()
+        payment_plan = function_action()
 
-            payment_plan.save()
         return payment_plan
 
-    @classmethod
-    def create_reject_approval(cls, payment_plan, input_data, user):
-        approval_process_obj = payment_plan.approval_process.last()
+    def send_for_approval(self):
+        self.payment_plan.status_send_to_approval()
+        self.payment_plan.save()
+
+        ApprovalProcess.objects.create(
+            payment_plan=self.payment_plan, approved_by=self.user, approve_date=timezone.now()
+        )
+
+        return self.payment_plan
+
+    def lock(self):
+        # TODO: add more logic for lock action
+
+        self.payment_plan.status_lock()
+        self.payment_plan.save()
+
+        return self.payment_plan
+
+    def unlock(self):
+        self.payment_plan.status_unlock()
+        self.payment_plan.save()
+
+        return self.payment_plan
+
+    def reject(self):
+        self.payment_plan.status_reject()
+        self.payment_plan.save()
+
+        approval_process_obj = self.payment_plan.approval_process.last()
         if not approval_process_obj:
-            logging.exception(f"ApprovalProcess object not found for PaymentPlan {payment_plan.pk}")
+            logging.exception(f"ApprovalProcess object not found for PaymentPlan {self.payment_plan.pk}")
             raise GraphQLError("ApprovalProcess object not found")
 
         data = {
             "approval_process": approval_process_obj,
-            "created_by": user,
+            "created_by": self.user,
             "type": Approval.REJECT,
-            "comment": input_data.get("comment"),
+            "comment": self.input_data.get("comment"),
         }
         Approval.objects.create(**data)
+        return self.payment_plan
 
-    @classmethod
-    def create_approval(cls, payment_plan, input_data, user) -> PaymentPlan:
-        status = input_data.get("status")
-        cls.validate_payment_plan_status(status)
-        acceptance_process = payment_plan.acceptance_process.last()
+    def acceptance_process_create(self):
+        statuses_list = (
+            PaymentPlan.Status.IN_APPROVAL,
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            PaymentPlan.Status.IN_REVIEW,
+        )
+        if self.payment_plan.status not in statuses_list:
+            raise GraphQLError(f"Add Acceptance Process is possible for PaymentPlan with status {statuses_list}")
+
+        acceptance_process_type = self.input_data.get("acceptance_process_type")
+        self.validate_payment_plan_status(acceptance_process_type)
+        # every time we will create Approval for last created AcceptanceProcess
+        # init creation AcceptanceProcess added in send_for_approval()
+        acceptance_process = self.payment_plan.acceptance_process.last()
+        if not acceptance_process:
+            logging.exception(f"ApprovalProcess object not found for PaymentPlan {self.payment_plan.pk}")
+            raise GraphQLError("ApprovalProcess object not found")
 
         data = {
             "approval_process": acceptance_process,
-            "created_by": user,
-            "type": status,
-            "comment": input_data.get("comment"),
+            "created_by": self.user,
+            "type": acceptance_process_type,
+            "comment": self.input_data.get("comment"),
         }
         Approval.objects.create(**data)
 
-        payment_plan = cls.payment_plan_update_status(payment_plan, acceptance_process, status, user)
+        # check if we need update PaymentPlan status
+        self.check_payment_plan_update_status(acceptance_process)
 
-        return payment_plan
+        return self.payment_plan
+
+    @staticmethod
+    def validate_payment_plan_status(acceptance_process_type):
+        acceptance_process_types_list = (Approval.APPROVAL, Approval.AUTHORIZATION, Approval.FINANCE_REVIEW)
+        if acceptance_process_type not in acceptance_process_types_list:
+            msg = f"PaymentPlan acceptance process type must be one of {acceptance_process_types_list}"
+            raise GraphQLError(msg)
+
+    def check_payment_plan_update_status(self, acceptance_process):
+        business_area = self.payment_plan.business_area
+
+        approval_count_map = {
+            Approval.APPROVAL: business_area.approval_number_required,
+            Approval.AUTHORIZATION: business_area.authorization_number_required,
+            Approval.FINANCE_REVIEW: business_area.finance_review_number_required,
+        }
+        acceptance_process_type = self.input_data.get("acceptance_process_type")
+
+        if acceptance_process.approvals.filter(type=acceptance_process_type).count() >= approval_count_map.get(
+            acceptance_process_type
+        ):
+            if acceptance_process_type == Approval.APPROVAL:
+                self.payment_plan.status_mark_as_approved()
+                acceptance_process.authorized_by = self.user
+                acceptance_process.authorization_date = timezone.now()
+                acceptance_process.save()
+
+            if acceptance_process_type == Approval.AUTHORIZATION:
+                self.payment_plan.status_mark_as_authorized()
+                acceptance_process.finance_review_by = self.user
+                acceptance_process.finance_review_date = timezone.now()
+                acceptance_process.save()
+
+            if acceptance_process_type == Approval.FINANCE_REVIEW:
+                self.payment_plan.status_mark_as_reviewed()
+
+            self.payment_plan.save()

@@ -66,7 +66,8 @@ class CreateFinancialServiceProviderInput(graphene.InputObjectType):
     fsp_xlsx_template_id = graphene.ID(required=True)
 
 
-class UpdatePaymentPlanStatusInput(graphene.InputObjectType):
+class ActionPaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
-    status = graphene.String()
+    action = graphene.String(required=True)
+    acceptance_process_type = graphene.String()
     comment = graphene.String()
