@@ -1,4 +1,3 @@
-import logging
 from datetime import date, datetime
 from django.utils import timezone
 
@@ -702,7 +701,6 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
     else:
         individual.recalculate_data()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
-
     transaction.on_commit(
         lambda: deduplicate_and_check_against_sanctions_list_task.delay(
             should_populate_index=True,
