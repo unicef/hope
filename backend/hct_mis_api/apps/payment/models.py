@@ -188,6 +188,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     STATUS_PENDING = "PENDING"
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
+    STATUS_INVALID = "INVALID"
     SAMPLING_FULL_LIST = "FULL_LIST"
     SAMPLING_RANDOM = "RANDOM"
     VERIFICATION_CHANNEL_RAPIDPRO = "RAPIDPRO"
@@ -197,6 +198,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
         (STATUS_PENDING, "Pending"),
+        (STATUS_INVALID, "Invalid"),
     )
     SAMPLING_CHOICES = (
         (SAMPLING_FULL_LIST, "Full list"),
@@ -229,6 +231,8 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     sex_filter = models.CharField(null=True, max_length=10)
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
+    xlsx_file_exporting = models.BooleanField(default=False)
+    xlsx_file_imported = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("created_at",)
