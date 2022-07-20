@@ -667,7 +667,7 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
-        business_area = BusinessArea.objects.get(slug=registration_data_import.business_area_slug)
+        business_area = BusinessArea.objects.get(slug=registration_data_import_datahub.business_area_slug)
         cls.set_thresholds(business_area)
 
         imported_individuals = ImportedIndividual.objects.filter(
