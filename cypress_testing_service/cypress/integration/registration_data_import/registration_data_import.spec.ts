@@ -24,7 +24,7 @@ Then("I should see the RDI page", () => {
 })
 
 When("I click the import button", () => {
-    cy.get('button > span').contains('IMPORT').click();
+    cy.get('button > span').contains('IMPORT').click({ force: true });
 })
 
 Then("I should see the file import modal", () => {
