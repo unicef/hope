@@ -1,7 +1,6 @@
 import logging
 from dataclasses import dataclass, fields
 from time import sleep
-from typing import Union
 
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat
