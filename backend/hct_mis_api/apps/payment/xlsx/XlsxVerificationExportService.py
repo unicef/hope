@@ -131,7 +131,6 @@ class XlsxVerificationExportService:
                 File(tmp)
             )
 
-
     def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col):
 
         column_widths = []
@@ -180,5 +179,4 @@ class XlsxVerificationExportService:
             body=text_body,
         )
         email.attach_alternative(html_body, "text/html")
-
         return email
