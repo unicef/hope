@@ -101,7 +101,7 @@ class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class DeliveryMechanismNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.PAYMENT_DELIVERY_MECHANISM_VIEW_DETAILS),)
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
 
     class Meta:
         model = DeliveryMechanism
