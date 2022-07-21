@@ -19,7 +19,7 @@ snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment
                     'line': 3
                 }
             ],
-            'message': 'You can mark invalid if xlsx file was downloaded but not imported',
+            'message': 'You can mark invalid if xlsx file was downloaded or imported',
             'path': [
                 'invalidCashPlanPaymentVerification'
             ]
