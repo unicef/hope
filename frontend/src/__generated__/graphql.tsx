@@ -7888,6 +7888,40 @@ export type ImportedIndividualFieldsQuery = (
   )>>> }
 );
 
+export type AllGrievanceDashboardChartsQueryVariables = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type AllGrievanceDashboardChartsQuery = (
+  { __typename?: 'Query' }
+  & { ticketsByType: Maybe<(
+    { __typename?: 'TicketByType' }
+    & Pick<TicketByType, 'userGeneratedCount' | 'systemGeneratedCount' | 'closedUserGeneratedCount' | 'closedSystemGeneratedCount' | 'userGeneratedAvgResolution' | 'systemGeneratedAvgResolution'>
+  )>, ticketsByStatus: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, ticketsByCategory: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, ticketsByLocationAndCategory: Maybe<(
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
+    )>>> }
+  )> }
+);
+
 export type AllGrievanceTicketQueryVariables = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -14284,6 +14318,80 @@ export function useImportedIndividualFieldsLazyQuery(baseOptions?: ApolloReactHo
 export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFieldsQuery>;
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
+export const AllGrievanceDashboardChartsDocument = gql`
+    query AllGrievanceDashboardCharts($businessAreaSlug: String!) {
+  ticketsByType(businessAreaSlug: $businessAreaSlug) {
+    userGeneratedCount
+    systemGeneratedCount
+    closedUserGeneratedCount
+    closedSystemGeneratedCount
+    userGeneratedAvgResolution
+    systemGeneratedAvgResolution
+  }
+  ticketsByStatus(businessAreaSlug: $businessAreaSlug) {
+    datasets {
+      data
+    }
+    labels
+  }
+  ticketsByCategory(businessAreaSlug: $businessAreaSlug) {
+    datasets {
+      data
+    }
+    labels
+  }
+  ticketsByLocationAndCategory(businessAreaSlug: $businessAreaSlug) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
+}
+    `;
+export type AllGrievanceDashboardChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>, 'query'> & ({ variables: AllGrievanceDashboardChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllGrievanceDashboardChartsComponent = (props: AllGrievanceDashboardChartsComponentProps) => (
+      <ApolloReactComponents.Query<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables> query={AllGrievanceDashboardChartsDocument} {...props} />
+    );
+    
+export type AllGrievanceDashboardChartsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables> & TChildProps;
+export function withAllGrievanceDashboardCharts<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllGrievanceDashboardChartsQuery,
+  AllGrievanceDashboardChartsQueryVariables,
+  AllGrievanceDashboardChartsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables, AllGrievanceDashboardChartsProps<TChildProps>>(AllGrievanceDashboardChartsDocument, {
+      alias: 'allGrievanceDashboardCharts',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllGrievanceDashboardChartsQuery__
+ *
+ * To run a query within a React component, call `useAllGrievanceDashboardChartsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllGrievanceDashboardChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllGrievanceDashboardChartsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useAllGrievanceDashboardChartsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, baseOptions);
+      }
+export function useAllGrievanceDashboardChartsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, baseOptions);
+        }
+export type AllGrievanceDashboardChartsQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsQuery>;
+export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsLazyQuery>;
+export type AllGrievanceDashboardChartsQueryResult = ApolloReactCommon.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
     query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String) {
   allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency) {
