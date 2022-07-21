@@ -30,7 +30,6 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
     TargetPopulation,
 )
 from hct_mis_api.apps.household import models as people
-from hct_mis_api.apps.payment import models as payment
 from hct_mis_api.apps.program import models as program
 from hct_mis_api.apps.targeting import models as targeting
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -80,7 +79,6 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             msg = f"{e.__class__.__name__}: {str(e)}"
             self.message_user(request, msg, messages.ERROR)
 
-    # @button(label="test import", permission="account.can_debug")
     @button()
     def simulate_import(self, request, pk):
         context = self.get_common_context(request, pk, title="Test Import")
