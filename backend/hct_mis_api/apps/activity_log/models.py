@@ -11,7 +11,9 @@ from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
 
 
-def log_create(mapping, business_area_field, user=None, old_object=None, new_object=None):
+def log_create(
+    mapping, business_area_field, user=None, old_object=None, new_object=None
+):
     if new_object:
         instance = new_object
     else:
@@ -78,9 +80,13 @@ class LogEntry(models.Model):
         related_name="logs",
         verbose_name=_("actor"),
     )
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.SET_NULL, null=True
+    )
 
-    timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"), db_index=True)
+    timestamp = models.DateTimeField(
+        auto_now_add=True, verbose_name=_("timestamp"), db_index=True
+    )
 
     class Meta:
         get_latest_by = "timestamp"

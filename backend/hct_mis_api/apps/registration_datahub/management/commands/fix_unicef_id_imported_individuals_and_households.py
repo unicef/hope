@@ -7,14 +7,20 @@ from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 
 def update_mis_unicef_id_individual_and_household():
 
-    for imported_individual in ImportedIndividual.objects.filter(Q(mis_unicef_id__isnull=True) | Q(mis_unicef_id="")):
-        individual = Individual.objects.filter(imported_individual_id=imported_individual.id).first()
+    for imported_individual in ImportedIndividual.objects.filter(
+        Q(mis_unicef_id__isnull=True) | Q(mis_unicef_id="")
+    ):
+        individual = Individual.objects.filter(
+            imported_individual_id=imported_individual.id
+        ).first()
         if individual:
             imported_individual.mis_unicef_id = individual.unicef_id
             imported_individual.save()
 
             if individual.household and imported_individual.household:
-                imported_individual.household.mis_unicef_id = individual.household.unicef_id
+                imported_individual.household.mis_unicef_id = (
+                    individual.household.unicef_id
+                )
                 imported_individual.household.save()
 
 

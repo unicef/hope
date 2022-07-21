@@ -28,7 +28,7 @@ class TestProgramChoices(APITestCase):
             name
             value
         }
-    }    
+    }
     """
 
     QUERY_PROGRAM_SCOPE_CHOICES = """
@@ -39,7 +39,6 @@ class TestProgramChoices(APITestCase):
         }
     }
     """
-
 
     @classmethod
     def setUpTestData(cls):

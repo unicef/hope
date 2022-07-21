@@ -17,11 +17,11 @@ from hct_mis_api.apps.household.models import (
     UNICEF,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedDocument,
+    ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,
-    ImportedDocument,
-    ImportedDocumentType,
 )
 
 faker = Faker()
@@ -62,11 +62,17 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(
         RegistrationDataImportDatahubFactory,
     )
-    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
-    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    first_registration_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=utc
+    )
+    last_registration_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=utc
+    )
     admin1 = ""
     admin2 = ""
-    geopoint = factory.LazyAttribute(lambda o: Point(factory.Faker("latlng").generate()))
+    geopoint = factory.LazyAttribute(
+        lambda o: Point(factory.Faker("latlng").generate())
+    )
     female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(3, 8)
     female_age_group_12_17_count = factory.fuzzy.FuzzyInteger(3, 8)
@@ -88,7 +94,9 @@ class ImportedHouseholdFactory(factory.DjangoModelFactory):
     male_age_group_12_17_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
     male_age_group_18_59_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
     male_age_group_60_disabled_count = factory.fuzzy.FuzzyInteger(3, 8)
-    start = factory.Faker("date_time_this_month", before_now=True, after_now=False, tzinfo=utc)
+    start = factory.Faker(
+        "date_time_this_month", before_now=True, after_now=False, tzinfo=utc
+    )
     deviceid = factory.Faker("md5")
     name_enumerator = factory.Faker("name")
     org_enumerator = factory.fuzzy.FuzzyChoice(
@@ -103,7 +111,9 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     class Meta:
         model = ImportedIndividual
 
-    full_name = factory.LazyAttribute(lambda o: f"{o.given_name} {o.middle_name} {o.family_name}")
+    full_name = factory.LazyAttribute(
+        lambda o: f"{o.given_name} {o.middle_name} {o.family_name}"
+    )
     given_name = factory.Faker("first_name")
     middle_name = factory.Faker("first_name")
     family_name = factory.Faker("last_name")
@@ -111,7 +121,9 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
         SEX_CHOICE,
         getter=lambda c: c[0],
     )
-    birth_date = factory.Faker("date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90)
+    birth_date = factory.Faker(
+        "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
+    )
     estimated_birth_date = factory.fuzzy.FuzzyChoice((True, False))
     marital_status = factory.fuzzy.FuzzyChoice(
         MARITAL_STATUS_CHOICE,
@@ -122,8 +134,12 @@ class ImportedIndividualFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(RegistrationDataImportDatahubFactory)
     disability = False
     household = factory.SubFactory(ImportedHouseholdFactory)
-    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
-    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    first_registration_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=utc
+    )
+    last_registration_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=utc
+    )
 
 
 def create_imported_household(household_args=None, individual_args=None):
@@ -132,7 +148,9 @@ def create_imported_household(household_args=None, individual_args=None):
     if individual_args is None:
         individual_args = {}
     household = ImportedHouseholdFactory(**household_args)
-    individuals = ImportedIndividualFactory.create_batch(household.size, household=household, **individual_args)
+    individuals = ImportedIndividualFactory.create_batch(
+        household.size, household=household, **individual_args
+    )
     individuals[0].relationship = "HEAD"
     individuals[0].save()
     household.head_of_household = individuals[0]
@@ -140,14 +158,19 @@ def create_imported_household(household_args=None, individual_args=None):
     return household, individuals
 
 
-def create_imported_household_and_individuals(household_data=None, individuals_data=None):
+def create_imported_household_and_individuals(
+    household_data=None, individuals_data=None
+):
     if household_data is None:
         household_data = {}
     if individuals_data is None:
         individuals_data = {}
-    household = ImportedHouseholdFactory.build(**household_data, size=len(individuals_data))
+    household = ImportedHouseholdFactory.build(
+        **household_data, size=len(individuals_data)
+    )
     individuals = [
-        ImportedIndividualFactory(household=household, **individual_data) for individual_data in individuals_data
+        ImportedIndividualFactory(household=household, **individual_data)
+        for individual_data in individuals_data
     ]
     household.head_of_household = individuals[0]
     household.save()
@@ -159,7 +182,9 @@ class ImportedDocumentFactory(factory.DjangoModelFactory):
         model = ImportedDocument
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
-    type = factory.LazyAttribute(lambda o: ImportedDocumentType.objects.order_by("?").first())
+    type = factory.LazyAttribute(
+        lambda o: ImportedDocumentType.objects.order_by("?").first()
+    )
     individual = factory.SubFactory(ImportedIndividualFactory)
 
 

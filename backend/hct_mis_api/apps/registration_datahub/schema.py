@@ -34,7 +34,10 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
 )
-from hct_mis_api.apps.registration_datahub.filters import ImportedHouseholdFilter, ImportedIndividualFilter
+from hct_mis_api.apps.registration_datahub.filters import (
+    ImportedHouseholdFilter,
+    ImportedIndividualFilter,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedDocument,
@@ -100,21 +103,23 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_individuals(parent, info):
         imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
         collectors_ids = list(
-            parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list(
-                "individual_id", flat=True
-            )
+            parent.individuals_and_roles.filter(
+                role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]
+            ).values_list("individual_id", flat=True)
         )
         ids = list(set(imported_individuals_ids + collectors_ids))
 
         return ImportedIndividual.objects.filter(id__in=ids).prefetch_related(
             Prefetch(
                 "households_and_roles",
-                queryset=ImportedIndividualRoleInHousehold.objects.filter(household=parent.id),
+                queryset=ImportedIndividualRoleInHousehold.objects.filter(
+                    household=parent.id
+                ),
             )
         )
 
     def resolve_import_id(parent, info):
-        row = ''
+        row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
         if parent.kobo_asset_id:
@@ -156,12 +161,20 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return ROLE_NO_ROLE
 
     def resolve_deduplication_batch_results(parent, info):
-        key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
+        key = (
+            "duplicates"
+            if parent.deduplication_batch_status == DUPLICATE_IN_BATCH
+            else "possible_duplicates"
+        )
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
 
     def resolve_deduplication_golden_record_results(parent, info):
-        key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
+        key = (
+            "duplicates"
+            if parent.deduplication_golden_record_status == DUPLICATE
+            else "possible_duplicates"
+        )
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
 
@@ -173,7 +186,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.age
 
     def resolve_import_id(parent, info):
-        row = ''
+        row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
         if parent.kobo_asset_id:
@@ -308,8 +321,12 @@ class Query(graphene.ObjectType):
             ),
         ),
     )
-    registration_data_import_datahub = relay.Node.Field(RegistrationDataImportDatahubNode)
-    all_registration_data_imports_datahub = DjangoFilterConnectionField(RegistrationDataImportDatahubNode)
+    registration_data_import_datahub = relay.Node.Field(
+        RegistrationDataImportDatahubNode
+    )
+    all_registration_data_imports_datahub = DjangoFilterConnectionField(
+        RegistrationDataImportDatahubNode
+    )
     imported_individual = relay.Node.Field(ImportedIndividualNode)
     all_imported_individuals = DjangoPermissionFilterConnectionField(
         ImportedIndividualNode,

@@ -394,7 +394,9 @@ class TestKoboSaveValidatorsMethods(TestCase):
             }
         ]
         validator = KoboProjectImportDataInstanceValidator()
-        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", valid_attachments)
+        result = validator.image_validator(
+            "signature-17_10_32.png", "consent_sign_h_c", valid_attachments
+        )
         self.assertIsNone(result, None)
 
         # test for invalid value
@@ -429,18 +431,33 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 449127,
             }
         ]
-        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", invalid_attachments)
-        expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
+        result = validator.image_validator(
+            "signature-17_10_32.png", "consent_sign_h_c", invalid_attachments
+        )
+        expected = (
+            "Specified image signature-17_10_32.png for field "
+            "consent_sign_h_c is not in attachments"
+        )
         self.assertEqual(result, expected)
 
         # test for empty value
-        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", [])
-        expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
+        result = validator.image_validator(
+            "signature-17_10_32.png", "consent_sign_h_c", []
+        )
+        expected = (
+            "Specified image signature-17_10_32.png for field "
+            "consent_sign_h_c is not in attachments"
+        )
         self.assertEqual(result, expected)
 
         # test invalid file extension
-        result = validator.image_validator("signature-17_10_32.txt", "consent_sign_h_c", [])
-        expected = "Specified image signature-17_10_32.txt for field " "consent_sign_h_c is not a valid image file"
+        result = validator.image_validator(
+            "signature-17_10_32.txt", "consent_sign_h_c", []
+        )
+        expected = (
+            "Specified image signature-17_10_32.txt for field "
+            "consent_sign_h_c is not a valid image file"
+        )
         self.assertEqual(result, expected)
 
     def test_geopoint_validator(self):
@@ -476,7 +493,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
     def test_date_validator(self):
         test_data = (
-            {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
+            {
+                "args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"),
+                "expected": None,
+            },
             {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {
                 "args": ("2020-13-32T25:13:31.590+02:00", "birth_date_i_c"),
@@ -510,7 +530,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("size_h_c", "four", attachments),
                 "expected": {
                     "header": "size_h_c",
-                    "message": "Invalid value four of type str for field " "size_h_c of type int",
+                    "message": "Invalid value four of type str for field "
+                    "size_h_c of type int",
                 },
             },
             # STRING
@@ -529,21 +550,26 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("returnee_h_c", "123", attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type str for field " "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type str for field "
+                    "returnee_h_c of type bool",
                 },
             },
             {
                 "args": ("returnee_h_c", 123, attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type int for field " "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type int for field "
+                    "returnee_h_c of type bool",
                 },
             },
             # SELECT ONE
             {"args": ("gender_i_c", "MALE", attachments), "expected": None},
             {
                 "args": ("gender_i_c", "YES", attachments),
-                "expected": {"header": "gender_i_c", "message": "Invalid choice YES for field gender_i_c"},
+                "expected": {
+                    "header": "gender_i_c",
+                    "message": "Invalid choice YES for field gender_i_c",
+                },
             },
             # DATE
             {
@@ -564,7 +590,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
             # GEOPOINT
-            {"args": ("hh_geopoint_h_c", "12.123 13.123", attachments), "expected": None},
+            {
+                "args": ("hh_geopoint_h_c", "12.123 13.123", attachments),
+                "expected": None,
+            },
             {
                 "args": (
                     "hh_geopoint_h_c",
@@ -573,7 +602,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 ),
                 "expected": {
                     "header": "hh_geopoint_h_c",
-                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 " "for field hh_geopoint_h_c",
+                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 "
+                    "for field hh_geopoint_h_c",
                 },
             },
             # IMAGE
@@ -603,17 +633,29 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
         result.sort(key=itemgetter("header"))
         expected = [
-            {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
-            {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
             {
-                "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+                "header": "admin1_h_c",
+                "message": "Invalid choice SO25 for field admin1_h_c",
+            },
+            {
+                "header": "admin2_h_c",
+                "message": "Invalid choice SO2502 for field admin2_h_c",
             },
             {
                 "header": "birth_certificate_no_i_c",
                 "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
             },
-            {"header": "role_i_c", "message": "Only one person can be a primary collector"},
-            {"header": "size_h_c", "message": "Missing household required field size_h_c"},
+            {
+                "header": "birth_certificate_no_i_c",
+                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+            },
+            {
+                "header": "role_i_c",
+                "message": "Only one person can be a primary collector",
+            },
+            {
+                "header": "size_h_c",
+                "message": "Missing household required field size_h_c",
+            },
         ]
         self.assertEqual(result, expected)

@@ -103,7 +103,9 @@ EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
 class TestExchangeRatesAPI(TestCase):
     @mock.patch.dict(os.environ, clear=True)
     def test_test_api_class_initialization_key_not_in_env(self):
-        self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateAPI)
+        self.assertRaisesMessage(
+            ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateAPI
+        )
 
     @parameterized.expand(
         [
@@ -113,7 +115,9 @@ class TestExchangeRatesAPI(TestCase):
         ]
     )
     def test_api_class_initialization(self, _, api_key, api_url):
-        with mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"}, clear=True):
+        with mock.patch.dict(
+            os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"}, clear=True
+        ):
             api_client = ExchangeRateAPI(api_key=api_key, api_url=api_url)
 
             if api_key is not None:
@@ -124,7 +128,10 @@ class TestExchangeRatesAPI(TestCase):
 
             if api_url is None and api_key is None:
                 self.assertEqual("TEST_API_KEY", api_client.api_key)
-                self.assertEqual("https://uniapis.unicef.org/biapi/v1/exchangerates", api_client.api_url)
+                self.assertEqual(
+                    "https://uniapis.unicef.org/biapi/v1/exchangerates",
+                    api_client.api_url,
+                )
 
     @parameterized.expand(
         [
@@ -159,7 +166,9 @@ class TestExchangeRatesAPI(TestCase):
 @mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestExchangeRates(TestCase):
     def test_convert_response_json_to_exchange_rates(self):
-        converted_response = ExchangeRates._convert_response_json_to_exchange_rates(EXCHANGE_RATES_WITH_HISTORICAL_DATA)
+        converted_response = ExchangeRates._convert_response_json_to_exchange_rates(
+            EXCHANGE_RATES_WITH_HISTORICAL_DATA
+        )
         xeu = converted_response.get("XEU")
         cup1 = converted_response.get("CUP1")
 
@@ -174,8 +183,12 @@ class TestExchangeRates(TestCase):
         self.assertEqual(3, len(xeu.historical_exchange_rates))
 
         xeu_second_historical_rate = xeu.historical_exchange_rates[1]
-        self.assertEqual(datetime(1998, 2, 1, 0, 0), xeu_second_historical_rate.valid_from)
-        self.assertEqual(datetime(1998, 2, 28, 0, 0), xeu_second_historical_rate.valid_to)
+        self.assertEqual(
+            datetime(1998, 2, 1, 0, 0), xeu_second_historical_rate.valid_from
+        )
+        self.assertEqual(
+            datetime(1998, 2, 28, 0, 0), xeu_second_historical_rate.valid_to
+        )
         self.assertEqual(0.926, xeu_second_historical_rate.past_xrate)
         self.assertEqual(1, xeu_second_historical_rate.past_ratio)
 
@@ -196,7 +209,9 @@ class TestExchangeRates(TestCase):
             ("cup1_future_date", "CUP1", timezone.now() + timedelta(weeks=200), 24),
         ]
     )
-    def test_get_exchange_rate_for_currency_code(self, _, currency_code, dispersion_date, expected_result):
+    def test_get_exchange_rate_for_currency_code(
+        self, _, currency_code, dispersion_date, expected_result
+    ):
         with requests_mock.Mocker() as adapter:
             adapter.register_uri(
                 "GET",
@@ -204,7 +219,9 @@ class TestExchangeRates(TestCase):
                 json=EXCHANGE_RATES_WITH_HISTORICAL_DATA,
             )
             exchange_rates_client = ExchangeRates()
-            exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency_code, dispersion_date)
+            exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(
+                currency_code, dispersion_date
+            )
             self.assertEqual(expected_result, exchange_rate)
 
 
@@ -228,15 +245,24 @@ class TestFixExchangeRatesCommand(TestCase):
         cash_plans_with_currency = (
             (
                 "PLN",
-                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2021, 4, 4))),
+                RealCashPlanFactory(
+                    program=program,
+                    dispersion_date=timezone.make_aware(datetime(2021, 4, 4)),
+                ),
             ),  # x_rate == 3.973
             (
                 "AFN",
-                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2020, 3, 3))),
+                RealCashPlanFactory(
+                    program=program,
+                    dispersion_date=timezone.make_aware(datetime(2020, 3, 3)),
+                ),
             ),  # x_rate == 76.55
             (
                 "USD",
-                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2020, 3, 3))),
+                RealCashPlanFactory(
+                    program=program,
+                    dispersion_date=timezone.make_aware(datetime(2020, 3, 3)),
+                ),
             ),  # x_rate ==  1
         )
         for currency, cash_plan in cash_plans_with_currency:
@@ -264,4 +290,7 @@ class TestFixExchangeRatesCommand(TestCase):
             "USD": Decimal("200"),
         }
         for payment_record in all_payment_records:
-            self.assertEqual(expected_results[payment_record.currency], payment_record.delivered_quantity_usd)
+            self.assertEqual(
+                expected_results[payment_record.currency],
+                payment_record.delivered_quantity_usd,
+            )

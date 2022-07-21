@@ -25,7 +25,7 @@ class MicrosoftGraphAPI:
     def get_token(self):
         if not self.azure_client_id or not self.azure_client_secret:
             logger.error("Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET")
-            raise ValueError("Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET")
+            raise ValueError("Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET") from None
 
         post_dict = {
             "grant_type": "client_credentials",
@@ -37,7 +37,7 @@ class MicrosoftGraphAPI:
 
         if response.status_code != 200:
             logger.error(f"Unable to fetch token from Azure. {response.status_code} {response.content}")
-            raise Exception(f"Error during token retrieval: {response.status_code} {response.content}")
+            raise Exception(f"Error during token retrieval: {response.status_code} {response.content}") from None
 
         json_response = response.json()
         token = json_response["access_token"]
@@ -48,8 +48,8 @@ class MicrosoftGraphAPI:
         response = requests.get(url, headers=headers)
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            logger.exception(e)
+        except requests.exceptions.HTTPError as exc:
+            logger.exception(exc)
             raise
         json_response = response.json()
         return json_response
@@ -65,11 +65,11 @@ class MicrosoftGraphAPI:
                 value = data.get("value")[0]
             else:
                 logger.error("You must provide 'uuid' or 'email' argument.")
-                raise ValueError("You must provide 'uuid' or 'email' argument.")
-        except (IndexError,):
+                raise ValueError("You must provide 'uuid' or 'email' argument.") from None
+        except IndexError as exc:
             logger.error(f"User not found using email={email},uuid={uuid}")
-            raise Http404("User not found")
+            raise Http404("User not found") from exc
         if not value:
             logger.error(f"User not found using email={email},uuid={uuid}")
-            raise Http404("User not found")
+            raise Http404("User not found") from None
         return value

@@ -25,7 +25,9 @@ class ReportFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    date_to = factory.LazyAttribute(lambda o: o.date_from + timedelta(days=randint(60, 1000)))
+    date_to = factory.LazyAttribute(
+        lambda o: o.date_from + timedelta(days=randint(60, 1000))
+    )
     report_type = fuzzy.FuzzyChoice(
         Report.REPORT_TYPES,
         getter=lambda c: c[0],

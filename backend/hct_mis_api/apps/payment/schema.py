@@ -1,5 +1,4 @@
 from django.db.models import Case, CharField, Count, Q, Sum, Value, When
-
 from django.shortcuts import get_object_or_404
 
 import graphene
@@ -28,10 +27,10 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Individual
 from hct_mis_api.apps.payment.filters import (
+    CashPlanPaymentVerificationFilter,
     PaymentRecordFilter,
     PaymentVerificationFilter,
     PaymentVerificationLogEntryFilter,
-    CashPlanPaymentVerificationFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -80,8 +79,8 @@ class RapidProFlow(graphene.ObjectType):
     created_on = graphene.DateTime()
     modified_on = graphene.DateTime()
 
-    def resolve_id(parent, info):
-        return parent["uuid"]
+    def resolve_id(self, info):
+        return self["uuid"]
 
 
 class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -244,7 +243,10 @@ class Query(graphene.ObjectType):
             )
             .annotate(
                 payment_record__household__status=Case(
-                    When(payment_record__household__withdrawn=True, then=Value(STATUS_INACTIVE)),
+                    When(
+                        payment_record__household__withdrawn=True,
+                        then=Value(STATUS_INACTIVE),
+                    ),
                     default=Value(STATUS_ACTIVE),
                     output_field=CharField(),
                 ),
@@ -268,7 +270,10 @@ class Query(graphene.ObjectType):
             }
 
         sampling = Sampling(input, cash_plan, payment_records)
-        payment_record_count, payment_records_sample_count = sampling.generate_sampling()
+        (
+            payment_record_count,
+            payment_records_sample_count,
+        ) = sampling.generate_sampling()
 
         return {
             "payment_record_count": payment_record_count,
@@ -384,7 +389,10 @@ class Query(graphene.ObjectType):
                 ]
             }
         ]
-        return {"labels": ["Successful Payments", "Unsuccessful Payments"], "datasets": dataset}
+        return {
+            "labels": ["Successful Payments", "Unsuccessful Payments"],
+            "datasets": dataset,
+        }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
@@ -442,12 +450,14 @@ class Query(graphene.ObjectType):
             .order_by("business_area__name")
             .annotate(
                 total_delivered_cash=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
                 )
             )
             .annotate(
                 total_delivered_voucher=Sum(
-                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER)
+                    "delivered_quantity_usd",
+                    filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
                 )
             )
         )

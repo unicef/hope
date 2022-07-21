@@ -1,4 +1,5 @@
 from django.core.management import call_command
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -127,7 +128,11 @@ class TestHouseholdQuery(APITestCase):
 
     @parameterized.expand(
         [
-            ("all_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY),
+            (
+                "all_with_permission",
+                [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+                ALL_HOUSEHOLD_QUERY,
+            ),
             ("all_without_permission", [], ALL_HOUSEHOLD_QUERY),
             (
                 "all_range_with_permission",
@@ -135,12 +140,22 @@ class TestHouseholdQuery(APITestCase):
                 ALL_HOUSEHOLD_QUERY_RANGE,
             ),
             ("all_range_without_permission", [], ALL_HOUSEHOLD_QUERY_RANGE),
-            ("all_min_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY_MIN),
-            ("all_max_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY_MAX),
+            (
+                "all_min_with_permission",
+                [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+                ALL_HOUSEHOLD_QUERY_MIN,
+            ),
+            (
+                "all_max_with_permission",
+                [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+                ALL_HOUSEHOLD_QUERY_MAX,
+            ),
         ]
     )
     def test_household_query_all(self, _, permissions, query_string):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=query_string,
@@ -154,11 +169,15 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_household_filter_by_programme(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY,
-            variables={"programs": [self.id_to_base64(self.program_one.id, "ProgramNode")]},
+            variables={
+                "programs": [self.id_to_base64(self.program_one.id, "ProgramNode")]
+            },
             context={"user": self.user},
         )
 
@@ -169,7 +188,9 @@ class TestHouseholdQuery(APITestCase):
         ]
     )
     def test_household_query_single(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=HOUSEHOLD_QUERY,

@@ -37,4 +37,3 @@ Feature: Programme Management
             And the Programme is in Active state
         When the User finishes the Programme
         Then status of this Programme is Finished
-

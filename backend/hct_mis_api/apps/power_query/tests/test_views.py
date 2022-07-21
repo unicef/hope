@@ -1,8 +1,9 @@
 import base64
-import random
+import string
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils.crypto import get_random_string
 
 from parameterized import parameterized, parameterized_class
 
@@ -72,7 +73,7 @@ class TestPowerQueryBasicAuth(TestCase):
         cls.USER_PASSWORD = "123"
         cls.formatter_json = FormatterFactory(name="Queryset To JSON")
         cls.user = UserFactory(
-            username="superuser-{}".format(random.randint(1, 100)),
+            username=f"superuser-{get_random_string(6, string.ascii_lowercase)}",
             is_superuser=True,
             is_staff=True,
             password=cls.USER_PASSWORD,
@@ -96,7 +97,7 @@ class TestPowerQueryBasicAuth(TestCase):
     def test_valid_fetch(self):
         url = reverse("power_query:data", args=[self.report2.pk])
         username, password = self.report2.owner.username, self.USER_PASSWORD
-        assert password == "123", password
+        self.assertEqual(password, "123")
         headers = {
             "HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
         }
@@ -121,7 +122,7 @@ class TestPowerQueryResponses(TestCase):
         cls.USER_PASSWORD = "123"
         cls.formatter_json = FormatterFactory(name="Queryset To JSON")
         cls.user = UserFactory(
-            username="superuser-{}".format(random.randint(1, 100)),
+            username=f"superuser-{get_random_string(6, string.ascii_lowercase)}",
             is_superuser=True,
             is_staff=True,
             password=cls.USER_PASSWORD,
@@ -143,7 +144,8 @@ class TestPowerQueryResponses(TestCase):
         with self.settings(POWER_QUERY_DB_ALIAS="default"):
             url = reverse("power_query:data", args=[self.report1.pk])
             username, password = self.report1.owner.username, self.USER_PASSWORD
-            assert password == "123", password
+            self.assertEqual(password, "123")
+            # assert password == "123", password
             headers = {
                 "HTTP_AUTHORIZATION": "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode("ascii"),
             }

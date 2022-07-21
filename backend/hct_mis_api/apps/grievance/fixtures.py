@@ -18,13 +18,17 @@ from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
     TicketNegativeFeedbackDetails,
     TicketNote,
+    TicketPaymentVerificationDetails,
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails, TicketPaymentVerificationDetails,
+    TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory, PaymentVerificationFactory
+from hct_mis_api.apps.payment.fixtures import (
+    PaymentRecordFactory,
+    PaymentVerificationFactory,
+)
 from hct_mis_api.apps.payment.models import PaymentVerification
 
 
@@ -72,14 +76,14 @@ class SensitiveGrievanceTicketFactory(factory.DjangoModelFactory):
     payment_record = None
 
     @factory.post_generation
-    def create_extras(obj, create, extracted, **kwargs):
+    def create_extras(self, create, extracted, **kwargs):
         household, individuals = create_household(
-            household_args={"size": 2, "business_area": obj.ticket.business_area},
+            household_args={"size": 2, "business_area": self.ticket.business_area},
         )
-        obj.household = household
-        obj.individual = individuals[0]
-        obj.payment_record = PaymentRecordFactory(household=household)
-        obj.save()
+        self.household = household
+        self.individual = individuals[0]
+        self.payment_record = PaymentRecordFactory(household=household)
+        self.save()
 
 
 class GrievanceComplaintTicketFactory(factory.DjangoModelFactory):
@@ -92,15 +96,15 @@ class GrievanceComplaintTicketFactory(factory.DjangoModelFactory):
     payment_record = None
 
     @factory.post_generation
-    def create_extras(obj, create, extracted, **kwargs):
+    def create_extras(self, create, extracted, **kwargs):
         household, individuals = create_household(
-            household_args={"size": 2, "business_area": obj.ticket.business_area},
+            household_args={"size": 2, "business_area": self.ticket.business_area},
         )
-        obj.household = household
-        obj.individual = individuals[0]
-        obj.payment_record = PaymentRecordFactory(household=household)
+        self.household = household
+        self.individual = individuals[0]
+        self.payment_record = PaymentRecordFactory(household=household)
 
-        obj.save()
+        self.save()
 
 
 class SensitiveGrievanceTicketWithoutExtrasFactory(factory.DjangoModelFactory):
@@ -283,5 +287,5 @@ class TicketPaymentVerificationDetailsFactory(factory.DjangoModelFactory):
     ticket = factory.SubFactory(GrievanceTicketFactory, category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION)
     payment_verification = factory.SubFactory(
         PaymentVerificationFactory,
-        status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
     )

@@ -57,8 +57,12 @@ class TestFlexibles(TestCase):
             vulnerability_questions
         """
 
-        household_questions_group = FlexibleAttributeGroup.objects.get(name="household_questions")
-        individual_questions_group = FlexibleAttributeGroup.objects.get(name="individual_questions")
+        household_questions_group = FlexibleAttributeGroup.objects.get(
+            name="household_questions"
+        )
+        individual_questions_group = FlexibleAttributeGroup.objects.get(
+            name="individual_questions"
+        )
         groups_tree_dict = {
             "consent": None,
             "household_questions": None,
@@ -123,7 +127,9 @@ class TestFlexibles(TestCase):
 
         groups_from_db = FlexibleAttributeGroup.objects.filter(name__in=deleted_groups)
 
-        deleted_groups_from_db = FlexibleAttributeGroup.all_objects.filter(name__in=deleted_groups)
+        deleted_groups_from_db = FlexibleAttributeGroup.all_objects.filter(
+            name__in=deleted_groups
+        )
         self.assertEqual(len(groups_from_db), 0)
 
         # check if they are soft deleted
@@ -132,7 +138,9 @@ class TestFlexibles(TestCase):
         consent_group = FlexibleAttributeGroup.objects.get(name="consent")
         self.assertEqual(consent_group.label["English(EN)"], "Consent Edited")
 
-        introduction = FlexibleAttribute.objects.filter(type="note", name="introduction_h_f").exists()
+        introduction = FlexibleAttribute.objects.filter(
+            type="note", name="introduction_h_f"
+        ).exists()
         self.assertFalse(introduction)
 
     def test_flexibles_type_validation(self):
@@ -167,14 +175,21 @@ class TestFlexibles(TestCase):
             },
         )
 
-        self.assertRaises(ValidationError, self.load_xls, "flex_update_invalid_types.xls")
+        self.assertRaises(
+            ValidationError, self.load_xls, "flex_update_invalid_types.xls"
+        )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 1)
         self.assertEqual(len(attribs), 1)
 
     def test_flexibles_missing_name(self):
-        self.assertRaisesMessage(ValidationError, "Name is required", self.load_xls, "flex_field_missing_name.xls")
+        self.assertRaisesMessage(
+            ValidationError,
+            "Name is required",
+            self.load_xls,
+            "flex_field_missing_name.xls",
+        )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 0)
@@ -182,7 +197,10 @@ class TestFlexibles(TestCase):
 
     def test_flexibles_missing_english_label(self):
         self.assertRaisesMessage(
-            ValidationError, "English label cannot be empty", self.load_xls, "flex_field_missing_english_label.xls"
+            ValidationError,
+            "English label cannot be empty",
+            self.load_xls,
+            "flex_field_missing_english_label.xls",
         )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()

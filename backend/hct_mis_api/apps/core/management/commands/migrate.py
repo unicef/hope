@@ -5,15 +5,8 @@ from importlib import import_module
 from django.apps import apps
 from django.conf import settings
 from django.core.checks import Tags, run_checks
-from django.core.management.base import (
-    BaseCommand,
-    CommandError,
-    no_translations,
-)
-from django.core.management.sql import (
-    emit_post_migrate_signal,
-    emit_pre_migrate_signal,
-)
+from django.core.management.base import BaseCommand, CommandError, no_translations
+from django.core.management.sql import emit_post_migrate_signal, emit_pre_migrate_signal
 from django.db import DEFAULT_DB_ALIAS, connections, router
 from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.executor import MigrationExecutor
@@ -125,12 +118,12 @@ class Command(BaseCommand):
             try:
                 apps.get_app_config(app_label)
             except LookupError as err:
-                raise CommandError(str(err))
+                raise CommandError(str(err)) from err
             if run_syncdb:
                 if app_label in executor.loader.migrated_apps:
-                    raise CommandError("Can't use run_syncdb with app '{}' as it has migrations.".format(app_label))
+                    raise CommandError(f"Can't use run_syncdb with app '{app_label}' as it has migrations.") from None
             elif app_label not in executor.loader.migrated_apps:
-                raise CommandError("App '{}' does not have migrations.".format(app_label))
+                raise CommandError(f"App '{app_label}' does not have migrations.") from None
 
         if options["app_label"] and options["migration_name"]:
             migration_name = options["migration_name"]
@@ -139,15 +132,15 @@ class Command(BaseCommand):
             else:
                 try:
                     migration = executor.loader.get_migration_by_prefix(app_label, migration_name)
-                except AmbiguityError:
+                except AmbiguityError as err:
                     raise CommandError(
                         "More than one migration matches '{}' in app '{}'. "
                         "Please be more specific.".format(migration_name, app_label)
-                    )
-                except KeyError:
+                    ) from err
+                except KeyError as err:
                     raise CommandError(
-                        "Cannot find a migration matching '{}' from app '{}'.".format(migration_name, app_label)
-                    )
+                        f"Cannot find a migration matching '{migration_name}' from app '{app_label}'."
+                    ) from err
                 targets = [(app_label, migration.name)]
             target_app_labels_only = False
         elif options["app_label"]:
@@ -176,7 +169,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.MIGRATE_HEADING("Operations to perform:"))
             if run_syncdb:
                 if options["app_label"]:
-                    self.stdout.write(self.style.MIGRATE_LABEL("  Synchronize unmigrated app: {}".format(app_label)))
+                    self.stdout.write(self.style.MIGRATE_LABEL(f"  Synchronize unmigrated app: {app_label}"))
                 else:
                     self.stdout.write(
                         self.style.MIGRATE_LABEL("  Synchronize unmigrated apps: ")
@@ -189,11 +182,16 @@ class Command(BaseCommand):
                 )
             else:
                 if targets[0][1] is None:
-                    self.stdout.write(self.style.MIGRATE_LABEL("  Unapply all migrations: ") + "{}".format(targets[0][0],))
+                    self.stdout.write(
+                        self.style.MIGRATE_LABEL("  Unapply all migrations: ")
+                        + "{}".format(
+                            targets[0][0],
+                        )
+                    )
                 else:
                     self.stdout.write(
                         self.style.MIGRATE_LABEL("  Target specific migration: ")
-                        + "{}, from {}".format(targets[0][1], targets[0][0])
+                        + f"{targets[0][1]}, from {targets[0][0]}"
                     )
 
         pre_migrate_state = executor._create_project_state(with_applied_migrations=True)
@@ -285,7 +283,7 @@ class Command(BaseCommand):
             if action == "apply_start":
                 if compute_time:
                     self.start = time.time()
-                self.stdout.write("  Applying {}...".format(migration), ending="")
+                self.stdout.write(f"  Applying {migration}...", ending="")
                 self.stdout.flush()
             elif action == "apply_success":
                 elapsed = " (%.3fs)" % (time.time() - self.start) if compute_time else ""
@@ -296,7 +294,7 @@ class Command(BaseCommand):
             elif action == "unapply_start":
                 if compute_time:
                     self.start = time.time()
-                self.stdout.write("  Unapplying {}...".format(migration), ending="")
+                self.stdout.write(f"  Unapplying {migration}...", ending="")
                 self.stdout.flush()
             elif action == "unapply_success":
                 elapsed = " (%.3fs)" % (time.time() - self.start) if compute_time else ""
@@ -350,9 +348,9 @@ class Command(BaseCommand):
                     if not model._meta.can_migrate(connection):
                         continue
                     if self.verbosity >= 3:
-                        self.stdout.write("    Processing {}.{} model\n".format(app_name, model._meta.object_name))
+                        self.stdout.write(f"    Processing {app_name}.{model._meta.object_name} model\n")
                     if self.verbosity >= 1:
-                        self.stdout.write("    Creating table {}\n".format(model._meta.db_table))
+                        self.stdout.write(f"    Creating table {model._meta.db_table}\n")
                     editor.create_model(model)
 
             # Deferred SQL is executed when exiting the editor's context.

@@ -1,4 +1,4 @@
-from django.db.models import Sum, F, DecimalField
+from django.db.models import DecimalField, F, Sum
 
 from hct_mis_api.apps.household.models import Household
 
@@ -9,8 +9,12 @@ def programs_with_delivered_quantity(household: Household):
         .annotate(program=F("cash_plan__program"))
         .values("program")
         .annotate(
-            total_delivered_quantity=Sum("delivered_quantity", output_field=DecimalField()),
-            total_delivered_quantity_usd=Sum("delivered_quantity_usd", output_field=DecimalField()),
+            total_delivered_quantity=Sum(
+                "delivered_quantity", output_field=DecimalField()
+            ),
+            total_delivered_quantity_usd=Sum(
+                "delivered_quantity_usd", output_field=DecimalField()
+            ),
             currency=F("currency"),
             program_name=F("cash_plan__program__name"),
             program_id=F("cash_plan__program__id"),
@@ -27,7 +31,9 @@ def programs_with_delivered_quantity(household: Household):
                 "name": program["program_name"],
                 "quantity": [
                     {
-                        "total_delivered_quantity": program["total_delivered_quantity_usd"],
+                        "total_delivered_quantity": program[
+                            "total_delivered_quantity_usd"
+                        ],
                         "currency": "USD",
                     }
                 ],

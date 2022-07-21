@@ -22,15 +22,23 @@ class MarkSubmissions:
         # Exclude submissions for merged rdi
         submissions = self._get_submissions(submission_ids)
         if not submissions:
-            return {"message": "No suitable (unmerged) Submissions found", "submissions": 0}
+            return {
+                "message": "No suitable (unmerged) Submissions found",
+                "submissions": 0,
+            }
 
         # Mark as amended
         with transaction.atomic(using="registration_datahub"):
             rows = submissions.update(amended=True)
-            return {"message": f"{rows} submissions successfully amended", "submissions": rows}
+            return {
+                "message": f"{rows} submissions successfully amended",
+                "submissions": rows,
+            }
 
     def _get_submissions(self, submission_ids):
-        return KoboImportedSubmission.objects.exclude(kobo_submission_uuid__in=list(submission_ids))
+        return KoboImportedSubmission.objects.exclude(
+            kobo_submission_uuid__in=list(submission_ids)
+        )
 
     def _get_submissions_ids(self, datahub_ids):
         return ImportedHousehold.objects.filter(

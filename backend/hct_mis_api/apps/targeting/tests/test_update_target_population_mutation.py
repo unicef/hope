@@ -7,8 +7,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import (
@@ -170,9 +170,15 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
-        create_household({"size": 2, "residence_status": "HOST", "business_area": cls.business_area})
-        create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
-        create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
+        create_household(
+            {"size": 2, "residence_status": "HOST", "business_area": cls.business_area}
+        )
+        create_household(
+            {"size": 3, "residence_status": "HOST", "business_area": cls.business_area}
+        )
+        create_household(
+            {"size": 3, "residence_status": "HOST", "business_area": cls.business_area}
+        )
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
@@ -185,7 +191,11 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         cls.approved_target_population = TargetPopulation(
             name="approved_target_population",
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
-                {"field_name": "size", "arguments": [1], "comparision_method": "GREATER_THAN"}
+                {
+                    "field_name": "size",
+                    "arguments": [1],
+                    "comparision_method": "GREATER_THAN",
+                }
             ),
             status="LOCKED",
             created_by=cls.user,
@@ -193,7 +203,10 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         )
         cls.approved_target_population.save()
         cls.approved_target_population.households.set(Household.objects.all())
-        cls.target_populations = [cls.draft_target_population, cls.approved_target_population]
+        cls.target_populations = [
+            cls.draft_target_population,
+            cls.approved_target_population,
+        ]
 
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter):
@@ -201,7 +214,9 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
+        rule_filter = TargetingCriteriaRuleFilter(
+            **rule_filter, targeting_criteria_rule=rule
+        )
         rule_filter.save()
         return targeting_criteria
 
@@ -213,8 +228,12 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             ("without_permission_approved", [], 1, False),
         ]
     )
-    def test_update_mutation_correct_variables(self, name, permissions, population_index, should_be_updated):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_update_mutation_correct_variables(
+        self, name, permissions, population_index, should_be_updated
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         variables = copy.deepcopy(VARIABLES)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
@@ -227,7 +246,9 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             context={"user": self.user},
             variables=variables,
         )
-        updated_target_population = TargetPopulation.objects.get(id=self.target_populations[population_index].id)
+        updated_target_population = TargetPopulation.objects.get(
+            id=self.target_populations[population_index].id
+        )
         if should_be_updated:
             assert "updated" in updated_target_population.name
         else:
@@ -243,19 +264,25 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         ]
     )
     def test_fail_update(self, _, variables):
-        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.TARGETING_UPDATE], self.business_area
+        )
 
         variables = copy.deepcopy(variables)
         variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
             self.draft_target_population.id, "TargetPopulationNode"
         )
-        variables["updateTargetPopulationInput"]["name"] = "draft_target_population wrong"
+        variables["updateTargetPopulationInput"][
+            "name"
+        ] = "draft_target_population wrong"
 
         self.snapshot_graphql_request(
             request_string=MUTATION_QUERY,
             context={"user": self.user},
             variables=variables,
         )
-        updated_target_population = TargetPopulation.objects.get(id=self.draft_target_population.id)
+        updated_target_population = TargetPopulation.objects.get(
+            id=self.draft_target_population.id
+        )
 
         assert "wrong" not in updated_target_population.name

@@ -122,7 +122,12 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             return float(value)
         return value
 
-    def _cast_and_assign(self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]):
+    def _cast_and_assign(
+        self,
+        value: Union[str, list],
+        field: str,
+        obj: Union[ImportedIndividual, ImportedHousehold],
+    ):
         complex_fields = {
             "IMAGE": self._handle_image_field,
             "GEOPOINT": self._handle_geopoint_field,
@@ -158,14 +163,17 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         identities = []
         for documents_dict in documents_and_identities:
             for document_name, data in documents_dict.items():
-                if not ImportedIndividual.objects.filter(id=data["individual"].id).exists():
+                if not ImportedIndividual.objects.filter(
+                    id=data["individual"].id
+                ).exists():
                     continue
 
                 is_identity = document_name in identity_fields
 
                 if is_identity:
                     agency, _ = ImportedAgency.objects.get_or_create(
-                        type="WFP" if document_name == "scope_id" else "UNHCR", country=Country(data["issuing_country"])
+                        type="WFP" if document_name == "scope_id" else "UNHCR",
+                        country=Country(data["issuing_country"]),
                     )
                     identities.append(
                         ImportedIndividualIdentity(
@@ -210,10 +218,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     def execute(self, registration_data_import_id, import_data_id, business_area_id):
-        registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
-            id=registration_data_import_id,
+        registration_data_import = (
+            RegistrationDataImportDatahub.objects.select_for_update().get(
+                id=registration_data_import_id,
+            )
         )
-        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        old_rdi_mis = RegistrationDataImport.objects.get(
+            id=registration_data_import.hct_id
+        )
         self.registration_data_import_mis = old_rdi_mis
         self.registration_data_import_datahub = registration_data_import
         registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
@@ -270,40 +282,63 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                     value_key = "issuing_country"
                                 else:
                                     value_key = "number"
-                                current_individual_docs_and_identities[key][value_key] = i_value
-                                current_individual_docs_and_identities[key]["individual"] = individual_obj
-                            elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
+                                current_individual_docs_and_identities[key][
+                                    value_key
+                                ] = i_value
+                                current_individual_docs_and_identities[key][
+                                    "individual"
+                                ] = individual_obj
+                            elif (
+                                i_field == "relationship_i_c"
+                                and i_value.upper() == NON_BENEFICIARY
+                            ):
                                 only_collector_flag = True
                             elif i_field == "role_i_c":
                                 role = i_value.upper()
                             elif i_field.endswith("_h_c") or i_field.endswith("_h_f"):
                                 try:
-                                    self._cast_and_assign(i_value, i_field, household_obj)
+                                    self._cast_and_assign(
+                                        i_value, i_field, household_obj
+                                    )
                                 except Exception as e:
                                     self._handle_exception("Household", i_field, e)
                             else:
                                 try:
-                                    self._cast_and_assign(i_value, i_field, individual_obj)
+                                    self._cast_and_assign(
+                                        i_value, i_field, individual_obj
+                                    )
                                 except Exception as e:
                                     self._handle_exception("Individual", i_field, e)
-                        individual_obj.last_registration_date = individual_obj.first_registration_date
-                        individual_obj.registration_data_import = registration_data_import
+                        individual_obj.last_registration_date = (
+                            individual_obj.first_registration_date
+                        )
+                        individual_obj.registration_data_import = (
+                            registration_data_import
+                        )
                         if individual_obj.relationship == HEAD:
                             head_of_households_mapping[household_obj] = individual_obj
 
-                        individual_obj.household = household_obj if only_collector_flag is False else None
+                        individual_obj.household = (
+                            household_obj if only_collector_flag is False else None
+                        )
 
-                        individuals_to_create[individual_obj.get_hash_key] = individual_obj
+                        individuals_to_create[
+                            individual_obj.get_hash_key
+                        ] = individual_obj
                         individuals_to_create_list.append(individual_obj)
                         current_individuals.append(individual_obj)
-                        documents_and_identities_to_create.append(current_individual_docs_and_identities)
+                        documents_and_identities_to_create.append(
+                            current_individual_docs_and_identities
+                        )
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                             role_obj = ImportedIndividualRoleInHousehold(
                                 individual=individual_obj,
                                 household_id=household_obj.pk,
                                 role=role,
                             )
-                            collectors_to_create[individual_obj.get_hash_key].append(role_obj)
+                            collectors_to_create[individual_obj.get_hash_key].append(
+                                role_obj
+                            )
                         if individual_obj.household is None:
                             individual_obj.relationship = NON_BENEFICIARY
 
@@ -351,10 +386,20 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()
-        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            None,
+            old_rdi_mis,
+            rdi_mis,
+        )
 
-        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
+        DeduplicateTask.deduplicate_imported_individuals(
+            registration_data_import_datahub=registration_data_import
+        )
 
     def _handle_exception(self, assigned_to, field_name, e):
         logger.exception(e)
-        raise Exception(f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})") from e
+        raise Exception(
+            f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})"
+        ) from e

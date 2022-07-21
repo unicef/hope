@@ -55,12 +55,12 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info):
         return self.arguments
 
-    def resolve_field_attribute(parent, info):
-        if parent.is_flex_field:
-            return FlexibleAttribute.objects.get(name=parent.field_name)
+    def resolve_field_attribute(self, info):
+        if self.is_flex_field:
+            return FlexibleAttribute.objects.get(name=self.field_name)
         else:
-            field_attribute = get_field_by_name(parent.field_name)
-            return filter_choices(field_attribute, parent.arguments)
+            field_attribute = get_field_by_name(self.field_name)
+            return filter_choices(field_attribute, self.arguments)
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
@@ -73,12 +73,12 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info):
         return self.arguments
 
-    def resolve_field_attribute(parent, info):
-        if parent.is_flex_field:
-            return FlexibleAttribute.objects.get(name=parent.field_name)
+    def resolve_field_attribute(self, info):
+        if self.is_flex_field:
+            return FlexibleAttribute.objects.get(name=self.field_name)
         else:
-            field_attribute = get_field_by_name(parent.field_name)
-            return filter_choices(field_attribute, parent.arguments)
+            field_attribute = get_field_by_name(self.field_name)
+            return filter_choices(field_attribute, self.arguments)
 
     class Meta:
         model = target_models.TargetingIndividualBlockRuleFilter
@@ -211,7 +211,8 @@ def prefetch_selections(qs, target_population=None):
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
     all_target_population = DjangoPermissionFilterConnectionField(
-        TargetPopulationNode, permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_LIST),)
+        TargetPopulationNode,
+        permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_LIST),),
     )
     golden_record_by_targeting_criteria = DjangoPermissionFilterConnectionField(
         HouseholdNode,
@@ -244,7 +245,7 @@ class Query(graphene.ObjectType):
     def resolve_target_population_status_choices(self, info, **kwargs):
         return [{"name": name, "value": value} for value, name in target_models.TargetPopulation.STATUS_CHOICES]
 
-    def resolve_candidate_households_list_by_targeting_criteria(parent, info, target_population, **kwargs):
+    def resolve_candidate_households_list_by_targeting_criteria(self, info, target_population, **kwargs):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
         if target_population_model.status == target_models.TargetPopulation.STATUS_DRAFT:
@@ -254,14 +255,15 @@ class Query(graphene.ObjectType):
             ).distinct()
         return (
             prefetch_selections(
-                target_population_model.vulnerability_score_filtered_households, target_population_model
+                target_population_model.vulnerability_score_filtered_households,
+                target_population_model,
             )
             .distinct()
             .all()
         )
 
     def resolve_final_households_list_by_targeting_criteria(
-        parent, info, target_population, targeting_criteria=None, **kwargs
+        self, info, target_population, targeting_criteria=None, **kwargs
     ):
         target_population_id = decode_id_string(target_population)
         target_population_model = target_models.TargetPopulation.objects.get(pk=target_population_id)
@@ -311,7 +313,7 @@ class Query(graphene.ObjectType):
             .all()
         )
 
-    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, excluded_ids, **kwargs):
+    def resolve_golden_record_by_targeting_criteria(self, info, targeting_criteria, program, excluded_ids, **kwargs):
         household_queryset = Household.objects
         return prefetch_selections(
             household_queryset.filter(

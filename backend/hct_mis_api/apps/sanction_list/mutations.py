@@ -26,7 +26,9 @@ class CheckAgainstSanctionListMutation(
             return CheckAgainstSanctionListMutation(False, errors)
 
         user = info.context.user
-        uploaded_file = UploadedXLSXFile.objects.create(file=file, associated_email=user.email)
+        uploaded_file = UploadedXLSXFile.objects.create(
+            file=file, associated_email=user.email
+        )
 
         check_against_sanction_list_task.delay(
             uploaded_file_id=str(uploaded_file.id),

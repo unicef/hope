@@ -30,10 +30,12 @@ def update_household_unicef_id():
     )
 
     updated = 0
-    while current_ids := GrievanceTicket.objects.filter(household_unicef_id__isnull=True).values_list("pk", flat=True)[
-        :2000
-    ]:
-        updated += GrievanceTicket.objects.filter(pk__in=current_ids).update(household_unicef_id=subquery)
+    while current_ids := GrievanceTicket.objects.filter(
+        household_unicef_id__isnull=True
+    ).values_list("pk", flat=True)[:2000]:
+        updated += GrievanceTicket.objects.filter(pk__in=current_ids).update(
+            household_unicef_id=subquery
+        )
     return updated
 
 

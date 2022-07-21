@@ -11,4 +11,3 @@ until pg_isready -h erp_datahub_db -p 5432;
 until pg_isready -h registration_datahub_db -p 5432;
   do echo "waiting for database"; sleep 2; done;
 python manage.py test  --settings hct_mis_api.settings.test --noinput --parallel
-

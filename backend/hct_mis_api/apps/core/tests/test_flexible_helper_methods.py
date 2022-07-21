@@ -12,7 +12,9 @@ class TestFlexibleHelperMethods(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.importer = FlexibleAttributeImporter()
-        wb = xlrd.open_workbook(filename=f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls")
+        wb = xlrd.open_workbook(
+            filename=f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls"
+        )
         cls.survey_sheet = wb.sheet_by_name("survey")
         cls.choices_sheet = wb.sheet_by_name("choices")
         cls.importer._reset_model_fields_variables()
@@ -83,15 +85,21 @@ class TestFlexibleHelperMethods(TestCase):
 
         self.importer._assign_field_values(type_value, "type", "attribute", row, 61)
         self.importer._assign_field_values(name_value, "name", "attribute", row, 61)
-        self.importer._assign_field_values(required_value, "required", "attribute", row, 61)
-        self.importer._assign_field_values(label_value, "label::English(EN)", "attribute", row, 61)
+        self.importer._assign_field_values(
+            required_value, "required", "attribute", row, 61
+        )
+        self.importer._assign_field_values(
+            label_value, "label::English(EN)", "attribute", row, 61
+        )
         expected_fields = {
             "type": "INTEGER",
             "name": "dairy_h_f",
             "required": False,
         }
 
-        expected_json_fields = {"label": {"English(EN)": "Milk and dairy products: yoghurt, cheese"}}
+        expected_json_fields = {
+            "label": {"English(EN)": "Milk and dairy products: yoghurt, cheese"}
+        }
 
         self.assertEqual(self.importer.object_fields_to_create, expected_fields)
         self.assertEqual(self.importer.json_fields_to_create, expected_json_fields)
@@ -140,7 +148,9 @@ class TestFlexibleHelperMethods(TestCase):
 
         self.importer._assign_field_values(name_value, "name", "group", row, 4)
         self.importer._assign_field_values(required_value, "required", "group", row, 4)
-        self.importer._assign_field_values(label_value, "label::English(EN)", "group", row, 4)
+        self.importer._assign_field_values(
+            label_value, "label::English(EN)", "group", row, 4
+        )
         expected_fields = {
             "name": "consent",
             "required": False,
@@ -173,9 +183,13 @@ class TestFlexibleHelperMethods(TestCase):
         name_value = row[1].value
         label_value = row[2].value
 
-        self.importer._assign_field_values(list_name_value, "list_name", "choice", row, 1)
+        self.importer._assign_field_values(
+            list_name_value, "list_name", "choice", row, 1
+        )
         self.importer._assign_field_values(name_value, "name", "choice", row, 1)
-        self.importer._assign_field_values(label_value, "label::English(EN)", "choice", row, 1)
+        self.importer._assign_field_values(
+            label_value, "label::English(EN)", "choice", row, 1
+        )
         expected_fields = {
             "list_name": "yes_no",
             "name": "1",

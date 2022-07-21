@@ -1,7 +1,8 @@
 import logging
 
-from django.utils import timezone
 from django.core.cache import cache
+from django.utils import timezone
+
 from constance import config
 
 from hct_mis_api.apps.grievance.models import (
@@ -41,7 +42,8 @@ class CheckAgainstSanctionListPreMergeTask:
             for doc in documents
         ]
         birth_dates_queries = [
-            {"match": {"birth_date": {"query": dob.date, "boost": 1}}} for dob in individual.dates_of_birth.all()
+            {"match": {"birth_date": {"query": dob.date, "boost": 1}}}
+            for dob in individual.dates_of_birth.all()
         ]
 
         # alias_names_queries = [
@@ -61,7 +63,15 @@ class CheckAgainstSanctionListPreMergeTask:
         # ]
 
         queries = [
-            {"match": {"full_name": {"query": individual.full_name, "boost": 4, "operator": "and"}}},
+            {
+                "match": {
+                    "full_name": {
+                        "query": individual.full_name,
+                        "boost": 4,
+                        "operator": "and",
+                    }
+                }
+            },
         ]
         queries.extend(document_queries)
         # queries.extend(alias_names_queries)
@@ -98,7 +108,9 @@ class CheckAgainstSanctionListPreMergeTask:
             for individual_hit in results:
                 score = individual_hit.meta.score
                 if score >= possible_match_score:
-                    marked_individual = Individual.objects.filter(id=individual_hit.id).first()
+                    marked_individual = Individual.objects.filter(
+                        id=individual_hit.id
+                    ).first()
                     if marked_individual:
                         possible_matches.add(marked_individual.id)
                         household = marked_individual.household
@@ -118,10 +130,12 @@ class CheckAgainstSanctionListPreMergeTask:
                             golden_records_individual=marked_individual,
                             sanction_list_individual=individual,
                         )
-                        details_already_exists = TicketSystemFlaggingDetails.objects.filter(
-                            golden_records_individual=marked_individual,
-                            sanction_list_individual=individual,
-                        ).exists()
+                        details_already_exists = (
+                            TicketSystemFlaggingDetails.objects.filter(
+                                golden_records_individual=marked_individual,
+                                sanction_list_individual=individual,
+                            ).exists()
+                        )
                         if details_already_exists is False:
                             tickets_to_create.append(ticket)
                             ticket_details_to_create.append(ticket_details)
@@ -132,12 +146,12 @@ class CheckAgainstSanctionListPreMergeTask:
             )
             log.debug([(r.full_name, r.meta.score) for r in results])
         cache.set("sanction_list_last_check", timezone.now(), None)
-        Individual.objects.filter(id__in=possible_matches, sanction_list_possible_match=False).update(
+        Individual.objects.filter(
+            id__in=possible_matches, sanction_list_possible_match=False
+        ).update(sanction_list_possible_match=True)
+        Individual.objects.exclude(id__in=possible_matches).filter(
             sanction_list_possible_match=True
-        )
-        Individual.objects.exclude(id__in=possible_matches).filter(sanction_list_possible_match=True).update(
-            sanction_list_possible_match=False
-        )
+        ).update(sanction_list_possible_match=False)
 
         GrievanceTicket.objects.bulk_create(tickets_to_create)
         for ticket in tickets_to_create:

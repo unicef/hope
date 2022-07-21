@@ -89,7 +89,9 @@ class TestHopeRedirect(APITestCase):
         cls.create_user_role_with_permissions(cls.user, [], business_area)
 
     def test_redirect_to_household_list(self):
-        hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_registrationgroup")
+        hope_redirect: HopeRedirect = get_hope_redirect(
+            self.user, "progres_registrationgroup"
+        )
 
         expected_url = "/afghanistan/population/household"
         self.assertEqual(expected_url, hope_redirect.url())
@@ -102,9 +104,7 @@ class TestHopeRedirect(APITestCase):
             "01780fad-9fa9-4e27-b3cd-7187c13452e5",
         )
 
-        expected_url = (
-            "/afghanistan/population/household/SG91c2Vob2xkTm9kZTowMTc4MGZhZC05ZmE5LTRlMjctYjNjZC03MTg3YzEzNDUyZTU="
-        )
+        expected_url = "/afghanistan/population/household/SG91c2Vob2xkTm9kZTowMTc4MGZhZC05ZmE5LTRlMjctYjNjZC03MTg3YzEzNDUyZTU="
         self.assertEqual(expected_url, hope_redirect.url())
 
     def test_redirect_to_individual_list(self):
@@ -121,9 +121,7 @@ class TestHopeRedirect(APITestCase):
             "001A2C2D-22CA-4538-A36F-D454AF5EDD3E",
         )
 
-        expected_url = (
-            "/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6MDAxYTJjMmQtMjJjYS00NTM4LWEzNmYtZDQ1NGFmNWVkZDNl"
-        )
+        expected_url = "/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6MDAxYTJjMmQtMjJjYS00NTM4LWEzNmYtZDQ1NGFmNWVkZDNl"
         self.assertEqual(expected_url, hope_redirect.url())
 
     def test_redirect_to_program_list(self):
@@ -180,7 +178,9 @@ class TestHopeRedirect(APITestCase):
         self.assertEqual(expected_url, hope_redirect.url())
 
     def test_redirect_to_target_population_list(self):
-        hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_targetpopulation")
+        hope_redirect: HopeRedirect = get_hope_redirect(
+            self.user, "progres_targetpopulation"
+        )
 
         expected_url = "/afghanistan/target-population"
         self.assertEqual(expected_url, hope_redirect.url())

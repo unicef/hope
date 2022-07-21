@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
-from hct_mis_api.apps.account.models import UserRole, Role
+from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -34,4 +34,6 @@ def post_save_user(sender, instance, created, *args, **kwargs):
     business_area = BusinessArea.objects.filter(slug="global").first()
     role = Role.objects.filter(name="Basic User").first()
     if business_area and role:
-        UserRole.objects.get_or_create(business_area=business_area, user=instance, role=role)
+        UserRole.objects.get_or_create(
+            business_area=business_area, user=instance, role=role
+        )

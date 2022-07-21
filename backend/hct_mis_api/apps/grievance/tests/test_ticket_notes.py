@@ -53,8 +53,12 @@ class TestTicketNotes(APITestCase):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=cls.business_area)
-        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
+        area_type = AdminAreaLevelFactory(
+            name="Admin type one", admin_level=2, business_area=cls.business_area
+        )
+        AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -91,7 +95,9 @@ class TestTicketNotes(APITestCase):
         ]
     )
     def test_create_ticket_note(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         input_data = {
             "noteInput": {

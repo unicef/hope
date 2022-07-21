@@ -5,8 +5,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -20,12 +20,13 @@ class TestDeleteProgram(APITestCase):
     }
     """
 
-
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
+        cls.program = ProgramFactory.create(
+            status=Program.DRAFT, business_area=cls.business_area
+        )
 
     def test_delete_program_not_authenticated(self):
         self.snapshot_graphql_request(
@@ -37,7 +38,11 @@ class TestDeleteProgram(APITestCase):
         [
             ("with_permission_in_draft", [Permissions.PROGRAMME_REMOVE], Program.DRAFT),
             ("without_permission_in_draft", [], Program.DRAFT),
-            ("with_permission_in_active", [Permissions.PROGRAMME_REMOVE], Program.ACTIVE),
+            (
+                "with_permission_in_active",
+                [Permissions.PROGRAMME_REMOVE],
+                Program.ACTIVE,
+            ),
         ]
     )
     def test_delete_program_authenticated(self, _, permissions, status):

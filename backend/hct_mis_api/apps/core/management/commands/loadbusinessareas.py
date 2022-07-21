@@ -39,19 +39,20 @@ class Command(BaseCommand):
         :return:
         """
         file = options["file"]
-        tree = ET.parse(file)
+        # Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called
+        tree = ET.parse(file)  # nosec
         root = tree.getroot()
 
         for business_area_tag in root:
             business_area, _ = BusinessArea.objects.get_or_create(
                 code=business_area_tag.find("BUSINESS_AREA_CODE").text,
-                defaults=dict(
-                    name=business_area_tag.find("BUSINESS_AREA_NAME").text,
-                    long_name=business_area_tag.find("BUSINESS_AREA_LONG_NAME").text,
-                    region_code=business_area_tag.find("REGION_CODE").text,
-                    region_name=business_area_tag.find("REGION_NAME").text,
-                    has_data_sharing_agreement=True,
-                ),
+                defaults={
+                    "name": business_area_tag.find("BUSINESS_AREA_NAME").text,
+                    "long_name": business_area_tag.find("BUSINESS_AREA_LONG_NAME").text,
+                    "region_code": business_area_tag.find("REGION_CODE").text,
+                    "region_name": business_area_tag.find("REGION_NAME").text,
+                    "has_data_sharing_agreement": True,
+                },
             )
 
             country = AdminAreaLevel.objects.filter(admin_level=0, country_name=business_area.name).first()
@@ -62,12 +63,12 @@ class Command(BaseCommand):
                 business_area.countries_new.add(country_new)
         BusinessArea.objects.get_or_create(
             code="GLOBAL",
-            defaults=dict(
-                name="Global",
-                long_name="Global Business Area",
-                region_code="GLOBAL",
-                region_name="GLOBAL",
-                has_data_sharing_agreement=True,
-            ),
+            defaults={
+                "name": "Global",
+                "long_name": "Global Business Area",
+                "region_code": "GLOBAL",
+                "region_name": "GLOBAL",
+                "has_data_sharing_agreement": True,
+            },
         )
         logger.debug(f"Imported business areas from {file}")

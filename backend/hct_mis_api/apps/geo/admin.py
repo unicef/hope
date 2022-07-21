@@ -39,7 +39,9 @@ class ActiveRecordFilter(ListFilter):
         for lookup, title in ((None, "All"), ("1", "Yes"), ("0", "No")):
             yield {
                 "selected": self.value() == lookup,
-                "query_string": changelist.get_query_string({self.parameter_name: lookup}),
+                "query_string": changelist.get_query_string(
+                    {self.parameter_name: lookup}
+                ),
                 "display": title,
             }
 
@@ -57,7 +59,9 @@ class ValidityManagerMixin:
 
 
 @admin.register(Country)
-class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class CountryAdmin(
+    ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase
+):
     list_display = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     search_fields = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     raw_id_fields = ("parent",)
@@ -95,7 +99,9 @@ class CountryAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEM
 
 
 @admin.register(AreaType)
-class AreaTypeAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class AreaTypeAdmin(
+    ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase
+):
     list_display = ("name", "country", "area_level", "parent")
     list_filter = (("country", AutoCompleteFilter), ("area_level", NumberFilter))
 
@@ -132,11 +138,15 @@ class AreaTypeFilter(RelatedFieldListFilter):
     def field_choices(self, field, request, model_admin):
         if "area_type__country__exact" not in request.GET:
             return []
-        return AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name")
+        return AreaType.objects.filter(
+            country=request.GET["area_type__country__exact"]
+        ).values_list("id", "name")
 
 
 @admin.register(Area)
-class AreaAdmin(ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class AreaAdmin(
+    ExtraButtonsMixin, ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase
+):
     list_display = (
         "name",
         "area_type",

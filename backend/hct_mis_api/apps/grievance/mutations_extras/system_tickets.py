@@ -23,7 +23,9 @@ def close_system_flagging_ticket(grievance_ticket, info, should_log=True):
     else:
         individual.sanction_list_confirmed_match = True
         individual.save()
-        reassign_roles_on_disable_individual(individual, ticket_details.role_reassign_data, info)
+        reassign_roles_on_disable_individual(
+            individual, ticket_details.role_reassign_data, info
+        )
 
     if should_log:
         log_create(
@@ -54,13 +56,20 @@ def _clear_deduplication_individuals_fields(individuals):
 
 
 def close_needs_adjudication_old_ticket(ticket_details, info):
-    both_individuals = (ticket_details.golden_records_individual, ticket_details.possible_duplicate)
+    both_individuals = (
+        ticket_details.golden_records_individual,
+        ticket_details.possible_duplicate,
+    )
 
     if ticket_details.selected_individual is None:
         _clear_deduplication_individuals_fields(both_individuals)
     else:
         individual_to_remove = ticket_details.selected_individual
-        unique_individuals = [individual for individual in both_individuals if individual.id != individual_to_remove.id]
+        unique_individuals = [
+            individual
+            for individual in both_individuals
+            if individual.id != individual_to_remove.id
+        ]
         mark_as_duplicate_individual_and_reassign_roles(
             ticket_details, individual_to_remove, info, unique_individuals[0]
         )
@@ -68,13 +77,20 @@ def close_needs_adjudication_old_ticket(ticket_details, info):
 
 
 def close_needs_adjudication_new_ticket(ticket_details, info):
-    individuals = (ticket_details.golden_records_individual, *ticket_details.possible_duplicates.all())
+    individuals = (
+        ticket_details.golden_records_individual,
+        *ticket_details.possible_duplicates.all(),
+    )
     selected_individuals = ticket_details.selected_individuals.all()
 
     if not selected_individuals:
         _clear_deduplication_individuals_fields(individuals)
     else:
-        unique_individuals = [individual for individual in individuals if individual not in selected_individuals]
+        unique_individuals = [
+            individual
+            for individual in individuals
+            if individual not in selected_individuals
+        ]
         for individual_to_remove in selected_individuals:
             mark_as_duplicate_individual_and_reassign_roles(
                 ticket_details, individual_to_remove, info, unique_individuals[0]

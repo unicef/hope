@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.cache import caches
 from django.http import HttpResponse
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
 
 from constance import config
 from smart_admin.site import SmartAdminSite, page
@@ -20,7 +19,7 @@ def get_bookmarks(request):
         if entry := clean(entry):
             try:
                 if entry == "--":
-                    quick_links.append(mark_safe("<li><hr/></li>"))
+                    quick_links.append(format_html("<li><hr/></li>"))
                 elif parts := entry.split(","):
                     args = None
                     if len(parts) == 1:
@@ -32,7 +31,12 @@ def get_bookmarks(request):
                     elif len(parts) == 4:
                         args = parts.reverse()
                     if args:
-                        quick_links.append(format_html('<li><a target="{}" class="{}" href="{}">{}</a></li>', *args))
+                        quick_links.append(
+                            format_html(
+                                '<li><a target="{}" class="{}" href="{}">{}</a></li>',
+                                *args,
+                            )
+                        )
             except ValueError:
                 pass
     return quick_links

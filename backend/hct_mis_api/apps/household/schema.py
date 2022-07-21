@@ -88,11 +88,11 @@ class DocumentTypeNode(DjangoObjectType):
     country = graphene.String(description="Country name")
     country_iso3 = graphene.String(description="Country ISO3")
 
-    def resolve_country(parent, info):
-        return parent.country.name
+    def resolve_country(self, info):
+        return self.country.name
 
-    def resolve_country_iso3(parent, info):
-        return parent.country.alpha3
+    def resolve_country_iso3(self, info):
+        return self.country.alpha3
 
     class Meta:
         model = DocumentType
@@ -102,11 +102,11 @@ class AgencyNode(DjangoObjectType):
     country = graphene.String(description="Country name")
     country_iso3 = graphene.String(description="Country ISO3")
 
-    def resolve_country(parent, info):
-        return parent.country.name
+    def resolve_country(self, info):
+        return self.country.name
 
-    def resolve_country_iso3(parent, info):
-        return parent.country.alpha3
+    def resolve_country_iso3(self, info):
+        return self.country.alpha3
 
     class Meta:
         model = Agency
@@ -116,11 +116,11 @@ class IndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
     country = graphene.String(description="Agency country")
 
-    def resolve_type(parent, info):
-        return parent.agency.type
+    def resolve_type(self, info):
+        return self.agency.type
 
-    def resolve_country(parent, info):
-        return getattr(parent.agency.country, "name", parent.agency.country)
+    def resolve_country(self, info):
+        return getattr(self.agency.country, "name", self.agency.country)
 
     class Meta:
         model = IndividualIdentity
@@ -133,12 +133,12 @@ class DocumentNode(DjangoObjectType):
     country = graphene.String(description="Document country")
     photo = graphene.String(description="Photo url")
 
-    def resolve_country(parent, info):
-        return getattr(parent.type.country, "name", parent.type.country)
+    def resolve_country(self, info):
+        return getattr(self.type.country, "name", self.type.country)
 
-    def resolve_photo(parent, info):
-        if parent.photo:
-            return parent.photo.url
+    def resolve_photo(self, info):
+        if self.photo:
+            return self.photo.url
         return
 
     class Meta:
@@ -156,14 +156,14 @@ class ExtendedHouseHoldConnection(graphene.Connection):
     individuals_count = graphene.Int()
     edge_count = graphene.Int()
 
-    def resolve_total_count(root, info, **kwargs):
-        return root.length
+    def resolve_total_count(self, info, **kwargs):
+        return self.length
 
-    def resolve_edge_count(root, info, **kwargs):
-        return len(root.edges)
+    def resolve_edge_count(self, info, **kwargs):
+        return len(self.edges)
 
-    def resolve_individuals_count(root, info, **kwargs):
-        return root.iterable.aggregate(sum=Sum("size")).get("sum")
+    def resolve_individuals_count(self, info, **kwargs):
+        return self.iterable.aggregate(sum=Sum("size")).get("sum")
 
 
 # FIXME: This need to be changed to HouseholdSelectionNode
@@ -213,52 +213,52 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     active_individuals_count = graphene.Int()
     admin_area = graphene.Field(AreaNode)
 
-    def resolve_admin1(parent, info):
-        return parent.admin1_new
+    def resolve_admin1(self, info):
+        return self.admin1_new
 
-    def resolve_admin2(parent, info):
-        return parent.admin2_new
+    def resolve_admin2(self, info):
+        return self.admin2_new
 
-    def resolve_admin_area(parent, info):
-        return parent.admin_area_new
+    def resolve_admin_area(self, info):
+        return self.admin_area_new
 
-    def resolve_admin_area_title(parent, info):
-        if parent.admin_area_new:
-            return parent.admin_area_new.name
+    def resolve_admin_area_title(self, info):
+        if self.admin_area_new:
+            return self.admin_area_new.name
         return ""
 
-    def resolve_programs_with_delivered_quantity(parent, info):
-        return programs_with_delivered_quantity(parent)
+    def resolve_programs_with_delivered_quantity(self, info):
+        return programs_with_delivered_quantity(self)
 
-    def resolve_country(parent, info):
-        return parent.country.name
+    def resolve_country(self, info):
+        return self.country.name
 
-    def resolve_country_origin(parent, info):
-        return parent.country_origin.name
+    def resolve_country_origin(self, info):
+        return self.country_origin.name
 
-    def resolve_selection(parent, info):
-        selection = parent.selections.first()
+    def resolve_selection(self, info):
+        selection = self.selections.first()
         return selection
 
-    def resolve_individuals(parent, info):
-        individuals_ids = list(parent.individuals.values_list("id", flat=True))
-        collectors_ids = list(parent.representatives.values_list("id", flat=True))
+    def resolve_individuals(self, info):
+        individuals_ids = list(self.individuals.values_list("id", flat=True))
+        collectors_ids = list(self.representatives.values_list("id", flat=True))
         ids = list(set(individuals_ids + collectors_ids))
         return Individual.objects.filter(id__in=ids).prefetch_related(
             Prefetch(
                 "households_and_roles",
-                queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),
+                queryset=IndividualRoleInHousehold.objects.filter(household=self.id),
             )
         )
 
-    def resolve_has_duplicates(parent, info):
-        return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
+    def resolve_has_duplicates(self, info):
+        return self.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
-    def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_to_string(parent)
+    def resolve_flex_fields(self, info):
+        return resolve_flex_fields_choices_to_string(self)
 
-    def resolve_active_individuals_count(parent, info):
-        return parent.active_individuals.count()
+    def resolve_active_individuals_count(self, info):
+        return self.active_individuals.count()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -266,7 +266,10 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         user = info.context.user
 
         # if user doesn't have permission to view all households, we check based on their grievance tickets
-        if not user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area):
+        if not user.has_permission(
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value,
+            object_instance.business_area,
+        ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
             )
@@ -339,57 +342,56 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     payment_channels = graphene.List(BankAccountInfoNode)
 
     @staticmethod
-    def resolve_payment_channels(parent: Individual, info):
-        return BankAccountInfo.objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
+    def resolve_payment_channels(self: Individual, info):
+        return BankAccountInfo.objects.filter(individual=self).annotate(type=Value("BANK_TRANSFER"))
 
-    def resolve_bank_account_info(parent, info):
-        bank_account_info = parent.bank_account_info.first()
+    def resolve_bank_account_info(self, info):
+        bank_account_info = self.bank_account_info.first()
         if bank_account_info:
             return bank_account_info
         return None
 
-    def resolve_role(parent, info):
-        role = parent.households_and_roles.first()
+    def resolve_role(self, info):
+        role = self.households_and_roles.first()
         if role is not None:
             return role.role
         return ROLE_NO_ROLE
 
-    def resolve_deduplication_golden_record_results(parent, info):
-        key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
-        results = parent.deduplication_golden_record_results.get(key, {})
+    def resolve_deduplication_golden_record_results(self, info):
+        key = "duplicates" if self.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
+        results = self.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
 
-    def resolve_deduplication_batch_results(parent, info):
-        key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
-        results = parent.deduplication_batch_results.get(key, {})
+    def resolve_deduplication_batch_results(self, info):
+        key = "duplicates" if self.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
+        results = self.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
 
-    def resolve_relationship(parent, info):
+    def resolve_relationship(self, info):
         # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)
-        if not parent.relationship:
+        if not self.relationship:
             return None
-        return parent.relationship
+        return self.relationship
 
-    def resolve_photo(parent, info):
-        if parent.photo:
-            return parent.photo.url
+    def resolve_photo(self, info):
+        if self.photo:
+            return self.photo.url
         return
 
-    def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_to_string(parent)
+    def resolve_flex_fields(self, info):
+        return resolve_flex_fields_choices_to_string(self)
 
-    def resolve_age(parent, info):
-        return parent.age
+    def resolve_age(self, info):
+        return self.age
 
-    def resolve_sanction_list_last_check(parent, info):
-        return parent.sanction_list_last_check
+    def resolve_sanction_list_last_check(self, info):
+        return self.sanction_list_last_check
 
-    def resolve_phone_no_valid(parent, info):
-        return parent.phone_no_valid
+    def resolve_phone_no_valid(self, info):
+        return self.phone_no_valid
 
-    def resolve_phone_no_alternative_valid(parent, info):
-        return parent.phone_no_alternative_valid
-
+    def resolve_phone_no_alternative_valid(self, info):
+        return self.phone_no_alternative_valid
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -397,7 +399,8 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         user = info.context.user
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value,
+            object_instance.business_area,
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()

@@ -90,7 +90,9 @@ def all_fields_attributes(request):
     if records:
         return Response(records)
 
-    records = sort_by_attr(get_fields_attr_generators(True, business_area_slug), "label.English(EN)")
+    records = sort_by_attr(
+        get_fields_attr_generators(True, business_area_slug), "label.English(EN)"
+    )
     serializer = FieldAttributeSerializer(records, many=True)
     data = serializer.data
 

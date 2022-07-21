@@ -31,7 +31,9 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class GrievanceTicketAdmin(
+    LinkedObjectsMixin, ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase
+):
     list_display = (
         "unicef_id",
         "created_at",
@@ -41,7 +43,13 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, ExtraButtonsMixin, AdminAdvancedF
         "category",
         "registration_data_import",
     )
-    raw_id_fields = ("created_by", "assigned_to", "admin2", "business_area", "registration_data_import")
+    raw_id_fields = (
+        "created_by",
+        "assigned_to",
+        "admin2",
+        "business_area",
+        "registration_data_import",
+    )
     search_fields = ("unicef_id",)
     date_hierarchy = "created_at"
     list_filter = (
@@ -108,7 +116,12 @@ class TicketDeleteHouseholdDetailsAdmin(HOPEModelAdminBase):
 
 @admin.register(TicketNeedsAdjudicationDetails)
 class TicketNeedsAdjudicationDetailsAdmin(HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "golden_records_individual", "possible_duplicate", "selected_individual")
+    raw_id_fields = (
+        "ticket",
+        "golden_records_individual",
+        "possible_duplicate",
+        "selected_individual",
+    )
 
 
 @admin.register(TicketPaymentVerificationDetails)

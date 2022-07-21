@@ -5,8 +5,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
@@ -27,16 +27,21 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         }
         """
 
-    
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        household, _ = create_household({"size": 2, "address": "Lorem Ipsum", "country_origin": "PL"})
+        household, _ = create_household(
+            {"size": 2, "address": "Lorem Ipsum", "country_origin": "PL"}
+        )
         cls.household = household
-        cls.program1 = ProgramFactory.create(name="Test program ONE", business_area=cls.business_area)
-        cls.program2 = ProgramFactory.create(name="Test program TWO", business_area=cls.business_area)
+        cls.program1 = ProgramFactory.create(
+            name="Test program ONE", business_area=cls.business_area
+        )
+        cls.program2 = ProgramFactory.create(
+            name="Test program TWO", business_area=cls.business_area
+        )
 
         cash_plans_program1 = CashPlanFactory.create_batch(2, program=cls.program1)
         cash_plans_program2 = CashPlanFactory.create_batch(2, program=cls.program2)
@@ -85,7 +90,9 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         ]
     )
     def test_household_query_single(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,

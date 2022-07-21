@@ -21,9 +21,13 @@ class TestReassignRolesOnUpdate(APITestCase):
         call_command("loadbusinessareas")
 
         business_area = BusinessArea.objects.get(slug="afghanistan")
-        program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
+        program_one = ProgramFactory(
+            name="Test program ONE", business_area=business_area
+        )
 
-        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
+        cls.household = HouseholdFactory.build(
+            id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054"
+        )
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.save()
         cls.household.programs.add(program_one)
@@ -79,7 +83,9 @@ class TestReassignRolesOnUpdate(APITestCase):
 
         self.assertEqual(self.household.head_of_household, individual)
         self.assertEqual(individual.relationship, HEAD)
-        role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
+        role = IndividualRoleInHousehold.objects.get(
+            household=self.household, individual=individual
+        ).role
         self.assertEqual(role, ROLE_PRIMARY)
 
     def test_reassign_alternate_role_to_primary_collector(self):
@@ -87,12 +93,16 @@ class TestReassignRolesOnUpdate(APITestCase):
             self.alternate_role.id: {
                 "role": "ALTERNATE",
                 "household": self.id_to_base64(self.household.id, "HouseholdNode"),
-                "individual": self.id_to_base64(self.primary_collector_individual.id, "IndividualNode"),
+                "individual": self.id_to_base64(
+                    self.primary_collector_individual.id, "IndividualNode"
+                ),
             },
         }
 
         with self.assertRaises(GraphQLError) as context:
-            reassign_roles_on_update(self.alternate_collector_individual, role_reassign_data)
+            reassign_roles_on_update(
+                self.alternate_collector_individual, role_reassign_data
+            )
 
         self.assertTrue("Cannot reassign the role" in str(context.exception))
 
@@ -109,7 +119,11 @@ class TestReassignRolesOnUpdate(APITestCase):
             },
         }
 
-        reassign_roles_on_update(self.alternate_collector_individual, role_reassign_data)
+        reassign_roles_on_update(
+            self.alternate_collector_individual, role_reassign_data
+        )
 
-        role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
+        role = IndividualRoleInHousehold.objects.get(
+            household=self.household, individual=individual
+        ).role
         self.assertEqual(role, ROLE_ALTERNATE)

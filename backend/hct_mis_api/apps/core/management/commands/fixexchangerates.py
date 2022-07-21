@@ -25,4 +25,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         fix_exchange_rates(all=True)
         if options["silent"] is False:
-            self.stdout.write("Exchange rates for Payment Records successfully modified")
+            self.stdout.write(
+                "Exchange rates for Payment Records successfully modified"
+            )

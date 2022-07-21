@@ -14,7 +14,7 @@ from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from django.utils.translation import get_language
 
 from admin_extra_buttons.api import ExtraButtonsMixin, button
@@ -94,18 +94,18 @@ class AutocompleteWidget(forms.Widget):
         )
         return forms.Media(
             js=(
-                "admin/js/vendor/jquery/jquery{}.js".format(extra),
-                "admin/js/vendor/select2/select2.full{}.js".format(extra),
+                f"admin/js/vendor/jquery/jquery{extra}.js",
+                f"admin/js/vendor/select2/select2.full{extra}.js",
             )
             + i18n_file
             + (
                 "admin/js/jquery.init.js",
                 "admin/js/autocomplete.js",
-                "adminfilters/adminfilters{}.js".format(extra),
+                f"adminfilters/adminfilters{extra}.js",
             ),
             css={
                 "screen": (
-                    "admin/css/vendor/select2/select2{}.css".format(extra),
+                    f"admin/css/vendor/select2/select2{extra}.css",
                     "adminfilters/adminfilters.css",
                 ),
             },
@@ -184,11 +184,15 @@ class TestRuleMixin:
 
 class RuleResource(ModelResource):
     created_by = fields.Field(
-        column_name="created_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="created_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     updated_by = fields.Field(
-        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="updated_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     class Meta:
@@ -209,7 +213,16 @@ class RuleResource(ModelResource):
 
 @register(Rule)
 class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, ModelAdmin):
-    list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
+    list_display = (
+        "name",
+        "version",
+        "language",
+        "enabled",
+        "deprecated",
+        "created_by",
+        "updated_by",
+        "stable",
+    )
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
     form = RuleForm
@@ -286,7 +299,7 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
     def stable(self, obj):
         try:
             url = reverse("admin:steficon_rulecommit_change", args=[obj.latest.pk])
-            return mark_safe(f'<a href="{url}">{obj.latest.version}</a>')
+            return format_html(f'<a href="{url}">{obj.latest.version}</a>')
         except (RuleCommit.DoesNotExist, AttributeError):
             pass
 
@@ -297,12 +310,12 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
         return super().render_delete_form(request, context)
 
     def _get_csv_config(self, form):
-        return dict(
-            quoting=int(form.cleaned_data["quoting"]),
-            delimiter=form.cleaned_data["delimiter"],
-            quotechar=form.cleaned_data["quotechar"],
-            escapechar=form.cleaned_data["escapechar"],
-        )
+        return {
+            "quoting": int(form.cleaned_data["quoting"]),
+            "delimiter": form.cleaned_data["delimiter"],
+            "quotechar": form.cleaned_data["quotechar"],
+            "escapechar": form.cleaned_data["escapechar"],
+        }
 
     @button(visible=lambda o, r: "/change/" in r.path)
     def process_file(self, request, pk):
@@ -465,20 +478,42 @@ class RuleAdmin(ExtraButtonsMixin, ImportExportMixin, TestRuleMixin, LinkedObjec
 class RuleCommitResource(ModelResource):
     rule = fields.Field(column_name="rule", attribute="rule", widget=ForeignKeyWidget(Rule, "name"))
     updated_by = fields.Field(
-        column_name="updated_by", attribute="created_by", widget=ForeignKeyWidget(User, "username")
+        column_name="updated_by",
+        attribute="created_by",
+        widget=ForeignKeyWidget(User, "username"),
     )
 
     class Meta:
         model = RuleCommit
-        fields = ("timestamp", "rule", "version", "updated_by", "affected_fields", "is_release")
+        fields = (
+            "timestamp",
+            "rule",
+            "version",
+            "updated_by",
+            "affected_fields",
+            "is_release",
+        )
         import_id_fields = ("rule", "version")
 
 
 @register(RuleCommit)
 class RuleCommitAdmin(
-    ExtraButtonsMixin, AdminFiltersMixin, ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, ModelAdmin
+    ExtraButtonsMixin,
+    AdminFiltersMixin,
+    ImportExportMixin,
+    LinkedObjectsMixin,
+    TestRuleMixin,
+    ModelAdmin,
 ):
-    list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
+    list_display = (
+        "timestamp",
+        "rule",
+        "version",
+        "updated_by",
+        "is_release",
+        "enabled",
+        "deprecated",
+    )
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("name",)
     readonly_fields = ("updated_by", "rule", "affected_fields", "version")

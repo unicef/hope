@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.db.models import QuerySet
 from django.http import HttpResponse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 import tablib
 from concurrency.utils import get_classname
@@ -27,7 +27,7 @@ def fqn(o):
     else:
         parts.append(cls.__name__)
     if not parts:
-        raise ValueError("Invalid argument `{}`".format(o))
+        raise ValueError(f"Invalid argument `{o}`") from None
     return ".".join(parts)
 
 
@@ -38,31 +38,31 @@ def to_dataset(result):
         if not fields:
             fields = [field.name for field in result.model._meta.get_fields()]
         data.headers = fields
-        try :
+        try:
             for obj in result.all():
                 data.append([obj[f] if isinstance(obj, dict) else str(getattr(obj, f)) for f in fields])
-        except Exception as e:
-            raise ValueError("Results can't be rendered as a tablib Dataset")
+        except Exception as exc:
+            raise ValueError("Results can't be rendered as a tablib Dataset") from exc
     elif isinstance(result, (list, tuple)):
         data = tablib.Dataset()
         fields = set().union(*(d.keys() for d in list(result)))
         data.headers = fields
-        try :
+        try:
             for obj in result:
                 data.append([obj[f] for f in fields])
-        except Exception as e:
-            raise ValueError("Results can't be rendered as a tablib Dataset")
+        except Exception as exc:
+            raise ValueError("Results can't be rendered as a tablib Dataset") from exc
     elif isinstance(result, (tablib.Dataset, dict)):
         data = result
     else:
-        raise ValueError(f"{result} ({type(result)}")
+        raise ValueError(f"{result} ({type(result)}") from None
     return data
 
 
 def get_sentry_url(event_id, html=False):
     url = f"{settings.SENTRY_URL}?query={event_id}"
     if html:
-        return mark_safe('<a href="{url}" target="_sentry" >View on Sentry<a/>')
+        return format_html('<a href="{url}" target="_sentry" >View on Sentry<a/>')
     return url
 
 

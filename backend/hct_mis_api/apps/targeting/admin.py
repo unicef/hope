@@ -17,7 +17,11 @@ from .steficon import SteficonExecutorMixin
 
 @admin.register(TargetPopulation)
 class TargetPopulationAdmin(
-    SoftDeletableAdminMixin, SteficonExecutorMixin, LinkedObjectsMixin, ExtraButtonsMixin, HOPEModelAdminBase
+    SoftDeletableAdminMixin,
+    SteficonExecutorMixin,
+    LinkedObjectsMixin,
+    ExtraButtonsMixin,
+    HOPEModelAdminBase,
 ):
     list_display = (
         "name",
@@ -57,15 +61,23 @@ class TargetPopulationAdmin(
 
     @button()
     def inspect(self, request, pk):
-        context = self.get_common_context(request, pk, aeu_groups=[None], action="Inspect")
+        context = self.get_common_context(
+            request, pk, aeu_groups=[None], action="Inspect"
+        )
 
-        return TemplateResponse(request, "admin/targeting/targetpopulation/inspect.html", context)
+        return TemplateResponse(
+            request, "admin/targeting/targetpopulation/inspect.html", context
+        )
 
     @button()
     def payments(self, request, pk):
-        context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
+        context = self.get_common_context(
+            request, pk, aeu_groups=[None], action="payments"
+        )
 
-        return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
+        return TemplateResponse(
+            request, "admin/targeting/targetpopulation/payments.html", context
+        )
 
     @button()
     def download_xlsx(self, request, pk):

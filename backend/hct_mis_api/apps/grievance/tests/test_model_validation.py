@@ -3,8 +3,8 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
@@ -45,18 +45,30 @@ class TestGrievanceModelValidation(TestCase):
         }
 
     def test_valid_issue_types(self):
-        grievance_ticket_1 = GrievanceTicket(**self.base_model_data, **self.valid_model_data)
-        grievance_ticket_2 = GrievanceTicket(**self.base_model_data, **self.valid_model_2_data)
+        grievance_ticket_1 = GrievanceTicket(
+            **self.base_model_data, **self.valid_model_data
+        )
+        grievance_ticket_2 = GrievanceTicket(
+            **self.base_model_data, **self.valid_model_2_data
+        )
 
         grievance_ticket_1.save()
         grievance_ticket_2.save()
 
-        self.assertEqual(self.valid_model_data["issue_type"], grievance_ticket_1.issue_type)
-        self.assertEqual(self.valid_model_2_data["issue_type"], grievance_ticket_2.issue_type)
+        self.assertEqual(
+            self.valid_model_data["issue_type"], grievance_ticket_1.issue_type
+        )
+        self.assertEqual(
+            self.valid_model_2_data["issue_type"], grievance_ticket_2.issue_type
+        )
 
     def test_invalid_issue_types(self):
-        grievance_ticket_1 = GrievanceTicket(**self.base_model_data, **self.invalid_model_data)
-        grievance_ticket_2 = GrievanceTicket(**self.base_model_data, **self.invalid_model_2_data)
+        grievance_ticket_1 = GrievanceTicket(
+            **self.base_model_data, **self.invalid_model_data
+        )
+        grievance_ticket_2 = GrievanceTicket(
+            **self.base_model_data, **self.invalid_model_2_data
+        )
 
         self.assertRaisesMessage(
             ValidationError,

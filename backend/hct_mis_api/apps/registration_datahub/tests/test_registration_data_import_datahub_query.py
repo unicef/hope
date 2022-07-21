@@ -38,7 +38,9 @@ class TestRegistrationDataImportDatahubQuery(APITestCase):
             {"name": "Lorem Ipsum 3", "hct_id": "df7e419f-26bd-4a52-8698-0a201447a5f1"},
         ]
 
-        cls.data = [RegistrationDataImportDatahubFactory(**item) for item in cls.to_create]
+        cls.data = [
+            RegistrationDataImportDatahubFactory(**item) for item in cls.to_create
+        ]
 
     def test_registration_data_import_datahub_query_all(self):
         self.snapshot_graphql_request(

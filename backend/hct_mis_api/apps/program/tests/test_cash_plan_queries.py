@@ -1,15 +1,15 @@
 from datetime import datetime
-from django.utils import timezone
 
 from django.core.management import call_command
+from django.utils import timezone
 
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 
@@ -81,16 +81,20 @@ class TestCashPlanQueries(APITestCase):
                 "assistance_measurement": "Syrian pound",
                 "dispersion_date": "2020-04-25T00:00:00+00:00",
                 "distribution_level": "Registration Group",
-                "end_date": timezone.make_aware(datetime.strptime(
-                    "2064-03-14T22:52:54",
-                    "%Y-%m-%dT%H:%M:%S",
-                )),
+                "end_date": timezone.make_aware(
+                    datetime.strptime(
+                        "2064-03-14T22:52:54",
+                        "%Y-%m-%dT%H:%M:%S",
+                    )
+                ),
                 "name": "Far yet reveal area bar almost dinner.",
                 "total_persons_covered": 540,
-                "start_date": timezone.make_aware(datetime.strptime(
-                    "2051-11-30T00:02:09",
-                    "%Y-%m-%dT%H:%M:%S",
-                )),
+                "start_date": timezone.make_aware(
+                    datetime.strptime(
+                        "2051-11-30T00:02:09",
+                        "%Y-%m-%dT%H:%M:%S",
+                    )
+                ),
                 "status": "Transaction Completed",
                 "total_delivered_quantity": 53477453.27,
                 "total_entitled_quantity": 56657648.82,
@@ -106,16 +110,20 @@ class TestCashPlanQueries(APITestCase):
                 "assistance_measurement": "Cuban peso",
                 "dispersion_date": "2020-02-22T00:00:00+00:00",
                 "distribution_level": "Registration Group",
-                "end_date": timezone.make_aware(datetime.strptime(
-                    "2028-03-31T18:44:15",
-                    "%Y-%m-%dT%H:%M:%S",
-                )),
+                "end_date": timezone.make_aware(
+                    datetime.strptime(
+                        "2028-03-31T18:44:15",
+                        "%Y-%m-%dT%H:%M:%S",
+                    )
+                ),
                 "name": "Despite action TV after.",
                 "total_persons_covered": 100,
-                "start_date": timezone.make_aware(datetime.strptime(
-                    "2041-06-14T10:15:44",
-                    "%Y-%m-%dT%H:%M:%S",
-                )),
+                "start_date": timezone.make_aware(
+                    datetime.strptime(
+                        "2041-06-14T10:15:44",
+                        "%Y-%m-%dT%H:%M:%S",
+                    )
+                ),
                 "status": "Transaction Completed",
                 "total_delivered_quantity": 41935107.03,
                 "total_entitled_quantity": 38204833.92,
@@ -133,17 +141,29 @@ class TestCashPlanQueries(APITestCase):
 
     @parameterized.expand(
         [
-            ("all_with_permission", [Permissions.PAYMENT_VERIFICATION_VIEW_LIST], QUERY_ALL_CASH_PLANS),
+            (
+                "all_with_permission",
+                [Permissions.PAYMENT_VERIFICATION_VIEW_LIST],
+                QUERY_ALL_CASH_PLANS,
+            ),
             ("all_without_permission", [], QUERY_ALL_CASH_PLANS),
-            ("single_with_permission", [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS], QUERY_SINGLE_CASH_PLAN),
+            (
+                "single_with_permission",
+                [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS],
+                QUERY_SINGLE_CASH_PLAN,
+            ),
             ("single_without_permission", [], QUERY_SINGLE_CASH_PLAN),
         ]
     )
     def test_cash_plans(self, name, permissions, query):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         variables = {}
         if "single" in name:
-            variables["id"] = self.id_to_base64("c7e768f1-5626-413e-a032-5fb18789f985", "CashPlanNode")
+            variables["id"] = self.id_to_base64(
+                "c7e768f1-5626-413e-a032-5fb18789f985", "CashPlanNode"
+            )
 
         self.snapshot_graphql_request(
             request_string=query,

@@ -97,17 +97,17 @@ def _slug_strip(value, separator="-"):
     if separator == "-" or not separator:
         re_sep = "-"
     else:
-        re_sep = "(?:-|{})".format(re.escape(separator))
+        re_sep = f"(?:-|{re.escape(separator)})"
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep, separator, value))
+        value = re.sub(f"{re_sep}+")
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
             re_sep = re.escape(separator)
 
-        value = re.sub(r"^{}+|{}+$".format(re_sep, re_sep), "", value)
+        value = re.sub(rf"^{re_sep}+|{re_sep}+$", "", value)
     return value
 
 
@@ -526,7 +526,7 @@ def chart_get_filtered_qs(
 
 
 def parse_list_values_to_int(list_to_parse):
-    return list(map(lambda x: int(x or 0), list_to_parse))
+    return [int(x or 0) for x in list_to_parse]
 
 
 def sum_lists_with_values(qs_values, list_len):
@@ -682,7 +682,7 @@ def map_unicef_ids_to_households_unicef_ids(excluded_ids_string):
     return excluded_household_ids_array
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def cached_business_areas_slug_id_dict():
     from hct_mis_api.apps.core.models import BusinessArea
 

@@ -3,11 +3,14 @@ from django.db.models.functions import Lower
 
 from django_filters import CharFilter, FilterSet, OrderingFilter, UUIDFilter
 
-
+from hct_mis_api.apps.activity_log.schema import LogEntryFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, is_valid_uuid
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, CashPlanPaymentVerification
-from hct_mis_api.apps.activity_log.schema import LogEntryFilter
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    PaymentRecord,
+    PaymentVerification,
+)
 from hct_mis_api.apps.program.models import CashPlan
 
 
@@ -52,7 +55,11 @@ class PaymentVerificationFilter(FilterSet):
     verification_channel = CharFilter(field_name="cash_plan_payment_verification__verification_channel")
 
     class Meta:
-        fields = ("cash_plan_payment_verification", "cash_plan_payment_verification__cash_plan", "status")
+        fields = (
+            "cash_plan_payment_verification",
+            "cash_plan_payment_verification__cash_plan",
+            "status",
+        )
         model = PaymentVerification
 
     order_by = OrderingFilter(
@@ -90,7 +97,7 @@ class PaymentVerificationFilter(FilterSet):
 
 class CashPlanPaymentVerificationFilter(FilterSet):
     class Meta:
-        fields = tuple()
+        fields = tuple()  # noqa: C408
         model = CashPlanPaymentVerification
 
 

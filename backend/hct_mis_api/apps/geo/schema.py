@@ -4,8 +4,8 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.geo.models import Area, AreaType
 from hct_mis_api.apps.geo.filters import AreaFilter
+from hct_mis_api.apps.geo.models import Area, AreaType
 
 
 class AreaNode(DjangoObjectType):

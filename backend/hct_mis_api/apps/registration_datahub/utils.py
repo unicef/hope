@@ -13,13 +13,20 @@ def post_process_dedupe_results(record):
     #  }
     max_score = 0
     min_score = sys.maxsize
-    for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
+    for field in [
+        record.deduplication_batch_results,
+        record.deduplication_golden_record_results,
+    ]:
         if "duplicates" in field:
             duplicates = field["duplicates"]
             for entry in field["duplicates"]:
                 max_score = max(max_score, entry["score"])
                 min_score = min(min_score, entry["score"])
-            field["score"] = {"max": max_score, "min": min_score, "qty": len(duplicates)}
+            field["score"] = {
+                "max": max_score,
+                "min": min_score,
+                "qty": len(duplicates),
+            }
 
 
 def combine_collections(a, b, path=None, update=True):
@@ -36,7 +43,10 @@ def combine_collections(a, b, path=None, update=True):
             elif isinstance(a[key], list) and isinstance(b[key], list):
                 for idx, val in enumerate(b[key]):
                     a[key][idx] = combine_collections(
-                        a[key][idx], b[key][idx], path + [str(key), str(idx)], update=update
+                        a[key][idx],
+                        b[key][idx],
+                        path + [str(key), str(idx)],
+                        update=update,
                     )
             elif update:
                 a[key] = b[key]

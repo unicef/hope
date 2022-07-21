@@ -5,8 +5,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -72,7 +72,10 @@ class TestRegistrationDataImportQuery(APITestCase):
             },
         ]
 
-        cls.data = [RegistrationDataImportFactory(**item, business_area=cls.business_area) for item in cls.to_create]
+        cls.data = [
+            RegistrationDataImportFactory(**item, business_area=cls.business_area)
+            for item in cls.to_create
+        ]
 
     @parameterized.expand(
         [
@@ -87,7 +90,9 @@ class TestRegistrationDataImportQuery(APITestCase):
         ]
     )
     def test_registration_data_import_datahub_query_all(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         self.snapshot_graphql_request(
             request_string=self.ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
             context={"user": self.user},
@@ -105,8 +110,12 @@ class TestRegistrationDataImportQuery(APITestCase):
             ),
         ]
     )
-    def test_registration_data_import_datahub_query_single_with_permission(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_registration_data_import_datahub_query_single_with_permission(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         self.snapshot_graphql_request(
             request_string=self.REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,
             context={"user": self.user},

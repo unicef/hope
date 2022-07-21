@@ -24,20 +24,41 @@ def extract(records_ids: List[int], raise_exception=False):
             record.data = _filter(record.get_data())
 
             individuals = record.data.get("individuals", {})
-            collectors = [individual for individual in individuals if individual.get("role_i_c", "n") == "y"]
-            heads = [individual for individual in individuals if individual.get("relationship_i_c") == "head"]
+            collectors = [
+                individual
+                for individual in individuals
+                if individual.get("role_i_c", "n") == "y"
+            ]
+            heads = [
+                individual
+                for individual in individuals
+                if individual.get("relationship_i_c") == "head"
+            ]
 
             record.data["w_counters"] = {
                 "individuals_num": len(individuals),
                 "collectors_num": len(collectors),
                 "head": len(heads),
-                "valid_phones": len([individual for individual in individuals if individual.get("phone_no_i_c")]),
-                "valid_taxid": len([head for head in heads if head.get("tax_id_no_i_c") and head.get("bank_account")]),
+                "valid_phones": len(
+                    [
+                        individual
+                        for individual in individuals
+                        if individual.get("phone_no_i_c")
+                    ]
+                ),
+                "valid_taxid": len(
+                    [
+                        head
+                        for head in heads
+                        if head.get("tax_id_no_i_c") and head.get("bank_account")
+                    ]
+                ),
                 "valid_payment": len(
                     [
                         individual
                         for individual in individuals
-                        if individual.get("tax_id_no_i_c") and individual.get("bank_account")
+                        if individual.get("tax_id_no_i_c")
+                        and individual.get("bank_account")
                     ]
                 ),
                 "birth_certificate": len(
@@ -52,12 +73,22 @@ def extract(records_ids: List[int], raise_exception=False):
                         [
                             individual
                             for individual in individuals
-                            if individual.get("disability_certificate_picture") == "::image::"
+                            if individual.get("disability_certificate_picture")
+                            == "::image::"
                         ]
                     )
-                    == len([individual for individual in individuals if individual.get("disability_i_c") == "y"])
+                    == len(
+                        [
+                            individual
+                            for individual in individuals
+                            if individual.get("disability_i_c") == "y"
+                        ]
+                    )
                 ),
-                "collector_bank_account": len([individual.get("bank_account") for individual in collectors]) > 0,
+                "collector_bank_account": len(
+                    [individual.get("bank_account") for individual in collectors]
+                )
+                > 0,
             }
             record.save()
         except Exception as e:

@@ -16,5 +16,7 @@ class TestImportedDocumentTypeModel(TestCase):
         self.assertEqual(document_type.country, Country(code="PL"))
 
     def test_create_document_type_without_specific_country(self):
-        document_type = ImportedDocumentType.objects.create(type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE)
+        document_type = ImportedDocumentType.objects.create(
+            type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+        )
         self.assertEqual(document_type.country, Country(code="U"))

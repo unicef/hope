@@ -1,0 +1,28 @@
+[MASTER]
+load-plugins=pylint.extensions.mccabe, pylint_django, pylint_celery
+django-settings-module=hct_mis_api.settings.dev
+ignore=migrations
+
+[FORMAT]
+max-line-length=120
+
+[DESIGN]
+max-parents=13
+max-complexity=5
+max-line-length=120
+
+[TYPECHECK]
+generated-members=REQUEST,acl_users,aq_parent,"[a-zA-Z]+_set{1,2}",save,delete
+
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-function-docstring,
+    missing-class-docstring,
+    fixme,
+    logging-fstring-interpolation,
+    broad-except,
+    no-member,
+    import-error,
+    consider-using-f-string,
+    too-few-public-methods,

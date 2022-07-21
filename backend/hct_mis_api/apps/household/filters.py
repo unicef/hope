@@ -1,10 +1,10 @@
 import json
 import re
 
-from constance import config
 from django.db.models import Q
 from django.db.models.functions import Lower
 
+from constance import config
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -15,13 +15,13 @@ from django_filters import (
 
 from hct_mis_api.apps.core.filters import (
     AgeRangeFilter,
+    BusinessAreaSlugFilter,
     DateRangeFilter,
     IntegerRangeFilter,
-    BusinessAreaSlugFilter,
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.documents import IndividualDocument, HouseholdDocument
+from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     INDIVIDUAL_FLAGS_CHOICES,
@@ -48,7 +48,9 @@ def _prepare_kobo_asset_id_value(code):
     if len(code) < 6:
         return code
 
-    code = code[5:].split("/")[-1]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
+    code = code[5:].split("/")[
+        -1
+    ]  # remove prefix 'KOBO-' and split ['20220531-3', '111222']
     if code.startswith("20223"):
         # month 3 day 25...31 id is 44...12067
         code = code[7:]
@@ -76,10 +78,13 @@ class HouseholdFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
-    head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
+    head_of_household__full_name = CharFilter(
+        field_name="head_of_household__full_name", lookup_expr="startswith"
+    )
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
-        field_name="admin_area_new", queryset=Area.objects.filter(area_type__area_level=2)
+        field_name="admin_area_new",
+        queryset=Area.objects.filter(area_type__area_level=2),
     )
     withdrawn = BooleanFilter(field_name="withdrawn")
 
@@ -121,7 +126,10 @@ class HouseholdFilter(FilterSet):
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_households(value, business_area)
         es_response = (
-            HouseholdDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
+            HouseholdDocument.search()
+            .params(search_type="dfs_query_then_fetch")
+            .from_dict(query_dict)
+            .execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
 
@@ -172,16 +180,23 @@ class IndividualFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
-    programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
+    programs = ModelMultipleChoiceFilter(
+        field_name="household__programs", queryset=Program.objects.all()
+    )
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
-        field_name="household__admin_area_new", queryset=Area.objects.filter(area_type__area_level=2)
+        field_name="household__admin_area_new",
+        queryset=Area.objects.filter(area_type__area_level=2),
     )
-    status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
+    status = MultipleChoiceFilter(
+        choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter"
+    )
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
-    flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
+    flags = MultipleChoiceFilter(
+        choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter"
+    )
 
     class Meta:
         model = Individual
@@ -218,7 +233,9 @@ class IndividualFilter(FilterSet):
         if DUPLICATE in value:
             q_obj |= Q(duplicate=True)
         if SANCTION_LIST_POSSIBLE_MATCH in value:
-            q_obj |= Q(sanction_list_possible_match=True, sanction_list_confirmed_match=False)
+            q_obj |= Q(
+                sanction_list_possible_match=True, sanction_list_confirmed_match=False
+            )
         if SANCTION_LIST_CONFIRMED_MATCH in value:
             q_obj |= Q(sanction_list_confirmed_match=True)
 
@@ -228,7 +245,10 @@ class IndividualFilter(FilterSet):
         business_area = self.data["business_area"]
         query_dict = get_elasticsearch_query_for_individuals(value, business_area)
         es_response = (
-            IndividualDocument.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict).execute()
+            IndividualDocument.search()
+            .params(search_type="dfs_query_then_fetch")
+            .from_dict(query_dict)
+            .execute()
         )
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()

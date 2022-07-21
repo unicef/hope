@@ -14,7 +14,9 @@ class HouseholdWithdraw:
 
         individuals = []
 
-        for individual in Individual.objects.filter(id__in=individuals_ids, duplicate=False):
+        for individual in Individual.objects.filter(
+            id__in=individuals_ids, duplicate=False
+        ):
             individual.withdrawn = withdrawn
             individual.save()
             individuals.append(individual)

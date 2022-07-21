@@ -4,7 +4,9 @@ from uuid import UUID
 from concurrency.api import disable_concurrency
 
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.household.services.household_recalculate_data import recalculate_data
+from hct_mis_api.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +41,9 @@ def recalculate_population_fields_task(household_ids: list[UUID] = None):
 
 @app.task()
 def calculate_children_fields_for_not_collected_individual_data():
-    from hct_mis_api.apps.household.models import Household
     from django.db.models import F
+
+    from hct_mis_api.apps.household.models import Household
 
     Household.objects.update(
         children_count=F("female_age_group_0_5_count")
@@ -71,10 +74,14 @@ def calculate_children_fields_for_not_collected_individual_data():
 
 
 @app.task()
-def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_by_id: UUID):
-    from hct_mis_api.apps.household.models import XlsxUpdateFile
-    from hct_mis_api.apps.household.services.individuals_iban_xlsx_update import IndividualsIBANXlsxUpdate
+def update_individuals_iban_from_xlsx_task(
+    xlsx_update_file_id: UUID, uploaded_by_id: UUID
+):
     from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.household.models import XlsxUpdateFile
+    from hct_mis_api.apps.household.services.individuals_iban_xlsx_update import (
+        IndividualsIBANXlsxUpdate,
+    )
 
     uploaded_by = User.objects.get(id=uploaded_by_id)
     try:
@@ -90,5 +97,7 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
 
     except Exception as e:
         IndividualsIBANXlsxUpdate.send_error_email(
-            error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
+            error_message=str(e),
+            xlsx_update_file_id=str(xlsx_update_file_id),
+            uploaded_by=uploaded_by,
         )

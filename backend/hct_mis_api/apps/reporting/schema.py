@@ -60,8 +60,12 @@ class Query(graphene.ObjectType):
 
     report_types_choices = graphene.List(ChoiceObject)
     report_status_choices = graphene.List(ChoiceObject)
-    dashboard_report_types_choices = graphene.List(ChoiceObject, business_area_slug=graphene.String(required=True))
-    dashboard_years_choices = graphene.List(graphene.String, business_area_slug=graphene.String(required=True))
+    dashboard_report_types_choices = graphene.List(
+        ChoiceObject, business_area_slug=graphene.String(required=True)
+    )
+    dashboard_years_choices = graphene.List(
+        graphene.String, business_area_slug=graphene.String(required=True)
+    )
 
     def resolve_report_types_choices(self, info, **kwargs):
         return to_choice_object(Report.REPORT_TYPES)
@@ -69,7 +73,9 @@ class Query(graphene.ObjectType):
     def resolve_report_status_choices(self, info, **kwargs):
         return to_choice_object(Report.STATUSES)
 
-    def resolve_dashboard_report_types_choices(self, info, business_area_slug, **kwargs):
+    def resolve_dashboard_report_types_choices(
+        self, info, business_area_slug, **kwargs
+    ):
         if business_area_slug == "global":
             return to_choice_object(
                 [
@@ -99,15 +105,17 @@ class Query(graphene.ObjectType):
             if business_area_slug == "global":
                 years_list_from_db.extend(
                     list(
-                        model_name.objects.annotate(year_value=ExtractYear(field_name)).values_list(
-                            "year_value", flat=True
-                        )
+                        model_name.objects.annotate(
+                            year_value=ExtractYear(field_name)
+                        ).values_list("year_value", flat=True)
                     )
                 )
             else:
                 years_list_from_db.extend(
                     list(
-                        model_name.objects.filter(business_area__slug=business_area_slug)
+                        model_name.objects.filter(
+                            business_area__slug=business_area_slug
+                        )
                         .annotate(year_value=ExtractYear(field_name))
                         .values_list("year_value", flat=True)
                     )

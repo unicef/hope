@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from django.utils import timezone
 
 from parameterized import parameterized
@@ -17,8 +18,8 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.reporting.fixtures import ReportFactory
+from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.reporting.validators import ReportValidator
 
 
@@ -62,7 +63,9 @@ class TestReportingMutation(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        AdminAreaFactory(title="Adminarea Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
+        AdminAreaFactory(
+            title="Adminarea Test", admin_area_level=area_type, p_code="asdfgfhghkjltr"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -70,9 +73,13 @@ class TestReportingMutation(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area_1 = AreaFactory(name="Adminarea Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        cls.admin_area_1 = AreaFactory(
+            name="Adminarea Test", area_type=area_type, p_code="asdfgfhghkjltr"
+        )
 
-        cls.program_1 = ProgramFactory(business_area=cls.business_area, end_date="2020-01-01")
+        cls.program_1 = ProgramFactory(
+            business_area=cls.business_area, end_date="2020-01-01"
+        )
 
         cls.households = []
         for index, family_size in enumerate(family_sizes_list):
@@ -82,12 +89,24 @@ class TestReportingMutation(APITestCase):
                     "address": "Lorem Ipsum",
                     "country_origin": "PL",
                     "business_area": cls.business_area,
-                    "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
+                    "last_registration_date": last_registration_dates[0]
+                    if index % 2
+                    else last_registration_dates[1],
                 },
-                [{"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]}],
+                [
+                    {
+                        "last_registration_date": last_registration_dates[0]
+                        if index % 2
+                        else last_registration_dates[1]
+                    }
+                ],
             )
         report_updated_at = timezone.now() - timedelta(minutes=31)
-        cls.report = ReportFactory(business_area=cls.business_area, status=Report.IN_PROGRESS, report_type=Report.INDIVIDUALS)
+        cls.report = ReportFactory(
+            business_area=cls.business_area,
+            status=Report.IN_PROGRESS,
+            report_type=Report.INDIVIDUALS,
+        )
         cls.report.update_at = report_updated_at
         cls.report.save()
 
@@ -117,11 +136,20 @@ class TestReportingMutation(APITestCase):
                 Report.HOUSEHOLD_DEMOGRAPHICS,
                 "2022-01-02",
             ),
-            ("without_permission_individuals_report", [], Report.INDIVIDUALS, "2022-01-02"),
+            (
+                "without_permission_individuals_report",
+                [],
+                Report.INDIVIDUALS,
+                "2022-01-02",
+            ),
         ]
     )
-    def test_create_report_with_no_extra_filters(self, _, permissions, report_type, date_to):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_create_report_with_no_extra_filters(
+        self, _, permissions, report_type, date_to
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         self.snapshot_graphql_request(
             request_string=self.CREATE_REPORT,
             context={"user": self.user},
@@ -139,17 +167,34 @@ class TestReportingMutation(APITestCase):
         [
             ("individuals", Report.INDIVIDUALS, "admin_area", "program"),
             ("households", Report.HOUSEHOLD_DEMOGRAPHICS, "admin_area", "program"),
-            ("cash_plan_verifications", Report.CASH_PLAN_VERIFICATION, "program", "admin_area"),
+            (
+                "cash_plan_verifications",
+                Report.CASH_PLAN_VERIFICATION,
+                "program",
+                "admin_area",
+            ),
             ("payments", Report.PAYMENTS, "admin_area", "program"),
-            ("payment_verifications", Report.PAYMENT_VERIFICATION, "program", "admin_area"),
+            (
+                "payment_verifications",
+                Report.PAYMENT_VERIFICATION,
+                "program",
+                "admin_area",
+            ),
             ("cash_plans", Report.CASH_PLAN, "program", "admin_area"),
             ("programs", Report.PROGRAM, None, "admin_area"),
             ("programs", Report.PROGRAM, None, "program"),
-            ("individuals_payments", Report.INDIVIDUALS_AND_PAYMENT, "admin_area", None),
+            (
+                "individuals_payments",
+                Report.INDIVIDUALS_AND_PAYMENT,
+                "admin_area",
+                None,
+            ),
             ("individuals_payments", Report.INDIVIDUALS_AND_PAYMENT, "program", None),
         ]
     )
-    def test_create_report_validator(self, _, report_type, should_exist_field, should_not_exist_field):
+    def test_create_report_validator(
+        self, _, report_type, should_exist_field, should_not_exist_field
+    ):
 
         report_data = {
             "report_type": report_type,
@@ -173,7 +218,9 @@ class TestReportingMutation(APITestCase):
         ]
     )
     def test_restart_create_report(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         self.snapshot_graphql_request(
             request_string=self.RESTART_CREATE_REPORT,
             context={"user": self.user},
@@ -186,7 +233,9 @@ class TestReportingMutation(APITestCase):
         )
 
     def test_restart_create_report_invalid_status_update_time(self):
-        self.create_user_role_with_permissions(self.user, [Permissions.REPORTING_EXPORT], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.REPORTING_EXPORT], self.business_area
+        )
         self.report.status = Report.COMPLETED
         self.report.save()
         self.snapshot_graphql_request(

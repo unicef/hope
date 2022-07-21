@@ -29,22 +29,22 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
+    pull_kobo_submissions_task,
     rdi_deduplication_task,
     registration_kobo_import_task,
     registration_xlsx_import_task,
-    pull_kobo_submissions_task,
     validate_xlsx_import_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
-    RegistrationDataImportDatahub,
     KoboImportData,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
     KoboErrorNode,
-    XlsxRowErrorNode,
     KoboImportDataNode,
+    XlsxRowErrorNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
     KoboProjectImportDataInstanceValidator,
@@ -57,11 +57,17 @@ logger = logging.getLogger(__name__)
 
 @transaction.atomic(using="default")
 @transaction.atomic(using="registration_datahub")
-def create_registration_data_import_objects(registration_data_import_data, user, data_source):
-    import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
+def create_registration_data_import_objects(
+    registration_data_import_data, user, data_source
+):
+    import_data_id = decode_id_string(
+        registration_data_import_data.pop("import_data_id")
+    )
     import_data_obj = ImportData.objects.get(id=import_data_id)
 
-    business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
+    business_area = BusinessArea.objects.get(
+        slug=registration_data_import_data.pop("business_area_slug")
+    )
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
@@ -112,11 +118,15 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     screen_beneficiary = graphene.Boolean()
 
 
-class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
+class RegistrationXlsxImportMutation(
+    BaseValidator, PermissionMutation, ValidationErrorMutationMixin
+):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
-        registration_data_import_data = RegistrationXlsxImportMutationInput(required=True)
+        registration_data_import_data = RegistrationXlsxImportMutationInput(
+            required=True
+        )
 
     @classmethod
     @transaction.atomic(using="default")
@@ -128,7 +138,9 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
+        ) = create_registration_data_import_objects(
+            registration_data_import_data, info.context.user, "XLS"
+        )
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
@@ -139,7 +151,11 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             raise ValidationError("Cannot check against sanction list")
 
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            None,
+            created_obj_hct,
         )
         registration_xlsx_import_task.delay(
             registration_data_import_id=str(created_obj_datahub.id),
@@ -170,8 +186,12 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, registration_data_import_datahub_id, **kwargs):
-        old_rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
-        rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
+        old_rdi_obj = RegistrationDataImport.objects.get(
+            datahub_id=registration_data_import_datahub_id
+        )
+        rdi_obj = RegistrationDataImport.objects.get(
+            datahub_id=registration_data_import_datahub_id
+        )
         check_concurrency_version_in_mutation(kwargs.get("version"), rdi_obj)
         cls.has_permission(info, Permissions.RDI_RERUN_DEDUPE, rdi_obj.business_area)
 
@@ -180,23 +200,36 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
         rdi_obj.status = RegistrationDataImport.DEDUPLICATION
         rdi_obj.save()
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_rdi_obj, rdi_obj
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_rdi_obj,
+            rdi_obj,
         )
-        rdi_deduplication_task.delay(registration_data_import_id=str(registration_data_import_datahub_id))
+        rdi_deduplication_task.delay(
+            registration_data_import_id=str(registration_data_import_datahub_id)
+        )
 
         return cls(ok=True)
 
 
-class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
+class RegistrationKoboImportMutation(
+    BaseValidator, PermissionMutation, ValidationErrorMutationMixin
+):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
-        registration_data_import_data = RegistrationKoboImportMutationInput(required=True)
+        registration_data_import_data = RegistrationKoboImportMutationInput(
+            required=True
+        )
 
     @classmethod
     def check_is_not_empty(cls, import_data_id):
         import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
-        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
+        if (
+            import_data.number_of_households == 0
+            and import_data.number_of_individuals == 0
+        ):
             logger.error("Cannot import empty KoBo form")
             raise ValidationError("Cannot import empty KoBo form")
 
@@ -212,7 +245,9 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             created_obj_hct,
             import_data_obj,
             business_area,
-        ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
+        ) = create_registration_data_import_objects(
+            registration_data_import_data, info.context.user, "KOBO"
+        )
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
@@ -223,7 +258,11 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
             raise ValidationError("Cannot check against sanction list")
 
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            None,
+            created_obj_hct,
         )
         registration_kobo_import_task.delay(
             registration_data_import_id=str(created_obj_datahub.id),
@@ -245,8 +284,12 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     def validate_object_status(cls, *args, **kwargs):
         status = kwargs.get("status")
         if status != RegistrationDataImport.IN_REVIEW:
-            logger.error("Only In Review Registration Data Import can be merged into Population")
-            raise ValidationError("Only In Review Registration Data Import can be merged into Population")
+            logger.error(
+                "Only In Review Registration Data Import can be merged into Population"
+            )
+            raise ValidationError(
+                "Only In Review Registration Data Import can be merged into Population"
+            )
 
     @classmethod
     @transaction.atomic(using="default")
@@ -271,7 +314,11 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
 
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_obj_hct,
+            obj_hct,
         )
         return MergeRegistrationDataImportMutation(obj_hct)
 
@@ -288,7 +335,9 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         status = kwargs.get("status")
         if status != RegistrationDataImport.IN_REVIEW:
             logger.error("Only In Review Registration Data Import can be refused")
-            raise ValidationError("Only In Review Registration Data Import can be refused")
+            raise ValidationError(
+                "Only In Review Registration Data Import can be refused"
+            )
 
     @classmethod
     @transaction.atomic(using="default")
@@ -308,7 +357,11 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         obj_hct.save()
 
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_obj_hct,
+            obj_hct,
         )
         return RefuseRegistrationDataImportMutation(obj_hct)
 
@@ -375,7 +428,13 @@ class DeleteRegistrationDataImport(graphene.Mutation):
         rdi_obj = RegistrationDataImport.objects.get(id=decoded_id)
         rdi_obj.delete()
 
-        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, rdi_obj, None)
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            rdi_obj,
+            None,
+        )
         return cls(ok=True)
 
 

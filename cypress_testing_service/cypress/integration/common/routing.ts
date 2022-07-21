@@ -14,4 +14,3 @@ When('I visit {word}', (path) => {
 When('I click {word} in navigation', (navItemLabel) => {
   cy.getByTestId('side-nav').contains(navItemLabel).click();
 });
-

@@ -87,7 +87,9 @@ class DeduplicateTask:
         names_queries = cls._prepare_queries_for_names_from_fields(fields)
         documents_queries = cls._prepare_documents_queries_from_fields(fields)
         identities_queries = cls._prepare_identities_queries_from_fields(fields)
-        households_and_roles_queries = cls._prepare_households_and_roles_queries_from_fields(fields)
+        households_and_roles_queries = (
+            cls._prepare_households_and_roles_queries_from_fields(fields)
+        )
         queries_list.extend(names_queries)
         queries_list.extend(documents_queries)
         queries_list.extend(identities_queries)
@@ -121,7 +123,9 @@ class DeduplicateTask:
                 "bool": {
                     "minimum_should_match": 1,
                     "should": queries_list,
-                    "must_not": [{"match": {"id": {"query": str(individual.id), "boost": 0}}}],
+                    "must_not": [
+                        {"match": {"id": {"query": str(individual.id), "boost": 0}}}
+                    ],
                 }
             },
         }
@@ -139,19 +143,25 @@ class DeduplicateTask:
     @classmethod
     def _prepare_households_and_roles_queries_from_fields(cls, fields):
         households_and_roles = fields.pop("households_and_roles", [])
-        households_and_roles_queries = cls._prepare_households_and_roles_queries(households_and_roles)
+        households_and_roles_queries = cls._prepare_households_and_roles_queries(
+            households_and_roles
+        )
         return households_and_roles_queries
 
     @classmethod
     def _prepare_identities_queries_from_fields(cls, fields):
         identities = fields.pop("identities", [])
-        identities_queries = cls._prepare_identities_or_documents_query(identities, "identity")
+        identities_queries = cls._prepare_identities_or_documents_query(
+            identities, "identity"
+        )
         return identities_queries
 
     @classmethod
     def _prepare_documents_queries_from_fields(cls, fields):
         documents = fields.pop("documents", [])
-        documents_queries = cls._prepare_identities_or_documents_query(documents, "document")
+        documents_queries = cls._prepare_identities_or_documents_query(
+            documents, "document"
+        )
         return documents_queries
 
     @staticmethod
@@ -180,8 +190,18 @@ class DeduplicateTask:
                         {
                             "bool": {
                                 "must": [
-                                    {"match": {"households_and_role.role": {"query": role}}},
-                                    {"match": {"households_and_role.individual": {"query": individual_id}}},
+                                    {
+                                        "match": {
+                                            "households_and_role.role": {"query": role}
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "households_and_role.individual": {
+                                                "query": individual_id
+                                            }
+                                        }
+                                    },
                                 ],
                                 "boost": 2,
                             }
@@ -216,15 +236,24 @@ class DeduplicateTask:
                 else:
                     admin_areas = {
                         "admin1": data.title if data else None,
-                        "admin2": data.children.filter(admin_area_level__admin_level=2).first(),
+                        "admin2": data.children.filter(
+                            admin_area_level__admin_level=2
+                        ).first(),
                     }
-                queries.extend([{"match": {admin_area: {"query": value}}} for admin_area, value in admin_areas.items()])
+                queries.extend(
+                    [
+                        {"match": {admin_area: {"query": value}}}
+                        for admin_area, value in admin_areas.items()
+                    ]
+                )
             else:
                 queries.append(
                     {
                         "match": {
                             f"household.{key}": {
-                                "query": data.alpha3 if isinstance(data, Country) else data,
+                                "query": data.alpha3
+                                if isinstance(data, Country)
+                                else data,
                                 "boost": 0.4,
                             }
                         }
@@ -256,7 +285,9 @@ class DeduplicateTask:
                         {
                             "match": {
                                 f"{prefix}.country": {
-                                    "query": country.alpha3 if isinstance(country, Country) else country
+                                    "query": country.alpha3
+                                    if isinstance(country, Country)
+                                    else country
                                 }
                             }
                         },
@@ -286,9 +317,23 @@ class DeduplicateTask:
         """
         if not given_name or not family_name:
             # max possible score 7
-            return [{"match": {"full_name": {"query": full_name, "boost": 8.0, "operator": "AND"}}}]
-        given_name_complex_query = cls._get_complex_query_for_name(given_name, "given_name")
-        family_name_complex_query = cls._get_complex_query_for_name(family_name, "family_name")
+            return [
+                {
+                    "match": {
+                        "full_name": {
+                            "query": full_name,
+                            "boost": 8.0,
+                            "operator": "AND",
+                        }
+                    }
+                }
+            ]
+        given_name_complex_query = cls._get_complex_query_for_name(
+            given_name, "given_name"
+        )
+        family_name_complex_query = cls._get_complex_query_for_name(
+            family_name, "family_name"
+        )
         names_should_query = {
             "bool": {
                 "should": [
@@ -307,13 +352,20 @@ class DeduplicateTask:
                 "boost": 4,
             }
         }
-        max_from_should_and_must = {"dis_max": {"queries": [names_should_query, names_must_query], "tie_breaker": 0}}
+        max_from_should_and_must = {
+            "dis_max": {
+                "queries": [names_should_query, names_must_query],
+                "tie_breaker": 0,
+            }
+        }
 
         return [max_from_should_and_must]
 
     @classmethod
     def _get_complex_query_for_name(cls, name, field_name):
-        name_phonetic_query_dict = {"match": {f"{field_name}.phonetic": {"query": name}}}
+        name_phonetic_query_dict = {
+            "match": {f"{field_name}.phonetic": {"query": name}}
+        }
         # phonetic analyzer not working with fuzziness
         name_fuzzy_query_dict = {
             "match": {
@@ -330,7 +382,10 @@ class DeduplicateTask:
         # phonetic score === 0 or 1
         # fuzzy score <=1 changes if there is need make change
         name_complex_query = {
-            "dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}
+            "dis_max": {
+                "queries": [name_fuzzy_query_dict, name_phonetic_query_dict],
+                "tie_breaker": 0,
+            }
         }
         return name_complex_query
 
@@ -341,7 +396,11 @@ class DeduplicateTask:
         original_individuals_ids_duplicates = []
         original_individuals_ids_possible_duplicates = []
         # TODO add pagination
-        query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
+        query = (
+            document.search()
+            .params(search_type="dfs_query_then_fetch")
+            .from_dict(query_dict)
+        )
         query._index = document._index._name
         results = query.execute()
         results_data = {
@@ -351,7 +410,9 @@ class DeduplicateTask:
         for individual_hit in results:
             if (
                 isinstance(individual, Individual)
-                and Individual.objects.filter(id=individual_hit.id, withdrawn=True).exists()
+                and Individual.objects.filter(
+                    id=individual_hit.id, withdrawn=True
+                ).exists()
                 and individual.business_area.deduplication_ignore_withdraw
             ):
                 continue
@@ -371,7 +432,9 @@ class DeduplicateTask:
             elif document == IndividualDocument:
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
-                results_core_data["proximity_to_score"] = score - cls.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE
+                results_core_data["proximity_to_score"] = (
+                    score - cls.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE
+                )
                 results_data["possible_duplicates"].append(results_core_data)
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])
@@ -465,7 +528,13 @@ class DeduplicateTask:
         )
         # noinspection PyTypeChecker
         query_dict["query"]["bool"]["filter"] = [
-            {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
+            {
+                "term": {
+                    "registration_data_import_id": str(
+                        individual.registration_data_import.id
+                    )
+                }
+            },
         ]
         return cls._get_duplicates_tuple(
             query_dict,
@@ -549,7 +618,9 @@ class DeduplicateTask:
     @classmethod
     def _get_duplicated_individuals(cls, registration_data_import, individuals):
         if individuals is None:
-            individuals = Individual.objects.filter(registration_data_import=registration_data_import)
+            individuals = Individual.objects.filter(
+                registration_data_import=registration_data_import
+            )
         all_duplicates = []
         all_possible_duplicates = []
         all_original_individuals_ids_duplicates = []
@@ -569,8 +640,12 @@ class DeduplicateTask:
 
             all_duplicates.extend(duplicates)
             all_possible_duplicates.extend(possible_duplicates)
-            all_original_individuals_ids_duplicates.extend(original_individuals_ids_duplicates)
-            all_original_individuals_ids_possible_duplicates.extend(original_individuals_ids_possible_duplicates)
+            all_original_individuals_ids_duplicates.extend(
+                original_individuals_ids_duplicates
+            )
+            all_original_individuals_ids_possible_duplicates.extend(
+                original_individuals_ids_possible_duplicates
+            )
 
         return (
             all_duplicates,
@@ -629,7 +704,10 @@ class DeduplicateTask:
 
         Individual.objects.bulk_update(
             to_bulk_update_results,
-            ["deduplication_golden_record_results", "deduplication_golden_record_status"],
+            [
+                "deduplication_golden_record_results",
+                "deduplication_golden_record_status",
+            ],
         )
 
     @staticmethod
@@ -641,12 +719,13 @@ class DeduplicateTask:
         all_original_individuals_ids_possible_duplicates,
     ):
         Individual.objects.filter(
-            id__in=all_possible_duplicates + all_original_individuals_ids_possible_duplicates
+            id__in=all_possible_duplicates
+            + all_original_individuals_ids_possible_duplicates
         ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
 
-        Individual.objects.filter(id__in=all_duplicates + all_original_individuals_ids_duplicates).update(
-            deduplication_golden_record_status=DUPLICATE
-        )
+        Individual.objects.filter(
+            id__in=all_duplicates + all_original_individuals_ids_duplicates
+        ).update(deduplication_golden_record_status=DUPLICATE)
 
         Individual.objects.bulk_update(
             to_bulk_update_results,
@@ -660,18 +739,26 @@ class DeduplicateTask:
         registration_data_import.status = RegistrationDataImport.DEDUPLICATION_FAILED
         registration_data_import.save()
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            None,
+            old_rdi,
+            registration_data_import,
         )
 
     @classmethod
     def set_thresholds(cls, registration_data):
         # registration_data
         if isinstance(registration_data, RegistrationDataImportDatahub):
-            cls.business_area = BusinessArea.objects.get(slug=registration_data.business_area_slug)
+            cls.business_area = BusinessArea.objects.get(
+                slug=registration_data.business_area_slug
+            )
         elif isinstance(registration_data, RegistrationDataImport):
             cls.business_area = registration_data.business_area
         else:
-            raise ValueError(f"Invalid type ({type(registration_data)}) for 'registration_data'")
+            raise ValueError(
+                f"Invalid type ({type(registration_data)}) for 'registration_data'"
+            )
 
         cls.thresholds = Thresholds.from_business_area(cls.business_area)
 
@@ -684,9 +771,12 @@ class DeduplicateTask:
         )
         populate_index(imported_individuals, ImportedIndividualDocument)
         cls._wait_until_health_green()
-        registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
+        registration_data_import = RegistrationDataImport.objects.get(
+            id=registration_data_import_datahub.hct_id
+        )
         allowed_duplicates_batch_amount = round(
-            (imported_individuals.count() or 1) * (cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
+            (imported_individuals.count() or 1)
+            * (cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
         )
         allowed_duplicates_golden_record_amount = round(
             (imported_individuals.count() or 1)
@@ -728,16 +818,25 @@ class DeduplicateTask:
             if results_data["duplicates"]:
                 imported_individual.deduplication_golden_record_status = DUPLICATE
             elif results_data["possible_duplicates"]:
-                imported_individual.deduplication_golden_record_status = NEEDS_ADJUDICATION
+                imported_individual.deduplication_golden_record_status = (
+                    NEEDS_ADJUDICATION
+                )
             else:
                 imported_individual.deduplication_golden_record_status = UNIQUE
-            all_original_individuals_ids_duplicates.extend(original_individuals_ids_duplicates)
-            all_original_individuals_ids_possible_duplicates.extend(original_individuals_ids_possible_duplicates)
+            all_original_individuals_ids_duplicates.extend(
+                original_individuals_ids_duplicates
+            )
+            all_original_individuals_ids_possible_duplicates.extend(
+                original_individuals_ids_possible_duplicates
+            )
 
             checked_individuals_ids.append(imported_individual.id)
             to_bulk_update_results.append(imported_individual)
 
-            if len(results_data_imported["duplicates"]) > cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED:
+            if (
+                len(results_data_imported["duplicates"])
+                > cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED
+            ):
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
                     f"exceed the maximum allowed ({cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED})"
@@ -745,7 +844,10 @@ class DeduplicateTask:
                 cls.set_error_message_and_status(registration_data_import, message)
                 break
 
-            if len(results_data["duplicates"]) > cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED:
+            if (
+                len(results_data["duplicates"])
+                > cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED
+            ):
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
                     f"exceed the maximum allowed ({cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED})"
@@ -754,13 +856,16 @@ class DeduplicateTask:
                 break
 
             set_of_all_duplicates = set(all_duplicates)
-            set_of_all_original_individuals_ids_duplicates = set(all_original_individuals_ids_duplicates)
+            set_of_all_original_individuals_ids_duplicates = set(
+                all_original_individuals_ids_duplicates
+            )
 
             batch_amount_exceeded = (
                 len(set_of_all_duplicates) >= allowed_duplicates_batch_amount
             ) and imported_individuals.count() > 1
             golden_record_amount_exceeded = (
-                len(set_of_all_original_individuals_ids_duplicates) >= allowed_duplicates_golden_record_amount
+                len(set_of_all_original_individuals_ids_duplicates)
+                >= allowed_duplicates_golden_record_amount
             ) and imported_individuals.count() > 1
 
             checked_individuals_ids.append(imported_individual.id)
@@ -799,13 +904,21 @@ class DeduplicateTask:
         )
         set_of_all_possible_duplicates = set(all_possible_duplicates)
         set_of_all_duplicates = set(all_duplicates)
-        set_of_all_original_individuals_ids_duplicates = set(all_original_individuals_ids_duplicates)
-        set_of_all_original_individuals_ids_possible_duplicates = set(all_original_individuals_ids_possible_duplicates)
+        set_of_all_original_individuals_ids_duplicates = set(
+            all_original_individuals_ids_duplicates
+        )
+        set_of_all_original_individuals_ids_possible_duplicates = set(
+            all_original_individuals_ids_possible_duplicates
+        )
 
         registration_data_import_datahub.refresh_from_db()
-        if registration_data_import.status == RegistrationDataImport.DEDUPLICATION_FAILED:
+        if (
+            registration_data_import.status
+            == RegistrationDataImport.DEDUPLICATION_FAILED
+        ):
             registration_data_import_datahub.individuals.filter(
-                Q(deduplication_batch_status=UNIQUE_IN_BATCH) & Q(deduplication_golden_record_status=UNIQUE)
+                Q(deduplication_batch_status=UNIQUE_IN_BATCH)
+                & Q(deduplication_golden_record_status=UNIQUE)
             ).exclude(id__in=checked_individuals_ids).update(
                 deduplication_batch_status=NOT_PROCESSED,
                 deduplication_golden_record_status=NOT_PROCESSED,
@@ -825,34 +938,61 @@ class DeduplicateTask:
             registration_data_import.save()
 
             log_create(
-                RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+                RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                None,
+                old_rdi,
+                registration_data_import,
             )
-
 
     @classmethod
     def hard_deduplicate_documents(cls, new_documents, registration_data_import=None):
-        documents_to_dedup = [x for x in new_documents if  x.status != Document.STATUS_VALID]
+        documents_to_dedup = [
+            x for x in new_documents if x.status != Document.STATUS_VALID
+        ]
         documents_numbers = [x.document_number for x in documents_to_dedup]
-        new_document_signatures = [f"{d.type_id}--{d.document_number}" for d in documents_to_dedup]
+        new_document_signatures = [
+            f"{d.type_id}--{d.document_number}" for d in documents_to_dedup
+        ]
         new_document_signatures_duplicated_in_batch = [
             d for d in new_document_signatures if new_document_signatures.count(d) > 1
         ]
         all_matching_number_documents = (
-            Document.objects.select_related("individual", "individual__household", "individual__business_area")
+            Document.objects.select_related(
+                "individual", "individual__household", "individual__business_area"
+            )
             .filter(document_number__in=documents_numbers, status=Document.STATUS_VALID)
-            .annotate(signature=Concat(F("type_id"), Value("--"), F("document_number"), output_field=CharField()))
+            .annotate(
+                signature=Concat(
+                    F("type_id"),
+                    Value("--"),
+                    F("document_number"),
+                    output_field=CharField(),
+                )
+            )
         )
-        all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
-        all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
+        all_matching_number_documents_dict = {
+            d.signature: d for d in all_matching_number_documents
+        }
+        all_matching_number_documents_signatures = (
+            all_matching_number_documents_dict.keys()
+        )
         already_processed_signatures = []
         ticket_data_dict = {}
         for new_document in documents_to_dedup:
-            new_document_signature = f"{new_document.type_id}--{new_document.document_number}"
+            new_document_signature = (
+                f"{new_document.type_id}--{new_document.document_number}"
+            )
             if new_document_signature in all_matching_number_documents_signatures:
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
                 ticket_data = ticket_data_dict.get(
                     new_document_signature,
-                    {"original": all_matching_number_documents_dict[new_document_signature], "possible_duplicates": []},
+                    {
+                        "original": all_matching_number_documents_dict[
+                            new_document_signature
+                        ],
+                        "possible_duplicates": [],
+                    },
                 )
                 ticket_data["possible_duplicates"].append(new_document)
                 ticket_data_dict[new_document_signature] = ticket_data
@@ -862,7 +1002,9 @@ class DeduplicateTask:
                 and new_document_signature in already_processed_signatures
             ):
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
-                ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
+                ticket_data_dict[new_document_signature]["possible_duplicates"].append(
+                    new_document
+                )
                 continue
             new_document.status = Document.STATUS_VALID
             already_processed_signatures.append(new_document_signature)
@@ -880,5 +1022,7 @@ class DeduplicateTask:
                 possible_duplicate=ticket_data["possible_duplicates"][0].individual,
                 registration_data_import=registration_data_import,
                 is_multiple_duplicates_version=True,
-                possible_duplicates=[d.individual for d in ticket_data["possible_duplicates"]],
+                possible_duplicates=[
+                    d.individual for d in ticket_data["possible_duplicates"]
+                ],
             )

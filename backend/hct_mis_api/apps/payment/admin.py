@@ -1,7 +1,7 @@
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
@@ -91,9 +91,9 @@ class CashPlanPaymentVerificationAdmin(ExtraButtonsMixin, LinkedObjectsMixin, HO
                 self,
                 request,
                 self.execute_sync_rapid_pro,
-                mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                        <h3>Import will only be simulated</h3> 
+                format_html(
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                        <h3>Import will only be simulated</h3>
                         """
                 ),
                 "Successfully executed",
@@ -108,7 +108,10 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("cash_plan_payment_verification__cash_plan", AutoCompleteFilter),
-        ("cash_plan_payment_verification__cash_plan__business_area", AutoCompleteFilter),
+        (
+            "cash_plan_payment_verification__cash_plan__business_area",
+            AutoCompleteFilter,
+        ),
         ("payment_record__household__unicef_id", ValueFilter),
     )
     date_hierarchy = "updated_at"

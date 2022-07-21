@@ -82,7 +82,8 @@ class Query(models.Model):
                 "invoke": self._invoke,
             }
 
-            exec(self.code, globals(), locals_)
+            # TODO: exec is not secure, use better evaluator instead
+            exec(self.code, globals(), locals_)  # nosec
             result = locals_.get("result", None)
             debug_info = locals_.get("debug_info", None)
 
@@ -120,7 +121,9 @@ class Dataset(models.Model):
 
     @property
     def data(self):
-        return pickle.loads(self.result)
+        # TODO: Fix
+        # Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
+        return pickle.loads(self.result)  # nosec
 
 
 class Formatter(models.Model):

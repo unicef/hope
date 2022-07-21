@@ -62,21 +62,21 @@ class TargetingCriteriaRuleFilterInputValidator:
                 logger.error(f"Can't find any core field attribute associated with {rule_filter.field_name} field name")
                 raise ValidationError(
                     f"Can't find any core field attribute associated with {rule_filter.field_name} field name"
-                )
+                ) from None
         else:
             try:
                 attribute = FlexibleAttribute.objects.get(name=rule_filter.field_name)
-            except FlexibleAttribute.DoesNotExist:
+            except FlexibleAttribute.DoesNotExist as exc:
                 logger.exception(
                     f"Can't find any flex field attribute associated with {rule_filter.field_name} field name",
                 )
                 raise ValidationError(
                     f"Can't find any flex field attribute associated with {rule_filter.field_name} field name"
-                )
+                ) from exc
         comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(rule_filter.comparision_method)
         if comparision_attribute is None:
             logger.error(f"Unknown comparision method - {rule_filter.comparision_method}")
-            raise ValidationError(f"Unknown comparision method - {rule_filter.comparision_method}")
+            raise ValidationError(f"Unknown comparision method - {rule_filter.comparision_method}") from None
         args_count = comparision_attribute.get("arguments")
         given_args_count = len(rule_filter.arguments)
         select_many = get_attr_value("type", attribute) == "SELECT_MANY"
@@ -87,7 +87,7 @@ class TargetingCriteriaRuleFilterInputValidator:
                 )
                 raise ValidationError(
                     f"SELECT_MANY expect at least 1 argument" f"expect {args_count} arguments, {given_args_count} given"
-                )
+                ) from None
         elif given_args_count != args_count:
             logger.error(
                 f"Comparision method - {rule_filter.comparision_method} "
@@ -96,7 +96,7 @@ class TargetingCriteriaRuleFilterInputValidator:
             raise ValidationError(
                 f"Comparision method - {rule_filter.comparision_method} "
                 f"expect {args_count} arguments, {given_args_count} given"
-            )
+            ) from None
         if get_attr_value("type", attribute) not in comparision_attribute.get("supported_types"):
             logger.error(
                 f"{rule_filter.field_name} is {get_attr_value('type', attribute)} type filter "
@@ -105,7 +105,7 @@ class TargetingCriteriaRuleFilterInputValidator:
             raise ValidationError(
                 f"{rule_filter.field_name} is {get_attr_value( 'type', attribute)} type filter "
                 f"and does not accept - {rule_filter.comparision_method} comparision method"
-            )
+            ) from None
 
 
 class TargetingCriteriaRuleInputValidator:
@@ -121,7 +121,7 @@ class TargetingCriteriaRuleInputValidator:
 
         if total_len < 1:
             logger.error("There should be at least 1 filter or block in rules")
-            raise ValidationError("There should be at least 1 filter or block in rules")
+            raise ValidationError("There should be at least 1 filter or block in rules") from None
         for rule_filter in filters:
             TargetingCriteriaRuleFilterInputValidator.validate(rule_filter)
 
@@ -132,6 +132,6 @@ class TargetingCriteriaInputValidator:
         rules = targeting_criteria.get("rules")
         if len(rules) < 1:
             logger.error("There should be at least 1 rule in target criteria")
-            raise ValidationError("There should be at least 1 rule in target criteria")
+            raise ValidationError("There should be at least 1 rule in target criteria") from None
         for rule in rules:
             TargetingCriteriaRuleInputValidator.validate(rule)

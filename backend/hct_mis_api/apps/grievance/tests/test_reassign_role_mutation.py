@@ -10,7 +10,8 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
-    TicketDeleteIndividualDetailsFactory, TicketNeedsAdjudicationDetailsFactory,
+    TicketDeleteIndividualDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -21,16 +22,16 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestRoleReassignMutation(APITestCase):
     REASSIGN_ROLE_MUTATION = """
     mutation ReassignRole(
-      $grievanceTicketId: ID!, 
-      $householdId: ID!, 
-      $individualId: ID!, 
+      $grievanceTicketId: ID!,
+      $householdId: ID!,
+      $individualId: ID!,
       $newIndividualId: ID,
       $role: String!
     ) {
       reassignRole(
-        grievanceTicketId: $grievanceTicketId, 
-        householdId: $householdId, 
-        individualId: $individualId, 
+        grievanceTicketId: $grievanceTicketId,
+        householdId: $householdId,
+        individualId: $individualId,
         newIndividualId: $newIndividualId,
         role: $role
       ) {
@@ -144,16 +145,16 @@ class TestRoleReassignMutation(APITestCase):
 class TestRoleReassignMutationNewTicket(APITestCase):
     REASSIGN_ROLE_MUTATION = """
     mutation ReassignRole(
-      $grievanceTicketId: ID!, 
-      $householdId: ID!, 
-      $individualId: ID!, 
+      $grievanceTicketId: ID!,
+      $householdId: ID!,
+      $individualId: ID!,
       $newIndividualId: ID,
       $role: String!
     ) {
       reassignRole(
-        grievanceTicketId: $grievanceTicketId, 
-        householdId: $householdId, 
-        individualId: $individualId, 
+        grievanceTicketId: $grievanceTicketId,
+        householdId: $householdId,
+        individualId: $individualId,
         newIndividualId: $newIndividualId,
         role: $role
       ) {
@@ -264,7 +265,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
             golden_records_individual=cls.individual_1,
             possible_duplicate=cls.individual_2,
             is_multiple_duplicates_version=True,
-            selected_individual=None
+            selected_individual=None,
         )
 
     def test_role_reassignment_new_ticket(self):

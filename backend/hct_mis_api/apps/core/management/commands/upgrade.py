@@ -44,4 +44,6 @@ class Command(BaseCommand):
             },
         )
 
-        Formatter.objects.get_or_create(name="Dataset To XLS", defaults={"code": "", "content_type": "xls"})
+        Formatter.objects.get_or_create(
+            name="Dataset To XLS", defaults={"code": "", "content_type": "xls"}
+        )

@@ -26,7 +26,10 @@ class TokenInvalid(Exception):
 
 
 class KoboRequestsSession(requests.Session):
-    AUTH_DOMAINS = [urlparse(settings.KOBO_KF_URL).hostname, urlparse(settings.KOBO_KC_URL).hostname]
+    AUTH_DOMAINS = [
+        urlparse(settings.KOBO_KF_URL).hostname,
+        urlparse(settings.KOBO_KC_URL).hostname,
+    ]
 
     def should_strip_auth(self, old_url, new_url):
         new_parsed = urlparse(new_url)
@@ -58,7 +61,13 @@ class KoboAPI:
             results.extend(data["results"])
         return results
 
-    def _get_url(self, endpoint: str, append_api=True, add_limit=True, additional_query_params=None):
+    def _get_url(
+        self,
+        endpoint: str,
+        append_api=True,
+        add_limit=True,
+        additional_query_params=None,
+    ):
         endpoint.strip("/")
         if endpoint != "token" and append_api is True:
             endpoint = f"api/v2/{endpoint}"
@@ -71,7 +80,12 @@ class KoboAPI:
 
     def _get_token(self):
         self._client = KoboRequestsSession()
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=False)
+        retries = Retry(
+            total=5,
+            backoff_factor=1,
+            status_forcelist=[502, 503, 504],
+            method_whitelist=False,
+        )
         self._client.mount(self.KPI_URL, HTTPAdapter(max_retries=retries))
 
         token = settings.KOBO_MASTER_API_TOKEN
@@ -99,7 +113,9 @@ class KoboAPI:
         response = self._client.patch(url=url, data=data, files=files)
         return response
 
-    def create_template_from_file(self, bytes_io_file, xlsx_kobo_template_object, template_id=""):
+    def create_template_from_file(
+        self, bytes_io_file, xlsx_kobo_template_object, template_id=""
+    ):
         data = {
             "name": "Untitled",
             "asset_type": "template",
@@ -109,7 +125,9 @@ class KoboAPI:
             "share-metadata": False,
         }
         if not template_id:
-            asset_response = self._post_request(url=self._get_url("assets/", add_limit=False), data=data)
+            asset_response = self._post_request(
+                url=self._get_url("assets/", add_limit=False), data=data
+            )
             try:
                 asset_response.raise_for_status()
             except requests.exceptions.HTTPError as e:
@@ -121,7 +139,9 @@ class KoboAPI:
             asset_uid = template_id
         file_import_data = {
             "assetUid": asset_uid,
-            "destination": self._get_url(f"assets/{asset_uid}/", append_api=False, add_limit=False),
+            "destination": self._get_url(
+                f"assets/{asset_uid}/", append_api=False, add_limit=False
+            ),
         }
         file_import_response = self._post_request(
             url=self._get_url("imports/", append_api=False, add_limit=False),
@@ -163,7 +183,9 @@ class KoboAPI:
     def get_project_submissions(self, uid: str, only_active_submissions) -> list:
         additional_query_params = None
         if only_active_submissions:
-            additional_query_params = 'query={"_validation_status.uid":"validation_status_approved"}'
+            additional_query_params = (
+                'query={"_validation_status.uid":"validation_status_approved"}'
+            )
         submissions_url = self._get_url(
             f"assets/{uid}/data",
             additional_query_params=additional_query_params,

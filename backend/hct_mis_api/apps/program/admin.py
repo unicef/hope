@@ -34,7 +34,14 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
 
 @admin.register(CashPlan)
 class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    list_display = ("name", "program", "delivery_type", "status", "verification_status","ca_id")
+    list_display = (
+        "name",
+        "program",
+        "delivery_type",
+        "status",
+        "verification_status",
+        "ca_id",
+    )
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
@@ -51,6 +58,8 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
     @button()
     def payments(self, request, pk):
-        context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
+        context = self.get_common_context(
+            request, pk, aeu_groups=[None], action="payments"
+        )
 
         return TemplateResponse(request, "admin/cashplan/payments.html", context)

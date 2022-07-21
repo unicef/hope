@@ -36,8 +36,12 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdsdf334")
-        AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="jghhrrr")
+        AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="asdsdf334"
+        )
+        AdminAreaFactory(
+            title="City Example", admin_area_level=area_type, p_code="jghhrrr"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -89,11 +93,15 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_status_change(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         variables = {
             "status": GrievanceTicket.STATUS_ASSIGNED,
-            "grievanceTicketId": self.id_to_base64(self.grievance_ticket1.id, "GrievanceTicketNode"),
+            "grievanceTicketId": self.id_to_base64(
+                self.grievance_ticket1.id, "GrievanceTicketNode"
+            ),
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
@@ -105,17 +113,24 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK, Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK],
+                [
+                    Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                    Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
+                ],
             ),
             ("without_permission", []),
         ]
     )
     def test_grievance_status_change_fail(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         variables = {
             "status": GrievanceTicket.STATUS_CLOSED,
-            "grievanceTicketId": self.id_to_base64(self.grievance_ticket2.id, "GrievanceTicketNode"),
+            "grievanceTicketId": self.id_to_base64(
+                self.grievance_ticket2.id, "GrievanceTicketNode"
+            ),
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
@@ -133,11 +148,15 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_assign_user(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         variables = {
             "status": GrievanceTicket.STATUS_ASSIGNED,
-            "grievanceTicketId": self.id_to_base64(self.grievance_ticket3.id, "GrievanceTicketNode"),
+            "grievanceTicketId": self.id_to_base64(
+                self.grievance_ticket3.id, "GrievanceTicketNode"
+            ),
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,

@@ -31,4 +31,6 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_steficon_rules(self, info, **kwargs):
-        return Rule.objects.filter(deprecated=False, enabled=True, history__is_release=True).distinct()
+        return Rule.objects.filter(
+            deprecated=False, enabled=True, history__is_release=True
+        ).distinct()

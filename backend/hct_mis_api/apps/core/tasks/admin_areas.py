@@ -31,7 +31,12 @@ def load_admin_area(country_id: int, geom, page_size, max_records, notify_to=Non
     try:
         with transaction.atomic():
             data = list(
-                api.get_locations(gis=geom, page_size=page_size, max_records=max_records, country=country.country_name)
+                api.get_locations(
+                    gis=geom,
+                    page_size=page_size,
+                    max_records=max_records,
+                    country=country.country_name,
+                )
             )
             for loc in data:
                 try:
@@ -72,12 +77,12 @@ def load_admin_area(country_id: int, geom, page_size, max_records, notify_to=Non
                     "Admin Area Successfully Loaded",
                     f"""
     All locations for {country} have been successfully loaded in HOPE
-    
+
     Created: {results['created']}
     Updated: {results['updated']}
     Errors: {len(results['errors'])}
-    
-    
+
+
     """,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=notify_to,

@@ -16,7 +16,12 @@ class TestTemplateFileGenerator(TestCase):
 
     def test_handle_name_and_label_row(self):
         fields = {
-            "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": []},
+            "test": {
+                "label": {"English(EN)": "My Test Label"},
+                "required": True,
+                "type": "STRING",
+                "choices": [],
+            },
             "test_h_f": {
                 "label": {"English(EN)": "Flex Test Label"},
                 "required": False,

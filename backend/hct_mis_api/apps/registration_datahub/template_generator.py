@@ -18,7 +18,9 @@ class TemplateFileGenerator:
 
     @classmethod
     def _handle_choices(cls, fields: dict) -> list[list[str]]:
-        rows: list[list[str]] = [["Field Name", "Label", "Value to be used in template"]]
+        rows: list[list[str]] = [
+            ["Field Name", "Label", "Value to be used in template"]
+        ]
 
         for field_name, field_value in fields.items():
             is_admin_level = field_name in ("admin1_h_c", "admin2_h_c")

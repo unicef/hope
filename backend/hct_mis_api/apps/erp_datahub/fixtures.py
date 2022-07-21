@@ -13,7 +13,9 @@ class FundsCommitmentFactory(factory.DjangoModelFactory):
 
     rec_serial_number = factory.fuzzy.FuzzyInteger(1000, 99999999)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().code)
-    funds_commitment_number = factory.LazyAttribute(lambda o: CashPlan.objects.order_by("?").first().funds_commitment)
+    funds_commitment_number = factory.LazyAttribute(
+        lambda o: CashPlan.objects.order_by("?").first().funds_commitment
+    )
     document_type = "DO"
     currency_code = factory.Faker("currency_code")
 

@@ -48,7 +48,9 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     )
     ca_id = factory.Faker("uuid4")
     ca_hash_id = factory.Faker("uuid4")
-    household_mis_id = factory.LazyAttribute(lambda o: Household.objects.order_by("?").first().id)
+    household_mis_id = factory.LazyAttribute(
+        lambda o: Household.objects.order_by("?").first().id
+    )
     total_persons_covered = factory.fuzzy.FuzzyInteger(1, 7)
     distribution_modality = factory.Faker(
         "sentence",
@@ -56,7 +58,9 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    target_population_mis_id = factory.LazyAttribute(lambda o: TargetPopulation.objects.order_by("?").first().id)
+    target_population_mis_id = factory.LazyAttribute(
+        lambda o: TargetPopulation.objects.order_by("?").first().id
+    )
     entitlement_card_number = factory.Faker("ssn")
     entitlement_card_status = fuzzy.FuzzyChoice(
         payment_models.PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE,
@@ -81,7 +85,9 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    service_provider_ca_id = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first().ca_id)
+    service_provider_ca_id = factory.LazyAttribute(
+        lambda o: ServiceProvider.objects.order_by("?").first().ca_id
+    )
 
 
 class CashPlanFactory(factory.DjangoModelFactory):
@@ -90,7 +96,9 @@ class CashPlanFactory(factory.DjangoModelFactory):
 
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().code)
 
-    program_mis_id = factory.LazyAttribute(lambda o: program_models.Program.objects.order_by("?").first().id)
+    program_mis_id = factory.LazyAttribute(
+        lambda o: program_models.Program.objects.order_by("?").first().id
+    )
     cash_plan_id = factory.Faker("uuid4")
     cash_plan_hash_id = factory.Faker("uuid4")
     status_date = factory.Faker(
@@ -116,8 +124,12 @@ class CashPlanFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
-    dispersion_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    end_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
+    )
+    dispersion_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
+    )
     coverage_duration = factory.fuzzy.FuzzyInteger(1, 4)
     coverage_unit = factory.Faker(
         "random_element",
@@ -134,7 +146,9 @@ class CashPlanFactory(factory.DjangoModelFactory):
         getter=lambda c: c[0],
     )
     assistance_measurement = factory.Faker("currency_name")
-    assistance_through = factory.Faker("random_element", elements=["ING", "Bank of America", "mBank"])
+    assistance_through = factory.Faker(
+        "random_element", elements=["ING", "Bank of America", "mBank"]
+    )
     vision_id = factory.Faker("uuid4")
     funds_commitment = factory.fuzzy.FuzzyInteger(1000, 99999999)
     down_payment = factory.fuzzy.FuzzyInteger(1000, 99999999)

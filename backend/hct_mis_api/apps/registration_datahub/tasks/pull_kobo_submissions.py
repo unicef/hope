@@ -10,7 +10,9 @@ from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.models import KoboImportData
-from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataInstanceValidator
+from hct_mis_api.apps.registration_datahub.validators import (
+    KoboProjectImportDataInstanceValidator,
+)
 
 
 class PullKoboSubmissions:
@@ -23,13 +25,19 @@ class PullKoboSubmissions:
         submissions = kobo_api.get_project_submissions(
             kobo_import_data.kobo_asset_id, kobo_import_data.only_active_submissions
         )
-        business_area = BusinessArea.objects.get(slug=kobo_import_data.business_area_slug)
+        business_area = BusinessArea.objects.get(
+            slug=kobo_import_data.business_area_slug
+        )
         validator = KoboProjectImportDataInstanceValidator()
         validation_errors = validator.validate_everything(submissions, business_area)
 
-        number_of_households, number_of_individuals = count_population(submissions, business_area)
+        number_of_households, number_of_individuals = count_population(
+            submissions, business_area
+        )
 
-        import_file_name = f"project-uid-{kobo_import_data.kobo_asset_id}-{time.time()}.json"
+        import_file_name = (
+            f"project-uid-{kobo_import_data.kobo_asset_id}-{time.time()}.json"
+        )
         file = File(BytesIO(json.dumps(submissions).encode()), name=import_file_name)
         kobo_import_data.file = file
         kobo_import_data.save()

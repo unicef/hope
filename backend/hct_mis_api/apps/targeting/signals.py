@@ -26,7 +26,9 @@ def calculate_candidate_counts(target_population):
         households = target_population.vulnerability_score_filtered_households
     households_count = households.count()
     individuals_count = (
-        households.annotate(individuals_count=Count("individuals")).aggregate(sum=Sum("individuals_count")).get("sum")
+        households.annotate(individuals_count=Count("individuals"))
+        .aggregate(sum=Sum("individuals_count"))
+        .get("sum")
     )
     target_population.candidate_list_total_households = households_count
     target_population.candidate_list_total_individuals = individuals_count
@@ -41,14 +43,18 @@ def calculate_final_counts(target_population):
         if target_population.final_list_targeting_criteria is None:
             households = target_population.vulnerability_score_filtered_households
         else:
-            households = target_population.vulnerability_score_filtered_households.filter(
-                target_population.final_list_targeting_criteria.get_query()
-            ).distinct()
+            households = (
+                target_population.vulnerability_score_filtered_households.filter(
+                    target_population.final_list_targeting_criteria.get_query()
+                ).distinct()
+            )
     else:
         households = target_population.final_list
     households_count = households.count()
     individuals_count = (
-        households.annotate(individuals_count=Count("individuals")).aggregate(sum=Sum("individuals_count")).get("sum")
+        households.annotate(individuals_count=Count("individuals"))
+        .aggregate(sum=Sum("individuals_count"))
+        .get("sum")
     )
     target_population.final_list_total_households = households_count
     target_population.final_list_total_individuals = individuals_count
@@ -57,13 +63,17 @@ def calculate_final_counts(target_population):
 @receiver(post_save, sender=TargetingCriteriaRuleFilter)
 def post_save_rule_filter(sender, instance, *args, **kwargs):
     try:
-        target_population = instance.targeting_criteria_rule.targeting_criteria.target_population_candidate
+        target_population = (
+            instance.targeting_criteria_rule.targeting_criteria.target_population_candidate
+        )
         calculate_candidate_counts(target_population)
         target_population.save()
     except TargetPopulation.DoesNotExist:
         pass
     try:
-        target_population = instance.targeting_criteria_rule.targeting_criteria.target_population_final
+        target_population = (
+            instance.targeting_criteria_rule.targeting_criteria.target_population_final
+        )
         calculate_final_counts(target_population)
         target_population.save()
     except TargetPopulation.DoesNotExist:

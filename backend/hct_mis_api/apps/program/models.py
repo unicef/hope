@@ -34,7 +34,9 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 
-class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Program(
+    SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
@@ -125,7 +127,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         related_name="programs",
         blank=True,
     )
-    admin_areas_new = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
+    admin_areas_new = models.ManyToManyField(
+        "geo.Area", related_name="programs", blank=True
+    )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     budget = models.DecimalField(
         decimal_places=2,
@@ -210,7 +214,9 @@ class CashPlan(TimeStampedUUIDModel):
     coverage_duration = models.PositiveIntegerField()
     coverage_unit = models.CharField(max_length=255)
     comments = models.CharField(max_length=255, null=True)
-    program = models.ForeignKey("program.Program", on_delete=models.CASCADE, related_name="cash_plans")
+    program = models.ForeignKey(
+        "program.Program", on_delete=models.CASCADE, related_name="cash_plans"
+    )
     delivery_type = models.CharField(
         choices=PaymentRecord.DELIVERY_TYPE_CHOICE,
         max_length=24,
@@ -227,7 +233,9 @@ class CashPlan(TimeStampedUUIDModel):
     )
     vision_id = models.CharField(max_length=255, null=True)
     funds_commitment = models.CharField(max_length=255, null=True)
-    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
+    exchange_rate = models.DecimalField(
+        decimal_places=8, blank=True, null=True, max_digits=12
+    )
     down_payment = models.CharField(max_length=255, null=True)
     validation_alerts_count = models.IntegerField()
     total_persons_covered = models.IntegerField(db_index=True)
@@ -270,7 +278,9 @@ class CashPlan(TimeStampedUUIDModel):
 
     @property
     def bank_reconciliation_success(self):
-        return self.payment_records.filter(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION).count()
+        return self.payment_records.filter(
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION
+        ).count()
 
     @property
     def bank_reconciliation_error(self):
@@ -290,12 +300,19 @@ class CashPlan(TimeStampedUUIDModel):
     def can_create_payment_verification_plan(self):
         return self.available_payment_records().count() > 0
 
-    def available_payment_records(self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None):
-        params = Q(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
+    def available_payment_records(
+        self, payment_verification_plan: Optional[CashPlanPaymentVerification] = None
+    ):
+        params = Q(
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+        )
 
         if payment_verification_plan:
             params &= Q(
-                Q(verification__isnull=True) | Q(verification__cash_plan_payment_verification=payment_verification_plan)
+                Q(verification__isnull=True)
+                | Q(
+                    verification__cash_plan_payment_verification=payment_verification_plan
+                )
             )
         else:
             params &= Q(verification__isnull=True)

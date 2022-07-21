@@ -1,8 +1,8 @@
 import datetime
-from django.utils import timezone
 import json
 
 from django.test import TestCase
+from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
@@ -26,7 +26,9 @@ class TestUkrainianRegistrationService(TestCase):
     @classmethod
     def setUp(self):
         ImportedDocumentType.objects.create(
-            type=IDENTIFICATION_TYPE_TAX_ID, label=IDENTIFICATION_TYPE_TAX_ID, country="UA"
+            type=IDENTIFICATION_TYPE_TAX_ID,
+            label=IDENTIFICATION_TYPE_TAX_ID,
+            country="UA",
         )
         BusinessArea.objects.create(
             **{
@@ -110,25 +112,37 @@ class TestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=1,
-                fields={"household": household, "individuals": [individual_wit_bank_account_and_tax_and_disability]},
+                fields={
+                    "household": household,
+                    "individuals": [individual_wit_bank_account_and_tax_and_disability],
+                },
                 files=json.dumps(files).encode(),
             ),
             Record(
                 **defaults,
                 source_id=2,
-                fields={"household": household, "individuals": [individual_wit_bank_account_and_tax]},
+                fields={
+                    "household": household,
+                    "individuals": [individual_wit_bank_account_and_tax],
+                },
                 files=json.dumps({}).encode(),
             ),
             Record(
                 **defaults,
                 source_id=3,
-                fields={"household": household, "individuals": [individual_with_no_tax]},
+                fields={
+                    "household": household,
+                    "individuals": [individual_with_no_tax],
+                },
                 files=json.dumps(files).encode(),
             ),
             Record(
                 **defaults,
                 source_id=4,
-                fields={"household": household, "individuals": [individual_without_bank_account]},
+                fields={
+                    "household": household,
+                    "individuals": [individual_without_bank_account],
+                },
                 files=json.dumps(files).encode(),
             ),
         ]

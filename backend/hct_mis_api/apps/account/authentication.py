@@ -20,7 +20,9 @@ def social_details(backend, details, response, *args, **kwargs):
 
     if not r["details"].get("email"):
         user_data = backend.user_data(None, response=response) or {}
-        r["details"]["email"] = user_data.get("email", user_data.get("signInNames.emailAddress"))
+        r["details"]["email"] = user_data.get(
+            "email", user_data.get("signInNames.emailAddress")
+        )
 
     r["details"]["idp"] = response.get("idp", "")
     return r
@@ -41,7 +43,9 @@ def user_details(strategy, details, backend, user=None, *args, **kwargs):
         user.status = ACTIVE
         user.save()
 
-    return social_core_user.user_details(strategy, details, backend, user, *args, **kwargs)
+    return social_core_user.user_details(
+        strategy, details, backend, user, *args, **kwargs
+    )
 
 
 def require_email(strategy, details, user=None, is_new=False, *args, **kwargs):
@@ -65,7 +69,9 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     )
     ms_graph = MicrosoftGraphAPI()
     user_data = ms_graph.get_user_data(email=details["email"])
-    business_area_code = user_data.get("extension_f4805b4021f643d0aa596e1367d432f1_unicefBusinessAreaCode")
+    business_area_code = user_data.get(
+        "extension_f4805b4021f643d0aa596e1367d432f1_unicefBusinessAreaCode"
+    )
     job_title = user_data.get("jobTitle")
     if job_title is not None:
         user.job_title = job_title
@@ -74,7 +80,9 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if business_area_code:
         basic_user_role = UserRole()
         basic_user_role.role = Role.objects.filter(name="Basic User").first()
-        basic_user_role.business_area = BusinessArea.objects.get(code=business_area_code)
+        basic_user_role.business_area = BusinessArea.objects.get(
+            code=business_area_code
+        )
         basic_user_role.user = user
         basic_user_role.save()
 

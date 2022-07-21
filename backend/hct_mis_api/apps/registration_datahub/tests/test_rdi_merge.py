@@ -1,15 +1,22 @@
 from django.forms import model_to_dict
 
-from hct_mis_api.apps.household.models import Individual, Household, HEAD, COUSIN, BROTHER_SISTER, YES
+from freezegun import freeze_time
+
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+from hct_mis_api.apps.household.models import (
+    BROTHER_SISTER,
+    COUSIN,
+    HEAD,
+    YES,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
     ImportedHouseholdFactory,
     ImportedIndividualFactory,
+    RegistrationDataImportDatahubFactory,
 )
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
-
-from freezegun import freeze_time
 
 
 class TestRdiMergeTask(BaseElasticSearchTestCase):
@@ -26,7 +33,9 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
         cls.rdi = RegistrationDataImportFactory()
         rdi_hub = RegistrationDataImportDatahubFactory(
-            name=cls.rdi.name, hct_id=cls.rdi.id, business_area_slug=cls.rdi.business_area.slug
+            name=cls.rdi.name,
+            hct_id=cls.rdi.id,
+            business_area_slug=cls.rdi.business_area.slug,
         )
         cls.rdi.datahub_id = rdi_hub.id
         cls.rdi.save()
@@ -119,7 +128,10 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
             },
         ]
 
-        cls.individuals = [ImportedIndividualFactory(**individual) for individual in individuals_to_create]
+        cls.individuals = [
+            ImportedIndividualFactory(**individual)
+            for individual in individuals_to_create
+        ]
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self):

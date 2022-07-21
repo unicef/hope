@@ -37,7 +37,9 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="test334")
+        AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="test334"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -67,7 +69,9 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         }
 
         individual = IndividualFactory(**individual_data)
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        national_id_type = DocumentType.objects.get(
+            country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID
+        )
         birth_certificate_type = DocumentType.objects.get(
             country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
@@ -94,9 +98,15 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         ticket2 = GrievanceTicketFactory.create()
 
         ticket1.linked_tickets.set(self.grievance_tickets)
-        ticket2.linked_tickets.set([ticket for ticket in self.grievance_tickets] + [ticket1])
+        ticket2.linked_tickets.set(
+            [ticket for ticket in self.grievance_tickets] + [ticket1]
+        )
 
-        ticket1_related_tickets_count = len([ticket for ticket in ticket1.related_tickets])
-        ticket2_related_tickets_count = len([ticket for ticket in ticket2.related_tickets])
+        ticket1_related_tickets_count = len(
+            [ticket for ticket in ticket1.related_tickets]
+        )
+        ticket2_related_tickets_count = len(
+            [ticket for ticket in ticket2.related_tickets]
+        )
         self.assertEqual(ticket1_related_tickets_count, 6)
         self.assertEqual(ticket2_related_tickets_count, 6)

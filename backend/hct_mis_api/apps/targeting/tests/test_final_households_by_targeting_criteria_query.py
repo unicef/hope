@@ -5,8 +5,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -39,13 +39,31 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
     """
     FAMILY_SIZE_1_TARGETING_CRITERIA = {
         "rules": [
-            {"filters": [{"comparisionMethod": "EQUALS", "arguments": [1], "fieldName": "size", "isFlexField": False}]}
+            {
+                "filters": [
+                    {
+                        "comparisionMethod": "EQUALS",
+                        "arguments": [1],
+                        "fieldName": "size",
+                        "isFlexField": False,
+                    }
+                ]
+            }
         ]
     }
 
     FAMILY_SIZE_2_TARGETING_CRITERIA = {
         "rules": [
-            {"filters": [{"comparisionMethod": "EQUALS", "arguments": [2], "fieldName": "size", "isFlexField": False}]}
+            {
+                "filters": [
+                    {
+                        "comparisionMethod": "EQUALS",
+                        "arguments": [2],
+                        "fieldName": "size",
+                        "isFlexField": False,
+                    }
+                ]
+            }
         ]
     }
 
@@ -55,7 +73,9 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         create_afghanistan()
         cls.households = []
         cls.business_area = BusinessArea.objects.first()
-        program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
+        program = ProgramFactory(
+            business_area=cls.business_area, individual_data_needed=True
+        )
         _ = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
@@ -72,7 +92,11 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         cls.household_residence_status_citizen = cls.household_size_1
 
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area},
+            {
+                "size": 2,
+                "residence_status": "REFUGEE",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_residence_status_refugee = household
         cls.households.append(cls.household_residence_status_refugee)
@@ -91,7 +115,11 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         cls.target_population_size_2.households.set(cls.households)
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {
+                "field_name": "residence_status",
+                "arguments": ["HOST"],
+                "comparision_method": "EQUALS",
+            }
         )
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
@@ -126,7 +154,9 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
+        rule_filter = TargetingCriteriaRuleFilter(
+            **rule_filter, targeting_criteria_rule=rule
+        )
         rule_filter.save()
         return targeting_criteria
 
@@ -140,13 +170,17 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         ]
     )
     def test_final_households_list_by_targeting_criteria_size(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
             context={"user": self.user},
             variables={
-                "targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode"),
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_size_2.id, "TargetPopulationNode"
+                ),
                 **self.variables,
             },
         )
@@ -160,8 +194,12 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_final_households_list_by_targeting_criteria_residence_status(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_final_households_list_by_targeting_criteria_residence_status(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
@@ -184,8 +222,12 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_final_households_list_by_targeting_criteria_finalized(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_final_households_list_by_targeting_criteria_finalized(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
@@ -208,8 +250,12 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_final_households_list_by_targeting_criteria_size_1_edit(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_final_households_list_by_targeting_criteria_size_1_edit(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
@@ -233,8 +279,12 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_final_households_list_by_targeting_criteria_size_2_edit(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_final_households_list_by_targeting_criteria_size_2_edit(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
@@ -259,10 +309,14 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         ]
     )
     def test_final_households_list_without_invalid_documents(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         household = self.household_status_host
-        individual = IndividualRoleInHousehold.objects.get(household=household, role=ROLE_PRIMARY).individual
+        individual = IndividualRoleInHousehold.objects.get(
+            household=household, role=ROLE_PRIMARY
+        ).individual
         individual.household = household
         individual.save()
         DocumentFactory.create(individual=individual, status="INVALID")

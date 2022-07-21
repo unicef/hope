@@ -26,19 +26,19 @@ from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 class TestAlreadyExistingFilterTickets(APITestCase):
     FILTER_EXISTING_GRIEVANCES_QUERY = """
     query ExistingGrievanceTickets(
-      $businessArea: String!, 
-      $category: String!, 
-      $issueType: String, 
-      $household: ID, 
-      $individual: ID, 
+      $businessArea: String!,
+      $category: String!,
+      $issueType: String,
+      $household: ID,
+      $individual: ID,
       $paymentRecord: [ID]
     ) {
       existingGrievanceTickets(
-        businessArea: $businessArea, 
-        category: $category, 
-        issueType: $issueType, 
-        household: $household, 
-        individual: $individual, 
+        businessArea: $businessArea,
+        category: $category,
+        issueType: $issueType,
+        household: $household,
+        individual: $individual,
         paymentRecord: $paymentRecord,
         orderBy: "id"
       ) {
@@ -83,7 +83,12 @@ class TestAlreadyExistingFilterTickets(APITestCase):
 
         cls.household, cls.individuals = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         program = ProgramFactory(business_area=cls.business_area)
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
@@ -150,7 +155,10 @@ class TestAlreadyExistingFilterTickets(APITestCase):
                     Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
                 ],
             ),
-            ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
+            (
+                "without_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
         ]
     )
     def test_filter_existing_tickets_by_payment_record(self, _, permissions):
@@ -171,7 +179,10 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]
@@ -198,7 +209,10 @@ class TestAlreadyExistingFilterTickets(APITestCase):
                     Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
                 ],
             ),
-            ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
+            (
+                "without_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
         ]
     )
     def test_filter_existing_tickets_by_household(self, _, permissions):
@@ -218,7 +232,10 @@ class TestAlreadyExistingFilterTickets(APITestCase):
                     Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
                 ],
             ),
-            ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
+            (
+                "without_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
         ]
     )
     def test_filter_existing_tickets_by_individual(self, _, permissions):

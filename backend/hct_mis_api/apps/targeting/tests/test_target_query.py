@@ -7,8 +7,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
@@ -86,7 +86,11 @@ class TestTargetPopulationQuery(APITestCase):
         cls.household_size_1 = household
         cls.household_residence_status_citizen = cls.household_size_1
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area},
+            {
+                "size": 2,
+                "residence_status": "REFUGEE",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_residence_status_refugee = household
         cls.household_size_2 = cls.household_residence_status_refugee
@@ -103,7 +107,11 @@ class TestTargetPopulationQuery(APITestCase):
         )
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparision_method": "EQUALS"}
+            {
+                "field_name": "residence_status",
+                "arguments": ["REFUGEE"],
+                "comparision_method": "EQUALS",
+            }
         )
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
@@ -135,10 +143,11 @@ class TestTargetPopulationQuery(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
+        rule_filter = TargetingCriteriaRuleFilter(
+            **rule_filter, targeting_criteria_rule=rule
+        )
         rule_filter.save()
         return targeting_criteria
-
 
     @parameterized.expand(
         [
@@ -156,7 +165,9 @@ class TestTargetPopulationQuery(APITestCase):
         ]
     )
     def test_simple_all_targets_query(self, _, permissions, variables):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,
@@ -177,7 +188,9 @@ class TestTargetPopulationQuery(APITestCase):
         ]
     )
     def test_simple_target_query(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
@@ -203,7 +216,9 @@ class TestTargetPopulationQuery(APITestCase):
         ]
     )
     def test_simple_target_query_2(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,

@@ -95,16 +95,16 @@ class CoreFieldChoiceObject(graphene.ObjectType):
     admin = String()
     list_name = String()
 
-    def resolve_label_en(parent, info):
-        return dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
+    def resolve_label_en(self, info):
+        return dict_or_attr_resolver("label", None, self, info)["English(EN)"]
 
-    def resolve_value(parent, info):
-        if isinstance(parent, FlexibleAttributeChoice):
-            return parent.name
-        return dict_or_attr_resolver("value", None, parent, info)
+    def resolve_value(self, info):
+        if isinstance(self, FlexibleAttributeChoice):
+            return self.name
+        return dict_or_attr_resolver("value", None, self, info)
 
-    def resolve_labels(parent, info):
-        return resolve_label(dict_or_attr_resolver("label", None, parent, info))
+    def resolve_labels(self, info):
+        return resolve_label(dict_or_attr_resolver("label", None, self, info))
 
 
 def _custom_dict_or_attr_resolver(attname, default_value, root, info, **args):
@@ -120,7 +120,7 @@ def sort_by_attr(options, attrs: str) -> list:
             el = _custom_dict_or_attr_resolver(attr, None, el, None)
         return el
 
-    return list(sorted(options, key=key_extractor))
+    return sorted(options, key=key_extractor)
 
 
 class FieldAttributeNode(graphene.ObjectType):
@@ -138,8 +138,8 @@ class FieldAttributeNode(graphene.ObjectType):
     associated_with = graphene.String()
     is_flex_field = graphene.Boolean()
 
-    def resolve_choices(parent, info):
-        choices = _custom_dict_or_attr_resolver("choices", None, parent, info)
+    def resolve_choices(self, info):
+        choices = _custom_dict_or_attr_resolver("choices", None, self, info)
 
         if callable(choices) and not isinstance(choices, models.Manager):
             choices = choices()
@@ -155,11 +155,11 @@ class FieldAttributeNode(graphene.ObjectType):
             return True
         return False
 
-    def resolve_labels(parent, info):
-        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
+    def resolve_labels(self, info):
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, self, info))
 
-    def resolve_label_en(parent, info):
-        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
+    def resolve_label_en(self, info):
+        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]
 
     def resolve_associated_with(self, info):
         resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
@@ -230,12 +230,12 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
         return_method = reduce_assets_list
     try:
         assets = method
-    except ObjectDoesNotExist:
+    except ObjectDoesNotExist as exc:
         logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
-        raise GraphQLError("Provided business area does not exist.")
+        raise GraphQLError("Provided business area does not exist.") from exc
     except AttributeError as error:
         logger.exception(error)
-        raise GraphQLError(str(error))
+        raise GraphQLError(str(error)) from error
 
     return return_method(assets, only_deployed=kwargs.get("only_deployed", False))
 
@@ -271,17 +271,20 @@ class Query(graphene.ObjectType):
     )
     cash_assist_url_prefix = graphene.String()
 
-    def resolve_business_area(parent, info, business_area_slug):
+    def resolve_business_area(self, info, business_area_slug):
         return BusinessArea.objects.get(slug=business_area_slug)
 
-    def resolve_all_business_areas(parent, info):
+    def resolve_all_business_areas(self, info):
         return BusinessArea.objects.filter(is_split=False)
 
-    def resolve_cash_assist_url_prefix(parent, info):
+    def resolve_cash_assist_url_prefix(self, info):
         return config.CASH_ASSIST_URL_PREFIX
 
-    def resolve_all_fields_attributes(parent, info, flex_field=None, business_area_slug=None):
-        return sort_by_attr(get_fields_attr_generators(flex_field, business_area_slug), "label.English(EN)")
+    def resolve_all_fields_attributes(self, info, flex_field=None, business_area_slug=None):
+        return sort_by_attr(
+            get_fields_attr_generators(flex_field, business_area_slug),
+            "label.English(EN)",
+        )
 
     def resolve_kobo_project(self, info, uid, business_area_slug, **kwargs):
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)

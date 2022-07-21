@@ -1,10 +1,10 @@
 import uuid
 from datetime import datetime
-from django.utils import timezone
 from decimal import Decimal
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
 from hct_mis_api.apps.core.fixtures import (
@@ -85,8 +85,12 @@ class TestDataSendTpToDatahub(TestCase):
             admin_level=2,
         )
         admin_area0 = AdminAreaFactory(admin_area_level=country_area_type)
-        admin_area1 = AdminAreaFactory(admin_area_level=state_area_type, parent=admin_area0)
-        admin_area2 = AdminAreaFactory(admin_area_level=province_area_type, parent=admin_area1)
+        admin_area1 = AdminAreaFactory(
+            admin_area_level=state_area_type, parent=admin_area0
+        )
+        admin_area2 = AdminAreaFactory(
+            admin_area_level=province_area_type, parent=admin_area1
+        )
 
         cls.program = ProgramFactory(
             individual_data_needed=True,
@@ -111,11 +115,19 @@ class TestDataSendTpToDatahub(TestCase):
     @classmethod
     def create_first_household(cls, admin_area, rdi):
         cls.household = HouseholdFactory.build(
-            size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country="PL"
+            size=1,
+            registration_data_import=rdi,
+            admin_area=admin_area,
+            unhcr_id="UNHCR-1337",
+            country="PL",
         )
         unhcr_agency = Agency.objects.create(type=UNHCR)
-        cls.individual = IndividualFactory(household=cls.household, relationship="HEAD", registration_data_import=rdi)
-        IndividualIdentity.objects.create(agency=unhcr_agency, number="UN-TEST", individual=cls.individual)
+        cls.individual = IndividualFactory(
+            household=cls.household, relationship="HEAD", registration_data_import=rdi
+        )
+        IndividualIdentity.objects.create(
+            agency=unhcr_agency, number="UN-TEST", individual=cls.individual
+        )
         IndividualRoleInHousehold.objects.create(
             individual=cls.individual,
             household=cls.household,
@@ -135,12 +147,16 @@ class TestDataSendTpToDatahub(TestCase):
             "ca_hash_id": str(self.program.ca_hash_id),
             "ca_id": self.program.ca_id,
             "description": self.program.description,
-            "end_date": timezone.make_aware(datetime.combine(self.program.end_date, datetime.min.time())),
+            "end_date": timezone.make_aware(
+                datetime.combine(self.program.end_date, datetime.min.time())
+            ),
             "individual_data_needed": True,
             "mis_id": self.program.id,
             "name": self.program.name,
             "scope": self.program.scope,
-            "start_date": timezone.make_aware(datetime.combine(self.program.start_date, datetime.min.time())),
+            "start_date": timezone.make_aware(
+                datetime.combine(self.program.start_date, datetime.min.time())
+            ),
         }
         dh_program_dict = dh_models.Program.objects.first().__dict__
         dh_program_dict.pop("_state")
@@ -180,11 +196,15 @@ class TestDataSendTpToDatahub(TestCase):
             "target_population_mis_id": self.target_population.id,
             "vulnerability_score": Decimal("1.230"),
         }
-        dh_target_population_entry_dict = dh_models.TargetPopulationEntry.objects.first().__dict__
+        dh_target_population_entry_dict = (
+            dh_models.TargetPopulationEntry.objects.first().__dict__
+        )
         dh_target_population_entry_dict.pop("_state")
         dh_target_population_entry_dict.pop("id")
         dh_target_population_entry_dict.pop("session_id")
-        self.assertDictEqual(expected_target_population_entry_dict, dh_target_population_entry_dict)
+        self.assertDictEqual(
+            expected_target_population_entry_dict, dh_target_population_entry_dict
+        )
 
     def test_individual_send_correctly(self):
         self.maxDiff = None

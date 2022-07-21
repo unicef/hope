@@ -19,33 +19,53 @@ class NegativeFeedbackTicketExtras(graphene.InputObjectType):
     individual = graphene.GlobalID(node=IndividualNode, required=False)
 
 
-def save_positive_feedback_extras(root, info, input, grievance_ticket, extras, **kwargs):
-    household, individual = fetch_household_and_individual(extras, "positive_feedback_ticket_extras")
+def save_positive_feedback_extras(
+    root, info, input, grievance_ticket, extras, **kwargs
+):
+    household, individual = fetch_household_and_individual(
+        extras, "positive_feedback_ticket_extras"
+    )
     create_new_positive_feedback_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
 
 
-def update_positive_feedback_extras(root, info, input, grievance_ticket, extras, **kwargs):
-    household, individual = fetch_household_and_individual(extras, "positive_feedback_ticket_extras")
+def update_positive_feedback_extras(
+    root, info, input, grievance_ticket, extras, **kwargs
+):
+    household, individual = fetch_household_and_individual(
+        extras, "positive_feedback_ticket_extras"
+    )
 
-    update_ticket(grievance_ticket.positive_feedback_ticket_details, household, individual)
+    update_ticket(
+        grievance_ticket.positive_feedback_ticket_details, household, individual
+    )
     grievance_ticket.refresh_from_db()
     return grievance_ticket
 
 
-def save_negative_feedback_extras(root, info, input, grievance_ticket, extras, **kwargs):
-    household, individual = fetch_household_and_individual(extras, "negative_feedback_ticket_extras")
+def save_negative_feedback_extras(
+    root, info, input, grievance_ticket, extras, **kwargs
+):
+    household, individual = fetch_household_and_individual(
+        extras, "negative_feedback_ticket_extras"
+    )
 
     create_new_negative_feedback_ticket(grievance_ticket, household, individual)
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
 
 
-def update_negative_feedback_extras(root, info, input, grievance_ticket, extras, **kwargs):
-    household, individual = fetch_household_and_individual(extras, "negative_feedback_ticket_extras")
+def update_negative_feedback_extras(
+    root, info, input, grievance_ticket, extras, **kwargs
+):
+    household, individual = fetch_household_and_individual(
+        extras, "negative_feedback_ticket_extras"
+    )
 
-    update_ticket(grievance_ticket.negative_feedback_ticket_details, household, individual)
+    update_ticket(
+        grievance_ticket.negative_feedback_ticket_details, household, individual
+    )
     grievance_ticket.refresh_from_db()
     return grievance_ticket
 

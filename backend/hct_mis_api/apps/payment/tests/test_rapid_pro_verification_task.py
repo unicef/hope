@@ -22,13 +22,13 @@ from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
     CheckRapidProVerificationTask,
 )
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -37,7 +37,10 @@ class TestRapidProVerificationTask(TestCase):
         {
             "id": 1202235952,
             "uuid": "5b6f30ee-010b-4bd5-a510-e78f062af448",
-            "flow": {"uuid": "0331293b-9e47-4766-9b78-37a9a702fd95", "name": "Payment Verification"},
+            "flow": {
+                "uuid": "0331293b-9e47-4766-9b78-37a9a702fd95",
+                "name": "Payment Verification",
+            },
             "contact": {
                 "uuid": "875cf5d1-ab56-48f4-97e5-1d757d75a06a",
                 "urn": "telegram:1241420989",
@@ -46,11 +49,26 @@ class TestRapidProVerificationTask(TestCase):
             "start": {"uuid": START_UUID},
             "responded": True,
             "path": [
-                {"node": "f511ccc6-b380-453a-9901-d8cb9c672d72", "time": "2020-08-10T13:24:37.813876Z"},
-                {"node": "2b541238-e1fb-4d75-aa83-6e5946382734", "time": "2020-08-10T13:24:37.813947Z"},
-                {"node": "0532a470-e128-48a6-aa9f-c5bdffd0f61a", "time": "2020-08-10T14:51:18.515192Z"},
-                {"node": "8952391d-89fc-404a-8c34-4569aa5fb947", "time": "2020-08-10T14:51:18.515221Z"},
-                {"node": "d4af6004-268a-468d-897a-c4f93cff34fc", "time": "2020-08-10T14:51:22.493086Z"},
+                {
+                    "node": "f511ccc6-b380-453a-9901-d8cb9c672d72",
+                    "time": "2020-08-10T13:24:37.813876Z",
+                },
+                {
+                    "node": "2b541238-e1fb-4d75-aa83-6e5946382734",
+                    "time": "2020-08-10T13:24:37.813947Z",
+                },
+                {
+                    "node": "0532a470-e128-48a6-aa9f-c5bdffd0f61a",
+                    "time": "2020-08-10T14:51:18.515192Z",
+                },
+                {
+                    "node": "8952391d-89fc-404a-8c34-4569aa5fb947",
+                    "time": "2020-08-10T14:51:18.515221Z",
+                },
+                {
+                    "node": "d4af6004-268a-468d-897a-c4f93cff34fc",
+                    "time": "2020-08-10T14:51:22.493086Z",
+                },
             ],
             "values": {
                 "cash_received_amount": {
@@ -139,15 +157,22 @@ class TestRapidProVerificationTask(TestCase):
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_filtering_by_start_id(self, mock_parent_init):
         mock_parent_init.return_value = None
-        payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
+        payment_record_verification_obj = (
+            TestRapidProVerificationTask.verification.payment_record_verifications
+        )
         payment_record_verification = payment_record_verification_obj.prefetch_related(
             "payment_record__head_of_household"
         ).first()
         TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"][
             "urn"
         ] = f"tel:{payment_record_verification.payment_record.head_of_household.phone_no}"
-        mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
-        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
+        mock = MagicMock(
+            return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE
+        )
+        with patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs",
+            mock,
+        ):
             api = RapidProAPI("afghanistan")
             mapped_dict = api.get_mapped_flow_runs([uuid.uuid4()])
             self.assertEqual(
@@ -158,22 +183,33 @@ class TestRapidProVerificationTask(TestCase):
     @patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.__init__")
     def test_mapping(self, mock_parent_init):
         mock_parent_init.return_value = None
-        payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
+        payment_record_verification_obj = (
+            TestRapidProVerificationTask.verification.payment_record_verifications
+        )
         payment_record_verification = payment_record_verification_obj.prefetch_related(
             "payment_record__head_of_household"
         ).first()
         TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"][
             "urn"
         ] = f"tel:{payment_record_verification.payment_record.head_of_household.phone_no}"
-        mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
-        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
+        mock = MagicMock(
+            return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE
+        )
+        with patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_flow_runs",
+            mock,
+        ):
             api = RapidProAPI("afghanistan")
-            mapped_dict = api.get_mapped_flow_runs([TestRapidProVerificationTask.START_UUID])
+            mapped_dict = api.get_mapped_flow_runs(
+                [TestRapidProVerificationTask.START_UUID]
+            )
             self.assertEqual(
                 mapped_dict,
                 [
                     {
-                        "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
+                        "phone_number": str(
+                            payment_record_verification.payment_record.head_of_household.phone_no
+                        ),
                         "received": True,
                         "received_amount": Decimal("200"),
                     }
@@ -197,12 +233,17 @@ class TestRapidProVerificationTask(TestCase):
 
         fake_data_to_return_from_rapid_pro_api = [
             {
-                "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
+                "phone_number": str(
+                    payment_record_verification.payment_record.head_of_household.phone_no
+                ),
                 "received": False,
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+            mock,
+        ):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -228,13 +269,19 @@ class TestRapidProVerificationTask(TestCase):
         )
         fake_data_to_return_from_rapid_pro_api = [
             {
-                "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
+                "phone_number": str(
+                    payment_record_verification.payment_record.head_of_household.phone_no
+                ),
                 "received": True,
-                "received_amount": payment_record_verification.payment_record.delivered_quantity - 1,
+                "received_amount": payment_record_verification.payment_record.delivered_quantity
+                - 1,
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+            mock,
+        ):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -264,13 +311,18 @@ class TestRapidProVerificationTask(TestCase):
         )
         fake_data_to_return_from_rapid_pro_api = [
             {
-                "phone_number": str(payment_record_verification.payment_record.head_of_household.phone_no),
+                "phone_number": str(
+                    payment_record_verification.payment_record.head_of_household.phone_no
+                ),
                 "received": True,
                 "received_amount": payment_record_verification.payment_record.delivered_quantity,
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+            mock,
+        ):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -306,7 +358,10 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch(
+            "hct_mis_api.apps.payment.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs",
+            mock,
+        ):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()

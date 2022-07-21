@@ -3,12 +3,12 @@ from django.core.management import call_command
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     create_household_and_individuals,
-    create_individual_document
+    create_individual_document,
 )
 from hct_mis_api.apps.household.models import MALE
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -41,7 +41,9 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
-        cls.program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
+        cls.program = ProgramFactory(
+            business_area=cls.business_area, individual_data_needed=True
+        )
         (household, individuals) = create_household_and_individuals(
             {
                 "business_area": cls.business_area,
@@ -50,7 +52,14 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                 {
                     "sex": "MALE",
                     "marital_status": "MARRIED",
-                    "observed_disability": ["SEEING", "HEARING", "WALKING", "MEMORY", "SELF_CARE", "COMMUNICATING"],
+                    "observed_disability": [
+                        "SEEING",
+                        "HEARING",
+                        "WALKING",
+                        "MEMORY",
+                        "SELF_CARE",
+                        "COMMUNICATING",
+                    ],
                     "seeing_disability": "LOT_DIFFICULTY",
                     "hearing_disability": "SOME_DIFFICULTY",
                     "physical_disability": "SOME_DIFFICULTY",
@@ -65,12 +74,17 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             {
                 "business_area": cls.business_area,
             },
-            [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
+            [
+                {"sex": "MALE", "marital_status": "SINGLE"},
+                {"sex": "FEMALE", "marital_status": "MARRIED"},
+            ],
         )
         cls.not_targeted_household = household
 
         cls.user = UserFactory()
-        cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.TARGETING_CREATE], cls.business_area
+        )
 
     def test_golden_record_by_targeting_criteria_size(self):
         variables = {
@@ -145,7 +159,9 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             variables=variables,
         )
 
-    def test_golden_record_by_targeting_criteria_observed_disability_with_invalid_argument(self):
+    def test_golden_record_by_targeting_criteria_observed_disability_with_invalid_argument(
+        self,
+    ):
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
@@ -224,17 +240,23 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
-        cls.program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
+        cls.program = ProgramFactory(
+            business_area=cls.business_area, individual_data_needed=True
+        )
         cls.user = UserFactory()
-        cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)
+        cls.create_user_role_with_permissions(
+            cls.user, [Permissions.TARGETING_CREATE], cls.business_area
+        )
 
     def test_golden_record_by_targeting_criteria_phone_number(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": "+48 123456789", "full_name": "individual_with_phone"}],
+            {"business_area": self.business_area},
+            [{"phone_no": "+48 123456789", "full_name": "individual_with_phone"}],
         )
 
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"phone_no": "", "full_name": "individual_without_phone"}]
+            {"business_area": self.business_area},
+            [{"phone_no": "", "full_name": "individual_without_phone"}],
         )
 
         variables = {
@@ -249,15 +271,13 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                                 "individualBlockFilters": [
                                     {
                                         "comparisionMethod": "EQUALS",
-                                        "arguments": [
-                                            "True"
-                                        ],
+                                        "arguments": ["True"],
                                         "fieldName": "has_phone_number",
-                                        "isFlexField": False
+                                        "isFlexField": False,
                                     }
                                 ]
                             }
-                        ]
+                        ],
                     }
                 ]
             },
@@ -270,11 +290,13 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_has_bank_account_info(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
+            {"business_area": self.business_area},
+            [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}]
+            {"business_area": self.business_area},
+            [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}],
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -291,15 +313,13 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                                 "individualBlockFilters": [
                                     {
                                         "comparisionMethod": "EQUALS",
-                                        "arguments": [
-                                            "True"
-                                        ],
+                                        "arguments": ["True"],
                                         "fieldName": "has_the_bank_account_number",
-                                        "isFlexField": False
+                                        "isFlexField": False,
                                     }
                                 ]
                             }
-                        ]
+                        ],
                     }
                 ]
             },
@@ -312,11 +332,13 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_has_not_bank_account_info(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
+            {"business_area": self.business_area},
+            [{"full_name": "individual_without_bank_account", "phone_no": "123456789"}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}]
+            {"business_area": self.business_area},
+            [{"full_name": "individual_with_bank_account", "phone_no": "123456789"}],
         )
 
         BankAccountInfoFactory(individual=individuals[0], bank_name="Santander")
@@ -333,15 +355,13 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                                 "individualBlockFilters": [
                                     {
                                         "comparisionMethod": "EQUALS",
-                                        "arguments": [
-                                            "False"
-                                        ],
+                                        "arguments": ["False"],
                                         "fieldName": "has_the_bank_account_number",
-                                        "isFlexField": False
+                                        "isFlexField": False,
                                     }
                                 ]
                             }
-                        ]
+                        ],
                     }
                 ]
             },
@@ -354,11 +374,13 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
 
     def test_golden_record_by_targeting_criteria_tax_id(self):
         create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_without_tax_id", "phone_no": "123456789"}],
+            {"business_area": self.business_area},
+            [{"full_name": "individual_without_tax_id", "phone_no": "123456789"}],
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area}, [{"full_name": "individual_with_tax_id", "phone_no": "123456789"}]
+            {"business_area": self.business_area},
+            [{"full_name": "individual_with_tax_id", "phone_no": "123456789"}],
         )
 
         create_individual_document(individuals[0], document_type="TAX_ID")
@@ -375,15 +397,13 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
                                 "individualBlockFilters": [
                                     {
                                         "comparisionMethod": "EQUALS",
-                                        "arguments": [
-                                            "True"
-                                        ],
+                                        "arguments": ["True"],
                                         "fieldName": "has_tax_id_number",
-                                        "isFlexField": False
+                                        "isFlexField": False,
                                     }
                                 ]
                             }
-                        ]
+                        ],
                     }
                 ]
             },

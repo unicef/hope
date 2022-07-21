@@ -52,11 +52,15 @@ class APITestCase(SnapshotTestTestCase):
 
     @classmethod
     def generate_document_types_for_all_countries(cls):
-        identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
+        identification_type_choice = tuple(
+            (doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE
+        )
         document_types = []
         for alpha2 in COUNTRIES:
             for doc_type, label in identification_type_choice:
-                document_types.append(DocumentType(country=alpha2, label=label, type=doc_type))
+                document_types.append(
+                    DocumentType(country=alpha2, label=label, type=doc_type)
+                )
 
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
@@ -76,7 +80,9 @@ class APITestCase(SnapshotTestTestCase):
         role, created = Role.objects.update_or_create(
             name="Role with Permissions", defaults={"permissions": permission_list}
         )
-        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
+        user_role, _ = UserRole.objects.get_or_create(
+            user=user, role=role, business_area=business_area
+        )
         return user_role
 
 

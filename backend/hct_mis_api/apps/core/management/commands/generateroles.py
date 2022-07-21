@@ -273,7 +273,11 @@ class Command(BaseCommand):
             role, created = Role.objects.update_or_create(
                 subsystem=Role.HOPE,
                 name=default_role["name"],
-                defaults={"permissions": [permission.value for permission in default_role["permissions"]]},
+                defaults={
+                    "permissions": [
+                        permission.value for permission in default_role["permissions"]
+                    ]
+                },
             )
 
             if created:
@@ -302,6 +306,8 @@ class Command(BaseCommand):
                 )
                 incompatible_roles_created.append(f"{role_pair[0]} and {role_pair[1]}")
         if incompatible_roles_created:
-            print(f"Incompatible roles pairs created: {', '.join(incompatible_roles_created)}")
+            print(
+                f"Incompatible roles pairs created: {', '.join(incompatible_roles_created)}"
+            )
         else:
             print("No new incompatible roles pairs were created.")

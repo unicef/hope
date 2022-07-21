@@ -175,7 +175,7 @@ class Command(BaseCommand):
                 should_create_grievance = random.choice((True, False))
                 if should_create_grievance:
                     grievance_type = random.choice(("feedback", "sensitive", "complaint"))
-                    should_contain_payment_record = random.choice((True, False))
+                    should_contain_payment_record = payment_record if random.choice((True, False)) else None
                     switch_dict = {
                         "feedback": lambda: GrievanceTicketFactory(
                             admin2=AdminArea.objects.filter(admin_area_level__business_area=business_area, level=2)
@@ -183,25 +183,27 @@ class Command(BaseCommand):
                             .first()
                             .title,
                             admin2_new=Area.objects.filter(
-                                area_type__business_area=business_area, area_type__area_level=2
+                                area_type__business_area=business_area,
+                                area_type__area_level=2,
                             )
                             .order_by("?")
                             .first()
                             .title,
                         ),
+                        # TODO: Fix all flake8 reported issued (B023) below
                         "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
-                            household=household,
-                            individual=random.choice(individuals),
-                            payment_record=payment_record if should_contain_payment_record else None,
+                            household=household,  # noqa: B023
+                            individual=random.choice(individuals),  # noqa: B023
+                            payment_record=should_contain_payment_record,  # noqa: B023
                         ),
                         "complaint": lambda: GrievanceComplaintTicketWithoutExtrasFactory(
-                            household=household,
-                            individual=random.choice(individuals),
-                            payment_record=payment_record if should_contain_payment_record else None,
+                            household=household,  # noqa: B023
+                            individual=random.choice(individuals),  # noqa: B023
+                            payment_record=should_contain_payment_record,  # noqa: B023
                         ),
                     }
 
-                    grievance_ticket = switch_dict.get(grievance_type)()
+                    switch_dict.get(grievance_type)()  # noqa: F841
 
                 EntitlementCardFactory(household=household)
         CashPlanPaymentVerificationFactory.create_batch(1)
@@ -209,7 +211,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        self.stdout.write(f"Generating fixtures...")
+        self.stdout.write("Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
             call_command("flush", "--noinput", database="cash_assist_datahub_mis")

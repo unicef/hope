@@ -1,4 +1,3 @@
-from django.utils import timezone
 import logging
 
 from django.conf import settings
@@ -8,6 +7,7 @@ from django.contrib.messages import DEFAULT_TAGS
 from django.db import transaction
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.api import button
@@ -46,7 +46,14 @@ class RollbackException(Exception):
 
 @admin.register(Session)
 class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    list_display = ("timestamp", "id", "status", "last_modified_date", "business_area", "run_time")
+    list_display = (
+        "timestamp",
+        "id",
+        "status",
+        "last_modified_date",
+        "business_area",
+        "run_time",
+    )
     date_hierarchy = "timestamp"
     list_filter = (
         BusinessAreaFilter,
@@ -56,7 +63,13 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     )
     ordering = ("-timestamp",)
     exclude = ("traceback",)
-    readonly_fields = ("timestamp", "last_modified_date", "sentry_id", "source", "business_area")
+    readonly_fields = (
+        "timestamp",
+        "last_modified_date",
+        "sentry_id",
+        "source",
+        "business_area",
+    )
 
     def run_time(self, obj):
         if obj.status in (obj.STATUS_PROCESSING, obj.STATUS_LOADING):
@@ -133,7 +146,9 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     @button(visible=lambda btn: btn.original.traceback, permission="account.can_debug")
     def view_error(self, request, pk):
         context = self.get_common_context(request, pk)
-        return TemplateResponse(request, "admin/cash_assist_datahub/session/debug.html", context)
+        return TemplateResponse(
+            request, "admin/cash_assist_datahub/session/debug.html", context
+        )
 
     @button(permission="account.can_inspect")
     def inspect(self, request, pk):
@@ -156,24 +171,43 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         elif obj.status == obj.STATUS_PROCESSING:
             elapsed = timezone.now() - obj.timestamp
             if elapsed.total_seconds() >= DAY:
-                warnings.append([messages.ERROR, f"Session is running more than {elapsed}"])
+                warnings.append(
+                    [messages.ERROR, f"Session is running more than {elapsed}"]
+                )
             elif elapsed.total_seconds() >= HOUR:
-                warnings.append([messages.WARNING, f"Session is running more than {elapsed}"])
+                warnings.append(
+                    [messages.WARNING, f"Session is running more than {elapsed}"]
+                )
 
-        for model in (Programme, CashPlan, TargetPopulation, PaymentRecord, ServiceProvider):
+        for model in (
+            Programme,
+            CashPlan,
+            TargetPopulation,
+            PaymentRecord,
+            ServiceProvider,
+        ):
             count = model.objects.filter(session=pk).count()
             has_content = has_content or count
-            context["data"][model] = {"count": count, "warnings": [], "errors": [], "meta": model._meta}
+            context["data"][model] = {
+                "count": count,
+                "warnings": [],
+                "errors": [],
+                "meta": model._meta,
+            }
 
         for prj in Programme.objects.filter(session=pk):
             if not program.Program.objects.filter(id=prj.mis_id).exists():
                 errors += 1
-                context["data"][Programme]["errors"].append(f"Program {prj.mis_id} not found in HOPE")
+                context["data"][Programme]["errors"].append(
+                    f"Program {prj.mis_id} not found in HOPE"
+                )
 
         for tp in TargetPopulation.objects.filter(session=pk):
             if not targeting.TargetPopulation.objects.filter(id=tp.mis_id).exists():
                 errors += 1
-                context["data"][TargetPopulation]["errors"].append(f"TargetPopulation {tp.mis_id} not found in HOPE")
+                context["data"][TargetPopulation]["errors"].append(
+                    f"TargetPopulation {tp.mis_id} not found in HOPE"
+                )
 
         svs = []
         for sv in ServiceProvider.objects.filter(session=pk):
@@ -182,10 +216,12 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             #     errors += 1
             #     context["data"][ServiceProvider]["warnings"].append(f"ServiceProvider {sv.ca_id} not found in HOPE")
 
-        session_cacheplans = CashPlan.objects.filter(session=pk).values_list("cash_plan_id", flat=True)
-        hope_cacheplans = program.CashPlan.objects.filter(business_area__code=obj.business_area).values_list(
-            "ca_id", flat=True
+        session_cacheplans = CashPlan.objects.filter(session=pk).values_list(
+            "cash_plan_id", flat=True
         )
+        hope_cacheplans = program.CashPlan.objects.filter(
+            business_area__code=obj.business_area
+        ).values_list("ca_id", flat=True)
         known_cacheplans = list(session_cacheplans) + list(hope_cacheplans)
 
         for pr in PaymentRecord.objects.filter(session=pk):
@@ -210,7 +246,9 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             warnings.append([messages.ERROR, f"{errors} Errors found"])
 
         if (obj.status == obj.STATUS_EMPTY) and has_content:
-            warnings.append([messages.ERROR, f"Session marked as Empty but records found"])
+            warnings.append(
+                [messages.ERROR, f"Session marked as Empty but records found"]
+            )
 
         area = BusinessArea.objects.filter(code=obj.business_area.strip()).first()
         context["area"] = area
@@ -218,7 +256,9 @@ class SessionAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             warnings.append([messages.ERROR, f"Invalid Business Area"])
 
         context["warnings"] = [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings]
-        return TemplateResponse(request, "admin/cash_assist_datahub/session/inspect.html", context)
+        return TemplateResponse(
+            request, "admin/cash_assist_datahub/session/inspect.html", context
+        )
 
 
 @admin.register(CashPlan)
@@ -245,7 +285,13 @@ class CashPlanAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 @admin.register(PaymentRecord)
 class PaymentRecordAdmin(ExtraButtonsMixin, AdminFiltersMixin, admin.ModelAdmin):
-    list_display = ("session", "business_area", "status", "full_name", "service_provider_ca_id")
+    list_display = (
+        "session",
+        "business_area",
+        "status",
+        "full_name",
+        "service_provider_ca_id",
+    )
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
     list_filter = (
@@ -284,13 +330,23 @@ class PaymentRecordAdmin(ExtraButtonsMixin, AdminFiltersMixin, admin.ModelAdmin)
             ("head_of_household_mis_id", Individual, "pk"),
             ("target_population_mis_id", TargetPopulation, "pk"),
         ):
-            instance = model.objects.filter(**{rk: getattr(payment_record, field_name)}).first()
+            instance = model.objects.filter(
+                **{rk: getattr(payment_record, field_name)}
+            ).first()
             details = None
             if instance:
-                details = reverse(admin_urlname(model._meta, "change"), args=[instance.pk])
-            ctx["data"][model] = {"instance": instance, "details": details, "meta": model._meta}
+                details = reverse(
+                    admin_urlname(model._meta, "change"), args=[instance.pk]
+                )
+            ctx["data"][model] = {
+                "instance": instance,
+                "details": details,
+                "meta": model._meta,
+            }
 
-        return TemplateResponse(request, "admin/cash_assist_datahub/payment_record/inspect.html", ctx)
+        return TemplateResponse(
+            request, "admin/cash_assist_datahub/payment_record/inspect.html", ctx
+        )
 
 
 @admin.register(ServiceProvider)

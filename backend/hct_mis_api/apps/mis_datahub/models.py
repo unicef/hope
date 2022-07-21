@@ -27,7 +27,9 @@ class SessionModel(models.Model):
 class Household(SessionModel, UnicefIdentifiedModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
-    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
+    status = models.CharField(
+        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
+    )
     household_size = models.PositiveIntegerField()
     # registration household id
     form_number = models.CharField(max_length=255, null=True)
@@ -35,7 +37,9 @@ class Household(SessionModel, UnicefIdentifiedModel):
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
     country = models.CharField(null=True, max_length=3)
-    residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True)
+    residence_status = models.CharField(
+        max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True
+    )
     registration_date = models.DateField(null=True)
     village = models.CharField(max_length=250, blank=True, null=True)
 
@@ -189,7 +193,9 @@ class Document(SessionModel):
         (DAMAGED, _("Damaged")),
     )
 
-    status = models.CharField(choices=STATUS_CHOICE, null=True, max_length=30, default=None)
+    status = models.CharField(
+        choices=STATUS_CHOICE, null=True, max_length=30, default=None
+    )
     date_of_expiry = models.DateField(null=True, default=None)
     photo = models.ImageField(blank=True, default="")
     mis_id = models.UUIDField()

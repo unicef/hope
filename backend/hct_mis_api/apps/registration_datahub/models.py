@@ -41,9 +41,9 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
     YES_NO_CHOICE,
 )
+from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
-from hct_mis_api.apps.payment.utils import is_right_phone_number_format
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
@@ -92,17 +92,39 @@ class ImportedHousehold(TimeStampedUUIDModel):
     male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    head_of_household = models.OneToOneField("ImportedIndividual", on_delete=models.CASCADE, null=True)
+    female_age_group_0_5_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    female_age_group_18_59_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    female_age_group_60_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    male_age_group_0_5_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    male_age_group_6_11_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    male_age_group_12_17_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    male_age_group_18_59_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    male_age_group_60_disabled_count = models.PositiveIntegerField(
+        default=None, null=True
+    )
+    head_of_household = models.OneToOneField(
+        "ImportedIndividual", on_delete=models.CASCADE, null=True
+    )
     fchild_hoh = models.BooleanField(null=True)
     child_hoh = models.BooleanField(null=True)
     registration_data_import = models.ForeignKey(
@@ -117,11 +139,17 @@ class ImportedHousehold(TimeStampedUUIDModel):
     start = models.DateTimeField(blank=True, null=True)
     deviceid = models.CharField(max_length=250, blank=True)
     name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
-    org_enumerator = models.CharField(max_length=250, choices=ORG_ENUMERATOR_CHOICES, blank=True, default=BLANK)
+    org_enumerator = models.CharField(
+        max_length=250, choices=ORG_ENUMERATOR_CHOICES, blank=True, default=BLANK
+    )
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
-    registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
+    registration_method = models.CharField(
+        max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK
+    )
+    collect_individual_data = models.CharField(
+        max_length=250, choices=YES_NO_CHOICE, default=BLANK
+    )
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
@@ -184,7 +212,9 @@ class ImportedIndividual(TimeStampedUUIDModel):
         related_name="individuals",
         on_delete=models.CASCADE,
     )
-    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
+    disability = models.CharField(
+        max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED
+    )
     work_status = models.CharField(
         max_length=20,
         choices=WORK_STATUS_CHOICE,
@@ -210,12 +240,24 @@ class ImportedIndividual(TimeStampedUUIDModel):
     flex_fields = JSONField(default=dict)
     pregnant = models.BooleanField(null=True)
     observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE)
-    seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    physical_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    memory_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    selfcare_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
+    seeing_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
+    )
+    hearing_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
+    )
+    physical_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
+    )
+    memory_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
+    )
+    selfcare_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
+    )
+    comms_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True
+    )
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
@@ -312,7 +354,9 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    import_done = models.CharField(max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED)
+    import_done = models.CharField(
+        max_length=15, choices=IMPORT_DONE_CHOICES, default=NOT_STARTED
+    )
     business_area_slug = models.CharField(max_length=250, blank=True)
 
     class Meta:
@@ -350,7 +394,9 @@ class ImportData(TimeStampedUUIDModel):
         (STATUS_ERROR, _("Error")),
         (STATUS_VALIDATION_ERROR, _("Validation Error")),
     )
-    status = models.CharField(max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES)
+    status = models.CharField(
+        max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES
+    )
     business_area_slug = models.CharField(max_length=200, blank=True)
     file = models.FileField(null=True)
     data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
@@ -390,7 +436,9 @@ class ImportedDocumentType(TimeStampedUUIDModel):
 class ImportedDocument(TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
-    individual = models.ForeignKey("ImportedIndividual", related_name="documents", on_delete=models.CASCADE)
+    individual = models.ForeignKey(
+        "ImportedIndividual", related_name="documents", on_delete=models.CASCADE
+    )
     type = models.ForeignKey(
         "ImportedDocumentType",
         related_name="documents",
@@ -424,7 +472,9 @@ class ImportedAgency(models.Model):
 
 
 class ImportedIndividualIdentity(models.Model):
-    agency = models.ForeignKey("ImportedAgency", related_name="identities", on_delete=models.CASCADE)
+    agency = models.ForeignKey(
+        "ImportedAgency", related_name="identities", on_delete=models.CASCADE
+    )
     individual = models.ForeignKey(
         "ImportedIndividual",
         related_name="identities",
@@ -442,13 +492,17 @@ class ImportedIndividualIdentity(models.Model):
 
 
 class KoboImportedSubmission(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True, null=True, blank=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True, db_index=True, null=True, blank=True
+    )
     kobo_submission_uuid = models.UUIDField()
     kobo_asset_id = models.CharField(max_length=150)
     kobo_submission_time = models.DateTimeField()
     # we use on_delete=models.SET_NULL because we want to be able to delete
     # ImportedHousehold without loosing track of importing
-    imported_household = models.ForeignKey(ImportedHousehold, blank=True, null=True, on_delete=models.SET_NULL)
+    imported_household = models.ForeignKey(
+        ImportedHousehold, blank=True, null=True, on_delete=models.SET_NULL
+    )
     amended = models.BooleanField(default=False, blank=True)
 
     registration_data_import = models.ForeignKey(
@@ -482,9 +536,13 @@ class Record(models.Model):
     source_id = models.IntegerField(db_index=True)
     data = models.JSONField(default=dict, blank=True, null=True)
     error_message = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
+    status = models.CharField(
+        max_length=16, choices=STATUSES_CHOICES, null=True, blank=True
+    )
 
-    unique_field = models.CharField(blank=True, null=True, max_length=255, db_index=True)
+    unique_field = models.CharField(
+        blank=True, null=True, max_length=255, db_index=True
+    )
     size = models.IntegerField(blank=True, null=True)
     counters = models.JSONField(blank=True, null=True)
 
@@ -513,7 +571,9 @@ class Record(models.Model):
 
 class ImportedBankAccountInfo(TimeStampedUUIDModel):
     individual = models.ForeignKey(
-        "registration_datahub.ImportedIndividual", related_name="bank_account_info", on_delete=models.CASCADE
+        "registration_datahub.ImportedIndividual",
+        related_name="bank_account_info",
+        on_delete=models.CASCADE,
     )
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
@@ -540,7 +600,9 @@ class DiiaHousehold(models.Model):
     )
 
     rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
-    vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True, null=True)
+    vpo_doc = ImageField(
+        validators=[validate_image_file_extension], blank=True, null=True
+    )
     vpo_doc_id = models.CharField(max_length=128, blank=True, null=True)
     vpo_doc_date = models.CharField(max_length=64, blank=True, null=True)
     address = models.CharField(max_length=1024, blank=True, null=True)
@@ -554,9 +616,15 @@ class DiiaHousehold(models.Model):
         blank=True,
     )
     imported_household = models.ForeignKey(
-        "ImportedHousehold", on_delete=models.SET_NULL, related_name="diia_households", null=True, blank=True
+        "ImportedHousehold",
+        on_delete=models.SET_NULL,
+        related_name="diia_households",
+        null=True,
+        blank=True,
     )
-    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
+    status = models.CharField(
+        max_length=16, choices=STATUSES_CHOICES, null=True, blank=True
+    )
 
     def __str__(self):
         return f"Diia Household ID: {self.id}"
@@ -600,13 +668,23 @@ class DiiaIndividual(models.Model):
     last_name = models.CharField(max_length=85, blank=True, null=True)
     first_name = models.CharField(max_length=85, blank=True, null=True)
     second_name = models.CharField(max_length=85, blank=True, null=True)
-    relationship = models.CharField(max_length=255, blank=True, choices=DIIA_RELATIONSHIP_CHOICE, null=True)
-    sex = models.CharField(max_length=255, choices=DIIA_SEX_CHOICE, null=True, blank=True)
+    relationship = models.CharField(
+        max_length=255, blank=True, choices=DIIA_RELATIONSHIP_CHOICE, null=True
+    )
+    sex = models.CharField(
+        max_length=255, choices=DIIA_SEX_CHOICE, null=True, blank=True
+    )
     birth_date = models.CharField(max_length=64, blank=True, null=True)
     birth_doc = models.CharField(max_length=128, blank=True, null=True)
-    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True)
+    marital_status = models.CharField(
+        max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True
+    )
     disability = models.CharField(
-        max_length=20, choices=DIIA_DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True
+        max_length=20,
+        choices=DIIA_DISABILITY_CHOICES,
+        default=NOT_DISABLED,
+        null=True,
+        blank=True,
     )
     iban = models.CharField(max_length=255, blank=True, null=True)
     bank_name = models.CharField(max_length=255, blank=True, null=True)
@@ -623,7 +701,11 @@ class DiiaIndividual(models.Model):
         blank=True,
     )
     imported_individual = models.ForeignKey(
-        "ImportedIndividual", on_delete=models.SET_NULL, related_name="diia_individuals", null=True, blank=True
+        "ImportedIndividual",
+        on_delete=models.SET_NULL,
+        related_name="diia_individuals",
+        null=True,
+        blank=True,
     )
 
     @property

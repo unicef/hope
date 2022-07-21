@@ -10,10 +10,14 @@ from hct_mis_api.apps.registration_datahub.models import (
 def update_kobo_asset_id():
     ImportedHousehold.objects.exclude(flex_registrations_record__isnull=True).update(
         kobo_asset_id=Subquery(
-            ImportedHousehold.objects.filter(pk=OuterRef("pk")).values("flex_registrations_record__source_id")[:1]
+            ImportedHousehold.objects.filter(pk=OuterRef("pk")).values(
+                "flex_registrations_record__source_id"
+            )[:1]
         )
     )
-    ImportedIndividual.objects.exclude(household__flex_registrations_record__isnull=True).update(
+    ImportedIndividual.objects.exclude(
+        household__flex_registrations_record__isnull=True
+    ).update(
         kobo_asset_id=Subquery(
             ImportedHousehold.objects.filter(pk=OuterRef("household__pk")).values(
                 "flex_registrations_record__source_id"

@@ -30,7 +30,10 @@ def _get_models(args):
                 if model._meta.app_label == arg:
                     models.append(model)
                     match_found = True
-                elif f"{model._meta.app_label.lower()}.{model._meta.model_name.lower()}" == arg:
+                elif (
+                    f"{model._meta.app_label.lower()}.{model._meta.model_name.lower()}"
+                    == arg
+                ):
                     models.append(model)
                     match_found = True
 

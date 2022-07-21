@@ -1,21 +1,36 @@
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from hct_mis_api.apps.registration_datahub.models import ImportedDocument, ImportedHousehold
-from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID, Document, Household
-from hct_mis_api.apps.household.serializers import serialize_by_household, serialize_by_individual
-from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
-from hct_mis_api.apps.core.models import BusinessArea
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_TAX_ID,
+    Document,
+    Household,
+)
+from hct_mis_api.apps.household.serializers import (
+    serialize_by_household,
+    serialize_by_individual,
+)
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedDocument,
+    ImportedHousehold,
+)
 
 
 def get_individual(tax_id, business_area_code):
     documents = (
         Document.objects.all()
         if not business_area_code
-        else Document.objects.filter(individual__household__business_area__code=business_area_code)
+        else Document.objects.filter(
+            individual__household__business_area__code=business_area_code
+        )
     ).filter(type__type=IDENTIFICATION_TYPE_TAX_ID, document_number=tax_id)
     if documents.count() > 1:
-        raise Exception(f"Multiple documents ({documents.count()}) with given tax_id found")
+        raise Exception(
+            f"Multiple documents ({documents.count()}) with given tax_id found"
+        )
     if documents.count() == 1:
         return documents.first().individual
 
@@ -27,7 +42,9 @@ def get_individual(tax_id, business_area_code):
         )
     ).filter(type__type=IDENTIFICATION_TYPE_TAX_ID, document_number=tax_id)
     if imported_documents.count() > 1:
-        raise Exception(f"Multiple imported documents ({imported_documents.count()}) with given tax_id found")
+        raise Exception(
+            f"Multiple imported documents ({imported_documents.count()}) with given tax_id found"
+        )
     if imported_documents.count() == 1:
         return imported_documents.first().individual
     raise Exception("Document with given tax_id not found")
@@ -41,7 +58,9 @@ def get_household(registration_id, business_area_code):
         else Household.objects.filter(business_area__code=business_area_code)
     ).filter(kobo_asset_id__endswith=kobo_asset_value)
     if households.count() > 1:
-        raise Exception(f"Multiple households ({households.count()}) with given registration_id found")
+        raise Exception(
+            f"Multiple households ({households.count()}) with given registration_id found"
+        )
     if households.count() == 1:
         return households.first()
 
@@ -51,12 +70,16 @@ def get_household(registration_id, business_area_code):
         business_areas = BusinessArea.objects.filter(code=business_area_code)
         if not business_areas:
             raise Exception(f"Business area with code {business_area_code} not found")
-        business_area = business_areas.first()  # code is unique, so no need to worry here
+        business_area = (
+            business_areas.first()
+        )  # code is unique, so no need to worry here
         imported_households_by_business_area = ImportedHousehold.objects.filter(
             registration_data_import__business_area_slug=business_area.slug
         )
 
-    imported_households = imported_households_by_business_area.filter(kobo_asset_id__endswith=kobo_asset_value)
+    imported_households = imported_households_by_business_area.filter(
+        kobo_asset_id__endswith=kobo_asset_value
+    )
     if imported_households.count() > 1:
         raise Exception(
             f"Multiple imported households ({imported_households.count()}) with given registration_id found"
@@ -93,8 +116,12 @@ class HouseholdStatusView(APIView):
         business_area_code = query_params.get("business_area_code", None)
 
         try:
-            data = get_household_or_individual(tax_id, registration_id, business_area_code)
+            data = get_household_or_individual(
+                tax_id, registration_id, business_area_code
+            )
         except Exception as exception:
-            return Response({"status": "not found", "error_message": str(exception)}, status=404)
+            return Response(
+                {"status": "not found", "error_message": str(exception)}, status=404
+            )
 
         return Response(data, status=200)

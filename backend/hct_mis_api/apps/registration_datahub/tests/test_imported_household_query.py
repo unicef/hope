@@ -66,7 +66,9 @@ class TestImportedHouseholdQuery(APITestCase):
         ]
     )
     def test_imported_household_query_all(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY,
@@ -86,10 +88,14 @@ class TestImportedHouseholdQuery(APITestCase):
         ]
     )
     def test_imported_household_query_single(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.IMPORTED_HOUSEHOLD_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.households[0].id, "ImportedHouseholdNode")},
+            variables={
+                "id": self.id_to_base64(self.households[0].id, "ImportedHouseholdNode")
+            },
         )

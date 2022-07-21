@@ -23,7 +23,6 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
@@ -33,7 +32,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
-from hct_mis_api.apps.program.filters import ProgramFilter, CashPlanFilter
+from hct_mis_api.apps.program.filters import CashPlanFilter, ProgramFilter
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
@@ -107,7 +106,10 @@ class Query(graphene.ObjectType):
         ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
+            hopeOneOfPermissionClass(
+                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+                *ALL_GRIEVANCES_CREATE_MODIFY
+            ),
         ),
     )
     chart_programmes_by_sector = graphene.Field(
@@ -153,7 +155,11 @@ class Query(graphene.ObjectType):
                 )
             )
             .annotate(
-                households_count=Coalesce(Sum("cash_plans__total_persons_covered"), 0, output_field=IntegerField())
+                households_count=Coalesce(
+                    Sum("cash_plans__total_persons_covered"),
+                    0,
+                    output_field=IntegerField(),
+                )
             )
             .order_by("custom_order", "start_date")
         )
@@ -193,17 +199,31 @@ class Query(graphene.ObjectType):
         ).order_by("-updated_at", "custom_order")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_programmes_by_sector(
+        self, info, business_area_slug, year, **kwargs
+    ):
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
-        valid_payment_records = get_payment_records_for_dashboard(year, business_area_slug, filters, True)
-        programs = Program.objects.filter(cash_plans__payment_records__in=valid_payment_records).distinct()
+        valid_payment_records = get_payment_records_for_dashboard(
+            year, business_area_slug, filters, True
+        )
+        programs = Program.objects.filter(
+            cash_plans__payment_records__in=valid_payment_records
+        ).distinct()
 
         programmes_by_sector = (
             programs.values("sector")
             .order_by("sector")
-            .annotate(total_count_without_cash_plus=Count("id", distinct=True, filter=Q(cash_plus=False)))
-            .annotate(total_count_with_cash_plus=Count("id", distinct=True, filter=Q(cash_plus=True)))
+            .annotate(
+                total_count_without_cash_plus=Count(
+                    "id", distinct=True, filter=Q(cash_plus=False)
+                )
+            )
+            .annotate(
+                total_count_with_cash_plus=Count(
+                    "id", distinct=True, filter=Q(cash_plus=True)
+                )
+            )
         )
         labels = []
         programmes_wo_cash_plus = []
@@ -211,9 +231,15 @@ class Query(graphene.ObjectType):
         programmes_total = []
         for programme in programmes_by_sector:
             labels.append(sector_choice_mapping.get(programme.get("sector")))
-            programmes_wo_cash_plus.append(programme.get("total_count_without_cash_plus") or 0)
-            programmes_with_cash_plus.append(programme.get("total_count_with_cash_plus") or 0)
-            programmes_total.append(programmes_wo_cash_plus[-1] + programmes_with_cash_plus[-1])
+            programmes_wo_cash_plus.append(
+                programme.get("total_count_without_cash_plus") or 0
+            )
+            programmes_with_cash_plus.append(
+                programme.get("total_count_with_cash_plus") or 0
+            )
+            programmes_total.append(
+                programmes_wo_cash_plus[-1] + programmes_with_cash_plus[-1]
+            )
 
         datasets = [
             {"label": "Programmes", "data": programmes_wo_cash_plus},
@@ -224,7 +250,9 @@ class Query(graphene.ObjectType):
         return {"labels": labels, "datasets": datasets}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_total_transferred_by_month(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_total_transferred_by_month(
+        self, info, business_area_slug, year, **kwargs
+    ):
         payment_records = get_payment_records_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
@@ -247,7 +275,20 @@ class Query(graphene.ObjectType):
                 )
             )
         )
-        months_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        months_labels = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ]
         previous_transfers = [0] * 12
         cash_transfers = [0] * 12
         voucher_transfers = [0] * 12
@@ -255,11 +296,15 @@ class Query(graphene.ObjectType):
         for data_dict in months_and_amounts:
             month_index = data_dict.get("delivery_date__month") - 1
             cash_transfers[month_index] = data_dict.get("total_delivered_cash") or 0
-            voucher_transfers[month_index] = data_dict.get("total_delivered_voucher") or 0
+            voucher_transfers[month_index] = (
+                data_dict.get("total_delivered_voucher") or 0
+            )
 
         for index in range(1, len(months_labels)):
             previous_transfers[index] = (
-                previous_transfers[index - 1] + cash_transfers[index - 1] + voucher_transfers[index - 1]
+                previous_transfers[index - 1]
+                + cash_transfers[index - 1]
+                + voucher_transfers[index - 1]
             )
         datasets = [
             {"label": "Previous Transfers", "data": previous_transfers},

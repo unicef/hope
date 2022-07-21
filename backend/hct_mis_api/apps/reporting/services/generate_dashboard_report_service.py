@@ -113,7 +113,7 @@ class GenerateDashboardReportContentHelpers:
         ) = cls._get_business_areas_or_programs(report, valid_payment_records)
 
         def aggregate_by_delivery_type(payment_records):
-            result = dict()
+            result = {}
             for delivery_type in PaymentRecord.DELIVERY_TYPE_CHOICE:
                 value = delivery_type[0]
                 result[value] = (
@@ -363,7 +363,8 @@ class GenerateDashboardReportContentHelpers:
         )
 
         totals = business_areas.aggregate(
-            Sum("total_cash", output_field=DecimalField()), Sum("total_voucher", output_field=DecimalField())
+            Sum("total_cash", output_field=DecimalField()),
+            Sum("total_voucher", output_field=DecimalField()),
         )
 
         return business_areas, totals
@@ -379,13 +380,17 @@ class GenerateDashboardReportContentHelpers:
             )
             .distinct()
             .annotate(
-                total_transferred=Sum("household__payment_records__delivered_quantity_usd", output_field=DecimalField())
+                total_transferred=Sum(
+                    "household__payment_records__delivered_quantity_usd",
+                    output_field=DecimalField(),
+                )
             )
             .annotate(num_households=Count("household", distinct=True))
         )
 
         totals = admin_areas.aggregate(
-            Sum("total_transferred", output_field=DecimalField()), Sum("num_households", output_field=DecimalField())
+            Sum("total_transferred", output_field=DecimalField()),
+            Sum("num_households", output_field=DecimalField()),
         )
         admin_areas = admin_areas.values("id", "name", "p_code", "num_households", "total_transferred")
 
@@ -573,8 +578,8 @@ class GenerateDashboardReportContentHelpers:
         return filter_vars
 
     @classmethod
-    def _format_filters_for_payment_records(self, report: DashboardReport):
-        return self._format_filters(
+    def _format_filters_for_payment_records(cls, report: DashboardReport):
+        return cls._format_filters(
             report,
             {"delivered_quantity_usd__gt": 0},
             "delivery_date",
@@ -584,8 +589,8 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def _get_payment_records_for_report(self, report):
-        filter_vars = self._format_filters_for_payment_records(report)
+    def _get_payment_records_for_report(cls, report):
+        filter_vars = cls._format_filters_for_payment_records(report)
         return PaymentRecord.objects.filter(**filter_vars)
 
     @classmethod
@@ -994,7 +999,7 @@ class GenerateDashboardReportService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i, _width in enumerate(column_widths):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             value = (

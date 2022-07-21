@@ -1,7 +1,8 @@
-from django.core.management.base import BaseCommand
+from collections import defaultdict
+
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from collections import defaultdict
+from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
@@ -101,7 +102,12 @@ class Command(BaseCommand):
                 "targetpopulationentry",
                 "targetpopulation",
             ],
-            "payment": ["cashplanpaymentverification", "paymentrecord", "paymentverification", "serviceprovider"],
+            "payment": [
+                "cashplanpaymentverification",
+                "paymentrecord",
+                "paymentverification",
+                "serviceprovider",
+            ],
             "django_celery_beat": [
                 "clockedschedule",
                 "crontabschedule",
@@ -114,7 +120,10 @@ class Command(BaseCommand):
             "social_django": ["association", "nonce", "usersocialauth"],
             "registration_data": ["registrationdataimport"],
             "reporting": ["dashboardreport", "report"],
-            "sanction_list": ["sanctionlistindividualdocument", "sanctionlistindividual"],
+            "sanction_list": [
+                "sanctionlistindividualdocument",
+                "sanctionlistindividual",
+            ],
             "explorer": ["query"],
             "steficon": ["rulecommit"],  # 'rule' view only
             "targeting": ["householdselection", "targetpopulation"],
@@ -128,10 +137,20 @@ class Command(BaseCommand):
             "delete": "All Models Can DELETE",
         }
 
-        self.view_perms, self.add_perms, self.change_perms, self.delete_perms = list(), list(), list(), list()
+        self.view_perms, self.add_perms, self.change_perms, self.delete_perms = (
+            [],
+            [],
+            [],
+            [],
+        )
         self.perms_list_map = defaultdict(list)
         self.perms_list_map.update(
-            {"view": self.view_perms, "add": self.add_perms, "change": self.change_perms, "delete": self.delete_perms}
+            {
+                "view": self.view_perms,
+                "add": self.add_perms,
+                "change": self.change_perms,
+                "delete": self.delete_perms,
+            }
         )
 
         for app, models in app_model_map.items():
@@ -165,14 +184,26 @@ class Command(BaseCommand):
 
         # custom create groups for Steficon Rule, Constance Config, Advanced Filter and Query Dataset
         other_custom_groups_map = [
-            {"name": "steficon | Rule | Can view Rule", "codename": "view_rule", "action": "view"},
-            {"name": "constance | config | Can change Config", "codename": "change_config", "action": "change"},
+            {
+                "name": "steficon | Rule | Can view Rule",
+                "codename": "view_rule",
+                "action": "view",
+            },
+            {
+                "name": "constance | config | Can change Config",
+                "codename": "change_config",
+                "action": "change",
+            },
             {
                 "name": "advanced_filters | Advanced Filter | Can change Advanced Filter",
                 "codename": "change_advancedfilter",
                 "action": "change",
             },
-            {"name": "power_query | dataset | Can change dataset", "codename": "change_dataset", "action": "change"},
+            {
+                "name": "power_query | dataset | Can change dataset",
+                "codename": "change_dataset",
+                "action": "change",
+            },
         ]
 
         for i in other_custom_groups_map:

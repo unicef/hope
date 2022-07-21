@@ -70,8 +70,12 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
 
         cls.validate(
-            start_date=datetime.combine(program_data.get("start_date"), datetime.min.time()),
-            end_date=datetime.combine(program_data.get("end_date"), datetime.min.time()),
+            start_date=datetime.combine(
+                program_data.get("start_date"), datetime.min.time()
+            ),
+            end_date=datetime.combine(
+                program_data.get("end_date"), datetime.min.time()
+            ),
         )
 
         program = Program(
@@ -81,7 +85,13 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         )
         program.full_clean()
         program.save()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            None,
+            program,
+        )
         return CreateProgram(program=program)
 
 
@@ -127,7 +137,13 @@ class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutatio
         program.full_clean()
         program.save()
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_program, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_program,
+            program,
+        )
         return UpdateProgram(program=program)
 
 
@@ -149,7 +165,13 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         cls.validate(program=program)
 
         program.delete()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_program, program)
+        log_create(
+            Program.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_program,
+            program,
+        )
         return cls(ok=True)
 
 

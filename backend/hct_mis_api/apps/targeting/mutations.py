@@ -1,11 +1,12 @@
 import logging
 
-import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import (
@@ -49,6 +50,7 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
+
 from .celery_tasks import target_population_apply_steficon
 
 logger = logging.getLogger(__name__)
@@ -78,7 +80,13 @@ class ValidatedMutation(PermissionMutation):
         old_model_object = cls.get_object(root, info, **kwargs)
         if cls.permissions:
             cls.has_permission(info, cls.permissions, model_object.business_area)
-        return cls.validated_mutate(root, info, model_object=model_object, old_model_object=old_model_object, **kwargs)
+        return cls.validated_mutate(
+            root,
+            info,
+            model_object=model_object,
+            old_model_object=old_model_object,
+            **kwargs
+        )
 
     @classmethod
     def get_object(cls, root, info, **kwargs):
@@ -119,14 +127,19 @@ def from_input_to_targeting_criteria(targeting_criteria_input, program: Program)
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
         for filter_input in rule_input.get("filters", []):
-            rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **filter_input)
+            rule_filter = TargetingCriteriaRuleFilter(
+                targeting_criteria_rule=rule, **filter_input
+            )
             rule_filter.save()
         for block_input in rule_input.get("individuals_filters_blocks", []):
             block = TargetingIndividualRuleFilterBlock(
-                targeting_criteria_rule=rule, target_only_hoh=not program.individual_data_needed
+                targeting_criteria_rule=rule,
+                target_only_hoh=not program.individual_data_needed,
             )
             block.save()
-            for individual_block_filters_input in block_input.get("individual_block_filters"):
+            for individual_block_filters_input in block_input.get(
+                "individual_block_filters"
+            ):
                 individual_block_filters = TargetingIndividualBlockRuleFilter(
                     individuals_filters_block=block, **individual_block_filters_input
                 )
@@ -146,7 +159,9 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     def processed_mutate(cls, root, info, **kwargs):
         user = info.context.user
         input = kwargs.pop("input")
-        program = get_object_or_404(Program, pk=decode_id_string(input.get("program_id")))
+        program = get_object_or_404(
+            Program, pk=decode_id_string(input.get("program_id"))
+        )
 
         cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
 
@@ -158,7 +173,9 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
         business_area = BusinessArea.objects.get(slug=input.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
-        targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
+        targeting_criteria = from_input_to_targeting_criteria(
+            targeting_criteria_input, program
+        )
         target_population = TargetPopulation(
             name=input.get("name"),
             created_by=user,
@@ -170,7 +187,13 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         target_population.program = program
         target_population.full_clean()
         target_population.save()
-        log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            None,
+            target_population,
+        )
         return cls(target_population=target_population)
 
 
@@ -191,7 +214,9 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
         old_target_population = cls.get_object(id)
 
-        cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
+        cls.has_permission(
+            info, Permissions.TARGETING_UPDATE, target_population.business_area
+        )
 
         name = input.get("name")
         program_id_encoded = input.get("program_id")
@@ -214,21 +239,29 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             target_population.vulnerability_score_max = vulnerability_score_max
 
         if target_population.is_locked() and name:
-            logger.error("Name can't be changed when Target Population is in APPROVED status")
-            raise ValidationError("Name can't be changed when Target Population is in APPROVED status")
+            logger.error(
+                "Name can't be changed when Target Population is in APPROVED status"
+            )
+            raise ValidationError(
+                "Name can't be changed when Target Population is in APPROVED status"
+            )
         if target_population.is_finalized():
             logger.error("Finalized Target Population can't be changed")
             raise ValidationError("Finalized Target Population can't be changed")
         if name:
             target_population.name = name
         if program_id_encoded:
-            program = get_object_or_404(Program, pk=decode_id_string(program_id_encoded))
+            program = get_object_or_404(
+                Program, pk=decode_id_string(program_id_encoded)
+            )
             target_population.program = program
         targeting_criteria_input = input.get("targeting_criteria")
         if targeting_criteria_input is not None:
             TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         if targeting_criteria_input:
-            targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, target_population.program)
+            targeting_criteria = from_input_to_targeting_criteria(
+                targeting_criteria_input, target_population.program
+            )
             if target_population.status == TargetPopulation.STATUS_DRAFT:
                 if target_population.candidate_list_targeting_criteria:
                     target_population.candidate_list_targeting_criteria.delete()
@@ -358,9 +391,15 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                     target_population=target_population,
                 ).update(final=False)
 
-            HouseholdSelection.objects.filter(target_population=target_population,).exclude(
-                household__id__in=target_population.vulnerability_score_filtered_households.values_list("id")
-            ).update(final=False)
+            HouseholdSelection.objects.filter(
+                target_population=target_population,
+            ).exclude(
+                household__id__in=target_population.vulnerability_score_filtered_households.values_list(
+                    "id"
+                )
+            ).update(
+                final=False
+            )
 
             target_population.save()
         send_target_population_task.delay(target_population.id)
@@ -393,7 +432,9 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             target_id = utils.decode_id_string(target_population_data.pop("id"))
             target_population = TargetPopulation.objects.get(id=target_id)
 
-            cls.has_permission(info, Permissions.TARGETING_DUPLICATE, target_population.business_area)
+            cls.has_permission(
+                info, Permissions.TARGETING_DUPLICATE, target_population.business_area
+            )
 
             target_population_copy = TargetPopulation(
                 name=name,
@@ -409,14 +450,20 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             target_population_copy.full_clean()
             target_population_copy.save()
             if target_population.candidate_list_targeting_criteria:
-                target_population_copy.candidate_list_targeting_criteria = cls.copy_target_criteria(
-                    target_population.candidate_list_targeting_criteria
+                target_population_copy.candidate_list_targeting_criteria = (
+                    cls.copy_target_criteria(
+                        target_population.candidate_list_targeting_criteria
+                    )
                 )
             target_population_copy.full_clean()
             target_population_copy.save()
             target_population_copy.refresh_from_db()
             log_create(
-                TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population
+                TargetPopulation.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                info.context.user,
+                None,
+                target_population,
             )
             return CopyTargetPopulationMutation(target_population_copy)
         except ValidationError as e:
@@ -428,7 +475,9 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         targeting_criteria_copy = TargetingCriteria()
         targeting_criteria_copy.save()
         for rule in targeting_criteria.rules.all():
-            rule_copy = TargetingCriteriaRule(targeting_criteria=targeting_criteria_copy)
+            rule_copy = TargetingCriteriaRule(
+                targeting_criteria=targeting_criteria_copy
+            )
             rule_copy.save()
             for hh_filter in rule.filters.all():
                 hh_filter.pk = None
@@ -436,7 +485,8 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
                 hh_filter.save()
             for ind_filter_block in rule.individuals_filters_blocks.all():
                 ind_filter_block_copy = TargetingIndividualRuleFilterBlock(
-                    targeting_criteria_rule=rule_copy, target_only_hoh=ind_filter_block.target_only_hoh
+                    targeting_criteria_rule=rule_copy,
+                    target_only_hoh=ind_filter_block.target_only_hoh,
                 )
                 ind_filter_block_copy.save()
                 for ind_filter in ind_filter_block.individual_block_filters.all():
@@ -460,7 +510,9 @@ class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         target_population = TargetPopulation.objects.get(id=target_id)
         old_target_population = TargetPopulation.objects.get(id=target_id)
 
-        cls.has_permission(_info, Permissions.TARGETING_REMOVE, target_population.business_area)
+        cls.has_permission(
+            _info, Permissions.TARGETING_REMOVE, target_population.business_area
+        )
 
         cls.validate_is_finalized(target_population.status)
         target_population.delete()
@@ -474,7 +526,9 @@ class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         return DeleteTargetPopulationMutation(ok=True)
 
 
-class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
+class SetSteficonRuleOnTargetPopulationMutation(
+    PermissionRelayMutation, TargetValidator
+):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Input:
@@ -495,7 +549,9 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
         target_population = TargetPopulation.objects.get(id=target_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
         old_target_population = TargetPopulation.objects.get(id=target_id)
-        cls.has_permission(_info, Permissions.TARGETING_UPDATE, target_population.business_area)
+        cls.has_permission(
+            _info, Permissions.TARGETING_UPDATE, target_population.business_area
+        )
 
         encoded_steficon_rule_id = kwargs.get("steficon_rule_id")
         if encoded_steficon_rule_id is not None:
@@ -514,7 +570,9 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             steficon_rule_commit = steficon_rule.latest
             if not steficon_rule.enabled or steficon_rule.deprecated:
                 logger.error("This steficon rule is not enabled or is deprecated.")
-                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+                raise GraphQLError(
+                    "This steficon rule is not enabled or is deprecated."
+                )
             target_population.steficon_rule = steficon_rule_commit
             target_population.status = TargetPopulation.STATUS_STEFICON_WAIT
             target_population.save()
@@ -524,7 +582,9 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             target_population.vulnerability_score_min = None
             target_population.vulnerability_score_max = None
             target_population.save()
-            for selection in HouseholdSelection.objects.filter(target_population=target_population):
+            for selection in HouseholdSelection.objects.filter(
+                target_population=target_population
+            ):
                 selection.vulnerability_score = None
                 selection.save(update_fields=["vulnerability_score"])
         log_create(
@@ -534,7 +594,9 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             old_target_population,
             target_population,
         )
-        return SetSteficonRuleOnTargetPopulationMutation(target_population=target_population)
+        return SetSteficonRuleOnTargetPopulationMutation(
+            target_population=target_population
+        )
 
 
 class Mutations(graphene.ObjectType):
@@ -545,4 +607,6 @@ class Mutations(graphene.ObjectType):
     approve_target_population = ApproveTargetPopulationMutation.Field()
     unapprove_target_population = UnapproveTargetPopulationMutation.Field()
     finalize_target_population = FinalizeTargetPopulationMutation.Field()
-    set_steficon_rule_on_target_population = SetSteficonRuleOnTargetPopulationMutation.Field()
+    set_steficon_rule_on_target_population = (
+        SetSteficonRuleOnTargetPopulationMutation.Field()
+    )

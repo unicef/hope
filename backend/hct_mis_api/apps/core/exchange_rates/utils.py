@@ -28,8 +28,10 @@ def fix_exchange_rates(all=None):
             continue
         else:
             exchange_rate = Decimal(exchange_rate)
-        payment_record.delivered_quantity_usd = Decimal(payment_record.delivered_quantity / exchange_rate).quantize(
-            Decimal(".01")
-        )
+        payment_record.delivered_quantity_usd = Decimal(
+            payment_record.delivered_quantity / exchange_rate
+        ).quantize(Decimal(".01"))
 
-    PaymentRecord.objects.bulk_update(all_payment_records, ["delivered_quantity_usd"], 1000)
+    PaymentRecord.objects.bulk_update(
+        all_payment_records, ["delivered_quantity_usd"], 1000
+    )

@@ -1,5 +1,5 @@
 import operator
-from unittest import  mock
+from unittest import mock
 
 from django.conf import settings
 from django.core.management import call_command
@@ -12,7 +12,9 @@ from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceV
 
 
 class TestXLSXValidatorsMethods(APITestCase):
-    FILES_DIR_PATH = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
+    FILES_DIR_PATH = (
+        f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
+    )
 
     @classmethod
     def setUpTestData(cls):
@@ -27,7 +29,11 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value in correct_values:
-            self.assertTrue(upload_xlsx_instance_validator.geolocation_validator(value, "hh_geopoint_h_c"))
+            self.assertTrue(
+                upload_xlsx_instance_validator.geolocation_validator(
+                    value, "hh_geopoint_h_c"
+                )
+            )
 
         # test incorrect values:
         incorrect_values = (
@@ -38,7 +44,11 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value in incorrect_values:
-            self.assertFalse(upload_xlsx_instance_validator.geolocation_validator(value, "hh_geopoint_h_c"))
+            self.assertFalse(
+                upload_xlsx_instance_validator.geolocation_validator(
+                    value, "hh_geopoint_h_c"
+                )
+            )
 
     def test_date_validator(self):
         # test correct values:
@@ -52,7 +62,9 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value in correct_values:
-            self.assertTrue(upload_xlsx_instance_validator.date_validator(value, "birth_date_i_c"))
+            self.assertTrue(
+                upload_xlsx_instance_validator.date_validator(value, "birth_date_i_c")
+            )
 
         # test incorrect values:
         incorrect_values = (
@@ -64,7 +76,9 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value in incorrect_values:
-            self.assertFalse(upload_xlsx_instance_validator.date_validator(value, "birth_date_i_c"))
+            self.assertFalse(
+                upload_xlsx_instance_validator.date_validator(value, "birth_date_i_c")
+            )
 
     def test_integer_validator(self):
         # test correct values:
@@ -78,7 +92,9 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value in correct_values:
-            self.assertTrue(upload_xlsx_instance_validator.integer_validator(value, "size_h_c"))
+            self.assertTrue(
+                upload_xlsx_instance_validator.integer_validator(value, "size_h_c")
+            )
 
         # test incorrect values:
         incorrect_values = (
@@ -91,7 +107,9 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value in incorrect_values:
-            self.assertFalse(upload_xlsx_instance_validator.integer_validator(value, "size_h_c"))
+            self.assertFalse(
+                upload_xlsx_instance_validator.integer_validator(value, "size_h_c")
+            )
 
     def test_phone_validator(self):
         # test correct values:
@@ -106,7 +124,9 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value in correct_values:
-            self.assertTrue(upload_xlsx_instance_validator.phone_validator(value, "phone_no_i_c"))
+            self.assertTrue(
+                upload_xlsx_instance_validator.phone_validator(value, "phone_no_i_c")
+            )
 
         # test incorrect values:
         incorrect_values = (
@@ -122,7 +142,9 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value in incorrect_values:
-            self.assertFalse(upload_xlsx_instance_validator.phone_validator(value, "phone_no_i_c"))
+            self.assertFalse(
+                upload_xlsx_instance_validator.phone_validator(value, "phone_no_i_c")
+            )
 
     def test_choice_validator(self):
         test_correct_values = (("REFUGEE", "residence_status_h_c"),)
@@ -134,11 +156,15 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value, header in test_correct_values:
-            self.assertTrue(upload_xlsx_instance_validator.choice_validator(value, header))
+            self.assertTrue(
+                upload_xlsx_instance_validator.choice_validator(value, header)
+            )
 
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
         for value, header in test_incorrect_values:
-            self.assertFalse(upload_xlsx_instance_validator.choice_validator(value, header))
+            self.assertFalse(
+                upload_xlsx_instance_validator.choice_validator(value, header)
+            )
 
     def test_rows_validator_too_many_head_of_households(self):
         wb = openpyxl.load_workbook(
@@ -152,7 +178,8 @@ class TestXLSXValidatorsMethods(APITestCase):
             {
                 "row_number": 0,
                 "header": "relationship_i_c",
-                "message": "Sheet: Individuals, There are multiple head of " "households for household with id: 3",
+                "message": "Sheet: Individuals, There are multiple head of "
+                "households for household with id: 3",
             }
         ]
         self.assertEqual(expected, result)
@@ -436,7 +463,9 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result = upload_xlsx_instance_validator.validate_everything(
+                file, "afghanistan"
+            )
             self.assertEqual(result[0]["row_number"], expected_values[0]["row_number"])
             self.assertEqual(result[0]["message"], expected_values[0]["message"])
 
@@ -455,7 +484,9 @@ class TestXLSXValidatorsMethods(APITestCase):
             lambda *args: {"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.required_validator(value="tak", header="test")
+            result = upload_xlsx_instance_validator.required_validator(
+                value="tak", header="test"
+            )
             self.assertTrue(result)
 
         with mock.patch(
@@ -463,7 +494,9 @@ class TestXLSXValidatorsMethods(APITestCase):
             lambda *args: {"test": {"required": True}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.required_validator(value="", header="test")
+            result = upload_xlsx_instance_validator.required_validator(
+                value="", header="test"
+            )
             self.assertFalse(result)
 
         with mock.patch(
@@ -471,7 +504,9 @@ class TestXLSXValidatorsMethods(APITestCase):
             lambda *args: {"test": {"required": False}},
         ):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.required_validator(value="", header="test")
+            result = upload_xlsx_instance_validator.required_validator(
+                value="", header="test"
+            )
             self.assertTrue(result)
 
     def test_validate_empty_file(self):

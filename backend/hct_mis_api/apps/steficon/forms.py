@@ -68,8 +68,8 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
     def clean_results(self):
         try:
             return self.cleaned_data["results"].split(",")
-        except Exception as e:
-            raise ValidationError(e)
+        except Exception as exc:
+            raise ValidationError(exc) from exc
 
 
 class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
@@ -85,14 +85,14 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
     def clean_fields(self):
         try:
             return self.cleaned_data["fields"].split(",")
-        except Exception as e:
-            raise ValidationError(e)
+        except Exception as exc:
+            raise ValidationError(exc) from exc
 
     def clean_data(self):
         try:
             return json.loads(self.cleaned_data["data"])
-        except Exception as e:
-            raise ValidationError(e)
+        except Exception as exc:
+            raise ValidationError(exc) from exc
 
 
 class TPModelChoiceField(forms.ModelChoiceField):
@@ -153,37 +153,37 @@ class RuleTestForm(forms.Form):
         if original:
             try:
                 return json.loads(original)
-            except Exception as e:
-                raise ValidationError(e)
+            except Exception as exc:
+                raise ValidationError(exc) from exc
 
     def clean_file(self):
         original = self.cleaned_data["file"]
         if original:
             try:
                 return json.loads(original.read())
-            except Exception as e:
-                raise ValidationError(e)
+            except Exception as exc:
+                raise ValidationError(exc) from exc
 
     def clean(self):
         selection = self.cleaned_data["opt"]
         if selection == "optFile":
             if not self.cleaned_data.get("file"):
-                raise ValidationError({"file": "Please select a file to upload"})
+                raise ValidationError({"file": "Please select a file to upload"}) from None
         elif selection == "optData" and not self.cleaned_data.get("raw_data"):
-            raise ValidationError({"raw_data": "Please provide sample data"})
+            raise ValidationError({"raw_data": "Please provide sample data"}) from None
         elif selection == "optTargetPopulation":
             if not self.cleaned_data.get("target_population"):
-                raise ValidationError({"target_population": "Please select a TargetPopulation"})
+                raise ValidationError({"target_population": "Please select a TargetPopulation"}) from None
         elif selection == "optContentType":
             if not self.cleaned_data.get("content_type"):
-                raise ValidationError({"content_type": "Please select a Content Type"})
+                raise ValidationError({"content_type": "Please select a Content Type"}) from None
             ct: ContentType = self.cleaned_data["content_type"]
             model = ct.model_class()
             try:
                 filters = json.loads(self.cleaned_data.get("content_type_filters") or "{}")
                 model.objects.filter(**filters)
-            except Exception as e:
-                raise ValidationError({"content_type_filters": str(e)})
+            except Exception as exc:
+                raise ValidationError({"content_type_filters": str(exc)}) from exc
 
 
 class RuleForm(forms.ModelForm):
@@ -200,13 +200,13 @@ class RuleForm(forms.ModelForm):
         i = mapping[language](code)
         try:
             i.validate()
-        except Exception as e:
-            raise ValidationError({"definition": str(e)})
+        except Exception as exc:
+            raise ValidationError({"definition": str(exc)}) from exc
         if config.USE_BLACK:
             try:
                 self.cleaned_data["definition"] = format_code(code)
-            except Exception as e:
-                raise ValidationError({"definition": str(e)})
+            except Exception as exc:
+                raise ValidationError({"definition": str(exc)}) from exc
         if self.instance.pk:
             pass
         return self.cleaned_data

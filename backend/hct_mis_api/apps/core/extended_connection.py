@@ -8,8 +8,8 @@ class ExtendedConnection(graphene.Connection):
     total_count = graphene.Int()
     edge_count = graphene.Int()
 
-    def resolve_total_count(root, info, **kwargs):
-        return root.length
+    def resolve_total_count(self, info, **kwargs):
+        return self.length
 
-    def resolve_edge_count(root, info, **kwargs):
-        return len(root.edges)
+    def resolve_edge_count(self, info, **kwargs):
+        return len(self.edges)

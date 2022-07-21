@@ -9,7 +9,7 @@ IS_STAGING = True
 
 # domains/hosts etc.
 DOMAIN_NAME = os.getenv("DOMAIN", "dev-hct.unitst.org")
-WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
+WWW_ROOT = f"http://{DOMAIN_NAME}/"
 
 # other
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

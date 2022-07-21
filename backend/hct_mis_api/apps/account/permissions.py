@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(name, *args):
-        return name
+    def _generate_next_value_(self, *args):
+        return self
 
     # RDI
     RDI_VIEW_LIST = auto()
@@ -306,7 +306,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
     def filterset_class(self):
         if not self._filterset_class:
             fields = self._fields or self.node_type._meta.filter_fields
-            meta = dict(model=self.model, fields=fields)
+            meta = {"model": self.model, "fields": fields}
             if self._extra_filter_meta:
                 meta.update(self._extra_filter_meta)
 

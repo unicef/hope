@@ -122,8 +122,12 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdsdf334")
-        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="jghhrrr")
+        cls.admin_area_1 = AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="asdsdf334"
+        )
+        cls.admin_area_2 = AdminAreaFactory(
+            title="City Example", admin_area_level=area_type, p_code="jghhrrr"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -131,15 +135,21 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area_1_new = AreaFactory(name="City Test", area_type=area_type, p_code="asdsdf334")
-        cls.admin_area_2_new = AreaFactory(name="City Example", area_type=area_type, p_code="jghhrrr")
+        cls.admin_area_1_new = AreaFactory(
+            name="City Test", area_type=area_type, p_code="asdsdf334"
+        )
+        cls.admin_area_2_new = AreaFactory(
+            name="City Example", area_type=area_type, p_code="jghhrrr"
+        )
 
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
+        household_one = HouseholdFactory.build(
+            id="07a901ed-d2a5-422a-b962-3570da1d5d07"
+        )
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
@@ -162,10 +172,13 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         ]
 
         cls.individuals = [
-            IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
+            IndividualFactory(household=household_one, **individual)
+            for individual in cls.individuals_to_create
         ]
         first_individual = cls.individuals[0]
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        national_id_type = DocumentType.objects.get(
+            country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID
+        )
         birth_certificate_type = DocumentType.objects.get(
             country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
@@ -236,11 +249,18 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "full_name": {"value": "Test Example", "approve_status": False},
                 "family_name": {"value": "Example", "approve_status": False},
                 "sex": {"value": "MALE", "approve_status": False},
-                "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
+                "birth_date": {
+                    "value": date(year=1980, month=2, day=1).isoformat(),
+                    "approve_status": False,
+                },
                 "marital_status": {"value": SINGLE, "approve_status": False},
                 "documents": [
                     {
-                        "value": {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "999-888-777"},
+                        "value": {
+                            "country": "POL",
+                            "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                            "number": "999-888-777",
+                        },
                         "approve_status": False,
                     },
                 ],
@@ -264,8 +284,16 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                     }
                 ],
                 "documents_to_remove": [
-                    {"value": cls.id_to_base64(cls.national_id.id, "DocumentNode"), "approve_status": False},
-                    {"value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                    {
+                        "value": cls.id_to_base64(cls.national_id.id, "DocumentNode"),
+                        "approve_status": False,
+                    },
+                    {
+                        "value": cls.id_to_base64(
+                            cls.birth_certificate.id, "DocumentNode"
+                        ),
+                        "approve_status": False,
+                    },
                 ],
                 "flex_fields": {},
             },
@@ -298,13 +326,17 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         ]
     )
     def test_approve_add_individual(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_ADD_INDIVIDUAL_MUTATION,
             context={"user": self.user},
             variables={
-                "grievanceTicketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
+                "grievanceTicketId": self.id_to_base64(
+                    self.add_individual_grievance_ticket.id, "GrievanceTicketNode"
+                ),
                 "approveStatus": True,
             },
         )
@@ -319,16 +351,21 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         ]
     )
     def test_approve_update_individual(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_INDIVIDUAL_DATA_CHANGE_GRIEVANCE_MUTATION,
             context={"user": self.user},
             variables={
                 "grievanceTicketId": self.id_to_base64(
-                    self.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"
+                    self.individual_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
                 ),
-                "individualApproveData": json.dumps({"givenName": True, "fullName": True, "familyName": True}),
+                "individualApproveData": json.dumps(
+                    {"givenName": True, "fullName": True, "familyName": True}
+                ),
                 "approvedDocumentsToCreate": [0],
                 "approvedDocumentsToEdit": [0],
                 "approvedDocumentsToRemove": [0],
@@ -352,14 +389,17 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         ]
     )
     def test_approve_update_household(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_HOUSEHOLD_DATA_CHANGE_GRIEVANCE_MUTATION,
             context={"user": self.user},
             variables={
                 "grievanceTicketId": self.id_to_base64(
-                    self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"
+                    self.household_data_change_grievance_ticket.id,
+                    "GrievanceTicketNode",
                 ),
                 "householdApproveData": json.dumps({"village": True}),
                 "flexFieldsApproveData": json.dumps({}),

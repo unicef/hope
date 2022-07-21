@@ -19,7 +19,7 @@ class Sampling:
 
     def process_sampling(
         self, cash_plan_verification: CashPlanPaymentVerification
-    ) -> Tuple[CashPlanPaymentVerification, List[PaymentRecord]]:
+    ) -> tuple[CashPlanPaymentVerification, list[PaymentRecord]]:
         if not self.payment_records:
             raise GraphQLError("There are no payment records that could be assigned to a new verification plan.")
 
@@ -41,7 +41,7 @@ class Sampling:
 
         return cash_plan_verification, self.payment_records
 
-    def generate_sampling(self) -> Tuple[int, int]:
+    def generate_sampling(self) -> tuple[int, int]:
         payment_record_count = self.payment_records.count()
         sampling = self._get_sampling()
         sampling.sampling(self.payment_records)

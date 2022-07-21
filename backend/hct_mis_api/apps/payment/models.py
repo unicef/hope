@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import JSONField
@@ -7,12 +8,15 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.contrib.postgres.fields import ArrayField
 
 from model_utils import Choices
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hct_mis_api.apps.utils.models import (
+    ConcurrencyModel,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 
 class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
@@ -99,7 +103,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="payment_records",
     )
     head_of_household = models.ForeignKey(
-        "household.Individual", on_delete=models.CASCADE, related_name="payment_records", null=True
+        "household.Individual",
+        on_delete=models.CASCADE,
+        related_name="payment_records",
+        null=True,
     )
 
     full_name = models.CharField(max_length=255)
@@ -115,7 +122,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     target_population_cash_assist_id = models.CharField(max_length=255)
     entitlement_card_number = models.CharField(max_length=255, null=True)
     entitlement_card_status = models.CharField(
-        choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20, null=True
+        choices=ENTITLEMENT_CARD_STATUS_CHOICE,
+        default="ACTIVE",
+        max_length=20,
+        null=True,
     )
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
@@ -136,7 +146,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     service_provider = models.ForeignKey(
@@ -161,7 +174,9 @@ class ServiceProvider(TimeStampedUUIDModel):
         return self.full_name
 
 
-class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
+class CashPlanPaymentVerification(
+    TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel
+):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -206,14 +221,18 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
         (VERIFICATION_CHANNEL_RAPIDPRO, "RAPIDPRO"),
         (VERIFICATION_CHANNEL_XLSX, "XLSX"),
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True
+    )
     cash_plan = models.ForeignKey(
         "program.CashPlan",
         on_delete=models.CASCADE,
         related_name="verifications",
     )
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
-    verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
+    verification_channel = models.CharField(
+        max_length=50, choices=VERIFICATION_CHANNEL_CHOICES
+    )
     sample_size = models.PositiveIntegerField(null=True)
     responded_count = models.PositiveIntegerField(null=True)
     received_count = models.PositiveIntegerField(null=True)
@@ -222,7 +241,9 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
     confidence_interval = models.FloatField(null=True)
     margin_of_error = models.FloatField(null=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
-    rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
+    rapid_pro_flow_start_uuids = ArrayField(
+        models.CharField(max_length=255, blank=True), default=list
+    )
     age_filter = JSONField(null=True)
     excluded_admin_areas_filter = JSONField(null=True)
     sex_filter = models.CharField(null=True, max_length=10)
@@ -251,8 +272,12 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, Unicef
 
 
 def build_summary(cash_plan):
-    active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
-    pending_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_PENDING).count()
+    active_count = cash_plan.verifications.filter(
+        status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE
+    ).count()
+    pending_count = cash_plan.verifications.filter(
+        status=CashPlanPaymentVerificationSummary.STATUS_PENDING
+    ).count()
     not_finished_count = cash_plan.verifications.exclude(
         status=CashPlanPaymentVerificationSummary.STATUS_FINISHED
     ).count()
@@ -317,9 +342,15 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="payment_record_verifications",
     )
     payment_record = models.OneToOneField(
-        "payment.PaymentRecord", related_name="verification", on_delete=models.CASCADE, null=True, blank=True
+        "payment.PaymentRecord",
+        related_name="verification",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
+    )
     status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
         decimal_places=2,
@@ -336,7 +367,9 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         ):
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
-        return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
+        return not (
+            self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10
+        )
 
     @property
     def business_area(self):
@@ -358,10 +391,16 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
         (STATUS_PENDING, "Pending"),
     )
     status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, verbose_name="Verification status", db_index=True
+        max_length=50,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+        verbose_name="Verification status",
+        db_index=True,
     )
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     cash_plan = models.OneToOneField(
-        "program.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
+        "program.CashPlan",
+        on_delete=models.CASCADE,
+        related_name="cash_plan_payment_verification_summary",
     )

@@ -10,17 +10,19 @@ from django.utils.translation import gettext_lazy as _
 
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
+from smart_admin.utils import match, regex
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
+
+from .config import env
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
-from .config import env
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
-WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
+WWW_ROOT = f"http://{DOMAIN_NAME}/"
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
 FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
@@ -615,7 +617,11 @@ if SENTRY_DSN:
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
+        integrations=[
+            DjangoIntegration(transaction_style="url"),
+            sentry_logging,
+            CeleryIntegration(),
+        ],
         release=get_full_version(),
         traces_sample_rate=1.0,
         send_default_pii=True,
@@ -634,8 +640,6 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 360 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
-
-from smart_admin.utils import match, regex
 
 SMART_ADMIN_SECTIONS = {
     "HOPE": [
@@ -707,7 +711,7 @@ SMART_ADMIN_BOOKMARKS = "hct_mis_api.apps.administration.site.get_bookmarks"
 
 SMART_ADMIN_BOOKMARKS_PERMISSION = None
 SMART_ADMIN_PROFILE_LINK = True
-SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root-token") == env("ROOT_TOKEN")
+SMART_ADMIN_ISROOT = lambda r, *a: r.user.is_superuser and r.headers.get("x-root-token") == env("ROOT_TOKEN")  # noqa
 
 EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
 
@@ -756,8 +760,8 @@ EXPLORER_CONNECTIONS = {
     "HUB Reg": "registration_datahub",
 }
 EXPLORER_DEFAULT_CONNECTION = "default"
-EXPLORER_PERMISSION_VIEW = lambda r: r.user.has_perm("explorer.view_query")
-EXPLORER_PERMISSION_CHANGE = lambda r: r.user.has_perm("explorer.change_query")
+EXPLORER_PERMISSION_VIEW = lambda r: r.user.has_perm("explorer.view_query")  # noqa
+EXPLORER_PERMISSION_CHANGE = lambda r: r.user.has_perm("explorer.change_query")  # noqa
 
 IMPERSONATE = {
     "REDIRECT_URL": f"/api/{ADMIN_PANEL_URL}/",

@@ -6,14 +6,14 @@ from django_countries.fields import Country
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.household.models import (
     DISABLED,
+    MARITAL_STATUS_CHOICE,
     NOT_DISABLED,
     RELATIONSHIP_CHOICE,
-    MARITAL_STATUS_CHOICE,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    DiiaHousehold,
     ImportedHousehold,
     ImportedIndividual,
-    DiiaHousehold,
 )
 
 
@@ -27,7 +27,9 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import RdiDiiaCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
+            RdiDiiaCreateTask,
+        )
 
         cls.RdiDiiaCreateTask = RdiDiiaCreateTask
 
@@ -38,7 +40,10 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
 
-        self.assertEqual(2, DiiaHousehold.objects.filter(status=DiiaHousehold.STATUS_IMPORTED).count())
+        self.assertEqual(
+            2,
+            DiiaHousehold.objects.filter(status=DiiaHousehold.STATUS_IMPORTED).count(),
+        )
 
         self.assertEqual(2, households.count())
         self.assertEqual(5, individuals.count())
@@ -47,7 +52,12 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(2, individual.documents.count())
         self.assertEqual(1, individual.bank_account_info.count())
         self.assertEqual(
-            str(individual.documents.filter(document_number="VPO-DOC-2222").first().doc_date), "2022-04-29"
+            str(
+                individual.documents.filter(document_number="VPO-DOC-2222")
+                .first()
+                .doc_date
+            ),
+            "2022-04-29",
         )
 
         individual_2 = individuals.get(full_name="Sam Bautista")
@@ -65,7 +75,9 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(individuals_obj_data, expected)
 
-        household_obj_data = model_to_dict(individual.household, ("country", "size", "diia_rec_id", "address"))
+        household_obj_data = model_to_dict(
+            individual.household, ("country", "size", "diia_rec_id", "address")
+        )
         expected = {
             "country": Country(code="UA"),
             "size": 3,
@@ -85,7 +97,9 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(5, ImportedIndividual.objects.all().count())
         rdi = self.RdiDiiaCreateTask().create_rdi(None, "Test import Diia 2")
 
-        with self.assertRaisesRegex(ValidationError, ".*Rdi doesn't found any records within status to import.*"):
+        with self.assertRaisesRegex(
+            ValidationError, ".*Rdi doesn't found any records within status to import.*"
+        ):
             self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[1, 2])
 
         self.assertEqual(2, ImportedHousehold.objects.all().count())
@@ -95,18 +109,31 @@ class TestRdiDiiaCreateTask(BaseElasticSearchTestCase):
         rdi = self.RdiDiiaCreateTask().create_rdi(None, "Test import Diia")
         self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[991, 992, 993])
         self.assertEqual(
-            DiiaHousehold.objects.filter(registration_data_import__isnull=False, id__in=[991, 992, 993]).count(), 3
+            DiiaHousehold.objects.filter(
+                registration_data_import__isnull=False, id__in=[991, 992, 993]
+            ).count(),
+            3,
         )
 
     def test_execute_staging_data_choices_conversion(self):
         rdi = self.RdiDiiaCreateTask().create_rdi(None, "Test import Diia")
         self.RdiDiiaCreateTask().execute(rdi.pk, diia_hh_ids=[991, 992, 993])
 
-        self.assertEqual(ImportedIndividual.objects.filter(disability=DISABLED).count(), 1)
-        self.assertEqual(ImportedIndividual.objects.filter(disability=NOT_DISABLED).count(), 8)
         self.assertEqual(
-            ImportedIndividual.objects.filter(relationship__in=[x[0] for x in RELATIONSHIP_CHOICE]).count(), 9
+            ImportedIndividual.objects.filter(disability=DISABLED).count(), 1
         )
         self.assertEqual(
-            ImportedIndividual.objects.filter(marital_status__in=[x[0] for x in MARITAL_STATUS_CHOICE]).count(), 9
+            ImportedIndividual.objects.filter(disability=NOT_DISABLED).count(), 8
+        )
+        self.assertEqual(
+            ImportedIndividual.objects.filter(
+                relationship__in=[x[0] for x in RELATIONSHIP_CHOICE]
+            ).count(),
+            9,
+        )
+        self.assertEqual(
+            ImportedIndividual.objects.filter(
+                marital_status__in=[x[0] for x in MARITAL_STATUS_CHOICE]
+            ).count(),
+            9,
         )

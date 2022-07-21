@@ -1,10 +1,10 @@
 import base64
-from django.utils import timezone
 import json
 from pathlib import Path
 
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 
 from hct_mis_api.apps.registration_datahub.celery_tasks import extract_records_task
 from hct_mis_api.apps.registration_datahub.models import Record
@@ -15,7 +15,9 @@ class TestExtractRecords(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
+        content = Path(
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg"
+        ).read_bytes()
 
         fields = {
             "household": [
@@ -60,8 +62,12 @@ class TestExtractRecords(TestCase):
         files = {
             "individuals": [
                 {
-                    "disability_certificate_picture": str(base64.b64encode(content), "utf-8"),
-                    "birth_certificate_picture": str(base64.b64encode(content), "utf-8"),
+                    "disability_certificate_picture": str(
+                        base64.b64encode(content), "utf-8"
+                    ),
+                    "birth_certificate_picture": str(
+                        base64.b64encode(content), "utf-8"
+                    ),
                 }
             ],
         }

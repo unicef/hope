@@ -2,7 +2,6 @@ import base64
 import json
 import os
 
-
 CURRENT_DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT_PATH = os.path.abspath(os.path.join(CURRENT_DIR_PATH, "../.."))
 

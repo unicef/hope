@@ -70,11 +70,11 @@ class RapidProAPI:
             if not urns:
                 return False
             errors = []
-            for index, error in urns.items():
+            for index, _error in urns.items():
                 errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
             return errors
 
-        except:
+        except Exception:
             return False
 
     def _get_url(self):
@@ -97,11 +97,11 @@ class RapidProAPI:
                     RapidProAPI.FLOW_STARTS_ENDPOINT,
                     data,
                 )
-            except requests.exceptions.HTTPError as e:
-                errors = self._parse_json_urns_error(e, phone_numbers)
+            except requests.exceptions.HTTPError as exc:
+                errors = self._parse_json_urns_error(exc, phone_numbers)
                 if errors:
                     logger.error("wrong phone numbers " + str(errors))
-                    raise ValidationError(message={"phone_numbers": errors})
+                    raise ValidationError(message={"phone_numbers": errors}) from exc
                 else:
                     raise
 
@@ -137,7 +137,11 @@ class RapidProAPI:
         received = None
         received_amount = None
         if not values:
-            return {"phone_number": phone_number, "received": None, "received_amount": None}
+            return {
+                "phone_number": phone_number,
+                "received": None,
+                "received_amount": None,
+            }
         received_variable = values.get(variable_received_name)
         if received_variable is not None:
             received = received_variable.get("category").upper() == variable_received_positive_string
@@ -147,7 +151,11 @@ class RapidProAPI:
                 received_amount = Decimal(received_amount_variable.get("value", 0))
             except InvalidOperation:
                 received_amount = 0
-        return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
+        return {
+            "phone_number": phone_number,
+            "received": received,
+            "received_amount": received_amount,
+        }
 
     def test_connection_start_flow(self, flow_name, phone_number):
         # find flow by name, get its uuid and start it

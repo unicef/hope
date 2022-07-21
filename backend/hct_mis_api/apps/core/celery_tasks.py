@@ -21,16 +21,17 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self, xlsx_k
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError as exc:
         from datetime import timedelta
+
         from django.utils import timezone
 
         one_day_earlier_time = timezone.now() - timedelta(days=1)
         if exc.xlsx_kobo_template_object.first_connection_failed_time > one_day_earlier_time:
             logger.exception(exc)
-            raise self.retry(exc=exc)
+            raise self.retry(exc=exc) from exc
         else:
             exc.xlsx_kobo_template_object.status = XLSXKoboTemplate.UNSUCCESSFUL
-    except Exception as e:
-        logger.exception(e)
+    except Exception as exc:
+        logger.exception(exc)
         raise
 
 
@@ -45,6 +46,6 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError:
         upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay(xlsx_kobo_template_id)
-    except Exception as e:
-        logger.exception(e)
+    except Exception as exc:
+        logger.exception(exc)
         raise

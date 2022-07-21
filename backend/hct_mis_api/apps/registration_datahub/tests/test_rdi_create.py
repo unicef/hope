@@ -46,7 +46,9 @@ class ImageLoaderMock:
         return True
 
     def get(self, *args, **kwargs):
-        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+        content = Path(
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png"
+        ).read_bytes()
         file = File(BytesIO(content), name="image.png")
         return Image.open(file)
 
@@ -58,7 +60,9 @@ class CellMock:
 
 
 def create_document_image():
-    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+    content = Path(
+        f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png"
+    ).read_bytes()
     return File(BytesIO(content), name="image.png")
 
 
@@ -89,7 +93,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             number_of_individuals=6,
         )
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
-            import_data=cls.import_data, business_area_slug=business_area.slug, hct_id=None
+            import_data=cls.import_data,
+            business_area_slug=business_area.slug,
+            hct_id=None,
         )
         hct_rdi = RegistrationDataImportFactory(
             datahub_id=cls.registration_data_import.id,
@@ -139,7 +145,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             "flex_fields": {},
         }
         household = matching_individuals.first().household
-        household_obj_data = model_to_dict(household, ("residence_status", "country", "flex_fields"))
+        household_obj_data = model_to_dict(
+            household, ("residence_status", "country", "flex_fields")
+        )
 
         roles = household.individuals_and_roles.all()
         self.assertEqual(roles.count(), 1)
@@ -202,7 +210,11 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
                 "type": "BIRTH_CERTIFICATE",
                 "value": value,
             },
-            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER"},
+            "individual_14_other": {
+                "individual": individual,
+                "name": name,
+                "type": "OTHER",
+            },
         }
         self.assertEqual(task.documents, expected)
         # other_id_no_i_c
@@ -220,7 +232,12 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
                 "type": "BIRTH_CERTIFICATE",
                 "value": value,
             },
-            "individual_14_other": {"individual": individual, "name": name, "type": "OTHER", "value": number},
+            "individual_14_other": {
+                "individual": individual,
+                "name": name,
+                "type": "OTHER",
+                "value": number,
+            },
         }
         self.assertEqual(task.documents, expected)
 
@@ -248,7 +265,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertIn("individual_14_birth_certificate_i_c", task.documents.keys())
         birth_certificate = task.documents["individual_14_birth_certificate_i_c"]
         self.assertEqual(birth_certificate["individual"], individual)
-        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00:00-0000.jpg")
+        self.assertEqual(
+            birth_certificate["photo"].name, "12-2020-06-22 12:00:00-0000.jpg"
+        )
 
         birth_cert_doc = {
             "individual_14_birth_certificate_i_c": {
@@ -271,7 +290,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(birth_certificate["name"], "Birth Certificate")
         self.assertEqual(birth_certificate["type"], "BIRTH_CERTIFICATE")
         self.assertEqual(birth_certificate["value"], "CD1247246Q12W")
-        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00:00-0000.jpg")
+        self.assertEqual(
+            birth_certificate["photo"].name, "12-2020-06-22 12:00:00-0000.jpg"
+        )
 
     def test_handle_geopoint_field(self):
         empty_geopoint = ""
@@ -355,7 +376,10 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         individuals = ImportedIndividual.objects.all()
 
         [self.assertTrue(household.row_id in [3, 4, 5]) for household in households]
-        [self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8]) for individual in individuals]
+        [
+            self.assertTrue(individual.row_id in [3, 4, 5, 6, 7, 8])
+            for individual in individuals
+        ]
 
     def test_create_bank_account(self):
         task = self.RdiXlsxCreateTask()
@@ -365,9 +389,13 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.business_area.id,
         )
 
-        bank_account_info = ImportedBankAccountInfo.objects.filter(individual__row_id=6).first()
+        bank_account_info = ImportedBankAccountInfo.objects.filter(
+            individual__row_id=6
+        ).first()
         self.assertEqual(bank_account_info.bank_name, "Bank testowy")
-        self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
+        self.assertEqual(
+            bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671"
+        )
         self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
 
     def test_create_tax_id_document(self):
@@ -389,7 +417,9 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     @staticmethod
     def _return_test_image(*args, **kwargs):
         return BytesIO(
-            Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+            Path(
+                f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png"
+            ).read_bytes()
         )
 
     @classmethod
@@ -405,10 +435,14 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
-        identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
+        identification_type_choice = tuple(
+            (doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE
+        )
         document_types = []
         for doc_type, label in identification_type_choice:
-            document_types.append(DocumentType(country=Country("AFG"), label=label, type=doc_type))
+            document_types.append(
+                DocumentType(country=Country("AFG"), label=label, type=doc_type)
+            )
         ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
         content = Path(
@@ -435,11 +469,22 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         cls.business_area.kobo_username = "1234ABC"
         cls.business_area.save()
 
-        admin1_level = AdminAreaLevel.objects.create(name="Bakool", admin_level=1, business_area=cls.business_area)
-        admin1 = AdminArea.objects.create(p_code="SO25", title="SO25", admin_area_level=admin1_level)
+        admin1_level = AdminAreaLevel.objects.create(
+            name="Bakool", admin_level=1, business_area=cls.business_area
+        )
+        admin1 = AdminArea.objects.create(
+            p_code="SO25", title="SO25", admin_area_level=admin1_level
+        )
 
-        admin2_level = AdminAreaLevel.objects.create(name="Ceel Barde", admin_level=2, business_area=cls.business_area)
-        admin2 = AdminArea.objects.create(p_code="SO2502", title="SO2502", parent=admin1, admin_area_level=admin2_level)
+        admin2_level = AdminAreaLevel.objects.create(
+            name="Ceel Barde", admin_level=2, business_area=cls.business_area
+        )
+        admin2 = AdminArea.objects.create(
+            p_code="SO2502",
+            title="SO2502",
+            parent=admin1,
+            admin_area_level=admin2_level,
+        )
 
         country = geo_models.Country.objects.first()
 
@@ -451,10 +496,17 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         )
 
         admin2_type = geo_models.AreaType.objects.create(
-            name="Ceel Barde", area_level=2, country=country, original_id=admin2_level.id
+            name="Ceel Barde",
+            area_level=2,
+            country=country,
+            original_id=admin2_level.id,
         )
         geo_models.Area.objects.create(
-            p_code="SO2502", name="SO2502", parent=admin1_new, area_type=admin2_type, original_id=admin2.id
+            p_code="SO2502",
+            name="SO2502",
+            parent=admin1_new,
+            area_type=admin2_type,
+            original_id=admin2.id,
         )
 
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
@@ -499,7 +551,9 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         }
         self.assertEqual(individuals_obj_data, expected)
 
-        household_obj_data = model_to_dict(individual.household, ("residence_status", "country", "flex_fields"))
+        household_obj_data = model_to_dict(
+            individual.household, ("residence_status", "country", "flex_fields")
+        )
         expected = {
             "residence_status": "REFUGEE",
             "country": Country(code="AF"),
@@ -524,7 +578,9 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(households.count(), 2)
         self.assertEqual(individuals.count(), 5)
 
-        documents = ImportedDocument.objects.values_list("individual__full_name", flat=True)
+        documents = ImportedDocument.objects.values_list(
+            "individual__full_name", flat=True
+        )
         self.assertEqual(
             sorted(list(documents)),
             ["Tesa Testowski", "Test Testowski", "Zbyszek Zbyszkowski", "abc efg"],
@@ -540,8 +596,10 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             list(first_household_collectors),
             [("Tesa Testowski", "ALTERNATE"), ("Test Testowski", "PRIMARY")],
         )
-        second_household_collectors = second_household.individuals_and_roles.values_list(
-            "individual__full_name", "role"
+        second_household_collectors = (
+            second_household.individuals_and_roles.values_list(
+                "individual__full_name", "role"
+            )
         )
         self.assertEqual(
             list(second_household_collectors),
@@ -649,7 +707,9 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         ]
         task._handle_documents_and_identities(documents_and_identities)
 
-        result = list(ImportedDocument.objects.values("document_number", "individual_id"))
+        result = list(
+            ImportedDocument.objects.values("document_number", "individual_id")
+        )
         expected = [
             {"document_number": "123123123", "individual_id": individual.id},
             {"document_number": "444111123", "individual_id": individual.id},
@@ -660,8 +720,12 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertIsInstance(photo, ImageFieldFile)
         self.assertTrue(photo.name.startswith("signature-14_59_24"))
 
-        birth_certificate = ImportedDocument.objects.get(document_number=123123123).type.type
-        national_passport = ImportedDocument.objects.get(document_number=444111123).type.type
+        birth_certificate = ImportedDocument.objects.get(
+            document_number=123123123
+        ).type.type
+        national_passport = ImportedDocument.objects.get(
+            document_number=444111123
+        ).type.type
 
         self.assertEqual(birth_certificate, "BIRTH_CERTIFICATE")
         self.assertEqual(national_passport, "NATIONAL_PASSPORT")
@@ -813,9 +877,15 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
             for x in range(4):
                 individual = {
                     **copy["individual_questions"][0],
-                    "individual_questions/more_information/drivers_license_no_i_c": secrets.token_hex(15),
-                    "individual_questions/more_information/birth_certificate_no_i_c": secrets.token_hex(15),
-                    "individual_questions/relationship_i_c": "head" if x == 0 else "NON_BENEFICIARY",
+                    "individual_questions/more_information/drivers_license_no_i_c": secrets.token_hex(
+                        15
+                    ),
+                    "individual_questions/more_information/birth_certificate_no_i_c": secrets.token_hex(
+                        15
+                    ),
+                    "individual_questions/relationship_i_c": "head"
+                    if x == 0
+                    else "NON_BENEFICIARY",
                 }
                 new_individuals.append(individual)
 

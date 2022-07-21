@@ -8,8 +8,8 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
+from django.utils.html import format_html
 from django.utils.module_loading import import_string
-from django.utils.safestring import mark_safe
 
 from jinja2 import Environment
 
@@ -28,9 +28,9 @@ class Interpreter:
         try:
             self.execute()
             return True
-        except Exception as e:
-            logger.exception(e)
-            raise ValidationError(e)
+        except Exception as exc:
+            logger.exception(exc)
+            raise ValidationError(exc) from None
 
     def get_result(self):
         return config.RESULT()
@@ -94,11 +94,12 @@ class PythonExec(Interpreter):
                 logger.exception(e)
 
         pts = self.get_result()
-        locals_ = dict()
-        locals_["context"] = context
-        locals_["result"] = pts
+        locals_ = {
+            "context": context,
+            "result": pts,
+        }
         try:
-            exec(self.init_string, gl, locals_)
+            exec(self.init_string, gl, locals_)  # nosec
         except SyntaxError as err:
             error_class = err.__class__.__name__
             detail = err.args[0]
@@ -109,7 +110,7 @@ class PythonExec(Interpreter):
                 detail=detail,
                 line_number=line_number,
                 traceback=None,
-            )
+            ) from err
         except Exception as err:
             error_class = err.__class__.__name__
             detail = err.args[0]
@@ -121,7 +122,7 @@ class PythonExec(Interpreter):
                 detail=detail,
                 line_number=line_number,
                 traceback=traceback,
-            )
+            ) from err
         else:
             return pts
 
@@ -138,21 +139,21 @@ class PythonExec(Interpreter):
             "exec",
         ]:
             if forbidden in self.init_string:
-                errors.append("Code contains an invalid statement '{}'".format(forbidden))
+                errors.append(f"Code contains an invalid statement '{forbidden}'")
         if errors:
             raise ValidationError(errors)
         try:
             compile(self.init_string, "<code>", mode="exec")
             return True
-        except Exception as e:
-            logger.exception(e)
+        except Exception as exc:
+            logger.exception(exc)
             tb = traceback.format_exc(limit=-1)
             msg = tb.split('<code>", ')[-1]
-            raise ValidationError(mark_safe(msg))
+            raise ValidationError(format_html(msg)) from exc
 
 
 def get_env(**options) -> Environment:
-    env = Environment(**options)
+    env = Environment(**options, autoescape=True)
     env.filters.update(
         {
             "adults": engine.adults

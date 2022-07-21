@@ -259,7 +259,9 @@ class CreateGrievanceTicketMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        arg = lambda name, default=None: input.get(name, default)
+        def arg(name, default=None):
+            return input.get(name, default)
+
         cls.has_permission(info, Permissions.GRIEVANCES_CREATE, arg("business_area"))
 
         verify_required_arguments(input, "category", cls.CATEGORY_OPTIONS)
@@ -292,7 +294,9 @@ class CreateGrievanceTicketMutation(PermissionMutation):
 
     @classmethod
     def save_basic_data(cls, root, info, input, **kwargs):
-        arg = lambda name, default=None: input.get(name, default)
+        def arg(name, default=None):
+            return input.get(name, default)
+
         user = info.context.user
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
@@ -354,8 +358,14 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             "required": [],
             "not_allowed": [],
         },
-        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {"required": [], "not_allowed": []},
-        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {"required": [], "not_allowed": []},
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
+            "required": [],
+            "not_allowed": [],
+        },
+        GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {
+            "required": [],
+            "not_allowed": [],
+        },
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {
             "required": [],
@@ -399,7 +409,9 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        arg = lambda name, default=None: input.get(name, default)
+        def arg(name, default=None):
+            return input.get(name, default)
+
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
         grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
         household, individual = None, None
@@ -488,7 +500,10 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
     def update_basic_data(cls, root, info, input, grievance_ticket, **kwargs):
         old_status = grievance_ticket.status
         old_assigned_to = grievance_ticket.assigned_to
-        arg = lambda name, default=None: input.get(name, default)
+
+        def arg(name, default=None):
+            return input.get(name, default)
+
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
         linked_tickets = [decode_id_string(encoded_id) for encoded_id in linked_tickets_encoded_ids]
@@ -1186,7 +1201,9 @@ class PaymentDetailsApproveMutation(PermissionMutation):
             logger.error("Payment Details changes can approve only for Grievance Ticket on status For Approval")
             raise GraphQLError("Payment Details changes can approve only for Grievance Ticket on status For Approval")
 
-        old_payment_verification_ticket_details = grievance_ticket.payment_verification_ticket_details
+        # old_payment_verification_ticket_details = (
+        #     grievance_ticket.payment_verification_ticket_details
+        # )
         grievance_ticket.payment_verification_ticket_details.approve_status = kwargs.get("approve_status", False)
         grievance_ticket.payment_verification_ticket_details.save()
 

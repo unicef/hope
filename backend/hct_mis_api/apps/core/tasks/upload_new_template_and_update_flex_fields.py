@@ -1,6 +1,7 @@
 import logging
-from django.utils import timezone
 from io import BytesIO
+
+from django.utils import timezone
 
 import requests
 
@@ -11,7 +12,7 @@ from hct_mis_api.apps.core.models import XLSXKoboTemplate
 logger = logging.getLogger(__name__)
 
 
-class KoboRetriableError(Exception):
+class KoboRetriableError(Exception):  # noqa: B903
     def __init__(self, xlsx_kobo_template_object):
         self.xlsx_kobo_template_object = xlsx_kobo_template_object
 
@@ -27,7 +28,9 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
         xlsx_kobo_template_object = XLSXKoboTemplate.objects.filter(id=xlsx_kobo_template_id).first()
         if not xlsx_kobo_template_object:
             self._save_message_status_template_id(
-                xlsx_kobo_template_object, "Uploaded file is not found on the server", XLSXKoboTemplate.UNSUCCESSFUL
+                xlsx_kobo_template_object,
+                "Uploaded file is not found on the server",
+                XLSXKoboTemplate.UNSUCCESSFUL,
             )
             return
 
@@ -50,7 +53,10 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             if response_status == "error" or response_details:
                 error_message = response.get("messages", "") if response_status == "error" else response_details
                 self._save_message_status_template_id(
-                    xlsx_kobo_template_object, error_message, XLSXKoboTemplate.UNSUCCESSFUL, asset_uid
+                    xlsx_kobo_template_object,
+                    error_message,
+                    XLSXKoboTemplate.UNSUCCESSFUL,
+                    asset_uid,
                 )
                 return
             else:
@@ -58,22 +64,28 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                 flex_fields_task.import_xls(xlsx_kobo_template_object.file)
 
             self._save_message_status_template_id(xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, asset_uid)
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException as exc:
             logger.exception("Import template to Kobo Exception")
-            if e.response is not None and 400 <= e.response.status_code < 500:
+            if exc.response is not None and 400 <= exc.response.status_code < 500:
                 self._save_message_status_template_id(
-                    xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
+                    xlsx_kobo_template_object,
+                    str(exc),
+                    XLSXKoboTemplate.UNSUCCESSFUL,
+                    template_id,
                 )
             else:
                 xlsx_kobo_template_object.status = XLSXKoboTemplate.CONNECTION_FAILED
-                xlsx_kobo_template_object.message = str(e)
+                xlsx_kobo_template_object.message = str(exc)
                 if xlsx_kobo_template_object.first_connection_failed_time is None:
                     xlsx_kobo_template_object.first_connection_failed_time = timezone.now()
                 xlsx_kobo_template_object.save()
-                raise KoboRetriableError(xlsx_kobo_template_object)
-        except Exception as e:
+                raise KoboRetriableError(xlsx_kobo_template_object) from exc
+        except Exception as exc:
             self._save_message_status_template_id(
-                xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
+                xlsx_kobo_template_object,
+                str(exc),
+                XLSXKoboTemplate.UNSUCCESSFUL,
+                template_id,
             )
-            logger.exception(e)
-            raise e
+            logger.exception(exc)
+            raise exc

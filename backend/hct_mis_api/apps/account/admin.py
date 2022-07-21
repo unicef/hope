@@ -158,7 +158,7 @@ class DjAdminManager:
         pass
 
     def __init__(self, kf_host=settings.KOBO_KF_URL, kc_host=settings.KOBO_KC_URL):
-        self.admin_path = f"/admin/"
+        self.admin_path = "/admin/"
         self.admin_url = f"{kf_host}{self.admin_path}"
         self.login_url = f"{self.admin_url}login/"
 
@@ -175,7 +175,7 @@ class DjAdminManager:
         self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
         return self.form_errors
 
-    def assert_response(self, status: [int], location: str = None, custom_error=""):
+    def assert_response(self, status: list[int], location: str = None, custom_error=""):
         if not isinstance(status, (list, tuple)):
             status = [status]
         if self._last_response.status_code not in status:
@@ -206,32 +206,29 @@ class DjAdminManager:
     def login(self, request=None, twin=None):
         try:
             username, password = config.KOBO_ADMIN_CREDENTIALS.split(":")
-        except ValueError:
-            raise ValueError("Invalid KOBO_ADMIN_CREDENTIALS")
-        try:
-            try:
-                self._get(self.login_url)
-                csrftoken = self.get_csrfmiddlewaretoken()
-                self._post(
-                    self.login_url,
-                    {
-                        "username": username,
-                        "password": password,
-                        "next": self.admin_url,
-                        "csrfmiddlewaretoken": csrftoken,
-                    },
-                )
-                self.assert_response(302, self.admin_url)
-            except Exception as e:
-                raise self.ResponseException(
-                    f"Unable to login to Kobo at "
-                    f"{self.login_url}: {e.__class__.__name__} {e}. "
-                    f"Check KOBO_ADMIN_CREDENTIALS value"
-                )
+        except ValueError as exc:
+            raise ValueError("Invalid KOBO_ADMIN_CREDENTIALS") from exc
 
-        except Exception as e:
-            logger.exception(e)
-            raise
+        try:
+            self._get(self.login_url)
+            csrftoken = self.get_csrfmiddlewaretoken()
+            self._post(
+                self.login_url,
+                {
+                    "username": username,
+                    "password": password,
+                    "next": self.admin_url,
+                    "csrfmiddlewaretoken": csrftoken,
+                },
+            )
+            self.assert_response(302, self.admin_url)
+        except Exception as exc:
+            logger.exception(exc)
+            raise self.ResponseException(
+                f"Unable to login to Kobo at "
+                f"{self.login_url}: {exc.__class__.__name__} {exc}. "
+                f"Check KOBO_ADMIN_CREDENTIALS value"
+            ) from exc
 
     def _get(self, url):
         self._last_response = self.client.get(url, allow_redirects=False)
@@ -266,12 +263,15 @@ class DjAdminManager:
         try:
             m = regex.search(self._last_response.content.decode("utf8"))
             return m.groups()[0]
-        except Exception as e:
-            raise ValueError("Unable to get CSRF token from Kobo")
+        except Exception as exc:
+            raise ValueError("Unable to get CSRF token from Kobo") from exc
 
     def delete_user(self, username, pk):
         self.login()
-        for url in (f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"):
+        for url in (
+            f"{self.admin_url_kc}auth/user/{pk}/delete/",
+            f"{self.admin_url}auth/user/{pk}/delete/",
+        ):
             self._get(url)
             self.assert_response([200, 404, 302], custom_error=url)
             if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
@@ -325,7 +325,13 @@ class HopeUserCreationForm(UserCreationForm):
 
 
 @admin.register(account_models.User)
-class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminActionPermMixin, BaseUserAdmin):
+class UserAdmin(
+    ExtraButtonsMixin,
+    LinkedObjectsMixin,
+    AdminFiltersMixin,
+    AdminActionPermMixin,
+    BaseUserAdmin,
+):
     Results = namedtuple("Result", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
@@ -666,8 +672,8 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
                             for row in reader:
                                 try:
                                     email = row["email"].strip()
-                                except Exception as e:
-                                    raise Exception(f"{e.__class__.__name__}: {e} on `{row}`")
+                                except Exception as exc:
+                                    raise Exception(f"{exc.__class__.__name__}: {exc} on `{row}`") from exc
 
                                 user_info = {
                                     "email": email,
@@ -704,13 +710,13 @@ class UserAdmin(ExtraButtonsMixin, LinkedObjectsMixin, AdminFiltersMixin, AdminA
                                     self._grant_kobo_accesss_to_user(u, sync=False)
 
                                 context["results"].append(user_info)
-                        except Exception as e:
+                        except Exception:
                             raise
-                except Exception as e:
-                    logger.exception(e)
+                except Exception as exc:
+                    logger.exception(exc)
                     context["form"] = form
-                    context["errors"] = [str(e)]
-                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+                    context["errors"] = [str(exc)]
+                    self.message_user(request, f"{exc.__class__.__name__}: {exc}", messages.ERROR)
             else:
                 self.message_user(request, "Please correct errors below", messages.ERROR)
                 context["form"] = form
@@ -1012,9 +1018,9 @@ class IncompatibleRoleFilter(SimpleListFilter):
             return queryset.filter(
                 Q(role_one=self.value()) | Q(role_two=self.value()),
             )
-        except (ValueError, ValidationError) as e:
-            logger.exception(e)
-            raise IncorrectLookupParameters(e)
+        except (ValueError, ValidationError) as exc:
+            logger.exception(exc)
+            raise IncorrectLookupParameters(exc) from exc
 
 
 @admin.register(account_models.IncompatibleRoles)

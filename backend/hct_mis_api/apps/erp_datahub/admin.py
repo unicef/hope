@@ -29,32 +29,56 @@ class NumberValidator(RegexValidator):
 
 
 class FundsCommitmentAddForm(forms.ModelForm):
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects, to_field_name="code")
-    currency_code = forms.ChoiceField(choices=sorted(CURRENCY_CHOICES[1:], key=itemgetter(1)))
+    business_area = forms.ModelChoiceField(
+        queryset=BusinessArea.objects, to_field_name="code"
+    )
+    currency_code = forms.ChoiceField(
+        choices=sorted(CURRENCY_CHOICES[1:], key=itemgetter(1))
+    )
     funds_commitment_number = forms.CharField(required=True)
     vendor_id = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
     gl_account = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
     business_office_code = forms.ModelChoiceField(
-        queryset=BusinessArea.objects.filter(is_split=False), to_field_name="code", required=False
+        queryset=BusinessArea.objects.filter(is_split=False),
+        to_field_name="code",
+        required=False,
     )
 
     class Meta:
         model = FundsCommitment
-        exclude = ("update_date", "updated_by", "mis_sync_flag", "mis_sync_date", "ca_sync_date", "ca_sync_flag")
+        exclude = (
+            "update_date",
+            "updated_by",
+            "mis_sync_flag",
+            "mis_sync_date",
+            "ca_sync_date",
+            "ca_sync_flag",
+        )
 
     def clean_business_area(self):
         return self.cleaned_data["business_area"].code
 
 
 class DownPaymentAddForm(forms.ModelForm):
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects, to_field_name="code")
+    business_area = forms.ModelChoiceField(
+        queryset=BusinessArea.objects, to_field_name="code"
+    )
     business_office_code = forms.ModelChoiceField(
-        queryset=BusinessArea.objects.filter(is_split=False), to_field_name="code", required=False
+        queryset=BusinessArea.objects.filter(is_split=False),
+        to_field_name="code",
+        required=False,
     )
 
     class Meta:
         model = DownPayment
-        exclude = ("update_date", "updated_by", "mis_sync_flag", "mis_sync_date", "ca_sync_date", "ca_sync_flag")
+        exclude = (
+            "update_date",
+            "updated_by",
+            "mis_sync_flag",
+            "mis_sync_date",
+            "ca_sync_date",
+            "ca_sync_flag",
+        )
 
     def clean_business_area(self):
         return self.cleaned_data["business_area"].code
@@ -62,7 +86,9 @@ class DownPaymentAddForm(forms.ModelForm):
 
 class FundsCommitmentAssignBusinessOffice(forms.ModelForm):
     business_office_code = forms.ModelChoiceField(
-        queryset=BusinessArea.objects.filter(is_split=False), to_field_name="code", required=True
+        queryset=BusinessArea.objects.filter(is_split=False),
+        to_field_name="code",
+        required=True,
     )
 
     class Meta:
@@ -91,7 +117,9 @@ class SplitBusinessAreaFilter(SimpleListFilter):
             return queryset
         from hct_mis_api.apps.core.models import BusinessArea
 
-        split_codes = list(BusinessArea.objects.filter(is_split=True).values_list("code", flat=True))
+        split_codes = list(
+            BusinessArea.objects.filter(is_split=True).values_list("code", flat=True)
+        )
         try:
             if self.value() == "1":
                 return queryset.filter(business_area__in=split_codes)
@@ -103,7 +131,12 @@ class SplitBusinessAreaFilter(SimpleListFilter):
 
 @admin.register(FundsCommitment)
 class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
-    list_display = ("rec_serial_number", "business_area", "funds_commitment_number", "posting_date")
+    list_display = (
+        "rec_serial_number",
+        "business_area",
+        "funds_commitment_number",
+        "posting_date",
+    )
     list_filter = (
         SplitBusinessAreaFilter,
         "mis_sync_date",
@@ -117,7 +150,9 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
     def assign_business_office(self, request, pk):
-        context = self.get_common_context(request, pk, title="Please assign business office")
+        context = self.get_common_context(
+            request, pk, title="Please assign business office"
+        )
         obj: FundsCommitment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
         context["business_area"] = business_area
@@ -126,14 +161,19 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         else:
             form = FundsCommitmentAssignBusinessOffice(instance=obj)
         form.fields["business_office_code"] = forms.ModelChoiceField(
-            queryset=BusinessArea.objects.filter(parent=business_area), to_field_name="code"
+            queryset=BusinessArea.objects.filter(parent=business_area),
+            to_field_name="code",
         )
         if request.method == "POST":
             if form.is_valid():
                 form.save()
                 obj.refresh_from_db()
-                messages.success(request, "Business Office assigned, Founds Commitment sent")
-                mis_funds_commitment = mis_models.FundsCommitment(**SyncToMisDatahubTask.get_model_dict(obj))
+                messages.success(
+                    request, "Business Office assigned, Founds Commitment sent"
+                )
+                mis_funds_commitment = mis_models.FundsCommitment(
+                    **SyncToMisDatahubTask.get_model_dict(obj)
+                )
                 mis_funds_commitment.business_area = obj.business_office_code
                 mis_funds_commitment.save()
                 obj.mis_sync_flag = True
@@ -142,7 +182,11 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 return redirect(f"/api/admin/erp_datahub/fundscommitment/{pk}/")
 
         context["form"] = form
-        return TemplateResponse(request, "admin/erp_datahub/funds_commitment/assign_business_office.html", context)
+        return TemplateResponse(
+            request,
+            "admin/erp_datahub/funds_commitment/assign_business_office.html",
+            context,
+        )
 
     @button()
     def execute_exchange_rate_sync(self, request):
@@ -184,7 +228,9 @@ class FundsCommitmentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
 
 class DownPaymentAssignBusinessOffice(forms.ModelForm):
     business_office_code = forms.ModelChoiceField(
-        queryset=BusinessArea.objects.filter(is_split=False), to_field_name="code", required=True
+        queryset=BusinessArea.objects.filter(is_split=False),
+        to_field_name="code",
+        required=True,
     )
 
     class Meta:
@@ -209,7 +255,9 @@ class DownPaymentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
     def assign_business_office(self, request, pk):
-        context = self.get_common_context(request, pk, title="Please assign business office")
+        context = self.get_common_context(
+            request, pk, title="Please assign business office"
+        )
         obj: DownPayment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
         context["business_area"] = business_area
@@ -218,14 +266,19 @@ class DownPaymentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         else:
             form = DownPaymentAssignBusinessOffice(instance=obj)
         form.fields["business_office_code"] = forms.ModelChoiceField(
-            queryset=BusinessArea.objects.filter(parent=business_area), to_field_name="code"
+            queryset=BusinessArea.objects.filter(parent=business_area),
+            to_field_name="code",
         )
         if request.method == "POST":
             if form.is_valid():
                 form.save()
                 obj.refresh_from_db()
-                messages.success(request, "Business Office assigned, Founds Commitment sent")
-                mis_down_payment = mis_models.DownPayment(**SyncToMisDatahubTask.get_model_dict(obj))
+                messages.success(
+                    request, "Business Office assigned, Founds Commitment sent"
+                )
+                mis_down_payment = mis_models.DownPayment(
+                    **SyncToMisDatahubTask.get_model_dict(obj)
+                )
                 mis_down_payment.business_area = obj.business_office_code
                 obj.mis_sync_flag = True
                 obj.mis_sync_date = timezone.now()
@@ -234,4 +287,8 @@ class DownPaymentAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 return redirect(f"/api/admin/erp_datahub/downpayment/{pk}/")
 
         context["form"] = form
-        return TemplateResponse(request, "admin/erp_datahub/funds_commitment/assign_business_office.html", context)
+        return TemplateResponse(
+            request,
+            "admin/erp_datahub/funds_commitment/assign_business_office.html",
+            context,
+        )

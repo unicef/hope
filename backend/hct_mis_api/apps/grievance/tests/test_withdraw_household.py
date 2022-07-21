@@ -45,7 +45,9 @@ class TestWithdrawHousehold(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=cls.area_type, p_code="sfds323")
+        cls.admin_area_1 = AdminAreaFactory(
+            title="City Test", admin_area_level=cls.area_type, p_code="sfds323"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -53,7 +55,9 @@ class TestWithdrawHousehold(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area_1_new = AreaFactory(name="City Test", area_type=area_type, p_code="sfds323")
+        cls.admin_area_1_new = AreaFactory(
+            name="City Test", area_type=area_type, p_code="sfds323"
+        )
 
         cls.program_one = ProgramFactory(
             name="Test program ONE",
@@ -62,7 +66,9 @@ class TestWithdrawHousehold(APITestCase):
 
     def test_withdraw_household_when_withdraw_last_individual_empty(self):
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.business_area,
         )
 
         household = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
@@ -106,7 +112,9 @@ class TestWithdrawHousehold(APITestCase):
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
             variables={
-                "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
+                "grievanceTicketId": self.id_to_base64(
+                    ticket.id, "GrievanceTicketNode"
+                ),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )

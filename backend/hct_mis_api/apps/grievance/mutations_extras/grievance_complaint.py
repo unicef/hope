@@ -13,9 +13,13 @@ class GrievanceComplaintTicketExtras(graphene.InputObjectType):
     payment_record = graphene.List(graphene.ID)
 
 
-def save_grievance_complaint_extras(root, info, input, grievance_ticket, extras, **kwargs):
+def save_grievance_complaint_extras(
+    root, info, input, grievance_ticket, extras, **kwargs
+):
     grievance_complaint_extras = extras.get("category", {})
-    grievance_complaint_category_extras = grievance_complaint_extras.get("grievance_complaint_ticket_extras", {})
+    grievance_complaint_category_extras = grievance_complaint_extras.get(
+        "grievance_complaint_ticket_extras", {}
+    )
 
     individual_encoded_id = grievance_complaint_category_extras.get("individual")
     individual = decode_and_get_object(individual_encoded_id, Individual, False)
@@ -23,12 +27,16 @@ def save_grievance_complaint_extras(root, info, input, grievance_ticket, extras,
     household_encoded_id = grievance_complaint_category_extras.get("household")
     household = decode_and_get_object(household_encoded_id, Household, False)
 
-    payment_record_encoded_ids_list = grievance_complaint_category_extras.get("payment_record")
+    payment_record_encoded_ids_list = grievance_complaint_category_extras.get(
+        "payment_record"
+    )
 
     if payment_record_encoded_ids_list:
         grievance_tickets_to_return = []
         for payment_record_encoded_id in payment_record_encoded_ids_list:
-            payment_record = decode_and_get_object(payment_record_encoded_id, PaymentRecord, False)
+            payment_record = decode_and_get_object(
+                payment_record_encoded_id, PaymentRecord, False
+            )
 
             # copy GrievanceTicket object and assign linked tickets
             ticket = grievance_ticket

@@ -20,14 +20,19 @@ class VerificationPlanStatusChangeServices:
         self.cash_plan_verification = cash_plan_verification
 
     def discard(self) -> CashPlanPaymentVerification:
-        if self.cash_plan_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
+        if (
+            self.cash_plan_verification.status
+            != CashPlanPaymentVerification.STATUS_ACTIVE
+        ):
             raise GraphQLError("You can discard only ACTIVE verification")
 
         self.cash_plan_verification.set_pending()
         self.cash_plan_verification.save()
 
         # payment verifications to reset
-        payment_record_verifications = self.cash_plan_verification.payment_record_verifications.all()
+        payment_record_verifications = (
+            self.cash_plan_verification.payment_record_verifications.all()
+        )
         for payment_record_verification in payment_record_verifications:
             payment_record_verification.set_pending()
 
@@ -38,7 +43,10 @@ class VerificationPlanStatusChangeServices:
         return self.cash_plan_verification
 
     def activate(self) -> CashPlanPaymentVerification:
-        if self.cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
+        if (
+            self.cash_plan_verification.status
+            != CashPlanPaymentVerification.STATUS_PENDING
+        ):
             raise GraphQLError("You can activate only PENDING verification")
 
         if self._can_activate_via_rapidpro():
@@ -64,7 +72,9 @@ class VerificationPlanStatusChangeServices:
                 heading_household__payment_records__verification__cash_plan_payment_verification=pv_id
             ).values_list("phone_no", flat=True)
         )
-        flow_start_info_list = api.start_flow(self.cash_plan_verification.rapid_pro_flow_id, phone_numbers)
+        flow_start_info_list = api.start_flow(
+            self.cash_plan_verification.rapid_pro_flow_id, phone_numbers
+        )
         self.cash_plan_verification.rapid_pro_flow_start_uuids = [
             flow_start_info.get("uuid") for flow_start_info in flow_start_info_list
         ]
@@ -79,8 +89,14 @@ class VerificationPlanStatusChangeServices:
         ).delete()
         return self.cash_plan_verification
 
-    def _create_grievance_ticket_for_status(self, cashplan_payment_verification, status):
-        verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
+    def _create_grievance_ticket_for_status(
+        self, cashplan_payment_verification, status
+    ):
+        verifications = (
+            cashplan_payment_verification.payment_record_verifications.filter(
+                status=status
+            )
+        )
         if verifications.count() == 0:
             return
 
@@ -91,24 +107,37 @@ class VerificationPlanStatusChangeServices:
             )
             for _ in list(range(verifications.count()))
         ]
-        grievance_ticket_objs = GrievanceTicket.objects.bulk_create(grievance_ticket_list)
+        grievance_ticket_objs = GrievanceTicket.objects.bulk_create(
+            grievance_ticket_list
+        )
 
         ticket_payment_verification_details_list = []
         for verification, grievance_ticket in zip(verifications, grievance_ticket_objs):
 
             GrievanceNotification.send_all_notifications(
-                GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+                GrievanceNotification.prepare_notification_for_ticket_creation(
+                    grievance_ticket
+                )
             )
 
             ticket_payment_verification_details = TicketPaymentVerificationDetails(
-                ticket=grievance_ticket, payment_verification_status=status, payment_verification=verification
+                ticket=grievance_ticket,
+                payment_verification_status=status,
+                payment_verification=verification,
             )
-            ticket_payment_verification_details_list.append(ticket_payment_verification_details)
+            ticket_payment_verification_details_list.append(
+                ticket_payment_verification_details
+            )
 
-        TicketPaymentVerificationDetails.objects.bulk_create(ticket_payment_verification_details_list)
+        TicketPaymentVerificationDetails.objects.bulk_create(
+            ticket_payment_verification_details_list
+        )
 
     def _create_grievance_tickets(self, cashplan_payment_verification):
-        self._create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)
         self._create_grievance_ticket_for_status(
-            cashplan_payment_verification, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+            cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED
+        )
+        self._create_grievance_ticket_for_status(
+            cashplan_payment_verification,
+            PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )

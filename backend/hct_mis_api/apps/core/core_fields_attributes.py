@@ -90,7 +90,14 @@ FIELD_TYPES_TO_INTERNAL_TYPE = {
 _INDIVIDUAL = "Individual"
 _HOUSEHOLD = "Household"
 
-FILTERABLE_TYPES = [TYPE_INTEGER, TYPE_STRING, TYPE_SELECT_ONE, TYPE_SELECT_MANY, TYPE_DATE, TYPE_BOOL]
+FILTERABLE_TYPES = [
+    TYPE_INTEGER,
+    TYPE_STRING,
+    TYPE_SELECT_ONE,
+    TYPE_SELECT_MANY,
+    TYPE_DATE,
+    TYPE_BOOL,
+]
 
 
 class Scope(str, enum.Enum):
@@ -127,10 +134,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Residence status"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in RESIDENCE_STATUS_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in RESIDENCE_STATUS_CHOICE
+        ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "residence_status_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "e47bafa7-0b86-4be9-a07f-d3fc7ac698cf",
@@ -143,7 +158,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "consent_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "9480fc0d-1b88-45b0-9056-6a6fe0ebe509",
@@ -156,7 +176,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "consent_sign_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "e44efed6-47d6-4f60-bcf6-b1d2ffc4d7d1",
@@ -172,7 +197,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "custom_cast_value": Countries.get_country_value,
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "country_origin_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "aa79985c-b616-453c-9884-0666252c3070",
@@ -188,7 +218,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "custom_cast_value": Countries.get_country_value,
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "country_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "59685cec-69bf-4abe-81b4-70b8f05b89f3",
@@ -201,7 +236,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "address_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "c53ea58b-e7cf-4bf3-82d0-dec41f66ef3a",
@@ -212,7 +252,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Household resides in which ${admin1_h_c}?"},
         "hint": "",
-        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(1, *args, **kwargs),
+        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(
+            1, *args, **kwargs
+        ),
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "admin1_h_c",
@@ -226,7 +268,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Household resides in which ${admin2_h_c}?"},
         "hint": "",
-        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(2, *args, **kwargs),
+        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(
+            2, *args, **kwargs
+        ),
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "admin2_h_c",
@@ -256,7 +300,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "unhcr_id_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "5f530642-b889-4130-bf1a-5fac1b17cf09",
@@ -269,7 +318,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "returnee_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "d668ae31-12cf-418e-8f7f-4c6398d82ffd",
@@ -282,7 +336,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "size_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "ee54d921-e11d-46a2-8a1f-3ebf17485dd6",
@@ -295,7 +354,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "fchild_hoh_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "f9d16bda-4823-425d-b30e-ce35030bc5c0",
@@ -308,7 +372,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "child_hoh_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "8d9df01a-ce7c-4e78-b8ec-6f3eec8f30ce",
@@ -318,10 +387,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": "Relationship to head of household"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in RELATIONSHIP_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in RELATIONSHIP_CHOICE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "relationship_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "36ab3421-6e7a-40d1-b816-ea5cbdcc0b6a",
@@ -334,7 +411,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "full_name_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "b1f90314-b8b8-4bcb-9265-9d48d1fce5a4",
@@ -347,7 +429,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "given_name_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "6f603107-bd88-4a8d-97cc-748a7238358d",
@@ -360,7 +447,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "middle_name_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "3f74dd36-bfd2-4c84-bfc7-21f7adbff7f0",
@@ -373,7 +465,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "family_name_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "da726870-dfc9-48dc-aba9-b9138b611c74",
@@ -383,10 +480,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": "Gender"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in SEX_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in SEX_CHOICE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "gender_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "416b0119-2d89-4517-819d-e563d2eb428c",
@@ -399,7 +504,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "birth_date_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "5e2c2a7c-9651-4c07-873c-f594ae18a56a",
@@ -412,7 +522,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "estimated_birth_date_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "84827966-17e5-407a-9424-1350c7ec3b64",
@@ -435,10 +550,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Marital status"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in MARITAL_STATUS_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in MARITAL_STATUS_CHOICE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "marital_status_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "01c1ae70-d8f8-4451-96c5-09afb4ff3057",
@@ -451,7 +574,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "phone_no_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "8e10289e-235a-4af5-a745-8c3082b820f5",
@@ -464,7 +592,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "who_answers_phone_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "f7609980-95c4-4b18-82dc-132a04ce7d65",
@@ -477,7 +610,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "phone_no_alternative_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "2448dbfe-e746-4aea-9e74-e635a3195dc5",
@@ -490,7 +628,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "who_answers_alt_phone_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "e991e0e2-d6be-4abd-b3bc-9122091ca96e",
@@ -498,12 +641,22 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "registration_method",
         "lookup": "registration_method",
         "required": False,
-        "label": {"English(EN)": "Method of collection (e.g. HH survey, Community, etc.)"},
+        "label": {
+            "English(EN)": "Method of collection (e.g. HH survey, Community, etc.)"
+        },
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in REGISTRATION_METHOD_CHOICES],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in REGISTRATION_METHOD_CHOICES
+        ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "registration_method_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "d9eea60c-5747-4d26-9f4b-f99a2165e913",
@@ -511,12 +664,22 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "collect_individual_data",
         "lookup": "collect_individual_data",
         "required": False,
-        "label": {"English(EN)": "Will you be collecting all member Individuals' data?"},
+        "label": {
+            "English(EN)": "Will you be collecting all member Individuals' data?"
+        },
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in YES_NO_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in YES_NO_CHOICE
+        ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "collect_individual_data_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "1c2e3c42-8b32-4198-bd4f-06a61e2ecf0e",
@@ -524,7 +687,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "currency",
         "lookup": "currency",
         "required": False,
-        "label": {"English(EN)": "Which currency will be used for financial questions?"},
+        "label": {
+            "English(EN)": "Which currency will be used for financial questions?"
+        },
         "hint": "",
         "choices": [
             {"label": {"English(EN)": currency_name}, "value": code}
@@ -533,7 +698,12 @@ CORE_FIELDS_ATTRIBUTES = [
         ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "currency_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "f1d0c0c1-53d7-422a-be3d-b3588ee0ff58",
@@ -928,7 +1098,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_0_5_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "6b993af8-4a5d-4a08-a444-8ade115c39ad",
@@ -941,7 +1116,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_6_11_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "71ce16b5-4e49-48fa-818c-0bd2eba079eb",
@@ -954,7 +1134,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_12_17_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "1af02ab4-469b-4de1-a71a-7d51cc86224b",
@@ -967,7 +1152,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_18_59_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "4009ca04-1ffd-48eb-a41f-64ddb439cc8d",
@@ -980,7 +1170,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_60_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "18fd9429-400f-4fce-b72f-035d2afca201",
@@ -993,7 +1188,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "pregnant_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "57233f1b-93c3-4fd4-a885-92c512c5e32a",
@@ -1006,7 +1206,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_0_5_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "11e2a938-e93a-4c18-8eca-7e61355d7476",
@@ -1019,7 +1224,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_6_11_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "bf28628e-0f6a-46e8-9587-3b0c17977006",
@@ -1032,7 +1242,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_12_17_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "e76cd764-1466-49c3-92da-5a558069c472",
@@ -1045,7 +1260,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_18_59_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "988ebe6d-8782-4bc1-95a0-eeb692980847",
@@ -1058,7 +1278,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_60_age_group_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "4f59aca6-5900-40c0-a1e4-47c331a90a6f",
@@ -1071,7 +1296,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_0_5_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "10e33d7b-b3c4-4383-a4f0-6eba00a15e9c",
@@ -1084,7 +1314,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_6_11_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "623a6fd6-d863-40cc-a4d1-964f739747be",
@@ -1097,7 +1332,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_12_17_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "c99df741-4559-4166-a49c-05d69ba8a4fa",
@@ -1110,7 +1350,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_18_59_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "f21d61f2-923e-46b8-aefc-b623cb0026ca",
@@ -1123,7 +1368,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "f_60_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "d3b82576-1bba-44fa-9d5a-db04e71bb35b",
@@ -1136,7 +1386,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_0_5_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "78340f8f-86ab-464a-8e19-ce3d6feec5d6",
@@ -1149,7 +1404,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_6_11_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "519140f7-1a9e-4115-b736-2b09dbc6f036",
@@ -1162,7 +1422,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_12_17_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "9c6e1d87-0768-4db7-b925-41da8b5c7988",
@@ -1175,7 +1440,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_18_59_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "c07da769-b7c4-4e4f-aefa-1a20bb24d8b2",
@@ -1188,7 +1458,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "m_60_disability_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "b2593385-5a81-452e-ae9a-28292e35714b",
@@ -1201,7 +1476,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "pregnant_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "dca6748f-7831-4fa1-b5c8-e708a456656b",
@@ -1209,12 +1489,22 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "work_status",
         "lookup": "work_status",
         "required": False,
-        "label": {"English(EN)": "Does the individual have paid employment in the current month?"},
+        "label": {
+            "English(EN)": "Does the individual have paid employment in the current month?"
+        },
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in WORK_STATUS_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in WORK_STATUS_CHOICE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "work_status_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "21cd9a35-b080-4f60-97da-6ec6918a49c0",
@@ -1224,10 +1514,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Does the individual have disability?"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in OBSERVED_DISABILITY_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in OBSERVED_DISABILITY_CHOICE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "observed_disability_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "244ec9ae-5eb8-4b80-9416-91024a3f32d7",
@@ -1235,14 +1533,22 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "seeing_disability",
         "lookup": "seeing_disability",
         "required": False,
-        "label": {"English(EN)": "If the individual has difficulty seeing, what is the severity?"},
+        "label": {
+            "English(EN)": "If the individual has difficulty seeing, what is the severity?"
+        },
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": value} for value, label in SEVERITY_OF_DISABILITY_CHOICES
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in SEVERITY_OF_DISABILITY_CHOICES
         ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "seeing_disability_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "bef35c02-1fe7-4f6b-a0af-8282ec31de89",
@@ -1250,14 +1556,22 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "hearing_disability",
         "lookup": "hearing_disability",
         "required": False,
-        "label": {"English(EN)": "If the individual has difficulty hearing, what is the severity?"},
+        "label": {
+            "English(EN)": "If the individual has difficulty hearing, what is the severity?"
+        },
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": value} for value, label in SEVERITY_OF_DISABILITY_CHOICES
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in SEVERITY_OF_DISABILITY_CHOICES
         ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "hearing_disability_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "b7346b1f-23ea-47a8-b2ec-c176c62cdb5b",
@@ -1265,14 +1579,22 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "physical_disability",
         "lookup": "physical_disability",
         "required": False,
-        "label": {"English(EN)": "If the individual has difficulty walking or climbing steps, what is the severity?"},
+        "label": {
+            "English(EN)": "If the individual has difficulty walking or climbing steps, what is the severity?"
+        },
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": value} for value, label in SEVERITY_OF_DISABILITY_CHOICES
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in SEVERITY_OF_DISABILITY_CHOICES
         ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "physical_disability_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "0f24c374-4428-43ef-b162-86dc1b14e39d",
@@ -1285,11 +1607,17 @@ CORE_FIELDS_ATTRIBUTES = [
         },
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": value} for value, label in SEVERITY_OF_DISABILITY_CHOICES
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in SEVERITY_OF_DISABILITY_CHOICES
         ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "memory_disability_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "59508af1-07d0-4e20-ac3d-f241bef319c1",
@@ -1297,14 +1625,22 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "selfcare_disability",
         "lookup": "selfcare_disability",
         "required": False,
-        "label": {"English(EN)": "Do you have difficulty (with self-care such as) washing all over or dressing"},
+        "label": {
+            "English(EN)": "Do you have difficulty (with self-care such as) washing all over or dressing"
+        },
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": value} for value, label in SEVERITY_OF_DISABILITY_CHOICES
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in SEVERITY_OF_DISABILITY_CHOICES
         ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "selfcare_disability_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "78311be2-fb3f-443c-aac6-c0e7197af20d",
@@ -1312,14 +1648,22 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "comms_disability",
         "lookup": "comms_disability",
         "required": False,
-        "label": {"English(EN)": "If the individual has difficulty communicating, what is the severity?"},
+        "label": {
+            "English(EN)": "If the individual has difficulty communicating, what is the severity?"
+        },
         "hint": "",
         "choices": [
-            {"label": {"English(EN)": label}, "value": value} for value, label in SEVERITY_OF_DISABILITY_CHOICES
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in SEVERITY_OF_DISABILITY_CHOICES
         ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "comms_disability_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "9fbd2b6f-6713-445c-a7bb-e1efc398b20d",
@@ -1358,7 +1702,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "village_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "c640fe45-368f-4206-afae-09700a495db3",
@@ -1384,7 +1733,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "name_enumerator_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "201e9a88-fb7d-4ba4-afec-66aba748fe55",
@@ -1394,10 +1748,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Organization of the enumerator"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in ORG_ENUMERATOR_CHOICES],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in ORG_ENUMERATOR_CHOICES
+        ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "org_enumerator_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "0858371e-4e5c-402e-9cda-b767eb2d337c",
@@ -1405,9 +1767,14 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "consent_sharing",
         "lookup": "consent_sharing",
         "required": False,
-        "label": {"English(EN)": "Which organizations may we share your information with?"},
+        "label": {
+            "English(EN)": "Which organizations may we share your information with?"
+        },
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in DATA_SHARING_CHOICES],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in DATA_SHARING_CHOICES
+        ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "consent_sharing_h_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
@@ -1423,7 +1790,12 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "org_name_enumerator_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.HOUSEHOLD_UPDATE,
+        ],
     },
     {
         "id": "69dbc5f2-039f-4671-b39f-a63d96475cab",
@@ -1433,10 +1805,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Individual is disabled?"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in DISABILITY_CHOICES],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in DISABILITY_CHOICES
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "disability_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE],
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+        ],
     },
     {
         "id": "6536a987-a50e-453b-9517-57c1dccd1340",
@@ -1527,7 +1907,10 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": True,
         "label": {"English(EN)": "Role"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in ROLE_CHOICE],
+        "choices": [
+            {"label": {"English(EN)": label}, "value": value}
+            for value, label in ROLE_CHOICE
+        ],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "role_i_c",
         "get_query": get_role_query,
@@ -1542,7 +1925,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Registration Data Import"},
         "hint": "",
-        "_choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(*args, **kwargs),
+        "_choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(
+            *args, **kwargs
+        ),
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "registration_data_import",
@@ -1582,7 +1967,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Household resides in which admin area?"},
         "hint": "",
-        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(*args, **kwargs),
+        "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(
+            *args, **kwargs
+        ),
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "admin_area_h_c",
@@ -1618,7 +2005,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "type": TYPE_LIST_OF_IDS,
         "name": "primary_collector_id",
         "required": True,
-        "label": {"English(EN)": "List of primary collectors ids, separated by a semicolon"},
+        "label": {
+            "English(EN)": "List of primary collectors ids, separated by a semicolon"
+        },
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "primary_collector_id",
@@ -1629,7 +2018,9 @@ CORE_FIELDS_ATTRIBUTES = [
         "type": TYPE_LIST_OF_IDS,
         "name": "alternate_collector_id",
         "required": True,
-        "label": {"English(EN)": "List of alternate collectors ids, separated by a semicolon"},
+        "label": {
+            "English(EN)": "List of alternate collectors ids, separated by a semicolon"
+        },
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "alternate_collector_id",
@@ -1716,7 +2107,12 @@ class FieldFactory(list):
     def from_scopes(cls, scopes: list[Scope]):
         factory = cls()
         all_fields = copy.deepcopy(factory.all_fields)
-        factory.extend(filter(lambda field: any(True for scope in scopes if scope in field["scope"]), all_fields))
+        factory.extend(
+            filter(
+                lambda field: any(True for scope in scopes if scope in field["scope"]),
+                all_fields,
+            )
+        )
         factory.scopes.update(scopes)
         return factory
 

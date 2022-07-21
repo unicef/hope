@@ -89,8 +89,12 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="dffgh565556")
-        AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="fggtyjyj")
+        AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="dffgh565556"
+        )
+        AdminAreaFactory(
+            title="City Example", admin_area_level=area_type, p_code="fggtyjyj"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -110,8 +114,12 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country="AFG")
-        household_two = HouseholdFactory.build(id="ac540aa1-5c7a-47d0-a013-32054e2af454")
+        household_one = HouseholdFactory.build(
+            id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country="AFG"
+        )
+        household_two = HouseholdFactory.build(
+            id="ac540aa1-5c7a-47d0-a013-32054e2af454"
+        )
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_two.registration_data_import.imported_by.save()
@@ -183,7 +191,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
 
         cls.individuals = [
-            IndividualFactory(household=household_one if index % 2 else household_two, **individual)
+            IndividualFactory(
+                household=household_one if index % 2 else household_two, **individual
+            )
             for index, individual in enumerate(cls.individuals_to_create)
         ]
         household_one.head_of_household = cls.individuals[0]
@@ -192,7 +202,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.save()
         cls.household_one = household_one
 
-        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        national_id_type = DocumentType.objects.get(
+            country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID
+        )
         cls.national_id = DocumentFactory.create(
             id="d367e431-b807-4c1f-a811-ef2e0d217cc4",
             type=national_id_type,
@@ -217,9 +229,14 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
+    @mock.patch(
+        "django.core.files.storage.default_storage.save",
+        lambda filename, file: "test_file_name.jpg",
+    )
     def test_grievance_create_individual_data_change(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         variables = {
             "input": {
@@ -233,13 +250,17 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "extras": {
                     "issueType": {
                         "addIndividualIssueTypeExtras": {
-                            "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
+                            "household": self.id_to_base64(
+                                self.household_one.id, "HouseholdNode"
+                            ),
                             "individualData": {
                                 "givenName": "Test",
                                 "fullName": "Test Test",
                                 "familyName": "Romaniak",
                                 "sex": "MALE",
-                                "birthDate": date(year=1980, month=2, day=1).isoformat(),
+                                "birthDate": date(
+                                    year=1980, month=2, day=1
+                                ).isoformat(),
                                 "maritalStatus": SINGLE,
                                 "estimatedBirthDate": False,
                                 "relationship": RELATIONSHIP_UNKNOWN,
@@ -249,7 +270,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                                         "country": "POL",
                                         "number": "123-123-UX-321",
-                                        "photo": SimpleUploadedFile(name="test.jpg", content=b""),
+                                        "photo": SimpleUploadedFile(
+                                            name="test.jpg", content=b""
+                                        ),
                                     }
                                 ],
                                 "identities": [
@@ -287,9 +310,14 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             ("without_permission", []),
         ]
     )
-    @mock.patch("django.core.files.storage.default_storage.save", lambda filename, file: "test_file_name.jpg")
+    @mock.patch(
+        "django.core.files.storage.default_storage.save",
+        lambda filename, file: "test_file_name.jpg",
+    )
     def test_grievance_update_individual_data_change(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         variables = {
             "input": {
@@ -303,28 +331,38 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "extras": {
                     "issueType": {
                         "individualDataUpdateIssueTypeExtras": {
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "individual": self.id_to_base64(
+                                self.individuals[0].id, "IndividualNode"
+                            ),
                             "individualData": {
                                 "givenName": "Test",
                                 "fullName": "Test Test",
                                 "sex": "MALE",
-                                "birthDate": date(year=1980, month=2, day=1).isoformat(),
+                                "birthDate": date(
+                                    year=1980, month=2, day=1
+                                ).isoformat(),
                                 "maritalStatus": SINGLE,
                                 "documents": [
                                     {
                                         "type": IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
                                         "country": "POL",
                                         "number": "321-321-XU-987",
-                                        "photo": SimpleUploadedFile(name="test.jpg", content=b""),
+                                        "photo": SimpleUploadedFile(
+                                            name="test.jpg", content=b""
+                                        ),
                                     }
                                 ],
                                 "documentsToEdit": [
                                     {
-                                        "id": self.id_to_base64(self.national_id.id, "DocumentNode"),
+                                        "id": self.id_to_base64(
+                                            self.national_id.id, "DocumentNode"
+                                        ),
                                         "type": IDENTIFICATION_TYPE_NATIONAL_ID,
                                         "country": "POL",
                                         "number": "321-321-XU-123",
-                                        "photo": SimpleUploadedFile(name="test.jpg", content=b""),
+                                        "photo": SimpleUploadedFile(
+                                            name="test.jpg", content=b""
+                                        ),
                                     }
                                 ],
                                 "identities": [
@@ -336,7 +374,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 ],
                                 "identitiesToEdit": [
                                     {
-                                        "id": self.id_to_base64(self.identity.id, "IndividualIdentityNode"),
+                                        "id": self.id_to_base64(
+                                            self.identity.id, "IndividualIdentityNode"
+                                        ),
                                         "agency": UNHCR,
                                         "country": "POL",
                                         "number": "3333",
@@ -364,7 +404,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_create_payment_channel_for_individual(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         variables = {
             "input": {
@@ -378,7 +420,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "extras": {
                     "issueType": {
                         "individualDataUpdateIssueTypeExtras": {
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "individual": self.id_to_base64(
+                                self.individuals[0].id, "IndividualNode"
+                            ),
                             "individualData": {
                                 "paymentChannels": [
                                     {
@@ -409,7 +453,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_edit_payment_channel_for_individual(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         bank_account = BankAccountInfoFactory(
             id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
@@ -430,11 +476,15 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "extras": {
                     "issueType": {
                         "individualDataUpdateIssueTypeExtras": {
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "individual": self.id_to_base64(
+                                self.individuals[0].id, "IndividualNode"
+                            ),
                             "individualData": {
                                 "paymentChannelsToEdit": [
                                     {
-                                        "id": self.id_to_base64(bank_account.id, "BankAccountInfoNode"),
+                                        "id": self.id_to_base64(
+                                            bank_account.id, "BankAccountInfoNode"
+                                        ),
                                         "type": "BANK_TRANSFER",
                                         "bankName": "privatbank",
                                         "bankAccountNumber": 1111222233334444,
@@ -462,7 +512,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_delete_individual_data_change(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         variables = {
             "input": {
@@ -476,7 +528,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "extras": {
                     "issueType": {
                         "individualDeleteIssueTypeExtras": {
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+                            "individual": self.id_to_base64(
+                                self.individuals[0].id, "IndividualNode"
+                            ),
                         }
                     }
                 },
@@ -498,7 +552,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_update_household_data_change(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         self.household_one.female_age_group_6_11_count = 2
         self.household_one.save()
 
@@ -514,7 +570,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "extras": {
                     "issueType": {
                         "householdDataUpdateIssueTypeExtras": {
-                            "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
+                            "household": self.id_to_base64(
+                                self.household_one.id, "HouseholdNode"
+                            ),
                             "householdData": {
                                 "femaleAgeGroup611Count": 14,
                                 "country": "AFG",
@@ -541,7 +599,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         ]
     )
     def test_grievance_delete_household_data_change(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         variables = {
             "input": {
@@ -555,7 +615,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "extras": {
                     "issueType": {
                         "householdDeleteIssueTypeExtras": {
-                            "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
+                            "household": self.id_to_base64(
+                                self.household_one.id, "HouseholdNode"
+                            ),
                         }
                     }
                 },

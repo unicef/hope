@@ -14,11 +14,15 @@ class FormatterTestForm(forms.Form):
 
 
 class QueryForm(forms.ModelForm):
-    name = forms.CharField(required=True, widget=forms.TextInput(attrs={"style": "width:80%"}))
+    name = forms.CharField(
+        required=True, widget=forms.TextInput(attrs={"style": "width:80%"})
+    )
     target = ContentTypeChoiceField()
     code = forms.CharField(widget=PythonEditor)
     owner = forms.ModelChoiceField(queryset=User.objects, widget=forms.HiddenInput)
-    description = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows": 2, "style": "width:80%"}))
+    description = forms.CharField(
+        required=False, widget=forms.Textarea(attrs={"rows": 2, "style": "width:80%"})
+    )
 
     class Meta:
         model = Query

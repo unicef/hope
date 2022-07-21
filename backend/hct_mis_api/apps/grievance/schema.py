@@ -316,9 +316,9 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_extra_data(parent, info):
-        golden_records = parent.extra_data.get("golden_records")
-        possible_duplicate = parent.extra_data.get("possible_duplicate")
+    def resolve_extra_data(self, info):
+        golden_records = self.extra_data.get("golden_records")
+        possible_duplicate = self.extra_data.get("possible_duplicate")
         return TicketNeedsAdjudicationDetailsExtraDataNode(golden_records, possible_duplicate)
 
     def resolve_possible_duplicates(self, info):

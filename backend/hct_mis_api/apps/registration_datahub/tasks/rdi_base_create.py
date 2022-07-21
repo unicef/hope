@@ -1,5 +1,4 @@
 import logging
-
 from datetime import date, datetime
 
 from dateutil.parser import parse
@@ -22,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_flex_field_attr(field):
-    return field.endswith(("_i_f","_h_f"))
+    return field.endswith(("_i_f", "_h_f"))
 
 
 class RdiBaseCreateTask:
@@ -32,10 +31,14 @@ class RdiBaseCreateTask:
     @staticmethod
     def _assign_admin_areas_titles(household_obj):
         if household_obj.admin1:
-            admin_area_level_1 = Area.objects.filter(p_code=household_obj.admin1).first()
+            admin_area_level_1 = Area.objects.filter(
+                p_code=household_obj.admin1
+            ).first()
             household_obj.admin1_title = getattr(admin_area_level_1, "name", "")
         if household_obj.admin2:
-            admin_area_level_2 = Area.objects.filter(p_code=household_obj.admin2).first()
+            admin_area_level_2 = Area.objects.filter(
+                p_code=household_obj.admin2
+            ).first()
             household_obj.admin2_title = getattr(admin_area_level_2, "name", "")
 
         return household_obj
@@ -121,4 +124,3 @@ class RdiBaseCreateTask:
                 value = parse(value)
 
         return value
-

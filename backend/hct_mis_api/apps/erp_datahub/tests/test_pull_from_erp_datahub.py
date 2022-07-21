@@ -1,5 +1,6 @@
 import os
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -12,8 +13,6 @@ from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
-
-from unittest.mock import patch
 
 
 class TestPullDataFromErpDatahub(TestCase):
@@ -70,13 +69,19 @@ class TestPullDataFromErpDatahub(TestCase):
     @classmethod
     def _setup_datahub_data(cls):
         cls.funds_commitment_1 = FundsCommitmentFactory(
-            funds_commitment_number="123456", total_open_amount_local=1000, total_open_amount_usd=2000
+            funds_commitment_number="123456",
+            total_open_amount_local=1000,
+            total_open_amount_usd=2000,
         )
         cls.funds_commitment_2 = FundsCommitmentFactory(
-            funds_commitment_number="654321", total_open_amount_local=1500, total_open_amount_usd=2000
+            funds_commitment_number="654321",
+            total_open_amount_local=1500,
+            total_open_amount_usd=2000,
         )
         cls.funds_commitment_4 = FundsCommitmentFactory(
-            funds_commitment_number="111111", total_open_amount_local=1000, total_open_amount_usd=None
+            funds_commitment_number="111111",
+            total_open_amount_local=1000,
+            total_open_amount_usd=None,
         )
 
     @classmethod
@@ -85,8 +90,14 @@ class TestPullDataFromErpDatahub(TestCase):
         cls._setup_in_app_data()
         cls._setup_datahub_data()
 
-    @patch("hct_mis_api.apps.erp_datahub.utils.get_exchange_rate_for_cash_plan", new=lambda *arg: 2)
-    @patch("hct_mis_api.apps.erp_datahub.utils.get_payment_record_delivered_quantity_in_usd", new=lambda *arg: 2)
+    @patch(
+        "hct_mis_api.apps.erp_datahub.utils.get_exchange_rate_for_cash_plan",
+        new=lambda *arg: 2,
+    )
+    @patch(
+        "hct_mis_api.apps.erp_datahub.utils.get_payment_record_delivered_quantity_in_usd",
+        new=lambda *arg: 2,
+    )
     def test_pull_data(self):
         task = PullFromErpDatahubTask()
         task.execute()

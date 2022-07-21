@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from django.utils import timezone
 
 from parameterized import parameterized
@@ -14,7 +15,10 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.household.fixtures import create_household
 
 
@@ -174,8 +178,12 @@ class TestGrievanceQuery(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        cls.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
-        cls.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
+        cls.admin_area_1 = AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="123aa123"
+        )
+        cls.admin_area_2 = AdminAreaFactory(
+            title="City Example", admin_area_level=area_type, p_code="sadasdasfd222"
+        )
 
         country = Country.objects.first()
         area_type_new = AreaTypeFactory(
@@ -185,10 +193,16 @@ class TestGrievanceQuery(APITestCase):
             original_id=area_type.id,
         )
         cls.admin_area_1_new = AreaFactory(
-            name="City Test", area_type=area_type_new, p_code="123aa123", original_id=cls.admin_area_1.id
+            name="City Test",
+            area_type=area_type_new,
+            p_code="123aa123",
+            original_id=cls.admin_area_1.id,
         )
         cls.admin_area_2_new = AreaFactory(
-            name="City Example", area_type=area_type_new, p_code="sadasdasfd222", original_id=cls.admin_area_2.id
+            name="City Example",
+            area_type=area_type_new,
+            p_code="sadasdasfd222",
+            original_id=cls.admin_area_2.id,
         )
 
         _, individuals = create_household({"size": 2})
@@ -196,9 +210,15 @@ class TestGrievanceQuery(APITestCase):
         cls.individual_2 = individuals[1]
 
         created_at_dates_to_set = {
-            GrievanceTicket.STATUS_NEW: timezone.make_aware(datetime(year=2020, month=3, day=12)),
-            GrievanceTicket.STATUS_ON_HOLD: timezone.make_aware(datetime(year=2020, month=7, day=12)),
-            GrievanceTicket.STATUS_IN_PROGRESS: timezone.make_aware(datetime(year=2020, month=8, day=22)),
+            GrievanceTicket.STATUS_NEW: timezone.make_aware(
+                datetime(year=2020, month=3, day=12)
+            ),
+            GrievanceTicket.STATUS_ON_HOLD: timezone.make_aware(
+                datetime(year=2020, month=7, day=12)
+            ),
+            GrievanceTicket.STATUS_IN_PROGRESS: timezone.make_aware(
+                datetime(year=2020, month=8, day=22)
+            ),
         }
 
         grievances_to_create = (
@@ -257,21 +277,25 @@ class TestGrievanceQuery(APITestCase):
             golden_records_individual=cls.individual_1,
             possible_duplicate=cls.individual_2,
             score_min=100,
-            score_max=150
+            score_max=150,
         )
-
 
     @parameterized.expand(
         [
             (
                 "with_permission",
-                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                ],
             ),
             ("without_permission", []),
         ]
     )
     def test_grievance_query_all(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.ALL_GRIEVANCE_QUERY,
@@ -280,14 +304,21 @@ class TestGrievanceQuery(APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR]),
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR],
+            ),
             ("without_permission", []),
         ]
     )
     def test_grievance_query_single(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
-        gt_id = GrievanceTicket.objects.get(status=GrievanceTicket.STATUS_IN_PROGRESS).id
+        gt_id = GrievanceTicket.objects.get(
+            status=GrievanceTicket.STATUS_IN_PROGRESS
+        ).id
         self.snapshot_graphql_request(
             request_string=self.GRIEVANCE_QUERY,
             context={"user": self.user},
@@ -297,7 +328,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_admin2(self):
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -310,7 +344,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_created_at(self):
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -323,7 +360,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_status(self):
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -348,7 +388,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_category(self, _, category):
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -361,7 +404,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_assigned_to_correct_user(self):
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -374,7 +420,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_assigned_to_incorrect_user(self):
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 
@@ -387,7 +436,10 @@ class TestGrievanceQuery(APITestCase):
     def test_grievance_list_filtered_by_score(self):
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            ],
             self.business_area,
         )
 

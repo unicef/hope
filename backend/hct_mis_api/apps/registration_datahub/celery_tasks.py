@@ -1,8 +1,9 @@
-from django.utils import timezone
 import logging
 from contextlib import contextmanager
 
 from django.core.cache import cache
+from django.utils import timezone
+
 from redis.exceptions import LockError
 
 from hct_mis_api.apps.core.celery import app
@@ -32,7 +33,9 @@ def locked_cache(key):
 
 @app.task
 @log_start_and_end
-def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
+def registration_xlsx_import_task(
+    registration_data_import_id, import_data_id, business_area
+):
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
@@ -62,7 +65,9 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
 
 @app.task
 @log_start_and_end
-def registration_kobo_import_task(registration_data_import_id, import_data_id, business_area):
+def registration_kobo_import_task(
+    registration_data_import_id, import_data_id, business_area
+):
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
             RdiKoboCreateTask,
@@ -93,7 +98,11 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
 
         RegistrationDataImport.objects.filter(
             datahub_id=registration_data_import_id,
-        ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))
+        ).update(
+            status=RegistrationDataImport.IMPORT_ERROR,
+            sentry_id=err,
+            error_message=str(e),
+        )
 
         raise
 
@@ -116,7 +125,9 @@ def registration_kobo_import_hourly_task():
 
         if not_started_rdi is None:
             return
-        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
+        business_area = BusinessArea.objects.get(
+            slug=not_started_rdi.business_area_slug
+        )
 
         RdiKoboCreateTask().execute(
             registration_data_import_id=str(not_started_rdi.id),
@@ -146,7 +157,9 @@ def registration_xlsx_import_hourly_task():
         if not_started_rdi is None:
             return
 
-        business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
+        business_area = BusinessArea.objects.get(
+            slug=not_started_rdi.business_area_slug
+        )
 
         RdiXlsxCreateTask().execute(
             registration_data_import_id=str(not_started_rdi.id),
@@ -187,9 +200,13 @@ def rdi_deduplication_task(registration_data_import_id):
             DeduplicateTask,
         )
 
-        rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_id)
+        rdi_obj = RegistrationDataImportDatahub.objects.get(
+            id=registration_data_import_id
+        )
 
-        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
+        DeduplicateTask.deduplicate_imported_individuals(
+            registration_data_import_datahub=rdi_obj
+        )
     except Exception as e:
         logger.exception(e)
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -257,7 +274,11 @@ def process_flex_records_task(rdi_id, records_ids):
 @app.task
 @log_start_and_end
 def extract_records_task(max_records=500):
-    records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
+    records_ids = (
+        Record.objects.filter(data__isnull=True)
+        .only("pk")
+        .values_list("pk", flat=True)[:max_records]
+    )
     extract(records_ids)
 
 
@@ -265,7 +286,9 @@ def extract_records_task(max_records=500):
 @log_start_and_end
 def fresh_extract_records_task(records_ids=None):
     if not records_ids:
-        records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
+        records_ids = (
+            Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
+        )
     extract(records_ids)
 
 
@@ -297,7 +320,8 @@ def automate_rdi_creation_task(
                 return ["No Records found", 0]
 
             splitted_record_ids = [
-                all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
+                all_records_ids[i : i + page_size]
+                for i in range(0, len(all_records_ids), page_size)
             ]
             output = []
             for page, records_ids in enumerate(splitted_record_ids, 1):
@@ -339,7 +363,9 @@ def check_and_set_taxid(queryset):
 
 
 @app.task
-def automate_registration_diia_import_task(page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters):
+def automate_registration_diia_import_task(
+    page_size: int, template="Diia ukraine rdi {date} {page_size}", **filters
+):
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
@@ -359,7 +385,9 @@ def automate_registration_diia_import_task(page_size: int, template="Diia ukrain
 
 
 @app.task
-def registration_diia_import_task(diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters):
+def registration_diia_import_task(
+    diia_hh_ids, template="Diia ukraine rdi {date} {page_size}", **filters
+):
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )

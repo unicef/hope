@@ -78,7 +78,9 @@ class FlexFieldsScalar(graphene.Scalar):
         if not dt:
             return dt
 
-        images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
+        images_flex_fields_names = FlexibleAttribute.objects.filter(
+            type=TYPE_IMAGE
+        ).values_list("name", flat=True)
         for name, value in dt.items():
             if value and name in images_flex_fields_names:
                 try:

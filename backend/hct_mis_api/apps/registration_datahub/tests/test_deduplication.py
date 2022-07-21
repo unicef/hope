@@ -64,9 +64,13 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         cls.registration_data_import_datahub.hct_id = rdi.id
         cls.registration_data_import_datahub.save()
 
-        registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
+        registration_data_import_second = RegistrationDataImportFactory(
+            business_area=cls.business_area
+        )
         (cls.household, cls.individuals,) = create_imported_household_and_individuals(
-            household_data={"registration_data_import": cls.registration_data_import_datahub},
+            household_data={
+                "registration_data_import": cls.registration_data_import_datahub
+            },
             individuals_data=[
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -248,15 +252,15 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             expected_uniques,
         )
 
-        duplicate_in_golden_record = ImportedIndividual.objects.order_by("full_name").filter(
-            deduplication_golden_record_status=DUPLICATE
-        )
-        needs_adjudication_in_golden_record = ImportedIndividual.objects.order_by("full_name").filter(
-            deduplication_golden_record_status=NEEDS_ADJUDICATION
-        )
-        unique_in_golden_record = ImportedIndividual.objects.order_by("full_name").filter(
-            deduplication_golden_record_status=UNIQUE
-        )
+        duplicate_in_golden_record = ImportedIndividual.objects.order_by(
+            "full_name"
+        ).filter(deduplication_golden_record_status=DUPLICATE)
+        needs_adjudication_in_golden_record = ImportedIndividual.objects.order_by(
+            "full_name"
+        ).filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
+        unique_in_golden_record = ImportedIndividual.objects.order_by(
+            "full_name"
+        ).filter(deduplication_golden_record_status=UNIQUE)
 
         self.assertEqual(duplicate_in_golden_record.count(), 5)
         self.assertEqual(unique_in_golden_record.count(), 1)
@@ -297,8 +301,12 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             deduplication_possible_duplicate_score=11.0,
             has_data_sharing_agreement=True,
         )
-        cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
-        registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area
+        )
+        registration_data_import_second = RegistrationDataImportFactory(
+            business_area=cls.business_area
+        )
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
@@ -393,8 +401,12 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         task = DeduplicateTask()
         task.business_area = self.business_area.slug
         task.deduplicate_individuals(self.registration_data_import)
-        needs_adjudication = Individual.objects.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
-        duplicate = Individual.objects.filter(deduplication_golden_record_status=DUPLICATE)
+        needs_adjudication = Individual.objects.filter(
+            deduplication_golden_record_status=NEEDS_ADJUDICATION
+        )
+        duplicate = Individual.objects.filter(
+            deduplication_golden_record_status=DUPLICATE
+        )
 
         self.assertEqual(needs_adjudication.count(), 0)
         self.assertEqual(duplicate.count(), 4)

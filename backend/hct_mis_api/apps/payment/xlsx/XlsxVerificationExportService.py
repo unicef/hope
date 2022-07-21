@@ -90,10 +90,10 @@ class XlsxVerificationExportService:
             self._add_payment_record_verification_row(payment_record_verification)
 
     def _add_data_validation(self):
-        self.dv_received = DataValidation(type="list", formula1=f'"YES,NO"', allow_blank=False)
+        self.dv_received = DataValidation(type="list", formula1='"YES,NO"', allow_blank=False)
         self.dv_received.add(f"B2:B{len(self.ws_verifications['B'])}")
         self.ws_verifications.add_data_validation(self.dv_received)
-        cell_range = self.ws_verifications["B2":f"B{len(self.ws_verifications['B'])}"]
+        self.ws_verifications["B2":f"B{len(self.ws_verifications['B'])}"]
 
     def generate_workbook(self):
         self._create_workbook()
@@ -126,7 +126,7 @@ class XlsxVerificationExportService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i, _width in enumerate(column_widths):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             ws.column_dimensions[col_name].width = value

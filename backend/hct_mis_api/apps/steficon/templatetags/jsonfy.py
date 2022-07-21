@@ -3,7 +3,7 @@ import json
 from django import template
 from django.core import serializers
 from django.db.models import Model
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -45,7 +45,7 @@ def pretty_json(context):
     response = json.dumps(data, sort_keys=True, indent=2)
     formatter = HtmlFormatter(style="colorful")
     response = highlight(response, JsonLexer(), formatter)
-    return mark_safe(response)
+    return format_html(response)
 
 
 @register.filter
@@ -61,7 +61,7 @@ def smart_json(value):
 def pretty_python(value):
     formatter = HtmlFormatter(style="xcode", linenos="table")
     response = highlight(value, PythonLexer(), formatter)
-    return mark_safe(response)
+    return format_html(response)
 
 
 @register.filter(name="repr")
@@ -75,4 +75,4 @@ def _repr(value):
 #     from django.core.serializers.json import DjangoJSONEncoder
 #
 #     json_str = json.dumps(value, cls=DjangoJSONEncoder).translate(json_value_escapes)
-#     return mark_safe(json_str)
+#     return format_html(json_str)

@@ -19,7 +19,9 @@ def fix_document_photos():
         document_photo = imported_document.get("photo")
 
         document = Document.objects.filter(
-            individual__registration_data_import__id=hct_id, document_number=document_number, photo=""
+            individual__registration_data_import__id=hct_id,
+            document_number=document_number,
+            photo="",
         ).first()
 
         if document:

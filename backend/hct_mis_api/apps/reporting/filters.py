@@ -14,12 +14,21 @@ class ReportFilter(FilterSet):
     created_from = DateTimeFilter(field_name="created_at", lookup_expr="gte")
     created_to = DateTimeFilter(field_name="created_at", lookup_expr="lte")
     status = MultipleChoiceFilter(field_name="status", choices=Report.STATUSES)
-    report_type = MultipleChoiceFilter(field_name="report_type", choices=Report.REPORT_TYPES)
+    report_type = MultipleChoiceFilter(
+        field_name="report_type", choices=Report.REPORT_TYPES
+    )
 
     class Meta:
         fields = ("created_by", "report_type", "status", "business_area")
         model = Report
 
     order_by = OrderingFilter(
-        fields=("report_type", "status", "created_at", "created_by__first_name", "date_from", "number_of_records")
+        fields=(
+            "report_type",
+            "status",
+            "created_at",
+            "created_by__first_name",
+            "date_from",
+            "number_of_records",
+        )
     )

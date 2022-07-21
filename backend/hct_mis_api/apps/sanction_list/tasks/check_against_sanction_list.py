@@ -1,11 +1,11 @@
 from datetime import date, datetime
-from django.utils import timezone
 from itertools import permutations
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.template.loader import render_to_string
+from django.utils import timezone
 
 import dateutil.parser
 from openpyxl import Workbook, load_workbook
@@ -57,7 +57,9 @@ class CheckAgainstSanctionListTask:
             names = [str(n).capitalize().strip() for n in filter_values.values() if n]
 
             name_permutations = permutations(names)
-            full_name_permutations = [" ".join(permutation).title() for permutation in name_permutations]
+            full_name_permutations = [
+                " ".join(permutation).title() for permutation in name_permutations
+            ]
 
             if isinstance(dob, datetime):
                 dob_query = (
@@ -72,7 +74,9 @@ class CheckAgainstSanctionListTask:
             if len(names) == 0:
                 continue
             elif len(names) == 1:
-                name_query = Q(full_name__in=full_name_permutations) | Q(first_name__iexact=names[0])
+                name_query = Q(full_name__in=full_name_permutations) | Q(
+                    first_name__iexact=names[0]
+                )
             else:
                 name_query = Q(full_name__in=full_name_permutations) | (
                     Q(full_name__icontains=names[0]) & Q(full_name__icontains=names[1])
@@ -92,7 +96,10 @@ class CheckAgainstSanctionListTask:
         }
         text_body = render_to_string("sanction_list/check_results.txt", context)
         html_body = render_to_string("sanction_list/check_results.html", context)
-        subject = f"Sanction List Check - file: {original_file_name}, " f"date: {today.strftime('%Y-%m-%d %I:%M %p')}"
+        subject = (
+            f"Sanction List Check - file: {original_file_name}, "
+            f"date: {today.strftime('%Y-%m-%d %I:%M %p')}"
+        )
 
         attachment_wb = Workbook()
         attachment_ws = attachment_wb.active
@@ -115,7 +122,12 @@ class CheckAgainstSanctionListTask:
                     individual.second_name,
                     individual.third_name,
                     individual.fourth_name,
-                    ", ".join(d.strftime("%Y-%m-%d") for d in individual.dates_of_birth.values_list("date", flat=True)),
+                    ", ".join(
+                        d.strftime("%Y-%m-%d")
+                        for d in individual.dates_of_birth.values_list(
+                            "date", flat=True
+                        )
+                    ),
                     row_number,
                 )
             )

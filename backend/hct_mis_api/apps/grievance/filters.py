@@ -77,7 +77,9 @@ class GrievanceTicketFilter(FilterSet):
     )
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
-    status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
+    status = TypedMultipleChoiceFilter(
+        field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int
+    )
     fsp = CharFilter(method="fsp_filter")
     admin = ModelMultipleChoiceFilter(
         field_name="admin",
@@ -89,10 +91,18 @@ class GrievanceTicketFilter(FilterSet):
         lookup_expr="payment_verifications__cash_plan_payment_verification__cash_plan",
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
-    permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
-    issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
-    score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
-    score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
+    permissions = MultipleChoiceFilter(
+        choices=Permissions.choices(), method="permissions_filter"
+    )
+    issue_type = ChoiceFilter(
+        field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES
+    )
+    score_min = CharFilter(
+        field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte"
+    )
+    score_max = CharFilter(
+        field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte"
+    )
     household = CharFilter(field_name="household_unicef_id")
 
     class Meta:
@@ -123,11 +133,15 @@ class GrievanceTicketFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$") | Q(registration_data_import__name__icontains=value)
+            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$") | Q(
+                registration_data_import__name__icontains=value
+            )
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
-                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__istartswith": value})
+                        q_obj |= Q(
+                            **{f"{ticket_type}__{field}__{lookup}__istartswith": value}
+                        )
 
         return qs.filter(q_obj)
 
@@ -135,7 +149,9 @@ class GrievanceTicketFilter(FilterSet):
         if value:
             q_obj = Q()
             for ticket_type, path_to_fsp in self.TICKET_TYPES_WITH_FSP:
-                q_obj |= Q(**{f"{ticket_type}__{path_to_fsp}__full_name__istartswith": value})
+                q_obj |= Q(
+                    **{f"{ticket_type}__{path_to_fsp}__full_name__istartswith": value}
+                )
 
             return qs.filter(q_obj)
         return qs
@@ -146,12 +162,25 @@ class GrievanceTicketFilter(FilterSet):
         return qs
 
     def permissions_filter(self, qs, name, value):
-        can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
-        can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
-        can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value
-        can_view_ex_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER.value in value
-        can_view_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR.value in value
-        can_view_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER.value in value
+        can_view_ex_sensitive_all = (
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
+        )
+        can_view_sensitive_all = (
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
+        )
+        can_view_ex_sensitive_creator = (
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value
+            in value
+        )
+        can_view_ex_sensitive_owner = (
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER.value in value
+        )
+        can_view_sensitive_creator = (
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR.value in value
+        )
+        can_view_sensitive_owner = (
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER.value in value
+        )
 
         # can view all
         if can_view_ex_sensitive_all and can_view_sensitive_all:
@@ -161,7 +190,9 @@ class GrievanceTicketFilter(FilterSet):
         filters_1_exclude = {}
         filters_2 = {}
         filters_2_exclude = {}
-        sensitive_category_filter = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
+        sensitive_category_filter = {
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE
+        }
         created_by_filter = {"created_by": self.request.user}
         assigned_to_filter = {"assigned_to": self.request.user}
 
@@ -173,9 +204,13 @@ class GrievanceTicketFilter(FilterSet):
                 filters_2.update(assigned_to_filter)
 
             if can_view_ex_sensitive_all:
-                return qs.filter(~Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2))
+                return qs.filter(
+                    ~Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2)
+                )
             else:
-                return qs.filter(Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_1))
+                return qs.filter(
+                    Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_1)
+                )
 
         else:
             # no full lists so only creator and/or owner lists
@@ -189,7 +224,8 @@ class GrievanceTicketFilter(FilterSet):
                     filters_2_exclude.update(sensitive_category_filter)
             if filters_1 or filters_2:
                 return qs.filter(
-                    Q(Q(**filters_1), ~Q(**filters_1_exclude)) | Q(Q(**filters_2), ~Q(**filters_2_exclude))
+                    Q(Q(**filters_1), ~Q(**filters_1_exclude))
+                    | Q(Q(**filters_2), ~Q(**filters_2_exclude))
                 )
             else:
                 return GrievanceTicket.objects.none()
@@ -197,12 +233,18 @@ class GrievanceTicketFilter(FilterSet):
 
 class ExistingGrievanceTicketFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
-    category = ChoiceFilter(field_name="category", choices=GrievanceTicket.CATEGORY_CHOICES)
-    issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
+    category = ChoiceFilter(
+        field_name="category", choices=GrievanceTicket.CATEGORY_CHOICES
+    )
+    issue_type = ChoiceFilter(
+        field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES
+    )
     household = ModelChoiceFilter(queryset=Household.objects.all())
     individual = ModelChoiceFilter(queryset=Individual.objects.all())
     payment_record = ModelMultipleChoiceFilter(queryset=PaymentRecord.objects.all())
-    permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
+    permissions = MultipleChoiceFilter(
+        choices=Permissions.choices(), method="permissions_filter"
+    )
 
     class Meta:
         fields = ("id",)

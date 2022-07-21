@@ -10,8 +10,8 @@ from PIL import Image
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_datahub.models import ImportData
 
 
@@ -103,9 +103,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             charset=None,
         )
 
-        xlsx_valid_file_path = (
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
-        )
+        xlsx_valid_file_path = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
 
         with open(xlsx_valid_file_path, "rb") as file:
             cls.valid_file = SimpleUploadedFile(file.name, file.read())
@@ -116,12 +114,19 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             ("without_permission", [], False),
         ]
     )
-    def test_registration_data_import_datahub_upload(self, _, permissions, should_have_import_data):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_registration_data_import_datahub_upload(
+        self, _, permissions, should_have_import_data
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         self.snapshot_graphql_request(
             request_string=self.UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB,
             context={"user": self.user},
-            variables={"file": self.valid_file, "businessAreaSlug": self.business_area_slug},
+            variables={
+                "file": self.valid_file,
+                "businessAreaSlug": self.business_area_slug,
+            },
         )
 
         if should_have_import_data:
@@ -149,13 +154,17 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             number_of_households=3,
             number_of_individuals=6,
         )
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
             context={"user": self.user},
             variables={
                 "registrationDataImportData": {
-                    "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),
+                    "importDataId": self.id_to_base64(
+                        import_data_obj.id, "ImportDataNode"
+                    ),
                     "name": "New Import of Data 123",
                     "businessAreaSlug": self.business_area_slug,
                 }

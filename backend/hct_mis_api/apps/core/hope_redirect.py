@@ -42,7 +42,11 @@ class HopeRedirect(abc.ABC):
         pass
 
     def _get_business_area_slug_from_user(self) -> str:
-        business_area = BusinessArea.objects.exclude(slug="global").filter(user_roles__user=self.user).first()
+        business_area = (
+            BusinessArea.objects.exclude(slug="global")
+            .filter(user_roles__user=self.user)
+            .first()
+        )
         if business_area:
             return business_area.slug
         return "/"
@@ -106,7 +110,9 @@ class HopeRedirectCashPlan(HopeRedirect):
         return "/"
 
     def _get_cash_plan(self) -> CashPlan:
-        return CashPlan.objects.filter(Q(ca_id=self.ca_id) | Q(program__pk=self.program_id)).first()
+        return CashPlan.objects.filter(
+            Q(ca_id=self.ca_id) | Q(program__pk=self.program_id)
+        ).first()
 
 
 class HopeRedirectPayment(HopeRedirect):
@@ -124,7 +130,9 @@ class HopeRedirectPayment(HopeRedirect):
         return "/"
 
     def _get_payment_verification(self) -> PaymentVerification:
-        return PaymentVerification.objects.filter(payment_record__ca_id=self.ca_id).first()
+        return PaymentVerification.objects.filter(
+            payment_record__ca_id=self.ca_id
+        ).first()
 
 
 class HopeRedirectTargetPopulation(HopeRedirect):
@@ -136,7 +144,9 @@ class HopeRedirectTargetPopulation(HopeRedirect):
         return f"/{business_area_slug}/target-population/{encode_id_base64(self.source_id, 'TargetPopulation')}"
 
     def _get_business_area_slug_from_obj(self) -> str:
-        if target_population := TargetPopulation.objects.filter(pk=self.source_id).first():
+        if target_population := TargetPopulation.objects.filter(
+            pk=self.source_id
+        ).first():
             return target_population.business_area.slug
         return "/"
 
@@ -149,7 +159,9 @@ class HopeRedirectDefault(HopeRedirect):
         return ""
 
 
-def get_hope_redirect(user: User, ent, ca_id="", source_id="", program_id="") -> HopeRedirect:
+def get_hope_redirect(
+    user: User, ent, ca_id="", source_id="", program_id=""
+) -> HopeRedirect:
     if ent == "progres_registrationgroup":
         return HopeRedirectHousehold(user, ent, ca_id, source_id, program_id)
     if ent == "progres_individual":

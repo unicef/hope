@@ -3,7 +3,7 @@ import json
 from difflib import _mdiff
 
 from django import template
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
@@ -14,7 +14,7 @@ register = template.Library()
 class HtmlDiff(difflib.HtmlDiff):
     def _format_line(self, side, flag, linenum, text):
         try:
-            linenum = "{}".format(linenum)
+            linenum = f"{linenum}"
             id = f' id="{self._prefix[side]}{linenum}"'
         except TypeError:
             id = ""
@@ -86,14 +86,18 @@ class HtmlDiff(difflib.HtmlDiff):
         if fromdesc or todesc:
             header_row = "<thead><tr>{}{}{}{}</tr></thead>".format(
                 '<th class="diff_next"><br /></th>',
-                '<th colspan="2" class="diff_header">{}</th>'.format(fromdesc),
+                f'<th colspan="2" class="diff_header">{fromdesc}</th>',
                 '<th class="diff_next"><br /></th>',
-                '<th colspan="2" class="diff_header">{}</th>'.format(todesc),
+                f'<th colspan="2" class="diff_header">{todesc}</th>',
             )
         else:
             header_row = ""
 
-        table = self._table_template % dict(data_rows="".join(s), header_row=header_row, prefix=self._prefix[1])
+        table = self._table_template % {
+            "data_rows": "".join(s),
+            "header_row": header_row,
+            "prefix": self._prefix[1],
+        }
 
         return (
             table.replace("\0+", '<span class="diff_add">')
@@ -123,7 +127,7 @@ def adults(hh):
 def pretty_json(json_object):
     json_str = json.dumps(json_object, indent=4, sort_keys=True)
     lex = lexers.get_lexer_by_name("json")
-    return mark_safe(highlight(json_str, lex, HtmlFormatter()))
+    return format_html(highlight(json_str, lex, HtmlFormatter()))
 
 
 @register.filter
@@ -136,7 +140,7 @@ def pygmentize(code):
     formatter = HtmlFormatter(linenos=True)
     lex = lexers.get_lexer_by_name("python")
     formatted_code = highlight(code, lex, formatter)
-    return mark_safe(formatted_code)
+    return format_html(formatted_code)
 
 
 @register.filter
@@ -146,7 +150,7 @@ def diff(commit, panels="before,after"):
     left_panel, right_panel = [], []
     right_label = "No data"
     if panels == "before,after":
-        left_label = f"No Data (First Commit"
+        left_label = "No Data (First Commit"
         if "definition" in commit.before:
             left_label = f"Version before commit ({commit.prev.version})"
             left_panel = commit.before["definition"].split("\n")
@@ -167,4 +171,4 @@ def diff(commit, panels="before,after"):
         right_panel = rule.definition.split("\n")
     else:
         raise Exception(f"Invalid value for panels: `{panels}`")
-    return mark_safe(HtmlDiff(wrapcolumn=80).make_table(left_panel, right_panel, left_label, right_label))
+    return format_html(HtmlDiff(wrapcolumn=80).make_table(left_panel, right_panel, left_label, right_label))

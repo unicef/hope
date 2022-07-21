@@ -10,12 +10,12 @@ class TestPowerQuery(TestCase):
     databases = ["default"]
 
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(cls):
         create_defaults()
-        self.query1 = QueryFactory(code="result=conn.all()")
-        self.query2 = QueryFactory(code=f"result, __=invoke({self.query1.pk})")
-        self.formatter = FormatterFactory(name="Queryset To HTML")
-        self.report = ReportFactory(formatter=self.formatter, query=self.query1)
+        cls.query1 = QueryFactory(code="result=conn.all()")
+        cls.query2 = QueryFactory(code=f"result, __=invoke({cls.query1.pk})")
+        cls.formatter = FormatterFactory(name="Queryset To HTML")
+        cls.report = ReportFactory(formatter=cls.formatter, query=cls.query1)
 
     def test_query_execution(self):
         result, debug_info = self.query1.execute()

@@ -1,7 +1,7 @@
 from time import time
 
 from django.core.management import BaseCommand
-from django.db.models import DecimalField, Sum, F, Subquery, OuterRef
+from django.db.models import DecimalField, F, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 
 from hct_mis_api.apps.household.models import Household
@@ -33,7 +33,9 @@ def handle_total_cash_in_specific_households(id_list, only_empty=True):
 
 
 def handle_total_cash_in_households():
-    base_queryset = Household.objects.filter(total_cash_received_usd__isnull=True, total_cash_received__isnull=True)
+    base_queryset = Household.objects.filter(
+        total_cash_received_usd__isnull=True, total_cash_received__isnull=True
+    )
     id_list = list(base_queryset[:500].values_list("id", flat=True))
     base_count = base_queryset.count()
     index = 0

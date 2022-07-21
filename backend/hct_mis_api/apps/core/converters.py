@@ -19,7 +19,9 @@ class GeoJSON(graphene.Scalar):
 
 @convert_form_field.register(MultipleChoiceField)
 def convert_form_field_to_string_list(field):
-    return graphene.List(graphene.String, description=field.help_text, required=field.required)
+    return graphene.List(
+        graphene.String, description=field.help_text, required=field.required
+    )
 
 
 @convert_django_field.register(GeometryField)

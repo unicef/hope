@@ -4,8 +4,8 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, UserRole
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class IncompatibleRolesTest(TestCase):
@@ -18,7 +18,11 @@ class IncompatibleRolesTest(TestCase):
         test_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_2)
         test_role.full_clean()
         test_role.save()
-        self.assertTrue(IncompatibleRoles.objects.filter(role_one=self.role_1, role_two=self.role_2).exists())
+        self.assertTrue(
+            IncompatibleRoles.objects.filter(
+                role_one=self.role_1, role_two=self.role_2
+            ).exists()
+        )
 
     def test_roles_must_be_different(self):
         incomp_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_1)
@@ -30,7 +34,8 @@ class IncompatibleRolesTest(TestCase):
 
         test_role = IncompatibleRoles(role_one=self.role_2, role_two=self.role_1)
         with self.assertRaisesMessage(
-            ValidationError, "This combination of roles already exists as incompatible pair."
+            ValidationError,
+            "This combination of roles already exists as incompatible pair.",
         ):
             test_role.full_clean()
 
@@ -38,8 +43,12 @@ class IncompatibleRolesTest(TestCase):
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
         user = UserFactory()
-        UserRole.objects.create(role=self.role_1, business_area=business_area, user=user)
-        UserRole.objects.create(role=self.role_2, business_area=business_area, user=user)
+        UserRole.objects.create(
+            role=self.role_1, business_area=business_area, user=user
+        )
+        UserRole.objects.create(
+            role=self.role_2, business_area=business_area, user=user
+        )
 
         test_role = IncompatibleRoles(role_one=self.role_1, role_two=self.role_2)
 

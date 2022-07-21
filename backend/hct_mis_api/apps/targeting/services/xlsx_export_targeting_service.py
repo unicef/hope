@@ -26,7 +26,7 @@ class XlsxExportTargetingService:
             "Household unicef_id": "household.unicef_id",
             "unicef_id": "unicef_id",
             "Linked Households": self._render_all_linked_households,
-            "Bank account information": self._bank_account_info
+            "Bank account information": self._bank_account_info,
         }
 
     @cached_property
@@ -138,7 +138,7 @@ class XlsxExportTargetingService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i, _width in enumerate(column_widths):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             ws.column_dimensions[col_name].width = value

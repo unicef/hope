@@ -39,7 +39,9 @@ class TestChangeHeadOfHousehold(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sfds323")
+        admin_area_1 = AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="sfds323"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -47,7 +49,9 @@ class TestChangeHeadOfHousehold(APITestCase):
             country=country,
             area_level=2,
         )
-        admin_area_1_new = AreaFactory(name="City Test", area_type=area_type, p_code="sfds323")
+        admin_area_1_new = AreaFactory(
+            name="City Test", area_type=area_type, p_code="sfds323"
+        )
 
         cls.household = HouseholdFactory.build()
         cls.household.registration_data_import.imported_by.save()
@@ -75,15 +79,23 @@ class TestChangeHeadOfHousehold(APITestCase):
             ticket=cls.grievance_ticket,
             individual=cls.individual2,
             individual_data={
-                "relationship": {"value": "HEAD", "approve_status": True, "previous_value": "BROTHER_SISTER"}
+                "relationship": {
+                    "value": "HEAD",
+                    "approve_status": True,
+                    "previous_value": "BROTHER_SISTER",
+                }
             },
         )
 
         cls.create_user_role_with_permissions(
-            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
+            cls.user,
+            [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            cls.business_area,
         )
 
-    def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(self):
+    def test_close_update_individual_should_throw_error_when_there_is_one_head_of_household(
+        self,
+    ):
         self.individual1.relationship = HEAD
         self.individual1.save()
 
@@ -94,18 +106,24 @@ class TestChangeHeadOfHousehold(APITestCase):
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
             variables={
-                "grievanceTicketId": self.id_to_base64(self.grievance_ticket.id, "GrievanceTicketNode"),
+                "grievanceTicketId": self.id_to_base64(
+                    self.grievance_ticket.id, "GrievanceTicketNode"
+                ),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
         self.individual1.refresh_from_db()
         self.individual2.refresh_from_db()
 
-        self.assertTrue("There is one head of household" in response["errors"][0]["message"])
+        self.assertTrue(
+            "There is one head of household" in response["errors"][0]["message"]
+        )
         self.assertEqual(self.individual1.relationship, "HEAD")
         self.assertEqual(self.individual2.relationship, "BROTHER_SISTER")
 
-    def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(self):
+    def test_close_update_individual_should_change_head_of_household_if_there_was_no_one(
+        self,
+    ):
         self.individual1.relationship = AUNT_UNCLE
         self.individual1.save()
 
@@ -116,7 +134,9 @@ class TestChangeHeadOfHousehold(APITestCase):
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
             variables={
-                "grievanceTicketId": self.id_to_base64(self.grievance_ticket.id, "GrievanceTicketNode"),
+                "grievanceTicketId": self.id_to_base64(
+                    self.grievance_ticket.id, "GrievanceTicketNode"
+                ),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )

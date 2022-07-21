@@ -1,8 +1,8 @@
 from django.core.management import call_command
 from django.test import TestCase
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household
 from hct_mis_api.apps.targeting.models import (
@@ -33,7 +33,10 @@ class TestIndividualBlockFilter(TestCase):
             {
                 "business_area": business_area,
             },
-            [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
+            [
+                {"sex": "MALE", "marital_status": "SINGLE"},
+                {"sex": "FEMALE", "marital_status": "MARRIED"},
+            ],
         )
         cls.household_2_indiv = household
 
@@ -79,9 +82,12 @@ class TestIndividualBlockFilter(TestCase):
             arguments=[MALE],
         )
         individuals_filters_block = TargetingIndividualRuleFilterBlockMixin(
-            individual_block_filters=[married_rule_filter, sex_filter], target_only_hoh=False
+            individual_block_filters=[married_rule_filter, sex_filter],
+            target_only_hoh=False,
         )
-        tcr = TargetingCriteriaRuleQueryingMixin(filters=[], individuals_filters_blocks=[individuals_filters_block])
+        tcr = TargetingCriteriaRuleQueryingMixin(
+            filters=[], individuals_filters_blocks=[individuals_filters_block]
+        )
         tc = TargetingCriteriaQueryingMixin(rules=[tcr])
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
@@ -110,13 +116,19 @@ class TestIndividualBlockFilter(TestCase):
             arguments=[FEMALE],
         )
         individuals_filters_block1 = TargetingIndividualRuleFilterBlockMixin(
-            individual_block_filters=[married_rule_filter, female_sex_filter], target_only_hoh=False
+            individual_block_filters=[married_rule_filter, female_sex_filter],
+            target_only_hoh=False,
         )
         individuals_filters_block2 = TargetingIndividualRuleFilterBlockMixin(
-            individual_block_filters=[single_rule_filter, male_sex_filter], target_only_hoh=False
+            individual_block_filters=[single_rule_filter, male_sex_filter],
+            target_only_hoh=False,
         )
         tcr = TargetingCriteriaRuleQueryingMixin(
-            filters=[], individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2]
+            filters=[],
+            individuals_filters_blocks=[
+                individuals_filters_block1,
+                individuals_filters_block2,
+            ],
         )
         tc = TargetingCriteriaQueryingMixin(rules=[tcr])
         query = query.filter(tc.get_query())

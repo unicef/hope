@@ -35,7 +35,9 @@ class ProgramFactory(factory.DjangoModelFactory):
         after_now=True,
         tzinfo=utc,
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    end_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
+    )
     description = factory.Faker(
         "sentence",
         nb_words=10,
@@ -110,8 +112,12 @@ class CashPlanFactory(factory.DjangoModelFactory):
         after_now=True,
         tzinfo=utc,
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
-    dispersion_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    end_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
+    )
+    dispersion_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
+    )
     coverage_duration = factory.fuzzy.FuzzyInteger(1, 4)
     coverage_unit = factory.Faker(
         "random_element",
@@ -128,7 +134,9 @@ class CashPlanFactory(factory.DjangoModelFactory):
         getter=lambda c: c[0],
     )
     assistance_measurement = factory.Faker("currency_name")
-    assistance_through = factory.Faker("random_element", elements=["ING", "Bank of America", "mBank"])
+    assistance_through = factory.Faker(
+        "random_element", elements=["ING", "Bank of America", "mBank"]
+    )
     vision_id = factory.Faker("uuid4")
     funds_commitment = factory.fuzzy.FuzzyInteger(1000, 99999999)
     exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)

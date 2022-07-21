@@ -1,5 +1,4 @@
 import base64
-from django.utils import timezone
 import json
 from contextlib import contextmanager
 from pathlib import Path
@@ -7,6 +6,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
 
 from constance import config
 from django_countries.fields import Country
@@ -28,7 +28,9 @@ from hct_mis_api.apps.registration_datahub.services.flex_registration_service im
 
 def create_record(registration, status):
     # based on backend/hct_mis_api/apps/registration_datahub/tests/test_extract_records.py
-    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
+    content = Path(
+        f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg"
+    ).read_bytes()
     fields = {
         "household": [
             {
@@ -72,7 +74,9 @@ def create_record(registration, status):
     files = {
         "individuals": [
             {
-                "disability_certificate_picture": str(base64.b64encode(content), "utf-8"),
+                "disability_certificate_picture": str(
+                    base64.b64encode(content), "utf-8"
+                ),
                 "birth_certificate_picture": str(base64.b64encode(content), "utf-8"),
             }
         ],
@@ -90,8 +94,13 @@ def create_record(registration, status):
 
 
 def create_imported_document_types(country_code):
-    for document_type_string, _ in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
-        ImportedDocumentType.objects.create(country=Country(code=country_code), type=document_type_string)
+    for (
+        document_type_string,
+        _,
+    ) in FlexRegistrationService.DOCUMENT_MAPPING_TYPE_DICT.items():
+        ImportedDocumentType.objects.create(
+            country=Country(code=country_code), type=document_type_string
+        )
 
 
 def create_ukraine_business_area():
@@ -139,7 +148,9 @@ class TestAutomatingRDICreationTask(TestCase):
         page_size = 1
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
-        result = run_automate_rdi_creation_task(registration_id=record.registration, page_size=page_size)
+        result = run_automate_rdi_creation_task(
+            registration_id=record.registration, page_size=page_size
+        )
         assert RegistrationDataImport.objects.count() == 0
         assert ImportedIndividual.objects.count() == 0
         assert result[0] == "No Records found"
@@ -160,10 +171,14 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ImportedIndividual.objects.count() == 0
 
         result = run_automate_rdi_creation_task(
-            registration_id=registration, page_size=page_size, template="some template {date} {records}"
+            registration_id=registration,
+            page_size=page_size,
+            template="some template {date} {records}",
         )
 
-        assert RegistrationDataImport.objects.count() == 4  # or math.ceil(amount_of_records / page_size)
+        assert (
+            RegistrationDataImport.objects.count() == 4
+        )  # or math.ceil(amount_of_records / page_size)
         assert ImportedIndividual.objects.count() == amount_of_records
         assert result[0][0].startswith("some template")
         assert result[0][1] == page_size
@@ -224,4 +239,6 @@ class TestAutomatingRDICreationTask(TestCase):
             )
         assert len(result) == 4
         assert not merge_task_mock.called  # auto_merge was not set ; defaults to false
-        assert set(Record.objects.values_list("unique_field", flat=True)) == {"123123123"}
+        assert set(Record.objects.values_list("unique_field", flat=True)) == {
+            "123123123"
+        }

@@ -1,4 +1,3 @@
-from django.utils import timezone
 import uuid
 from io import BytesIO
 from pathlib import Path
@@ -7,9 +6,10 @@ from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedHouseholdFactory,
@@ -59,7 +59,9 @@ class TestMarkSubmissions(TestCase):
         )
         datahub_id = uuid.uuid4()
 
-        registration_data_import = RegistrationDataImportFactory(status=status, datahub_id=datahub_id)
+        registration_data_import = RegistrationDataImportFactory(
+            status=status, datahub_id=datahub_id
+        )
         registration_data_import_data_hub = RegistrationDataImportDatahubFactory(
             id=datahub_id,
             import_data=import_data,

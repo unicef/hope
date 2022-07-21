@@ -134,4 +134,3 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: true
               testRunTitle: 'TEST Results'
-

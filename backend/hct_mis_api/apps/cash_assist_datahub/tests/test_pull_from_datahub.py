@@ -168,8 +168,12 @@ class TestPullDataFromDatahub(TestCase):
         dh_payment_record.target_population_mis_id = cls.target_population.id
         dh_payment_record.target_population_cash_assist_id = "123-TP-12345"
         dh_payment_record.entitlement_card_number = "ASH12345678"
-        dh_payment_record.entitlement_card_status = PaymentRecord.ENTITLEMENT_CARD_STATUS_ACTIVE
-        dh_payment_record.entitlement_card_issue_date = timezone.now() - timedelta(days=10)
+        dh_payment_record.entitlement_card_status = (
+            PaymentRecord.ENTITLEMENT_CARD_STATUS_ACTIVE
+        )
+        dh_payment_record.entitlement_card_issue_date = timezone.now() - timedelta(
+            days=10
+        )
         dh_payment_record.delivery_type = PaymentRecord.DELIVERY_TYPE_CASH
         dh_payment_record.currency = "USD"
         dh_payment_record.entitlement_quantity = 10
@@ -202,80 +206,169 @@ class TestPullDataFromDatahub(TestCase):
         # tp
         self.target_population.refresh_from_db()
         self.assertEqual(self.target_population.ca_id, self.dh_target_population.ca_id)
-        self.assertEqual(str(self.target_population.ca_hash_id), str(self.dh_target_population.ca_hash_id))
+        self.assertEqual(
+            str(self.target_population.ca_hash_id),
+            str(self.dh_target_population.ca_hash_id),
+        )
         # program
         self.program.refresh_from_db()
         self.assertEqual(self.program.ca_id, self.dh_program.ca_id)
         self.assertEqual(str(self.program.ca_hash_id), str(self.dh_program.ca_hash_id))
         # service provider
-        service_provider = ServiceProvider.objects.get(ca_id=self.dh_payment_record.service_provider_ca_id)
-        self.assertEqual(service_provider.business_area.code, self.dh_service_provider.business_area)
+        service_provider = ServiceProvider.objects.get(
+            ca_id=self.dh_payment_record.service_provider_ca_id
+        )
+        self.assertEqual(
+            service_provider.business_area.code, self.dh_service_provider.business_area
+        )
         self.assertEqual(service_provider.ca_id, self.dh_service_provider.ca_id)
         self.assertEqual(service_provider.full_name, self.dh_service_provider.full_name)
-        self.assertEqual(service_provider.short_name, self.dh_service_provider.short_name)
+        self.assertEqual(
+            service_provider.short_name, self.dh_service_provider.short_name
+        )
         self.assertEqual(service_provider.country, self.dh_service_provider.country)
         self.assertEqual(service_provider.vision_id, self.dh_service_provider.vision_id)
         # cash plan
         cash_plan = CashPlan.objects.get(ca_id=self.dh_cash_plan1.cash_plan_id)
         self.assertEqual(cash_plan.business_area.code, self.dh_cash_plan1.business_area)
         self.assertEqual(cash_plan.ca_id, self.dh_cash_plan1.cash_plan_id)
-        self.assertEqual(str(cash_plan.ca_hash_id), str(self.dh_cash_plan1.cash_plan_hash_id))
+        self.assertEqual(
+            str(cash_plan.ca_hash_id), str(self.dh_cash_plan1.cash_plan_hash_id)
+        )
         self.assertEqual(cash_plan.status, self.dh_cash_plan1.status)
         self.assertEqual(cash_plan.status_date, self.dh_cash_plan1.status_date)
         self.assertEqual(cash_plan.name, self.dh_cash_plan1.name)
-        self.assertEqual(cash_plan.distribution_level, self.dh_cash_plan1.distribution_level)
+        self.assertEqual(
+            cash_plan.distribution_level, self.dh_cash_plan1.distribution_level
+        )
         self.assertEqual(cash_plan.start_date, self.dh_cash_plan1.start_date)
         self.assertEqual(cash_plan.end_date, self.dh_cash_plan1.end_date)
         self.assertEqual(cash_plan.dispersion_date, self.dh_cash_plan1.dispersion_date)
-        self.assertEqual(cash_plan.coverage_duration, self.dh_cash_plan1.coverage_duration)
+        self.assertEqual(
+            cash_plan.coverage_duration, self.dh_cash_plan1.coverage_duration
+        )
         self.assertEqual(cash_plan.coverage_unit, self.dh_cash_plan1.coverage_unit)
         self.assertEqual(cash_plan.comments, self.dh_cash_plan1.comments)
-        self.assertEqual(str(cash_plan.program_id), str(self.dh_cash_plan1.program_mis_id))
+        self.assertEqual(
+            str(cash_plan.program_id), str(self.dh_cash_plan1.program_mis_id)
+        )
         self.assertEqual(cash_plan.delivery_type, self.dh_cash_plan1.delivery_type)
-        self.assertEqual(cash_plan.assistance_measurement, self.dh_cash_plan1.assistance_measurement)
-        self.assertEqual(cash_plan.assistance_through, self.dh_cash_plan1.assistance_through)
+        self.assertEqual(
+            cash_plan.assistance_measurement, self.dh_cash_plan1.assistance_measurement
+        )
+        self.assertEqual(
+            cash_plan.assistance_through, self.dh_cash_plan1.assistance_through
+        )
         self.assertEqual(cash_plan.vision_id, self.dh_cash_plan1.vision_id)
-        self.assertEqual(cash_plan.funds_commitment, self.dh_cash_plan1.funds_commitment)
+        self.assertEqual(
+            cash_plan.funds_commitment, self.dh_cash_plan1.funds_commitment
+        )
         self.assertEqual(cash_plan.down_payment, self.dh_cash_plan1.down_payment)
-        self.assertEqual(cash_plan.validation_alerts_count, self.dh_cash_plan1.validation_alerts_count)
-        self.assertEqual(cash_plan.total_persons_covered, self.dh_cash_plan1.total_persons_covered)
-        self.assertEqual(cash_plan.total_persons_covered_revised, self.dh_cash_plan1.total_persons_covered_revised)
-        self.assertEqual(cash_plan.payment_records_count, self.dh_cash_plan1.payment_records_count)
-        self.assertEqual(cash_plan.total_entitled_quantity, self.dh_cash_plan1.total_entitled_quantity)
-        self.assertEqual(cash_plan.total_entitled_quantity_revised, self.dh_cash_plan1.total_entitled_quantity_revised)
-        self.assertEqual(cash_plan.total_delivered_quantity, self.dh_cash_plan1.total_delivered_quantity)
-        self.assertEqual(cash_plan.total_undelivered_quantity, self.dh_cash_plan1.total_undelivered_quantity)
-        self.assertEqual(cash_plan.service_provider.ca_id, self.dh_cash_plan1.assistance_through)
+        self.assertEqual(
+            cash_plan.validation_alerts_count,
+            self.dh_cash_plan1.validation_alerts_count,
+        )
+        self.assertEqual(
+            cash_plan.total_persons_covered, self.dh_cash_plan1.total_persons_covered
+        )
+        self.assertEqual(
+            cash_plan.total_persons_covered_revised,
+            self.dh_cash_plan1.total_persons_covered_revised,
+        )
+        self.assertEqual(
+            cash_plan.payment_records_count, self.dh_cash_plan1.payment_records_count
+        )
+        self.assertEqual(
+            cash_plan.total_entitled_quantity,
+            self.dh_cash_plan1.total_entitled_quantity,
+        )
+        self.assertEqual(
+            cash_plan.total_entitled_quantity_revised,
+            self.dh_cash_plan1.total_entitled_quantity_revised,
+        )
+        self.assertEqual(
+            cash_plan.total_delivered_quantity,
+            self.dh_cash_plan1.total_delivered_quantity,
+        )
+        self.assertEqual(
+            cash_plan.total_undelivered_quantity,
+            self.dh_cash_plan1.total_undelivered_quantity,
+        )
+        self.assertEqual(
+            cash_plan.service_provider.ca_id, self.dh_cash_plan1.assistance_through
+        )
 
         # payment record
         payment_record = PaymentRecord.objects.get(ca_id=self.dh_payment_record.ca_id)
 
-        self.assertEqual(payment_record.business_area.code, self.dh_payment_record.business_area)
+        self.assertEqual(
+            payment_record.business_area.code, self.dh_payment_record.business_area
+        )
         self.assertEqual(payment_record.status, self.dh_payment_record.status)
         self.assertEqual(payment_record.status_date, self.dh_payment_record.status_date)
         self.assertEqual(payment_record.ca_id, self.dh_payment_record.ca_id)
-        self.assertEqual(str(payment_record.ca_hash_id), str(self.dh_payment_record.ca_hash_id))
-        self.assertEqual(str(payment_record.household_id), str(self.dh_payment_record.household_mis_id))
-        self.assertEqual(str(payment_record.head_of_household_id), str(self.dh_payment_record.head_of_household_mis_id))
-        self.assertEqual(payment_record.full_name, self.dh_payment_record.full_name)
-        self.assertEqual(payment_record.total_persons_covered, self.dh_payment_record.total_persons_covered)
-        self.assertEqual(payment_record.distribution_modality, self.dh_payment_record.distribution_modality)
-        self.assertEqual(str(payment_record.target_population_id), str(self.dh_payment_record.target_population_mis_id))
-        self.assertEqual(payment_record.entitlement_card_number, self.dh_payment_record.entitlement_card_number)
-        self.assertEqual(payment_record.entitlement_card_status, self.dh_payment_record.entitlement_card_status)
         self.assertEqual(
-            payment_record.entitlement_card_issue_date, self.dh_payment_record.entitlement_card_issue_date.date()
+            str(payment_record.ca_hash_id), str(self.dh_payment_record.ca_hash_id)
         )
-        self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
-        self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
+        self.assertEqual(
+            str(payment_record.household_id),
+            str(self.dh_payment_record.household_mis_id),
+        )
+        self.assertEqual(
+            str(payment_record.head_of_household_id),
+            str(self.dh_payment_record.head_of_household_mis_id),
+        )
+        self.assertEqual(payment_record.full_name, self.dh_payment_record.full_name)
+        self.assertEqual(
+            payment_record.total_persons_covered,
+            self.dh_payment_record.total_persons_covered,
+        )
+        self.assertEqual(
+            payment_record.distribution_modality,
+            self.dh_payment_record.distribution_modality,
+        )
+        self.assertEqual(
+            str(payment_record.target_population_id),
+            str(self.dh_payment_record.target_population_mis_id),
+        )
+        self.assertEqual(
+            payment_record.entitlement_card_number,
+            self.dh_payment_record.entitlement_card_number,
+        )
+        self.assertEqual(
+            payment_record.entitlement_card_status,
+            self.dh_payment_record.entitlement_card_status,
+        )
+        self.assertEqual(
+            payment_record.entitlement_card_issue_date,
+            self.dh_payment_record.entitlement_card_issue_date.date(),
+        )
+        self.assertEqual(
+            payment_record.delivery_type, self.dh_payment_record.delivery_type
+        )
+        self.assertEqual(
+            payment_record.delivery_type, self.dh_payment_record.delivery_type
+        )
         self.assertEqual(payment_record.currency, self.dh_payment_record.currency)
-        self.assertEqual(payment_record.entitlement_quantity, self.dh_payment_record.entitlement_quantity)
-        self.assertEqual(payment_record.delivered_quantity, self.dh_payment_record.delivered_quantity)
-        self.assertEqual(payment_record.delivery_date, self.dh_payment_record.delivery_date)
-        self.assertEqual(payment_record.transaction_reference_id, self.dh_payment_record.transaction_reference_id)
+        self.assertEqual(
+            payment_record.entitlement_quantity,
+            self.dh_payment_record.entitlement_quantity,
+        )
+        self.assertEqual(
+            payment_record.delivered_quantity, self.dh_payment_record.delivered_quantity
+        )
+        self.assertEqual(
+            payment_record.delivery_date, self.dh_payment_record.delivery_date
+        )
+        self.assertEqual(
+            payment_record.transaction_reference_id,
+            self.dh_payment_record.transaction_reference_id,
+        )
         self.assertEqual(payment_record.vision_id, self.dh_payment_record.vision_id)
         self.assertEqual(payment_record.service_provider_id, service_provider.id)
-        self.assertEqual(payment_record.registration_ca_id, self.dh_payment_record.registration_ca_id)
+        self.assertEqual(
+            payment_record.registration_ca_id, self.dh_payment_record.registration_ca_id
+        )
 
         self.assertIn(self.household, self.program.households.all())
         self.household.refresh_from_db()
@@ -291,9 +384,13 @@ class TestSessionsPullDataFromDatahub(TestCase):
         call_command("loadcountrycodes")
 
     def test_multiple_sessions_same_ba_working(self):
-        session1 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session1 = Session(
+            status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code
+        )
         session1.save()
-        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2 = Session(
+            status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code
+        )
         session2.save()
         copy_session_mock = MagicMock()
         with patch(
@@ -307,9 +404,14 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session2.delete()
 
     def test_multiple_sessions_same_ba_fail(self):
-        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
+        session1 = Session(
+            status=Session.STATUS_FAILED,
+            business_area=BusinessArea.objects.first().code,
+        )
         session1.save()
-        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2 = Session(
+            status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code
+        )
         session2.save()
         copy_session_mock = MagicMock()
         with patch(
@@ -324,11 +426,19 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session2.delete()
 
     def test_multiple_sessions_different_ba_run1(self):
-        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
+        session1 = Session(
+            status=Session.STATUS_FAILED,
+            business_area=BusinessArea.objects.first().code,
+        )
         session1.save()
-        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session2 = Session(
+            status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code
+        )
         session2.save()
-        session3 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.all()[3].code)
+        session3 = Session(
+            status=Session.STATUS_READY,
+            business_area=BusinessArea.objects.all()[3].code,
+        )
         session3.save()
         copy_session_mock = MagicMock()
         with patch(
@@ -358,7 +468,9 @@ class TestSessionsPullDataFromDatahub(TestCase):
         ]
     )
     def test_country_mapping(self, _, ca_code, expected):
-        session = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session = Session(
+            status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code
+        )
         session.save()
         dh_service_provider = DHServiceProvider()
         dh_service_provider.session = session
@@ -372,5 +484,7 @@ class TestSessionsPullDataFromDatahub(TestCase):
 
         task = PullFromDatahubTask(DummyExchangeRates())
         task.copy_service_providers(session)
-        service_provider = ServiceProvider.objects.filter(ca_id=dh_service_provider.ca_id).first()
+        service_provider = ServiceProvider.objects.filter(
+            ca_id=dh_service_provider.ca_id
+        ).first()
         self.assertEqual(service_provider.country, expected)

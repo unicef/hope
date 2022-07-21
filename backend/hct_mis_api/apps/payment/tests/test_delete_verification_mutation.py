@@ -70,7 +70,9 @@ class TestDeleteVerificationMutation(APITestCase):
         ]
     )
     def test_delete_pending_verification_plan(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         self.create_active_payment_verification_plan()
         cash_plan_payment_verification = self.create_pending_payment_verification_plan()
 
@@ -79,7 +81,10 @@ class TestDeleteVerificationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "cashPlanVerificationId": [
-                    self.id_to_base64(cash_plan_payment_verification.id, "CashPlanPaymentVerificationNode")
+                    self.id_to_base64(
+                        cash_plan_payment_verification.id,
+                        "CashPlanPaymentVerificationNode",
+                    )
                 ]
             },
         )
@@ -91,7 +96,9 @@ class TestDeleteVerificationMutation(APITestCase):
         ]
     )
     def test_delete_active_verification_plan(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         cash_plan_payment_verification = self.create_active_payment_verification_plan()
         self.create_pending_payment_verification_plan()
 
@@ -100,19 +107,28 @@ class TestDeleteVerificationMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "cashPlanVerificationId": [
-                    self.id_to_base64(cash_plan_payment_verification.id, "CashPlanPaymentVerificationNode")
+                    self.id_to_base64(
+                        cash_plan_payment_verification.id,
+                        "CashPlanPaymentVerificationNode",
+                    )
                 ]
             },
         )
 
     def create_pending_payment_verification_plan(self):
-        return self.create_payment_verification_plan_with_status(CashPlanPaymentVerification.STATUS_PENDING)
+        return self.create_payment_verification_plan_with_status(
+            CashPlanPaymentVerification.STATUS_PENDING
+        )
 
     def create_active_payment_verification_plan(self):
-        return self.create_payment_verification_plan_with_status(CashPlanPaymentVerification.STATUS_ACTIVE)
+        return self.create_payment_verification_plan_with_status(
+            CashPlanPaymentVerification.STATUS_ACTIVE
+        )
 
     def create_payment_verification_plan_with_status(self, status):
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=self.cash_plan)
+        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
+            cash_plan=self.cash_plan
+        )
         cash_plan_payment_verification.status = status
         cash_plan_payment_verification.save()
         for _ in range(5):

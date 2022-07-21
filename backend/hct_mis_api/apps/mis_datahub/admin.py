@@ -44,7 +44,9 @@ class HUBAdminMixin(ExtraButtonsMixin, HOPEModelAdminBase):
     @button(label="Truncate", css_class="btn-danger", permission=is_root)
     def truncate(self, request):
         if not request.headers.get("x-root-access") == "XMLHttpRequest":
-            self.message_user(request, "You are not allowed to perform this action", messages.ERROR)
+            self.message_user(
+                request, "You are not allowed to perform this action", messages.ERROR
+            )
             return
         if request.method == "POST":
             with atomic():
@@ -60,7 +62,9 @@ class HUBAdminMixin(ExtraButtonsMixin, HOPEModelAdminBase):
 
                 conn = connections[self.model.objects.db]
                 cursor = conn.cursor()
-                cursor.execute(f"TRUNCATE TABLE '{self.model._meta.db_table}' RESTART IDENTITY CASCADE")
+                cursor.execute(
+                    f"TRUNCATE TABLE '{self.model._meta.db_table}' RESTART IDENTITY CASCADE"
+                )
         else:
             return confirm_action(
                 self,
@@ -103,7 +107,14 @@ class HouseholdAdmin(HUBAdminMixin):
 
 @admin.register(Individual)
 class IndividualAdmin(HUBAdminMixin):
-    list_display = ("session", "unicef_id", "mis_id", "household_mis_id", "family_name", "given_name")
+    list_display = (
+        "session",
+        "unicef_id",
+        "mis_id",
+        "household_mis_id",
+        "family_name",
+        "given_name",
+    )
     list_filter = (
         BusinessAreaFilter,
         ("session__id", ValueFilter),
@@ -147,7 +158,14 @@ class IndividualRoleInHouseholdAdmin(HUBAdminMixin):
 
 @admin.register(Session)
 class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
-    list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area")
+    list_display = (
+        "timestamp",
+        "id",
+        "source",
+        "status",
+        "last_modified_date",
+        "business_area",
+    )
     date_hierarchy = "timestamp"
     list_filter = (
         "status",
@@ -198,9 +216,14 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
             TargetPopulationEntry,
             Document,
         ]:
-            context["data"][model] = {"count": model.objects.filter(session=pk).count(), "meta": model._meta}
+            context["data"][model] = {
+                "count": model.objects.filter(session=pk).count(),
+                "meta": model._meta,
+            }
 
-        return TemplateResponse(request, "admin/mis_datahub/session/inspect.html", context)
+        return TemplateResponse(
+            request, "admin/mis_datahub/session/inspect.html", context
+        )
 
     @button()
     def reset_sync_date(self, request, pk):
@@ -209,16 +232,26 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
                 with atomic():
                     obj = self.get_object(request, pk)
                     # Programs
-                    hub_program_ids = Program.objects.filter(session=obj.id).values_list("mis_id", flat=True)
-                    programs.Program.objects.filter(id__in=hub_program_ids).update(last_sync_at=None)
+                    hub_program_ids = Program.objects.filter(
+                        session=obj.id
+                    ).values_list("mis_id", flat=True)
+                    programs.Program.objects.filter(id__in=hub_program_ids).update(
+                        last_sync_at=None
+                    )
                     # Documents
-                    hub_document_ids = Document.objects.filter(session=obj.id).values_list("mis_id", flat=True)
-                    households.Document.objects.filter(id__in=hub_document_ids).update(last_sync_at=None)
+                    hub_document_ids = Document.objects.filter(
+                        session=obj.id
+                    ).values_list("mis_id", flat=True)
+                    households.Document.objects.filter(id__in=hub_document_ids).update(
+                        last_sync_at=None
+                    )
                     # HH / Ind
                     for hub_tp in TargetPopulation.objects.filter(session=obj.id):
                         tp = targeting.TargetPopulation.objects.get(id=hub_tp.mis_id)
                         tp.households.update(last_sync_at=None)
-                        households.Individual.objects.filter(household__target_populations=tp).update(last_sync_at=None)
+                        households.Individual.objects.filter(
+                            household__target_populations=tp
+                        ).update(last_sync_at=None)
 
                     self.message_user(request, "Done", messages.SUCCESS)
 
@@ -233,7 +266,8 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
                 self,
                 request,
                 self.reset_sync_date,
-                "Continuing will reset last_sync_date of any" " object linked to this Session.",
+                "Continuing will reset last_sync_date of any"
+                " object linked to this Session.",
                 "Successfully executed",
             )
 
@@ -252,7 +286,9 @@ class TargetPopulationAdmin(HUBAdminMixin):
     search_fields = ("name",)
 
     def get_search_results(self, request, queryset, search_term):
-        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        queryset, use_distinct = super().get_search_results(
+            request, queryset, search_term
+        )
         return queryset, use_distinct
 
     @link()

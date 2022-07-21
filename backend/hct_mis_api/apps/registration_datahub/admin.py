@@ -1,5 +1,4 @@
 import base64
-from django.utils import timezone
 import logging
 
 from django import forms
@@ -8,6 +7,7 @@ from django.core.signing import BadSignature, Signer
 from django.db.models import F
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 import requests
@@ -27,6 +27,8 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     process_flex_records_task,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    DiiaHousehold,
+    DiiaIndividual,
     ImportData,
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -38,8 +40,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     Record,
     RegistrationDataImportDatahub,
-    DiiaHousehold,
-    DiiaIndividual,
 )
 from hct_mis_api.apps.registration_datahub.services.extract_record import extract
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
@@ -53,9 +53,21 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImportDatahub)
-class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
-    list_display = ("name", "import_date", "import_done", "business_area_slug", "hct_id")
-    list_filter = ("created_at", "import_done", ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")))
+class RegistrationDataImportDatahubAdmin(
+    ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase
+):
+    list_display = (
+        "name",
+        "import_date",
+        "import_done",
+        "business_area_slug",
+        "hct_id",
+    )
+    list_filter = (
+        "created_at",
+        "import_done",
+        ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")),
+    )
     advanced_filter_fields = (
         "created_at",
         "import_done",
@@ -74,9 +86,14 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
         obj = button.context.get("original")
         if obj:
             if obj.hct_id:
-                return reverse("admin:registration_data_registrationdataimport_change", args=[obj.hct_id])
+                return reverse(
+                    "admin:registration_data_registrationdataimport_change",
+                    args=[obj.hct_id],
+                )
             else:
-                button.html_attrs = {"style": "background-color:#CCCCCC;cursor:not-allowed"}
+                button.html_attrs = {
+                    "style": "background-color:#CCCCCC;cursor:not-allowed"
+                }
                 return "javascript:alert('RDI not imported');"
         button.visible = False
 
@@ -90,9 +107,16 @@ class RegistrationDataImportDatahubAdmin(ExtraButtonsMixin, AdminAdvancedFilters
         for model in [ImportedIndividual, ImportedHousehold]:
             count = model.objects.filter(registration_data_import=obj).count()
             has_content = has_content or count
-            context["data"][model] = {"count": count, "warnings": [], "errors": [], "meta": model._meta}
+            context["data"][model] = {
+                "count": count,
+                "warnings": [],
+                "errors": [],
+                "meta": model._meta,
+            }
 
-        return TemplateResponse(request, "registration_datahub/admin/inspect.html", context)
+        return TemplateResponse(
+            request, "registration_datahub/admin/inspect.html", context
+        )
 
 
 class ImportedBankAccountInfoStackedInline(admin.StackedInline):
@@ -116,7 +140,10 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     list_filter = (
         ("deduplication_batch_results", NumberFilter),
         ("deduplication_golden_record_results", NumberFilter),
-        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
+        (
+            "registration_data_import__name",
+            ValueFilter.factory(lookup_name="istartswith"),
+        ),
         ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
         "deduplication_batch_status",
         "deduplication_golden_record_status",
@@ -140,8 +167,12 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             return ""
 
     def dedupe_status(self, obj):
-        lbl = f"{obj.deduplication_batch_status}/{obj.deduplication_golden_record_status}"
-        url = reverse("admin:registration_datahub_importedindividual_duplicates", args=[obj.pk])
+        lbl = (
+            f"{obj.deduplication_batch_status}/{obj.deduplication_golden_record_status}"
+        )
+        url = reverse(
+            "admin:registration_datahub_importedindividual_duplicates", args=[obj.pk]
+        )
         if "duplicates" in obj.deduplication_batch_results:
             ret = f'<a href="{url}">{lbl}</a>'
         elif "duplicates" in obj.deduplication_golden_record_results:
@@ -163,7 +194,9 @@ class ImportedIndividualAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
     @button()
     def duplicates(self, request, pk):
         ctx = self.get_common_context(request, pk, title="Duplicates")
-        return TemplateResponse(request, "registration_datahub/admin/duplicates.html", ctx)
+        return TemplateResponse(
+            request, "registration_datahub/admin/duplicates.html", ctx
+        )
 
 
 @admin.register(ImportedIndividualIdentity)
@@ -175,7 +208,13 @@ class ImportedIndividualIdentityAdmin(HOPEModelAdminBase):
 @admin.register(ImportedHousehold)
 class ImportedHouseholdAdmin(HOPEModelAdminBase):
     search_fields = ("id", "registration_data_import")
-    list_display = ("registration_data_import", "registration_method", "name_enumerator", "country", "country_origin")
+    list_display = (
+        "registration_data_import",
+        "registration_method",
+        "name_enumerator",
+        "country",
+        "country_origin",
+    )
     raw_id_fields = ("registration_data_import", "head_of_household")
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (
@@ -183,14 +222,26 @@ class ImportedHouseholdAdmin(HOPEModelAdminBase):
         ("country", ChoicesFieldComboFilter),
         ("country_origin", ChoicesFieldComboFilter),
         "registration_method",
-        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
-        ("kobo_submission_uuid", ValueFilter.factory(lookup_name="istartswith", title="Kobo Submission UUID")),
+        (
+            "registration_data_import__name",
+            ValueFilter.factory(lookup_name="istartswith"),
+        ),
+        (
+            "kobo_submission_uuid",
+            ValueFilter.factory(
+                lookup_name="istartswith", title="Kobo Submission UUID"
+            ),
+        ),
     )
 
 
 @admin.register(ImportData)
 class ImportDataAdmin(HOPEModelAdminBase):
-    list_filter = ("data_type", "status", ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")))
+    list_filter = (
+        "data_type",
+        "status",
+        ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")),
+    )
     date_hierarchy = "created_at"
 
 
@@ -293,7 +344,9 @@ class AlexisFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if "1" in self.lookup_val:
-            queryset = queryset.filter(data__w_counters__individuals_num=F("data__household__0__size_h_c"))
+            queryset = queryset.filter(
+                data__w_counters__individuals_num=F("data__household__0__size_h_c")
+            )
         if "2" in self.lookup_val:
             queryset = queryset.filter(data__w_counters__collectors_num=1)
         if "3" in self.lookup_val:
@@ -328,7 +381,9 @@ class AlexisFilter(SimpleListFilter):
     def choices(self, changelist):
         for lookup, title in self.lookup_choices:
             qs = changelist.get_query_string(remove=[self.parameter_name]) + "&"
-            qs += "&".join([f"{self.parameter_name}={v}" for v in self.lookup_val if v != lookup])
+            qs += "&".join(
+                [f"{self.parameter_name}={v}" for v in self.lookup_val if v != lookup]
+            )
             if str(lookup) not in self.lookup_val:
                 qs += f"&{self.parameter_name}={lookup}"
             yield {
@@ -384,9 +439,15 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
             rdi = service.create_rdi(request.user, f"ukraine rdi {timezone.now()}")
 
             process_flex_records_task.delay(rdi.id, list(records_ids))
-            url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
+            url = reverse(
+                "admin:registration_data_registrationdataimport_change", args=[rdi.pk]
+            )
             self.message_user(
-                request, mark_safe(f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"), messages.SUCCESS
+                request,
+                mark_safe(
+                    f"RDI Import with name: <a href='{url}'>{rdi.name}</a> started"
+                ),
+                messages.SUCCESS,
             )
         except Exception as e:
             self.message_user(request, str(e), messages.ERROR)
@@ -396,7 +457,11 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
         try:
             records_ids = queryset.values_list("id", flat=True)
             fresh_extract_records_task.delay(list(records_ids))
-            self.message_user(request, f"Extracting data for {len(records_ids)} records", messages.SUCCESS)
+            self.message_user(
+                request,
+                f"Extracting data for {len(records_ids)} records",
+                messages.SUCCESS,
+            )
         except Exception as e:
             self.message_user(request, str(e), messages.ERROR)
 
@@ -410,8 +475,12 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                 if form.cleaned_data["remember"]:
                     cookies = {form.SYNC_COOKIE: form.get_signed_cookie(request)}
 
-                auth = HTTPBasicAuth(form.cleaned_data["username"], form.cleaned_data["password"])
-                url = "{host}api/data/{registration}/{start}/{end}/".format(**form.cleaned_data)
+                auth = HTTPBasicAuth(
+                    form.cleaned_data["username"], form.cleaned_data["password"]
+                )
+                url = "{host}api/data/{registration}/{start}/{end}/".format(
+                    **form.cleaned_data
+                )
                 with requests.get(url, stream=True, auth=auth) as res:
                     if res.status_code != 200:
                         raise Exception(str(res))
@@ -420,13 +489,18 @@ class RecordDatahubAdmin(ExtraButtonsMixin, HOPEModelAdminBase):
                         Record.objects.update_or_create(
                             source_id=record["id"],
                             registration=2,
-                            defaults={"timestamp": record["timestamp"], "storage": base64.b64decode(record["storage"])},
+                            defaults={
+                                "timestamp": record["timestamp"],
+                                "storage": base64.b64decode(record["storage"]),
+                            },
                         )
         else:
             form = FetchForm(initial=FetchForm.get_saved_config(request))
 
         ctx["form"] = form
-        response = TemplateResponse(request, "registration_datahub/admin/record/fetch.html", ctx)
+        response = TemplateResponse(
+            request, "registration_datahub/admin/record/fetch.html", ctx
+        )
         if cookies:
             for k, v in cookies.items():
                 response.set_cookie(k, v)
@@ -454,12 +528,15 @@ class DiiaIndividualAdmin(HOPEModelAdminBase):
         "individual_id",
         "full_name",
         "sex",
-        "disability"
+        "disability",
     )
     list_filter = (
-        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
+        (
+            "registration_data_import__name",
+            ValueFilter.factory(lookup_name="istartswith"),
+        ),
         ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
-        "disability"
+        "disability",
     )
 
 
@@ -470,6 +547,14 @@ class DiiaHouseholdAdmin(HOPEModelAdminBase):
     raw_id_fields = ("registration_data_import",)
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (
-        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
-        ("rec_id", ValueFilter.factory(lookup_name="istartswith",)),
+        (
+            "registration_data_import__name",
+            ValueFilter.factory(lookup_name="istartswith"),
+        ),
+        (
+            "rec_id",
+            ValueFilter.factory(
+                lookup_name="istartswith",
+            ),
+        ),
     )

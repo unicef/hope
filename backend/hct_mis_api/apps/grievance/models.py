@@ -14,7 +14,11 @@ from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel, UnicefIdentifiedModel
+from hct_mis_api.apps.utils.models import (
+    ConcurrencyModel,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -353,7 +357,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         if self.issue_type is None:
             return None
         issue_type_choices_dict = {}
-        for key, value in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
+        for _key, value in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
             issue_type_choices_dict.update(value)
         return issue_type_choices_dict[self.issue_type]
 
@@ -542,7 +546,9 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
 
 class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
-        "grievance.GrievanceTicket", related_name="delete_household_ticket_details", on_delete=models.CASCADE
+        "grievance.GrievanceTicket",
+        related_name="delete_household_ticket_details",
+        on_delete=models.CASCADE,
     )
     household = models.ForeignKey(
         "household.Household",
@@ -606,7 +612,10 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
             return bool(set(documents1) & set(documents2))
         else:
-            possible_duplicates = [self.golden_records_individual, *self.possible_duplicates.all()]
+            possible_duplicates = [
+                self.golden_records_individual,
+                *self.possible_duplicates.all(),
+            ]
             selected_individuals = self.selected_individuals.all()
 
             unselected_individuals = [
@@ -616,7 +625,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             if unselected_individuals and len(unselected_individuals) > 1:
                 documents = []
                 for individual in unselected_individuals:
-                    documents.append(set([f"{x.document_number}--{x.type_id}" for x in individual.documents.all()]))
+                    documents.append({f"{x.document_number}--{x.type_id}" for x in individual.documents.all()})
                 return bool(set.intersection(*documents))
             return False
 
@@ -642,9 +651,17 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         choices=PaymentVerification.STATUS_CHOICES,
     )
     payment_verification = models.ForeignKey(
-        "payment.PaymentVerification", related_name="ticket_detail", on_delete=models.SET_NULL, null=True
+        "payment.PaymentVerification",
+        related_name="ticket_detail",
+        on_delete=models.SET_NULL,
+        null=True,
     )
-    new_status = models.CharField(max_length=50, choices=PaymentVerification.STATUS_CHOICES, default=None, null=True)
+    new_status = models.CharField(
+        max_length=50,
+        choices=PaymentVerification.STATUS_CHOICES,
+        default=None,
+        null=True,
+    )
     new_received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=12,

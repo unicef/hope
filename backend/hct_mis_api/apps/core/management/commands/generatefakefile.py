@@ -71,7 +71,9 @@ class Command(BaseCommand):
                     single_household_data.append(value)
                     continue
                 elif header == "consent_h_c":
-                    img = Image(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png")
+                    img = Image(
+                        f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png"
+                    )
                     households_ws.add_image(img, f"{cell.column_letter}{number + 2}")
                     single_household_data.append("")
                     continue
@@ -201,7 +203,11 @@ class Command(BaseCommand):
                             value = HEAD
                         else:
                             i_field_dict = combined_fields.get(header)
-                            choices = [x["value"] for x in i_field_dict["choices"] if x["value"] != HEAD]
+                            choices = [
+                                x["value"]
+                                for x in i_field_dict["choices"]
+                                if x["value"] != HEAD
+                            ]
                             value = random.choice(choices)
                         single_individual_data.append(value)
                         continue

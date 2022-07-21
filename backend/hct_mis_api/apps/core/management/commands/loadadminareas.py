@@ -22,4 +22,4 @@ class Command(BaseCommand):
         business_area = BusinessArea.objects.filter(name=options["business_area"][0]).first()
         api = DatamartAPI()
         locations = api.get_locations_geo_data(business_area)
-        admin_areas = api.generate_admin_areas(locations, business_area)
+        api.generate_admin_areas(locations, business_area)

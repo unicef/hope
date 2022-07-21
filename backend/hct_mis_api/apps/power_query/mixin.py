@@ -12,6 +12,9 @@ class PowerQueryMixin(ExtraButtonsMixin):
     def power_query(self, request):
         ct = ContentType.objects.get_for_model(self.model)
         context = self.get_common_context(
-            request, title="Power Queries", ct=ct, entries=Query.objects.filter(target=ct)
+            request,
+            title="Power Queries",
+            ct=ct,
+            entries=Query.objects.filter(target=ct),
         )
         return render(request, "power_query/list.html", context)

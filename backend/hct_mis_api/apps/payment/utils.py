@@ -1,9 +1,10 @@
+import logging
 from decimal import Decimal
 from math import ceil
-import phonenumbers
-import logging
 
 from django.db.models import Q
+
+import phonenumbers
 
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
@@ -20,7 +21,7 @@ def is_right_phone_number_format(phone_number):
 
     phone_number = phone_number.strip()
     if phone_number.startswith("00"):
-        phone_number = f"+{phone_number[2:]}"    
+        phone_number = f"+{phone_number[2:]}"
 
     try:
         phonenumbers.parse(phone_number)
@@ -30,14 +31,23 @@ def is_right_phone_number_format(phone_number):
     return True
 
 
-def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error):
+def get_number_of_samples(
+    payment_records_sample_count, confidence_interval, margin_of_error
+):
     from statistics import NormalDist
 
     variable = 0.5
     z_score = NormalDist().inv_cdf(confidence_interval + (1 - confidence_interval) / 2)
-    theoretical_sample = (z_score ** 2) * variable * (1 - variable) / margin_of_error ** 2
+    theoretical_sample = (
+        (z_score**2) * variable * (1 - variable) / margin_of_error**2
+    )
     actual_sample = ceil(
-        (payment_records_sample_count * theoretical_sample / (theoretical_sample + payment_records_sample_count)) * 1.5
+        (
+            payment_records_sample_count
+            * theoretical_sample
+            / (theoretical_sample + payment_records_sample_count)
+        )
+        * 1.5
     )
     return min(actual_sample, payment_records_sample_count)
 
@@ -73,21 +83,31 @@ def from_received_yes_no_to_status(received, received_amount, delivered_amount):
 
 
 def calculate_counts(cash_plan_verification):
-    cash_plan_verification.responded_count = cash_plan_verification.payment_record_verifications.filter(
-        ~Q(status=PaymentVerification.STATUS_PENDING)
-    ).count()
-    cash_plan_verification.received_count = cash_plan_verification.payment_record_verifications.filter(
-        Q(status=PaymentVerification.STATUS_RECEIVED)
-    ).count()
-    cash_plan_verification.not_received_count = cash_plan_verification.payment_record_verifications.filter(
-        Q(status=PaymentVerification.STATUS_NOT_RECEIVED)
-    ).count()
-    cash_plan_verification.received_with_problems_count = cash_plan_verification.payment_record_verifications.filter(
-        Q(status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
-    ).count()
+    cash_plan_verification.responded_count = (
+        cash_plan_verification.payment_record_verifications.filter(
+            ~Q(status=PaymentVerification.STATUS_PENDING)
+        ).count()
+    )
+    cash_plan_verification.received_count = (
+        cash_plan_verification.payment_record_verifications.filter(
+            Q(status=PaymentVerification.STATUS_RECEIVED)
+        ).count()
+    )
+    cash_plan_verification.not_received_count = (
+        cash_plan_verification.payment_record_verifications.filter(
+            Q(status=PaymentVerification.STATUS_NOT_RECEIVED)
+        ).count()
+    )
+    cash_plan_verification.received_with_problems_count = (
+        cash_plan_verification.payment_record_verifications.filter(
+            Q(status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES)
+        ).count()
+    )
 
 
-def get_payment_records_for_dashboard(year, business_area_slug, filters, only_with_delivered_quantity=False):
+def get_payment_records_for_dashboard(
+    year, business_area_slug, filters, only_with_delivered_quantity=False
+):
     additional_filters = {}
     if only_with_delivered_quantity:
         additional_filters["delivered_quantity_usd__gt"] = 0

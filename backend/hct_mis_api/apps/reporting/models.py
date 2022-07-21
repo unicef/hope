@@ -1,7 +1,5 @@
-from django.utils import timezone
-
-
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.account.models import ChoiceArrayField
@@ -39,9 +37,13 @@ class Report(TimeStampedUUIDModel):
         (GRIEVANCES, _("Grievances")),
     )
 
-    business_area = models.ForeignKey("core.BusinessArea", related_name="reports", on_delete=models.CASCADE)
+    business_area = models.ForeignKey(
+        "core.BusinessArea", related_name="reports", on_delete=models.CASCADE
+    )
     file = models.FileField(blank=True, null=True)
-    created_by = models.ForeignKey("account.User", related_name="reports", on_delete=models.CASCADE)
+    created_by = models.ForeignKey(
+        "account.User", related_name="reports", on_delete=models.CASCADE
+    )
     status = models.IntegerField(choices=STATUSES, default=IN_PROGRESS)
     report_type = models.IntegerField(choices=REPORT_TYPES)
     date_from = models.DateField()
@@ -55,8 +57,12 @@ class Report(TimeStampedUUIDModel):
         null=True,
         related_name="reports",
     )
-    admin_area = models.ManyToManyField("core.AdminArea", blank=True, related_name="reports")
-    admin_area_new = models.ManyToManyField("geo.Area", blank=True, related_name="reports")
+    admin_area = models.ManyToManyField(
+        "core.AdminArea", blank=True, related_name="reports"
+    )
+    admin_area_new = models.ManyToManyField(
+        "geo.Area", blank=True, related_name="reports"
+    )
 
     def __str__(self):
         return f"[{self.report_type}] Report for [{self.business_area}]"
@@ -94,11 +100,17 @@ class DashboardReport(TimeStampedUUIDModel):
         (PAYMENT_VERIFICATION, _("Payment verification")),
     )
 
-    business_area = models.ForeignKey("core.BusinessArea", related_name="dashboard_reports", on_delete=models.CASCADE)
+    business_area = models.ForeignKey(
+        "core.BusinessArea", related_name="dashboard_reports", on_delete=models.CASCADE
+    )
     file = models.FileField(blank=True, null=True)
-    created_by = models.ForeignKey("account.User", related_name="dashboard_reports", on_delete=models.CASCADE)
+    created_by = models.ForeignKey(
+        "account.User", related_name="dashboard_reports", on_delete=models.CASCADE
+    )
     status = models.PositiveSmallIntegerField(choices=STATUSES, default=IN_PROGRESS)
-    report_type = ChoiceArrayField(models.CharField(choices=REPORT_TYPES, max_length=255))
+    report_type = ChoiceArrayField(
+        models.CharField(choices=REPORT_TYPES, max_length=255)
+    )
 
     # filters
     year = models.PositiveSmallIntegerField(default=timezone.now().year)

@@ -9,7 +9,7 @@ TEMPLATES[0]["OPTIONS"]["debug"] = True
 
 # domains/hosts etc.
 DOMAIN_NAME = "localhost:8000"
-WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
+WWW_ROOT = f"http://{DOMAIN_NAME}/"
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
 
 # other
@@ -80,7 +80,7 @@ ELASTICSEARCH_DSL = {
     "default": {"hosts": "elasticsearch:9200"},
     "test": {"hosts": "elasticsearch:9200"},
 }
-ELASTICSEARCH_INDEX_PREFIX = 'test_'
+ELASTICSEARCH_INDEX_PREFIX = "test_"
 
 try:
     from .local import *  # noqa: ignore=F403

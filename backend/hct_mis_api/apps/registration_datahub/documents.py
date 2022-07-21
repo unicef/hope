@@ -1,6 +1,7 @@
+from django.conf import settings
+
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from django.conf import settings
 
 from hct_mis_api.apps.core.es_analyzers import name_synonym_analyzer, phonetic_analyzer
 from hct_mis_api.apps.household.elasticsearch_utils import DEFAULT_SCRIPT
@@ -12,21 +13,28 @@ from .models import ImportedIndividual
 class ImportedIndividualDocument(Document):
     id = fields.KeywordField(boost=0)
     given_name = fields.TextField(
-        analyzer=name_synonym_analyzer, fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)}
+        analyzer=name_synonym_analyzer,
+        fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)},
     )
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
-    family_name = fields.TextField(fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})
+    family_name = fields.TextField(
+        fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)}
+    )
     full_name = fields.TextField(analyzer=phonetic_analyzer)
     birth_date = fields.DateField(similarity="boolean")
     phone_no = fields.KeywordField("phone_no.__str__", similarity="boolean")
-    phone_no_alternative = fields.KeywordField("phone_no_alternative.__str__", similarity="boolean")
+    phone_no_alternative = fields.KeywordField(
+        "phone_no_alternative.__str__", similarity="boolean"
+    )
     business_area = fields.KeywordField(similarity="boolean")
     admin1 = fields.KeywordField()
     admin2 = fields.KeywordField()
     household = fields.ObjectField(
         properties={
             "residence_status": fields.KeywordField(similarity="boolean"),
-            "country_origin": fields.KeywordField(attr="country_origin.alpha3", similarity="boolean"),
+            "country_origin": fields.KeywordField(
+                attr="country_origin.alpha3", similarity="boolean"
+            ),
             "size": fields.IntegerField(),
             "address": fields.TextField(),
             "country": fields.KeywordField(attr="country.alpha3", similarity="boolean"),
@@ -51,7 +59,9 @@ class ImportedIndividualDocument(Document):
             "male_age_group_12_17_disabled_count": fields.IntegerField(),
             "male_age_group_18_59_disabled_count": fields.IntegerField(),
             "male_age_group_60_disabled_count": fields.IntegerField(),
-            "head_of_household": fields.KeywordField(attr="head_of_household.id", similarity="boolean"),
+            "head_of_household": fields.KeywordField(
+                attr="head_of_household.id", similarity="boolean"
+            ),
             "returnee": fields.BooleanField(),
             "registration_method": fields.KeywordField(similarity="boolean"),
             "collect_individual_data": fields.KeywordField(similarity="boolean"),
@@ -66,7 +76,9 @@ class ImportedIndividualDocument(Document):
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
             "type": fields.KeywordField(attr="type.type", similarity="boolean"),
-            "country": fields.KeywordField(attr="type.country.alpha3", similarity="boolean"),
+            "country": fields.KeywordField(
+                attr="type.country.alpha3", similarity="boolean"
+            ),
         }
     )
     identities = fields.ObjectField(
@@ -78,7 +90,9 @@ class ImportedIndividualDocument(Document):
     households_and_roles = fields.ObjectField(
         properties={
             "role": fields.KeywordField(similarity="boolean"),
-            "individual": fields.KeywordField(attr="individual.id", similarity="boolean"),
+            "individual": fields.KeywordField(
+                attr="individual.id", similarity="boolean"
+            ),
         }
     )
 

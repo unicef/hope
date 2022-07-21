@@ -119,9 +119,13 @@ class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
 
 
 class PaymentVerificationFactory(factory.DjangoModelFactory):
-    cash_plan_payment_verification = factory.Iterator(CashPlanPaymentVerification.objects.all())
+    cash_plan_payment_verification = factory.Iterator(
+        CashPlanPaymentVerification.objects.all()
+    )
     payment_record = factory.LazyAttribute(
-        lambda o: PaymentRecord.objects.filter(cash_plan=o.cash_plan_payment_verification.cash_plan)
+        lambda o: PaymentRecord.objects.filter(
+            cash_plan=o.cash_plan_payment_verification.cash_plan
+        )
         .order_by("?")
         .first()
     )
@@ -129,7 +133,9 @@ class PaymentVerificationFactory(factory.DjangoModelFactory):
         PaymentVerification.STATUS_CHOICES,
         getter=lambda c: c[0],
     )
-    status_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    status_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=utc
+    )
 
     class Meta:
         model = PaymentVerification
@@ -157,7 +163,9 @@ class RealProgramFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    end_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
+    )
     description = factory.Faker(
         "sentence",
         nb_words=10,
@@ -219,8 +227,12 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
-    end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
-    dispersion_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
+    end_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
+    )
+    dispersion_date = factory.LazyAttribute(
+        lambda o: o.start_date + timedelta(days=randint(60, 1000))
+    )
     coverage_duration = factory.fuzzy.FuzzyInteger(1, 4)
     coverage_unit = factory.Faker(
         "random_element",
@@ -237,7 +249,9 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
         getter=lambda c: c[0],
     )
     assistance_measurement = factory.Faker("currency_name")
-    assistance_through = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first().ca_id)
+    assistance_through = factory.LazyAttribute(
+        lambda o: ServiceProvider.objects.order_by("?").first().ca_id
+    )
     vision_id = factory.fuzzy.FuzzyInteger(123534, 12353435234)
     funds_commitment = factory.fuzzy.FuzzyInteger(1000, 99999999)
     exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
@@ -304,15 +318,21 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     )
     currency = factory.Faker("currency_code")
     entitlement_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
-    delivered_quantity = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
-    delivered_quantity_usd = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
+    delivered_quantity = factory.LazyAttribute(
+        lambda o: Decimal(randint(10, int(o.entitlement_quantity)))
+    )
+    delivered_quantity_usd = factory.LazyAttribute(
+        lambda o: Decimal(randint(10, int(o.entitlement_quantity)))
+    )
     delivery_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,
         after_now=False,
         tzinfo=utc,
     )
-    service_provider = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first())
+    service_provider = factory.LazyAttribute(
+        lambda o: ServiceProvider.objects.order_by("?").first()
+    )
     registration_ca_id = factory.Faker("uuid4")
 
 
@@ -335,9 +355,13 @@ def generate_real_cash_plans():
 
 def generate_real_cash_plans_for_households(households):
     if ServiceProvider.objects.count() < 3:
-        ServiceProviderFactory.create_batch(3, business_area=households[0].business_area)
+        ServiceProviderFactory.create_batch(
+            3, business_area=households[0].business_area
+        )
     program = RealProgramFactory(business_area=households[0].business_area)
-    cash_plans = RealCashPlanFactory.create_batch(3, program=program, business_area=households[0].business_area)
+    cash_plans = RealCashPlanFactory.create_batch(
+        3, program=program, business_area=households[0].business_area
+    )
     for cash_plan in cash_plans:
         for hh in households:
             RealPaymentRecordFactory(

@@ -9,8 +9,12 @@ class DataChangeValidator:
     @classmethod
     def verify_approve_data(cls, approve_data):
         if not isinstance(approve_data, dict):
-            logger.error("Fields must be a dictionary with field name as key and boolean as a value")
-            raise GraphQLError("Fields must be a dictionary with field name as key and boolean as a value")
+            logger.error(
+                "Fields must be a dictionary with field name as key and boolean as a value"
+            )
+            raise GraphQLError(
+                "Fields must be a dictionary with field name as key and boolean as a value"
+            )
 
         if not all([isinstance(value, bool) for value in approve_data.values()]):
             logger.error("Values must be booleans")
@@ -18,7 +22,9 @@ class DataChangeValidator:
 
     @classmethod
     def verify_approve_data_against_object_data(cls, object_data, approve_data):
-        error = "Provided fields are not the same as provided in the object approve data"
+        error = (
+            "Provided fields are not the same as provided in the object approve data"
+        )
         if approve_data and not isinstance(object_data, dict):
             logger.error(error)
             raise GraphQLError(error)

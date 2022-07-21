@@ -91,7 +91,9 @@ class PullFromDatahubTask:
         self.exchange_rates_client = exchange_rates_client or ExchangeRates()
 
     def execute(self):
-        grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
+        grouped_session = Session.objects.values("business_area").annotate(
+            count=Count("business_area")
+        )
         ret = {
             "grouped_session": 0,
             "skipped_due_failure": [],
@@ -106,7 +108,9 @@ class PullFromDatahubTask:
             if session_queryset.filter(status=Session.STATUS_FAILED).count() > 0:
                 ret["skipped_due_failure"].append(business_area)
                 continue
-            sessions = session_queryset.filter(status=Session.STATUS_READY).order_by("-last_modified_date")
+            sessions = session_queryset.filter(status=Session.STATUS_READY).order_by(
+                "-last_modified_date"
+            )
             for session in sessions:
                 try:
                     self.copy_session(session)
@@ -145,20 +149,25 @@ class PullFromDatahubTask:
     def copy_cash_plans(self, session):
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
         for dh_cash_plan in dh_cash_plans:
-            cash_plan_args = build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
+            cash_plan_args = build_arg_dict(
+                dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT
+            )
             self.set_cash_plan_service_provider(cash_plan_args)
-            cash_plan_args["business_area"] = BusinessArea.objects.get(code=dh_cash_plan.business_area)
-            (
-                cash_plan,
-                created,
-            ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
+            cash_plan_args["business_area"] = BusinessArea.objects.get(
+                code=dh_cash_plan.business_area
+            )
+            (cash_plan, created,) = CashPlan.objects.update_or_create(
+                ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args
+            )
 
             if created:
                 CashPlanPaymentVerificationSummary.objects.create(cash_plan=cash_plan)
 
             if not cash_plan.exchange_rate:
                 try:
-                    cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, self.exchange_rates_client)
+                    cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(
+                        cash_plan, self.exchange_rates_client
+                    )
                     cash_plan.save(update_fields=["exchange_rate"])
                 except Exception as e:
                     logger.exception(e)
@@ -167,7 +176,9 @@ class PullFromDatahubTask:
         assistance_through = cash_plan_args.get("assistance_through")
         if not assistance_through:
             return
-        service_provider = ServiceProvider.objects.filter(ca_id=assistance_through).first()
+        service_provider = ServiceProvider.objects.filter(
+            ca_id=assistance_through
+        ).first()
         if service_provider is None:
             return
         cash_plan_args["service_provider"] = service_provider
@@ -181,24 +192,33 @@ class PullFromDatahubTask:
                 PullFromDatahubTask.MAPPING_PAYMENT_RECORD_DICT,
             )
 
-            payment_record_args["business_area"] = BusinessArea.objects.get(code=dh_payment_record.business_area)
+            payment_record_args["business_area"] = BusinessArea.objects.get(
+                code=dh_payment_record.business_area
+            )
             payment_record_args["service_provider"] = ServiceProvider.objects.get(
                 ca_id=dh_payment_record.service_provider_ca_id
             )
-            payment_record_args["cash_plan"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
-            (
-                payment_record,
-                created,
-            ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
+            payment_record_args["cash_plan"] = CashPlan.objects.get(
+                ca_id=dh_payment_record.cash_plan_ca_id
+            )
+            (payment_record, created,) = PaymentRecord.objects.update_or_create(
+                ca_id=dh_payment_record.ca_id, defaults=payment_record_args
+            )
             try:
-                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
-                    payment_record, self.exchange_rates_client
+                payment_record.delivered_quantity_usd = (
+                    get_payment_record_delivered_quantity_in_usd(
+                        payment_record, self.exchange_rates_client
+                    )
                 )
                 payment_record.save(update_fields=["delivered_quantity_usd"])
             except Exception as e:
                 logger.exception(e)
             household_ids.append(payment_record.household_id)
-            if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
+            if (
+                payment_record.household
+                and payment_record.cash_plan
+                and payment_record.cash_plan.program
+            ):
                 payment_record.household.programs.add(payment_record.cash_plan.program)
         self.save_total_cash_received_in_household(household_ids)
 
@@ -212,9 +232,15 @@ class PullFromDatahubTask:
                 dh_service_provider,
                 PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
-            service_provider_args["business_area"] = BusinessArea.objects.get(code=dh_service_provider.business_area)
-            service_provider_args["country"] = CountryCodeMap.objects.get_iso3_code(dh_service_provider.country)
-            ServiceProvider.objects.update_or_create(ca_id=dh_service_provider.ca_id, defaults=service_provider_args)
+            service_provider_args["business_area"] = BusinessArea.objects.get(
+                code=dh_service_provider.business_area
+            )
+            service_provider_args["country"] = CountryCodeMap.objects.get_iso3_code(
+                dh_service_provider.country
+            )
+            ServiceProvider.objects.update_or_create(
+                ca_id=dh_service_provider.ca_id, defaults=service_provider_args
+            )
 
     def copy_programs(self, session):
         dh_programs = ca_models.Programme.objects.filter(session=session)
@@ -227,11 +253,17 @@ class PullFromDatahubTask:
         Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
 
     def copy_target_population(self, session):
-        dh_target_populations = ca_models.TargetPopulation.objects.filter(session=session)
+        dh_target_populations = ca_models.TargetPopulation.objects.filter(
+            session=session
+        )
         target_populations = []
         for dh_target_population in dh_target_populations:
-            target_population = TargetPopulation.objects.get(id=dh_target_population.mis_id)
+            target_population = TargetPopulation.objects.get(
+                id=dh_target_population.mis_id
+            )
             target_population.ca_id = dh_target_population.ca_id
             target_population.ca_hash_id = dh_target_population.ca_hash_id
             target_populations.append(target_population)
-        TargetPopulation.objects.bulk_update(target_populations, ["ca_id", "ca_hash_id"])
+        TargetPopulation.objects.bulk_update(
+            target_populations, ["ca_id", "ca_hash_id"]
+        )

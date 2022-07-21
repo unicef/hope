@@ -1,6 +1,6 @@
-from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-
 import logging
+
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,9 @@ def _get_min_max_score(golden_records):
     return min(items, default=0.0), max(items, default=0.0)
 
 
-def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
+def create_grievance_ticket_with_details(
+    main_individual, possible_duplicate, business_area, **kwargs
+):
     from hct_mis_api.apps.grievance.models import (
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
@@ -25,16 +27,14 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
     if registration_data_import:
         ticket_details_to_check = TicketNeedsAdjudicationDetails.objects.exclude(
             ticket__status=GrievanceTicket.STATUS_CLOSED
-        ).filter(
-            ticket__registration_data_import_id=registration_data_import.pk
-        )
+        ).filter(ticket__registration_data_import_id=registration_data_import.pk)
 
         ticket_all_individuals = {main_individual, *possible_duplicates}
 
         for ticket_detail in ticket_details_to_check:
             other_ticket_all_individuals = {
                 ticket_detail.golden_records_individual,
-                *ticket_detail.possible_duplicates.all()
+                *ticket_detail.possible_duplicates.all(),
             }
             if set.intersection(ticket_all_individuals, other_ticket_all_individuals):
                 return None, None
@@ -62,11 +62,13 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         ticket=ticket,
         golden_records_individual=main_individual,
         possible_duplicate=possible_duplicate,
-        is_multiple_duplicates_version=kwargs.get("is_multiple_duplicates_version", False),
+        is_multiple_duplicates_version=kwargs.get(
+            "is_multiple_duplicates_version", False
+        ),
         selected_individual=None,
         extra_data=extra_data,
         score_min=score_min,
-        score_max=score_max
+        score_max=score_max,
     )
 
     ticket_details.possible_duplicates.add(*possible_duplicates)
@@ -78,7 +80,9 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
     return ticket, ticket_details
 
 
-def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area, **kwargs):
+def create_needs_adjudication_tickets(
+    individuals_queryset, results_key, business_area, **kwargs
+):
     from hct_mis_api.apps.household.models import Individual
 
     if not individuals_queryset:
@@ -89,7 +93,9 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
         linked_tickets = []
         possible_duplicates = []
 
-        for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
+        for individual in possible_duplicate.deduplication_golden_record_results[
+            results_key
+        ]:
             duplicate = Individual.objects.filter(id=individual.get("hit_id")).first()
             if not duplicate:
                 continue
@@ -102,7 +108,7 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
             business_area=business_area,
             registration_data_import=kwargs.get("registration_data_import", None),
             possible_duplicates=possible_duplicates,
-            is_multiple_duplicates_version=True
+            is_multiple_duplicates_version=True,
         )
 
         if ticket and ticket_details:

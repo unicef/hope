@@ -58,7 +58,9 @@ class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
 
     def resolve_permissions(self, info):
-        user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
+        user_roles = UserRole.objects.filter(
+            user=info.context.user, business_area_id=self.id
+        )
         return permissions_resolver(user_roles)
 
     class Meta:
@@ -133,14 +135,18 @@ class Query(graphene.ObjectType):
         UserNode,
         filterset_class=UsersFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
+            hopeOneOfPermissionClass(
+                Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY
+            ),
         ),
         max_limit=1000,
     )
     user_roles_choices = graphene.List(ChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
-    has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
+    has_available_users_to_export = graphene.Boolean(
+        business_area_slug=graphene.String(required=True)
+    )
 
     def resolve_all_users(self, info, **kwargs):
         return User.objects.all().distinct()
@@ -163,6 +169,10 @@ class Query(graphene.ObjectType):
         return (
             get_user_model()
             .objects.prefetch_related("user_roles")
-            .filter(available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug)
+            .filter(
+                available_for_export=True,
+                is_superuser=False,
+                user_roles__business_area__slug=business_area_slug,
+            )
             .exists()
         )

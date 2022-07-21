@@ -2,13 +2,13 @@ import contextlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
-from django.utils import timezone
 from typing import Any, Dict, Iterable, List, Set, Union
 from urllib.request import urlopen
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet
 from django.forms import model_to_dict
+from django.utils import timezone
 from django.utils.functional import cached_property
 
 import dateutil.parser
@@ -195,7 +195,7 @@ class LoadSanctionListXMLTask:
         path = "INDIVIDUAL_PLACE_OF_BIRTH/COUNTRY"
         countries = self._get_country_field(individual_tag, path)
         if isinstance(countries, set):
-            return sorted(list(countries)).pop()
+            return sorted(countries).pop()
         else:
             return countries
 
@@ -383,12 +383,14 @@ class LoadSanctionListXMLTask:
             year, month, day, *time = value.split("-")
             if time:
                 hour, minute = time[0].split(":")
-                return timezone.make_aware(datetime(
-                    year=int(year),
-                    month=int(month),
-                    day=int(day),
-                    hour=int(hour),
-                    minute=int(minute)),
+                return timezone.make_aware(
+                    datetime(
+                        year=int(year),
+                        month=int(month),
+                        day=int(day),
+                        hour=int(hour),
+                        minute=int(minute),
+                    ),
                 )
         if field.get_internal_type() == "DateField":
             year, month, day, *time = value.split("-")
@@ -403,10 +405,10 @@ class LoadSanctionListXMLTask:
 
     def execute(self):
         if self.file_path is not None:
-            tree = ET.parse(self.file_path)
+            tree = ET.parse(self.file_path)  # nosec
         else:
-            url = urlopen(self.SANCTION_LIST_XML_URL)
-            tree = ET.parse(url)
+            url = urlopen(self.SANCTION_LIST_XML_URL)  # nosec
+            tree = ET.parse(url)  # nosec
         root = tree.getroot()
 
         individuals_from_file = set()

@@ -2,8 +2,8 @@ from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
@@ -52,7 +52,9 @@ class TestTargetPopulationQuery(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
+        rule_filter = TargetingCriteriaRuleFilter(
+            **rule_filter, targeting_criteria_rule=rule
+        )
         rule_filter.save()
         return targeting_criteria
 
@@ -133,7 +135,11 @@ class TestTargetPopulationQuery(APITestCase):
         self.assertEqual(tp.final_list_total_individuals, 2)
 
         targeting_criteria = self.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
+            {
+                "field_name": "residence_status",
+                "arguments": ["HOST"],
+                "comparision_method": "EQUALS",
+            }
         )
         tp.final_list_targeting_criteria = targeting_criteria
         tp.save()
@@ -171,7 +177,11 @@ class TestTargetPopulationQuery(APITestCase):
         self.assertEqual(tp.final_list_total_households, 1)
         self.assertEqual(tp.final_list_total_individuals, 2)
         tp.final_list_targeting_criteria = self.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["IDP"], "comparision_method": "EQUALS"}
+            {
+                "field_name": "residence_status",
+                "arguments": ["IDP"],
+                "comparision_method": "EQUALS",
+            }
         )
         tp.save()
         tp.refresh_from_db()

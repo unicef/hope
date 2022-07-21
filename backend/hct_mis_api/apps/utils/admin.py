@@ -67,7 +67,11 @@ class LastSyncDateResetMixin(ExtraButtonsMixin):
 
 
 class HOPEModelAdminBase(
-    SmartDisplayAllMixin, AdminFiltersMixin, AdminActionPermMixin, JSONWidgetMixin, admin.ModelAdmin
+    SmartDisplayAllMixin,
+    AdminFiltersMixin,
+    AdminActionPermMixin,
+    JSONWidgetMixin,
+    admin.ModelAdmin,
 ):
     list_per_page = 50
 

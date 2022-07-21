@@ -93,7 +93,9 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
         )
-        cls.target_population_with_individuals.households.set([cls.household, cls.household_second])
+        cls.target_population_with_individuals.households.set(
+            [cls.household, cls.household_second]
+        )
 
         cls.target_population_without_individuals = cls._create_target_population(
             sent_to_datahub=False,
@@ -102,7 +104,9 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
         )
-        cls.target_population_without_individuals.households.set([cls.household, cls.household_second])
+        cls.target_population_without_individuals.households.set(
+            [cls.household, cls.household_second]
+        )
 
     @classmethod
     def create_first_household(cls, admin_area, rdi):
@@ -162,7 +166,9 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             household=cls.external_primary_collector_household,
             registration_data_import=rdi_second,
         )
-        cls.external_primary_collector_household.head_of_household = cls.external_primary_collector
+        cls.external_primary_collector_household.head_of_household = (
+            cls.external_primary_collector
+        )
         cls.external_primary_collector_household.save()
         cls.external_alternate_collector = IndividualFactory(
             registration_data_import=rdi_second,
@@ -203,7 +209,9 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             household=external_primary_collector_household,
             registration_data_import=rdi_second,
         )
-        external_primary_collector_household.head_of_household = external_primary_collector
+        external_primary_collector_household.head_of_household = (
+            external_primary_collector
+        )
         external_primary_collector_household.save()
         external_alternate_collector = IndividualFactory(
             registration_data_import=rdi_second,
@@ -234,18 +242,25 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         )
 
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.household1_individual_primary_and_head.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.household1_individual_primary_and_head.id
+            ).count(),
             1,
             "Head of household for first household should be in datahub",
         )
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.household1_individual_alternate.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.household1_individual_alternate.id
+            ).count(),
             1,
             "Alternate collector for first household should be in datahub",
         )
         self.assertEqual(
             dh_models.Individual.objects.filter(
-                mis_id__in=[self.individual_no_role_first.id, self.individual_no_role_second.id]
+                mis_id__in=[
+                    self.individual_no_role_first.id,
+                    self.individual_no_role_second.id,
+                ]
             ).count(),
             2,
             "All individuals for first household should be in datahub",
@@ -276,23 +291,31 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             "Household 2 should be in MIS datahub",
         )
         self.assertEqual(
-            dh_models.Household.objects.filter(mis_id=self.external_primary_collector_household.id).count(),
+            dh_models.Household.objects.filter(
+                mis_id=self.external_primary_collector_household.id
+            ).count(),
             1,
             "Primary collector household should be in MIS datahub",
         )
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.second_household_head.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.second_household_head.id
+            ).count(),
             1,
             "Head of household for 2nd household should be in datahub",
         )
 
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.external_primary_collector.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.external_primary_collector.id
+            ).count(),
             1,
             "External Primary collector for 2nd household should be in datahub",
         )
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.external_primary_collector.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.external_primary_collector.id
+            ).count(),
             1,
             "External Alternate collector for 2nd household should be in datahub",
         )
@@ -348,18 +371,25 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         )
 
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.household1_individual_primary_and_head.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.household1_individual_primary_and_head.id
+            ).count(),
             1,
             "Head of household for first household should be in datahub",
         )
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.household1_individual_alternate.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.household1_individual_alternate.id
+            ).count(),
             1,
             "Alternate collector for first household should be in datahub",
         )
         self.assertEqual(
             dh_models.Individual.objects.filter(
-                mis_id__in=[self.individual_no_role_first.id, self.individual_no_role_second.id]
+                mis_id__in=[
+                    self.individual_no_role_first.id,
+                    self.individual_no_role_second.id,
+                ]
             ).count(),
             0,
             "Individuals without role should not be sent",
@@ -390,23 +420,31 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             "Household 2 should be in MIS datahub",
         )
         self.assertEqual(
-            dh_models.Household.objects.filter(mis_id=self.external_primary_collector_household.id).count(),
+            dh_models.Household.objects.filter(
+                mis_id=self.external_primary_collector_household.id
+            ).count(),
             1,
             "Primary collector household should be in MIS datahub",
         )
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.second_household_head.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.second_household_head.id
+            ).count(),
             1,
             "Head of household for 2nd household should be in datahub",
         )
 
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.external_primary_collector.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.external_primary_collector.id
+            ).count(),
             1,
             "External Primary collector for 2nd household should be in datahub",
         )
         self.assertEqual(
-            dh_models.Individual.objects.filter(mis_id=self.external_primary_collector.id).count(),
+            dh_models.Individual.objects.filter(
+                mis_id=self.external_primary_collector.id
+            ).count(),
             1,
             "External Alternate collector for 2nd household should be in datahub",
         )

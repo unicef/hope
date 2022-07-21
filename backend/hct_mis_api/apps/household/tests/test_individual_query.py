@@ -8,10 +8,10 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import cached_business_areas_slug_id_dict
-from hct_mis_api.apps.household.documents import IndividualDocument, HouseholdDocument
+from hct_mis_api.apps.household.documents import HouseholdDocument, IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import Individual, Household
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -136,7 +136,9 @@ class TestIndividualQuery(APITestCase):
         ]
 
         cls.individuals = [
-            IndividualFactory(household=household_one if index % 2 else household_two, **individual)
+            IndividualFactory(
+                household=household_one if index % 2 else household_two, **individual
+            )
             for index, individual in enumerate(cls.individuals_to_create)
         ]
         household_one.head_of_household = cls.individuals[0]
@@ -151,7 +153,9 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_individual_query_all(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
@@ -165,12 +169,16 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_individual_query_single(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.INDIVIDUAL_QUERY,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
+            variables={
+                "id": self.id_to_base64(self.individuals[0].id, "IndividualNode")
+            },
         )
 
     @parameterized.expand(
@@ -180,7 +188,9 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_individual_programme_filter(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
@@ -195,7 +205,9 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_filter(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},

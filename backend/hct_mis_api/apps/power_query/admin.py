@@ -115,14 +115,22 @@ class QueryAdmin(AdminFiltersMixin, ExtraButtonsMixin, ModelAdmin):
             elif isinstance(ret, (dict, list, tuple)):
                 context["result"] = ret[:100]
             else:
-                self.message_user(request, f"Query does not returns a valid result. It returned {type(ret)}")
+                self.message_user(
+                    request,
+                    f"Query does not returns a valid result. It returned {type(ret)}",
+                )
             return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
 
     def get_changeform_initial_data(self, request):
         ct = ContentType.objects.filter(id=request.GET.get("ct", 0)).first()
-        return {"code": "result=conn.all()", "name": ct, "target": ct, "owner": request.user}
+        return {
+            "code": "result=conn.all()",
+            "name": ct,
+            "target": ct,
+            "owner": request.user,
+        }
 
 
 @register(Dataset)
@@ -157,13 +165,13 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
                         "query": obj.query,
                     }
                     output = formatter.render(report_context)
-                    if formatter.content_type == 'xls':
+                    if formatter.content_type == "xls":
                         response = HttpResponse(output, content_type=formatter.content_type)
-                        response['Content-Disposition'] = f'attachment; filename=Dataset Report.xls'
+                        response["Content-Disposition"] = "attachment; filename=Dataset Report.xls"
                         return response
                     return HttpResponse(output)
             else:
-                context["extra_buttons"] = ''
+                context["extra_buttons"] = ""
                 form = ExportForm()
             context["form"] = form
             return render(request, "admin/power_query/dataset/export.html", context)
@@ -176,7 +184,9 @@ class DatasetAdmin(ExtraButtonsMixin, AdminFiltersMixin, ModelAdmin):
         obj = self.get_object(request, pk)
         try:
             context = self.get_common_context(request, pk, title="Results")
-            data = pickle.loads(obj.result)
+            # TODO: Fix
+            # Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
+            data = pickle.loads(obj.result)  # nosec
             context["dataset"] = to_dataset(data)
             return render(request, "admin/power_query/query/preview.html", context)
         except Exception as e:
@@ -216,12 +226,12 @@ class FormatterAdmin(ImportExportMixin, ExtraButtonsMixin, ModelAdmin):
                         "dataset": form.cleaned_data["query"].dataset,
                         "report": "None",
                     }
-                    if obj.content_type == 'xls':
+                    if obj.content_type == "xls":
                         output = obj.render(ctx)
                         response = HttpResponse(output, content_type=obj.content_type)
-                        response['Content-Disposition'] = 'attachment; filename=Report.xls'
+                        response["Content-Disposition"] = "attachment; filename=Report.xls"
                         return response
-                    else:    
+                    else:
                         context["results"] = str(obj.render(ctx))
                 else:
                     form = FormatterTestForm()

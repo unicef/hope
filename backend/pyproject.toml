@@ -44,6 +44,9 @@ sections = ["FUTURE","STDLIB","DJANGO","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
 include_trailing_comma = true
 skip = "migrations"
 
+[tool.bandit]
+skips = ["B101", "B102", "B601", "B301", "B314", "B310"]
+
 [tool.poetry]
 name = "HCT MIS Backend"
 version = "2022.7.3"
@@ -51,7 +54,7 @@ description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
 [tool.poetry.dependencies]
-python = "3.9.12"
+python = "^3.9.12"
 Django = "3.2.13"
 Jinja2 = "3.1.2"
 PyJWT = "^2.4.0"
@@ -135,6 +138,13 @@ watchdog = "^2.1.8"
 wasmer = "1.1.0"
 parso = "0.8.3"
 argh = "^0.26.2"
+pre-commit = "^2.20.0"
+mypy = "^0.971"
+ipython = "^8.4.0"
+django-stubs-ext = "^0.5.0"
+types-requests = "^2.28.3"
+black = "^22.6.0"
+django-stubs = "^1.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

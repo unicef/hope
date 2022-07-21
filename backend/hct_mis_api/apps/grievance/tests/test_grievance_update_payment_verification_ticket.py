@@ -5,22 +5,31 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
+from hct_mis_api.apps.core.fixtures import (
+    AdminAreaFactory,
+    AdminAreaLevelFactory,
+    create_afghanistan,
+)
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetailsFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentVerificationFactory,
+    CashPlanPaymentVerificationFactory,
     PaymentRecordFactory,
-    CashPlanPaymentVerificationFactory
+    PaymentVerificationFactory,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    PaymentVerification,
+)
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 
 
 class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
@@ -60,7 +69,9 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        cls.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
+        cls.admin_area = AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -124,25 +135,31 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             payment_record=payment_record,
             status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )
-        cls.ticket = TicketPaymentVerificationDetailsFactory(payment_verification=payment_verification)
+        cls.ticket = TicketPaymentVerificationDetailsFactory(
+            payment_verification=payment_verification
+        )
         cls.ticket.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
         cls.ticket.ticket.save()
 
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_UPDATE],
+                "with_permission",
+                [Permissions.GRIEVANCES_UPDATE],
             ),
             ("without_permission", []),
         ]
     )
-    def test_update_payment_verification_ticket_with_new_received_amount_extras(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_update_payment_verification_ticket_with_new_received_amount_extras(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         extras = {
             "newReceivedAmount": 1234.99,
-            "newStatus": PaymentVerification.STATUS_RECEIVED
+            "newStatus": PaymentVerification.STATUS_RECEIVED,
         }
         input_data = self._prepare_input(extras)
 
@@ -152,12 +169,11 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             variables=input_data,
         )
 
-
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION],
+                "with_permission",
+                [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION],
             ),
             ("without_permission", []),
         ]
@@ -166,12 +182,16 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
         # update status for approval
         self.ticket.ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
         self.ticket.ticket.save()
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         input_data = {
-                "grievanceTicketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
-                "approveStatus": True
-            }
+            "grievanceTicketId": self.id_to_base64(
+                self.ticket.ticket.id, "GrievanceTicketNode"
+            ),
+            "approveStatus": True,
+        }
 
         self.snapshot_graphql_request(
             request_string=self.APPROVE_QUERY,
@@ -182,11 +202,15 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
     def _prepare_input(self, extras=None):
         input_data = {
             "input": {
-                "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
+                "ticketId": self.id_to_base64(
+                    self.ticket.ticket.id, "GrievanceTicketNode"
+                ),
             }
         }
 
         if extras:
-            input_data["input"]["extras"] = {"ticketPaymentVerificationDetailsExtras": extras}
+            input_data["input"]["extras"] = {
+                "ticketPaymentVerificationDetailsExtras": extras
+            }
 
         return input_data

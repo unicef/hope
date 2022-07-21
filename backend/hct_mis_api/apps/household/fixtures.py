@@ -2,8 +2,8 @@ import random
 
 import factory
 from factory import enums, fuzzy
-from pytz import utc
 from faker import Faker
+from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.household.models import (
@@ -45,7 +45,9 @@ def flex_field_households(o):
             ],
             k=2,
         ),
-        "other_treatment_facility_h_f": random.choice(["testing other", "narodowy fundusz zdrowia", None]),
+        "other_treatment_facility_h_f": random.choice(
+            ["testing other", "narodowy fundusz zdrowia", None]
+        ),
     }
 
 
@@ -90,11 +92,19 @@ class HouseholdFactory(factory.DjangoModelFactory):
     registration_data_import = factory.SubFactory(
         RegistrationDataImportFactory,
     )
-    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
-    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
+    first_registration_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=utc
+    )
+    last_registration_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=utc
+    )
     flex_fields = factory.LazyAttribute(flex_field_households)
-    business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
-    start = factory.Faker("date_time_this_month", before_now=True, after_now=False, tzinfo=utc)
+    business_area = factory.LazyAttribute(
+        lambda o: o.registration_data_import.business_area
+    )
+    start = factory.Faker(
+        "date_time_this_month", before_now=True, after_now=False, tzinfo=utc
+    )
     deviceid = factory.Faker("md5")
     name_enumerator = factory.Faker("name")
     org_enumerator = factory.fuzzy.FuzzyChoice(
@@ -119,7 +129,9 @@ class HouseholdFactory(factory.DjangoModelFactory):
     def build(cls, **kwargs):
         """Build an instance of the associated class, with overriden attrs."""
         if "registration_data_import__imported_by__partner" not in kwargs:
-            kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
+            kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(
+                name="UNICEF"
+            )
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
 
@@ -134,7 +146,9 @@ class IndividualFactory(factory.DjangoModelFactory):
     class Meta:
         model = Individual
 
-    full_name = factory.LazyAttribute(lambda o: f"{o.given_name} {o.middle_name} {o.family_name}")
+    full_name = factory.LazyAttribute(
+        lambda o: f"{o.given_name} {o.middle_name} {o.family_name}"
+    )
     given_name = factory.Faker("first_name")
     middle_name = factory.Faker("first_name")
     family_name = factory.Faker("last_name")
@@ -142,21 +156,33 @@ class IndividualFactory(factory.DjangoModelFactory):
         SEX_CHOICE,
         getter=lambda c: c[0],
     )
-    birth_date = factory.Faker("date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90)
+    birth_date = factory.Faker(
+        "date_of_birth", tzinfo=utc, minimum_age=16, maximum_age=90
+    )
     marital_status = factory.fuzzy.FuzzyChoice(
         MARITAL_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
-    phone_no = factory.LazyAttribute(lambda _: f"{faker.country_calling_code()} {faker.msisdn()[3:]}")
+    phone_no = factory.LazyAttribute(
+        lambda _: f"{faker.country_calling_code()} {faker.msisdn()[3:]}"
+    )
     phone_no_alternative = ""
-    relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
+    relationship = factory.fuzzy.FuzzyChoice(
+        [value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"]
+    )
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
     disability = NOT_DISABLED
     flex_fields = factory.LazyAttribute(flex_field_individual)
-    first_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
-    last_registration_date = factory.Faker("date_time_this_year", before_now=True, after_now=False, tzinfo=utc)
-    business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
+    first_registration_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=utc
+    )
+    last_registration_date = factory.Faker(
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=utc
+    )
+    business_area = factory.LazyAttribute(
+        lambda o: o.registration_data_import.business_area
+    )
 
 
 class BankAccountInfoFactory(factory.DjangoModelFactory):
@@ -210,7 +236,9 @@ def create_household(household_args=None, individual_args=None):
     household_args["registration_data_import__imported_by__partner"] = partner
 
     household = HouseholdFactory.build(**household_args)
-    individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
+    individuals = IndividualFactory.create_batch(
+        household.size, household=None, **individual_args
+    )
 
     household.head_of_household = individuals[0]
     # household.registration_data_import.imported_by.partner.save()
@@ -248,7 +276,9 @@ def create_household_for_fixtures(household_args=None, individual_args=None):
     if individual_args is None:
         individual_args = {}
     household = HouseholdFactory.build(**household_args)
-    individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
+    individuals = IndividualFactory.create_batch(
+        household.size, household=None, **individual_args
+    )
 
     household.head_of_household = individuals[0]
     household.registration_data_import.imported_by.save()
@@ -265,8 +295,12 @@ def create_household_for_fixtures(household_args=None, individual_args=None):
     Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
 
     if random.choice([True, False]) and len(individuals) >= 2:
-        IndividualRoleInHousehold.objects.create(individual=individuals[0], household=household, role=ROLE_PRIMARY)
-        IndividualRoleInHousehold.objects.create(individual=individuals[1], household=household, role=ROLE_ALTERNATE)
+        IndividualRoleInHousehold.objects.create(
+            individual=individuals[0], household=household, role=ROLE_PRIMARY
+        )
+        IndividualRoleInHousehold.objects.create(
+            individual=individuals[1], household=household, role=ROLE_ALTERNATE
+        )
     else:
         primary_collector, alternate_collector = IndividualFactory.create_batch(
             2, household=None, relationship="NON_BENEFICIARY"
@@ -283,7 +317,9 @@ def create_household_for_fixtures(household_args=None, individual_args=None):
     return household, individuals
 
 
-def create_household_and_individuals(household_data=None, individuals_data=None, imported=False):
+def create_household_and_individuals(
+    household_data=None, individuals_data=None, imported=False
+):
     if household_data is None:
         household_data = {}
     if individuals_data is None:
@@ -293,7 +329,10 @@ def create_household_and_individuals(household_data=None, individuals_data=None,
     household = HouseholdFactory.build(**household_data)
     household.registration_data_import.imported_by.save()
     household.registration_data_import.save()
-    individuals = [IndividualFactory(household=household, **individual_data) for individual_data in individuals_data]
+    individuals = [
+        IndividualFactory(household=household, **individual_data)
+        for individual_data in individuals_data
+    ]
     household.head_of_household = individuals[0]
     household.save()
     return household, individuals

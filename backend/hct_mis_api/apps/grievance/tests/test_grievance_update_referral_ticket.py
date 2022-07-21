@@ -49,7 +49,9 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
+        AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -57,11 +59,18 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        cls.admin_area = AreaFactory(
+            name="City Test", area_type=area_type, p_code="asdfgfhghkjltr"
+        )
 
         cls.household, cls.individuals = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         cls.ticket = ReferralTicketWithoutExtrasFactory()
         cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
@@ -77,7 +86,9 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
         ]
     )
     def test_update_referral_ticket_without_extras(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         input_data = self._prepare_input()
 
@@ -97,7 +108,9 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
         ]
     )
     def test_update_referral_ticket_with_household_extras(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         extras = {
             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -120,7 +133,9 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
         ]
     )
     def test_update_referral_ticket_with_individual_extras(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         extras = {
             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
@@ -142,8 +157,12 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_update_referral_ticket_with_household_and_individual_extras(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_update_referral_ticket_with_household_and_individual_extras(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         extras = {
             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -164,11 +183,15 @@ class TestGrievanceUpdateReferralTicketQuery(APITestCase):
                 "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
                 "admin": self.admin_area.p_code,
                 "language": "Polish, English",
-                "ticketId": self.id_to_base64(self.ticket.ticket.id, "GrievanceTicketNode"),
+                "ticketId": self.id_to_base64(
+                    self.ticket.ticket.id, "GrievanceTicketNode"
+                ),
             }
         }
 
         if extras:
-            input_data["input"]["extras"] = {"category": {"referralTicketExtras": extras}}
+            input_data["input"]["extras"] = {
+                "category": {"referralTicketExtras": extras}
+            }
 
         return input_data

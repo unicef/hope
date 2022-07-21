@@ -1,9 +1,10 @@
-import logging
 import datetime
-from django.utils import timezone
-import graphene
+import logging
 
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -41,11 +42,15 @@ class CreateReport(ReportValidator, PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, report_data):
-        business_area = BusinessArea.objects.get(slug=report_data.pop("business_area_slug"))
+        business_area = BusinessArea.objects.get(
+            slug=report_data.pop("business_area_slug")
+        )
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
 
         cls.validate(
-            start_date=report_data.get("date_from"), end_date=report_data.get("date_to"), report_data=report_data
+            start_date=report_data.get("date_from"),
+            end_date=report_data.get("date_to"),
+            report_data=report_data,
         )
 
         report_vars = {
@@ -61,12 +66,18 @@ class CreateReport(ReportValidator, PermissionMutation):
         program_id = report_data.pop("program", None)
         admin_area_ids = report_data.pop("admin_area", None)
         if program_id:
-            program = get_object_or_404(Program, id=decode_id_string(program_id), business_area=business_area)
+            program = get_object_or_404(
+                Program, id=decode_id_string(program_id), business_area=business_area
+            )
             report_vars["program"] = program
 
         if admin_area_ids:
             admin_areas = [
-                get_object_or_404(Area, id=decode_id_string(admin_area_id), area_type__country__name=business_area.name)
+                get_object_or_404(
+                    Area,
+                    id=decode_id_string(admin_area_id),
+                    area_type__country__name=business_area.name,
+                )
                 for admin_area_id in admin_area_ids
             ]
 
@@ -96,9 +107,13 @@ class RestartCreateReport(PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, report_data):
-        business_area = BusinessArea.objects.get(slug=report_data.get("business_area_slug"))
+        business_area = BusinessArea.objects.get(
+            slug=report_data.get("business_area_slug")
+        )
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
-        report = get_object_or_404(Report, id=decode_id_string(report_data.get("report_id")))
+        report = get_object_or_404(
+            Report, id=decode_id_string(report_data.get("report_id"))
+        )
 
         delta30 = timezone.now() - datetime.timedelta(minutes=30)
         if report.status is not Report.IN_PROGRESS and report.updated_at > delta30:
@@ -128,7 +143,9 @@ class CreateDashboardReport(PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, report_data):
-        business_area = BusinessArea.objects.get(slug=report_data.pop("business_area_slug"))
+        business_area = BusinessArea.objects.get(
+            slug=report_data.pop("business_area_slug")
+        )
         cls.has_permission(info, Permissions.DASHBOARD_EXPORT, business_area)
 
         report_vars = {
@@ -142,7 +159,9 @@ class CreateDashboardReport(PermissionMutation):
         program_id = report_data.pop("program", None)
         admin_area_id = report_data.pop("admin_area", None)
         if program_id and business_area.slug != "global":
-            program = get_object_or_404(Program, id=decode_id_string(program_id), business_area=business_area)
+            program = get_object_or_404(
+                Program, id=decode_id_string(program_id), business_area=business_area
+            )
             report_vars["program"] = program
 
         if admin_area_id and business_area.slug != "global":

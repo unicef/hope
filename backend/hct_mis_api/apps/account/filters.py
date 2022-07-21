@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
-from django_filters import CharFilter, FilterSet, MultipleChoiceFilter
-
 from django.db.models import Q
 from django.db.models.functions import Lower
+
+from django_filters import CharFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
@@ -12,15 +12,16 @@ class UsersFilter(FilterSet):
     business_area = CharFilter(required=True, method="business_area_filter")
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=USER_STATUS_CHOICES)
-    partner = MultipleChoiceFilter(choices=Partner.get_partners_as_choices(), method="partners_filter")
-    roles = MultipleChoiceFilter(choices=Role.get_roles_as_choices(), method="roles_filter")
+    partner = MultipleChoiceFilter(
+        choices=Partner.get_partners_as_choices(), method="partners_filter"
+    )
+    roles = MultipleChoiceFilter(
+        choices=Role.get_roles_as_choices(), method="roles_filter"
+    )
 
     class Meta:
         model = get_user_model()
-        fields = {
-            "status": ["exact"],
-            "partner": ["exact"]
-        }
+        fields = {"status": ["exact"], "partner": ["exact"]}
 
     order_by = CustomOrderingFilter(
         fields=(

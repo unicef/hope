@@ -1,6 +1,6 @@
-from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
-from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 
 def get_household_status(household):

@@ -49,7 +49,7 @@ class GenerateReportContentHelpers:
         return Individual.objects.filter(**filter_vars)
 
     @classmethod
-    def format_individual_row(self, individual: Individual) -> tuple:
+    def format_individual_row(cls, individual: Individual) -> tuple:
 
         return (
             individual.household.id,
@@ -69,7 +69,7 @@ class GenerateReportContentHelpers:
             individual.selfcare_disability,
             individual.pregnant,
             individual.relationship,
-            self._to_values_list(individual.households_and_roles.all(), "role"),
+            cls._to_values_list(individual.households_and_roles.all(), "role"),
             dict(WORK_STATUS_CHOICE).get(individual.work_status, ""),
             individual.sanction_list_possible_match,
             individual.deduplication_batch_status,
@@ -80,8 +80,8 @@ class GenerateReportContentHelpers:
             individual.deduplication_golden_record_results.get("possible_duplicates", "")
             if individual.deduplication_golden_record_results
             else "",
-            self._format_date(individual.first_registration_date),
-            self._format_date(individual.last_registration_date),
+            cls._format_date(individual.first_registration_date),
+            cls._format_date(individual.last_registration_date),
         )
 
     @staticmethod
@@ -97,7 +97,7 @@ class GenerateReportContentHelpers:
         return Household.objects.filter(**filter_vars)
 
     @classmethod
-    def format_household_row(self, household: Household) -> tuple:
+    def format_household_row(cls, household: Household) -> tuple:
         row = [
             household.id,
             household.country_origin.name if household.country_origin else "",
@@ -130,8 +130,8 @@ class GenerateReportContentHelpers:
             household.male_age_group_18_59_disabled_count,
             household.male_age_group_60_count,
             household.male_age_group_60_disabled_count,
-            self._format_date(household.first_registration_date),
-            self._format_date(household.last_registration_date),
+            cls._format_date(household.first_registration_date),
+            cls._format_date(household.last_registration_date),
             household.org_name_enumerator,
         ]
         for program in household.programs.all():
@@ -164,15 +164,15 @@ class GenerateReportContentHelpers:
         return ", ".join(result)
 
     @classmethod
-    def format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification) -> tuple:
+    def format_cash_plan_verification_row(cls, verification: CashPlanPaymentVerification) -> tuple:
         return (
             verification.id,
             verification.cash_plan.ca_id,
             verification.cash_plan.program.name,
-            self._format_date(verification.activation_date),
+            cls._format_date(verification.activation_date),
             verification.status,
             verification.verification_channel,
-            self._format_date(verification.completion_date),
+            cls._format_date(verification.completion_date),
             verification.sample_size,
             verification.responded_count,
             verification.received_count,
@@ -180,7 +180,7 @@ class GenerateReportContentHelpers:
             verification.not_received_count,
             verification.sampling,
             verification.sex_filter,
-            self._map_admin_area_names_from_ids(verification.excluded_admin_areas_filter),
+            cls._map_admin_area_names_from_ids(verification.excluded_admin_areas_filter),
             verification.age_filter,
         )
 
@@ -195,7 +195,7 @@ class GenerateReportContentHelpers:
         return PaymentRecord.objects.filter(**filter_vars)
 
     @classmethod
-    def format_payment_row(self, payment: PaymentRecord) -> tuple:
+    def format_payment_row(cls, payment: PaymentRecord) -> tuple:
         cash_or_voucher = ""
         if payment.delivery_type:
             if payment.delivery_type in [
@@ -216,7 +216,7 @@ class GenerateReportContentHelpers:
             payment.currency,
             payment.delivered_quantity,
             payment.delivered_quantity_usd or payment.delivered_quantity,
-            self._format_date(payment.delivery_date),
+            cls._format_date(payment.delivery_date),
             payment.delivery_type,
             payment.distribution_modality,
             payment.entitlement_quantity,
@@ -231,19 +231,22 @@ class GenerateReportContentHelpers:
         filter_vars = {
             "cash_plan_payment_verification__cash_plan__business_area": report.business_area,
             "cash_plan_payment_verification__completion_date__isnull": False,
-            "cash_plan_payment_verification__completion_date__date__range": (report.date_from, report.date_to),
+            "cash_plan_payment_verification__completion_date__date__range": (
+                report.date_from,
+                report.date_to,
+            ),
         }
         if report.program:
             filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
         return PaymentVerification.objects.filter(**filter_vars)
 
     @classmethod
-    def format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
+    def format_payment_verification_row(cls, payment_verification: PaymentVerification) -> tuple:
         return (
             payment_verification.cash_plan_payment_verification.id,
             payment_verification.payment_record.ca_id,
             payment_verification.cash_plan_payment_verification.cash_plan.ca_id,
-            self._format_date(payment_verification.cash_plan_payment_verification.completion_date),
+            cls._format_date(payment_verification.cash_plan_payment_verification.completion_date),
             payment_verification.received_amount,
             payment_verification.status,
             payment_verification.status_date,
@@ -261,18 +264,18 @@ class GenerateReportContentHelpers:
         return CashPlan.objects.filter(**filter_vars)
 
     @classmethod
-    def format_cash_plan_row(self, cash_plan: CashPlan) -> tuple:
+    def format_cash_plan_row(cls, cash_plan: CashPlan) -> tuple:
         return (
             cash_plan.ca_id,
             cash_plan.name,
-            self._format_date(cash_plan.start_date),
-            self._format_date(cash_plan.end_date),
+            cls._format_date(cash_plan.start_date),
+            cls._format_date(cash_plan.end_date),
             cash_plan.program.name,
             cash_plan.funds_commitment,
             cash_plan.assistance_measurement,
             cash_plan.assistance_through,
             cash_plan.delivery_type,
-            self._format_date(cash_plan.dispersion_date),
+            cls._format_date(cash_plan.dispersion_date),
             cash_plan.down_payment,
             cash_plan.total_delivered_quantity,
             cash_plan.total_undelivered_quantity,
@@ -281,7 +284,7 @@ class GenerateReportContentHelpers:
             cash_plan.total_persons_covered,
             cash_plan.total_persons_covered_revised,
             cash_plan.status,
-            self._format_date(cash_plan.status_date),
+            cls._format_date(cash_plan.status_date),
             cash_plan.vision_id,
             cash_plan.validation_alerts_count,
             cash_plan.verification_status,
@@ -297,7 +300,7 @@ class GenerateReportContentHelpers:
         return Program.objects.filter(**filter_vars)
 
     @classmethod
-    def format_program_row(self, program: Program) -> tuple:
+    def format_program_row(cls, program: Program) -> tuple:
         return (
             program.id,
             program.name,
@@ -342,25 +345,27 @@ class GenerateReportContentHelpers:
             .annotate(payment_currency=ArrayAgg("household__payment_records__currency"))
             .annotate(
                 total_delivered_quantity_local=Sum(
-                    "household__payment_records__delivered_quantity", output_field=DecimalField()
+                    "household__payment_records__delivered_quantity",
+                    output_field=DecimalField(),
                 )
             )
             .annotate(
                 total_delivered_quantity_usd=Sum(
-                    "household__payment_records__delivered_quantity_usd", output_field=DecimalField()
+                    "household__payment_records__delivered_quantity_usd",
+                    output_field=DecimalField(),
                 )
             )
             .order_by("household__id")
         )
 
     @classmethod
-    def format_payments_for_individuals_row(self, individual: Individual) -> tuple:
+    def format_payments_for_individuals_row(cls, individual: Individual) -> tuple:
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",
             individual.household.admin_area.title if individual.household.admin_area else "",
-            self._format_date(individual.first_delivery_date),
-            self._format_date(individual.last_delivery_date),
+            cls._format_date(individual.first_delivery_date),
+            cls._format_date(individual.last_delivery_date),
             individual.payments_made,
             ", ".join(individual.payment_currency),
             individual.total_delivered_quantity_local,
@@ -379,7 +384,7 @@ class GenerateReportContentHelpers:
             individual.selfcare_disability,
             individual.pregnant,
             individual.relationship,
-            self._to_values_list(individual.households_and_roles.all(), "role"),
+            cls._to_values_list(individual.households_and_roles.all(), "role"),
             dict(WORK_STATUS_CHOICE).get(individual.work_status, ""),
             individual.sanction_list_possible_match,
             individual.deduplication_batch_status,
@@ -639,8 +644,14 @@ class GenerateReportService:
     }
     OPTIONAL_HEADERS = {Report.HOUSEHOLD_DEMOGRAPHICS: "programme enrolled"}
     TIMEFRAME_CELL_LABELS = {
-        Report.INDIVIDUALS: ("Last Registration Date From", "Last Registration Date To"),
-        Report.HOUSEHOLD_DEMOGRAPHICS: ("Last Registration Date From", "Last Registration Date To"),
+        Report.INDIVIDUALS: (
+            "Last Registration Date From",
+            "Last Registration Date To",
+        ),
+        Report.HOUSEHOLD_DEMOGRAPHICS: (
+            "Last Registration Date From",
+            "Last Registration Date To",
+        ),
         Report.CASH_PLAN_VERIFICATION: ("Completion Date From", "Completion Date To"),
         Report.PAYMENT_VERIFICATION: ("Completion Date From", "Completion Date To"),
         Report.PAYMENTS: ("Delivery Date From", "Delivery Date To"),
@@ -662,7 +673,10 @@ class GenerateReportService:
             GenerateReportContentHelpers.get_cash_plan_verifications,
             GenerateReportContentHelpers.format_cash_plan_verification_row,
         ),
-        Report.PAYMENTS: (GenerateReportContentHelpers.get_payments, GenerateReportContentHelpers.format_payment_row),
+        Report.PAYMENTS: (
+            GenerateReportContentHelpers.get_payments,
+            GenerateReportContentHelpers.format_payment_row,
+        ),
         Report.PAYMENT_VERIFICATION: (
             GenerateReportContentHelpers.get_payment_verifications,
             GenerateReportContentHelpers.format_payment_verification_row,
@@ -671,7 +685,10 @@ class GenerateReportService:
             GenerateReportContentHelpers.get_cash_plans,
             GenerateReportContentHelpers.format_cash_plan_row,
         ),
-        Report.PROGRAM: (GenerateReportContentHelpers.get_programs, GenerateReportContentHelpers.format_program_row),
+        Report.PROGRAM: (
+            GenerateReportContentHelpers.get_programs,
+            GenerateReportContentHelpers.format_program_row,
+        ),
         Report.INDIVIDUALS_AND_PAYMENT: (
             GenerateReportContentHelpers.get_payments_for_individuals,
             GenerateReportContentHelpers.format_payments_for_individuals_row,
@@ -702,8 +719,14 @@ class GenerateReportService:
         filter_rows = [
             ("Report type", str(self._report_type_to_str())),
             ("Business area", self.business_area.name),
-            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0], str(self.report.date_from)),
-            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0], str(self.report.date_to)),
+            (
+                GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0],
+                str(self.report.date_from),
+            ),
+            (
+                GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0],
+                str(self.report.date_to),
+            ),
         ]
 
         if self.report.admin_area.all().exists():
@@ -817,7 +840,7 @@ class GenerateReportService:
                     except IndexError:
                         column_widths.append(len(value))
 
-        for i, width in enumerate(column_widths):
+        for i, _width in enumerate(column_widths):
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             value = GenerateReportService.MAX_COL_WIDTH if value > GenerateReportService.MAX_COL_WIDTH else value

@@ -140,6 +140,10 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
             {"full_name": "Test Testowski", "sanction_list_possible_match": False},
         ]
 
-        result = list(Individual.objects.order_by("full_name").values("full_name", "sanction_list_possible_match"))
+        result = list(
+            Individual.objects.order_by("full_name").values(
+                "full_name", "sanction_list_possible_match"
+            )
+        )
 
         self.assertEqual(result, expected)

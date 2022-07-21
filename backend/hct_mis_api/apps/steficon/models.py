@@ -39,7 +39,9 @@ class Rule(models.Model):
     description = models.TextField(blank=True, null=True)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES)
+    language = models.CharField(
+        max_length=10, default=LANGUAGES[0][0], choices=LANGUAGES
+    )
     security = models.IntegerField(
         choices=(
             (SAFETY_NONE, "Low"),
@@ -48,8 +50,12 @@ class Rule(models.Model):
         ),
         default=SAFETY_STANDARD,
     )
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT
+    )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
@@ -93,7 +99,9 @@ class Rule(models.Model):
         diff = set(data1.items()).symmetric_difference(data2.items())
         return data1, list(dict(diff).keys())
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
         if "individual_data_needed" not in self.flags:
             self.flags["individual_data_needed"] = False
         with atomic():
@@ -113,9 +121,13 @@ class Rule(models.Model):
             "affected_fields": changes,
         }
         if changes:
-            release = RuleCommit.objects.create(rule=self, version=self.version, **values)
+            release = RuleCommit.objects.create(
+                rule=self, version=self.version, **values
+            )
         elif force:
-            release, __ = RuleCommit.objects.update_or_create(rule=self, version=self.version, defaults=values)
+            release, __ = RuleCommit.objects.update_or_create(
+                rule=self, version=self.version, defaults=values
+            )
         if is_release:
             self.history.exclude(pk=release.pk).update(deprecated=True)
         return release
@@ -183,17 +195,27 @@ class RuleCommit(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
 
     version = models.IntegerField()
-    rule = models.ForeignKey(Rule, null=True, related_name="history", on_delete=models.SET_NULL)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT)
+    rule = models.ForeignKey(
+        Rule, null=True, related_name="history", on_delete=models.SET_NULL
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="+", null=True, on_delete=models.PROTECT
+    )
     definition = models.TextField(blank=True, default="result.value=0")
     is_release = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
-    language = models.CharField(max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES)
+    language = models.CharField(
+        max_length=10, default=Rule.LANGUAGES[0][0], choices=Rule.LANGUAGES
+    )
 
     affected_fields = ArrayField(models.CharField(max_length=100))
-    before = JSONField(help_text="The record before change", editable=False, default=dict)
-    after = JSONField(help_text="The record after apply changes", editable=False, default=dict)
+    before = JSONField(
+        help_text="The record before change", editable=False, default=dict
+    )
+    after = JSONField(
+        help_text="The record after apply changes", editable=False, default=dict
+    )
 
     class Meta:
         verbose_name = "RuleCommit"

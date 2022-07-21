@@ -1,15 +1,78 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+exclude: "docs|node_modules|migrations|.git|.tox|.vscode|.idea|data|test-results|staticserve|frontend|yarn.lock|cypress_testing_service|deployment|snapshots"
+default_stages: [commit]
+fail_fast: true
+
 repos:
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.10.1
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
     hooks:
-      - id: isort
-        stages: [commit]
-  - repo: https://github.com/ambv/black
+      - id: check-ast
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: debug-statements
+      # - id: name-tests-test
+      #   args: [ "--django" ]
+      - id: trailing-whitespace
+      - id: check-added-large-files
+      - id: no-commit-to-branch
+        args: ["-b", "staging", "-b", "main", "-b", "develop"]
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.32.1
+    hooks:
+      - id: pyupgrade
+        args: ["--py39-plus"]
+
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.4
+    hooks:
+      - id: bandit
+        args: ["-iii", "-ll"]
+
+  - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:
       - id: black
         exclude: "migrations|snapshots"
-        stages: [commit]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        args: ["--config=.flake8"]
+        additional_dependencies:
+          [
+            "flake8-isort",
+            "flake8-bugbear",
+            "flake8-comprehensions",
+            "flake8-mutable",
+            "flake8-print",
+            "flake8-simplify",
+          ]
+
+  # TODO: Fix No module named 'hct_mis_api'
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v0.971
+  #   hooks:
+  #     - id: mypy
+  #       exclude: "[a-zA-Z]*/(migrations)/(.)*"
+  #       entry: mypy
+  #       language: system # to prevent creating new virtual env
+  #       types: [python]
+  #       args: ["--config=mypy.ini", "--cache-dir=/dev/null", "--no-incremental"]
+
   - repo: local
     hooks:
       - id: unittest
@@ -19,3 +82,9 @@ repos:
         always_run: true
         pass_filenames: false
         stages: [push]
+
+# sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
+ci:
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

@@ -118,28 +118,25 @@ def copy_admin_area_data():
         Report,
     )
     for Model in models_to_update:
-        try:
-            for field in Model._meta.get_fields():
-                if type(field) == models.ForeignKey:
-                    opts = field.related_model._meta
-                    if opts.app_label == "geo" and opts.model_name == "area":
-                        old_field_name = field.name[:-4]
-                        geo_name = field.name
-                        records = (
-                            Model.objects.filter(**{f"{field.name}__isnull": True})
-                            .select_related(old_field_name)
-                            .only(f"{old_field_name}__p_code")
-                        )
-                        for record in records:
-                            source = getattr(record, old_field_name)
-                            if source:
-                                p_code = source.p_code
-                                if p_code not in areas.keys():
-                                    areas[p_code] = Area.objects.get(p_code=p_code)
-                                setattr(record, geo_name, areas[p_code])
-                        Model.objects.bulk_update(records, [geo_name])
-        except Exception as e:
-            raise
+        for field in Model._meta.get_fields():
+            if type(field) == models.ForeignKey:
+                opts = field.related_model._meta
+                if opts.app_label == "geo" and opts.model_name == "area":
+                    old_field_name = field.name[:-4]
+                    geo_name = field.name
+                    records = (
+                        Model.objects.filter(**{f"{field.name}__isnull": True})
+                        .select_related(old_field_name)
+                        .only(f"{old_field_name}__p_code")
+                    )
+                    for record in records:
+                        source = getattr(record, old_field_name)
+                        if source:
+                            p_code = source.p_code
+                            if p_code not in areas.keys():
+                                areas[p_code] = Area.objects.get(p_code=p_code)
+                            setattr(record, geo_name, areas[p_code])
+                    Model.objects.bulk_update(records, [geo_name])
 
 
 def copy_country_data():
@@ -166,20 +163,17 @@ def copy_country_data():
     )
     countries = {}
     for Model in models_to_update:
-        try:
-            for field in Model._meta.get_fields():
-                if type(field) == models.ForeignKey:
-                    opts = field.related_model._meta
-                    if opts.app_label == "geo" and opts.model_name == "country":
-                        old_field_name = field.name[:-4]
-                        geo_name = field.name
-                        records = Model.objects.all()
-                        for record in records:
-                            source = getattr(record, old_field_name).code
-                            if source:
-                                if source not in countries:
-                                    countries[source] = Country.objects.get(iso_code2=source)
-                                setattr(record, geo_name, countries[source])
-                        Model.objects.bulk_update(records, [geo_name])
-        except Exception as e:
-            raise
+        for field in Model._meta.get_fields():
+            if type(field) == models.ForeignKey:
+                opts = field.related_model._meta
+                if opts.app_label == "geo" and opts.model_name == "country":
+                    old_field_name = field.name[:-4]
+                    geo_name = field.name
+                    records = Model.objects.all()
+                    for record in records:
+                        source = getattr(record, old_field_name).code
+                        if source:
+                            if source not in countries:
+                                countries[source] = Country.objects.get(iso_code2=source)
+                            setattr(record, geo_name, countries[source])
+                    Model.objects.bulk_update(records, [geo_name])

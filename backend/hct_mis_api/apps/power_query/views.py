@@ -16,10 +16,12 @@ def report(request, pk):
     if request.user.is_superuser or report.available_to.filter(pk=request.user.pk):
         if report.result is None:
             return HttpResponse("This report is not currently available", status=400)
-        data = pickle.loads(report.result)
-        if report.formatter.content_type == 'xls':
+        # TODO: Fix
+        # Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
+        data = pickle.loads(report.result)  # nosec
+        if report.formatter.content_type == "xls":
             response = HttpResponse(data, content_type=report.formatter.content_type)
-            response['Content-Disposition'] = f'attachment; filename={report.name}.xls'
+            response["Content-Disposition"] = f"attachment; filename={report.name}.xls"
             return response
         else:
             return HttpResponse(data, content_type=report.formatter.content_type)
@@ -38,8 +40,14 @@ def fetch(request, pk):
             elif "application/json" in content_types:
                 return JsonResponse({"error": "This report is not currently available"}, status=400)
             else:
-                return HttpResponse("This report is not currently available", content_type="text/plain", status=400)
-        data = pickle.loads(report.result)
+                return HttpResponse(
+                    "This report is not currently available",
+                    content_type="text/plain",
+                    status=400,
+                )
+        # TODO: Fix
+        # Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
+        data = pickle.loads(report.result)  # nosec
         return HttpResponse(data, content_type=report.formatter.get_content_type_display())
     else:
         raise PermissionDenied()

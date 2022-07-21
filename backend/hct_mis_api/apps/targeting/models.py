@@ -1,4 +1,3 @@
-from django.utils import timezone
 import logging
 
 from django.conf import settings
@@ -15,6 +14,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import Case, Count, JSONField, Q, Value, When
+from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
@@ -341,7 +341,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     def get_criteria_string(self):
         try:
             return self.candidate_list_targeting_criteria.get_criteria_string()
-        except:
+        except:  # noqa
             return ""
 
     @property
@@ -400,7 +400,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         self.sent_to_datahub = True
 
     def is_finalized(self):
-        return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
+        return self.status in (
+            self.STATUS_PROCESSING,
+            self.STATUS_READY_FOR_CASH_ASSIST,
+        )
 
     def is_locked(self):
         return self.status == self.STATUS_LOCKED

@@ -1,7 +1,7 @@
 from datetime import datetime
-from django.utils import timezone
 
 from django.core.management import call_command
+from django.utils import timezone
 
 from parameterized import parameterized
 
@@ -66,7 +66,9 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
         ]
     )
     def test_resolving_chart(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, BusinessArea.objects.get(slug="global"))
+        self.create_user_role_with_permissions(
+            self.user, permissions, BusinessArea.objects.get(slug="global")
+        )
 
         self.snapshot_graphql_request(
             request_string=self.CHART_TOTAL_TRANSFERRED_CASH_BY_COUNTRY_QUERY,

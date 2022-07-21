@@ -30,9 +30,15 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.RDI_VIEW_DETAILS),)
 
     batch_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    golden_record_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    batch_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    golden_record_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
+    golden_record_duplicates_count_and_percentage = graphene.Field(
+        CountAndPercentageNode
+    )
+    batch_possible_duplicates_count_and_percentage = graphene.Field(
+        CountAndPercentageNode
+    )
+    golden_record_possible_duplicates_count_and_percentage = graphene.Field(
+        CountAndPercentageNode
+    )
     batch_unique_count_and_percentage = graphene.Field(CountAndPercentageNode)
     golden_record_unique_count_and_percentage = graphene.Field(CountAndPercentageNode)
 
@@ -43,27 +49,39 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_batch_duplicates_count_and_percentage(root, info, **kwargs):
-        batch_duplicates = root.all_imported_individuals.filter(deduplication_batch_status=DUPLICATE_IN_BATCH)
+        batch_duplicates = root.all_imported_individuals.filter(
+            deduplication_batch_status=DUPLICATE_IN_BATCH
+        )
         return get_count_and_percentage(batch_duplicates, root.all_imported_individuals)
 
     def resolve_golden_record_duplicates_count_and_percentage(root, info, **kwargs):
-        gr_duplicates = root.all_imported_individuals.filter(deduplication_golden_record_status=DUPLICATE)
+        gr_duplicates = root.all_imported_individuals.filter(
+            deduplication_golden_record_status=DUPLICATE
+        )
         return get_count_and_percentage(gr_duplicates, root.all_imported_individuals)
 
     # def resolve_batch_possible_duplicates_count_and_percentage(root, info, **kwargs):
     #     batch_similar = root.all_imported_individuals.filter(deduplication_batch_status=SIMILAR_IN_BATCH)
     #     return get_count_and_percentage(batch_similar, root.all_imported_individuals)
 
-    def resolve_golden_record_possible_duplicates_count_and_percentage(root, info, **kwargs):
-        gr_similar = root.all_imported_individuals.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
+    def resolve_golden_record_possible_duplicates_count_and_percentage(
+        root, info, **kwargs
+    ):
+        gr_similar = root.all_imported_individuals.filter(
+            deduplication_golden_record_status=NEEDS_ADJUDICATION
+        )
         return get_count_and_percentage(gr_similar, root.all_imported_individuals)
 
     def resolve_batch_unique_count_and_percentage(root, info, **kwargs):
-        unique = root.all_imported_individuals.filter(deduplication_batch_status=UNIQUE_IN_BATCH)
+        unique = root.all_imported_individuals.filter(
+            deduplication_batch_status=UNIQUE_IN_BATCH
+        )
         return get_count_and_percentage(unique, root.all_imported_individuals)
 
     def resolve_golden_record_unique_count_and_percentage(root, info, **kwargs):
-        unique = root.all_imported_individuals.filter(deduplication_golden_record_status=UNIQUE)
+        unique = root.all_imported_individuals.filter(
+            deduplication_golden_record_status=UNIQUE
+        )
         return get_count_and_percentage(unique, root.all_imported_individuals)
 
 
@@ -79,4 +97,7 @@ class Query(graphene.ObjectType):
     registration_data_status_choices = graphene.List(ChoiceObject)
 
     def resolve_registration_data_status_choices(self, info, **kwargs):
-        return [{"name": name, "value": value} for value, name in RegistrationDataImport.STATUS_CHOICE]
+        return [
+            {"name": name, "value": value}
+            for value, name in RegistrationDataImport.STATUS_CHOICE
+        ]

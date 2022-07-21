@@ -11,8 +11,8 @@ from django_filters import (
 
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
-from hct_mis_api.apps.payment.models import PaymentRecord, CashPlanPaymentVerification
-from hct_mis_api.apps.program.models import Program, CashPlan
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.program.models import CashPlan, Program
 
 
 class ProgramFilter(FilterSet):
@@ -39,7 +39,15 @@ class ProgramFilter(FilterSet):
         model = Program
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
+        fields=(
+            Lower("name"),
+            "status",
+            "start_date",
+            "end_date",
+            "sector",
+            "total_hh_count",
+            "budget",
+        )
     )
 
     def filter_queryset(self, queryset):
@@ -62,9 +70,12 @@ class ProgramFilter(FilterSet):
 
 class CashPlanFilter(FilterSet):
     search = CharFilter(method="search_filter")
-    delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE)
+    delivery_type = MultipleChoiceFilter(
+        field_name="delivery_type", choices=PaymentRecord.DELIVERY_TYPE_CHOICE
+    )
     verification_status = MultipleChoiceFilter(
-        field_name="cash_plan_payment_verification_summary__status", choices=CashPlanPaymentVerification.STATUS_CHOICES
+        field_name="cash_plan_payment_verification_summary__status",
+        choices=CashPlanPaymentVerification.STATUS_CHOICES,
     )
     business_area = CharFilter(
         field_name="business_area__slug",

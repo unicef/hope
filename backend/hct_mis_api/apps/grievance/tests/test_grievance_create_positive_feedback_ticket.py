@@ -51,7 +51,9 @@ class TestGrievanceCreatePositiveFeedbackTicketQuery(APITestCase):
             admin_level=2,
             business_area=cls.business_area,
         )
-        AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
+        AdminAreaFactory(
+            title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -59,11 +61,18 @@ class TestGrievanceCreatePositiveFeedbackTicketQuery(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        cls.admin_area = AreaFactory(
+            name="City Test", area_type=area_type, p_code="asdfgfhghkjltr"
+        )
 
         cls.household, cls.individuals = create_household(
             {"size": 1, "business_area": cls.business_area},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
     @parameterized.expand(
@@ -76,7 +85,9 @@ class TestGrievanceCreatePositiveFeedbackTicketQuery(APITestCase):
         ]
     )
     def test_create_positive_feedback_ticket_without_extras(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         input_data = self._prepare_input()
 
@@ -95,8 +106,12 @@ class TestGrievanceCreatePositiveFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_positive_feedback_ticket_with_household_extras(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_create_positive_feedback_ticket_with_household_extras(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         extras = {
             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -118,8 +133,12 @@ class TestGrievanceCreatePositiveFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_positive_feedback_ticket_with_individual_extras(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_create_positive_feedback_ticket_with_individual_extras(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         extras = {
             "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
@@ -141,8 +160,12 @@ class TestGrievanceCreatePositiveFeedbackTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_create_positive_feedback_ticket_with_household_and_individual_extras(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_create_positive_feedback_ticket_with_household_and_individual_extras(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         extras = {
             "household": self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -170,6 +193,8 @@ class TestGrievanceCreatePositiveFeedbackTicketQuery(APITestCase):
         }
 
         if extras:
-            input_data["input"]["extras"] = {"category": {"positiveFeedbackTicketExtras": extras}}
+            input_data["input"]["extras"] = {
+                "category": {"positiveFeedbackTicketExtras": extras}
+            }
 
         return input_data

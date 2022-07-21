@@ -8,9 +8,9 @@ from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 
 
 def update_birth_date():
-    updated = ImportedIndividual.objects.filter(household__country="UA", birth_date__lt=datetime(1923, 1, 1)).update(
-        birth_date=datetime(1923, 1, 1)
-    )
+    updated = ImportedIndividual.objects.filter(
+        household__country="UA", birth_date__lt=datetime(1923, 1, 1)
+    ).update(birth_date=datetime(1923, 1, 1))
     print(f"{updated} updated imported individuals")
     updated = Individual.objects.filter(
         household__country_new__name="Ukraine", birth_date__lt=datetime(1923, 1, 1)

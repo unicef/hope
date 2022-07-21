@@ -32,8 +32,12 @@ class TestChangeProgramStatus(APITestCase):
         cls.user = UserFactory.create()
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        state_area_type = AdminAreaLevelFactory(name="State", business_area=cls.business_area, admin_level=1)
-        AdminAreaFactory(title="City Test", admin_area_level=state_area_type, p_code="asdfgfhghkjltr")
+        state_area_type = AdminAreaLevelFactory(
+            name="State", business_area=cls.business_area, admin_level=1
+        )
+        AdminAreaFactory(
+            title="City Test", admin_area_level=state_area_type, p_code="asdfgfhghkjltr"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -45,13 +49,48 @@ class TestChangeProgramStatus(APITestCase):
 
     @parameterized.expand(
         [
-            ("draft_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], Program.DRAFT, Program.ACTIVE),
-            ("draft_to_acive_without_permission", [Permissions.PROGRAMME_FINISH], Program.DRAFT, Program.ACTIVE),
-            ("finish_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], Program.FINISHED, Program.ACTIVE),
-            ("finish_to_active_without_permission", [], Program.FINISHED, Program.ACTIVE),
-            ("draft_to_finished_with_permission", [Permissions.PROGRAMME_FINISH], Program.DRAFT, Program.FINISHED),
-            ("draft_to_finished_without_permission", [], Program.DRAFT, Program.FINISHED),
-            ("active_to_finished_with_permission", [Permissions.PROGRAMME_FINISH], Program.ACTIVE, Program.FINISHED),
+            (
+                "draft_to_active_with_permission",
+                [Permissions.PROGRAMME_ACTIVATE],
+                Program.DRAFT,
+                Program.ACTIVE,
+            ),
+            (
+                "draft_to_acive_without_permission",
+                [Permissions.PROGRAMME_FINISH],
+                Program.DRAFT,
+                Program.ACTIVE,
+            ),
+            (
+                "finish_to_active_with_permission",
+                [Permissions.PROGRAMME_ACTIVATE],
+                Program.FINISHED,
+                Program.ACTIVE,
+            ),
+            (
+                "finish_to_active_without_permission",
+                [],
+                Program.FINISHED,
+                Program.ACTIVE,
+            ),
+            (
+                "draft_to_finished_with_permission",
+                [Permissions.PROGRAMME_FINISH],
+                Program.DRAFT,
+                Program.FINISHED,
+            ),
+            (
+                "draft_to_finished_without_permission",
+                [],
+                Program.DRAFT,
+                Program.FINISHED,
+            ),
+            (
+                "active_to_finished_with_permission",
+                [Permissions.PROGRAMME_FINISH],
+                Program.ACTIVE,
+                Program.FINISHED,
+            ),
             (
                 "active_to_finished_without_permission",
                 [Permissions.PROGRAMME_ACTIVATE],
@@ -60,13 +99,21 @@ class TestChangeProgramStatus(APITestCase):
             ),
             (
                 "active_to_draft",
-                [Permissions.PROGRAMME_ACTIVATE, Permissions.PROGRAMME_FINISH, Permissions.PROGRAMME_UPDATE],
+                [
+                    Permissions.PROGRAMME_ACTIVATE,
+                    Permissions.PROGRAMME_FINISH,
+                    Permissions.PROGRAMME_UPDATE,
+                ],
                 Program.ACTIVE,
                 Program.DRAFT,
             ),
             (
                 "finished_to_draft",
-                [Permissions.PROGRAMME_ACTIVATE, Permissions.PROGRAMME_FINISH, Permissions.PROGRAMME_UPDATE],
+                [
+                    Permissions.PROGRAMME_ACTIVATE,
+                    Permissions.PROGRAMME_FINISH,
+                    Permissions.PROGRAMME_UPDATE,
+                ],
                 Program.FINISHED,
                 Program.DRAFT,
             ),
@@ -78,10 +125,17 @@ class TestChangeProgramStatus(APITestCase):
             business_area=self.business_area,
         )
 
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programData": {"id": self.id_to_base64(program.id, "ProgramNode"), "status": target_status}},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(program.id, "ProgramNode"),
+                    "status": target_status,
+                }
+            },
         )

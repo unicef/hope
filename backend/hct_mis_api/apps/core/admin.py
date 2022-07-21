@@ -15,6 +15,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
+from django.db.models import Aggregate, CharField
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -22,7 +23,6 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
 
 import xlrd
 from admin_extra_buttons.api import ExtraButtonsMixin, button
@@ -113,9 +113,6 @@ class BusinessofficeFilter(SimpleListFilter):
         return queryset
 
 
-from django.db.models import Aggregate, CharField
-
-
 class GroupConcat(Aggregate):
     function = "GROUP_CONCAT"
     template = "%(function)s(%(distinct)s%(expressions)s)"
@@ -139,7 +136,12 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         "region_code",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
+    list_filter = (
+        "has_data_sharing_agreement",
+        "region_name",
+        BusinessofficeFilter,
+        "is_split",
+    )
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
     # formfield_overrides = {
@@ -198,7 +200,15 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     def _get_doap_matrix(self, obj):
         matrix = []
         ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
-        fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
+        fields = [
+            "org",
+            "Last Name",
+            "First Name",
+            "Email",
+            "Business Unit",
+            "Partner Instance ID",
+            "Action",
+        ]
         fields += list(ca_roles)
         matrix.append(fields)
         all_user_data = {}
@@ -270,7 +280,7 @@ class BusinessAreaAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             mail = EmailMessage(
                 f"CashAssist - UNICEF - {obj.name} user updates",
                 f"""Dear GSD,
-                
+
 In CashAssist, please update the users in {environment} UNICEF - {obj.name} business unit as per the attached DOAP.
 Many thanks,
 UNICEF HOPE""",
@@ -388,9 +398,9 @@ UNICEF HOPE""",
                 self,
                 request,
                 self.mark_submissions,
-                mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                <h3>All ImportedSubmission for not merged rdi will be marked.</h3> 
+                format_html(
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>
+                <h3>All ImportedSubmission for not merged rdi will be marked.</h3>
                 """
                 ),
                 "Successfully executed",
@@ -425,7 +435,7 @@ class AdminLevelFilter(SimpleListFilter):
     parameter_name = "alevel"
 
     def lookups(self, request, model_admin):
-        return [(l, f"Level {l}") for l in range(3)]
+        return [(range_num, f"Level {range_num}") for range_num in range(3)]
 
     def value(self):
         return self.used_parameters.get(self.parameter_name)
@@ -525,7 +535,8 @@ class ImportAreaForm(forms.Form):
 
 class AdminAreaResource(resources.ModelResource):
     admin_area_level = fields.Field(
-        widget=ForeignKeyWidget(AdminAreaLevel, field="datamart_id"), attribute="admin_area_level"
+        widget=ForeignKeyWidget(AdminAreaLevel, field="datamart_id"),
+        attribute="admin_area_level",
     )
     parent = fields.Field(widget=ForeignKeyWidget(AdminArea, field="p_code"), attribute="parent")
 
@@ -624,7 +635,7 @@ class AdminAreaAdmin(ImportExportModelAdmin, AdminFiltersMixin, ExtraButtonsMixi
                                     p_code=row["parent_area_code"],
                                 ).first()
                                 if parent is None:
-                                    assert level_number == 0, f"Cannot find parent area for {row}"
+                                    assert level_number == 0, f"Cannot find parent area for {row}"  # nosec
                                 AdminArea.objects.create(
                                     external_id=external_id,
                                     title=row["area_name"],
@@ -773,7 +784,13 @@ class FlexibleAttributeChoiceAdmin(SoftDeletableAdminMixin):
 
 @admin.register(XLSXKoboTemplate)
 class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
+    list_display = (
+        "original_file_name",
+        "uploaded_by",
+        "created_at",
+        "file",
+        "import_status",
+    )
     list_filter = (
         "status",
         ("uploaded_by", AutoCompleteFilter),
@@ -894,7 +911,12 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, AdminFiltersMixin, ExtraBut
         return TemplateResponse(request, "core/xls_form.html", payload)
 
     def change_view(self, request, object_id=None, form_url="", extra_context=None):
-        extra_context = dict(show_save=False, show_save_and_continue=False, show_delete=True)
+        extra_context = {
+            **(extra_context or {}),
+            "show_save": False,
+            "show_save_and_continue": False,
+            "show_delete": True,
+        }
         has_add_permission = self.has_add_permission
         self.has_add_permission = lambda __: False
         template_response = super().change_view(request, object_id, form_url, extra_context)

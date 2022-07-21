@@ -32,7 +32,12 @@ def target_population_apply_steficon(target_population_id):
         with atomic():
             entry: HouseholdSelection
             for entry in target_population.selections.all():
-                result = rule.execute({"household": entry.household, "target_population": target_population})
+                result = rule.execute(
+                    {
+                        "household": entry.household,
+                        "target_population": target_population,
+                    }
+                )
                 entry.vulnerability_score = result.value
                 updates.append(entry)
             HouseholdSelection.objects.bulk_update(updates, ["vulnerability_score"])

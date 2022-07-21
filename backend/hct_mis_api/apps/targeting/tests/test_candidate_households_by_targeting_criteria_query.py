@@ -5,8 +5,8 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
@@ -59,7 +59,11 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         cls.household_residence_status_citizen = household
 
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area},
+            {
+                "size": 2,
+                "residence_status": "REFUGEE",
+                "business_area": cls.business_area,
+            },
         )
         cls.household_residence_status_refugee = household
         cls.household_size_2 = household
@@ -74,7 +78,11 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         )
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
-            {"field_name": "residence_status", "arguments": ["REFUGEE"], "comparision_method": "EQUALS"}
+            {
+                "field_name": "residence_status",
+                "arguments": ["REFUGEE"],
+                "comparision_method": "EQUALS",
+            }
         )
         cls.target_population_residence_status = TargetPopulation(
             name="target_population_residence_status",
@@ -105,7 +113,9 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
+        rule_filter = TargetingCriteriaRuleFilter(
+            **rule_filter, targeting_criteria_rule=rule
+        )
         rule_filter.save()
         return targeting_criteria
 
@@ -119,13 +129,17 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
         ]
     )
     def test_candidate_households_list_by_targeting_criteria_size(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
             context={"user": self.user},
             variables={
-                "targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode"),
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_size_2.id, "TargetPopulationNode"
+                ),
                 **self.variables,
             },
         )
@@ -139,8 +153,12 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_candidate_households_list_by_targeting_criteria_residence_status(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_candidate_households_list_by_targeting_criteria_residence_status(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
@@ -163,8 +181,12 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_candidate_households_list_by_targeting_criteria_approved(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_candidate_households_list_by_targeting_criteria_approved(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY,
@@ -187,14 +209,20 @@ class CandidateListTargetingCriteriaQueryTestCase(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_candidate_households_list_by_targeting_criteria_first_10(self, _, permissions):
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_candidate_households_list_by_targeting_criteria_first_10(
+        self, _, permissions
+    ):
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=CandidateListTargetingCriteriaQueryTestCase.QUERY_FIRST_10,
             context={"user": self.user},
             variables={
-                "targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode"),
+                "targetPopulation": self.id_to_base64(
+                    self.target_population_size_2.id, "TargetPopulationNode"
+                ),
                 **self.variables,
             },
         )

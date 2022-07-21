@@ -1,5 +1,5 @@
 from django import forms
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 
 class JsonWidget(forms.widgets.TextInput):
@@ -23,7 +23,13 @@ class JsonWidget(forms.widgets.TextInput):
         json_str = json.dumps(json_object, indent=4, sort_keys=True)
 
         context = {
-            "json_pretty": mark_safe(highlight(json_str, JsonLexer(), HtmlFormatter(style="colorful", wrapcode=True))),
+            "json_pretty": format_html(
+                highlight(
+                    json_str,
+                    JsonLexer(),
+                    HtmlFormatter(style="colorful", wrapcode=True),
+                )
+            ),
             # 'json_pretty': mark_safe(highlight(json_str, JsonLexer(), HtmlFormatter(wrapcode=True))),
             "widget": {
                 "name": name,

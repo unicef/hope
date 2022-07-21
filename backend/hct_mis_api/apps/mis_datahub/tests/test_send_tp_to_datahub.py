@@ -83,7 +83,9 @@ class TestSendTpToDatahub(TestCase):
             business_area=business_area_with_data_sharing,
             admin_level=1,
         )
-        admin_area = AdminAreaFactory(admin_area_level=state_area_type, p_code="asdfgfhghkjltr")
+        admin_area = AdminAreaFactory(
+            admin_area_level=state_area_type, p_code="asdfgfhghkjltr"
+        )
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -91,7 +93,9 @@ class TestSendTpToDatahub(TestCase):
             country=country,
             area_level=1,
         )
-        admin_area_new = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        admin_area_new = AreaFactory(
+            name="City Test", area_type=area_type, p_code="asdfgfhghkjltr"
+        )
 
         unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
         test_agency = Agency.objects.create(type="test", label="test")
@@ -277,7 +281,11 @@ class TestSendTpToDatahub(TestCase):
             business_area=business_area_with_data_sharing,
         )
         (household, individuals) = create_household(
-            {"size": 3, "residence_status": "HOST", "business_area": business_area_with_data_sharing},
+            {
+                "size": 3,
+                "residence_status": "HOST",
+                "business_area": business_area_with_data_sharing,
+            },
         )
 
         target_population_first = self._create_target_population(
@@ -300,13 +308,21 @@ class TestSendTpToDatahub(TestCase):
 
         task = SendTPToDatahubTask()
         task.send_target_population(target_population_first)
-        dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
-        dh_individuals_count = dh_models.Individual.objects.filter(household_mis_id=household.id).count()
+        dh_households_count = dh_models.Household.objects.filter(
+            mis_id=household.id
+        ).count()
+        dh_individuals_count = dh_models.Individual.objects.filter(
+            household_mis_id=household.id
+        ).count()
         self.assertEqual(dh_households_count, 1)
         self.assertEqual(dh_individuals_count, 1)
         task.send_target_population(target_population_second)
-        dh_individuals_count = dh_models.Individual.objects.filter(household_mis_id=household.id).count()
-        dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
+        dh_individuals_count = dh_models.Individual.objects.filter(
+            household_mis_id=household.id
+        ).count()
+        dh_households_count = dh_models.Household.objects.filter(
+            mis_id=household.id
+        ).count()
         self.assertEqual(dh_households_count, 1)
         self.assertEqual(dh_individuals_count, 3)
 
@@ -334,7 +350,9 @@ class TestSendTpToDatahub(TestCase):
         )
 
         targeting_criteria = TargetingCriteriaFactory()
-        TargetingCriteriaRuleFactory.create_batch(150, targeting_criteria=targeting_criteria)
+        TargetingCriteriaRuleFactory.create_batch(
+            150, targeting_criteria=targeting_criteria
+        )
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
@@ -344,7 +362,9 @@ class TestSendTpToDatahub(TestCase):
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)
 
-        dh_target_population = dh_models.TargetPopulation.objects.filter(mis_id=target_population.id).first()
+        dh_target_population = dh_models.TargetPopulation.objects.filter(
+            mis_id=target_population.id
+        ).first()
 
         self.assertEqual(len(dh_target_population.targeting_criteria), 390)
         self.assertTrue("..." in dh_target_population.targeting_criteria)
@@ -358,7 +378,9 @@ class TestSendTpToDatahub(TestCase):
         )
 
         targeting_criteria = TargetingCriteriaFactory()
-        TargetingCriteriaRuleFactory.create_batch(50, targeting_criteria=targeting_criteria)
+        TargetingCriteriaRuleFactory.create_batch(
+            50, targeting_criteria=targeting_criteria
+        )
         target_population = TargetPopulationFactory(
             program=program,
             status=TargetPopulation.STATUS_PROCESSING,
@@ -368,7 +390,9 @@ class TestSendTpToDatahub(TestCase):
         task = SendTPToDatahubTask()
         task.send_target_population(target_population)
 
-        dh_target_population = dh_models.TargetPopulation.objects.filter(mis_id=target_population.id).first()
+        dh_target_population = dh_models.TargetPopulation.objects.filter(
+            mis_id=target_population.id
+        ).first()
 
         self.assertEqual(len(dh_target_population.targeting_criteria), 194)
         self.assertFalse("..." in dh_target_population.targeting_criteria)

@@ -1,6 +1,7 @@
 from datetime import datetime
-from django.utils import timezone
 from typing import Dict, Optional
+
+from django.utils import timezone
 
 from dateutil.parser import parse
 
@@ -8,7 +9,9 @@ from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateAPI
 
 
 class HistoryExchangeRate:
-    def __init__(self, VALID_FROM: str, VALID_TO: str, PAST_XRATE: str, PAST_RATIO: str):
+    def __init__(
+        self, VALID_FROM: str, VALID_TO: str, PAST_XRATE: str, PAST_RATIO: str
+    ):
         self.valid_from = parse(VALID_FROM)
         self.valid_to = parse(VALID_TO)
         self.past_xrate = float(PAST_XRATE)
@@ -40,7 +43,9 @@ class SingleExchangeRate:
         self.currency_name = CURRENCY_NAME
         self.x_rate = float(X_RATE)
         self.valid_from = parse(VALID_FROM)
-        self.valid_to = datetime(9999, 12, 31) if VALID_TO == "31-DEC-99" else parse(VALID_TO)
+        self.valid_to = (
+            datetime(9999, 12, 31) if VALID_TO == "31-DEC-99" else parse(VALID_TO)
+        )
         self.ratio = float(RATIO)
         self.no_of_decimal = int(NO_OF_DECIMAL)
 
@@ -50,12 +55,16 @@ class SingleExchangeRate:
         else:
             past_xrates.reverse()
 
-        self.historical_exchange_rates = [HistoryExchangeRate(**past_xrate) for past_xrate in past_xrates]
+        self.historical_exchange_rates = [
+            HistoryExchangeRate(**past_xrate) for past_xrate in past_xrates
+        ]
 
     def __repr__(self):
         return f"SingleExchangeRate(currency_code: {self.currency_code}, ratio: {self.ratio}, x_rate: {self.x_rate})"
 
-    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> Optional[float]:
+    def get_exchange_rate_by_dispersion_date(
+        self, dispersion_date: datetime
+    ) -> Optional[float]:
         today = timezone.now()
 
         dispersion_date_is_not_provided = dispersion_date is None
@@ -64,14 +73,21 @@ class SingleExchangeRate:
 
         dispersion_date = datetime.combine(dispersion_date.date(), datetime.min.time())
         dispersion_date_is_in_current_date_range = (
-            self.valid_from <= dispersion_date <= (today if self.valid_to is None else self.valid_to)
+            self.valid_from
+            <= dispersion_date
+            <= (today if self.valid_to is None else self.valid_to)
         )
         if dispersion_date_is_in_current_date_range:
             return self.x_rate * self.ratio
 
         for historical_exchange_rate in self.historical_exchange_rates:
-            if historical_exchange_rate.is_valid_for_provided_dispersion_date(dispersion_date):
-                return historical_exchange_rate.past_xrate * historical_exchange_rate.past_ratio
+            if historical_exchange_rate.is_valid_for_provided_dispersion_date(
+                dispersion_date
+            ):
+                return (
+                    historical_exchange_rate.past_xrate
+                    * historical_exchange_rate.past_ratio
+                )
 
         return None
 
