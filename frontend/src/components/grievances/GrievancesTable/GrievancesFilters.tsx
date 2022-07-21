@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import {
-  GrievancesStauses,
-  GrievancesType,
+  GrievanceStatuses,
+  GrievanceTypes,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
@@ -37,7 +37,7 @@ export function GrievancesFilters({
       [name]: e.target.value,
       ...(name === 'status' &&
         +e.target.value === GRIEVANCE_TICKET_STATES.CLOSED && {
-          grievanceStatus: GrievancesStauses.All,
+          grievanceStatus: GrievanceStatuses.All,
         }),
     });
   };
@@ -50,7 +50,7 @@ export function GrievancesFilters({
 
   const categoryChoices = useMemo(() => {
     return filter.grievanceType ===
-      GrievancesType[GRIEVANCE_TICKETS_TYPES.userGenerated]
+      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
       ? choicesData.grievanceTicketManualCategoryChoices
       : choicesData.grievanceTicketSystemCategoryChoices;
   }, [choicesData, filter.grievanceType]);
@@ -248,10 +248,10 @@ export function GrievancesFilters({
             label={undefined}
             value={filter.grievanceStatus || ''}
           >
-            <MenuItem value={GrievancesStauses.Active}>
+            <MenuItem value={GrievanceStatuses.Active}>
               <em>{t('Active Tickets')}</em>
             </MenuItem>
-            <MenuItem value={GrievancesStauses.All}>
+            <MenuItem value={GrievanceStatuses.All}>
               <em>{t('All Tickets')}</em>
             </MenuItem>
           </SelectFilter>

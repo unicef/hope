@@ -16,7 +16,7 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
-import { GrievancesStauses, GrievancesType, GRIEVANCE_TICKETS_TYPES } from '../../../utils/constants';
+import { GrievanceStatuses, GrievanceTypes, GRIEVANCE_TICKETS_TYPES } from '../../../utils/constants';
 
 export function GrievancesTablePage(): React.ReactElement {
   const { t } = useTranslation();
@@ -37,8 +37,8 @@ export function GrievancesTablePage(): React.ReactElement {
     cashPlan: cashPlanId,
     scoreMin: null,
     scoreMax: null,
-    grievanceType: GrievancesType[0],
-    grievanceStatus: GrievancesStauses.Active,
+    grievanceType: GrievanceTypes[0],
+    grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
   });
@@ -63,7 +63,7 @@ export function GrievancesTablePage(): React.ReactElement {
         setSelectedTab(newValue);
         setFilter({
           ...filter,
-          grievanceType: GrievancesType[newValue],
+          grievanceType: GrievanceTypes[newValue],
           category: '',
         });
       }}
