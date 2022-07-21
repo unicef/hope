@@ -26,6 +26,7 @@ export const AllGrievanceDashboardCharts = gql`
     ticketsByLocationAndCategory(businessAreaSlug: $businessAreaSlug) {
       datasets {
         data
+        label
       }
       labels
     }

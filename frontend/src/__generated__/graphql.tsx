@@ -7917,7 +7917,7 @@ export type AllGrievanceDashboardChartsQuery = (
     & Pick<ChartDetailedDatasetsNode, 'labels'>
     & { datasets: Maybe<Array<Maybe<(
       { __typename?: '_DetailedDatasetsNode' }
-      & Pick<_DetailedDatasetsNode, 'data'>
+      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
     )>>> }
   )> }
 );
@@ -14343,6 +14343,7 @@ export const AllGrievanceDashboardChartsDocument = gql`
   ticketsByLocationAndCategory(businessAreaSlug: $businessAreaSlug) {
     datasets {
       data
+      label
     }
     labels
   }
