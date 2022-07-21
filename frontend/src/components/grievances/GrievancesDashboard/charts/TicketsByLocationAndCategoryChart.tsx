@@ -3,11 +3,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import React, { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import {
-  formatCurrencyWithSymbol,
-  formatThousands,
-  getPercentage,
-} from '../../../../utils/utils';
+import { formatThousands } from '../../../../utils/utils';
 import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
 
 interface TicketsByLocationAndCategoryChartProps {
@@ -20,9 +16,8 @@ export const TicketsByLocationAndCategoryChart = ({
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
   const { t } = useTranslation();
-  if (!data) return null;
 
-  console.log('data', data);
+  if (!data) return null;
 
   const matchDataSize = (
     dataToSlice: number[] | string[],
@@ -30,18 +25,30 @@ export const TicketsByLocationAndCategoryChart = ({
     return showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount);
   };
 
-  // const mappedDatasets = data.map((el) => ({
-  //   categoryPercentage: 0.5,
-  //   label: el.location,
-  //   backgroundColor: '#03867B',
-  //   data: matchDataSize(data.datasets[0].data),
-  //   stack: 2,
-  //   maxBarThickness: 15,
-  // }));
+  const categoriesAndColors = [
+    { category: 'Data Change', color: '#FFAA20' },
+    { category: 'Grievance Complaint', color: '#023E90' },
+    { category: 'Needs Adjudication', color: '#05C9B7' },
+    { category: 'Negative Feedback', color: '#FF0200' },
+    { category: 'Payment Verification', color: '#FFE399' },
+    { category: 'Positive Feedback', color: '#13CB17' },
+    { category: 'Refferal', color: '#FFAA20' },
+    { category: 'Sensitive Grievance', color: '#7FCB28' },
+    { category: 'System Flagging', color: '#00867B' },
+  ];
+
+  const mappedDatasets = data.datasets.map((el, index) => ({
+    categoryPercentage: 0.5,
+    label: el.label,
+    backgroundColor: categoriesAndColors[index].color,
+    data: matchDataSize(data.datasets[index].data),
+    stack: 2,
+    maxBarThickness: 15,
+  }));
 
   const chartData = {
     labels: matchDataSize(data.labels),
-    datasets: data.datasets,
+    datasets: mappedDatasets,
   };
 
   const options = {
