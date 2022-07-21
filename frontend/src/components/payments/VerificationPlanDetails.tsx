@@ -236,7 +236,6 @@ export const VerificationPlanDetails = ({
                   )}
                 {canDiscard &&
                   (verificationPlan.xlsxFileWasDownloaded &&
-                  !verificationPlan.xlsxFileImported &&
                   verificationPlan.status ===
                     CashPlanPaymentVerificationStatus.Active ? (
                     <Box p={2}>
@@ -256,13 +255,10 @@ export const VerificationPlanDetails = ({
                       </LoadingButton>
                     </Box>
                   ) : (
-                    verificationPlan.xlsxFileWasDownloaded &&
-                    verificationPlan.xlsxFileImported && (
-                      <DiscardVerificationPlan
-                        cashPlanVerificationId={verificationPlan.id}
-                        cashPlanId={cashPlan.id}
-                      />
-                    )
+                    <DiscardVerificationPlan
+                      cashPlanVerificationId={verificationPlan.id}
+                      cashPlanId={cashPlan.id}
+                    />
                   ))}
               </Box>
             )}
