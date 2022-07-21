@@ -5,9 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import {
-  GrievancesType,
+  GrievanceStatuses,
+  GrievanceTypes,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
+  GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
@@ -29,8 +31,16 @@ export function GrievancesFilters({
   choicesData,
 }: GrievancesFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const handleFilterChange = (e, name): void => {
+    onFilterChange({
+      ...filter,
+      [name]: e.target.value,
+      ...(name === 'status' &&
+        +e.target.value === GRIEVANCE_TICKET_STATES.CLOSED && {
+          grievanceStatus: GrievanceStatuses.All,
+        }),
+    });
+  };
 
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
@@ -39,7 +49,8 @@ export function GrievancesFilters({
   );
 
   const categoryChoices = useMemo(() => {
-    return filter.grievanceType === GrievancesType[GRIEVANCE_TICKETS_TYPES.userGenerated]
+    return filter.grievanceType ===
+      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
       ? choicesData.grievanceTicketManualCategoryChoices
       : choicesData.grievanceTicketSystemCategoryChoices;
   }, [choicesData, filter.grievanceType]);
@@ -229,6 +240,20 @@ export function GrievancesFilters({
                 </MenuItem>
               );
             })}
+          </SelectFilter>
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'grievanceStatus')}
+            label={undefined}
+            value={filter.grievanceStatus || ''}
+          >
+            <MenuItem value={GrievanceStatuses.Active}>
+              <em>{t('Active Tickets')}</em>
+            </MenuItem>
+            <MenuItem value={GrievanceStatuses.All}>
+              <em>{t('All Tickets')}</em>
+            </MenuItem>
           </SelectFilter>
         </Grid>
       </Grid>
