@@ -44,6 +44,10 @@ export const GrievancesTable = ({
     cashPlan: filter.cashPlan,
     scoreMin: filter.scoreMin,
     scoreMax: filter.scoreMax,
+    grievanceType: filter.grievanceType,
+    grievanceStatus: filter.grievanceStatus,
+    priority: filter.priority,
+    urgency: filter.urgency,
   };
 
   const {
@@ -68,6 +72,8 @@ export const GrievancesTable = ({
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
   const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
+  const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
+  const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
 
   const currentUserId = currentUserData.me.id;
 
@@ -119,6 +125,8 @@ export const GrievancesTable = ({
             statusChoices={statusChoices}
             categoryChoices={categoryChoices}
             issueTypeChoicesData={issueTypeChoicesData}
+            priorityChoicesData={priorityChoicesData}
+            urgencyChoicesData={urgencyChoicesData}
             canViewDetails={getCanViewDetailsOfTicket(row)}
           />
         )}

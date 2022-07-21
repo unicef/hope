@@ -51,3 +51,18 @@ export const REPORT_TYPES = {
   PROGRAM: '7',
   INDIVIDUALS_AND_PAYMENT: '8',
 };
+
+export const GRIEVANCE_TICKETS_TYPES = {
+  userGenerated: 0,
+  systemGenerated: 1,
+};
+
+export const GrievanceTypes = {
+  0: 'user',
+  1: 'system',
+};
+
+export const GrievanceStatuses = {
+  All: 'all',
+  Active: 'active',
+};

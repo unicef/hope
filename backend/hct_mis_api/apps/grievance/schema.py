@@ -80,6 +80,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     admin2 = graphene.Field(AreaNode)
     existing_tickets = graphene.List(lambda: GrievanceTicketNode)
     priority = graphene.Int()
+    urgency = graphene.Int()
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -146,6 +147,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def resolve_priority(grievance_ticket: GrievanceTicket, info):
         return grievance_ticket.priority
+
+    @staticmethod
+    def resolve_urgency(grievance_ticket: GrievanceTicket, info):
+        return grievance_ticket.urgency
 
 
 class TicketNoteNode(DjangoObjectType):
@@ -439,7 +444,10 @@ class Query(graphene.ObjectType):
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_sub_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
+    grievance_ticket_system_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
+    grievance_ticket_priority_choices = graphene.List(ChoiceObject)
+    grievance_ticket_urgency_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info, **kwargs):
         return GrievanceTicket.objects.filter(ignored=False).select_related("assigned_to", "created_by")
@@ -460,6 +468,13 @@ class Query(graphene.ObjectType):
             if value in GrievanceTicket.MANUAL_CATEGORIES
         ]
 
+    def resolve_grievance_ticket_system_category_choices(self, info, **kwargs):
+        return [
+            {"name": name, "value": value}
+            for value, name in GrievanceTicket.CATEGORY_CHOICES
+            if value not in GrievanceTicket.MANUAL_CATEGORIES
+        ]
+
     def resolve_grievance_ticket_all_category_choices(self, info, **kwargs):
         return [{"name": name, "value": value} for value, name in GrievanceTicket.CATEGORY_CHOICES]
 
@@ -469,6 +484,12 @@ class Query(graphene.ObjectType):
             {"category": key, "label": categories[key], "sub_categories": value}
             for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
         ]
+
+    def resolve_grievance_ticket_priority_choices(self, info, **kwargs):
+        return to_choice_object(GrievanceTicket.PRIORITY_CHOICES)
+
+    def resolve_grievance_ticket_urgency_choices(self, info, **kwargs):
+        return to_choice_object(GrievanceTicket.URGENCY_CHOICES)
 
     def resolve_all_add_individuals_fields_attributes(self, info, **kwargs):
         fields = FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE).associated_with_individual()
