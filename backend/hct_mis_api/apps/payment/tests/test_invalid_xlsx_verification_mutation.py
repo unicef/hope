@@ -62,7 +62,6 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
         cls.xlsx_file = XlsxCashPlanPaymentVerificationFile.objects.create(
             file=File(BytesIO(cls.content), name="flex_updated.xls"),
             cash_plan_payment_verification=cls.cash_plan_payment_verification,
-            was_downloaded=False,
             created_by=None,
         )
 
