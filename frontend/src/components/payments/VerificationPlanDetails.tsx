@@ -57,6 +57,7 @@ const StyledBox = styled(Box)`
   width: 100%;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
 `;
 
 export const VerificationPlanDetails = ({
