@@ -57,12 +57,12 @@ export const GRIEVANCE_TICKETS_TYPES = {
   systemGenerated: 1,
 };
 
-export const GrievancesType = {
+export const GrievanceTypes = {
   0: 'user',
   1: 'system',
 };
 
-export const GrievancesStauses = {
+export const GrievanceStatuses = {
   All: 'all',
   Active: 'active',
 };
