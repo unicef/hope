@@ -1,7 +1,7 @@
 import itertools
 
 import graphene
-from django.db.models import Case, CharField, Count, When, Value, Q, Avg, F
+from django.db.models import Case, CharField, Count, When, Value, Q, Avg, F, Func, FloatField
 from django.utils.encoding import force_str
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -45,6 +45,11 @@ def transform_to_chart_dataset(qs):
             {"data": data}
         ]
     }
+
+
+class Round(Func):
+    function = 'ROUND'
+    arity = 2
 
 
 def display_value(choices, field, default_field=None):
@@ -106,7 +111,7 @@ class Query(graphene.ObjectType):
     def resolve_tickets_by_type(self, info, **kwargs):
         user_generated, system_generated = create_type_generated_queries()
 
-        return (
+        qs = (
             GrievanceTicket.objects
             .filter(business_area__slug=kwargs.get("business_area_slug"))
             .annotate(
@@ -123,6 +128,10 @@ class Query(graphene.ObjectType):
                 system_generated_avg_resolution=Avg("days_diff", filter=system_generated),
             )
         )
+
+        qs["user_generated_avg_resolution"] = round(qs["user_generated_avg_resolution"], 2)
+        qs["system_generated_avg_resolution"] = round(qs["system_generated_avg_resolution"], 2)
+        return qs
 
     def resolve_tickets_by_category(self, info, **kwargs):
         qs = (
@@ -167,6 +176,9 @@ class Query(graphene.ObjectType):
         totals = []
 
         for key, group in itertools.groupby(qs, lambda x: x[0]):
+            if key is None:
+                continue
+
             labels.append(key)
             ticket_horizontal_counts = [0 for _ in range(9)]
 
