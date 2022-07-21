@@ -262,16 +262,24 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         CATEGORY_SYSTEM_FLAGGING: "system_flagging_ticket_details",
     }
 
-    PRIORITY_CRITICAL = 1
-    PRIORITY_HIGH = 2
-    PRIORITY_MEDIUM = 3
-    PRIORITY_LOW = 4
+    PRIORITY_HIGH = 1
+    PRIORITY_MEDIUM = 2
+    PRIORITY_LOW = 3
 
     PRIORITY_CHOICES = (
-        (PRIORITY_CRITICAL, _("Critical")),
         (PRIORITY_HIGH, _("High")),
         (PRIORITY_MEDIUM, _("Medium")),
         (PRIORITY_LOW, _("Low")),
+    )
+
+    URGENCY_VERY_URGENT = 1
+    URGENCY_URGENT = 2
+    URGENCY_NOT_URGENT = 3
+
+    URGENCY_CHOICES = (
+        (URGENCY_VERY_URGENT, _("Very urgent")),
+        (URGENCY_URGENT, _("Urgent")),
+        (URGENCY_NOT_URGENT, _("Not urgent")),
     )
 
     user_modified = models.DateTimeField(
@@ -306,7 +314,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     )
     status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_NEW)
     category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
-    sub_category = models.IntegerField(verbose_name=_("Sub Category"), choices=SUB_CATEGORY_CHOICES, null=True, blank=True)
+    sub_category = models.IntegerField(
+        verbose_name=_("Sub Category"), choices=SUB_CATEGORY_CHOICES, null=True, blank=True
+    )
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
     description = models.TextField(
         verbose_name=_("Description"),
@@ -335,6 +345,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     ignored = models.BooleanField(default=False, db_index=True)
     household_unicef_id = models.CharField(max_length=250, blank=True, null=True)
     priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_LOW)
+    urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_URGENT)
 
     objects = GrievanceTicketManager()
 

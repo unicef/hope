@@ -19,6 +19,7 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.core.utils import choices_to_dict
 
 
 class GrievanceTicketFilter(FilterSet):
@@ -95,6 +96,9 @@ class GrievanceTicketFilter(FilterSet):
     score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
     household = CharFilter(field_name="household_unicef_id")
     priority = ChoiceFilter(field_name="priority", choices=GrievanceTicket.PRIORITY_CHOICES)
+    urgency = ChoiceFilter(field_name="urgency", choices=GrievanceTicket.URGENCY_CHOICES)
+    grievance_type = CharFilter(method="filter_grievance_type")
+    grievance_status = CharFilter(method="filter_grievance_status")
 
     class Meta:
         fields = {
@@ -195,6 +199,23 @@ class GrievanceTicketFilter(FilterSet):
                 )
             else:
                 return GrievanceTicket.objects.none()
+
+    def filter_grievance_type(self, qs, name, val):
+        choices = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
+        user_generated = []
+        for value in choices:
+            if value in GrievanceTicket.MANUAL_CATEGORIES:
+                user_generated.append(value)
+        if val == 'user':
+            return qs.filter( category__in=user_generated )
+        elif val == 'system':
+            return qs.filter( ~Q(category__in=user_generated) )
+        return qs
+
+    def filter_grievance_status(self, qs, name, val):
+        if val == 'active':
+            return qs.filter(~Q(status= GrievanceTicket.STATUS_CLOSED))
+        return qs
 
 
 class ExistingGrievanceTicketFilter(FilterSet):
