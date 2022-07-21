@@ -1,10 +1,16 @@
 import { Box, Grid, MenuItem, TextField } from '@material-ui/core';
 import moment from 'moment';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
+import {
+  GrievanceStatuses,
+  GrievanceTypes,
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_TICKETS_TYPES,
+  GRIEVANCE_TICKET_STATES,
+} from '../../../utils/constants';
 import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
@@ -25,14 +31,30 @@ export function GrievancesFilters({
   choicesData,
 }: GrievancesFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const handleFilterChange = (e, name): void =>
-    onFilterChange({ ...filter, [name]: e.target.value });
+  const handleFilterChange = (e, name): void => {
+    onFilterChange({
+      ...filter,
+      [name]: e.target.value,
+      ...(name === 'status' &&
+        +e.target.value === GRIEVANCE_TICKET_STATES.CLOSED && {
+          grievanceStatus: GrievanceStatuses.All,
+        }),
+    });
+  };
 
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
     'category',
     '*',
   );
+
+  const categoryChoices = useMemo(() => {
+    return filter.grievanceType ===
+      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
+      ? choicesData.grievanceTicketManualCategoryChoices
+      : choicesData.grievanceTicketSystemCategoryChoices;
+  }, [choicesData, filter.grievanceType]);
+
   return (
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
@@ -113,7 +135,7 @@ export function GrievancesFilters({
             <MenuItem value=''>
               <em>None</em>
             </MenuItem>
-            {choicesData.grievanceTicketCategoryChoices.map((item) => {
+            {categoryChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
@@ -183,6 +205,56 @@ export function GrievancesFilters({
             onFilterChange={onFilterChange}
             name='registrationDataImport'
           />
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'priority')}
+            label={t('Priority')}
+            value={filter.priority || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketPriorityChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'urgency')}
+            label={t('Urgency')}
+            value={filter.urgency || ''}
+          >
+            <MenuItem value=''>
+              <em>None</em>
+            </MenuItem>
+            {choicesData.grievanceTicketUrgencyChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
+        <Grid item>
+          <SelectFilter
+            onChange={(e) => handleFilterChange(e, 'grievanceStatus')}
+            label={undefined}
+            value={filter.grievanceStatus || ''}
+          >
+            <MenuItem value={GrievanceStatuses.Active}>
+              <em>{t('Active Tickets')}</em>
+            </MenuItem>
+            <MenuItem value={GrievanceStatuses.All}>
+              <em>{t('All Tickets')}</em>
+            </MenuItem>
+          </SelectFilter>
         </Grid>
       </Grid>
     </ContainerWithBorder>

@@ -611,5 +611,10 @@
   "Tickets by Status": "Tickets by Status",
   "Tickets by Category": "Tickets by Category",
   "Tickets by Category and Location": "Tickets by Category and Location",
-  "SHOW MORE LOCATIONS": "SHOW MORE LOCATIONS"
+  "SHOW MORE LOCATIONS": "SHOW MORE LOCATIONS",
+  "ASSIGN TICKETS": "ASSIGN TICKETS",
+  "Priority": "Priority",
+  "Urgency": "Urgency",
+  "Active Tickets": "Active Tickets",
+  "All Tickets": "All Tickets"
 }

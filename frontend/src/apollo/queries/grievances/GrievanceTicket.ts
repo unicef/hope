@@ -351,6 +351,7 @@ export const GrievanceTicket = gql`
         }
       }
       priority
+      urgency
     }
   }
 `;
