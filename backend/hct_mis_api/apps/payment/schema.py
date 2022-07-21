@@ -35,6 +35,7 @@ from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderXlsxTemplateFilter,
     FinancialServiceProviderXlsxReportFilter,
     FinancialServiceProviderFilter,
+    PaymentPlanFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -47,6 +48,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxReport,
     FinancialServiceProvider,
     DeliveryMechanism,
+    PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.services.sampling import Sampling
@@ -207,6 +209,15 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
+class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+
+    class Meta:
+        model = PaymentPlan
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     financial_service_provider_xlsx_template = relay.Node.Field(FinancialServiceProviderXlsxTemplateNode)
@@ -304,6 +315,13 @@ class Query(graphene.ObjectType):
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
+    )
+
+    payment_plan = relay.Node.Field(PaymentPlanNode)
+    all_payment_plans = DjangoPermissionFilterConnectionField(
+        PaymentPlanNode,
+        filterset_class=PaymentPlanFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
 
     def resolve_all_payment_verifications(self, info, **kwargs):

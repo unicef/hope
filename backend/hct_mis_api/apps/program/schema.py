@@ -33,7 +33,8 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
-from hct_mis_api.apps.program.filters import ProgramFilter, CashPlanFilter
+from hct_mis_api.apps.program.filters import ProgramFilter
+from hct_mis_api.apps.payment.filters import CashPlanFilter
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import CashPlan
 

@@ -194,6 +194,7 @@ class GenericPayment(TimeStampedUUIDModel):
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     # TODO - store *count fields on create, update on lock/unlock
+    # TODO - create mutation, remove payment plan (status == open)
 
     class Status(models.TextChoices):
         OPEN = "OPEN"
@@ -238,7 +239,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     )
     def status_lock(self):
         # TODO MB additional actions
-        # - set/unset excluded on parent lock
+        # - set/unset excluded payments on parent lock
         # - update *count fields numbers
         self.status_date = timezone.now()
 
@@ -249,7 +250,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     )
     def status_unlock(self):
         # TODO MB additional actions
-        # - set/unset excluded on parent lock
+        # - set/unset excluded on payments parent unlock
         # - update *count fields numbers
         self.status_date = timezone.now()
 
