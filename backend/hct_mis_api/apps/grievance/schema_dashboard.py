@@ -47,11 +47,6 @@ def transform_to_chart_dataset(qs):
     }
 
 
-class Round(Func):
-    function = 'ROUND'
-    arity = 2
-
-
 def display_value(choices, field, default_field=None):
     options = [When(**{field: k, "then": Value(force_str(v))}) for k, v in choices]
     return Case(*options, default=default_field, output_field=CharField())
