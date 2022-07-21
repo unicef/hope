@@ -47,7 +47,7 @@ export const DashboardFilters = ({
   return (
     <Container>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={2}>
+        <Grid item>
           <SelectFilter
             onChange={(e) => handleFilterChange(e, 'program')}
             label={t('Programme')}
