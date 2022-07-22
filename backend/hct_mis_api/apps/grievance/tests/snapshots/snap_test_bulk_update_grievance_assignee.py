@@ -26,11 +26,6 @@ snapshots['TestUpdateGrievanceTickets::test_bulk_update_grievance_assignee_0_wit
                         'firstName': 'user_two'
                     }
                 },
-                {
-                    'assignedTo': {
-                        'firstName': 'user_two'
-                    }
-                }
             ]
         }
     }
