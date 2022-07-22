@@ -3,6 +3,7 @@ import logging
 from django.utils import timezone
 from graphql import GraphQLError
 
+from hct_mis_api.apps.payment.inputs import PaymentPlanActionType
 from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess
 
 
@@ -15,14 +16,14 @@ class PaymentPlanServices:
 
     def get_actions_map(self):
         actions_map = {
-            "LOCK": self.lock,
-            "UNLOCK": self.unlock,
-            "SEND_FOR_APPROVAL": self.send_for_approval,
+            PaymentPlanActionType.LOCK.value: self.lock,
+            PaymentPlanActionType.UNLOCK.value: self.unlock,
+            PaymentPlanActionType.SEND_FOR_APPROVAL.value: self.send_for_approval,
             # use the same method for Approve, Authorize, Finance Review and Reject
-            "APPROVE": self.acceptance_process,
-            "AUTHORIZE": self.acceptance_process,
-            "REVIEW": self.acceptance_process,
-            "REJECT":  self.acceptance_process
+            PaymentPlanActionType.APPROVE.value: self.acceptance_process,
+            PaymentPlanActionType.AUTHORIZE.value: self.acceptance_process,
+            PaymentPlanActionType.REVIEW.value: self.acceptance_process,
+            PaymentPlanActionType.REJECT.value:  self.acceptance_process
         }
         return actions_map
 
@@ -38,10 +39,10 @@ class PaymentPlanServices:
 
     def get_approval_type_by_action(self):
         actions_to_approval_type_map = {
-            "APPROVE": Approval.APPROVAL,
-            "AUTHORIZE": Approval.AUTHORIZATION,
-            "REVIEW": Approval.FINANCE_REVIEW,
-            "REJECT": Approval.REJECT,
+            PaymentPlanActionType.APPROVE.value: Approval.APPROVAL,
+            PaymentPlanActionType.AUTHORIZE.value: Approval.AUTHORIZATION,
+            PaymentPlanActionType.REVIEW.value: Approval.FINANCE_REVIEW,
+            PaymentPlanActionType.REJECT.value: Approval.REJECT,
         }
         return actions_to_approval_type_map.get(self.action)
 
@@ -49,6 +50,7 @@ class PaymentPlanServices:
         """Get function from get_action_function and execute it
         return PaymentPlan object
         """
+        self.validate_action()
 
         function_action = self.get_action_function()
         payment_plan = function_action()
@@ -118,10 +120,10 @@ class PaymentPlanServices:
 
     def validate_payment_plan_status_to_acceptance_process_approval_type(self):
         action_to_statuses_map = {
-            "APPROVE": [PaymentPlan.Status.IN_APPROVAL],
-            "AUTHORIZE": [PaymentPlan.Status.IN_AUTHORIZATION],
-            "REVIEW": [PaymentPlan.Status.IN_REVIEW],
-            "REJECT": [
+            PaymentPlanActionType.APPROVE.value: [PaymentPlan.Status.IN_APPROVAL],
+            PaymentPlanActionType.AUTHORIZE.value: [PaymentPlan.Status.IN_AUTHORIZATION],
+            PaymentPlanActionType.REVIEW.value: [PaymentPlan.Status.IN_REVIEW],
+            PaymentPlanActionType.REJECT.value: [
                 PaymentPlan.Status.IN_APPROVAL,
                 PaymentPlan.Status.IN_AUTHORIZATION,
                 PaymentPlan.Status.IN_REVIEW

@@ -584,7 +584,9 @@ def generate_real_payment_plans():
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3)
     program = RealProgramFactory()
-    payment_plans = PaymentPlanFactory.create_batch(3, program=program)
+    payment_plans = PaymentPlanFactory.create_batch(
+        3, program=program, business_area=BusinessArea.objects.get(slug='afghanistan')
+    )
     for payment_plan in payment_plans:
         PaymentFactory.create_batch(
             5,
