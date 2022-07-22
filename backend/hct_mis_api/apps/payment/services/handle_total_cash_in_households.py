@@ -22,10 +22,11 @@ def handle_total_cash_in_specific_households(id_list):
         .annotate(sum_delivered_quantity_usd=Sum("delivered_quantity_usd"))
         .values("sum_delivered_quantity_usd")[:1]
     )
-    print(Coalesce(total_cash_received_subquery, 0), Coalesce(total_cash_received_usd_subquery, 0))
-    Household.objects.filter(
+    households = Household.objects.filter(
         total_cash_received_usd__isnull=True, total_cash_received__isnull=True, id__in=id_list
-    ).update(
+    )
+    print("H", households.count())
+    households.update(
         total_cash_received=Coalesce(total_cash_received_subquery, 0),
         total_cash_received_usd=Coalesce(total_cash_received_usd_subquery, 0),
     )
