@@ -4,6 +4,7 @@ from typing import Union
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -763,6 +764,34 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
+class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
+    grievance_tickets = graphene.List(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_unicef_ids = graphene.List(graphene.ID)
+        assigned_to = graphene.String()
+        business_area_slug = graphene.String(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, grievance_ticket_unicef_ids, assigned_to, business_area_slug, **kwargs):
+        cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
+        assigned_to_id = decode_id_string(assigned_to)
+        assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
+        grievance_tickets = GrievanceTicket.objects.filter(
+            ~Q(status=GrievanceTicket.STATUS_CLOSED),
+            ~Q(assigned_to__id=assigned_to.id),
+            unicef_id__in=grievance_ticket_unicef_ids,
+        )
+        grievance_tickets_ids = list(grievance_tickets.values_list("id", flat=True))
+
+        if grievance_tickets.exists():
+            grievance_tickets.update(assigned_to=assigned_to)
+
+        return cls(grievance_tickets=GrievanceTicket.objects.filter(id__in=grievance_tickets_ids))
+
+
 class CreateTicketNoteMutation(PermissionMutation):
     grievance_ticket_note = graphene.Field(TicketNoteNode)
 
@@ -1203,6 +1232,7 @@ class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     update_grievance_ticket = UpdateGrievanceTicketMutation.Field()
     grievance_status_change = GrievanceStatusChangeMutation.Field()
+    bulk_update_grievance_assignee = BulkUpdateGrievanceTicketsAssigneesMutation.Field()
     create_ticket_note = CreateTicketNoteMutation.Field()
     approve_individual_data_change = IndividualDataChangeApproveMutation.Field()
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
