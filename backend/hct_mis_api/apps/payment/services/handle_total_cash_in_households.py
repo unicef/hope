@@ -9,7 +9,6 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 def handle_total_cash_in_specific_households(id_list):
-    print("handle_total_cash_in_specific_households", id_list)
     total_cash_received_subquery = Subquery(
         PaymentRecord.objects.filter(household__pk=OuterRef("pk"))
         .values("household__pk")
@@ -25,7 +24,6 @@ def handle_total_cash_in_specific_households(id_list):
     households = Household.objects.filter(
         total_cash_received_usd__isnull=True, total_cash_received__isnull=True, id__in=id_list
     )
-    print("H", households.count())
     households.update(
         total_cash_received=Coalesce(total_cash_received_subquery, 0),
         total_cash_received_usd=Coalesce(total_cash_received_usd_subquery, 0),
