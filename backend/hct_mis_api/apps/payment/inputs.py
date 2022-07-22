@@ -69,5 +69,4 @@ class CreateFinancialServiceProviderInput(graphene.InputObjectType):
 class ActionPaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
     action = graphene.String(required=True)
-    acceptance_process_type = graphene.String()
     comment = graphene.String()

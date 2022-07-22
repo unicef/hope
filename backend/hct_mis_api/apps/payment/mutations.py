@@ -521,19 +521,14 @@ class ActionPaymentPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
-        list_actions = ("LOCK", "UNLOCK", "SEND_FOR_APPROVAL", "REJECT", "ACCEPTANCE_PROCESS")
-        action = input.get("action")
-        if action not in list_actions:
-            raise GraphQLError(f"Wrong action. Should be one of {list_actions}")
-
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         old_payment_plan = copy_model_object(payment_plan)
 
-        # TODO maybe will update perms here?
+        # TODO: maybe will update perms here?
         cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_DETAILS, payment_plan.business_area)
 
-        service = PaymentPlanServices(payment_plan, action, info, input)
+        service = PaymentPlanServices(payment_plan, info, input)
         payment_plan = service.execute()
 
         log_create(

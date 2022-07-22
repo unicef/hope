@@ -871,14 +871,18 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
 
 
 class ApprovalProcess(TimeStampedUUIDModel):
-    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True)
-    approve_date = models.DateTimeField(null=True)
-    authorized_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True)
-    authorization_date = models.DateTimeField(null=True)
-    finance_review_by = models.ForeignKey(
+    sent_for_approval_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
     )
-    finance_review_date = models.DateTimeField(null=True)
+    sent_for_approval_date = models.DateTimeField(null=True)
+    sent_for_authorization_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
+    )
+    sent_for_authorization_date = models.DateTimeField(null=True)
+    sent_for_finance_review_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
+    )
+    sent_for_finance_review_date = models.DateTimeField(null=True)
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="approval_process")
 
     class Meta:
