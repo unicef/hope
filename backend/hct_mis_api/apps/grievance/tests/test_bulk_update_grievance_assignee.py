@@ -62,7 +62,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         cls.grievance_ticket4 = GrievanceTicket.objects.create(
             description="Test 4",
-            assigned_to=cls.user,
+            assigned_to=cls.user_two,
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
             language="PL",
             status=GrievanceTicket.STATUS_NEW,
