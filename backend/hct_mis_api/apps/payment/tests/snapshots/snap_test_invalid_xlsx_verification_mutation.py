@@ -38,7 +38,7 @@ snapshots['TestXlsxVerificationMarkAsInvalid::test_export_xlsx_cash_plan_payment
                                 'status': 'INVALID',
                                 'xlsxFileExporting': False,
                                 'xlsxFileImported': False,
-                                'xlsxFileWasDownloaded': True
+                                'xlsxFileWasDownloaded': False
                             }
                         }
                     ]
