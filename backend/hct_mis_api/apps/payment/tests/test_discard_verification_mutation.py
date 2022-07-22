@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -52,8 +50,6 @@ class TestDiscardVerificationMutation(APITestCase):
         }
         """
 
-    # verification = None
-
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
@@ -76,7 +72,10 @@ class TestDiscardVerificationMutation(APITestCase):
             program=program,
             business_area=cls.business_area,
         )
-        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
+        cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
+            cash_plan=cash_plan,
+            verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
+        )
         cash_plan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
         cash_plan_payment_verification.save()
         for _ in range(payment_record_amount):
@@ -99,7 +98,6 @@ class TestDiscardVerificationMutation(APITestCase):
                 household=household,
                 target_population=target_population,
             )
-
             PaymentVerificationFactory(
                 cash_plan_payment_verification=cash_plan_payment_verification,
                 payment_record=payment_record,
