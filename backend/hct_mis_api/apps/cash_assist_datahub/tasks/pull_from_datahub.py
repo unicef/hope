@@ -91,8 +91,6 @@ class PullFromDatahubTask:
         self.exchange_rates_client = exchange_rates_client or ExchangeRates()
 
     def execute(self):
-        print("execute")
-        print("S", Session.objects.values("business_area"))
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
         ret = {
             "grouped_session": 0,
@@ -100,7 +98,6 @@ class PullFromDatahubTask:
             "successes": [],
             "failures": [],
         }
-        print("grouped_session", grouped_session)
         for group in grouped_session:
             ret["grouped_session"] += 1
             business_area = group.get("business_area")
@@ -120,7 +117,6 @@ class PullFromDatahubTask:
         return ret
 
     def copy_session(self, session):
-        print("copy_session", session)
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
             session.status = session.STATUS_PROCESSING
