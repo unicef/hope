@@ -80,10 +80,6 @@ class TestUpdateGrievanceTickets(APITestCase):
     def test_bulk_update_grievance_assignee(self, name, permissions):
         self.maxDiff = None
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        self.grievance_ticket1.refresh_from_db()
-        self.grievance_ticket2.refresh_from_db()
-        self.grievance_ticket3.refresh_from_db()
-        self.grievance_ticket4.refresh_from_db()
         input_data = {
             "businessAreaSlug": self.business_area.slug,
             "grievanceTicketUnicefIds": [
