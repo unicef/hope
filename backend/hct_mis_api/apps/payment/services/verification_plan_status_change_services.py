@@ -22,11 +22,15 @@ class VerificationPlanStatusChangeServices:
     def discard(self) -> CashPlanPaymentVerification:
         if self.cash_plan_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             raise GraphQLError("You can discard only ACTIVE verification")
-        if self.cash_plan_verification.verification_channel != CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
-            raise GraphQLError("You can mark invalid only verification when XLSX channel is selected")
-
-        if self.cash_plan_verification.xlsx_cash_plan_payment_verification_file_was_downloaded:
-            raise GraphQLError("You can't discard if xlsx file was downloaded")
+        if self.cash_plan_verification.verification_channel == CashPlanPaymentVerification.VERIFICATION_CHANNEL_XLSX:
+            if (
+                    not self.cash_plan_verification.xlsx_cash_plan_payment_verification_file_was_downloaded or
+                    self.cash_plan_verification.xlsx_file_imported
+            ):
+                raise GraphQLError("You can't discard if xlsx file was downloaded or imported")
+            # remove xlsx file
+            if self.cash_plan_verification.has_xlsx_cash_plan_payment_verification_file:
+                self.cash_plan_verification.xlsx_cashplan_payment_verification_file.delete()
 
         self.cash_plan_verification.set_pending()
         self.cash_plan_verification.save()
@@ -48,6 +52,10 @@ class VerificationPlanStatusChangeServices:
             self.cash_plan_verification.status = CashPlanPaymentVerification.STATUS_INVALID
             self.cash_plan_verification.save()
             self._reset_payment_verifications()
+            # remove xlsx file
+            if self.cash_plan_verification.has_xlsx_cash_plan_payment_verification_file:
+                self.cash_plan_verification.xlsx_cashplan_payment_verification_file.delete()
+
             return self.cash_plan_verification
         else:
             raise GraphQLError("You can mark invalid if xlsx file was downloaded or imported")

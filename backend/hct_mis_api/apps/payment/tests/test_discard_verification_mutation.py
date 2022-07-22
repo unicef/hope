@@ -95,7 +95,6 @@ class TestDiscardVerificationMutation(APITestCase):
                 household=household,
                 target_population=target_population,
             )
-
             PaymentVerificationFactory(
                 cash_plan_payment_verification=cash_plan_payment_verification,
                 payment_record=payment_record,
