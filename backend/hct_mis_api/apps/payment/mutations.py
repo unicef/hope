@@ -1,5 +1,6 @@
 import logging
 import math
+
 from decimal import Decimal
 
 import graphene
@@ -9,6 +10,7 @@ from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanServices
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -23,9 +25,10 @@ from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
     CreateFinancialServiceProviderInput,
+    ActionPaymentPlanInput,
 )
-from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentPlan
+from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode, PaymentPlanNode
 from hct_mis_api.apps.payment.services.fsp_service import FSPService
 from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
     VerificationPlanCrudServices,
@@ -508,6 +511,36 @@ class EditFinancialServiceProviderMutation(PermissionMutation):
         return cls(financial_service_provider=fsp)
 
 
+class ActionPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = ActionPaymentPlanInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, input, **kwargs):
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        # TODO: maybe will update perms here?
+        cls.has_permission(info, Permissions.PAYMENT_MODULE_VIEW_DETAILS, payment_plan.business_area)
+
+        service = PaymentPlanServices(payment_plan, info, input)
+        payment_plan = service.execute()
+
+        log_create(
+            PaymentPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_payment_plan,
+            payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     create_cash_plan_payment_verification = CreatePaymentVerificationMutation.Field()
     create_financial_service_provider = CreateFinancialServiceProviderMutation.Field()
@@ -522,3 +555,4 @@ class Mutations(graphene.ObjectType):
     update_payment_verification_received_and_received_amount = (
         UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
     )
+    action_payment_plan_mutation = ActionPaymentPlanMutation.Field()

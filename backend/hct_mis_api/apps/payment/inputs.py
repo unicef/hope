@@ -64,3 +64,19 @@ class CreateFinancialServiceProviderInput(graphene.InputObjectType):
     distribution_limit = graphene.Decimal()
     communication_channel = graphene.String(required=True)
     fsp_xlsx_template_id = graphene.ID(required=True)
+
+
+class PaymentPlanActionType(graphene.Enum):
+    LOCK = "LOCK"
+    UNLOCK = "UNLOCK"
+    SEND_FOR_APPROVAL = "SEND_FOR_APPROVAL"
+    APPROVE = "APPROVE"
+    AUTHORIZE = "AUTHORIZE"
+    REVIEW = "REVIEW"
+    REJECT = "REJECT"
+
+
+class ActionPaymentPlanInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    action = graphene.InputField(PaymentPlanActionType, required=True)
+    comment = graphene.String()

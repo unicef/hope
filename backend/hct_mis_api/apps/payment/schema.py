@@ -26,7 +26,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Individual
+from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE
 from hct_mis_api.apps.payment.filters import (
     PaymentRecordFilter,
     PaymentVerificationFilter,
@@ -48,6 +48,8 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxReport,
     FinancialServiceProvider,
     DeliveryMechanism,
+    ApprovalProcess,
+    Approval,
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.rapid_pro.api import RapidProAPI
@@ -209,13 +211,44 @@ class PaymentVerificationLogEntryNode(LogEntryNode):
         connection_class = ExtendedConnection
 
 
+class ApprovalNode(DjangoObjectType):
+    info = graphene.String()
+
+    class Meta:
+        model = Approval
+        fields = ("type", "created_at", "comment")
+
+    def resolve_info(self, info):
+        return self.info
+
+
+class AcceptanceProcessNode(DjangoObjectType):
+
+    class Meta:
+        model = ApprovalProcess
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_DETAILS),)
+    approval_number_required = graphene.Int()
+    authorization_number_required = graphene.Int()
+    finance_review_number_required = graphene.Int()
 
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_approval_number_required(self, info):
+        return self.business_area.approval_number_required
+
+    def resolve_authorization_number_required(self, info):
+        return self.business_area.authorization_number_required
+
+    def resolve_finance_review_number_required(self, info):
+        return self.business_area.finance_review_number_required
 
 
 class Query(graphene.ObjectType):

@@ -96,6 +96,9 @@ class BusinessArea(TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False)
     deduplication_ignore_withdraw = models.BooleanField(default=False)
+    approval_number_required = models.PositiveIntegerField(default=0)
+    authorization_number_required = models.PositiveIntegerField(default=0)
+    finance_review_number_required = models.PositiveIntegerField(default=0)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")

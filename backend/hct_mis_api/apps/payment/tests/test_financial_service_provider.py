@@ -26,17 +26,13 @@ class TestAllFinancialServiceProviders(APITestCase):
         allFinancialServiceProviders {
             edges {
                 node {
-                    id
-                    createdAt
                     fspXlsxTemplate {
-                        id
                         name
                         # columns
                     }
                     financialserviceproviderxlsxreportSet {
                         edges {
                             node {
-                                id
                                 status
                                 reportUrl
                             }
@@ -58,20 +54,15 @@ class TestAllFinancialServiceProviders(APITestCase):
             inputs: $inputs
         ) {
             financialServiceProvider {
-                id
                 name
                 visionVendorNumber
                 deliveryMechanisms {
-                    id
                 }
                 communicationChannel
                 distributionLimit
                 fspXlsxTemplate {
-                    id
                     name
-                    createdAt
                     createdBy {
-                        id
                         username
                         firstName
                     }
@@ -93,20 +84,15 @@ class TestAllFinancialServiceProviders(APITestCase):
             inputs: $inputs
         ) {
             financialServiceProvider {
-                id
                 name
                 visionVendorNumber
                 deliveryMechanisms {
-                    id
                 }
                 communicationChannel
                 distributionLimit
                 fspXlsxTemplate {
-                    id
                     name
-                    createdAt
                     createdBy {
-                        id
                         username
                         firstName
                     }

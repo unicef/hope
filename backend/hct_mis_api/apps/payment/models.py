@@ -193,6 +193,12 @@ class GenericPayment(TimeStampedUUIDModel):
 
 
 class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "status",
+            "status_date",
+        ]
+    )
     # TODO - store *count fields on create, update on lock/unlock
     # TODO - create mutation, remove payment plan (status == open)
 
@@ -863,3 +869,58 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
     cash_plan = models.OneToOneField(
         "payment.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
     )
+
+
+class ApprovalProcess(TimeStampedUUIDModel):
+    sent_for_approval_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
+    )
+    sent_for_approval_date = models.DateTimeField(null=True)
+    sent_for_authorization_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
+    )
+    sent_for_authorization_date = models.DateTimeField(null=True)
+    sent_for_finance_review_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
+    )
+    sent_for_finance_review_date = models.DateTimeField(null=True)
+    payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="approval_process")
+
+    class Meta:
+        ordering = ("created_at",)
+        verbose_name_plural = "Approval Processes"
+
+
+class Approval(TimeStampedUUIDModel):
+    APPROVAL = "APPROVAL"
+    AUTHORIZATION = "AUTHORIZATION"
+    FINANCE_REVIEW = "FINANCE_REVIEW"
+    REJECT = "REJECT"
+    TYPE_CHOICES = (
+        (APPROVAL, "Approval"),
+        (AUTHORIZATION, "Authorization"),
+        (FINANCE_REVIEW, "Finance Review"),
+        (REJECT, "Reject"),
+    )
+
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=APPROVAL, verbose_name=_("Approval type"))
+    comment = models.CharField(max_length=500, null=True, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    approval_process = models.ForeignKey(ApprovalProcess, on_delete=models.CASCADE, related_name="approvals")
+
+    class Meta:
+        ordering = ("created_at",)
+
+    def __str__(self):
+        return self.type
+
+    @property
+    def info(self):
+        types_map = {
+            self.APPROVAL: "Approved",
+            self.AUTHORIZATION: "Authorized",
+            self.FINANCE_REVIEW: "Reviewed",
+            self.REJECT: "Rejected",
+        }
+
+        return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type)
