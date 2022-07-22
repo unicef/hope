@@ -18,7 +18,7 @@ class Command(BaseCommand):
         Session.objects.all().delete()
         for business_area in business_areas:
             Session.objects.get_or_create(business_area=business_area.code, status=Session.STATUS_READY)
-        print(f"Sessions: {len(Session.objects.all())}")
+        print(f"Sessions: {Session.objects.count()}")
 
         service_provider_ca_id = UUID("00000000-0000-0000-0000-000000000000")
         cash_plan_ca_id = UUID("00000000-0000-0000-0000-000000000001")
@@ -26,7 +26,7 @@ class Command(BaseCommand):
         session = Session.objects.order_by("?").first()
         ServiceProvider.objects.all().delete()
         ServiceProviderFactory.create(ca_id=service_provider_ca_id)
-        print(f"Service providers: {len(ServiceProvider.objects.all())}")
+        print(f"Service providers: {ServiceProvider.objects.count()}")
 
         PaymentRecord.objects.all().delete()
         for session in Session.objects.all():
@@ -35,8 +35,8 @@ class Command(BaseCommand):
                 service_provider_ca_id=service_provider_ca_id,
                 cash_plan_ca_id=cash_plan_ca_id,
             )
-        print(f"Payment records: {len(PaymentRecord.objects.all())}")
+        print(f"Payment records: {PaymentRecord.objects.count()}")
 
         CashPlan.objects.all().delete()
         CashPlanFactory.create(ca_id=cash_plan_ca_id)
-        print(f"Cash plans: {len(CashPlan.objects.all())}")
+        print(f"Cash plans: {CashPlan.objects.count()}")
