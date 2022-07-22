@@ -1,6 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
 import { StatusBox } from '../../core/StatusBox';
@@ -21,6 +21,13 @@ interface GrievancesTableRowProps {
   issueTypeChoicesData;
   priorityChoicesData;
   urgencyChoicesData;
+  checkboxClickHandler: (
+    event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    number,
+  ) => void;
+  selected: Array<string>;
 }
 
 export function GrievancesTableRow({
@@ -31,14 +38,14 @@ export function GrievancesTableRow({
   issueTypeChoicesData,
   priorityChoicesData,
   urgencyChoicesData,
+  checkboxClickHandler,
+  selected,
 }: GrievancesTableRowProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
   const detailsPath = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
-  const handleClick = (): void => {
-    history.push(detailsPath);
-  };
 
+  const isSelected = (name: string): boolean => selected.includes(name);
+  const isItemSelected = isSelected(ticket.unicefId);
   const issueType = ticket.issueType
     ? issueTypeChoicesData
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -49,10 +56,18 @@ export function GrievancesTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={canViewDetails ? handleClick : undefined}
+      onClick={(event) => checkboxClickHandler(event, ticket.unicefId)}
       role='checkbox'
       key={ticket.id}
     >
+      <TableCell align='left'>
+        <Checkbox
+          color='primary'
+          onClick={(event) => checkboxClickHandler(event, ticket.unicefId)}
+          checked={isItemSelected}
+          inputProps={{ 'aria-labelledby': ticket.unicefId }}
+        />
+      </TableCell>
       <TableCell align='left'>
         {canViewDetails ? (
           <BlackLink to={detailsPath}>{ticket.unicefId}</BlackLink>
@@ -70,8 +85,12 @@ export function GrievancesTableRow({
       <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
       <TableCell align='left'>{issueType}</TableCell>
       <TableCell align='left'>{ticket.household?.unicefId || '-'}</TableCell>
-      <TableCell align='left'>{priorityChoicesData[ticket.priority - 1]?.name || '-'}</TableCell>
-      <TableCell align='left'>{urgencyChoicesData[ticket.urgency - 1]?.name || '-'}</TableCell>
+      <TableCell align='left'>
+        {priorityChoicesData[ticket.priority - 1]?.name || '-'}
+      </TableCell>
+      <TableCell align='left'>
+        {urgencyChoicesData[ticket.urgency - 1]?.name || '-'}
+      </TableCell>
       <TableCell align='left'>
         <LinkedTicketsModal
           ticket={ticket}
