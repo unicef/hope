@@ -770,13 +770,13 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_unicef_ids = graphene.List(graphene.ID)
         assigned_to = graphene.String()
-        business_area = graphene.String()
+        business_area_slug = graphene.String(required=True)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_unicef_ids, assigned_to, business_area, **kwargs):
-        cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area)
+    def mutate(cls, root, info, grievance_ticket_unicef_ids, assigned_to, business_area_slug, **kwargs):
+        cls.has_permission(info, Permissions.GRIEVANCES_UPDATE, business_area_slug)
         assigned_to_id = decode_id_string(assigned_to)
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
         grievance_tickets = GrievanceTicket.objects.filter(
@@ -784,10 +784,13 @@ class BulkUpdateGrievanceTicketsAssigneesMutation(PermissionMutation):
             ~Q(assigned_to__id=assigned_to.id),
             unicef_id__in=grievance_ticket_unicef_ids,
         )
-        grievance_tickets_list = list(grievance_tickets)
+        grievance_tickets_ids = list(grievance_tickets.values_list("id", flat=True))
+
         if grievance_tickets.exists():
             grievance_tickets.update(assigned_to=assigned_to)
-        return cls(grievance_tickets=grievance_tickets_list)
+
+        return cls(grievance_tickets=GrievanceTicket.objects.filter(id__in=grievance_tickets_ids))
+
 
 class CreateTicketNoteMutation(PermissionMutation):
     grievance_ticket_note = graphene.Field(TicketNoteNode)
