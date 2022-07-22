@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   hasCreatorOrOwnerPermissions,
@@ -49,6 +49,8 @@ export const GrievancesTable = ({
     priority: filter.priority,
     urgency: filter.urgency,
   };
+
+  const [selected, setSelected] = useState<string[]>([]);
 
   const {
     data: choicesData,
@@ -104,6 +106,38 @@ export const GrievancesTable = ({
     );
   };
 
+  const handleCheckboxClick = (event, name): void => {
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+
+    setSelected(newSelected);
+  };
+
+  const handleSelectAllCheckboxesClick = (event, rows): void => {
+    if (!selected.length) {
+      const newSelecteds = rows.map((row) => row.unicefId);
+      setSelected(newSelecteds);
+
+      return;
+    }
+    setSelected([]);
+  };
+
+  const numSelected = selected.length;
+
   return (
     <TableWrapper>
       <UniversalTable<
@@ -114,6 +148,8 @@ export const GrievancesTable = ({
         title={t('Grievance and Feedback List')}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllGrievanceTicketQuery}
+        onSelectAllClick={handleSelectAllCheckboxesClick}
+        numSelected={numSelected}
         queriedObjectName='allGrievanceTicket'
         initialVariables={initialVariables}
         defaultOrderBy='created_at'
@@ -128,6 +164,8 @@ export const GrievancesTable = ({
             priorityChoicesData={priorityChoicesData}
             urgencyChoicesData={urgencyChoicesData}
             canViewDetails={getCanViewDetailsOfTicket(row)}
+            checkboxClickHandler={handleCheckboxClick}
+            selected={selected}
           />
         )}
       />
