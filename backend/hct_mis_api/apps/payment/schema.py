@@ -35,6 +35,7 @@ from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderXlsxTemplateFilter,
     FinancialServiceProviderXlsxReportFilter,
     FinancialServiceProviderFilter,
+    PaymentPlanFilter,
 )
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -347,6 +348,13 @@ class Query(graphene.ObjectType):
         PaymentVerificationLogEntryNode,
         filterset_class=PaymentVerificationLogEntryFilter,
         permission_classes=(hopePermissionClass(Permissions.ACTIVITY_LOG_VIEW),),
+    )
+
+    payment_plan = relay.Node.Field(PaymentPlanNode)
+    all_payment_plans = DjangoPermissionFilterConnectionField(
+        PaymentPlanNode,
+        filterset_class=PaymentPlanFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_MODULE_VIEW_LIST),),
     )
 
     def resolve_all_payment_verifications(self, info, **kwargs):
