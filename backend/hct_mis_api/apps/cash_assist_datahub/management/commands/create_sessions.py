@@ -1,6 +1,9 @@
 from uuid import UUID
 from django.core.management import BaseCommand
 
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.fixtures import IndividualFactory
+from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.program.fixtures import CashPlanFactory
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.payment.models import ServiceProvider
@@ -8,6 +11,7 @@ from hct_mis_api.apps.payment.fixtures import ServiceProviderFactory
 from hct_mis_api.apps.cash_assist_datahub.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.cash_assist_datahub.models import Session, PaymentRecord
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
 
 
 class Command(BaseCommand):
