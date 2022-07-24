@@ -236,6 +236,22 @@ export function grievanceTicketStatusToColor(
   }
 }
 
+export function grievanceTicketUrgencyToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Not urgent':
+      return theme.hctPalette.green;
+    case 'Very urgent':
+      return theme.palette.error.main;
+    case 'Urgent':
+      return theme.hctPalette.oragne;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
 export function reportStatusToColor(
   theme: typeof themeObj,
   status: string,

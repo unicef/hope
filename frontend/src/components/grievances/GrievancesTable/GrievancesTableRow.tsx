@@ -6,6 +6,7 @@ import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
 import { StatusBox } from '../../core/StatusBox';
 import {
   grievanceTicketStatusToColor,
+  grievanceTicketUrgencyToColor,
   renderUserName,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../core/UniversalMoment';
@@ -89,7 +90,10 @@ export function GrievancesTableRow({
         {priorityChoicesData[ticket.priority - 1]?.name || '-'}
       </TableCell>
       <TableCell align='left'>
-        {urgencyChoicesData[ticket.urgency - 1]?.name || '-'}
+        <StatusBox
+          status={urgencyChoicesData[ticket.urgency - 1]?.name || '-'}
+          statusToColor={grievanceTicketUrgencyToColor}
+        />
       </TableCell>
       <TableCell align='left'>
         <LinkedTicketsModal

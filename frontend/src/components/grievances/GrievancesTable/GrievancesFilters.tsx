@@ -2,6 +2,7 @@ import { Box, Grid, MenuItem, TextField } from '@material-ui/core';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { RdiAutocomplete } from '../../../shared/RdiAutocomplete';
 import {
@@ -88,6 +89,7 @@ export function GrievancesFilters({
           <SearchTextField
             value={filter.fsp || ''}
             label='FSP'
+            icon={<AccountBalanceIcon style={{ color: '#5f6368' }} />}
             onChange={(e) => handleFilterChange(e, 'fsp')}
           />
         </Grid>
