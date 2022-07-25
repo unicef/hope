@@ -30,7 +30,7 @@ class SendTPToDatahubTask:
     MAPPING_PROGRAM_DICT = {
         "mis_id": "id",
         "name": "name",
-        "business_area": "business_area.code",
+        "business_area": "business_area.cash_assist_code",
         "scope": "scope",
         "start_date": "start_date",
         "end_date": "end_date",
@@ -96,7 +96,7 @@ class SendTPToDatahubTask:
                     self.dh_session = dh_mis_models.Session(
                         source=dh_mis_models.Session.SOURCE_MIS,
                         status=dh_mis_models.Session.STATUS_READY,
-                        business_area=program.business_area.code,
+                        business_area=program.business_area.cash_assist_code,
                     )
                     self.dh_session.save()
 
