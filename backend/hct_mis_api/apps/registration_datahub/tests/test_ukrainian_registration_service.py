@@ -10,6 +10,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedHousehold,
     Record,
+    ImportedDocument,
 )
 from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
     FlexRegistrationService,
@@ -82,7 +83,7 @@ class TestUkrainianRegistrationService(TestCase):
             "phone_no_i_c": "0501706662",
         }
         individual_without_bank_account = {
-            "tax_id_no_i_c": "123123123",
+            "tax_id_no_i_c": "TESTID",
             "bank_account_h_f": "",
             "relationship_i_c": "head",
             "given_name_i_c": "Aleksiej",
@@ -162,6 +163,12 @@ class TestUkrainianRegistrationService(TestCase):
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
+        self.assertEqual(
+            ImportedDocument.objects.filter(
+                document_number="TESTID", type__type=IDENTIFICATION_TYPE_TAX_ID
+            ).count(),
+            1,
+        )
 
     def test_import_data_to_datahub_retry(self):
         service = FlexRegistrationService()
