@@ -1,4 +1,4 @@
-from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.program.fixtures import CashPlanFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -232,21 +232,26 @@ class TestRecalculatingCash(APITestCase):
         program_id = program_response["data"]["createProgram"]["program"]["id"]
 
         self.activate_program(program_id)
+
         target_population_response = self.create_target_population(program_id)
         target_population_id = target_population_response["data"]["createTargetPopulation"]["targetPopulation"]["id"]
+
         self.lock_target_population(target_population_id)
 
         self.finalize_target_population(target_population_id)
 
-        # target population must exist first
         ca_fixtures.PaymentRecordFactory.create(
             session=session,
             service_provider_ca_id=service_provider_ca_id,
             cash_plan_ca_id=cash_plan_ca_id,
             household_mis_id=household.id,
         )
-
-        # CashPlan must have the same service_provider_ca_id
+        payment_fixtures.PaymentRecordFactory.create(
+            household=household,
+            delivered_quantity=123,
+            delivered_quantity_usd=234,
+        )
+        CashPlanFactory.create(ca_id=cash_plan_ca_id)
 
         self.assertIsNone(household.total_cash_received)
         self.assertIsNone(household.total_cash_received_usd)
