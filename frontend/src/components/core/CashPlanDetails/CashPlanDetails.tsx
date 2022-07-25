@@ -42,7 +42,7 @@ export function CashPlanDetails({
     id: string;
     name: string;
   }> => {
-    const mappedTPs = cashPlan.paymentRecords?.edges.map((edge) => ({
+    const mappedTPs = cashPlan.paymentrecordSet?.edges.map((edge) => ({
       id: edge.node.targetPopulation?.id,
       name: edge.node.targetPopulation?.name,
     }));
