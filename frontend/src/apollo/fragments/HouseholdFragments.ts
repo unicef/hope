@@ -134,7 +134,7 @@ export const householdDetailed = gql`
         username
       }
     }
-    paymentRecords {
+    paymentrecordSet {
       edges {
         node {
           id

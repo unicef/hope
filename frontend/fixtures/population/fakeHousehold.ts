@@ -351,7 +351,7 @@ export const fakeHousehold = {
     },
     __typename: 'RegistrationDataImportNode',
   },
-  paymentRecords: {
+  paymentrecordSet: {
     edges: [
       {
         node: {
