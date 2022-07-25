@@ -97,16 +97,16 @@ class PaymentPlanServices:
 
         # every time we will create Approval for last created AcceptanceProcess
         # init creation AcceptanceProcess added in send_for_approval()
-        acceptance_process = self.payment_plan.acceptance_process.last()
-        if not acceptance_process:
-            logging.exception(f"Acceptance Process object not found for PaymentPlan {self.payment_plan.pk}")
-            raise GraphQLError(f"Acceptance Process object not found for PaymentPlan {self.payment_plan.pk}")
+        approval_process = self.payment_plan.approval_process.last()
+        if not approval_process:
+            logging.exception(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
+            raise GraphQLError(f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}")
 
         # validate approval required number
-        self.validate_acceptance_process_approval_count(acceptance_process)
+        self.validate_acceptance_process_approval_count(approval_process)
 
         approval_data = {
-            "approval_process": acceptance_process,
+            "approval_process": approval_process,
             "created_by": self.user,
             "type": self.get_approval_type_by_action(),
             "comment": self.input_data.get("comment"),
@@ -114,7 +114,7 @@ class PaymentPlanServices:
         Approval.objects.create(**approval_data)
 
         # base on approval required number check if we need update PaymentPlan status after creation new Approval
-        self.check_payment_plan_and_update_status(acceptance_process)
+        self.check_payment_plan_and_update_status(approval_process)
 
         return self.payment_plan
 
@@ -142,22 +142,22 @@ class PaymentPlanServices:
                 f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
             )
 
-    def check_payment_plan_and_update_status(self, acceptance_process):
+    def check_payment_plan_and_update_status(self, approval_process):
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_business_area_required_number_by_approval_type()
 
-        if acceptance_process.approvals.filter(type=approval_type).count() >= required_number:
+        if approval_process.approvals.filter(type=approval_type).count() >= required_number:
             if approval_type == Approval.APPROVAL:
-                self.payment_plan.status_mark_as_approved()
-                acceptance_process.sent_for_authorization_by = self.user
-                acceptance_process.sent_for_authorization_date = timezone.now()
-                acceptance_process.save()
+                self.payment_plan.status_approve()
+                approval_process.sent_for_authorization_by = self.user
+                approval_process.sent_for_authorization_date = timezone.now()
+                approval_process.save()
 
             if approval_type == Approval.AUTHORIZATION:
-                self.payment_plan.status_mark_as_authorized()
-                acceptance_process.sent_for_finance_review_by = self.user
-                acceptance_process.sent_for_finance_review_date = timezone.now()
-                acceptance_process.save()
+                self.payment_plan.status_authorize()
+                approval_process.sent_for_finance_review_by = self.user
+                approval_process.sent_for_finance_review_date = timezone.now()
+                approval_process.save()
 
             if approval_type == Approval.FINANCE_REVIEW:
                 self.payment_plan.status_mark_as_reviewed()

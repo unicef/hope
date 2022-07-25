@@ -216,7 +216,7 @@ class ApprovalNode(DjangoObjectType):
 
     class Meta:
         model = Approval
-        fields = ("type", "created_at", "comment")
+        fields = ("type", "created_at", "comment", "info")
 
     def resolve_info(self, info):
         return self.info
@@ -240,6 +240,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_status(self, info):
+        # in test it's fails without str()
+        return str(self.status)
 
     def resolve_approval_number_required(self, info):
         return self.business_area.approval_number_required
