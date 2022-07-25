@@ -165,8 +165,23 @@ snapshots['GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase::test_gold
     'data': {
         'goldenRecordByTargetingCriteria': {
             'edges': [
+                {
+                    'node': {
+                        'individuals': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'maritalStatus': 'MARRIED',
+                                        'sex': 'MALE'
+                                    }
+                                }
+                            ]
+                        },
+                        'size': 1
+                    }
+                }
             ],
-            'totalCount': 0
+            'totalCount': 1
         }
     }
 }
