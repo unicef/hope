@@ -245,12 +245,14 @@ class TestRecalculatingCash(APITestCase):
             service_provider_ca_id=service_provider_ca_id,
             cash_plan_ca_id=cash_plan_ca_id,
             household_mis_id=household.id,
-        )
-        payment_fixtures.PaymentRecordFactory.create(
-            household=household,
             delivered_quantity=123,
-            delivered_quantity_usd=234,
         )
+        # ?
+        # payment_fixtures.PaymentRecordFactory.create(
+        #     household=household,
+        #     delivered_quantity=123,
+        #     delivered_quantity_usd=234,
+        # )
         CashPlanFactory.create(ca_id=cash_plan_ca_id)
 
         self.assertIsNone(household.total_cash_received)
@@ -259,5 +261,23 @@ class TestRecalculatingCash(APITestCase):
         PullFromDatahubTask().execute()
 
         household.refresh_from_db()
+        previous_value = household.total_cash_received
         self.assertIsNotNone(household.total_cash_received)
         self.assertIsNotNone(household.total_cash_received_usd)
+
+        service_provider_ca_id_2 = uuid.uuid4()
+        session_2 = ca_models.Session.objects.create(
+            business_area=self.business_area.code, status=ca_models.Session.STATUS_READY
+        )
+        ca_fixtures.PaymentRecordFactory.create(
+            session=session_2,
+            service_provider_ca_id=service_provider_ca_id_2,
+            cash_plan_ca_id=cash_plan_ca_id,
+            household_mis_id=household.id,
+            delivered_quantity=234,
+        )
+
+        PullFromDatahubTask().execute()
+
+        household.refresh_from_db()
+        self.assertNotEqual(previous_value, household.total_cash_received)
