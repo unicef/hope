@@ -48,6 +48,7 @@ class TestMarkSubmissions(TestCase):
         self._create_submission("MERGED")
 
     def _create_submission(self, status):
+        self.assertFalse(True)
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions.json"
         ).read_bytes()

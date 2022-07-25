@@ -92,6 +92,17 @@ class TestUkrainianRegistrationService(TestCase):
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
         }
+        individual_with_tax_id_which_is_too_long = {
+            "tax_id_no_i_c": "x"*300,
+            "bank_account_h_f": "",
+            "relationship_i_c": "head",
+            "given_name_i_c": "Aleksiej",
+            "family_name_i_c": "Prysznicow",
+            "patronymic": "Paweł",
+            "birth_date": "1991-11-18",
+            "gender_i_c": "male",
+            "phone_no_i_c": "0501706662",
+        }
         defaults = {
             "registration": 1,
             "timestamp": datetime.datetime(2022, 4, 1),
@@ -131,7 +142,16 @@ class TestUkrainianRegistrationService(TestCase):
                 files=json.dumps(files).encode(),
             ),
         ]
+        bad_records = [
+            Record(
+                **defaults,
+                source_id=1,
+                fields={"household": household, "individuals": [individual_with_tax_id_which_is_too_long]},
+                files=json.dumps(files).encode(),
+            ),
+        ]
         self.records = Record.objects.bulk_create(records)
+        self.bad_records = Record.objects.bulk_create(bad_records)
         self.user = UserFactory.create()
 
     def test_import_data_to_datahub(self):
@@ -157,3 +177,14 @@ class TestUkrainianRegistrationService(TestCase):
         service.process_records(rdi.id, [x.id for x in self.records[:2]])
         self.assertEqual(Record.objects.filter(ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
+
+
+    def test_import_document_validation(self):
+        service = FlexRegistrationService()
+        rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
+
+        service.process_records(rdi.id, [x.id for x in self.bad_records])
+        self.records[0].refresh_from_db()
+        self.assertEqual(self.records[0].status, Record.STATUS_ERROR)
+        self.assertEqual(ImportedHousehold.objects.count(), 0)
+        self.assertFalse(True)
