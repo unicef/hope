@@ -46,6 +46,46 @@ export type _TableTotalCashTransferredDataNode = {
   totalHouseholds?: Maybe<Scalars['Int']>,
 };
 
+export type AcceptanceProcessNode = Node & {
+   __typename?: 'AcceptanceProcessNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  sentForApprovalBy?: Maybe<UserNode>,
+  sentForApprovalDate?: Maybe<Scalars['DateTime']>,
+  sentForAuthorizationBy?: Maybe<UserNode>,
+  sentForAuthorizationDate?: Maybe<Scalars['DateTime']>,
+  sentForFinanceReviewBy?: Maybe<UserNode>,
+  sentForFinanceReviewDate?: Maybe<Scalars['DateTime']>,
+  paymentPlan: PaymentPlanNode,
+  approvals: Array<ApprovalNode>,
+};
+
+export type AcceptanceProcessNodeConnection = {
+   __typename?: 'AcceptanceProcessNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<AcceptanceProcessNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type AcceptanceProcessNodeEdge = {
+   __typename?: 'AcceptanceProcessNodeEdge',
+  node?: Maybe<AcceptanceProcessNode>,
+  cursor: Scalars['String'],
+};
+
+export type ActionPaymentPlanInput = {
+  paymentPlanId: Scalars['ID'],
+  action: PaymentPlanActionType,
+  comment?: Maybe<Scalars['String']>,
+};
+
+export type ActionPaymentPlanMutation = {
+   __typename?: 'ActionPaymentPlanMutation',
+  paymentPlan?: Maybe<PaymentPlanNode>,
+};
+
 export type ActivateCashPlanVerificationMutation = {
    __typename?: 'ActivateCashPlanVerificationMutation',
   validationErrors?: Maybe<Scalars['Arg']>,
@@ -123,6 +163,21 @@ export type AgencyNodeIndividualIdentitiesArgs = {
 export enum AgencyType {
   Unhcr = 'UNHCR',
   Wfp = 'WFP'
+}
+
+export type ApprovalNode = {
+   __typename?: 'ApprovalNode',
+  createdAt: Scalars['DateTime'],
+  type: ApprovalType,
+  comment?: Maybe<Scalars['String']>,
+  info?: Maybe<Scalars['String']>,
+};
+
+export enum ApprovalType {
+  Approval = 'APPROVAL',
+  Authorization = 'AUTHORIZATION',
+  FinanceReview = 'FINANCE_REVIEW',
+  Reject = 'REJECT'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -303,15 +358,19 @@ export type BusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
+  approvalNumberRequired: Scalars['Int'],
+  authorizationNumberRequired: Scalars['Int'],
+  financeReviewNumberRequired: Scalars['Int'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
+  paymentplanSet: PaymentPlanNodeConnection,
+  cashplanSet: CashPlanNodeConnection,
   paymentrecordSet: PaymentRecordNodeConnection,
   serviceproviderSet: ServiceProviderNodeConnection,
   tickets: GrievanceTicketNodeConnection,
   householdSet: HouseholdNodeConnection,
   individualSet: IndividualNodeConnection,
   programSet: ProgramNodeConnection,
-  cashplanSet: CashPlanNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
@@ -326,6 +385,24 @@ export type BusinessAreaNodeChildrenArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>
+};
+
+
+export type BusinessAreaNodePaymentplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeCashplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -381,15 +458,6 @@ export type BusinessAreaNodeProgramSetArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   name?: Maybe<Scalars['String']>
-};
-
-
-export type BusinessAreaNodeCashplanSetArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -467,34 +535,38 @@ export type CashPlanNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   businessArea: UserBusinessAreaNode,
+  statusDate: Scalars['DateTime'],
+  name: Scalars['String'],
+  startDate: Scalars['DateTime'],
+  endDate: Scalars['DateTime'],
+  program: ProgramNode,
+  exchangeRate?: Maybe<Scalars['Float']>,
+  totalEntitledQuantity?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityUsd?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityRevised?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityRevisedUsd?: Maybe<Scalars['Float']>,
+  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
+  totalDeliveredQuantityUsd?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
   caId?: Maybe<Scalars['String']>,
   caHashId?: Maybe<Scalars['UUID']>,
   status: CashPlanStatus,
-  statusDate: Scalars['DateTime'],
-  name: Scalars['String'],
   distributionLevel: Scalars['String'],
-  startDate: Scalars['DateTime'],
-  endDate: Scalars['DateTime'],
   dispersionDate: Scalars['DateTime'],
   coverageDuration: Scalars['Int'],
   coverageUnit: Scalars['String'],
   comments?: Maybe<Scalars['String']>,
-  program: ProgramNode,
   deliveryType?: Maybe<Scalars['String']>,
   assistanceMeasurement: Scalars['String'],
   assistanceThrough: Scalars['String'],
   serviceProvider?: Maybe<ServiceProviderNode>,
   visionId?: Maybe<Scalars['String']>,
   fundsCommitment?: Maybe<Scalars['String']>,
-  exchangeRate?: Maybe<Scalars['Float']>,
   downPayment?: Maybe<Scalars['String']>,
   validationAlertsCount: Scalars['Int'],
   totalPersonsCovered: Scalars['Int'],
   totalPersonsCoveredRevised: Scalars['Int'],
-  totalEntitledQuantity?: Maybe<Scalars['Float']>,
-  totalEntitledQuantityRevised?: Maybe<Scalars['Float']>,
-  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
-  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
   paymentRecords: PaymentRecordNodeConnection,
   verifications: CashPlanPaymentVerificationNodeConnection,
   cashPlanPaymentVerificationSummary?: Maybe<CashPlanPaymentVerificationSummaryNode>,
@@ -742,6 +814,20 @@ export type CreateDashboardReportInput = {
   program?: Maybe<Scalars['ID']>,
 };
 
+export type CreateFinancialServiceProviderInput = {
+  name: Scalars['String'],
+  visionVendorNumber: Scalars['String'],
+  deliveryMechanisms: Array<Maybe<Scalars['ID']>>,
+  distributionLimit?: Maybe<Scalars['Decimal']>,
+  communicationChannel: Scalars['String'],
+  fspXlsxTemplateId: Scalars['ID'],
+};
+
+export type CreateFinancialServiceProviderMutation = {
+   __typename?: 'CreateFinancialServiceProviderMutation',
+  financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
+};
+
 export type CreateGrievanceTicketExtrasInput = {
   category?: Maybe<CategoryExtrasInput>,
   issueType?: Maybe<IssueTypeExtrasInput>,
@@ -887,6 +973,24 @@ export type DeliveredQuantityNode = {
   currency?: Maybe<Scalars['String']>,
 };
 
+export type DeliveryMechanismNode = Node & {
+   __typename?: 'DeliveryMechanismNode',
+  id: Scalars['ID'],
+  name: Scalars['String'],
+  displayName: Scalars['String'],
+  requiredFields: Array<Scalars['String']>,
+  financialServiceProviders: FinancialServiceProviderNodeConnection,
+};
+
+
+export type DeliveryMechanismNodeFinancialServiceProvidersArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
 export type DiscardCashPlanVerificationMutation = {
    __typename?: 'DiscardCashPlanVerificationMutation',
   cashPlan?: Maybe<CashPlanNode>,
@@ -992,6 +1096,11 @@ export type EditCashPlanPaymentVerificationInput = {
   rapidProArguments?: Maybe<RapidProArguments>,
 };
 
+export type EditFinancialServiceProviderMutation = {
+   __typename?: 'EditFinancialServiceProviderMutation',
+  financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
+};
+
 export type EditIndividualDocumentObjectType = {
   id: Scalars['ID'],
   country: Scalars['String'],
@@ -1030,6 +1139,126 @@ export type FieldAttributeNode = {
 export type FinalizeTargetPopulationMutation = {
    __typename?: 'FinalizeTargetPopulationMutation',
   targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+export enum FinancialServiceProviderCommunicationChannel {
+  Api = 'API',
+  Sftp = 'SFTP',
+  Xlsx = 'XLSX'
+}
+
+export type FinancialServiceProviderNode = Node & {
+   __typename?: 'FinancialServiceProviderNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  createdBy?: Maybe<UserNode>,
+  name: Scalars['String'],
+  visionVendorNumber: Scalars['String'],
+  deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
+  distributionLimit?: Maybe<Scalars['Float']>,
+  communicationChannel: FinancialServiceProviderCommunicationChannel,
+  dataTransferConfiguration?: Maybe<Scalars['JSONString']>,
+  fspXlsxTemplate?: Maybe<FinancialServiceProviderXlsxTemplateNode>,
+  financialserviceproviderxlsxreportSet: FinancialServiceProviderXlsxReportNodeConnection,
+};
+
+
+export type FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type FinancialServiceProviderNodeConnection = {
+   __typename?: 'FinancialServiceProviderNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<FinancialServiceProviderNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type FinancialServiceProviderNodeEdge = {
+   __typename?: 'FinancialServiceProviderNodeEdge',
+  node?: Maybe<FinancialServiceProviderNode>,
+  cursor: Scalars['String'],
+};
+
+export type FinancialServiceProviderXlsxReportNode = Node & {
+   __typename?: 'FinancialServiceProviderXlsxReportNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  financialServiceProvider: FinancialServiceProviderNode,
+  status?: Maybe<FinancialServiceProviderXlsxReportStatus>,
+  reportUrl?: Maybe<Scalars['String']>,
+};
+
+export type FinancialServiceProviderXlsxReportNodeConnection = {
+   __typename?: 'FinancialServiceProviderXlsxReportNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<FinancialServiceProviderXlsxReportNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type FinancialServiceProviderXlsxReportNodeEdge = {
+   __typename?: 'FinancialServiceProviderXlsxReportNodeEdge',
+  node?: Maybe<FinancialServiceProviderXlsxReportNode>,
+  cursor: Scalars['String'],
+};
+
+export enum FinancialServiceProviderXlsxReportStatus {
+  A_1 = 'A_1',
+  A_2 = 'A_2',
+  A_3 = 'A_3'
+}
+
+export enum FinancialServiceProviderXlsxTemplateColumns {
+  PaymentId = 'PAYMENT_ID',
+  HouseholdId = 'HOUSEHOLD_ID',
+  AdminLeve_2 = 'ADMIN_LEVE_2',
+  CollectorName = 'COLLECTOR_NAME',
+  PaymentChannel = 'PAYMENT_CHANNEL',
+  FspName = 'FSP_NAME',
+  EntitlementQuantity = 'ENTITLEMENT_QUANTITY',
+  Tbd = 'TBD'
+}
+
+export type FinancialServiceProviderXlsxTemplateNode = Node & {
+   __typename?: 'FinancialServiceProviderXlsxTemplateNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  createdBy?: Maybe<UserNode>,
+  name: Scalars['String'],
+  columns: FinancialServiceProviderXlsxTemplateColumns,
+  financialserviceproviderSet: FinancialServiceProviderNodeConnection,
+};
+
+
+export type FinancialServiceProviderXlsxTemplateNodeFinancialserviceproviderSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type FinancialServiceProviderXlsxTemplateNodeConnection = {
+   __typename?: 'FinancialServiceProviderXlsxTemplateNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<FinancialServiceProviderXlsxTemplateNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type FinancialServiceProviderXlsxTemplateNodeEdge = {
+   __typename?: 'FinancialServiceProviderXlsxTemplateNodeEdge',
+  node?: Maybe<FinancialServiceProviderXlsxTemplateNode>,
+  cursor: Scalars['String'],
 };
 
 export type FinishCashPlanVerificationMutation = {
@@ -1271,7 +1500,7 @@ export type HouseholdNode = Node & {
   rowId?: Maybe<Scalars['Int']>,
   totalCashReceivedUsd?: Maybe<Scalars['Decimal']>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
-  paymentRecords: PaymentRecordNodeConnection,
+  paymentrecordSet: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
   householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNodeConnection,
@@ -1316,7 +1545,7 @@ export type HouseholdNodeProgramsArgs = {
 };
 
 
-export type HouseholdNodePaymentRecordsArgs = {
+export type HouseholdNodePaymentrecordSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -2450,7 +2679,7 @@ export type IndividualNode = Node & {
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
-  paymentRecords: PaymentRecordNodeConnection,
+  paymentrecordSet: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
   individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNodeConnection,
@@ -2474,7 +2703,7 @@ export type IndividualNode = Node & {
 };
 
 
-export type IndividualNodePaymentRecordsArgs = {
+export type IndividualNodePaymentrecordSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -2822,6 +3051,8 @@ export type Mutations = {
   approvePaymentDetails?: Maybe<PaymentDetailsApproveMutation>,
   reassignRole?: Maybe<ReassignRoleMutation>,
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
+  createFinancialServiceProvider?: Maybe<CreateFinancialServiceProviderMutation>,
+  editFinancialServiceProvider?: Maybe<EditFinancialServiceProviderMutation>,
   editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
   importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
   activateCashPlanPaymentVerification?: Maybe<ActivateCashPlanVerificationMutation>,
@@ -2830,6 +3061,7 @@ export type Mutations = {
   deleteCashPlanPaymentVerification?: Maybe<DeleteCashPlanVerificationMutation>,
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>,
+  actionPaymentPlanMutation?: Maybe<ActionPaymentPlanMutation>,
   createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
   copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
@@ -2968,6 +3200,19 @@ export type MutationsCreateCashPlanPaymentVerificationArgs = {
 };
 
 
+export type MutationsCreateFinancialServiceProviderArgs = {
+  businessAreaSlug: Scalars['String'],
+  inputs: CreateFinancialServiceProviderInput
+};
+
+
+export type MutationsEditFinancialServiceProviderArgs = {
+  businessAreaSlug: Scalars['String'],
+  financialServiceProviderId: Scalars['ID'],
+  inputs: CreateFinancialServiceProviderInput
+};
+
+
 export type MutationsEditCashPlanPaymentVerificationArgs = {
   input: EditCashPlanPaymentVerificationInput,
   version?: Maybe<Scalars['BigInt']>
@@ -3017,6 +3262,11 @@ export type MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs = {
   received: Scalars['Boolean'],
   receivedAmount: Scalars['Decimal'],
   version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsActionPaymentPlanMutationArgs = {
+  input: ActionPaymentPlanInput
 };
 
 
@@ -3174,6 +3424,79 @@ export type PaymentDetailsApproveMutation = {
   grievanceTicket?: Maybe<GrievanceTicketNode>,
 };
 
+export enum PaymentPlanActionType {
+  Lock = 'LOCK',
+  Unlock = 'UNLOCK',
+  SendForApproval = 'SEND_FOR_APPROVAL',
+  Approve = 'APPROVE',
+  Authorize = 'AUTHORIZE',
+  Review = 'REVIEW',
+  Reject = 'REJECT'
+}
+
+export type PaymentPlanNode = Node & {
+   __typename?: 'PaymentPlanNode',
+  isRemoved: Scalars['Boolean'],
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  businessArea: UserBusinessAreaNode,
+  statusDate: Scalars['DateTime'],
+  name: Scalars['String'],
+  startDate: Scalars['DateTime'],
+  endDate: Scalars['DateTime'],
+  program: ProgramNode,
+  exchangeRate?: Maybe<Scalars['Float']>,
+  totalEntitledQuantity?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityUsd?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityRevised?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityRevisedUsd?: Maybe<Scalars['Float']>,
+  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
+  totalDeliveredQuantityUsd?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantityUsd?: Maybe<Scalars['Float']>,
+  createdBy: UserNode,
+  status: Scalars['String'],
+  unicefId: Scalars['String'],
+  targetPopulation: TargetPopulationNode,
+  currency: Scalars['String'],
+  dispersionStartDate: Scalars['DateTime'],
+  dispersionEndDate: Scalars['DateTime'],
+  femaleChildrenCount: Scalars['Int'],
+  maleChildrenCount: Scalars['Int'],
+  femaleAdultsCount: Scalars['Int'],
+  maleAdultsCount: Scalars['Int'],
+  totalHouseholdsCount: Scalars['Int'],
+  totalIndividualsCount: Scalars['Int'],
+  approvalProcess: AcceptanceProcessNodeConnection,
+  approvalNumberRequired?: Maybe<Scalars['Int']>,
+  authorizationNumberRequired?: Maybe<Scalars['Int']>,
+  financeReviewNumberRequired?: Maybe<Scalars['Int']>,
+};
+
+
+export type PaymentPlanNodeApprovalProcessArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type PaymentPlanNodeConnection = {
+   __typename?: 'PaymentPlanNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<PaymentPlanNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type PaymentPlanNodeEdge = {
+   __typename?: 'PaymentPlanNodeEdge',
+  node?: Maybe<PaymentPlanNode>,
+  cursor: Scalars['String'],
+};
+
 export enum PaymentRecordDeliveryType {
   CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
@@ -3204,11 +3527,20 @@ export type PaymentRecordNode = Node & {
   businessArea: UserBusinessAreaNode,
   status: PaymentRecordStatus,
   statusDate: Scalars['DateTime'],
+  household: HouseholdNode,
+  headOfHousehold?: Maybe<IndividualNode>,
+  deliveryType: PaymentRecordDeliveryType,
+  currency: Scalars['String'],
+  entitlementQuantity: Scalars['Float'],
+  entitlementQuantityUsd?: Maybe<Scalars['Float']>,
+  deliveredQuantity: Scalars['Float'],
+  deliveredQuantityUsd?: Maybe<Scalars['Float']>,
+  deliveryDate?: Maybe<Scalars['DateTime']>,
+  transactionReferenceId?: Maybe<Scalars['String']>,
+  serviceProvider: ServiceProviderNode,
   caId?: Maybe<Scalars['String']>,
   caHashId?: Maybe<Scalars['UUID']>,
   cashPlan?: Maybe<CashPlanNode>,
-  household: HouseholdNode,
-  headOfHousehold?: Maybe<IndividualNode>,
   fullName: Scalars['String'],
   totalPersonsCovered: Scalars['Int'],
   distributionModality: Scalars['String'],
@@ -3217,14 +3549,6 @@ export type PaymentRecordNode = Node & {
   entitlementCardNumber?: Maybe<Scalars['String']>,
   entitlementCardStatus?: Maybe<PaymentRecordEntitlementCardStatus>,
   entitlementCardIssueDate?: Maybe<Scalars['Date']>,
-  deliveryType: PaymentRecordDeliveryType,
-  currency: Scalars['String'],
-  entitlementQuantity: Scalars['Float'],
-  deliveredQuantity: Scalars['Float'],
-  deliveredQuantityUsd?: Maybe<Scalars['Float']>,
-  deliveryDate?: Maybe<Scalars['DateTime']>,
-  serviceProvider: ServiceProviderNode,
-  transactionReferenceId?: Maybe<Scalars['String']>,
   visionId?: Maybe<Scalars['String']>,
   registrationCaId?: Maybe<Scalars['String']>,
   verification?: Maybe<PaymentVerificationNode>,
@@ -3396,8 +3720,9 @@ export type ProgramNode = Node & {
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
+  paymentplanSet: PaymentPlanNodeConnection,
+  cashplanSet: CashPlanNodeConnection,
   households: HouseholdNodeConnection,
-  cashPlans: CashPlanNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
   totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
@@ -3417,7 +3742,7 @@ export type ProgramNodeAdminAreasNewArgs = {
 };
 
 
-export type ProgramNodeHouseholdsArgs = {
+export type ProgramNodePaymentplanSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -3426,7 +3751,16 @@ export type ProgramNodeHouseholdsArgs = {
 };
 
 
-export type ProgramNodeCashPlansArgs = {
+export type ProgramNodeCashplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodeHouseholdsArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -3540,6 +3874,12 @@ export type Query = {
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
   paymentRecord?: Maybe<PaymentRecordNode>,
+  financialServiceProviderXlsxTemplate?: Maybe<FinancialServiceProviderXlsxTemplateNode>,
+  allFinancialServiceProviderXlsxTemplates?: Maybe<FinancialServiceProviderXlsxTemplateNodeConnection>,
+  financialServiceProviderXlsxReport?: Maybe<FinancialServiceProviderXlsxReportNode>,
+  allFinancialServiceProviderXlsxReports?: Maybe<FinancialServiceProviderXlsxReportNodeConnection>,
+  financialServiceProvider?: Maybe<FinancialServiceProviderNode>,
+  allFinancialServiceProviders?: Maybe<FinancialServiceProviderNodeConnection>,
   paymentRecordVerification?: Maybe<PaymentVerificationNode>,
   cashPlanPaymentVerification?: Maybe<CashPlanPaymentVerificationNode>,
   allPaymentRecords?: Maybe<PaymentRecordNodeConnection>,
@@ -3561,6 +3901,8 @@ export type Query = {
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
   sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>,
   allPaymentVerificationLogEntries?: Maybe<PaymentVerificationLogEntryNodeConnection>,
+  paymentPlan?: Maybe<PaymentPlanNode>,
+  allPaymentPlans?: Maybe<PaymentPlanNodeConnection>,
   businessArea?: Maybe<BusinessAreaNode>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
@@ -3798,6 +4140,61 @@ export type QueryPaymentRecordArgs = {
 };
 
 
+export type QueryFinancialServiceProviderXlsxTemplateArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllFinancialServiceProviderXlsxTemplatesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdBy?: Maybe<Scalars['ID']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryFinancialServiceProviderXlsxReportArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllFinancialServiceProviderXlsxReportsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  status?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryFinancialServiceProviderArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllFinancialServiceProvidersArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  createdBy?: Maybe<Scalars['ID']>,
+  name?: Maybe<Scalars['String']>,
+  visionVendorNumber?: Maybe<Scalars['String']>,
+  deliveryMechanisms?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  distributionLimit?: Maybe<Scalars['Float']>,
+  communicationChannel?: Maybe<Scalars['String']>,
+  fspXlsxTemplate?: Maybe<Scalars['ID']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
 export type QueryPaymentRecordVerificationArgs = {
   id: Scalars['ID']
 };
@@ -3914,6 +4311,27 @@ export type QueryAllPaymentVerificationLogEntriesArgs = {
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   module?: Maybe<Scalars['String']>
+};
+
+
+export type QueryPaymentPlanArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllPaymentPlansArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  totalEntitledQuantity?: Maybe<Scalars['String']>,
+  dispersionStartDate?: Maybe<Scalars['Date']>,
+  dispersionEndDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -4061,7 +4479,6 @@ export type QueryGoldenRecordByTargetingCriteriaArgs = {
   targetingCriteria: TargetingCriteriaObjectType,
   program: Scalars['ID'],
   excludedIds: Scalars['String'],
-  criteriaFitRange?: Maybe<Array<Maybe<Scalars['Int']>>>,
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -4911,12 +5328,12 @@ export type ServiceProviderNode = Node & {
   shortName?: Maybe<Scalars['String']>,
   country: Scalars['String'],
   visionId?: Maybe<Scalars['String']>,
-  paymentRecords: PaymentRecordNodeConnection,
   cashPlans: CashPlanNodeConnection,
+  paymentrecordSet: PaymentRecordNodeConnection,
 };
 
 
-export type ServiceProviderNodePaymentRecordsArgs = {
+export type ServiceProviderNodeCashPlansArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -4925,7 +5342,7 @@ export type ServiceProviderNodePaymentRecordsArgs = {
 };
 
 
-export type ServiceProviderNodeCashPlansArgs = {
+export type ServiceProviderNodePaymentrecordSetArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5152,6 +5569,7 @@ export type TargetPopulationNode = Node & {
   vulnerabilityScoreMax?: Maybe<Scalars['Float']>,
   excludedIds: Scalars['String'],
   exclusionReason: Scalars['String'],
+  paymentPlans: PaymentPlanNodeConnection,
   paymentRecords: PaymentRecordNodeConnection,
   selections: Array<HouseholdSelection>,
   totalHouseholds?: Maybe<Scalars['Int']>,
@@ -5163,6 +5581,15 @@ export type TargetPopulationNode = Node & {
 
 
 export type TargetPopulationNodeHouseholdsArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type TargetPopulationNodePaymentPlansArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5720,15 +6147,19 @@ export type UserBusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesAllowed: Scalars['Int'],
   screenBeneficiary: Scalars['Boolean'],
   deduplicationIgnoreWithdraw: Scalars['Boolean'],
+  approvalNumberRequired: Scalars['Int'],
+  authorizationNumberRequired: Scalars['Int'],
+  financeReviewNumberRequired: Scalars['Int'],
   children: UserBusinessAreaNodeConnection,
   userRoles: Array<UserRoleNode>,
+  paymentplanSet: PaymentPlanNodeConnection,
+  cashplanSet: CashPlanNodeConnection,
   paymentrecordSet: PaymentRecordNodeConnection,
   serviceproviderSet: ServiceProviderNodeConnection,
   tickets: GrievanceTicketNodeConnection,
   householdSet: HouseholdNodeConnection,
   individualSet: IndividualNodeConnection,
   programSet: ProgramNodeConnection,
-  cashplanSet: CashPlanNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
   reports: ReportNodeConnection,
@@ -5744,6 +6175,24 @@ export type UserBusinessAreaNodeChildrenArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>
+};
+
+
+export type UserBusinessAreaNodePaymentplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodeCashplanSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -5799,15 +6248,6 @@ export type UserBusinessAreaNodeProgramSetArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   name?: Maybe<Scalars['String']>
-};
-
-
-export type UserBusinessAreaNodeCashplanSetArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -5901,6 +6341,10 @@ export type UserNode = Node & {
   lastDoapSync?: Maybe<Scalars['DateTime']>,
   doapHash: Scalars['String'],
   userRoles: Array<UserRoleNode>,
+  createdPaymentPlans: PaymentPlanNodeConnection,
+  createdFinancialServiceProviderXlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection,
+  createdFinancialServiceProviders: FinancialServiceProviderNodeConnection,
+  approvalSet: Array<ApprovalNode>,
   createdTickets: GrievanceTicketNodeConnection,
   assignedTickets: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
@@ -5911,6 +6355,33 @@ export type UserNode = Node & {
   reports: ReportNodeConnection,
   logs: PaymentVerificationLogEntryNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
+};
+
+
+export type UserNodeCreatedPaymentPlansArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeCreatedFinancialServiceProviderXlsxTemplatesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeCreatedFinancialServiceProvidersArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -6171,7 +6642,7 @@ export type HouseholdDetailedFragment = (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName' | 'email' | 'username'>
     )> }
-  ), paymentRecords: (
+  ), paymentrecordSet: (
     { __typename?: 'PaymentRecordNodeConnection' }
     & { edges: Array<Maybe<(
       { __typename?: 'PaymentRecordNodeEdge' }
@@ -8249,6 +8720,29 @@ export type RelatedGrievanceTicketsQuery = (
   )> }
 );
 
+export type PaymentPlanQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type PaymentPlanQuery = (
+  { __typename?: 'Query' }
+  & { paymentPlan: Maybe<(
+    { __typename?: 'PaymentPlanNode' }
+    & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'status' | 'currency' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount'>
+    & { createdBy: (
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+    ), program: (
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name'>
+    ), targetPopulation: (
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name'>
+    ) }
+  )> }
+);
+
 export type AllCashPlansQueryVariables = {
   program?: Maybe<Scalars['ID']>,
   after?: Maybe<Scalars['String']>,
@@ -10043,7 +10537,7 @@ export const HouseholdDetailedFragmentDoc = gql`
       username
     }
   }
-  paymentRecords {
+  paymentrecordSet {
     edges {
       node {
         id
@@ -14984,6 +15478,83 @@ export function useRelatedGrievanceTicketsLazyQuery(baseOptions?: ApolloReactHoo
 export type RelatedGrievanceTicketsQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsQuery>;
 export type RelatedGrievanceTicketsLazyQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsLazyQuery>;
 export type RelatedGrievanceTicketsQueryResult = ApolloReactCommon.QueryResult<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>;
+export const PaymentPlanDocument = gql`
+    query PaymentPlan($id: ID!) {
+  paymentPlan(id: $id) {
+    id
+    unicefId
+    status
+    createdBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    program {
+      id
+      name
+    }
+    targetPopulation {
+      id
+      name
+    }
+    currency
+    startDate
+    endDate
+    dispersionStartDate
+    dispersionEndDate
+    femaleChildrenCount
+    femaleAdultsCount
+    maleChildrenCount
+    maleAdultsCount
+    totalHouseholdsCount
+    totalIndividualsCount
+  }
+}
+    `;
+export type PaymentPlanComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentPlanQuery, PaymentPlanQueryVariables>, 'query'> & ({ variables: PaymentPlanQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const PaymentPlanComponent = (props: PaymentPlanComponentProps) => (
+      <ApolloReactComponents.Query<PaymentPlanQuery, PaymentPlanQueryVariables> query={PaymentPlanDocument} {...props} />
+    );
+    
+export type PaymentPlanProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentPlanQuery, PaymentPlanQueryVariables> & TChildProps;
+export function withPaymentPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PaymentPlanQuery,
+  PaymentPlanQueryVariables,
+  PaymentPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentPlanQuery, PaymentPlanQueryVariables, PaymentPlanProps<TChildProps>>(PaymentPlanDocument, {
+      alias: 'paymentPlan',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePaymentPlanQuery__
+ *
+ * To run a query within a React component, call `usePaymentPlanQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentPlanQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentPlanQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePaymentPlanQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentPlanQuery, PaymentPlanQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentPlanQuery, PaymentPlanQueryVariables>(PaymentPlanDocument, baseOptions);
+      }
+export function usePaymentPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentPlanQuery, PaymentPlanQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentPlanQuery, PaymentPlanQueryVariables>(PaymentPlanDocument, baseOptions);
+        }
+export type PaymentPlanQueryHookResult = ReturnType<typeof usePaymentPlanQuery>;
+export type PaymentPlanLazyQueryHookResult = ReturnType<typeof usePaymentPlanLazyQuery>;
+export type PaymentPlanQueryResult = ApolloReactCommon.QueryResult<PaymentPlanQuery, PaymentPlanQueryVariables>;
 export const AllCashPlansDocument = gql`
     query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $serviceProvider: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime, $businessArea: String) {
   allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, serviceProvider_FullName_Startswith: $serviceProvider, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte, businessArea: $businessArea) {
@@ -19151,12 +19722,9 @@ export type ResolversTypes = {
   Float: ResolverTypeWrapper<Scalars['Float']>,
   UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
   UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
-  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
-  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
-  PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
-  PaymentRecordStatus: PaymentRecordStatus,
-  CashPlanNode: ResolverTypeWrapper<CashPlanNode>,
-  CashPlanStatus: CashPlanStatus,
+  PaymentPlanNodeConnection: ResolverTypeWrapper<PaymentPlanNodeConnection>,
+  PaymentPlanNodeEdge: ResolverTypeWrapper<PaymentPlanNodeEdge>,
+  PaymentPlanNode: ResolverTypeWrapper<PaymentPlanNode>,
   ProgramNode: ResolverTypeWrapper<ProgramNode>,
   ProgramStatus: ProgramStatus,
   Date: ResolverTypeWrapper<Scalars['Date']>,
@@ -19164,8 +19732,15 @@ export type ResolversTypes = {
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
-  HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
-  HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
+  CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
+  CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
+  CashPlanNode: ResolverTypeWrapper<CashPlanNode>,
+  CashPlanStatus: CashPlanStatus,
+  ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
+  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
+  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
+  PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
+  PaymentRecordStatus: PaymentRecordStatus,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
@@ -19177,6 +19752,8 @@ export type ResolversTypes = {
   RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
   RegistrationDataImportStatus: RegistrationDataImportStatus,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
+  HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
   CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
   IndividualDisability: IndividualDisability,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
@@ -19282,14 +19859,9 @@ export type ResolversTypes = {
   StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
   ProgramsWithDeliveredQuantityNode: ResolverTypeWrapper<ProgramsWithDeliveredQuantityNode>,
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>,
-  CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
-  CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
-  ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
-  ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
-  ReportNode: ResolverTypeWrapper<ReportNode>,
-  ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
-  CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
-  CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
+  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
+  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
+  PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
   CashPlanPaymentVerificationNode: ResolverTypeWrapper<CashPlanPaymentVerificationNode>,
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
@@ -19297,17 +19869,24 @@ export type ResolversTypes = {
   AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>,
   PaymentVerificationNodeConnection: ResolverTypeWrapper<PaymentVerificationNodeConnection>,
   PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>,
-  PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
   PaymentVerificationStatus: PaymentVerificationStatus,
   TicketPaymentVerificationDetailsNodeConnection: ResolverTypeWrapper<TicketPaymentVerificationDetailsNodeConnection>,
   TicketPaymentVerificationDetailsNodeEdge: ResolverTypeWrapper<TicketPaymentVerificationDetailsNodeEdge>,
   TicketPaymentVerificationDetailsNode: ResolverTypeWrapper<TicketPaymentVerificationDetailsNode>,
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
   TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
+  CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
+  CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
   CashPlanPaymentVerificationSummaryNode: ResolverTypeWrapper<CashPlanPaymentVerificationSummaryNode>,
   CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
-  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
-  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
+  ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
+  ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
+  ReportNode: ResolverTypeWrapper<ReportNode>,
+  AcceptanceProcessNodeConnection: ResolverTypeWrapper<AcceptanceProcessNodeConnection>,
+  AcceptanceProcessNodeEdge: ResolverTypeWrapper<AcceptanceProcessNodeEdge>,
+  AcceptanceProcessNode: ResolverTypeWrapper<AcceptanceProcessNode>,
+  ApprovalNode: ResolverTypeWrapper<ApprovalNode>,
+  ApprovalType: ApprovalType,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
@@ -19319,6 +19898,19 @@ export type ResolversTypes = {
   LogEntryAction: LogEntryAction,
   RoleNode: ResolverTypeWrapper<RoleNode>,
   RoleSubsystem: RoleSubsystem,
+  FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>,
+  FinancialServiceProviderXlsxTemplateNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeEdge>,
+  FinancialServiceProviderXlsxTemplateNode: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNode>,
+  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
+  FinancialServiceProviderNodeConnection: ResolverTypeWrapper<FinancialServiceProviderNodeConnection>,
+  FinancialServiceProviderNodeEdge: ResolverTypeWrapper<FinancialServiceProviderNodeEdge>,
+  FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
+  DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
+  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
+  FinancialServiceProviderXlsxReportNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeConnection>,
+  FinancialServiceProviderXlsxReportNodeEdge: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNodeEdge>,
+  FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNode>,
+  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus,
   TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>,
   TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
   TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
@@ -19443,6 +20035,9 @@ export type ResolversTypes = {
   ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
+  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
+  CreateFinancialServiceProviderMutation: ResolverTypeWrapper<CreateFinancialServiceProviderMutation>,
+  EditFinancialServiceProviderMutation: ResolverTypeWrapper<EditFinancialServiceProviderMutation>,
   EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
   EditPaymentVerificationMutation: ResolverTypeWrapper<EditPaymentVerificationMutation>,
   Upload: ResolverTypeWrapper<Scalars['Upload']>,
@@ -19455,6 +20050,9 @@ export type ResolversTypes = {
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
   UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>,
+  ActionPaymentPlanInput: ActionPaymentPlanInput,
+  PaymentPlanActionType: PaymentPlanActionType,
+  ActionPaymentPlanMutation: ResolverTypeWrapper<ActionPaymentPlanMutation>,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -19519,12 +20117,9 @@ export type ResolversParentTypes = {
   Float: Scalars['Float'],
   UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
   UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
-  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
-  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
-  PaymentRecordNode: PaymentRecordNode,
-  PaymentRecordStatus: PaymentRecordStatus,
-  CashPlanNode: CashPlanNode,
-  CashPlanStatus: CashPlanStatus,
+  PaymentPlanNodeConnection: PaymentPlanNodeConnection,
+  PaymentPlanNodeEdge: PaymentPlanNodeEdge,
+  PaymentPlanNode: PaymentPlanNode,
   ProgramNode: ProgramNode,
   ProgramStatus: ProgramStatus,
   Date: Scalars['Date'],
@@ -19532,8 +20127,15 @@ export type ResolversParentTypes = {
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
-  HouseholdNodeConnection: HouseholdNodeConnection,
-  HouseholdNodeEdge: HouseholdNodeEdge,
+  CashPlanNodeConnection: CashPlanNodeConnection,
+  CashPlanNodeEdge: CashPlanNodeEdge,
+  CashPlanNode: CashPlanNode,
+  CashPlanStatus: CashPlanStatus,
+  ServiceProviderNode: ServiceProviderNode,
+  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
+  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
+  PaymentRecordNode: PaymentRecordNode,
+  PaymentRecordStatus: PaymentRecordStatus,
   HouseholdNode: HouseholdNode,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   IndividualNodeConnection: IndividualNodeConnection,
@@ -19545,6 +20147,8 @@ export type ResolversParentTypes = {
   RegistrationDataImportNode: RegistrationDataImportNode,
   RegistrationDataImportStatus: RegistrationDataImportStatus,
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  HouseholdNodeConnection: HouseholdNodeConnection,
+  HouseholdNodeEdge: HouseholdNodeEdge,
   CountAndPercentageNode: CountAndPercentageNode,
   IndividualDisability: IndividualDisability,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
@@ -19650,14 +20254,9 @@ export type ResolversParentTypes = {
   StatsObjectType: StatsObjectType,
   ProgramsWithDeliveredQuantityNode: ProgramsWithDeliveredQuantityNode,
   DeliveredQuantityNode: DeliveredQuantityNode,
-  CashPlanNodeConnection: CashPlanNodeConnection,
-  CashPlanNodeEdge: CashPlanNodeEdge,
-  ReportNodeConnection: ReportNodeConnection,
-  ReportNodeEdge: ReportNodeEdge,
-  ReportNode: ReportNode,
-  ServiceProviderNode: ServiceProviderNode,
-  CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
-  CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
+  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
+  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
+  PaymentVerificationNode: PaymentVerificationNode,
   CashPlanPaymentVerificationNode: CashPlanPaymentVerificationNode,
   CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
   CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
@@ -19665,17 +20264,24 @@ export type ResolversParentTypes = {
   AgeFilterObject: AgeFilterObject,
   PaymentVerificationNodeConnection: PaymentVerificationNodeConnection,
   PaymentVerificationNodeEdge: PaymentVerificationNodeEdge,
-  PaymentVerificationNode: PaymentVerificationNode,
   PaymentVerificationStatus: PaymentVerificationStatus,
   TicketPaymentVerificationDetailsNodeConnection: TicketPaymentVerificationDetailsNodeConnection,
   TicketPaymentVerificationDetailsNodeEdge: TicketPaymentVerificationDetailsNodeEdge,
   TicketPaymentVerificationDetailsNode: TicketPaymentVerificationDetailsNode,
   TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
   TicketPaymentVerificationDetailsNewStatus: TicketPaymentVerificationDetailsNewStatus,
+  CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
+  CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
   CashPlanPaymentVerificationSummaryNode: CashPlanPaymentVerificationSummaryNode,
   CashPlanPaymentVerificationSummaryStatus: CashPlanPaymentVerificationSummaryStatus,
-  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
-  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
+  ReportNodeConnection: ReportNodeConnection,
+  ReportNodeEdge: ReportNodeEdge,
+  ReportNode: ReportNode,
+  AcceptanceProcessNodeConnection: AcceptanceProcessNodeConnection,
+  AcceptanceProcessNodeEdge: AcceptanceProcessNodeEdge,
+  AcceptanceProcessNode: AcceptanceProcessNode,
+  ApprovalNode: ApprovalNode,
+  ApprovalType: ApprovalType,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
@@ -19687,6 +20293,19 @@ export type ResolversParentTypes = {
   LogEntryAction: LogEntryAction,
   RoleNode: RoleNode,
   RoleSubsystem: RoleSubsystem,
+  FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection,
+  FinancialServiceProviderXlsxTemplateNodeEdge: FinancialServiceProviderXlsxTemplateNodeEdge,
+  FinancialServiceProviderXlsxTemplateNode: FinancialServiceProviderXlsxTemplateNode,
+  FinancialServiceProviderXlsxTemplateColumns: FinancialServiceProviderXlsxTemplateColumns,
+  FinancialServiceProviderNodeConnection: FinancialServiceProviderNodeConnection,
+  FinancialServiceProviderNodeEdge: FinancialServiceProviderNodeEdge,
+  FinancialServiceProviderNode: FinancialServiceProviderNode,
+  DeliveryMechanismNode: DeliveryMechanismNode,
+  FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
+  FinancialServiceProviderXlsxReportNodeConnection: FinancialServiceProviderXlsxReportNodeConnection,
+  FinancialServiceProviderXlsxReportNodeEdge: FinancialServiceProviderXlsxReportNodeEdge,
+  FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode,
+  FinancialServiceProviderXlsxReportStatus: FinancialServiceProviderXlsxReportStatus,
   TicketNoteNodeConnection: TicketNoteNodeConnection,
   TicketNoteNodeEdge: TicketNoteNodeEdge,
   TicketNoteNode: TicketNoteNode,
@@ -19811,6 +20430,9 @@ export type ResolversParentTypes = {
   ReassignRoleMutation: ReassignRoleMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
+  CreateFinancialServiceProviderInput: CreateFinancialServiceProviderInput,
+  CreateFinancialServiceProviderMutation: CreateFinancialServiceProviderMutation,
+  EditFinancialServiceProviderMutation: EditFinancialServiceProviderMutation,
   EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
   EditPaymentVerificationMutation: EditPaymentVerificationMutation,
   Upload: Scalars['Upload'],
@@ -19823,6 +20445,9 @@ export type ResolversParentTypes = {
   PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
   UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount,
+  ActionPaymentPlanInput: ActionPaymentPlanInput,
+  PaymentPlanActionType: PaymentPlanActionType,
+  ActionPaymentPlanMutation: ActionPaymentPlanMutation,
   CreateTargetPopulationInput: CreateTargetPopulationInput,
   CreateTargetPopulationMutation: CreateTargetPopulationMutation,
   UpdateTargetPopulationInput: UpdateTargetPopulationInput,
@@ -19871,6 +20496,36 @@ export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, Paren
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
+export type AcceptanceProcessNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AcceptanceProcessNode'] = ResolversParentTypes['AcceptanceProcessNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  sentForApprovalBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  sentForApprovalDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  sentForAuthorizationBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  sentForAuthorizationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  sentForFinanceReviewBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  sentForFinanceReviewDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  paymentPlan?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>,
+  approvals?: Resolver<Array<ResolversTypes['ApprovalNode']>, ParentType, ContextType>,
+};
+
+export type AcceptanceProcessNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['AcceptanceProcessNodeConnection'] = ResolversParentTypes['AcceptanceProcessNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['AcceptanceProcessNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type AcceptanceProcessNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AcceptanceProcessNodeEdge'] = ResolversParentTypes['AcceptanceProcessNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['AcceptanceProcessNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type ActionPaymentPlanMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActionPaymentPlanMutation'] = ResolversParentTypes['ActionPaymentPlanMutation']> = {
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+};
+
 export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
@@ -19888,6 +20543,13 @@ export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversP
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, AgencyNodeIndividualIdentitiesArgs>,
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type ApprovalNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApprovalNode'] = ResolversParentTypes['ApprovalNode']> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['ApprovalType'], ParentType, ContextType>,
+  comment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  info?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
@@ -19999,15 +20661,19 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  approvalNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  authorizationNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  financeReviewNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+  paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentplanSetArgs>,
+  cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, BusinessAreaNodeCashplanSetArgs>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, BusinessAreaNodeServiceproviderSetArgs>,
   tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, BusinessAreaNodeTicketsArgs>,
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, BusinessAreaNodeHouseholdSetArgs>,
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, BusinessAreaNodeIndividualSetArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
-  cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, BusinessAreaNodeCashplanSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
@@ -20031,34 +20697,38 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
+  exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityRevisedUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['CashPlanStatus'], ParentType, ContextType>,
-  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   distributionLevel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   dispersionDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   coverageDuration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   coverageUnit?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
   deliveryType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   assistanceMeasurement?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   assistanceThrough?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   serviceProvider?: Resolver<Maybe<ResolversTypes['ServiceProviderNode']>, ParentType, ContextType>,
   visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   fundsCommitment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   downPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   validationAlertsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalPersonsCoveredRevised?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
   verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
   cashPlanPaymentVerificationSummary?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationSummaryNode']>, ParentType, ContextType>,
@@ -20197,6 +20867,10 @@ export type CreateDashboardReportResolvers<ContextType = any, ParentType extends
   success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
+export type CreateFinancialServiceProviderMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateFinancialServiceProviderMutation'] = ResolversParentTypes['CreateFinancialServiceProviderMutation']> = {
+  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
+};
+
 export type CreateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateGrievanceTicketMutation'] = ResolversParentTypes['CreateGrievanceTicketMutation']> = {
   grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
 };
@@ -20266,6 +20940,14 @@ export type DeliveredQuantityNodeResolvers<ContextType = any, ParentType extends
   currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type DeliveryMechanismNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveryMechanismNode'] = ResolversParentTypes['DeliveryMechanismNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  displayName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  requiredFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
+  financialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, DeliveryMechanismNodeFinancialServiceProvidersArgs>,
+};
+
 export type DiscardCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscardCashPlanVerificationMutation'] = ResolversParentTypes['DiscardCashPlanVerificationMutation']> = {
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
@@ -20327,6 +21009,10 @@ export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends Reso
   countryIso3?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type EditFinancialServiceProviderMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditFinancialServiceProviderMutation'] = ResolversParentTypes['EditFinancialServiceProviderMutation']> = {
+  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
+};
+
 export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
@@ -20346,6 +21032,76 @@ export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends Re
 
 export type FinalizeTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinalizeTargetPopulationMutation'] = ResolversParentTypes['FinalizeTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNode'] = ResolversParentTypes['FinancialServiceProviderNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  visionVendorNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
+  distributionLimit?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  communicationChannel?: Resolver<ResolversTypes['FinancialServiceProviderCommunicationChannel'], ParentType, ContextType>,
+  dataTransferConfiguration?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>,
+  fspXlsxTemplate?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType>,
+  financialserviceproviderxlsxreportSet?: Resolver<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs>,
+};
+
+export type FinancialServiceProviderNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNodeConnection'] = ResolversParentTypes['FinancialServiceProviderNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['FinancialServiceProviderNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type FinancialServiceProviderNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNodeEdge'] = ResolversParentTypes['FinancialServiceProviderNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type FinancialServiceProviderXlsxReportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNode'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  financialServiceProvider?: Resolver<ResolversTypes['FinancialServiceProviderNode'], ParentType, ContextType>,
+  status?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportStatus']>, ParentType, ContextType>,
+  reportUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type FinancialServiceProviderXlsxReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type FinancialServiceProviderXlsxReportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge'] = ResolversParentTypes['FinancialServiceProviderXlsxReportNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNode'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  columns?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateColumns'], ParentType, ContextType>,
+  financialserviceproviderSet?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, FinancialServiceProviderXlsxTemplateNodeFinancialserviceproviderSetArgs>,
+};
+
+export type FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeConnection'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeEdge'] = ResolversParentTypes['FinancialServiceProviderXlsxTemplateNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export type FinishCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinishCashPlanVerificationMutation'] = ResolversParentTypes['FinishCashPlanVerificationMutation']> = {
@@ -20516,7 +21272,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
-  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
+  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentrecordSetArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeSensitiveTicketDetailsArgs>,
   householdDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeHouseholdDataUpdateTicketDetailsArgs>,
@@ -20866,7 +21622,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentRecordsArgs>,
+  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentrecordSetArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, IndividualNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, IndividualNodeSensitiveTicketDetailsArgs>,
   individualDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketIndividualDataUpdateDetailsNodeConnection'], ParentType, ContextType, IndividualNodeIndividualDataUpdateTicketDetailsArgs>,
@@ -21018,6 +21774,8 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approvePaymentDetails?: Resolver<Maybe<ResolversTypes['PaymentDetailsApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApprovePaymentDetailsArgs, 'approveStatus' | 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
+  createFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['CreateFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsCreateFinancialServiceProviderArgs, 'businessAreaSlug' | 'inputs'>>,
+  editFinancialServiceProvider?: Resolver<Maybe<ResolversTypes['EditFinancialServiceProviderMutation']>, ParentType, ContextType, RequireFields<MutationsEditFinancialServiceProviderArgs, 'businessAreaSlug' | 'financialServiceProviderId' | 'inputs'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
   importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
   activateCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['ActivateCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsActivateCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
@@ -21026,6 +21784,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   deleteCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DeleteCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDeleteCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
+  actionPaymentPlanMutation?: Resolver<Maybe<ResolversTypes['ActionPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsActionPaymentPlanMutationArgs, 'input'>>,
   createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
   copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
@@ -21053,7 +21812,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'PaymentVerificationLogEntryNode' | 'TicketNoteNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'PaymentPlanNode' | 'ProgramNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentRecordNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'DocumentNode' | 'IndividualIdentityNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentVerificationNode' | 'CashPlanPaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'CashPlanPaymentVerificationSummaryNode' | 'ReportNode' | 'AcceptanceProcessNode' | 'PaymentVerificationLogEntryNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderXlsxReportNode' | 'TicketNoteNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -21075,6 +21834,57 @@ export type PaymentDetailsApproveMutationResolvers<ContextType = any, ParentType
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
 
+export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNode'] = ResolversParentTypes['PaymentPlanNode']> = {
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
+  exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityRevisedUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
+  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  dispersionStartDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  dispersionEndDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  maleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  totalHouseholdsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  totalIndividualsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  approvalProcess?: Resolver<ResolversTypes['AcceptanceProcessNodeConnection'], ParentType, ContextType, PaymentPlanNodeApprovalProcessArgs>,
+  approvalNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  authorizationNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  financeReviewNumberRequired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeConnection'] = ResolversParentTypes['PaymentPlanNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentPlanNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type PaymentPlanNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeEdge'] = ResolversParentTypes['PaymentPlanNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
 export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNode'] = ResolversParentTypes['PaymentRecordNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -21083,11 +21893,20 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentRecordStatus'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  deliveryType?: Resolver<ResolversTypes['PaymentRecordDeliveryType'], ParentType, ContextType>,
+  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  entitlementQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  entitlementQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  deliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
   caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
-  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
-  headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   distributionModality?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -21096,14 +21915,6 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   entitlementCardNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   entitlementCardStatus?: Resolver<Maybe<ResolversTypes['PaymentRecordEntitlementCardStatus']>, ParentType, ContextType>,
   entitlementCardIssueDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
-  deliveryType?: Resolver<ResolversTypes['PaymentRecordDeliveryType'], ParentType, ContextType>,
-  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  entitlementQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  deliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
-  deliveryDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
-  transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   registrationCaId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
@@ -21199,8 +22010,9 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, ProgramNodePaymentplanSetArgs>,
+  cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashplanSetArgs>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
-  cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
   totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -21253,6 +22065,12 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, QueryAllSteficonRulesArgs>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
+  financialServiceProviderXlsxTemplate?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxTemplateArgs, 'id'>>,
+  allFinancialServiceProviderXlsxTemplates?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection']>, ParentType, ContextType, QueryAllFinancialServiceProviderXlsxTemplatesArgs>,
+  financialServiceProviderXlsxReport?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderXlsxReportArgs, 'id'>>,
+  allFinancialServiceProviderXlsxReports?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxReportNodeConnection']>, ParentType, ContextType, QueryAllFinancialServiceProviderXlsxReportsArgs>,
+  financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType, RequireFields<QueryFinancialServiceProviderArgs, 'id'>>,
+  allFinancialServiceProviders?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNodeConnection']>, ParentType, ContextType, QueryAllFinancialServiceProvidersArgs>,
   paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
   cashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryCashPlanPaymentVerificationArgs, 'id'>>,
   allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
@@ -21274,6 +22092,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
   sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,
   allPaymentVerificationLogEntries?: Resolver<Maybe<ResolversTypes['PaymentVerificationLogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentVerificationLogEntriesArgs, 'businessArea'>>,
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType, RequireFields<QueryPaymentPlanArgs, 'id'>>,
+  allPaymentPlans?: Resolver<Maybe<ResolversTypes['PaymentPlanNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllPaymentPlansArgs, 'businessArea'>>,
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
@@ -21687,8 +22507,8 @@ export type ServiceProviderNodeResolvers<ContextType = any, ParentType extends R
   shortName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, ServiceProviderNodePaymentRecordsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ServiceProviderNodeCashPlansArgs>,
+  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, ServiceProviderNodePaymentrecordSetArgs>,
 };
 
 export type ServiceProviderNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceProviderNodeConnection'] = ResolversParentTypes['ServiceProviderNodeConnection']> = {
@@ -21837,6 +22657,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  paymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentPlansArgs>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
   selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -22228,15 +23049,19 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   deduplicationGoldenRecordDuplicatesAllowed?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  approvalNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  authorizationNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  financeReviewNumberRequired?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+  paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentplanSetArgs>,
+  cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeCashplanSetArgs>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentrecordSetArgs>,
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeServiceproviderSetArgs>,
   tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTicketsArgs>,
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeHouseholdSetArgs>,
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeIndividualSetArgs>,
   programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeProgramSetArgs>,
-  cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeCashplanSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeRegistrationdataimportSetArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeReportsArgs>,
@@ -22277,6 +23102,10 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   lastDoapSync?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   doapHash?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+  createdPaymentPlans?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, UserNodeCreatedPaymentPlansArgs>,
+  createdFinancialServiceProviderXlsxTemplates?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection'], ParentType, ContextType, UserNodeCreatedFinancialServiceProviderXlsxTemplatesArgs>,
+  createdFinancialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, UserNodeCreatedFinancialServiceProvidersArgs>,
+  approvalSet?: Resolver<Array<ResolversTypes['ApprovalNode']>, ParentType, ContextType>,
   createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeCreatedTicketsArgs>,
   assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeAssignedTicketsArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, UserNodeTicketNotesArgs>,
@@ -22328,9 +23157,14 @@ export type Resolvers<ContextType = any> = {
   _DatasetsNode?: _DatasetsNodeResolvers<ContextType>,
   _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>,
   _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>,
+  AcceptanceProcessNode?: AcceptanceProcessNodeResolvers<ContextType>,
+  AcceptanceProcessNodeConnection?: AcceptanceProcessNodeConnectionResolvers<ContextType>,
+  AcceptanceProcessNodeEdge?: AcceptanceProcessNodeEdgeResolvers<ContextType>,
+  ActionPaymentPlanMutation?: ActionPaymentPlanMutationResolvers<ContextType>,
   ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
   AgencyNode?: AgencyNodeResolvers<ContextType>,
+  ApprovalNode?: ApprovalNodeResolvers<ContextType>,
   ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
   AreaNode?: AreaNodeResolvers<ContextType>,
   AreaNodeConnection?: AreaNodeConnectionResolvers<ContextType>,
@@ -22362,6 +23196,7 @@ export type Resolvers<ContextType = any> = {
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
   CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>,
+  CreateFinancialServiceProviderMutation?: CreateFinancialServiceProviderMutationResolvers<ContextType>,
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
@@ -22377,6 +23212,7 @@ export type Resolvers<ContextType = any> = {
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
   DeliveredQuantityNode?: DeliveredQuantityNodeResolvers<ContextType>,
+  DeliveryMechanismNode?: DeliveryMechanismNodeResolvers<ContextType>,
   DiscardCashPlanVerificationMutation?: DiscardCashPlanVerificationMutationResolvers<ContextType>,
   DjangoDebug?: DjangoDebugResolvers<ContextType>,
   DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
@@ -22384,9 +23220,19 @@ export type Resolvers<ContextType = any> = {
   DocumentNodeConnection?: DocumentNodeConnectionResolvers<ContextType>,
   DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
   DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
+  EditFinancialServiceProviderMutation?: EditFinancialServiceProviderMutationResolvers<ContextType>,
   EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
   FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>,
   FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
+  FinancialServiceProviderNode?: FinancialServiceProviderNodeResolvers<ContextType>,
+  FinancialServiceProviderNodeConnection?: FinancialServiceProviderNodeConnectionResolvers<ContextType>,
+  FinancialServiceProviderNodeEdge?: FinancialServiceProviderNodeEdgeResolvers<ContextType>,
+  FinancialServiceProviderXlsxReportNode?: FinancialServiceProviderXlsxReportNodeResolvers<ContextType>,
+  FinancialServiceProviderXlsxReportNodeConnection?: FinancialServiceProviderXlsxReportNodeConnectionResolvers<ContextType>,
+  FinancialServiceProviderXlsxReportNodeEdge?: FinancialServiceProviderXlsxReportNodeEdgeResolvers<ContextType>,
+  FinancialServiceProviderXlsxTemplateNode?: FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType>,
+  FinancialServiceProviderXlsxTemplateNodeConnection?: FinancialServiceProviderXlsxTemplateNodeConnectionResolvers<ContextType>,
+  FinancialServiceProviderXlsxTemplateNodeEdge?: FinancialServiceProviderXlsxTemplateNodeEdgeResolvers<ContextType>,
   FinishCashPlanVerificationMutation?: FinishCashPlanVerificationMutationResolvers<ContextType>,
   FlexFieldsScalar?: GraphQLScalarType,
   GeoJSON?: GraphQLScalarType,
@@ -22442,6 +23288,9 @@ export type Resolvers<ContextType = any> = {
   PageInfo?: PageInfoResolvers<ContextType>,
   PartnerType?: PartnerTypeResolvers<ContextType>,
   PaymentDetailsApproveMutation?: PaymentDetailsApproveMutationResolvers<ContextType>,
+  PaymentPlanNode?: PaymentPlanNodeResolvers<ContextType>,
+  PaymentPlanNodeConnection?: PaymentPlanNodeConnectionResolvers<ContextType>,
+  PaymentPlanNodeEdge?: PaymentPlanNodeEdgeResolvers<ContextType>,
   PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
   PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,
   PaymentRecordNodeEdge?: PaymentRecordNodeEdgeResolvers<ContextType>,
