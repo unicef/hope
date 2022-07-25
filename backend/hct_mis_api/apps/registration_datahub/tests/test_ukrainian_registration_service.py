@@ -93,7 +93,7 @@ class TestUkrainianRegistrationService(TestCase):
             "phone_no_i_c": "0501706662",
         }
         individual_with_tax_id_which_is_too_long = {
-            "tax_id_no_i_c": "x"*300,
+            "tax_id_no_i_c": "x" * 300,
             "bank_account_h_f": "",
             "relationship_i_c": "head",
             "given_name_i_c": "Aleksiej",
@@ -157,34 +157,32 @@ class TestUkrainianRegistrationService(TestCase):
     def test_import_data_to_datahub(self):
         service = FlexRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
-
-        service.process_records(rdi.id, [x.id for x in self.records])
+        records_ids = [x.id for x in self.records]
+        service.process_records(rdi.id, records_ids)
         self.records[2].refresh_from_db()
-        self.assertEqual(Record.objects.filter(ignored=False).count(), 4)
+        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
 
     def test_import_data_to_datahub_retry(self):
         service = FlexRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
-
-        service.process_records(rdi.id, [x.id for x in self.records])
+        records_ids_all = [x.id for x in self.records]
+        service.process_records(rdi.id, records_ids_all)
         self.records[2].refresh_from_db()
-        self.assertEqual(Record.objects.filter(ignored=False).count(), 4)
+        self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
         service = FlexRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
-
-        service.process_records(rdi.id, [x.id for x in self.records[:2]])
-        self.assertEqual(Record.objects.filter(ignored=False).count(), 4)
+        records_ids = [x.id for x in self.records[:2]]
+        service.process_records(rdi.id, records_ids)
+        self.assertEqual(Record.objects.filter(id__in=records_ids_all, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
-
 
     def test_import_document_validation(self):
         service = FlexRegistrationService()
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
 
         service.process_records(rdi.id, [x.id for x in self.bad_records])
-        self.records[0].refresh_from_db()
-        self.assertEqual(self.records[0].status, Record.STATUS_ERROR)
+        self.bad_records[0].refresh_from_db()
+        self.assertEqual(self.bad_records[0].status, Record.STATUS_ERROR)
         self.assertEqual(ImportedHousehold.objects.count(), 0)
-        self.assertFalse(True)
