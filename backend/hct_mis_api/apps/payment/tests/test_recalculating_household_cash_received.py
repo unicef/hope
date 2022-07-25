@@ -241,12 +241,13 @@ class TestRecalculatingCash(APITestCase):
 
         self.finalize_target_population(target_population_id)
 
+        cash_amount_1 = 123
         ca_fixtures.PaymentRecordFactory.create(
             session=session,
             service_provider_ca_id=service_provider_ca_id,
             cash_plan_ca_id=cash_plan_ca_id,
             household_mis_id=household.id,
-            delivered_quantity=123,
+            delivered_quantity=cash_amount_1,
         )
 
         CashPlanFactory.create(ca_id=cash_plan_ca_id)
@@ -264,15 +265,17 @@ class TestRecalculatingCash(APITestCase):
         session_2 = ca_models.Session.objects.create(
             business_area=self.business_area.code, status=ca_models.Session.STATUS_READY
         )
+        cash_amount_2 = 234
         ca_fixtures.PaymentRecordFactory.create(
             session=session_2,
             service_provider_ca_id=service_provider_ca_id,
             cash_plan_ca_id=cash_plan_ca_id,
             household_mis_id=household.id,
-            delivered_quantity=234,
+            delivered_quantity=cash_amount_2,
         )
 
         PullFromDatahubTask(exchange_rates_client=MagicMock()).execute()
 
         household.refresh_from_db()
         self.assertNotEqual(previous_value, household.total_cash_received)
+        self.assertEqual(household.total_cash_received, cash_amount_1 + cash_amount_2)
