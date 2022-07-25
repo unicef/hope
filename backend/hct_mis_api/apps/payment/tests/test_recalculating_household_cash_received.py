@@ -258,5 +258,6 @@ class TestRecalculatingCash(APITestCase):
 
         PullFromDatahubTask().execute()
 
+        household.refresh_from_db()
         self.assertIsNotNone(household.total_cash_received)
         self.assertIsNotNone(household.total_cash_received_usd)
