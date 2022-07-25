@@ -282,41 +282,44 @@ def automate_rdi_creation_task(
     from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
         FlexRegistrationService,
     )
+    try:
+        with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
+            try:
+                service = FlexRegistrationService()
 
-    with locked_cache(key=f"automate_rdi_creation_task-{registration_id}"):
-        try:
-            service = FlexRegistrationService()
-
-            qs = Record.objects.filter(registration=registration_id, **filters).exclude(
-                status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
-            )
-            if fix_tax_id:
-                check_and_set_taxid(qs)
-            all_records_ids = qs.values_list("id", flat=True)
-            if len(all_records_ids) == 0:
-                return ["No Records found", 0]
-
-            splitted_record_ids = [
-                all_records_ids[i : i + page_size] for i in range(0, len(all_records_ids), page_size)
-            ]
-            output = []
-            for page, records_ids in enumerate(splitted_record_ids, 1):
-                rdi_name = template.format(
-                    page=page,
-                    date=timezone.now(),
-                    registration_id=registration_id,
-                    page_size=page_size,
-                    records=len(records_ids),
+                qs = Record.objects.filter(registration=registration_id, **filters).exclude(
+                    status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
                 )
-                rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
-                service.process_records(rdi_id=rdi.id, records_ids=records_ids)
-                output.append([rdi_name, len(records_ids)])
-                if auto_merge:
-                    merge_registration_data_import_task.delay(rdi.id)
+                if fix_tax_id:
+                    check_and_set_taxid(qs)
+                all_records_ids = qs.values_list("id", flat=True)
+                if len(all_records_ids) == 0:
+                    return ["No Records found", 0]
 
-            return output
-        except Exception:
-            raise
+                splitted_record_ids = [
+                    all_records_ids[i: i + page_size] for i in range(0, len(all_records_ids), page_size)
+                ]
+                output = []
+                for page, records_ids in enumerate(splitted_record_ids, 1):
+                    rdi_name = template.format(
+                        page=page,
+                        date=timezone.now(),
+                        registration_id=registration_id,
+                        page_size=page_size,
+                        records=len(records_ids),
+                    )
+                    rdi = service.create_rdi(imported_by=None, rdi_name=rdi_name)
+                    service.process_records(rdi_id=rdi.id, records_ids=records_ids)
+                    output.append([rdi_name, len(records_ids)])
+                    if auto_merge:
+                        merge_registration_data_import_task.delay(rdi.id)
+
+                return output
+            except Exception as e:
+                logger.exception(e)
+                raise
+    except LockError as e:
+        logger.exception(e)
     return None
 
 
