@@ -1,3 +1,4 @@
+from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -5,11 +6,16 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
 )
-from hct_mis_api.apps.cash_assist_datahub.models import Session
+import hct_mis_api.apps.cash_assist_datahub.models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
     PullFromDatahubTask,
 )
 from hct_mis_api.apps.household.fixtures import create_household
+
+import hct_mis_api.apps.cash_assist_datahub.fixtures as ca_fixtures
+import hct_mis_api.apps.payment.fixtures as payment_fixtures
+
+import factory
 
 
 class TestRecalculatingCash(APITestCase):
@@ -83,6 +89,17 @@ class TestRecalculatingCash(APITestCase):
     }
     """
 
+    FINALIZE_TARGET_POPULATION_MUTATION = """
+    mutation FinalizeTP($id: ID!) {
+        finalizeTargetPopulation(id: $id) {
+            targetPopulation {
+                __typename
+            }
+            __typename
+        }
+    }
+    """
+
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
@@ -139,35 +156,42 @@ class TestRecalculatingCash(APITestCase):
             }
         }
 
-    def send_graphql_request(self, **kwargs):
+    def send_successful_graphql_request(self, **kwargs):
         response = self.graphql_request(**kwargs)
-        self.assertTrue("data" in response)
+        self.assertTrue("data" in response)  # ensures successful response
         return response
 
     def create_program(self):
-        return self.send_graphql_request(
+        return self.send_successful_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION,
             context={"user": self.user},
             variables=self.create_program_mutation_variables,
         )
 
     def activate_program(self, program_id):
-        return self.send_graphql_request(
+        return self.send_successful_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
             variables=self.update_program_mutation_variables(program_id),
         )
 
     def create_target_population(self, program_id):
-        return self.send_graphql_request(
+        return self.send_successful_graphql_request(
             request_string=self.CREATE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables=self.create_target_population_mutation_variables(program_id),
         )
 
     def lock_target_population(self, target_population_id):
-        return self.send_graphql_request(
+        return self.send_successful_graphql_request(
             request_string=self.APPROVE_TARGET_POPULATION_MUTATION,
+            context={"user": self.user},
+            variables={"id": target_population_id},
+        )
+
+    def finalize_target_population(self, target_population_id):
+        return self.send_successful_graphql_request(
+            request_string=self.FINALIZE_TARGET_POPULATION_MUTATION,
             context={"user": self.user},
             variables={"id": target_population_id},
         )
@@ -175,7 +199,13 @@ class TestRecalculatingCash(APITestCase):
     def test_household_cash_received_update(self):
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.PROGRAMME_CREATE, Permissions.TARGETING_CREATE, Permissions.PROGRAMME_ACTIVATE],
+            [
+                Permissions.PROGRAMME_CREATE,
+                Permissions.TARGETING_CREATE,
+                Permissions.PROGRAMME_ACTIVATE,
+                Permissions.TARGETING_LOCK,
+                Permissions.TARGETING_SEND,
+            ],
             self.business_area,
         )
         household, _ = create_household(
@@ -190,7 +220,13 @@ class TestRecalculatingCash(APITestCase):
         self.assertIsNone(household.total_cash_received)
         self.assertIsNone(household.total_cash_received_usd)
 
-        Session.objects.create(business_area=self.business_area.code, status=Session.STATUS_READY)
+        session = ca_models.Session.objects.create(
+            business_area=self.business_area.code, status=ca_models.Session.STATUS_READY
+        )
+
+        service_provider_ca_id = factory.Faker("uuid4")
+        # cash_plan_ca_id = factory.Faker("uuid4")
+        payment_fixtures.ServiceProviderFactory.create(ca_id=service_provider_ca_id)
 
         program_response = self.create_program()
         program_id = program_response["data"]["createProgram"]["program"]["id"]
@@ -199,6 +235,18 @@ class TestRecalculatingCash(APITestCase):
         target_population_response = self.create_target_population(program_id)
         target_population_id = target_population_response["data"]["createTargetPopulation"]["targetPopulation"]["id"]
         self.lock_target_population(target_population_id)
+
+        self.assertFalse(CashPlan.objects.exists())
+        self.finalize_target_population(target_population_id)
+        self.assertTrue(CashPlan.objects.exists())
+
+        # target population must exist first
+        ca_fixtures.PaymentRecordFactory.create(
+            session=session,
+            service_provider_ca_id=service_provider_ca_id,
+            # cash_plan_ca_id=cash_plan_ca_id,
+            household_mis_id=household.id,
+        )
 
         self.assertIsNone(household.total_cash_received)
         self.assertIsNone(household.total_cash_received_usd)
