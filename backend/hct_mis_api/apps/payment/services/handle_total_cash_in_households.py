@@ -21,17 +21,16 @@ def handle_total_cash_in_specific_households(id_list):
         .annotate(sum_delivered_quantity_usd=Sum("delivered_quantity_usd"))
         .values("sum_delivered_quantity_usd")[:1]
     )
-    households = Household.objects.filter(
-        total_cash_received_usd__isnull=True, total_cash_received__isnull=True, id__in=id_list
-    )
-    households.update(
+    Household.objects.filter(id__in=id_list).update(
         total_cash_received=Coalesce(total_cash_received_subquery, 0),
         total_cash_received_usd=Coalesce(total_cash_received_usd_subquery, 0),
     )
 
 
-def handle_total_cash_in_households():
-    base_queryset = Household.objects.filter(total_cash_received_usd__isnull=True, total_cash_received__isnull=True)
+def handle_total_cash_in_households(only_new=False):
+    base_queryset = Household.objects.all()
+    if only_new:
+        base_queryset = base_queryset.filter(total_cash_received_usd__isnull=True, total_cash_received__isnull=True)
     id_list = list(base_queryset[:500].values_list("id", flat=True))
     while len(id_list):
         handle_total_cash_in_specific_households(id_list)
