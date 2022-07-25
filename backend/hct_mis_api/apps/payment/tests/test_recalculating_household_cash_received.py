@@ -72,6 +72,17 @@ class TestRecalculatingCash(APITestCase):
     }
     """
 
+    APPROVE_TARGET_POPULATION_MUTATION = """
+    mutation ApproveTP($id: ID!) {
+        approveTargetPopulation(id: $id) {
+            targetPopulation {
+                __typename
+            }
+            __typename
+        }
+    }
+    """
+
     @classmethod
     def setUpTestData(cls):
         create_afghanistan()
@@ -108,10 +119,10 @@ class TestRecalculatingCash(APITestCase):
                         {
                             "filters": [
                                 {
-                                    "comparisionMethod": "LESS_THAN",
-                                    "arguments": [100],
-                                    "fieldName": "number_of_children",
+                                    "comparisionMethod": "EQUALS",
+                                    "fieldName": "consent",
                                     "isFlexField": False,
+                                    "arguments": [True],
                                 }
                             ],
                             "individualsFiltersBlocks": [],
@@ -154,6 +165,13 @@ class TestRecalculatingCash(APITestCase):
             variables=self.create_target_population_mutation_variables(program_id),
         )
 
+    def lock_target_population(self, target_population_id):
+        return self.send_graphql_request(
+            request_string=self.APPROVE_TARGET_POPULATION_MUTATION,
+            context={"user": self.user},
+            variables={"id": target_population_id},
+        )
+
     def test_household_cash_received_update(self):
         self.create_user_role_with_permissions(
             self.user,
@@ -169,13 +187,18 @@ class TestRecalculatingCash(APITestCase):
                 "total_cash_received_usd": None,
             },
         )
+        self.assertIsNone(household.total_cash_received)
+        self.assertIsNone(household.total_cash_received_usd)
+
         Session.objects.create(business_area=self.business_area.code, status=Session.STATUS_READY)
 
         program_response = self.create_program()
         program_id = program_response["data"]["createProgram"]["program"]["id"]
 
         self.activate_program(program_id)
-        self.create_target_population(program_id)
+        target_population_response = self.create_target_population(program_id)
+        target_population_id = target_population_response["data"]["createTargetPopulation"]["targetPopulation"]["id"]
+        self.lock_target_population(target_population_id)
 
         self.assertIsNone(household.total_cash_received)
         self.assertIsNone(household.total_cash_received_usd)
