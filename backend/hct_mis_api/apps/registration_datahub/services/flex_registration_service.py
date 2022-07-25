@@ -350,12 +350,16 @@ class FlexRegistrationService:
             certificate_picture = self._prepare_picture_from_base64(certificate_picture, document_number)
 
             document_type = ImportedDocumentType.objects.get(type=document_type_string, country="UA")
-            document = ImportedDocument(
-                type=document_type,
-                document_number=document_number,
-                photo=certificate_picture,
-                individual=individual,
-            )
+            document_kwargs = {
+                "type": document_type,
+                "document_number": document_number,
+                "individual": individual,
+            }
+            ModelClassForm = modelform_factory(ImportedDocument, fields=document_kwargs.keys())
+            form = ModelClassForm(document_kwargs)
+            if not form.is_valid():
+                raise ValidationError(form.errors)
+            document = ImportedDocument(photo=certificate_picture, **document_kwargs)
             documents.append(document)
 
         return documents
