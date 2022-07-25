@@ -185,9 +185,7 @@ class PullFromDatahubTask:
             payment_record_args["service_provider"] = ServiceProvider.objects.get(
                 ca_id=dh_payment_record.service_provider_ca_id
             )
-            print("Before cash plan")
             payment_record_args["cash_plan"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
-            print("After cash plan")
             (
                 payment_record,
                 created,
