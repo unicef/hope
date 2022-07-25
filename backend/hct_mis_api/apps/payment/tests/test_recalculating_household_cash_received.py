@@ -15,7 +15,7 @@ from hct_mis_api.apps.household.fixtures import create_household
 import hct_mis_api.apps.cash_assist_datahub.fixtures as ca_fixtures
 import hct_mis_api.apps.payment.fixtures as payment_fixtures
 
-import factory
+import uuid
 
 
 class TestRecalculatingCash(APITestCase):
@@ -224,8 +224,8 @@ class TestRecalculatingCash(APITestCase):
             business_area=self.business_area.code, status=ca_models.Session.STATUS_READY
         )
 
-        service_provider_ca_id = factory.Faker("uuid4")
-        # cash_plan_ca_id = factory.Faker("uuid4")
+        service_provider_ca_id = uuid.uuid4()
+        cash_plan_ca_id = uuid.uuid4()
         payment_fixtures.ServiceProviderFactory.create(ca_id=service_provider_ca_id)
 
         program_response = self.create_program()
@@ -236,17 +236,17 @@ class TestRecalculatingCash(APITestCase):
         target_population_id = target_population_response["data"]["createTargetPopulation"]["targetPopulation"]["id"]
         self.lock_target_population(target_population_id)
 
-        self.assertFalse(CashPlan.objects.exists())
         self.finalize_target_population(target_population_id)
-        self.assertTrue(CashPlan.objects.exists())
 
         # target population must exist first
         ca_fixtures.PaymentRecordFactory.create(
             session=session,
             service_provider_ca_id=service_provider_ca_id,
-            # cash_plan_ca_id=cash_plan_ca_id,
+            cash_plan_ca_id=cash_plan_ca_id,
             household_mis_id=household.id,
         )
+
+        # CashPlan must have the same service_provider_ca_id
 
         self.assertIsNone(household.total_cash_received)
         self.assertIsNone(household.total_cash_received_usd)
