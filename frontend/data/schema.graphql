@@ -3,6 +3,42 @@ schema {
   mutation: Mutations
 }
 
+type AcceptanceProcessNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  sentForApprovalBy: UserNode
+  sentForApprovalDate: DateTime
+  sentForAuthorizationBy: UserNode
+  sentForAuthorizationDate: DateTime
+  sentForFinanceReviewBy: UserNode
+  sentForFinanceReviewDate: DateTime
+  paymentPlan: PaymentPlanNode!
+  approvals: [ApprovalNode!]!
+}
+
+type AcceptanceProcessNodeConnection {
+  pageInfo: PageInfo!
+  edges: [AcceptanceProcessNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type AcceptanceProcessNodeEdge {
+  node: AcceptanceProcessNode
+  cursor: String!
+}
+
+input ActionPaymentPlanInput {
+  paymentPlanId: ID!
+  action: PaymentPlanActionType!
+  comment: String
+}
+
+type ActionPaymentPlanMutation {
+  paymentPlan: PaymentPlanNode
+}
+
 type ActivateCashPlanVerificationMutation {
   validationErrors: Arg
   cashPlan: CashPlanNode
@@ -68,6 +104,20 @@ type AgencyNode {
 enum AgencyType {
   UNHCR
   WFP
+}
+
+type ApprovalNode {
+  createdAt: DateTime!
+  type: ApprovalType!
+  comment: String
+  info: String
+}
+
+enum ApprovalType {
+  APPROVAL
+  AUTHORIZATION
+  FINANCE_REVIEW
+  REJECT
 }
 
 type ApproveTargetPopulationMutation {
@@ -175,15 +225,19 @@ type BusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
+  approvalNumberRequired: Int!
+  authorizationNumberRequired: Int!
+  financeReviewNumberRequired: Int!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
+  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   tickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   registrationdataimportSet(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
@@ -207,34 +261,38 @@ type CashPlanNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
+  statusDate: DateTime!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  program: ProgramNode!
+  exchangeRate: Float
+  totalEntitledQuantity: Float
+  totalEntitledQuantityUsd: Float
+  totalEntitledQuantityRevised: Float
+  totalEntitledQuantityRevisedUsd: Float
+  totalDeliveredQuantity: Float
+  totalDeliveredQuantityUsd: Float
+  totalUndeliveredQuantity: Float
+  totalUndeliveredQuantityUsd: Float
   caId: String
   caHashId: UUID
   status: CashPlanStatus!
-  statusDate: DateTime!
-  name: String!
   distributionLevel: String!
-  startDate: DateTime!
-  endDate: DateTime!
   dispersionDate: DateTime!
   coverageDuration: Int!
   coverageUnit: String!
   comments: String
-  program: ProgramNode!
   deliveryType: String
   assistanceMeasurement: String!
   assistanceThrough: String!
   serviceProvider: ServiceProviderNode
   visionId: String
   fundsCommitment: String
-  exchangeRate: Float
   downPayment: String
   validationAlertsCount: Int!
   totalPersonsCovered: Int!
   totalPersonsCoveredRevised: Int!
-  totalEntitledQuantity: Float
-  totalEntitledQuantityRevised: Float
-  totalDeliveredQuantity: Float
-  totalUndeliveredQuantity: Float
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   verifications(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
   cashPlanPaymentVerificationSummary: CashPlanPaymentVerificationSummaryNode
@@ -429,6 +487,19 @@ input CreateDashboardReportInput {
   program: ID
 }
 
+input CreateFinancialServiceProviderInput {
+  name: String!
+  visionVendorNumber: String!
+  deliveryMechanisms: [ID]!
+  distributionLimit: Decimal
+  communicationChannel: String!
+  fspXlsxTemplateId: ID!
+}
+
+type CreateFinancialServiceProviderMutation {
+  financialServiceProvider: FinancialServiceProviderNode
+}
+
 input CreateGrievanceTicketExtrasInput {
   category: CategoryExtrasInput
   issueType: IssueTypeExtrasInput
@@ -565,6 +636,14 @@ type DeliveredQuantityNode {
   currency: String
 }
 
+type DeliveryMechanismNode implements Node {
+  id: ID!
+  name: String!
+  displayName: String!
+  requiredFields: [String!]!
+  financialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+}
+
 type DiscardCashPlanVerificationMutation {
   cashPlan: CashPlanNode
 }
@@ -654,6 +733,10 @@ input EditCashPlanPaymentVerificationInput {
   rapidProArguments: RapidProArguments
 }
 
+type EditFinancialServiceProviderMutation {
+  financialServiceProvider: FinancialServiceProviderNode
+}
+
 input EditIndividualDocumentObjectType {
   id: ID!
   country: String!
@@ -689,6 +772,99 @@ type FieldAttributeNode {
 
 type FinalizeTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
+}
+
+enum FinancialServiceProviderCommunicationChannel {
+  API
+  SFTP
+  XLSX
+}
+
+type FinancialServiceProviderNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: UserNode
+  name: String!
+  visionVendorNumber: String!
+  deliveryMechanisms: [DeliveryMechanismNode]
+  distributionLimit: Float
+  communicationChannel: FinancialServiceProviderCommunicationChannel!
+  dataTransferConfiguration: JSONString
+  fspXlsxTemplate: FinancialServiceProviderXlsxTemplateNode
+  financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
+}
+
+type FinancialServiceProviderNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FinancialServiceProviderNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FinancialServiceProviderNodeEdge {
+  node: FinancialServiceProviderNode
+  cursor: String!
+}
+
+type FinancialServiceProviderXlsxReportNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  financialServiceProvider: FinancialServiceProviderNode!
+  status: FinancialServiceProviderXlsxReportStatus
+  reportUrl: String
+}
+
+type FinancialServiceProviderXlsxReportNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FinancialServiceProviderXlsxReportNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FinancialServiceProviderXlsxReportNodeEdge {
+  node: FinancialServiceProviderXlsxReportNode
+  cursor: String!
+}
+
+enum FinancialServiceProviderXlsxReportStatus {
+  A_1
+  A_2
+  A_3
+}
+
+enum FinancialServiceProviderXlsxTemplateColumns {
+  PAYMENT_ID
+  HOUSEHOLD_ID
+  ADMIN_LEVE_2
+  COLLECTOR_NAME
+  PAYMENT_CHANNEL
+  FSP_NAME
+  ENTITLEMENT_QUANTITY
+  TBD
+}
+
+type FinancialServiceProviderXlsxTemplateNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: UserNode
+  name: String!
+  columns: FinancialServiceProviderXlsxTemplateColumns!
+  financialserviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+}
+
+type FinancialServiceProviderXlsxTemplateNodeConnection {
+  pageInfo: PageInfo!
+  edges: [FinancialServiceProviderXlsxTemplateNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type FinancialServiceProviderXlsxTemplateNodeEdge {
+  node: FinancialServiceProviderXlsxTemplateNode
+  cursor: String!
 }
 
 type FinishCashPlanVerificationMutation {
@@ -891,7 +1067,7 @@ type HouseholdNode implements Node {
   rowId: Int
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
-  paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
+  paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   householdDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
@@ -1874,7 +2050,7 @@ type IndividualNode implements Node {
   koboAssetId: String!
   rowId: Int
   disabilityCertificatePicture: String
-  paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
+  paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
@@ -2106,6 +2282,8 @@ type Mutations {
   approvePaymentDetails(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): PaymentDetailsApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
+  createFinancialServiceProvider(businessAreaSlug: String!, inputs: CreateFinancialServiceProviderInput!): CreateFinancialServiceProviderMutation
+  editFinancialServiceProvider(businessAreaSlug: String!, financialServiceProviderId: ID!, inputs: CreateFinancialServiceProviderInput!): EditFinancialServiceProviderMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
   activateCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): ActivateCashPlanVerificationMutation
@@ -2114,6 +2292,7 @@ type Mutations {
   deleteCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DeleteCashPlanVerificationMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
+  actionPaymentPlanMutation(input: ActionPaymentPlanInput!): ActionPaymentPlanMutation
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
   updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
@@ -2167,6 +2346,67 @@ type PaymentDetailsApproveMutation {
   grievanceTicket: GrievanceTicketNode
 }
 
+enum PaymentPlanActionType {
+  LOCK
+  UNLOCK
+  SEND_FOR_APPROVAL
+  APPROVE
+  AUTHORIZE
+  REVIEW
+  REJECT
+}
+
+type PaymentPlanNode implements Node {
+  isRemoved: Boolean!
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  businessArea: UserBusinessAreaNode!
+  statusDate: DateTime!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  program: ProgramNode!
+  exchangeRate: Float
+  totalEntitledQuantity: Float
+  totalEntitledQuantityUsd: Float
+  totalEntitledQuantityRevised: Float
+  totalEntitledQuantityRevisedUsd: Float
+  totalDeliveredQuantity: Float
+  totalDeliveredQuantityUsd: Float
+  totalUndeliveredQuantity: Float
+  totalUndeliveredQuantityUsd: Float
+  createdBy: UserNode!
+  status: String!
+  unicefId: String!
+  targetPopulation: TargetPopulationNode!
+  currency: String!
+  dispersionStartDate: DateTime!
+  dispersionEndDate: DateTime!
+  femaleChildrenCount: Int!
+  maleChildrenCount: Int!
+  femaleAdultsCount: Int!
+  maleAdultsCount: Int!
+  totalHouseholdsCount: Int!
+  totalIndividualsCount: Int!
+  approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): AcceptanceProcessNodeConnection!
+  approvalNumberRequired: Int
+  authorizationNumberRequired: Int
+  financeReviewNumberRequired: Int
+}
+
+type PaymentPlanNodeConnection {
+  pageInfo: PageInfo!
+  edges: [PaymentPlanNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type PaymentPlanNodeEdge {
+  node: PaymentPlanNode
+  cursor: String!
+}
+
 enum PaymentRecordDeliveryType {
   CARDLESS_CASH_WITHDRAWAL
   CASH
@@ -2196,11 +2436,20 @@ type PaymentRecordNode implements Node {
   businessArea: UserBusinessAreaNode!
   status: PaymentRecordStatus!
   statusDate: DateTime!
+  household: HouseholdNode!
+  headOfHousehold: IndividualNode
+  deliveryType: PaymentRecordDeliveryType!
+  currency: String!
+  entitlementQuantity: Float!
+  entitlementQuantityUsd: Float
+  deliveredQuantity: Float!
+  deliveredQuantityUsd: Float
+  deliveryDate: DateTime
+  transactionReferenceId: String
+  serviceProvider: ServiceProviderNode!
   caId: String
   caHashId: UUID
   cashPlan: CashPlanNode
-  household: HouseholdNode!
-  headOfHousehold: IndividualNode
   fullName: String!
   totalPersonsCovered: Int!
   distributionModality: String!
@@ -2209,14 +2458,6 @@ type PaymentRecordNode implements Node {
   entitlementCardNumber: String
   entitlementCardStatus: PaymentRecordEntitlementCardStatus
   entitlementCardIssueDate: Date
-  deliveryType: PaymentRecordDeliveryType!
-  currency: String!
-  entitlementQuantity: Float!
-  deliveredQuantity: Float!
-  deliveredQuantityUsd: Float
-  deliveryDate: DateTime
-  serviceProvider: ServiceProviderNode!
-  transactionReferenceId: String
   visionId: String
   registrationCaId: String
   verification: PaymentVerificationNode
@@ -2343,8 +2584,9 @@ type ProgramNode implements Node {
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
   individualDataNeeded: Boolean
+  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
-  cashPlans(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   totalEntitledQuantity: Decimal
@@ -2418,6 +2660,12 @@ type Query {
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
+  financialServiceProviderXlsxTemplate(id: ID!): FinancialServiceProviderXlsxTemplateNode
+  allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
+  financialServiceProviderXlsxReport(id: ID!): FinancialServiceProviderXlsxReportNode
+  allFinancialServiceProviderXlsxReports(offset: Int, before: String, after: String, first: Int, last: Int, status: String, orderBy: String): FinancialServiceProviderXlsxReportNodeConnection
+  financialServiceProvider(id: ID!): FinancialServiceProviderNode
+  allFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, name: String, visionVendorNumber: String, deliveryMechanisms: [ID], distributionLimit: Float, communicationChannel: String, fspXlsxTemplate: ID, orderBy: String): FinancialServiceProviderNodeConnection
   paymentRecordVerification(id: ID!): PaymentVerificationNode
   cashPlanPaymentVerification(id: ID!): CashPlanPaymentVerificationNode
   allPaymentRecords(offset: Int, before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
@@ -2439,6 +2687,8 @@ type Query {
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
   allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): PaymentVerificationLogEntryNodeConnection
+  paymentPlan(id: ID!): PaymentPlanNode
+  allPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], totalEntitledQuantity: String, dispersionStartDate: Date, dispersionEndDate: Date, orderBy: String): PaymentPlanNodeConnection
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String): [FieldAttributeNode]
@@ -2459,7 +2709,7 @@ type Query {
   cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
-  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, excludedIds: String!, criteriaFitRange: [Int], offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, excludedIds: String!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, excludedIds: String!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
@@ -2935,8 +3185,8 @@ type ServiceProviderNode implements Node {
   shortName: String
   country: String!
   visionId: String
-  paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   cashPlans(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+  paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
 }
 
 type ServiceProviderNodeConnection {
@@ -3041,6 +3291,7 @@ type TargetPopulationNode implements Node {
   vulnerabilityScoreMax: Float
   excludedIds: String!
   exclusionReason: String!
+  paymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   paymentRecords(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
   totalHouseholds: Int
@@ -3616,15 +3867,19 @@ type UserBusinessAreaNode implements Node {
   deduplicationGoldenRecordDuplicatesAllowed: Int!
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
+  approvalNumberRequired: Int!
+  authorizationNumberRequired: Int!
+  financeReviewNumberRequired: Int!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   userRoles: [UserRoleNode!]!
+  paymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   serviceproviderSet(offset: Int, before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   tickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  cashplanSet(offset: Int, before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   registrationdataimportSet(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   targetpopulationSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
@@ -3665,6 +3920,10 @@ type UserNode implements Node {
   lastDoapSync: DateTime
   doapHash: String!
   userRoles: [UserRoleNode!]!
+  createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
+  createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
+  createdFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
+  approvalSet: [ApprovalNode!]!
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
