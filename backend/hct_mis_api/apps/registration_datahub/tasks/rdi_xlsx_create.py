@@ -544,4 +544,5 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
-        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
+        if not self.business_area.postpone_deduplication:
+            DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
