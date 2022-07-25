@@ -35,11 +35,6 @@ def handle_total_cash_in_specific_households(id_list, only_empty=True):
 def handle_total_cash_in_households():
     base_queryset = Household.objects.filter(total_cash_received_usd__isnull=True, total_cash_received__isnull=True)
     id_list = list(base_queryset[:500].values_list("id", flat=True))
-    base_count = base_queryset.count()
-    index = 0
     while len(id_list):
-        index += 500
         handle_total_cash_in_specific_households(id_list)
-        if index % 500 == 0:
-            print(f"{index}/{base_count}")
         id_list = list(base_queryset[:500].values_list("id", flat=True))
