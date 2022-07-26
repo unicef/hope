@@ -24,11 +24,10 @@ from hct_mis_api.apps.payment.celery_tasks import fsp_generate_xlsx_report_task
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
-    CreateFinancialServiceProviderInput,
     ActionPaymentPlanInput,
     CreateFinancialServiceProviderInput,
     CreatePaymentPlanInput,
-    EditPaymentPlanInput,
+    UpdatePaymentPlanInput,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentPlan
 from hct_mis_api.apps.payment.schema import PaymentVerificationNode, FinancialServiceProviderNode, PaymentPlanNode
@@ -568,11 +567,11 @@ class CreatePaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
-class EditPaymentPlanMutation(PermissionMutation):
+class UpdatePaymentPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
     class Arguments:
-        input = EditPaymentPlanInput(required=True)
+        input = UpdatePaymentPlanInput(required=True)
 
     @classmethod
     @is_authenticated
@@ -606,9 +605,8 @@ class DeletePaymentPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
-        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+    def mutate(cls, root, info, payment_plan_id, **kwargs):
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
         old_payment_plan = copy_model_object(payment_plan)
 
@@ -643,5 +641,5 @@ class Mutations(graphene.ObjectType):
     )
     action_payment_plan_mutation = ActionPaymentPlanMutation.Field()
     create_payment_plan = CreatePaymentPlanMutation.Field()
-    update_payment_plan = EditPaymentPlanMutation.Field()
+    update_payment_plan = UpdatePaymentPlanMutation.Field()
     delete_payment_plan = DeletePaymentPlanMutation.Field()

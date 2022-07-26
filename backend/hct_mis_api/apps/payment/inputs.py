@@ -93,7 +93,7 @@ class CreatePaymentPlanInput(graphene.InputObjectType):
     currency = graphene.String(required=True)
 
 
-class EditPaymentPlanInput(CreatePaymentPlanInput):
+class UpdatePaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
     name = graphene.String(required=False)
     targeting_id = graphene.ID(required=False)

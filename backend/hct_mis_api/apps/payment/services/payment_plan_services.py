@@ -184,15 +184,19 @@ class PaymentPlanService:
         # TODO MB create payments for target population
 
         business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
+        if not business_area.is_payment_plan_applicable:
+            raise GraphQLError(f"PaymentPlan can not be created in provided Business Area")
 
+        targeting_id = decode_id_string(input_data["targeting_id"])
         try:
-            targeting_id = decode_id_string(input_data["targeting_id"])
-            target_population = TargetPopulation.objects.get(id=targeting_id)
+            target_population = TargetPopulation.objects.get(id=targeting_id, status=TargetPopulation.STATUS_READY)
         except TargetPopulation.DoesNotExist:
-            raise GraphQLError(f"TargetPopulation id:{input_data['targeting_id']} does not exist")
+            raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
+        if not target_population.program:
+            raise GraphQLError(f"TargetPopulation should have related Program defined")
 
         dispersion_end_date = input_data["dispersion_end_date"]
-        if not dispersion_end_date or dispersion_end_date >= timezone.now():
+        if not dispersion_end_date or dispersion_end_date >= timezone.now().date():
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] should be a past date")
 
         payment_plan = PaymentPlan.objects.create(
@@ -209,8 +213,12 @@ class PaymentPlanService:
             end_date=input_data["end_date"],
         )
 
+        payment_plan.refresh_from_db()
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
+
+        payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
+        payment_plan.target_population.save()
 
         return payment_plan
 
@@ -225,25 +233,34 @@ class PaymentPlanService:
         basic_fields = ["name", "start_date", "end_date", "dispersion_start_date"]
 
         for basic_field in basic_fields:
-            if input_data[basic_field] and input_data[basic_field] != getattr(self.payment_plan, basic_field):
+            if basic_field in input_data and input_data[basic_field] != getattr(self.payment_plan, basic_field):
                 setattr(self.payment_plan, basic_field, input_data[basic_field])
 
         if input_data["name"] and input_data["name"] != self.payment_plan.name:
             self.payment_plan.name = input_data["name"]
 
-        if input_data["targeting_id"] and input_data["targeting_id"] != self.payment_plan.target_population.id:
+        targeting_id = decode_id_string(input_data.get("targeting_id"))
+        if targeting_id and targeting_id != str(self.payment_plan.target_population.id):
             try:
-                targeting_id = decode_id_string(input_data["targeting_id"])
-                self.payment_plan.target_population = TargetPopulation.objects.get(id=targeting_id)
+                target_population = TargetPopulation.objects.get(id=targeting_id, status=TargetPopulation.STATUS_READY)
+
+                if not target_population.program:
+                    raise GraphQLError(f"TargetPopulation should have related Program defined")
+
+                self.payment_plan.target_population = target_population
+                self.payment_plan.program = target_population.program
+                self.payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
+                self.payment_plan.target_population.save()
                 recalculate = True
+
             except TargetPopulation.DoesNotExist:
-                raise GraphQLError(f"TargetPopulation id:{input_data['targeting_id']} does not exist")
+                raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
 
         if (
             input_data["dispersion_end_date"]
             and input_data["dispersion_end_date"] != self.payment_plan.dispersion_end_date
         ):
-            if input_data["dispersion_end_date"] >= timezone.now():
+            if input_data["dispersion_end_date"] >= timezone.now().date():
                 raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] should be a past date")
             self.payment_plan.dispersion_end_date = input_data["dispersion_end_date"]
             recalculate = True
@@ -252,21 +269,21 @@ class PaymentPlanService:
             self.payment_plan.currency = input_data["currency"]
             recalculate = True
 
+        self.payment_plan.save()
+
         if recalculate:
+            self.payment_plan.refresh_from_db()
             self.payment_plan.update_population_count_fields()
             self.payment_plan.update_money_fields()
 
-        self.payment_plan.save()
-
         return self.payment_plan
 
-
     def delete(self) -> PaymentPlan:
-        # TODO MB some additional actions?
-
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError(f"Only Payment Plan in Open status can be deleted")
 
+        self.payment_plan.target_population.status = TargetPopulation.STATUS_READY
+        self.payment_plan.target_population.save()
         self.payment_plan.delete()
 
         return self.payment_plan
