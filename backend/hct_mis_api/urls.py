@@ -78,6 +78,9 @@ api_patterns = [
     path("hh-status", hct_mis_api.apps.household.views.HouseholdStatusView.as_view()),
 ]
 
+if settings.PROFILING:
+    api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
+
 urlpatterns = (
     [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]
     + staticfiles_urlpatterns()
