@@ -41,9 +41,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
-        cls.program = ProgramFactory(
-            business_area=cls.business_area, individual_data_needed=True
-        )
+        cls.program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
         (household, individuals) = create_household_and_individuals(
             {
                 "business_area": cls.business_area,
@@ -52,14 +50,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                 {
                     "sex": "MALE",
                     "marital_status": "MARRIED",
-                    "observed_disability": [
-                        "SEEING",
-                        "HEARING",
-                        "WALKING",
-                        "MEMORY",
-                        "SELF_CARE",
-                        "COMMUNICATING",
-                    ],
+                    "observed_disability": ["SEEING", "HEARING", "WALKING", "MEMORY", "SELF_CARE", "COMMUNICATING"],
                     "seeing_disability": "LOT_DIFFICULTY",
                     "hearing_disability": "SOME_DIFFICULTY",
                     "physical_disability": "SOME_DIFFICULTY",
@@ -74,17 +65,12 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             {
                 "business_area": cls.business_area,
             },
-            [
-                {"sex": "MALE", "marital_status": "SINGLE"},
-                {"sex": "FEMALE", "marital_status": "MARRIED"},
-            ],
+            [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
         )
         cls.not_targeted_household = household
 
         cls.user = UserFactory()
-        cls.create_user_role_with_permissions(
-            cls.user, [Permissions.TARGETING_CREATE], cls.business_area
-        )
+        cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)
 
     def test_golden_record_by_targeting_criteria_size(self):
         variables = {
@@ -159,9 +145,8 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             variables=variables,
         )
 
-    def test_golden_record_by_targeting_criteria_observed_disability_with_invalid_argument(
-        self,
-    ):
+    # ruleFilters for observed_disability and fullname will be served with ts_vector
+    def test_golden_record_by_targeting_criteria_observed_disability_with_valid_argument(self):
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,
@@ -180,7 +165,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
                                             "MEMORY",
                                             "SEEING",
                                             "WALKING",
-                                            "SELF",
+                                            "SELF_CARE",
                                         ],
                                         "fieldName": "observed_disability",
                                         "isFlexField": False,
@@ -240,13 +225,9 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.first()
-        cls.program = ProgramFactory(
-            business_area=cls.business_area, individual_data_needed=True
-        )
+        cls.program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
         cls.user = UserFactory()
-        cls.create_user_role_with_permissions(
-            cls.user, [Permissions.TARGETING_CREATE], cls.business_area
-        )
+        cls.create_user_role_with_permissions(cls.user, [Permissions.TARGETING_CREATE], cls.business_area)
 
     def test_golden_record_by_targeting_criteria_phone_number(self):
         create_household_and_individuals(
@@ -255,8 +236,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         )
 
         create_household_and_individuals(
-            {"business_area": self.business_area},
-            [{"phone_no": "", "full_name": "individual_without_phone"}],
+            {"business_area": self.business_area}, [{"phone_no": "", "full_name": "individual_without_phone"}]
         )
 
         variables = {
@@ -379,8 +359,7 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersOtherQueryTestCase(APITestCas
         )
 
         _, individuals = create_household_and_individuals(
-            {"business_area": self.business_area},
-            [{"full_name": "individual_with_tax_id", "phone_no": "123456789"}],
+            {"business_area": self.business_area}, [{"full_name": "individual_with_tax_id", "phone_no": "123456789"}]
         )
 
         create_individual_document(individuals[0], document_type="TAX_ID")

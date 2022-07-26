@@ -15,8 +15,6 @@ from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
-    RelatedFieldComboFilter,
-    ValueFilter,
 )
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
@@ -43,9 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImport)
-class RegistrationDataImportAdmin(
-    ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase
-):
+class RegistrationDataImportAdmin(ExtraButtonsMixin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "import_date", "data_source", "business_area")
     search_fields = ("name",)
     list_filter = (
@@ -71,10 +67,7 @@ class RegistrationDataImportAdmin(
     def hub(self, button):
         obj = button.context.get("original")
         if obj:
-            return reverse(
-                "admin:registration_datahub_registrationdataimportdatahub_change",
-                args=[obj.datahub_id],
-            )
+            return reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
 
         button.visible = False
 
@@ -99,12 +92,8 @@ class RegistrationDataImportAdmin(
 
                 celery_task = registration_kobo_import_task
 
-            rdi_datahub_obj = get_object_or_404(
-                RegistrationDataImportDatahub, id=obj.datahub_id
-            )
-            business_area = BusinessArea.objects.get(
-                slug=rdi_datahub_obj.business_area_slug
-            )
+            rdi_datahub_obj = get_object_or_404(RegistrationDataImportDatahub, id=obj.datahub_id)
+            business_area = BusinessArea.objects.get(slug=rdi_datahub_obj.business_area_slug)
 
             celery_task.delay(
                 registration_data_import_id=str(rdi_datahub_obj.id),
@@ -115,9 +104,7 @@ class RegistrationDataImportAdmin(
             self.message_user(request, "RDI task has started")
         except Exception as e:
             logger.exception(e)
-            self.message_user(
-                request, "An error occurred while processing RDI task", messages.ERROR
-            )
+            self.message_user(request, "An error occurred while processing RDI task", messages.ERROR)
 
     @button(
         label="Re-run Merging RDI",
@@ -131,16 +118,11 @@ class RegistrationDataImportAdmin(
             self.message_user(request, "RDI Merge task has started")
         except Exception as e:
             logger.exception(e)
-            self.message_user(
-                request,
-                "An error occurred while processing RDI Merge task",
-                messages.ERROR,
-            )
+            self.message_user(request, "An error occurred while processing RDI Merge task", messages.ERROR)
 
     @button(
         permission=is_root,
-        enabled=lambda btn: btn.original.status
-        not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
+        enabled=lambda btn: btn.original.status not in [RegistrationDataImport.MERGED, RegistrationDataImport.MERGING],
     )
     def delete_rdi(self, request, pk):
         try:
@@ -149,11 +131,7 @@ class RegistrationDataImportAdmin(
                     with transaction.atomic(using="registration_datahub"):
                         rdi = RegistrationDataImport.objects.get(pk=pk)
                         rdi_name = rdi.name
-                        rdi_datahub = (
-                            datahub_models.RegistrationDataImportDatahub.objects.get(
-                                id=rdi.datahub_id
-                            )
-                        )
+                        rdi_datahub = datahub_models.RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
                         datahub_individuals_ids = list(
                             datahub_models.ImportedIndividual.objects.filter(
                                 registration_data_import=rdi_datahub
@@ -168,18 +146,14 @@ class RegistrationDataImportAdmin(
                         self.message_user(request, "RDI Deleted")
                         LogEntry.objects.log_action(
                             user_id=request.user.pk,
-                            content_type_id=ContentType.objects.get_for_model(
-                                self.model
-                            ).pk,
+                            content_type_id=ContentType.objects.get_for_model(self.model).pk,
                             object_id=None,
                             object_repr=f"Removed RDI {rdi_name} id: {pk}",
                             action_flag=DELETION,
                             change_message="RDI removed",
                         )
                         return HttpResponseRedirect(
-                            reverse(
-                                "admin:registration_data_registrationdataimport_changelist"
-                            )
+                            reverse("admin:registration_data_registrationdataimport_changelist")
                         )
             else:
                 return confirm_action(
@@ -195,28 +169,14 @@ class RegistrationDataImportAdmin(
                 )
         except Exception as e:
             logger.exception(e)
-            self.message_user(
-                request, "An error occurred while processing RDI delete", messages.ERROR
-            )
+            self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
 
     @staticmethod
     def delete_merged_rdi_visible(o, r):
         is_correct_status = o.status == RegistrationDataImport.MERGED
-        is_not_used_in_targeting = (
-            HouseholdSelection.objects.filter(
-                household__registration_data_import=o
-            ).count()
-            == 0
-        )
-        is_not_used_by_payment_record = (
-            PaymentRecord.objects.filter(household__registration_data_import=o).count()
-            == 0
-        )
-        return (
-            is_correct_status
-            and is_not_used_in_targeting
-            and is_not_used_by_payment_record
-        )
+        is_not_used_in_targeting = HouseholdSelection.objects.filter(household__registration_data_import=o).count() == 0
+        is_not_used_by_payment_record = PaymentRecord.objects.filter(household__registration_data_import=o).count() == 0
+        return is_correct_status and is_not_used_in_targeting and is_not_used_by_payment_record
 
     @staticmethod
     def generate_query_for_all_grievances_tickets(rdi):
@@ -244,9 +204,7 @@ class RegistrationDataImportAdmin(
 
     @button(
         permission=is_root,
-        visible=lambda o, r: RegistrationDataImportAdmin.delete_merged_rdi_visible(
-            o, r
-        ),
+        visible=lambda o, r: RegistrationDataImportAdmin.delete_merged_rdi_visible(o, r),
     )
     def delete_merged_rdi(self, request, pk):
         try:
@@ -255,50 +213,36 @@ class RegistrationDataImportAdmin(
                     with transaction.atomic(using="registration_datahub"):
                         rdi = RegistrationDataImport.objects.get(pk=pk)
                         rdi_name = rdi.name
-                        rdi_datahub = (
-                            datahub_models.RegistrationDataImportDatahub.objects.get(
-                                id=rdi.datahub_id
-                            )
-                        )
+                        rdi_datahub = datahub_models.RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
                         datahub_individuals_ids = list(
                             datahub_models.ImportedIndividual.objects.filter(
                                 registration_data_import=rdi_datahub
                             ).values_list("id", flat=True)
                         )
                         individuals_ids = list(
-                            Individual.objects.filter(
-                                registration_data_import=rdi
-                            ).values_list("id", flat=True)
+                            Individual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
                         )
                         rdi_datahub.delete()
                         GrievanceTicket.objects.filter(
-                            RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(
-                                rdi
-                            )
+                            RegistrationDataImportAdmin.generate_query_for_all_grievances_tickets(rdi)
                         ).filter(business_area=rdi.business_area).delete()
                         rdi.delete()
                         # remove elastic search records linked to individuals
                         remove_elasticsearch_documents_by_matching_ids(
                             datahub_individuals_ids, ImportedIndividualDocument
                         )
-                        remove_elasticsearch_documents_by_matching_ids(
-                            individuals_ids, IndividualDocument
-                        )
+                        remove_elasticsearch_documents_by_matching_ids(individuals_ids, IndividualDocument)
                         self.message_user(request, "RDI Deleted")
                         LogEntry.objects.log_action(
                             user_id=request.user.pk,
-                            content_type_id=ContentType.objects.get_for_model(
-                                self.model
-                            ).pk,
+                            content_type_id=ContentType.objects.get_for_model(self.model).pk,
                             object_id=None,
                             object_repr=f"Removed RDI {rdi_name} id: {pk}",
                             action_flag=DELETION,
                             change_message="RDI removed",
                         )
                         return HttpResponseRedirect(
-                            reverse(
-                                "admin:registration_data_registrationdataimport_changelist"
-                            )
+                            reverse("admin:registration_data_registrationdataimport_changelist")
                         )
             else:
                 return confirm_action(
@@ -314,6 +258,9 @@ class RegistrationDataImportAdmin(
                 )
         except Exception as e:
             logger.exception(e)
-            self.message_user(
-                request, "An error occurred while processing RDI delete", messages.ERROR
-            )
+            self.message_user(request, "An error occurred while processing RDI delete", messages.ERROR)
+
+    @button()
+    def households(self, request, pk):
+        url = reverse("admin:household_household_changelist")
+        return HttpResponseRedirect(f"{url}?&registration_data_import__exact={pk}")

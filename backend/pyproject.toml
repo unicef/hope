@@ -49,7 +49,7 @@ skips = ["B101", "B102", "B601", "B301", "B314", "B310"]
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "2022.7.3"
+version = "2022.7.4"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 

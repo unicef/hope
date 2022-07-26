@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+from typing import Sequence
 
 from django.db.models import Q
 from django.utils import timezone
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 @app.task(queue="priority")
 @log_start_and_end
 def deduplicate_and_check_against_sanctions_list_task(
-    should_populate_index, registration_data_import_id, individuals_ids
+    should_populate_index: bool, registration_data_import_id: str, individuals_ids: Sequence[str]
 ):
     try:
         from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
@@ -38,10 +39,7 @@ def periodic_grievances_notifications():
     sensitive_tickets_to_notify = (
         GrievanceTicket.objects.exclude(status=GrievanceTicket.STATUS_CLOSED)
         .filter(
-            Q(
-                Q(last_notification_sent__isnull=True)
-                & Q(created_at__lte=sensitive_tickets_one_day_date)
-            )
+            Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=sensitive_tickets_one_day_date))
             | Q(last_notification_sent__lte=sensitive_tickets_one_day_date)
         )
         .filter(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
@@ -51,10 +49,7 @@ def periodic_grievances_notifications():
     other_tickets_to_notify = (
         GrievanceTicket.objects.exclude(status=GrievanceTicket.STATUS_CLOSED)
         .filter(
-            Q(
-                Q(last_notification_sent__isnull=True)
-                & Q(created_at__lte=other_tickets_30_days_date)
-            )
+            Q(Q(last_notification_sent__isnull=True) & Q(created_at__lte=other_tickets_30_days_date))
             | Q(last_notification_sent__lte=other_tickets_30_days_date)
         )
         .exclude(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
@@ -62,9 +57,7 @@ def periodic_grievances_notifications():
     for ticket in sensitive_tickets_to_notify:
         with configure_scope() as scope:
             scope.set_tag("business_area", ticket.business_area)
-            notification = GrievanceNotification(
-                ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER
-            )
+            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
             notification.send_email_notification()
             ticket.last_notification_sent = timezone.now()
             ticket.save()
@@ -72,9 +65,7 @@ def periodic_grievances_notifications():
     for ticket in other_tickets_to_notify:
         with configure_scope() as scope:
             scope.set_tag("business_area", ticket.business_area)
-            notification = GrievanceNotification(
-                ticket, GrievanceNotification.ACTION_OVERDUE
-            )
+            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
             notification.send_email_notification()
             ticket.last_notification_sent = timezone.now()
             ticket.save()

@@ -1,5 +1,3 @@
-from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -52,8 +50,6 @@ class TestDiscardVerificationMutation(APITestCase):
         }
         """
 
-    # verification = None
-
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
@@ -77,11 +73,9 @@ class TestDiscardVerificationMutation(APITestCase):
             business_area=cls.business_area,
         )
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
-            cash_plan=cash_plan
+            cash_plan=cash_plan, verification_channel=CashPlanPaymentVerification.VERIFICATION_CHANNEL_MANUAL
         )
-        cash_plan_payment_verification.status = (
-            CashPlanPaymentVerification.STATUS_ACTIVE
-        )
+        cash_plan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
         cash_plan_payment_verification.save()
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
@@ -103,7 +97,6 @@ class TestDiscardVerificationMutation(APITestCase):
                 household=household,
                 target_population=target_population,
             )
-
             PaymentVerificationFactory(
                 cash_plan_payment_verification=cash_plan_payment_verification,
                 payment_record=payment_record,
@@ -120,18 +113,12 @@ class TestDiscardVerificationMutation(APITestCase):
         ]
     )
     def test_discard_active(self, _, permissions):
-        self.create_user_role_with_permissions(
-            self.user, permissions, self.business_area
-        )
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.DISCARD_MUTATION,
             context={"user": self.user},
             variables={
-                "cashPlanVerificationId": [
-                    self.id_to_base64(
-                        self.verification.id, "CashPlanPaymentVerificationNode"
-                    )
-                ]
+                "cashPlanVerificationId": [self.id_to_base64(self.verification.id, "CashPlanPaymentVerificationNode")]
             },
         )

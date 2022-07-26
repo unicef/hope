@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -103,10 +104,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="payment_records",
     )
     head_of_household = models.ForeignKey(
-        "household.Individual",
-        on_delete=models.CASCADE,
-        related_name="payment_records",
-        null=True,
+        "household.Individual", on_delete=models.CASCADE, related_name="payment_records", null=True
     )
 
     full_name = models.CharField(max_length=255)
@@ -122,10 +120,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     target_population_cash_assist_id = models.CharField(max_length=255)
     entitlement_card_number = models.CharField(max_length=255, null=True)
     entitlement_card_status = models.CharField(
-        choices=ENTITLEMENT_CARD_STATUS_CHOICE,
-        default="ACTIVE",
-        max_length=20,
-        null=True,
+        choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20, null=True
     )
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
@@ -146,10 +141,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         validators=[MinValueValidator(Decimal("0.01"))],
     )
     delivered_quantity_usd = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        null=True,
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
     )
     delivery_date = models.DateTimeField(null=True, blank=True)
     service_provider = models.ForeignKey(
@@ -174,9 +166,7 @@ class ServiceProvider(TimeStampedUUIDModel):
         return self.full_name
 
 
-class CashPlanPaymentVerification(
-    TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel
-):
+class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -202,6 +192,7 @@ class CashPlanPaymentVerification(
     STATUS_PENDING = "PENDING"
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
+    STATUS_INVALID = "INVALID"
     SAMPLING_FULL_LIST = "FULL_LIST"
     SAMPLING_RANDOM = "RANDOM"
     VERIFICATION_CHANNEL_RAPIDPRO = "RAPIDPRO"
@@ -211,6 +202,7 @@ class CashPlanPaymentVerification(
         (STATUS_ACTIVE, "Active"),
         (STATUS_FINISHED, "Finished"),
         (STATUS_PENDING, "Pending"),
+        (STATUS_INVALID, "Invalid"),
     )
     SAMPLING_CHOICES = (
         (SAMPLING_FULL_LIST, "Full list"),
@@ -221,18 +213,14 @@ class CashPlanPaymentVerification(
         (VERIFICATION_CHANNEL_RAPIDPRO, "RAPIDPRO"),
         (VERIFICATION_CHANNEL_XLSX, "XLSX"),
     )
-    status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True
-    )
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     cash_plan = models.ForeignKey(
         "program.CashPlan",
         on_delete=models.CASCADE,
         related_name="verifications",
     )
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
-    verification_channel = models.CharField(
-        max_length=50, choices=VERIFICATION_CHANNEL_CHOICES
-    )
+    verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
     responded_count = models.PositiveIntegerField(null=True)
     received_count = models.PositiveIntegerField(null=True)
@@ -241,14 +229,14 @@ class CashPlanPaymentVerification(
     confidence_interval = models.FloatField(null=True)
     margin_of_error = models.FloatField(null=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
-    rapid_pro_flow_start_uuids = ArrayField(
-        models.CharField(max_length=255, blank=True), default=list
-    )
+    rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
     age_filter = JSONField(null=True)
     excluded_admin_areas_filter = JSONField(null=True)
     sex_filter = models.CharField(null=True, max_length=10)
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
+    xlsx_file_exporting = models.BooleanField(default=False)
+    xlsx_file_imported = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("created_at",)
@@ -256,6 +244,29 @@ class CashPlanPaymentVerification(
     @property
     def business_area(self):
         return self.cash_plan.business_area
+
+    @property
+    def has_xlsx_cash_plan_payment_verification_file(self):
+        if all(
+            [
+                self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
+                getattr(self, "xlsx_cashplan_payment_verification_file", None),
+            ]
+        ):
+            return True
+        return False
+
+    @property
+    def xlsx_cash_plan_payment_verification_file_link(self):
+        if self.has_xlsx_cash_plan_payment_verification_file:
+            return self.xlsx_cashplan_payment_verification_file.file.url
+        return None
+
+    @property
+    def xlsx_cash_plan_payment_verification_file_was_downloaded(self):
+        if self.has_xlsx_cash_plan_payment_verification_file:
+            return self.xlsx_cashplan_payment_verification_file.was_downloaded
+        return False
 
     def set_active(self):
         self.status = CashPlanPaymentVerification.STATUS_ACTIVE
@@ -271,13 +282,18 @@ class CashPlanPaymentVerification(
         self.rapid_pro_flow_start_uuids = []
 
 
+class XlsxCashPlanPaymentVerificationFile(TimeStampedUUIDModel):
+    file = models.FileField()
+    cash_plan_payment_verification = models.OneToOneField(
+        CashPlanPaymentVerification, related_name="xlsx_cashplan_payment_verification_file", on_delete=models.CASCADE
+    )
+    was_downloaded = models.BooleanField(default=False)
+    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
+
+
 def build_summary(cash_plan):
-    active_count = cash_plan.verifications.filter(
-        status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE
-    ).count()
-    pending_count = cash_plan.verifications.filter(
-        status=CashPlanPaymentVerificationSummary.STATUS_PENDING
-    ).count()
+    active_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_ACTIVE).count()
+    pending_count = cash_plan.verifications.filter(status=CashPlanPaymentVerificationSummary.STATUS_PENDING).count()
     not_finished_count = cash_plan.verifications.exclude(
         status=CashPlanPaymentVerificationSummary.STATUS_FINISHED
     ).count()
@@ -342,15 +358,9 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="payment_record_verifications",
     )
     payment_record = models.OneToOneField(
-        "payment.PaymentRecord",
-        related_name="verification",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
+        "payment.PaymentRecord", related_name="verification", on_delete=models.CASCADE, null=True, blank=True
     )
-    status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
-    )
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
         decimal_places=2,
@@ -367,9 +377,7 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         ):
             return False
         minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
-        return not (
-            self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10
-        )
+        return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
 
     @property
     def business_area(self):
@@ -391,16 +399,10 @@ class CashPlanPaymentVerificationSummary(TimeStampedUUIDModel):
         (STATUS_PENDING, "Pending"),
     )
     status = models.CharField(
-        max_length=50,
-        choices=STATUS_CHOICES,
-        default=STATUS_PENDING,
-        verbose_name="Verification status",
-        db_index=True,
+        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, verbose_name="Verification status", db_index=True
     )
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     cash_plan = models.OneToOneField(
-        "program.CashPlan",
-        on_delete=models.CASCADE,
-        related_name="cash_plan_payment_verification_summary",
+        "program.CashPlan", on_delete=models.CASCADE, related_name="cash_plan_payment_verification_summary"
     )

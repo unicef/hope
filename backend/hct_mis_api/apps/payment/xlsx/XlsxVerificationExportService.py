@@ -1,8 +1,19 @@
+from tempfile import NamedTemporaryFile
+
+from django.conf import settings
+from django.core.files import File
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from hct_mis_api.apps.payment.models import PaymentVerification
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.payment.models import (
+    PaymentVerification,
+    XlsxCashPlanPaymentVerificationFile,
+)
 
 
 class XlsxVerificationExportService:
@@ -108,6 +119,17 @@ class XlsxVerificationExportService:
         self.generate_workbook()
         self.wb.save(filename=filename)
 
+    def save_xlsx_file(self, user):
+        filename = f"payment_verification_{self.cashplan_payment_verification.unicef_id}.xlsx"
+        self.generate_workbook()
+        with NamedTemporaryFile() as tmp:
+            xlsx_obj = XlsxCashPlanPaymentVerificationFile(
+                created_by=user, cash_plan_payment_verification=self.cashplan_payment_verification
+            )
+            self.wb.save(tmp.name)
+            tmp.seek(0)
+            xlsx_obj.file.save(filename, File(tmp))
+
     def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col):
 
         column_widths = []
@@ -130,3 +152,28 @@ class XlsxVerificationExportService:
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             ws.column_dimensions[col_name].width = value
+
+    @staticmethod
+    def send_email(user, business_area, cash_plan_payment_verification_id):
+        link = (
+            f'https://{settings.FRONTEND_HOST}/{business_area}/payment-verification/{encode_id_base64(cash_plan_payment_verification_id, "CashPlanPaymentVerification")}',
+        )
+        msg = "Verification Plan xlsx file was generated and here You have the link to download this file."
+        context = {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "message": msg,
+            "link": link,
+        }
+        text_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.txt", context=context)
+        html_body = render_to_string("payment/verification_plan_xlsx_file_generated_email.html", context=context)
+
+        email = EmailMultiAlternatives(
+            subject="Verification Plan XLSX file generated",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[context["email"]],
+            body=text_body,
+        )
+        email.attach_alternative(html_body, "text/html")
+        return email
