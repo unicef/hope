@@ -38,7 +38,7 @@ def create_cash_plan_payment_verification_xls(cash_plan_payment_verification_id,
 
         cash_plan_payment_verification.xlsx_file_exporting = False
         cash_plan_payment_verification.save()
-        service.send_email(user, cash_plan_payment_verification.business_area, cash_plan_payment_verification_id)
+        service.send_email(user, cash_plan_payment_verification_id)
     except Exception as e:
         logger.exception(e)
         raise
