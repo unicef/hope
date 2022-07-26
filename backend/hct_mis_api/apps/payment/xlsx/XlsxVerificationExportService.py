@@ -190,5 +190,5 @@ class XlsxVerificationExportService:
         email.attach_alternative(html_body, "text/html")
         result = email.send()
         if not result:
-            logger.error("Email couldn't be send")
+            logger.error(f"Email couldn't be send to {context['email']}")
 
