@@ -103,7 +103,9 @@ export function DashboardYearPage({
             />
             <DashboardPaper title={t('Number of Programmes by Sector')}>
               <ChartWrapper
-                numberOfProgrammes={data.chartProgrammesBySector.labels.length}
+                numberOfProgrammes={
+                  data.chartProgrammesBySector?.labels.length || 0
+                }
               >
                 <ProgrammesBySector data={data.chartProgrammesBySector} />
               </ChartWrapper>

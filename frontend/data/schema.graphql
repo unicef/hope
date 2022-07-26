@@ -278,6 +278,7 @@ type CashPlanPaymentVerificationNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   version: BigInt!
+  unicefId: String
   status: CashPlanPaymentVerificationStatus!
   cashPlan: CashPlanNode!
   sampling: CashPlanPaymentVerificationSampling!
@@ -296,8 +297,11 @@ type CashPlanPaymentVerificationNode implements Node {
   sexFilter: String
   activationDate: DateTime
   completionDate: DateTime
-  unicefId: String!
+  xlsxFileExporting: Boolean!
+  xlsxFileImported: Boolean!
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  xlsxFileWasDownloaded: Boolean
+  hasXlsxFile: Boolean
 }
 
 type CashPlanPaymentVerificationNodeConnection {
@@ -321,6 +325,7 @@ enum CashPlanPaymentVerificationStatus {
   ACTIVE
   FINISHED
   PENDING
+  INVALID
 }
 
 type CashPlanPaymentVerificationSummaryNode implements Node {
@@ -696,6 +701,10 @@ type EditPaymentVerificationMutation {
   cashPlan: CashPlanNode
 }
 
+type ExportXlsxCashPlanVerification {
+  cashPlan: CashPlanNode
+}
+
 type FieldAttributeNode {
   id: String
   type: String
@@ -756,6 +765,7 @@ type GrievanceTicketNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   version: BigInt!
+  unicefId: String
   userModified: DateTime
   lastNotificationSent: DateTime
   createdBy: UserNode
@@ -772,7 +782,6 @@ type GrievanceTicketNode implements Node {
   businessArea: UserBusinessAreaNode!
   linkedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   registrationDataImport: RegistrationDataImportNode
-  unicefId: String!
   extras: JSONString!
   ignored: Boolean!
   householdUnicefId: String
@@ -2016,6 +2025,10 @@ input IndividualUpdateDataObjectType {
   flexFields: Arg
 }
 
+type InvalidCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
 input IssueTypeExtrasInput {
   householdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras
   individualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras
@@ -2138,10 +2151,12 @@ type Mutations {
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, newIndividualId: ID, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
+  exportXlsxCashPlanVerification(cashPlanVerificationId: ID!): ExportXlsxCashPlanVerification
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
   activateCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): ActivateCashPlanVerificationMutation
   finishCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): FinishCashPlanVerificationMutation
   discardCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DiscardCashPlanVerificationMutation
+  invalidCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): InvalidCashPlanVerificationMutation
   deleteCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DeleteCashPlanVerificationMutation
   updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
