@@ -1,12 +1,14 @@
 from decimal import Decimal
+from dateutil.relativedelta import relativedelta
 from functools import cached_property
 from typing import Optional
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField, ArrayField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q
+from django.db.models import JSONField, Q, Count, Sum
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -20,6 +22,7 @@ from multiselectfield import MultiSelectField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
+from hct_mis_api.apps.household.models import Individual, MALE, FEMALE
 
 
 class GenericPaymentPlan(TimeStampedUUIDModel):
@@ -197,10 +200,15 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         [
             "status",
             "status_date",
+            "target_population",
+            "currency",
+            "dispersion_start_date",
+            "dispersion_end_date",
+            "name",
+            "start_date",
+            "end_date",
         ]
     )
-    # TODO - store *count fields on create, update on lock/unlock
-    # TODO - create mutation, remove payment plan (status == open)
 
     class Status(models.TextChoices):
         OPEN = "OPEN"
@@ -216,12 +224,12 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         related_name="created_payment_plans",
     )
     status = FSMField(default=Status.OPEN, protected=False, db_index=True)
-    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
+    unicef_id = CICharField(max_length=250, blank=True, db_index=True)  # TODO MB remove?
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
         related_name="payment_plans",
-    )  # TODO set program based on target_population.program
+    )
     currency = models.CharField(
         max_length=4,
     )
@@ -230,7 +238,7 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     female_children_count = models.PositiveSmallIntegerField(default=0)
     male_children_count = models.PositiveSmallIntegerField(default=0)
     female_adults_count = models.PositiveSmallIntegerField(default=0)
-    male_adult_count = models.PositiveSmallIntegerField(default=0)
+    male_adults_count = models.PositiveSmallIntegerField(default=0)
     total_households_count = models.PositiveSmallIntegerField(default=0)
     total_individuals_count = models.PositiveSmallIntegerField(default=0)
 
@@ -244,9 +252,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         target=Status.LOCKED,
     )
     def status_lock(self):
-        # TODO MB additional actions
-        # - set/unset excluded payments on parent lock
-        # - update *count fields numbers
         self.status_date = timezone.now()
 
     @transition(
@@ -255,9 +260,6 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
         target=Status.OPEN,
     )
     def status_unlock(self):
-        # TODO MB additional actions
-        # - set/unset excluded on payments parent unlock
-        # - update *count fields numbers
         self.status_date = timezone.now()
 
     @transition(
@@ -303,6 +305,76 @@ class PaymentPlan(SoftDeletableModel, GenericPaymentPlan):
     @property
     def currency_exchange_date(self):
         return self.dispersion_end_date
+
+    @property
+    def all_payments(self):
+        filter_excluded = False if self.status == self.Status.OPEN else True
+        payments = self.payments.all().exclude(excluded=filter_excluded)
+
+        return payments
+
+    def update_population_count_fields(self):
+        households_ids = self.all_payments.values_list("household_id", flat=True)
+
+        delta18 = relativedelta(years=+18)
+        date18ago = datetime.now() - delta18
+
+        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+            male_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
+            female_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
+            male_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
+            female_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+        )
+
+        self.female_children_count = targeted_individuals.get("female_children_count", 0)
+        self.male_children_count = targeted_individuals.get("male_children_count", 0)
+        self.female_adults_count = targeted_individuals.get("female_adults_count", 0)
+        self.male_adults_count = targeted_individuals.get("male_adults_count", 0)
+        self.total_households_count = households_ids.count()
+        self.total_individuals_count = (
+            self.female_children_count + self.male_children_count + self.female_adults_count + self.male_adults_count
+        )
+
+        self.save(
+            update_fields=[
+                "female_children_count",
+                "male_children_count",
+                "female_adults_count",
+                "male_adults_count",
+                "total_households_count",
+                "total_individuals_count",
+            ]
+        )
+
+    def update_money_fields(self):
+        if not self.exchange_rate:
+            self.exchange_rate = self.get_exchange_rate()
+
+        payments = self.all_payments.aggregate(
+            total_entitled_quantity=Sum("entitlement_quantity"),
+            entitlement_quantity_usd=Sum("entitlement_quantity_usd"),
+            delivered_quantity=Sum("delivered_quantity"),
+            delivered_quantity_usd=Sum("delivered_quantity_usd"),
+        )
+
+        self.total_entitled_quantity = payments.get("total_entitled_quantity__sum", 0.00)
+        self.total_entitled_quantity_usd = payments.get("entitlement_quantity_usd__sum", 0.00)
+        self.total_delivered_quantity = payments.get("delivered_quantity__sum", 0.00)
+        self.total_delivered_quantity_usd = payments.get("delivered_quantity_usd__sum", 0.00)
+
+        self.total_undelivered_quantity = self.total_entitled_quantity - self.total_delivered_quantity
+        self.total_undelivered_quantity_usd = self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
+
+        self.save(
+            update_fields=[
+                "total_entitled_quantity",
+                "total_entitled_quantity_usd",
+                "total_delivered_quantity",
+                "total_delivered_quantity_usd",
+                "total_undelivered_quantity",
+                "total_undelivered_quantity_usd",
+            ]
+        )
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):

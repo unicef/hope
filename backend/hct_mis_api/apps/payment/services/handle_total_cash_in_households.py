@@ -9,6 +9,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 def handle_total_cash_in_specific_households(id_list, only_empty=True):
+    # TODO MB include payment plans
     total_cash_received_subquery = Subquery(
         PaymentRecord.objects.filter(household__pk=OuterRef("pk"))
         .values("household__pk")

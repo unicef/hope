@@ -100,6 +100,8 @@ class BusinessArea(TimeStampedUUIDModel):
     authorization_number_required = models.PositiveIntegerField(default=0)
     finance_review_number_required = models.PositiveIntegerField(default=0)
 
+    is_payment_plan_applicable = models.BooleanField(default=False)
+
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
         if self.parent:

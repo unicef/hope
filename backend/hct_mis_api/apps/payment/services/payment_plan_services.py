@@ -1,21 +1,31 @@
 import logging
 
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from graphql import GraphQLError
 
 from hct_mis_api.apps.payment.inputs import PaymentPlanActionType
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+)
 from hct_mis_api.apps.payment.models import PaymentPlan, Approval, ApprovalProcess
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
-class PaymentPlanServices:
-    def __init__(self, payment_plan, info, input_data):
+User = get_user_model()
+
+
+class PaymentPlanService:
+    def __init__(self, payment_plan=None):
         self.payment_plan = payment_plan
-        self.input_data = input_data
-        self.action = input_data.get("action")
-        self.user = info.context.user
 
-    def get_actions_map(self):
-        actions_map = {
+        self.action = None
+        self.user = None
+
+    @property
+    def actions_map(self) -> dict:
+        return {
             PaymentPlanActionType.LOCK.value: self.lock,
             PaymentPlanActionType.UNLOCK.value: self.unlock,
             PaymentPlanActionType.SEND_FOR_APPROVAL.value: self.send_for_approval,
@@ -23,9 +33,8 @@ class PaymentPlanServices:
             PaymentPlanActionType.APPROVE.value: self.acceptance_process,
             PaymentPlanActionType.AUTHORIZE.value: self.acceptance_process,
             PaymentPlanActionType.REVIEW.value: self.acceptance_process,
-            PaymentPlanActionType.REJECT.value:  self.acceptance_process
+            PaymentPlanActionType.REJECT.value: self.acceptance_process,
         }
-        return actions_map
 
     def get_business_area_required_number_by_approval_type(self):
         business_area = self.payment_plan.business_area
@@ -46,10 +55,12 @@ class PaymentPlanServices:
         }
         return actions_to_approval_type_map.get(self.action)
 
-    def execute(self) -> PaymentPlan:
+    def execute_update_status_action(self, input_data: dict, user: User) -> PaymentPlan:
         """Get function from get_action_function and execute it
         return PaymentPlan object
         """
+        self.action = input_data.get("action")
+        self.user = user
         self.validate_action()
 
         function_action = self.get_action_function()
@@ -58,36 +69,38 @@ class PaymentPlanServices:
         return payment_plan
 
     def validate_action(self):
-        actions = self.get_actions_map().keys()
+        actions = self.actions_map.keys()
         if self.action not in actions:
-            raise GraphQLError(
-                f"Not Implemented Action: {self.action}. List of possible actions: {actions}"
-            )
+            raise GraphQLError(f"Not Implemented Action: {self.action}. List of possible actions: {actions}")
 
     def get_action_function(self):
-        return self.get_actions_map().get(self.action)
+        return self.actions_map.get(self.action)
 
     def send_for_approval(self):
         self.payment_plan.status_send_to_approval()
         self.payment_plan.save()
         # create new ApprovalProcess
         ApprovalProcess.objects.create(
-            payment_plan=self.payment_plan,
-            sent_for_approval_by=self.user,
-            sent_for_approval_date=timezone.now()
+            payment_plan=self.payment_plan, sent_for_approval_by=self.user, sent_for_approval_date=timezone.now()
         )
         return self.payment_plan
 
     def lock(self):
-        # TODO: add more logic for lock action
+        # TODO MB set/unset excluded payments
         self.payment_plan.status_lock()
+        self.payment_plan.update_population_count_fields()
+        self.payment_plan.update_money_fields()
+
         self.payment_plan.save()
 
         return self.payment_plan
 
     def unlock(self):
-        # TODO: add more logic for unlock action
+        # TODO MB set/unset excluded payments
         self.payment_plan.status_unlock()
+        self.payment_plan.update_population_count_fields()
+        self.payment_plan.update_money_fields()
+
         self.payment_plan.save()
 
         return self.payment_plan
@@ -126,8 +139,8 @@ class PaymentPlanServices:
             PaymentPlanActionType.REJECT.value: [
                 PaymentPlan.Status.IN_APPROVAL,
                 PaymentPlan.Status.IN_AUTHORIZATION,
-                PaymentPlan.Status.IN_REVIEW
-            ]
+                PaymentPlan.Status.IN_REVIEW,
+            ],
         }
         if self.payment_plan.status not in action_to_statuses_map.get(self.action):
             raise GraphQLError(
@@ -166,3 +179,94 @@ class PaymentPlanServices:
                 self.payment_plan.status_reject()
 
             self.payment_plan.save()
+
+    def create(self, input_data: dict, user: User) -> PaymentPlan:
+        # TODO MB create payments for target population
+
+        business_area = BusinessArea.objects.get(slug=input_data["business_area_slug"])
+
+        try:
+            targeting_id = decode_id_string(input_data["targeting_id"])
+            target_population = TargetPopulation.objects.get(id=targeting_id)
+        except TargetPopulation.DoesNotExist:
+            raise GraphQLError(f"TargetPopulation id:{input_data['targeting_id']} does not exist")
+
+        dispersion_end_date = input_data["dispersion_end_date"]
+        if not dispersion_end_date or dispersion_end_date >= timezone.now():
+            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] should be a past date")
+
+        payment_plan = PaymentPlan.objects.create(
+            business_area=business_area,
+            name=input_data["name"],
+            created_by=user,
+            target_population=target_population,
+            program=target_population.program,
+            currency=input_data["currency"],
+            dispersion_start_date=input_data["dispersion_start_date"],
+            dispersion_end_date=dispersion_end_date,
+            status_date=timezone.now(),
+            start_date=input_data["start_date"],
+            end_date=input_data["end_date"],
+        )
+
+        payment_plan.update_population_count_fields()
+        payment_plan.update_money_fields()
+
+        return payment_plan
+
+    def update(self, input_data: dict, user: User) -> PaymentPlan:
+        # TODO MB update payments for target population
+
+        if self.payment_plan.status != PaymentPlan.Status.OPEN:
+            raise GraphQLError(f"Only Payment Plan in Open status can be edited")
+
+        recalculate = False
+
+        basic_fields = ["name", "start_date", "end_date", "dispersion_start_date"]
+
+        for basic_field in basic_fields:
+            if input_data[basic_field] and input_data[basic_field] != getattr(self.payment_plan, basic_field):
+                setattr(self.payment_plan, basic_field, input_data[basic_field])
+
+        if input_data["name"] and input_data["name"] != self.payment_plan.name:
+            self.payment_plan.name = input_data["name"]
+
+        if input_data["targeting_id"] and input_data["targeting_id"] != self.payment_plan.target_population.id:
+            try:
+                targeting_id = decode_id_string(input_data["targeting_id"])
+                self.payment_plan.target_population = TargetPopulation.objects.get(id=targeting_id)
+                recalculate = True
+            except TargetPopulation.DoesNotExist:
+                raise GraphQLError(f"TargetPopulation id:{input_data['targeting_id']} does not exist")
+
+        if (
+            input_data["dispersion_end_date"]
+            and input_data["dispersion_end_date"] != self.payment_plan.dispersion_end_date
+        ):
+            if input_data["dispersion_end_date"] >= timezone.now():
+                raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] should be a past date")
+            self.payment_plan.dispersion_end_date = input_data["dispersion_end_date"]
+            recalculate = True
+
+        if input_data["currency"] and input_data["currency"] != self.payment_plan.currency:
+            self.payment_plan.currency = input_data["currency"]
+            recalculate = True
+
+        if recalculate:
+            self.payment_plan.update_population_count_fields()
+            self.payment_plan.update_money_fields()
+
+        self.payment_plan.save()
+
+        return self.payment_plan
+
+
+    def delete(self) -> PaymentPlan:
+        # TODO MB some additional actions?
+
+        if self.payment_plan.status != PaymentPlan.Status.OPEN:
+            raise GraphQLError(f"Only Payment Plan in Open status can be deleted")
+
+        self.payment_plan.delete()
+
+        return self.payment_plan

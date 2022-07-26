@@ -532,7 +532,7 @@ class PaymentPlanFactory(factory.DjangoModelFactory):
     female_children_count = factory.fuzzy.FuzzyInteger(2, 4)
     male_children_count = factory.fuzzy.FuzzyInteger(2, 4)
     female_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
-    male_adult_count = factory.fuzzy.FuzzyInteger(2, 4)
+    male_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_households_count = factory.fuzzy.FuzzyInteger(2, 4)
     total_individuals_count = factory.fuzzy.FuzzyInteger(8, 16)
 

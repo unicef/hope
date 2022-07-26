@@ -391,7 +391,7 @@ class Migration(migrations.Migration):
                 ("female_children_count", models.PositiveSmallIntegerField(default=0)),
                 ("male_children_count", models.PositiveSmallIntegerField(default=0)),
                 ("female_adults_count", models.PositiveSmallIntegerField(default=0)),
-                ("male_adult_count", models.PositiveSmallIntegerField(default=0)),
+                ("male_adults_count", models.PositiveSmallIntegerField(default=0)),
                 ("total_households_count", models.PositiveSmallIntegerField(default=0)),
                 ("total_individuals_count", models.PositiveSmallIntegerField(default=0)),
                 (
