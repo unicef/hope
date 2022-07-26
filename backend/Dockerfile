@@ -26,6 +26,10 @@ ADD pyproject.toml poetry.lock /tmp/
 RUN poetry config virtualenvs.create false \
   && poetry install $(test "$APP_ENV" == prod && echo "--no-dev")  --no-interaction --no-ansi
 
+ENV WAITFORIT_VERSION="v2.4.1"
+RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/$WAITFORIT_VERSION/waitforit-linux_amd64 && \
+  chmod +x /usr/local/bin/waitforit
+
 ADD . /code/
 
 WORKDIR /code/

@@ -145,7 +145,8 @@ class GoldenRecordTargetingCriteriaWithBlockFiltersQueryTestCase(APITestCase):
             variables=variables,
         )
 
-    def test_golden_record_by_targeting_criteria_observed_disability_with_invalid_argument(self):
+    # ruleFilters for observed_disability and fullname will be served with ts_vector
+    def test_golden_record_by_targeting_criteria_observed_disability_with_valid_argument(self):
         variables = {
             "program": self.id_to_base64(self.program.id, "Program"),
             "businessArea": self.business_area.slug,

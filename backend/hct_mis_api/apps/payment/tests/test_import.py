@@ -1,8 +1,6 @@
 import io
 import uuid
 
-from django.core.management import call_command
-
 from graphql import GraphQLError
 from openpyxl.writer.excel import save_virtual_workbook
 from parameterized import parameterized
@@ -35,7 +33,6 @@ from hct_mis_api.apps.targeting.fixtures import (
 
 
 class TestXlsxVerificationImport(APITestCase):
-    # verification = None
 
     @classmethod
     def setUpTestData(cls):
@@ -114,7 +111,6 @@ class TestXlsxVerificationImport(APITestCase):
 
         self.assertEqual(import_service.errors, [])
 
-    #
     def test_validation_valid_status_changed(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()

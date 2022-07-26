@@ -26,6 +26,10 @@ const Error = styled.div`
   padding: 20px;
 `;
 
+const StyledButton = styled(Button)`
+  width: 150px;
+`;
+
 export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashPlanId);
   const { showMessage } = useSnackbar();
@@ -69,7 +73,7 @@ export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
   return (
     <>
       <Box key='import'>
-        <Button
+        <StyledButton
           startIcon={<Publish />}
           color='primary'
           variant='outlined'
@@ -77,7 +81,7 @@ export function ImportXlsx({ verificationPlanId, cashPlanId }): ReactElement {
           onClick={() => setOpenImport(true)}
         >
           {t('Import XLSX')}
-        </Button>
+        </StyledButton>
       </Box>
       <Dialog
         open={open}
