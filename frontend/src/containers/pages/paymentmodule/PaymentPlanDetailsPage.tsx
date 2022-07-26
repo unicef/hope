@@ -1,6 +1,5 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { AcceptanceProcess } from '../../../components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
 import { Entitlement } from '../../../components/paymentmodule/PaymentPlanDetails/Entitlement/Entitlement';
@@ -16,7 +15,6 @@ import { usePaymentPlanQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
-  const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
